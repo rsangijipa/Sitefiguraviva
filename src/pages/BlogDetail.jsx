@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, Clock, Share2, Heart } from 'lucide-react';
 
 export default function BlogDetail() {
-    const { slug } = useParams();
+    const { id } = useParams();
     const navigate = useNavigate();
     const [post, setPost] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -15,12 +15,12 @@ export default function BlogDetail() {
     useEffect(() => {
         const fetchPost = async () => {
             setLoading(true);
-            const data = await blogService.getBySlug(slug);
+            const data = await blogService.getById(id);
             setPost(data);
             setLoading(false);
         };
         fetchPost();
-    }, [slug]);
+    }, [id]);
 
     if (loading) return <div className="min-h-screen bg-paper flex items-center justify-center font-serif text-3xl">Carregando...</div>;
     if (!post) return <div className="min-h-screen bg-paper flex items-center justify-center font-serif text-3xl">Artigo não encontrado.</div>;

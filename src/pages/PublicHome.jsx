@@ -65,9 +65,12 @@ export default function PublicHome() {
                             <a href="#clinica" className="btn-primary flex items-center justify-center gap-2">
                                 Começar Terapia <ArrowRight size={18} />
                             </a>
-                            <a href="#instituto" className="btn-secondary flex items-center justify-center gap-2 bg-white">
+                            <button 
+                                onClick={() => navigate('/portal')}
+                                className="btn-secondary flex items-center justify-center gap-2 bg-white"
+                            >
                                 Formação Profissional <ArrowUpRight size={18} className="text-gray-400" />
-                            </a>
+                            </button>
                         </motion.div>
                     </motion.div>
                 </div>
@@ -217,12 +220,12 @@ export default function PublicHome() {
                                         </h3>
                                     </div>
 
-                                    <button
-                                        onClick={() => window.open(course.link, '_blank')}
-                                        className="w-full py-4 border border-gray-200 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-primary hover:text-white hover:border-primary transition-all flex items-center justify-center gap-2"
-                                    >
-                                        Ver Detalhes <ArrowUpRight size={14} />
-                                    </button>
+                            <button 
+                                onClick={() => navigate(`/curso/${course.id}`)}
+                                className="w-full py-4 border border-gray-200 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-primary hover:text-white hover:border-primary transition-all flex items-center justify-center gap-2"
+                            >
+                                Ver Detalhes <ArrowUpRight size={14} />
+                            </button>
                                 </div>
                             </motion.div>
                         ))}
@@ -241,7 +244,7 @@ export default function PublicHome() {
                                 Artigos, ensaios e pílulas de awareness sobre a clínica, a vida e o encontro.
                             </p>
                         </div>
-                        <Link to="/blog" className="flex items-center gap-2 text-xs font-bold tracking-[0.2em] uppercase text-primary hover:text-gold transition-colors">
+                        <Link to="/blog/1" className="flex items-center gap-2 text-xs font-bold tracking-[0.2em] uppercase text-primary hover:text-gold transition-colors">
                             Ver Todas as Publicações <ArrowRight size={14} />
                         </Link>
                     </div>
