@@ -124,6 +124,15 @@ function CoursesManager() {
 
 // 2. Google Ecosystem Panel (NEW)
 function GoogleIntegrations() {
+    const { googleConfig, setGoogleConfig } = useApp();
+    const [localConfig, setLocalConfig] = useState(googleConfig);
+
+    const handleUpdate = (key, value) => {
+        const newConfig = { ...localConfig, [key]: value };
+        setLocalConfig(newConfig);
+        setGoogleConfig(newConfig);
+    };
+
     return (
         <div className="space-y-8 animate-fade-in">
             <div className="border-b border-gray-200 pb-5">
@@ -139,12 +148,17 @@ function GoogleIntegrations() {
                     </div>
                     <div className="flex items-center gap-3 mb-4">
                         <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600">
-                            <Calendar size={20} /> {/* Should technically be Calendar icon */}
+                            <Calendar size={20} />
                         </div>
                         <h3 className="font-bold text-gray-800">Google Calendar</h3>
                     </div>
                     <p className="text-sm text-gray-500 mb-4">Define qual agenda é exibida publicamente na seção "Agenda Viva".</p>
-                    <input type="text" className="w-full bg-gray-50 border border-gray-200 text-xs p-3 rounded mb-2 font-mono text-gray-600" defaultValue="pt.brazilian#holiday@group.v.calendar.google.com" />
+                    <input
+                        type="text"
+                        className="w-full bg-gray-50 border border-gray-200 text-xs p-3 rounded mb-2 font-mono text-gray-600 focus:ring-1 focus:ring-blue-500 outline-none"
+                        value={localConfig.calendarId}
+                        onChange={(e) => handleUpdate('calendarId', e.target.value)}
+                    />
                     <div className="flex items-center gap-2 text-green-600 text-xs font-bold">
                         <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" /> Conectado via API Simples
                     </div>
@@ -162,7 +176,12 @@ function GoogleIntegrations() {
                         <h3 className="font-bold text-gray-800">Google Drive</h3>
                     </div>
                     <p className="text-sm text-gray-500 mb-4">Pasta raiz para o "Portal do Aluno". Arquivos colocados lá aparecem automaticamente.</p>
-                    <input type="text" className="w-full bg-gray-50 border border-gray-200 text-xs p-3 rounded mb-2 font-mono text-gray-600" defaultValue="folder_id_123456789" />
+                    <input
+                        type="text"
+                        className="w-full bg-gray-50 border border-gray-200 text-xs p-3 rounded mb-2 font-mono text-gray-600 focus:ring-1 focus:ring-green-500 outline-none"
+                        value={localConfig.driveFolderId}
+                        onChange={(e) => handleUpdate('driveFolderId', e.target.value)}
+                    />
                     <button className="text-xs text-primary font-bold hover:underline">Testar Permissões</button>
                 </div>
 
@@ -178,7 +197,12 @@ function GoogleIntegrations() {
                         <h3 className="font-bold text-gray-800">Google Forms</h3>
                     </div>
                     <p className="text-sm text-gray-500 mb-4">Link para o formulário de anamnese/intake clínico.</p>
-                    <input type="text" className="w-full bg-gray-50 border border-gray-200 text-xs p-3 rounded mb-2 font-mono text-gray-600" defaultValue="https://docs.google.com/forms/u/0/..." />
+                    <input
+                        type="text"
+                        className="w-full bg-gray-50 border border-gray-200 text-xs p-3 rounded mb-2 font-mono text-gray-600 focus:ring-1 focus:ring-purple-500 outline-none"
+                        value={localConfig.formsUrl}
+                        onChange={(e) => handleUpdate('formsUrl', e.target.value)}
+                    />
                 </div>
 
                 {/* Youtube */}
@@ -193,7 +217,12 @@ function GoogleIntegrations() {
                         <h3 className="font-bold text-gray-800">Youtube Channel</h3>
                     </div>
                     <p className="text-sm text-gray-500 mb-4">Canal fonte para vídeos públicos.</p>
-                    <input type="text" className="w-full bg-gray-50 border border-gray-200 text-xs p-3 rounded mb-2 font-mono text-gray-600" defaultValue="channel_id_XYZ" />
+                    <input
+                        type="text"
+                        className="w-full bg-gray-50 border border-gray-200 text-xs p-3 rounded mb-2 font-mono text-gray-600 focus:ring-1 focus:ring-red-500 outline-none"
+                        value={localConfig.youtubeId}
+                        onChange={(e) => handleUpdate('youtubeId', e.target.value)}
+                    />
                 </div>
 
             </div>

@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import { ArrowRight, Calendar, ExternalLink, Heart, MessageCircle, FileText, ChevronDown } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -26,7 +27,8 @@ const staggerContainer = {
 };
 
 export default function PublicHome() {
-    const { courses, alertMessage, blogPosts } = useApp();
+    const { courses, alertMessage, blogPosts, loading } = useApp();
+    const navigate = useNavigate();
     const heroRef = useRef(null);
     const { scrollYProgress } = useScroll({
         target: heroRef,
@@ -45,7 +47,7 @@ export default function PublicHome() {
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
                     transition={{ duration: 0.5 }}
-                    className="bg-accent text-white text-xs font-bold tracking-widest uppercase text-center py-2 px-4 shadow-md relative z-50"
+                    className="bg-accent text-white text-xs font-bold tracking-widest uppercase text-center py-2 px-4 shadow-md relative z-50 cursor-pointer hover:bg-gold transition-colors"
                 >
                     {alertMessage}
                 </motion.div>
@@ -234,12 +236,23 @@ export default function PublicHome() {
                                         </div>
                                         <h3 className="font-serif text-3xl mb-8 leading-tight h-18 line-clamp-2">{course.title}</h3>
 
-                                        <button className="w-full py-5 rounded-2xl border border-primary/5 bg-gray-50 flex items-center justify-center gap-3 transition-soft group-hover:bg-primary group-hover:text-paper group-hover:border-primary">
-                                            <span className="font-bold uppercase text-[10px] tracking-[0.2em]">
-                                                {course.status === 'Aberto' ? 'Reservar Vaga' : 'Saiba Mais'}
-                                            </span>
-                                            <ExternalLink size={14} className="transition-transform group-hover:translate-x-1" />
-                                        </button>
+                                        <div className="flex gap-4">
+                                            <Link
+                                                to={`/curso/${course.id}`}
+                                                className="flex-1 py-5 rounded-2xl border border-primary/5 bg-gray-50 flex items-center justify-center gap-3 transition-soft hover:bg-white hover:shadow-xl group/btn"
+                                            >
+                                                <span className="font-bold uppercase text-[9px] tracking-[0.2em] text-primary/60">Detalhes</span>
+                                            </Link>
+                                            <button
+                                                onClick={() => window.open(course.link, '_blank')}
+                                                className="flex-[2] py-5 rounded-2xl bg-primary text-paper flex items-center justify-center gap-3 transition-soft hover:bg-gold hover:shadow-xl group/btn"
+                                            >
+                                                <span className="font-bold uppercase text-[9px] tracking-[0.2em]">
+                                                    {course.status === 'Aberto' ? 'Garantir Vaga' : 'Saiba Mais'}
+                                                </span>
+                                                <ExternalLink size={14} className="transition-transform group-hover/btn:translate-x-1" />
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </motion.div>
@@ -324,6 +337,7 @@ export default function PublicHome() {
                             whileHover={{ y: -15 }}
                             transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
                             className="min-w-[320px] md:min-w-[450px] snap-center"
+                            onClick={() => navigate(`/blog/${post.id}`)}
                         >
                             <div className="group bg-white p-12 rounded-[2.5rem] shadow-[0_40px_80px_-20px_rgba(0,0,0,0.05)] border border-primary/5 h-full flex flex-col justify-between cursor-pointer relative overflow-hidden transition-soft hover:shadow-[0_40px_80px_-20px_rgba(38,58,58,0.1)]">
                                 <div className="absolute top-0 right-0 w-48 h-48 bg-sage/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 group-hover:bg-accent/10 transition-soft" />
@@ -335,7 +349,7 @@ export default function PublicHome() {
                                 </div>
 
                                 <div className="flex items-center justify-between mt-12">
-                                    <div className="flex items-center gap-2 text-primary/30 group-hover:text-accent transition-soft">
+                                    <div className="flex items-center gap-2 text-primary/30 group-hover:text-accent transition-soft" onClick={(e) => { e.stopPropagation(); /* handle save */ }}>
                                         <Heart size={18} className="fill-current" />
                                         <span className="text-[10px] font-bold tracking-widest">GUARDAR</span>
                                     </div>

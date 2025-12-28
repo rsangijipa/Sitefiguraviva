@@ -6,6 +6,8 @@ import PublicHome from './pages/PublicHome';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminLogin from './pages/AdminLogin';
 import StudentPortal from './pages/StudentPortal';
+import CourseDetail from './pages/CourseDetail';
+import BlogDetail from './pages/BlogDetail';
 
 // --- Custom Cursor Component ---
 function CustomCursor() {
@@ -86,6 +88,8 @@ function AppContent() {
       <Routes>
         <Route path="/" element={<PublicHome />} />
         <Route path="/portal" element={<StudentPortal />} />
+        <Route path="/curso/:id" element={<CourseDetail />} />
+        <Route path="/blog/:slug" element={<BlogDetail />} />
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/*" element={
           <ProtectedRoute>
