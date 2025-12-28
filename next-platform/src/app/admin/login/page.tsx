@@ -3,16 +3,15 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Leaf, Lock, ArrowRight, Loader2 } from 'lucide-react';
+import { Lock, Loader2 } from 'lucide-react';
 import { useApp } from '../../../context/AppContext';
 
 export default function AdminLogin() {
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    // Fix: Remove useNavigate import above and usage
     const router = useRouter();
     const { login } = useApp();
 
@@ -21,10 +20,9 @@ export default function AdminLogin() {
         setError('');
         setIsLoading(true);
 
-        // Simulate network delay for UX
-        await new Promise(resolve => setTimeout(resolve, 800));
+        const success = await login(email, password);
 
-        if (login(username, password)) {
+        if (success) {
             router.push('/admin');
         } else {
             setError('Credenciais inválidas. Tente novamente.');
@@ -56,14 +54,14 @@ export default function AdminLogin() {
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-2">
-                        <label htmlFor="username" className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/60 ml-2">Usuário</label>
+                        <label htmlFor="email" className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/60 ml-2">Email</label>
                         <input
-                            id="username"
-                            type="text"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
+                            id="email"
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                             className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-gold/20 focus:border-gold transition-all text-primary font-medium"
-                            placeholder="Digite seu usuário"
+                            placeholder="admin@exemplo.com"
                             required
                         />
                     </div>
@@ -99,17 +97,9 @@ export default function AdminLogin() {
                         {isLoading ? (
                             <Loader2 size={18} className="animate-spin" />
                         ) : (
-                            <>
-                                Entrar <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                            </>
+                            "Entrar"
                         )}
                     </button>
-
-                    <div className="text-center mt-6">
-                        <button type="button" className="text-xs text-primary/30 hover:text-primary transition-colors flex items-center justify-center gap-2 mx-auto">
-                            <Leaf size={12} /> Voltar ao site
-                        </button>
-                    </div>
                 </form>
             </motion.div>
         </div>

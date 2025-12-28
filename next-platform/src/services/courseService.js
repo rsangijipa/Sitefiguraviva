@@ -1,28 +1,62 @@
-import { api } from './api';
+import { db } from './firebase';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, getDoc } from 'firebase/firestore';
 
-// Initial mock data as fallback
-const mockCourses = [
-    { id: 1, title: "Formação em Gestalt-Terapia", date: "Início Março/2024", status: "Aberto", image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=1000", link: "#" },
-    { id: 2, title: "Workshop: O Corpo na Clínica", date: "15 de Abril, 19h", status: "Aberto", image: "https://images.unsplash.com/photo-1516302752625-fbc3c8c1fa6d?auto=format&fit=crop&q=80&w=1000", link: "#" },
-    { id: 3, title: "Grupo de Estudos: Heidegger", date: "Sábados, Quinzenal", status: "Esgotado", image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&q=80&w=1000", link: "#" }
-];
+const COLLECTION_NAME = 'courses';
 
 export const courseService = {
     getAll: async () => {
         try {
-            return await api.get('/courses');
-        } catch {
-            return mockCourses; // Fallback
+            const querySnapshot = await getDocs(collection(db, COLLECTION_NAME));
+            return querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+        } catch (error) {
+            console.error("Error fetching courses from Firestore:", error);
+            return [];
         }
     },
     getById: async (id) => {
         try {
-            return await api.get(`/courses/${id}`);
-        } catch {
-            return mockCourses.find(c => c.id === parseInt(id));
+            const docRef = doc(db, COLLECTION_NAME, id);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                return { id: docSnap.id, ...docSnap.data() };
+            } else {
+                return null;
+            }
+        } catch (error) {
+            console.error("Error fetching course by ID:", error);
+            return null;
         }
     },
-    create: (data) => api.post('/courses', data),
-    update: (id, data) => api.put(`/courses/${id}`, data),
-    delete: (id) => api.delete(`/courses/${id}`),
+    create: async (data) => {
+        try {
+            const docRef = await addDoc(collection(db, COLLECTION_NAME), data);
+            return { id: docRef.id, ...data };
+        } catch (error) {
+            console.error("Error creating course:", error);
+            throw error;
+        }
+    },
+    update: async (id, data) => {
+        try {
+            const docRef = doc(db, COLLECTION_NAME, id);
+            await updateDoc(docRef, data);
+            return { id, ...data };
+        } catch (error) {
+            console.error("Error updating course:", error);
+            throw error;
+        }
+    },
+    delete: async (id) => {
+        try {
+            const docRef = doc(db, COLLECTION_NAME, id);
+            await deleteDoc(docRef);
+            return true;
+        } catch (error) {
+            console.error("Error deleting course:", error);
+            throw error;
+        }
+    },
 };

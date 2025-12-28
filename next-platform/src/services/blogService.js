@@ -1,21 +1,34 @@
-import { api } from './api';
+import { db } from './firebase';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 
-const mockPosts = [
-    { id: 1, title: "A Fenomenologia do Encontro", date: "12 Fev, 2024", excerpt: "Como a presença do terapeuta transforma o campo experiencial do cliente...", content: "Full content here..." },
-    { id: 2, title: "Awareness no Cotidiano", date: "05 Fev, 2024", excerpt: "Práticas simples para cultivar a percepção consciente no dia a dia corrido...", content: "Full content here..." },
-    { id: 3, title: "O Conceito de Ajustamento Criativo", date: "28 Jan, 2024", excerpt: "Entenda como nos adaptamos ao meio para satisfazer nossas necessidades...", content: "Full content here..." }
-];
+const COLLECTION_NAME = 'posts';
 
 export const blogService = {
     getAll: async () => {
         try {
-            return await api.get('/posts');
-        } catch {
-            return mockPosts;
+            const querySnapshot = await getDocs(collection(db, COLLECTION_NAME));
+            return querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+        } catch (error) {
+            console.error("Error fetching posts:", error);
+            return [];
         }
     },
     getBySlug: async (slug) => {
-        // In a real app, this would be a filtered API call
-        return mockPosts.find(p => p.id.toString() === slug);
+        try {
+            const q = query(collection(db, COLLECTION_NAME), where("slug", "==", slug));
+            const querySnapshot = await getDocs(q);
+
+            if (!querySnapshot.empty) {
+                const doc = querySnapshot.docs[0];
+                return { id: doc.id, ...doc.data() };
+            }
+            return null;
+        } catch (error) {
+            console.error("Error fetching post by slug:", error);
+            return null;
+        }
     }
 };
