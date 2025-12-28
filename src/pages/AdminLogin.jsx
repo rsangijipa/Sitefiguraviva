@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
-import { Leaf, Chrome } from 'lucide-react'; // Chrome icon works as a Google proxy icon visually
+import { Leaf, ArrowLeft } from 'lucide-react';
 
 export default function AdminLogin() {
     const [loading, setLoading] = useState(false);
@@ -21,6 +22,14 @@ export default function AdminLogin() {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-paper relative overflow-hidden">
+            {/* Navigation Button */}
+            <button
+                onClick={() => navigate('/')}
+                className="absolute top-8 left-8 z-20 flex items-center gap-2 text-primary/40 hover:text-primary transition-colors font-bold uppercase tracking-widest text-xs"
+            >
+                <ArrowLeft size={16} /> Voltar ao Início
+            </button>
+
             {/* Artistic background */}
             <div className="absolute inset-0 z-0">
                 <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-gold/5 rounded-full blur-[120px]" />
@@ -42,7 +51,44 @@ export default function AdminLogin() {
                     <p className="text-primary/40 text-[10px] uppercase tracking-[0.4em] font-bold">Ecossistema Digital</p>
                 </div>
 
-                <div className="space-y-10">
+                <div className="space-y-6">
+                    {/* Traditional Login Form for Dev/Testing */}
+                    <form onSubmit={(e) => {
+                        e.preventDefault();
+                        const user = e.target.username.value;
+                        const pass = e.target.password.value;
+                        if (login(user, pass)) {
+                            navigate('/admin');
+                        } else {
+                            alert("Credenciais inválidas");
+                        }
+                    }} className="space-y-4">
+                        <input
+                            name="username"
+                            type="text"
+                            placeholder="Usuário"
+                            className="w-full bg-gray-50 border border-gray-200 p-4 rounded-xl text-primary font-medium focus:ring-2 focus:ring-accent outline-none"
+                        />
+                        <input
+                            name="password"
+                            type="password"
+                            placeholder="Senha"
+                            className="w-full bg-gray-50 border border-gray-200 p-4 rounded-xl text-primary font-medium focus:ring-2 focus:ring-accent outline-none"
+                        />
+                        <button
+                            type="submit"
+                            className="w-full bg-primary text-white py-4 rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-primary/90 transition-colors shadow-lg"
+                        >
+                            Entrar
+                        </button>
+                    </form>
+
+                    <div className="flex items-center gap-4">
+                        <div className="h-[1px] bg-gray-200 flex-1" />
+                        <span className="text-gray-400 text-xs font-bold uppercase">Ou</span>
+                        <div className="h-[1px] bg-gray-200 flex-1" />
+                    </div>
+
                     <button
                         onClick={handleGoogleLogin}
                         disabled={loading}
@@ -74,8 +120,8 @@ export default function AdminLogin() {
                             Acesso reservado para administradores do Instituto.
                         </p>
                     </div>
-                </div>
-            </motion.div>
-        </div>
+                </div >
+            </motion.div >
+        </div >
     );
 }

@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AppProvider, useApp } from './context/AppContext';
 import PublicHome from './pages/PublicHome';
@@ -8,66 +7,7 @@ import AdminLogin from './pages/AdminLogin';
 import StudentPortal from './pages/StudentPortal';
 import CourseDetail from './pages/CourseDetail';
 import BlogDetail from './pages/BlogDetail';
-
-// --- Custom Cursor Component ---
-function CustomCursor() {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [isHovering, setIsHovering] = useState(false);
-
-  useEffect(() => {
-    // Start with listeners only if using a fine pointer (like a mouse)
-    const mediaQuery = window.matchMedia('(pointer: fine)');
-
-    if (!mediaQuery.matches) return;
-
-    const mouseMove = (e) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
-    };
-
-    window.addEventListener("mousemove", mouseMove);
-
-    // Add event listeners for hover effects
-    const handleMouseOver = (e) => {
-      if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || e.target.closest('a') || e.target.closest('button')) {
-        setIsHovering(true);
-      } else {
-        setIsHovering(false);
-      }
-    };
-
-    window.addEventListener("mouseover", handleMouseOver);
-
-    return () => {
-      window.removeEventListener("mousemove", mouseMove);
-      window.removeEventListener("mouseover", handleMouseOver);
-    };
-  }, []);
-
-  return (
-    <>
-      <motion.div
-        className="cursor-dot hidden md:block"
-        animate={{
-          x: mousePosition.x - 4,
-          y: mousePosition.y - 4,
-          scale: isHovering ? 0 : 1
-        }}
-        transition={{ type: "spring", stiffness: 500, damping: 28, restDelta: 0.001 }}
-      />
-      <motion.div
-        className="cursor-outline hidden md:block"
-        animate={{
-          x: mousePosition.x - 16,
-          y: mousePosition.y - 16,
-          scale: isHovering ? 2 : 1,
-          borderWidth: isHovering ? "1px" : "2px",
-          backgroundColor: isHovering ? "rgba(197, 160, 101, 0.1)" : "transparent"
-        }}
-        transition={{ type: "spring", stiffness: 250, damping: 20, restDelta: 0.001 }}
-      />
-    </>
-  );
-}
+import ScrollToTopButton from './components/ScrollToTopButton';
 
 // --- Protected Route Wrapper ---
 function ProtectedRoute({ children }) {
@@ -89,12 +29,12 @@ function AppContent() {
   return (
     <>
       <ScrollToTop />
-      <CustomCursor />
+      <ScrollToTopButton />
       <Routes>
         <Route path="/" element={<PublicHome />} />
         <Route path="/portal" element={<StudentPortal />} />
         <Route path="/curso/:id" element={<CourseDetail />} />
-        <Route path="/blog/:slug" element={<BlogDetail />} />
+        <Route path="/blog/:id" element={<BlogDetail />} />
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/*" element={
           <ProtectedRoute>

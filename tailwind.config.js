@@ -7,11 +7,13 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: '#263A3A',
-        accent: '#B86E58',
-        paper: '#F7F5EF',
+        primary: '#263A3A', // Deep Green (Brand)
+        accent: '#B86E58',  // Terracotta
+        paper: '#FAFAF9',   // Light Cream (New Background)
+        surface: '#FFFFFF', // Pure White (Cards)
+        text: '#374151',    // Dark Gray (Body)
+        muted: '#9CA3AF',   // Gray (Secondary)
         gold: '#C5A065',
-        sage: '#94A696',
       },
       fontFamily: {
         serif: ['"Cormorant Garamond"', 'serif'],

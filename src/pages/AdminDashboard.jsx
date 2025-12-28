@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import {
     LayoutDashboard, BookOpen, PenTool, Settings, LogOut,
     Plus, Trash2, Edit, Save, X, AlertTriangle,

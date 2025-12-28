@@ -42,3 +42,19 @@ Foi criado um arquivo `vercel.json` na raiz. Ele é essencial para que o "Refres
 ## 4. Teste Final
 
 Após o deploy, acesse `/admin/login` e tente logar com o usuário e a senha (não o hash) que você definiu.
+
+## 🔴 Solução de Erros Comuns
+
+### Erro: "No Next.js version detected" ou "Build Failed"
+
+Se você receber este erro, é porque o Vercel está tentando construir o projeto como **Next.js**, mas este projeto (na raiz) é **React + Vite**. O Vercel pode ter se confundido por causa da pasta `next-platform` existente.
+
+**Como corrigir:**
+
+1. No painel do Vercel, vá em **Settings** > **Build & Development**.
+2. No campo **Framework Preset**, mude de `Next.js` (ou `Other`) para **`Vite`**.
+3. Garanta que as configurações estejam assim:
+   - **Build Command**: `vite build` (ou `npm run build`)
+   - **Output Directory**: `dist`
+4. Clique em **Save**.
+5. Vá na aba **Deployments**, clique nos três pontinhos do último deploy falho e escolha **Redeploy**.

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { Folder, FileText, Download, Search, Image as ImageIcon, Video } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
