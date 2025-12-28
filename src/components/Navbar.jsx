@@ -31,7 +31,7 @@ export default function Navbar() {
 
                 {/* Desktop Menu */}
                 <div className="hidden md:flex items-center gap-8 font-sans text-xs font-bold tracking-widest uppercase text-text/80">
-                    {['Clínica', 'Instituto', 'Agenda', 'Blog'].map((item) => (
+                    {['Clínica', 'Fundadora', 'Instituto', 'Blog'].map((item) => (
                         <a
                             key={item}
                             href={`/#${item.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")}`}
@@ -64,7 +64,7 @@ export default function Navbar() {
             {/* Mobile Menu Overlay */}
             {mobileOpen && (
                 <div className="absolute top-full left-0 w-full bg-white shadow-xl border-t border-gray-100 p-6 flex flex-col gap-4 md:hidden animate-fade-in">
-                    {['Clínica', 'Instituto', 'Agenda', 'Blog'].map((item) => (
+                    {['Clínica', 'Fundadora', 'Instituto', 'Blog'].map((item) => (
                         <a
                             key={item}
                             href={`/#${item.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")}`}
