@@ -67,7 +67,7 @@ export default function Footer() {
                                     width="100%"
                                     height="100%"
                                     style={{ border: 0 }}
-                                    allowFullScreen=""
+                                    allowFullScreen
                                     loading="lazy"
                                     className="grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-soft duration-700"
                                 ></iframe>

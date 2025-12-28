@@ -6,11 +6,11 @@ import { useApp } from '../../context/AppContext';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import {
-    LayoutDashboard, BookOpen, PenTool, Settings, LogOut, Globe
+    LayoutDashboard, BookOpen, PenTool, Settings, LogOut, Globe, Loader2
 } from 'lucide-react';
 
 export default function AdminLayout({ children }) {
-    const { isAuthenticated, logout } = useApp();
+    const { isAuthenticated, logout, authLoading } = useApp();
     const router = useRouter();
     const pathname = usePathname();
     const [isClient, setIsClient] = useState(false);
@@ -20,16 +20,25 @@ export default function AdminLayout({ children }) {
     }, []);
 
     useEffect(() => {
-        if (isClient && !isAuthenticated && pathname !== '/admin/login') {
+        if (isClient && !authLoading && !isAuthenticated && pathname !== '/admin/login') {
             router.replace('/admin/login');
         }
-    }, [isAuthenticated, isClient, pathname, router]);
+    }, [isAuthenticated, authLoading, isClient, pathname, router]);
 
     if (!isClient) return null; // Avoid hydration mismatch
 
     // If on login page, render without sidebar
     if (pathname === '/admin/login') {
         return <>{children}</>;
+    }
+
+    // Show loading state while checking auth
+    if (authLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-[#FDFCF9]">
+                <Loader2 className="w-8 h-8 animate-spin text-primary/30" />
+            </div>
+        );
     }
 
     // If not authenticated (and not on login), show nothing (will redirect)
@@ -101,10 +110,7 @@ export default function AdminLayout({ children }) {
                         </div>
                     </div>
                 </header>
-
-                <div className="max-w-6xl animate-fade-in">
-                    {children}
-                </div>
+                {children}
             </main>
         </div>
     );

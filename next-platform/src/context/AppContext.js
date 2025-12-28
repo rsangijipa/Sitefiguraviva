@@ -1,9 +1,10 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { courseService } from '../services/courseService';
 import { blogService } from '../services/blogService';
 import { configService } from '../services/configService';
+import { authService } from '../services/authService';
 
 const AppContext = createContext(null);
 
@@ -14,15 +15,22 @@ export function AppProvider({ children }) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [alertMessage, setAlertMessage] = useState("Bem-vindos ao Instituto Figura Viva");
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [user, setUser] = useState(null);
+    const [authLoading, setAuthLoading] = useState(true);
+
+    // Auth State Listener
+    useEffect(() => {
+        const unsubscribe = authService.onAuthStateChanged((currentUser) => {
+            setUser(currentUser);
+            setAuthLoading(false);
+        });
+        return () => unsubscribe();
+    }, []);
 
     useEffect(() => {
         // Hydrate from localStorage on mount
         const savedAlert = localStorage.getItem('alertMessage');
-        const savedAuth = localStorage.getItem('isAdmin');
-
         if (savedAlert) setAlertMessage(savedAlert);
-        if (savedAuth === 'true') setIsAuthenticated(true);
 
         setGoogleConfig(configService.get());
     }, []);
@@ -56,12 +64,6 @@ export function AppProvider({ children }) {
     }, [alertMessage]);
 
     useEffect(() => {
-        if (typeof window !== 'undefined') {
-            localStorage.setItem('isAdmin', isAuthenticated);
-        }
-    }, [isAuthenticated]);
-
-    useEffect(() => {
         if (googleConfig) {
             configService.save(googleConfig);
         }
@@ -73,8 +75,8 @@ export function AppProvider({ children }) {
             setCourses(prev => [...prev, newCourse]);
             return true;
         } catch (err) {
-            setCourses(prev => [...prev, { ...course, id: Date.now() }]);
-            return true;
+            console.error("Failed to add course", err);
+            return false;
         }
     };
 
@@ -83,7 +85,7 @@ export function AppProvider({ children }) {
             await courseService.update(id, updatedData);
             setCourses(prev => prev.map(c => c.id === id ? { ...c, ...updatedData } : c));
         } catch (err) {
-            setCourses(prev => prev.map(c => c.id === id ? { ...c, ...updatedData } : c));
+            console.error("Failed to update course", err);
         }
     };
 
@@ -92,22 +94,25 @@ export function AppProvider({ children }) {
             await courseService.delete(id);
             setCourses(prev => prev.filter(c => c.id !== id));
         } catch (err) {
-            setCourses(prev => prev.filter(c => c.id !== id));
+            console.error("Failed to delete course", err);
         }
     };
 
-    const login = (user, pass) => {
-        if (user === 'admin' && pass === 'admin') {
-            setIsAuthenticated(true);
+    const login = async (email, password) => {
+        try {
+            await authService.login(email, password);
             return true;
+        } catch (error) {
+            console.error("Login failed", error);
+            return false;
         }
-        return false;
     };
 
-    const logout = () => {
-        setIsAuthenticated(false);
-        if (typeof window !== 'undefined') {
-            localStorage.removeItem('isAdmin');
+    const logout = async () => {
+        try {
+            await authService.logout();
+        } catch (error) {
+            console.error("Logout failed", error);
         }
     };
 
@@ -115,19 +120,20 @@ export function AppProvider({ children }) {
         <AppContext.Provider value={{
             courses,
             blogPosts,
-            googleConfig,
-            setGoogleConfig,
-            alertMessage,
-            setAlertMessage,
             loading,
             error,
+            alertMessage,
+            setAlertMessage,
             addCourse,
             updateCourse,
             deleteCourse,
-            isAuthenticated,
             login,
             logout,
-            refreshData: fetchData
+            isAuthenticated: !!user,
+            user,
+            authLoading,
+            googleConfig,
+            setGoogleConfig
         }}>
             {children}
         </AppContext.Provider>
@@ -135,5 +141,9 @@ export function AppProvider({ children }) {
 }
 
 export function useApp() {
-    return useContext(AppContext);
+    const context = useContext(AppContext);
+    if (!context) {
+        throw new Error('useApp must be used within an AppProvider');
+    }
+    return context;
 }
