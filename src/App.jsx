@@ -40,18 +40,23 @@ function CustomCursor() {
     <>
       <motion.div
         className="cursor-dot hidden md:block"
-        animate={{ x: mousePosition.x, y: mousePosition.y }}
-        transition={{ type: "tween", ease: "backOut", duration: 0 }}
+        animate={{
+          x: mousePosition.x - 4,
+          y: mousePosition.y - 4,
+          scale: isHovering ? 0 : 1
+        }}
+        transition={{ type: "spring", stiffness: 500, damping: 28, restDelta: 0.001 }}
       />
       <motion.div
         className="cursor-outline hidden md:block"
         animate={{
-          x: mousePosition.x,
-          y: mousePosition.y,
-          scale: isHovering ? 1.5 : 1,
-          backgroundColor: isHovering ? "rgba(184, 110, 88, 0.1)" : "transparent"
+          x: mousePosition.x - 16,
+          y: mousePosition.y - 16,
+          scale: isHovering ? 2 : 1,
+          borderWidth: isHovering ? "1px" : "2px",
+          backgroundColor: isHovering ? "rgba(197, 160, 101, 0.1)" : "transparent"
         }}
-        transition={{ type: "tween", ease: "backOut", duration: 0.15 }}
+        transition={{ type: "spring", stiffness: 250, damping: 20, restDelta: 0.001 }}
       />
     </>
   );

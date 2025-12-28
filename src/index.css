@@ -7,6 +7,8 @@
 @layer base {
   body {
     @apply bg-paper text-primary font-sans antialiased overflow-x-hidden md:cursor-none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   h1,
@@ -15,7 +17,11 @@
   h4,
   h5,
   h6 {
-    @apply font-serif font-semibold;
+    @apply font-serif font-semibold leading-tight tracking-tight;
+  }
+
+  ::selection {
+    @apply bg-accent/30 text-primary;
   }
 }
 
@@ -25,13 +31,29 @@
   }
 
   .glass {
-    @apply bg-white/10 backdrop-blur-md border border-white/20;
+    @apply bg-white/40 backdrop-blur-xl border border-white/40 shadow-[0_8px_32px_0_rgba(31, 38, 135, 0.07)];
+  }
+
+  .glass-dark {
+    @apply bg-primary/10 backdrop-blur-xl border border-white/10;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-gold;
+  }
+
+  .transition-soft {
+    @apply transition-all duration-500 ease-[cubic-bezier(0.23, 1, 0.32, 1)];
+  }
+
+  .hover-lift {
+    @apply hover:-translate-y-1 hover:shadow-xl transition-soft;
   }
 
   /* Custom Scrollbar */
   .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 4px;
+    height: 4px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-track {
@@ -39,16 +61,7 @@
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-sage/50 rounded-full;
-  }
-
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    @apply bg-accent;
-  }
-
-  /* Text selection color */
-  ::selection {
-    @apply bg-accent/30 text-primary;
+    @apply bg-sage/30 rounded-full transition-colors hover:bg-accent/50;
   }
 }
 
@@ -66,7 +79,7 @@ body::before {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
 }
 
-/* Custom Cursor */
+/* Custom Cursor Refinement */
 .cursor-dot,
 .cursor-outline {
   position: fixed;
@@ -76,22 +89,34 @@ body::before {
   border-radius: 50%;
   pointer-events: none;
   z-index: 9999;
+  mix-blend-mode: difference;
 }
 
 .cursor-dot {
-  width: 8px;
-  height: 8px;
-  background-color: #B86E58;
-  /* Accent */
+  width: 6px;
+  height: 6px;
+  background-color: #F7F5EF;
+  /* Paper color to contrast with dark/diff */
 }
 
 .cursor-outline {
-  width: 40px;
-  height: 40px;
-  border: 1px solid #B86E58;
-  transition: width 0.2s, height 0.2s, background-color 0.2s;
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(247, 245, 239, 0.5);
+  transition: width 0.3s cubic-bezier(0.23, 1, 0.32, 1),
+    height 0.3s cubic-bezier(0.23, 1, 0.32, 1),
+    opacity 0.3s ease;
 }
 
 body:hover .cursor-outline {
   opacity: 1;
+}
+
+/* Hide cursor on mobile or small screens */
+@media (max-width: 768px) {
+
+  .cursor-dot,
+  .cursor-outline {
+    display: none;
+  }
 }

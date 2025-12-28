@@ -256,61 +256,99 @@ export default function AdminDashboard() {
     const navItems = [
         { icon: LayoutDashboard, label: 'Visão Geral', path: '/admin' },
         { icon: BookOpen, label: 'Cursos', path: '/admin/courses' },
-        { icon: Globe, label: 'Conexões Google', path: '/admin/google' }, // Updated
-        { icon: PenTool, label: 'Blog', path: '/admin/blog' },
+        { icon: Globe, label: 'Google Suite', path: '/admin/google' },
+        { icon: PenTool, label: 'Diário Visual', path: '/admin/blog' },
         { icon: Settings, label: 'Configurações', path: '/admin/settings' },
     ];
 
     return (
-        <div className="flex min-h-screen bg-gray-50/50">
+        <div className="flex min-h-screen bg-[#FDFCF9]">
             {/* Sidebar */}
-            <aside className="w-72 bg-primary text-paper flex flex-col fixed h-full z-20 shadow-2xl">
-                <div className="p-10">
-                    <h1 className="font-serif text-3xl tracking-wide">Figura <span className="text-gold italic">Viva</span></h1>
-                    <div className="flex items-center gap-2 mt-2 opacity-50">
-                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                        <p className="text-[10px] uppercase tracking-widest font-bold">Sistema Ativo</p>
+            <aside className="w-80 bg-primary text-paper flex flex-col fixed h-full z-20 shadow-[20px_0_60px_rgba(0,0,0,0.05)]">
+                <div className="p-12">
+                    <h1 className="font-serif text-3xl tracking-tight mb-2">Figura <span className="font-light text-gold italic">Viva</span></h1>
+                    <div className="flex items-center gap-2 opacity-40">
+                        <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                        <p className="text-[9px] uppercase tracking-[0.3em] font-bold">Admin Panel v2.0</p>
                     </div>
                 </div>
 
-                <nav className="flex-1 px-6 space-y-3">
+                <nav className="flex-1 px-8 space-y-2">
                     {navItems.map(item => {
                         const isActive = location.pathname === item.path || (item.path !== '/admin' && location.pathname.startsWith(item.path));
                         return (
                             <Link
                                 key={item.path}
                                 to={item.path}
-                                className={`flex items-center gap-4 px-4 py-4 rounded-xl transition-all duration-300 group ${isActive ? 'bg-white/10 text-gold translate-x-1 font-bold shadow-lg' : 'text-sage hover:text-white hover:bg-white/5'}`}
+                                className={`flex items-center gap-4 px-6 py-5 rounded-[1.25rem] transition-soft group relative ${isActive ? 'bg-paper text-primary shadow-2xl scale-[1.02]' : 'text-paper/40 hover:text-paper hover:bg-white/5'}`}
                             >
-                                <item.icon size={20} className={`transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
-                                <span className="text-sm tracking-wide">{item.label}</span>
+                                <item.icon size={18} className={`transition-transform duration-500 ${isActive ? 'text-gold' : 'group-hover:scale-110'}`} />
+                                <span className={`text-[11px] font-bold uppercase tracking-widest ${isActive ? 'opacity-100' : 'opacity-80'}`}>{item.label}</span>
+                                {isActive && (
+                                    <motion.div
+                                        layoutId="activeTab"
+                                        className="absolute right-4 w-1.5 h-1.5 bg-gold rounded-full"
+                                    />
+                                )}
                             </Link>
                         )
                     })}
                 </nav>
 
-                <div className="p-6 border-t border-white/5 bg-black/20">
-                    <button onClick={logout} className="w-full flex items-center justify-center gap-3 px-4 py-3 text-red-300 hover:text-red-100 hover:bg-red-500/20 rounded-lg transition-colors text-xs font-bold uppercase tracking-widest">
-                        <LogOut size={16} />
+                <div className="p-8 border-t border-white/5">
+                    <button
+                        onClick={logout}
+                        className="w-full flex items-center justify-center gap-4 px-6 py-5 bg-red-500/5 text-red-400 hover:bg-red-500 hover:text-white rounded-2xl transition-soft text-[10px] font-bold uppercase tracking-[0.2em] group"
+                    >
+                        <LogOut size={16} className="group-hover:-translate-x-1 transition-transform" />
                         Desconectar
                     </button>
                 </div>
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 ml-72 p-12 overflow-y-auto min-h-screen bg-[#F8F9FA]">
-                <Routes>
-                    <Route path="/" element={
-                        <div className="text-center py-20 animate-fade-in">
-                            <h2 className="font-serif text-4xl text-primary mb-4">Bem-vinda de volta.</h2>
-                            <p className="text-sage"> Selecione uma opção no menu lateral para gerenciar seu ecossistema.</p>
+            <main className="flex-1 ml-80 p-16 overflow-y-auto min-h-screen">
+                <header className="mb-16 flex justify-between items-center">
+                    <div>
+                        <h2 className="font-serif text-4xl text-primary mb-2">Painel de Controle</h2>
+                        <p className="text-primary/40 text-sm font-light">Gerencie sua presença digital e conexões Google.</p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-full glass border border-primary/5 flex items-center justify-center text-primary/30">
+                            <Settings size={20} />
                         </div>
-                    } />
-                    <Route path="/courses" element={<CoursesManager />} />
-                    <Route path="/google" element={<GoogleIntegrations />} />
-                    <Route path="/blog" element={<div className="p-10 text-center text-gray-400">Editor de Blog em Construção...</div>} />
-                    <Route path="/settings" element={<SettingsManager />} />
-                </Routes>
+                    </div>
+                </header>
+
+                <div className="max-w-6xl">
+                    <Routes>
+                        <Route path="/" element={
+                            <div className="grid md:grid-cols-2 gap-8 py-10 animate-fade-in">
+                                <div className="bg-white p-10 rounded-[2.5rem] shadow-sm border border-primary/5 flex flex-col justify-center items-center text-center">
+                                    <div className="w-20 h-20 bg-gold/10 rounded-full flex items-center justify-center text-gold mb-8">
+                                        <LayoutDashboard size={32} />
+                                    </div>
+                                    <h2 className="font-serif text-4xl text-primary mb-4">Seja bem-vinda de volta.</h2>
+                                    <p className="text-primary/50 max-w-sm font-light leading-relaxed">Seu site está funcionando perfeitamente e conectado a todos os serviços Google.</p>
+                                </div>
+                                <div className="grid grid-cols-2 gap-6">
+                                    <div className="bg-primary p-8 rounded-[2rem] text-paper flex flex-col justify-between">
+                                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-40">Status do Site</span>
+                                        <h4 className="text-4xl font-serif">Online</h4>
+                                    </div>
+                                    <div className="bg-white p-8 rounded-[2rem] border border-primary/5 flex flex-col justify-between shadow-sm">
+                                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/30">Versão</span>
+                                        <h4 className="text-4xl font-serif text-primary italic">2.0.4</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        } />
+                        <Route path="/courses" element={<CoursesManager />} />
+                        <Route path="/google" element={<GoogleIntegrations />} />
+                        <Route path="/blog" element={<div className="p-20 text-center glass rounded-[2.5rem] text-primary/40 font-serif text-2xl">Editor de Blog em Construção...</div>} />
+                        <Route path="/settings" element={<SettingsManager />} />
+                    </Routes>
+                </div>
             </main>
         </div>
     );
