@@ -130,13 +130,55 @@ export default function PublicHome() {
                 </div>
             </section>
 
-            {/* 4. Institute Section (Clean Cards) */}
+            {/* 4. Institute Section (Expanded) */}
             <section id="instituto" className="py-24 bg-paper">
                 <div className="container mx-auto px-6 max-w-6xl">
+                    <div className="grid lg:grid-cols-2 gap-16 items-center mb-24">
+                        <motion.div
+                            initial={{ opacity: 0, x: -20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.8 }}
+                        >
+                            <span className="text-xs font-bold tracking-[0.2em] uppercase text-gold mb-4 block">Nossa Essência</span>
+                            <h2 className="text-4xl md:text-5xl font-serif text-primary mb-8 leading-tight">Um Solo Fértil para o <span className="italic text-gold font-light">Devir</span></h2>
+                            <p className="text-lg text-text/80 mb-6 leading-relaxed">
+                                O Instituto Figura Viva nasceu do desejo de criar um espaço onde a clínica e o ensino caminham juntos. Somos uma comunidade dedicada ao estudo e à prática da Gestalt-Terapia, fundamentada na ética do cuidado e na estética do encontro.
+                            </p>
+                            <p className="text-lg text-text/80 mb-8 leading-relaxed">
+                                Mais do que uma escola, somos um organismo vivo que busca integrar o saber acadêmico com a experiência sentida, formando profissionais capazes de sustentar a presença e acolher a singularidade.
+                            </p>
+                            <div className="grid grid-cols-2 gap-8 py-8 border-y border-gray-100">
+                                <div>
+                                    <h5 className="font-serif text-3xl text-primary mb-1">10+</h5>
+                                    <p className="text-xs font-bold tracking-widest uppercase text-text/50">Anos de Prática</p>
+                                </div>
+                                <div>
+                                    <h5 className="font-serif text-3xl text-primary mb-1">500+</h5>
+                                    <p className="text-xs font-bold tracking-widest uppercase text-text/50">Alunos Formados</p>
+                                </div>
+                            </div>
+                        </motion.div>
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.8 }}
+                            className="relative"
+                        >
+                            <img 
+                                src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&q=80&w=1000" 
+                                alt="Ambiente do Instituto" 
+                                className="w-full aspect-square object-cover rounded-full border-[12px] border-white shadow-2xl"
+                            />
+                            <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gold/5 rounded-full blur-3xl" />
+                        </motion.div>
+                    </div>
+
                     <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
                         <div className="max-w-xl">
                             <span className="text-xs font-bold tracking-[0.2em] uppercase text-gold mb-4 block">Instituto de Ensino</span>
-                            <h2 className="text-4xl md:text-5xl font-serif text-primary leading-tight">Formação & Cursos</h2>
+                            <h2 className="text-4xl md:text-5xl font-serif text-primary leading-tight">Caminhos de Formação</h2>
                         </div>
                         <a href="#" className="hidden md:flex items-center gap-2 text-xs font-bold tracking-[0.2em] uppercase text-text hover:text-primary transition-colors">
                             Ver Calendário Completo <ArrowRight size={14} />
