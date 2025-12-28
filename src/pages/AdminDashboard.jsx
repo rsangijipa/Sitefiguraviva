@@ -3,7 +3,7 @@ import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import {
     LayoutDashboard, BookOpen, PenTool, Settings, LogOut,
     Plus, Trash2, Edit, Save, X, AlertTriangle,
-    Globe, LayoutTemplate, Database, Youtube
+    Globe, LayoutTemplate, Database, Youtube, Calendar
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
@@ -20,6 +20,12 @@ function CoursesManager() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+
+        if (formData.link && !formData.link.startsWith('http')) {
+            alert("O link deve ser uma URL válida (http/https)");
+            return;
+        }
+
         if (currentCourse) {
             updateCourse(currentCourse.id, formData);
         } else {
@@ -126,11 +132,27 @@ function CoursesManager() {
 function GoogleIntegrations() {
     const { googleConfig, setGoogleConfig } = useApp();
     const [localConfig, setLocalConfig] = useState(googleConfig);
+    const [errors, setErrors] = useState({});
+
+    const validate = (name, value) => {
+        if (!value) return "";
+        if (name === 'calendarId' && !value.includes('@')) return "ID inválido (deve conter @)";
+        if (name === 'driveFolderId' && value.length < 5) return "ID muito curto";
+        if (name === 'formsUrl' && !value.startsWith('https://docs.google.com/forms')) return "URL deve ser do Google Forms";
+        return "";
+    };
 
     const handleUpdate = (key, value) => {
+        const error = validate(key, value);
+        setErrors(prev => ({ ...prev, [key]: error }));
+
         const newConfig = { ...localConfig, [key]: value };
         setLocalConfig(newConfig);
-        setGoogleConfig(newConfig);
+
+        // Auto-save only if valid
+        if (!error) {
+            setGoogleConfig(newConfig);
+        }
     };
 
     return (
@@ -142,7 +164,7 @@ function GoogleIntegrations() {
 
             <div className="grid md:grid-cols-2 gap-6">
                 {/* Google Calendar */}
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 relative overflow-hidden group hover:border-blue-200 transition-colors">
+                <div className={`bg-white p-6 rounded-xl shadow-sm border ${errors.calendarId ? 'border-red-300' : 'border-gray-200'} relative overflow-hidden group hover:border-blue-200 transition-colors`}>
                     <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                         <LayoutTemplate size={80} />
                     </div>
@@ -159,13 +181,17 @@ function GoogleIntegrations() {
                         value={localConfig.calendarId}
                         onChange={(e) => handleUpdate('calendarId', e.target.value)}
                     />
-                    <div className="flex items-center gap-2 text-green-600 text-xs font-bold">
-                        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" /> Conectado via API Simples
-                    </div>
+                    {errors.calendarId ? (
+                        <div className="text-red-500 text-xs font-bold">{errors.calendarId}</div>
+                    ) : (
+                        <div className="flex items-center gap-2 text-green-600 text-xs font-bold">
+                            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" /> Conectado via API Simples
+                        </div>
+                    )}
                 </div>
 
                 {/* Google Drive */}
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 relative overflow-hidden group hover:border-green-200 transition-colors">
+                <div className={`bg-white p-6 rounded-xl shadow-sm border ${errors.driveFolderId ? 'border-red-300' : 'border-gray-200'} relative overflow-hidden group hover:border-green-200 transition-colors`}>
                     <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                         <Database size={80} />
                     </div>
@@ -182,11 +208,12 @@ function GoogleIntegrations() {
                         value={localConfig.driveFolderId}
                         onChange={(e) => handleUpdate('driveFolderId', e.target.value)}
                     />
-                    <button className="text-xs text-primary font-bold hover:underline">Testar Permissões</button>
+                    {errors.driveFolderId && <div className="text-red-500 text-xs font-bold">{errors.driveFolderId}</div>}
+                    {!errors.driveFolderId && <button className="text-xs text-primary font-bold hover:underline">Testar Permissões</button>}
                 </div>
 
                 {/* Google Forms */}
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 relative overflow-hidden group hover:border-purple-200 transition-colors">
+                <div className={`bg-white p-6 rounded-xl shadow-sm border ${errors.formsUrl ? 'border-red-300' : 'border-gray-200'} relative overflow-hidden group hover:border-purple-200 transition-colors`}>
                     <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                         <LayoutTemplate size={80} />
                     </div>
@@ -203,6 +230,7 @@ function GoogleIntegrations() {
                         value={localConfig.formsUrl}
                         onChange={(e) => handleUpdate('formsUrl', e.target.value)}
                     />
+                    {errors.formsUrl && <div className="text-red-500 text-xs font-bold">{errors.formsUrl}</div>}
                 </div>
 
                 {/* Youtube */}

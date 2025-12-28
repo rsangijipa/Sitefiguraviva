@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 import { courseService } from '../services/courseService';
 import { blogService } from '../services/blogService';
 import { configService } from '../services/configService';
+import { authService } from '../services/authService';
 
 const AppContext = createContext();
 
@@ -19,7 +20,7 @@ export function AppProvider({ children }) {
     });
 
     const [isAuthenticated, setIsAuthenticated] = useState(() => {
-        return localStorage.getItem('isAdmin') === 'true';
+        return authService.isAuthenticated();
     });
 
     const fetchData = useCallback(async () => {
@@ -49,10 +50,6 @@ export function AppProvider({ children }) {
     }, [alertMessage]);
 
     useEffect(() => {
-        localStorage.setItem('isAdmin', isAuthenticated);
-    }, [isAuthenticated]);
-
-    useEffect(() => {
         configService.save(googleConfig);
     }, [googleConfig]);
 
@@ -62,8 +59,8 @@ export function AppProvider({ children }) {
             setCourses(prev => [...prev, newCourse]);
             return true;
         } catch (err) {
-            setCourses(prev => [...prev, { ...course, id: Date.now() }]);
-            return true;
+            console.error("Failed to add course", err);
+            return false;
         }
     };
 
@@ -72,7 +69,7 @@ export function AppProvider({ children }) {
             await courseService.update(id, updatedData);
             setCourses(prev => prev.map(c => c.id === id ? { ...c, ...updatedData } : c));
         } catch (err) {
-            setCourses(prev => prev.map(c => c.id === id ? { ...c, ...updatedData } : c));
+            console.error("Failed to update course", err);
         }
     };
 
@@ -81,21 +78,23 @@ export function AppProvider({ children }) {
             await courseService.delete(id);
             setCourses(prev => prev.filter(c => c.id !== id));
         } catch (err) {
-            setCourses(prev => prev.filter(c => c.id !== id));
+            console.error("Failed to delete course", err);
         }
     };
 
-    const login = (user, pass) => {
-        if (user === 'admin' && pass === 'admin') {
+    const login = async (user, pass) => {
+        try {
+            await authService.login(user, pass);
             setIsAuthenticated(true);
             return true;
+        } catch (error) {
+            return false;
         }
-        return false;
     };
 
     const logout = () => {
+        authService.logout();
         setIsAuthenticated(false);
-        localStorage.removeItem('isAdmin');
     };
 
     return (

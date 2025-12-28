@@ -15,6 +15,11 @@ function CustomCursor() {
   const [isHovering, setIsHovering] = useState(false);
 
   useEffect(() => {
+    // Start with listeners only if using a fine pointer (like a mouse)
+    const mediaQuery = window.matchMedia('(pointer: fine)');
+
+    if (!mediaQuery.matches) return;
+
     const mouseMove = (e) => {
       setMousePosition({ x: e.clientX, y: e.clientY });
     };
