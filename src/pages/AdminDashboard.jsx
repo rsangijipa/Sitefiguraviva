@@ -4,57 +4,139 @@ import { motion } from 'framer-motion';
 import {
     LayoutDashboard, BookOpen, PenTool, Settings, LogOut,
     Plus, Trash2, Edit, Save, X, AlertTriangle,
-    Globe, LayoutTemplate, Database, Youtube, Calendar
+    Globe, LayoutTemplate, Database, Youtube, Calendar, Menu, CheckCircle
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { blogService } from '../services/blogService';
+import { uploadFiles } from '../services/uploadService';
 
 // --- Sub-Components ---
 
-// 1. Course Manager (CRUD)
-function CoursesManager() {
+// 1. Academic Manager (Courses, Formations, Groups)
+function AcademicManager() {
     const { courses, addCourse, updateCourse, deleteCourse } = useApp();
     const [isEditing, setIsEditing] = useState(false);
     const [currentCourse, setCurrentCourse] = useState(null);
+    const [uploading, setUploading] = useState(false);
 
-    const initialForm = { title: '', date: '', status: 'Aberto', link: '', image: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=1000' };
+    // New state for file handling
+    const [selectedFiles, setSelectedFiles] = useState([]);
+    const [previewUrls, setPreviewUrls] = useState([]);
+
+    const initialForm = {
+        category: 'Curso',
+        title: '',
+        date: '',
+        status: 'Aberto',
+        link: '',
+        description: '',
+        images: []
+    };
     const [formData, setFormData] = useState(initialForm);
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
+    // Handle file selection
+    const handleFileSelect = (e) => {
+        const files = Array.from(e.target.files);
+        setSelectedFiles(prev => [...prev, ...files]);
 
-        if (formData.link && !formData.link.startsWith('http')) {
-            alert("O link deve ser uma URL válida (http/https)");
-            return;
-        }
+        // Create local preview URLs
+        const newPreviews = files.map(file => URL.createObjectURL(file));
+        setPreviewUrls(prev => [...prev, ...newPreviews]);
+    };
 
-        if (currentCourse) {
-            updateCourse(currentCourse.id, formData);
+    const removeFile = (index, isExisting = false) => {
+        if (isExisting) {
+            // Remove from existing images in formData
+            const newImages = formData.images.filter((_, i) => i !== index);
+            setFormData({ ...formData, images: newImages });
         } else {
-            addCourse(formData);
+            // Remove from selected files
+            const newSelected = selectedFiles.filter((_, i) => i !== index);
+            const newPreviews = previewUrls.filter((_, i) => i !== index);
+            setSelectedFiles(newSelected);
+            setPreviewUrls(newPreviews);
         }
-        setIsEditing(false);
-        setFormData(initialForm);
-        setCurrentCourse(null);
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setUploading(true);
+
+        try {
+            if (formData.link && !formData.link.startsWith('http')) {
+                alert("O link deve ser uma URL válida (http/https)");
+                setUploading(false);
+                return;
+            }
+
+            // 1. Upload new files if any
+            let uploadedUrls = [];
+            if (selectedFiles.length > 0) {
+                uploadedUrls = await uploadFiles(selectedFiles, 'courses');
+            }
+
+            // 2. Combine existing images with new uploaded URLs
+            const finalImages = [...(formData.images || []), ...uploadedUrls];
+
+            // Fallback for backward compatibility
+            const mainImage = finalImages.length > 0 ? finalImages[0] : 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=1000';
+
+            const dataToSave = {
+                ...formData,
+                images: finalImages,
+                image: mainImage
+            };
+
+            if (currentCourse) {
+                updateCourse(currentCourse.id, dataToSave);
+            } else {
+                addCourse(dataToSave);
+            }
+
+            setIsEditing(false);
+            setFormData(initialForm);
+            setSelectedFiles([]);
+            setPreviewUrls([]);
+            setCurrentCourse(null);
+            alert("Salvo com sucesso!");
+
+        } catch (error) {
+            console.error("Erro ao salvar:", error);
+            alert("Erro ao fazer upload das imagens.");
+        } finally {
+            setUploading(false);
+        }
     };
 
     const startEdit = (course) => {
         setCurrentCourse(course);
-        setFormData(course);
+        const existingImages = course.images || (course.image ? [course.image] : []);
+        setFormData({ ...initialForm, ...course, images: existingImages });
+        setSelectedFiles([]);
+        setPreviewUrls([]);
         setIsEditing(true);
+    };
+
+    const getCategoryBadge = (cat) => {
+        switch (cat) {
+            case 'Formacao': return <span className="bg-primary/10 text-primary px-2 py-1 rounded text-[10px] uppercase font-bold tracking-wider">Formação</span>;
+            case 'GrupoEstudos': return <span className="bg-accent/20 text-accent px-2 py-1 rounded text-[10px] uppercase font-bold tracking-wider">Grupo de Estudos</span>;
+            default: return <span className="bg-gold/20 text-primary px-2 py-1 rounded text-[10px] uppercase font-bold tracking-wider">Curso</span>;
+        }
     };
 
     return (
         <div className="space-y-8 animate-fade-in">
             <div className="flex justify-between items-center">
                 <div>
-                    <h2 className="text-3xl font-serif text-primary">Gestão de Cursos</h2>
-                    <p className="text-sage text-sm">Gerencie o que aparece na seção "Instituto".</p>
+                    <h2 className="text-3xl font-serif text-primary">Gestão Acadêmica</h2>
+                    <p className="text-sage text-sm">Gerencie Cursos, Formações e Grupos de Estudos.</p>
                 </div>
                 <button
-                    onClick={() => { setIsEditing(true); setCurrentCourse(null); setFormData(initialForm); }}
+                    onClick={() => { setIsEditing(true); setCurrentCourse(null); setFormData(initialForm); setSelectedFiles([]); setPreviewUrls([]); }}
                     className="bg-accent text-white px-6 py-3 rounded-lg flex items-center gap-2 text-sm font-bold uppercase tracking-wide hover:bg-accent/90 shadow-lg transform hover:-translate-y-1 transition-all"
                 >
-                    <Plus size={16} /> Novo Curso
+                    <Plus size={16} /> Novo Item
                 </button>
             </div>
 
@@ -62,17 +144,36 @@ function CoursesManager() {
                 <div className="bg-white p-6 rounded-xl shadow-xl border border-gray-100 animate-slide-in relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-1 h-full bg-accent" />
                     <div className="flex justify-between mb-6">
-                        <h3 className="font-bold text-lg text-primary">{currentCourse ? 'Editar Curso' : 'Adicionar Novo Curso'}</h3>
+                        <h3 className="font-bold text-lg text-primary">{currentCourse ? 'Editar Item' : 'Adicionar Novo Item'}</h3>
                         <button onClick={() => setIsEditing(false)}><X size={20} className="text-gray-400 hover:text-red-500" /></button>
                     </div>
                     <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-6">
+
                         <div className="md:col-span-2">
-                            <label className="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-wide">Título do Curso</label>
+                            <label className="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-wide">Categoria</label>
+                            <div className="flex gap-4">
+                                <label className="flex items-center gap-2 cursor-pointer bg-gray-50 px-4 py-2 rounded-lg border border-gray-200">
+                                    <input type="radio" name="category" value="Curso" checked={formData.category === 'Curso'} onChange={e => setFormData({ ...formData, category: e.target.value })} className="text-accent focus:ring-accent" />
+                                    <span className="text-sm font-bold text-primary">Curso Livre</span>
+                                </label>
+                                <label className="flex items-center gap-2 cursor-pointer bg-gray-50 px-4 py-2 rounded-lg border border-gray-200">
+                                    <input type="radio" name="category" value="Formacao" checked={formData.category === 'Formacao'} onChange={e => setFormData({ ...formData, category: e.target.value })} className="text-accent focus:ring-accent" />
+                                    <span className="text-sm font-bold text-primary">Formação</span>
+                                </label>
+                                <label className="flex items-center gap-2 cursor-pointer bg-gray-50 px-4 py-2 rounded-lg border border-gray-200">
+                                    <input type="radio" name="category" value="GrupoEstudos" checked={formData.category === 'GrupoEstudos'} onChange={e => setFormData({ ...formData, category: e.target.value })} className="text-accent focus:ring-accent" />
+                                    <span className="text-sm font-bold text-primary">Grupo de Estudos</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div className="md:col-span-2">
+                            <label className="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-wide">Título</label>
                             <input required className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg focus:ring-1 focus:ring-accent focus:border-accent outline-none transition-all" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} placeholder="Ex: Gestalt-Terapia Avançada" />
                         </div>
 
                         <div>
-                            <label className="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-wide">Data</label>
+                            <label className="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-wide">Data / Horário</label>
                             <input required className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg focus:ring-1 focus:ring-accent outline-none" value={formData.date} onChange={e => setFormData({ ...formData, date: e.target.value })} placeholder="Ex: 12 de Maio, 19h" />
                         </div>
 
@@ -86,14 +187,72 @@ function CoursesManager() {
                         </div>
 
                         <div className="md:col-span-2">
+                            <label className="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-wide">Descrição / Ementa</label>
+                            <textarea className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg focus:ring-1 focus:ring-accent outline-none" rows={4} value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} placeholder="Breve descrição do curso ou tópicos da ementa..." />
+                        </div>
+
+                        <div className="md:col-span-2">
                             <label className="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-wide">Link do Sympla (Checkout)</label>
                             <input className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg focus:ring-1 focus:ring-accent outline-none" value={formData.link} onChange={e => setFormData({ ...formData, link: e.target.value })} placeholder="https://sympla.com.br/..." />
                         </div>
 
+                        {/* Image Upload Section */}
+                        <div className="md:col-span-2">
+                            <label className="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-wide">Galeria de Imagens</label>
+
+                            <div className="flex items-center justify-center w-full">
+                                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
+                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                        <Plus className="w-8 h-8 mb-2 text-gray-400" />
+                                        <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Clique para adicionar fotos</p>
+                                    </div>
+                                    <input type="file" multiple accept="image/*" className="hidden" onChange={handleFileSelect} />
+                                </label>
+                            </div>
+
+                            {/* Preview Grid */}
+                            <div className="grid grid-cols-4 gap-4 mt-4">
+                                {/* Existing Images */}
+                                {formData.images && formData.images.map((url, idx) => (
+                                    <div key={`existing-${idx}`} className="relative group aspect-square rounded-lg overflow-hidden shadow-sm">
+                                        <img src={url} alt="" className="w-full h-full object-cover" />
+                                        <button type="button" onClick={() => removeFile(idx, true)} className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <X size={12} />
+                                        </button>
+                                        <div className="absolute bottom-0 left-0 w-full bg-black/50 text-white text-[9px] font-bold text-center py-1">Salva</div>
+                                    </div>
+                                ))}
+
+                                {/* New Selected Files */}
+                                {previewUrls.map((url, idx) => (
+                                    <div key={`new-${idx}`} className="relative group aspect-square rounded-lg overflow-hidden shadow-sm border-2 border-accent/50">
+                                        <img src={url} alt="" className="w-full h-full object-cover opacity-80" />
+                                        <button type="button" onClick={() => removeFile(idx, false)} className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <X size={12} />
+                                        </button>
+                                        <div className="absolute bottom-0 left-0 w-full bg-accent text-white text-[9px] font-bold text-center py-1">Nova</div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
                         <div className="md:col-span-2 flex justify-end gap-3 mt-4 pt-4 border-t border-gray-100">
                             <button type="button" onClick={() => setIsEditing(false)} className="px-6 py-3 text-gray-500 hover:text-gray-800 font-medium text-sm">Cancelar</button>
-                            <button type="submit" className="bg-primary text-white px-8 py-3 rounded-lg flex items-center gap-2 hover:bg-primary/90 shadow-md font-bold text-sm uppercase tracking-wide">
-                                <Save size={16} /> Salvar Publicação
+                            <button
+                                type="submit"
+                                disabled={uploading}
+                                className={`bg-primary text-white px-8 py-3 rounded-lg flex items-center gap-2 hover:bg-primary/90 shadow-md font-bold text-sm uppercase tracking-wide ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            >
+                                {uploading ? (
+                                    <>
+                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                        Enviando...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Save size={16} /> Salvar Publicação
+                                    </>
+                                )}
                             </button>
                         </div>
                     </form>
@@ -106,9 +265,12 @@ function CoursesManager() {
                         <div className="flex items-center gap-6 w-full md:w-auto mb-4 md:mb-0">
                             <div className={`w-3 h-3 rounded-full shrink-0 shadow-sm ${course.status === 'Aberto' ? 'bg-green-500 shadow-green-500/50' : course.status === 'Esgotado' ? 'bg-red-500 shadow-red-500/50' : 'bg-gray-400'}`} />
 
-                            <img src={course.image} className="w-12 h-12 rounded-lg object-cover hidden md:block" alt="" />
+                            <img src={course.images && course.images.length > 0 ? course.images[0] : course.image} className="w-12 h-12 rounded-lg object-cover hidden md:block" alt="" />
 
                             <div>
+                                <div className="flex items-center gap-2 mb-1">
+                                    {getCategoryBadge(course.category || 'Curso')}
+                                </div>
                                 <h4 className="font-bold text-primary text-lg">{course.title}</h4>
                                 <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">{course.date}</p>
                             </div>
@@ -306,29 +468,217 @@ function SettingsManager() {
     );
 }
 
+// 4. Blog & Library Manager
+function BlogManager() {
+    const { blogPosts, refreshData } = useApp();
+    const [isEditing, setIsEditing] = useState(false);
+    const [currentPost, setCurrentPost] = useState(null);
+
+    const initialForm = {
+        type: 'blog',
+        title: '',
+        slug: '',
+        category: '',
+        date: new Date().toLocaleDateString('pt-BR'),
+        image: '',
+        excerpt: '',
+        content: '',
+        reference: '',
+        featured: false
+    };
+    const [formData, setFormData] = useState(initialForm);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            if (currentPost) {
+                await blogService.update(currentPost.id, formData);
+            } else {
+                const dataToSave = { ...formData };
+                if (!dataToSave.slug) {
+                    dataToSave.slug = dataToSave.title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+                }
+                await blogService.create(dataToSave);
+            }
+            await refreshData();
+            setIsEditing(false);
+            setFormData(initialForm);
+            setCurrentPost(null);
+            alert("Salvo com sucesso!");
+        } catch (error) {
+            console.error(error);
+            alert("Erro ao salvar: " + error.message);
+        }
+    };
+
+    const startEdit = (post) => {
+        setCurrentPost(post);
+        setFormData(post);
+        setIsEditing(true);
+    };
+
+    const handleDelete = async (id) => {
+        if (window.confirm("Sim, tenho certeza.")) {
+            await blogService.delete(id);
+            await refreshData();
+        }
+    };
+
+    return (
+        <div className="space-y-8 animate-fade-in">
+            <div className="flex justify-between items-center">
+                <div>
+                    <h2 className="text-3xl font-serif text-primary">Diário Visual & Biblioteca</h2>
+                    <p className="text-sage text-sm">Gerencie artigos do Blog e itens da Biblioteca (PDFs).</p>
+                </div>
+                <button
+                    onClick={() => { setIsEditing(true); setCurrentPost(null); setFormData(initialForm); }}
+                    className="bg-accent text-white px-6 py-3 rounded-lg flex items-center gap-2 text-sm font-bold uppercase tracking-wide hover:bg-accent/90 shadow-lg transform hover:-translate-y-1 transition-all"
+                >
+                    <Plus size={16} /> Nova Publicação
+                </button>
+            </div>
+
+            {isEditing && (
+                <div className="bg-white p-6 rounded-xl shadow-xl border border-gray-100 animate-slide-in relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-1 h-full bg-accent" />
+                    <div className="flex justify-between mb-6">
+                        <h3 className="font-bold text-lg text-primary">{currentPost ? 'Editar Publicação' : 'Nova Publicação'}</h3>
+                        <button onClick={() => setIsEditing(false)}><X size={20} className="text-gray-400 hover:text-red-500" /></button>
+                    </div>
+                    <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-6">
+                        <div className="md:col-span-2">
+                            <label className="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-wide">Tipo de Conteúdo</label>
+                            <div className="flex gap-4">
+                                <label className="flex items-center gap-2 cursor-pointer bg-gray-50 px-4 py-2 rounded-lg border border-gray-200">
+                                    <input type="radio" name="type" value="blog" checked={formData.type === 'blog'} onChange={e => setFormData({ ...formData, type: e.target.value })} className="text-accent focus:ring-accent" />
+                                    <span className="text-sm font-bold text-gray-700">Blog Post</span>
+                                </label>
+                                <label className="flex items-center gap-2 cursor-pointer bg-gray-50 px-4 py-2 rounded-lg border border-gray-200">
+                                    <input type="radio" name="type" value="library" checked={formData.type === 'library'} onChange={e => setFormData({ ...formData, type: e.target.value })} className="text-accent focus:ring-accent" />
+                                    <span className="text-sm font-bold text-gray-700">Item da Biblioteca (PDF)</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div className="md:col-span-2">
+                            <label className="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-wide">Título</label>
+                            <input required className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg focus:ring-1 focus:ring-accent outline-none" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} />
+                        </div>
+
+                        <div>
+                            <label className="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-wide">Categoria</label>
+                            <input className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg focus:ring-1 focus:ring-accent outline-none" value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })} placeholder="Ex: Artigo Técnico" />
+                        </div>
+
+                        <div>
+                            <label className="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-wide">Data</label>
+                            <input className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg focus:ring-1 focus:ring-accent outline-none" value={formData.date} onChange={e => setFormData({ ...formData, date: e.target.value })} />
+                        </div>
+
+                        <div className="md:col-span-2">
+                            <label className="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-wide">Imagem de Capa (URL)</label>
+                            <input className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg focus:ring-1 focus:ring-accent outline-none" value={formData.image} onChange={e => setFormData({ ...formData, image: e.target.value })} placeholder="https://..." />
+                        </div>
+
+                        <div className="md:col-span-2">
+                            <label className="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-wide">Resumo (Excerpt)</label>
+                            <textarea className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg focus:ring-1 focus:ring-accent outline-none" rows={2} value={formData.excerpt} onChange={e => setFormData({ ...formData, excerpt: e.target.value })} />
+                        </div>
+
+                        {formData.type === 'library' && (
+                            <div className="md:col-span-2">
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-wide">Referência Bibliográfica</label>
+                                <textarea className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg focus:ring-1 focus:ring-accent outline-none" rows={2} value={formData.reference} onChange={e => setFormData({ ...formData, reference: e.target.value })} />
+                            </div>
+                        )}
+
+                        <div className="md:col-span-2">
+                            <label className="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-wide">Conteúdo HTML (Texto Completo)</label>
+                            <textarea className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg focus:ring-1 focus:ring-accent outline-none font-mono text-sm" rows={10} value={formData.content} onChange={e => setFormData({ ...formData, content: e.target.value })} />
+                            <p className="text-[10px] text-gray-400 mt-1">Aceita tags HTML básicas (p, b, i, ul, li).</p>
+                        </div>
+
+                        <div className="md:col-span-2 flex justify-end gap-3 mt-4 pt-4 border-t border-gray-100">
+                            <button type="button" onClick={() => setIsEditing(false)} className="px-6 py-3 text-gray-500 hover:text-gray-800 font-medium text-sm">Cancelar</button>
+                            <button type="submit" className="bg-primary text-white px-8 py-3 rounded-lg flex items-center gap-2 hover:bg-primary/90 shadow-md font-bold text-sm uppercase tracking-wide">
+                                <Save size={16} /> Salvar Publicação
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            )}
+
+            <div className="grid gap-4">
+                {blogPosts.map(post => (
+                    <div key={post.id} className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-center group hover:shadow-lg transition-all duration-300">
+                        <div className="flex items-center gap-6 w-full md:w-auto mb-4 md:mb-0">
+                            <div className={`shrink-0 w-12 h-12 rounded-lg flex items-center justify-center font-bold text-white text-xs ${post.type === 'library' ? 'bg-accent' : 'bg-primary'}`}>
+                                {post.type === 'library' ? 'LIB' : 'BLOG'}
+                            </div>
+                            <div>
+                                <h4 className="font-bold text-primary text-lg">{post.title}</h4>
+                                <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">{post.category} • {post.date}</p>
+                            </div>
+                        </div>
+                        <div className="flex gap-2 w-full md:w-auto justify-end">
+                            <button onClick={() => startEdit(post)} className="p-2 text-primary hover:bg-primary/5 rounded-lg transition-colors" title="Editar">
+                                <Edit size={18} />
+                            </button>
+                            <button onClick={() => handleDelete(post.id)} className="p-2 text-red-400 hover:bg-red-50 rounded-lg transition-colors" title="Excluir">
+                                <Trash2 size={18} />
+                            </button>
+                        </div>
+                    </div>
+                ))}
+                {blogPosts.length === 0 && (
+                    <div className="text-center p-12 text-gray-400">Nenhuma publicação encontrada.</div>
+                )}
+            </div>
+        </div>
+    );
+}
+
 // --- Main Layout ---
 export default function AdminDashboard() {
     const { logout } = useApp();
     const location = useLocation();
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     const navItems = [
         { icon: LayoutDashboard, label: 'Visão Geral', path: '/admin' },
-        { icon: BookOpen, label: 'Cursos', path: '/admin/courses' },
+        { icon: BookOpen, label: 'Acadêmico', path: '/admin/academic' },
         { icon: Globe, label: 'Google Suite', path: '/admin/google' },
         { icon: PenTool, label: 'Diário Visual', path: '/admin/blog' },
         { icon: Settings, label: 'Configurações', path: '/admin/settings' },
     ];
 
     return (
-        <div className="flex min-h-screen bg-[#FDFCF9]">
+        <div className="flex min-h-screen bg-surface">
+            {/* Mobile Overlay */}
+            {isMobileMenuOpen && (
+                <div
+                    className="fixed inset-0 bg-primary/20 backdrop-blur-sm z-40 md:hidden"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                />
+            )}
+
             {/* Sidebar */}
-            <aside className="w-80 bg-primary text-paper flex flex-col fixed h-full z-20 shadow-[20px_0_60px_rgba(0,0,0,0.05)]">
-                <div className="p-12">
-                    <h1 className="font-serif text-3xl tracking-tight mb-2">Figura <span className="font-light text-gold italic">Viva</span></h1>
-                    <div className="flex items-center gap-2 opacity-40">
-                        <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-                        <p className="text-[9px] uppercase tracking-[0.3em] font-bold">Admin Panel v2.0</p>
+            <aside className={`w-72 md:w-80 bg-[#FDFBF7] border-r border-[#EFECE5] text-primary flex flex-col fixed h-full z-50 transition-transform duration-300 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+                <div className="p-8 md:p-12 flex justify-between items-center">
+                    <div>
+                        <div className="flex items-center gap-3 mb-2">
+                            <img src="/assets/logo.jpeg" alt="" className="w-10 h-10 rounded-full border border-primary/10 shadow-sm" />
+                            <h1 className="font-serif text-2xl md:text-3xl tracking-tight text-primary">Figura <span className="font-light text-gold italic">Viva</span></h1>
+                        </div>
+                        <div className="flex items-center gap-2 opacity-50">
+                            <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                            <p className="text-[9px] uppercase tracking-[0.3em] font-bold text-primary/60">Admin Panel v2.1</p>
+                        </div>
                     </div>
+                    <button onClick={() => setIsMobileMenuOpen(false)} className="md:hidden text-primary/50 hover:text-primary">
+                        <X size={24} />
+                    </button>
                 </div>
 
                 <nav className="flex-1 px-8 space-y-2">
@@ -338,14 +688,14 @@ export default function AdminDashboard() {
                             <Link
                                 key={item.path}
                                 to={item.path}
-                                className={`flex items-center gap-4 px-6 py-5 rounded-[1.25rem] transition-soft group relative ${isActive ? 'bg-paper text-primary shadow-2xl scale-[1.02]' : 'text-paper/40 hover:text-paper hover:bg-white/5'}`}
+                                className={`flex items-center gap-4 px-6 py-5 rounded-[1.25rem] transition-all duration-300 group relative ${isActive ? 'bg-primary/5 text-primary font-bold shadow-sm' : 'text-primary/50 hover:text-primary hover:bg-primary/5'}`}
                             >
-                                <item.icon size={18} className={`transition-transform duration-500 ${isActive ? 'text-gold' : 'group-hover:scale-110'}`} />
-                                <span className={`text-[11px] font-bold uppercase tracking-widest ${isActive ? 'opacity-100' : 'opacity-80'}`}>{item.label}</span>
+                                <item.icon size={18} className={`transition-transform duration-500 ${isActive ? 'text-primary' : 'group-hover:scale-110 text-primary/40'}`} />
+                                <span className="text-[11px] font-bold uppercase tracking-widest">{item.label}</span>
                                 {isActive && (
                                     <motion.div
                                         layoutId="activeTab"
-                                        className="absolute right-4 w-1.5 h-1.5 bg-gold rounded-full"
+                                        className="absolute right-4 w-1.5 h-1.5 bg-primary rounded-full"
                                     />
                                 )}
                             </Link>
@@ -353,10 +703,10 @@ export default function AdminDashboard() {
                     })}
                 </nav>
 
-                <div className="p-8 border-t border-white/5">
+                <div className="p-8 border-t border-primary/5">
                     <button
                         onClick={logout}
-                        className="w-full flex items-center justify-center gap-4 px-6 py-5 bg-red-500/5 text-red-400 hover:bg-red-500 hover:text-white rounded-2xl transition-soft text-[10px] font-bold uppercase tracking-[0.2em] group"
+                        className="w-full flex items-center justify-center gap-4 px-6 py-5 bg-red-50 text-red-400 hover:bg-red-100 rounded-2xl transition-soft text-[10px] font-bold uppercase tracking-[0.2em] group"
                     >
                         <LogOut size={16} className="group-hover:-translate-x-1 transition-transform" />
                         Desconectar
@@ -365,14 +715,22 @@ export default function AdminDashboard() {
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 ml-80 p-16 overflow-y-auto min-h-screen">
-                <header className="mb-16 flex justify-between items-center">
-                    <div>
-                        <h2 className="font-serif text-4xl text-primary mb-2">Painel de Controle</h2>
-                        <p className="text-primary/40 text-sm font-light">Gerencie sua presença digital e conexões Google.</p>
+            <main className="flex-1 md:ml-80 p-6 md:p-16 overflow-y-auto min-h-screen transition-all bg-[#FBFAEC]">
+                <header className="mb-10 md:mb-16 flex justify-between items-center">
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => setIsMobileMenuOpen(true)}
+                            className="md:hidden p-2 -ml-2 text-primary hover:bg-primary/5 rounded-lg"
+                        >
+                            <Menu size={24} />
+                        </button>
+                        <div>
+                            <h2 className="font-serif text-2xl md:text-4xl text-primary mb-2">Painel de Controle</h2>
+                            <p className="text-primary/40 text-xs md:text-sm font-light hidden md:block">Gerencie sua presença digital e conexões Google.</p>
+                        </div>
                     </div>
                     <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-full glass border border-primary/5 flex items-center justify-center text-primary/30">
+                        <div className="w-10 h-10 rounded-full bg-white border border-primary/5 flex items-center justify-center text-primary/30 shadow-sm">
                             <Settings size={20} />
                         </div>
                     </div>
@@ -383,27 +741,33 @@ export default function AdminDashboard() {
                         <Route path="/" element={
                             <div className="grid md:grid-cols-2 gap-8 py-10 animate-fade-in">
                                 <div className="bg-white p-10 rounded-[2.5rem] shadow-sm border border-primary/5 flex flex-col justify-center items-center text-center">
-                                    <div className="w-20 h-20 bg-gold/10 rounded-full flex items-center justify-center text-gold mb-8">
+                                    <div className="w-20 h-20 bg-[#F5F2EA] rounded-full flex items-center justify-center text-gold mb-8">
                                         <LayoutDashboard size={32} />
                                     </div>
                                     <h2 className="font-serif text-4xl text-primary mb-4">Seja bem-vinda de volta.</h2>
                                     <p className="text-primary/50 max-w-sm font-light leading-relaxed">Seu site está funcionando perfeitamente e conectado a todos os serviços Google.</p>
                                 </div>
                                 <div className="grid grid-cols-2 gap-6">
-                                    <div className="bg-primary p-8 rounded-[2rem] text-paper flex flex-col justify-between">
-                                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-40">Status do Site</span>
-                                        <h4 className="text-4xl font-serif">Online</h4>
+                                    <div className="bg-[#E6F4EA] p-8 rounded-[2rem] border border-[#D5EADBC0] flex flex-col justify-between text-[#2E5C38]">
+                                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60">Status do Site</span>
+                                        <div className="flex items-center gap-2">
+                                            <span className="relative flex h-3 w-3">
+                                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                                <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                                            </span>
+                                            <h4 className="text-3xl font-serif">Online</h4>
+                                        </div>
                                     </div>
-                                    <div className="bg-white p-8 rounded-[2rem] border border-primary/5 flex flex-col justify-between shadow-sm">
-                                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/30">Versão</span>
-                                        <h4 className="text-4xl font-serif text-primary italic">2.0.4</h4>
+                                    <div className="bg-[#FAF8F5] p-8 rounded-[2rem] border border-[#EFECE5] flex flex-col justify-between shadow-sm">
+                                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/40">Versão</span>
+                                        <h4 className="text-3xl font-serif text-primary italic">2.1.0</h4>
                                     </div>
                                 </div>
                             </div>
                         } />
-                        <Route path="/courses" element={<CoursesManager />} />
+                        <Route path="/academic" element={<AcademicManager />} />
                         <Route path="/google" element={<GoogleIntegrations />} />
-                        <Route path="/blog" element={<div className="p-20 text-center glass rounded-[2.5rem] text-primary/40 font-serif text-2xl">Editor de Blog em Construção...</div>} />
+                        <Route path="/blog" element={<BlogManager />} />
                         <Route path="/settings" element={<SettingsManager />} />
                     </Routes>
                 </div>

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&display=swap');
+/* Fonts injected via HTML for performance */
 
 @tailwind base;
 @tailwind components;
@@ -9,6 +9,12 @@
     @apply bg-paper text-text font-sans antialiased text-base leading-relaxed;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Accessibility: Visible Focus Ring */
+  :focus-visible {
+    outline: 2px solid theme('colors.primary');
+    outline-offset: 2px;
   }
 
   h1,
@@ -27,10 +33,14 @@
   }
 
   .btn-primary {
-    @apply bg-primary text-white px-6 py-3 rounded-lg font-bold tracking-wide hover:bg-primary/90 transition-colors;
+    @apply inline-flex items-center justify-center bg-primary text-white px-6 py-3 rounded-lg font-bold tracking-wide hover:bg-primary/90 transition-all active:scale-95;
   }
 
   .btn-secondary {
-    @apply border border-gray-300 text-text px-6 py-3 rounded-lg font-bold hover:bg-gray-50 transition-colors;
+    @apply inline-flex items-center justify-center border border-gray-300 text-text px-6 py-3 rounded-lg font-bold hover:bg-gray-50 transition-all active:scale-95;
+  }
+
+  .skip-to-content {
+    @apply sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-white focus:text-primary focus:px-4 focus:py-2 focus:rounded-md focus:shadow-lg focus:font-bold;
   }
 }

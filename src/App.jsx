@@ -28,6 +28,7 @@ function ScrollToTop() {
 function AppContent() {
   return (
     <>
+      <a href="#main-content" className="skip-to-content">Pular para o conteúdo principal</a>
       <ScrollToTop />
       <ScrollToTopButton />
       <Routes>

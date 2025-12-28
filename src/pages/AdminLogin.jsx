@@ -40,12 +40,12 @@ export default function AdminLogin() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
-                className="bg-white/40 backdrop-blur-3xl p-16 rounded-[3rem] shadow-[0_80px_150px_-30px_rgba(38,58,58,0.15)] w-full max-w-md relative z-10 border border-white/60 text-center"
+                className="bg-white/40 backdrop-blur-3xl p-8 md:p-16 rounded-[2rem] md:rounded-[3rem] shadow-[0_80px_150px_-30px_rgba(38,58,58,0.15)] w-full max-w-md relative z-10 border border-white/60 text-center mx-4"
             >
 
                 <div className="flex flex-col items-center mb-12">
-                    <div className="w-20 h-20 bg-primary/5 rounded-full mb-8 flex items-center justify-center text-primary/20 ring-1 ring-primary/5">
-                        <Leaf className="w-10 h-10" />
+                    <div className="w-24 h-24 rounded-full mb-8 flex items-center justify-center p-1 border border-primary/10 shadow-xl bg-paper">
+                        <img src="/assets/logo.jpeg" alt="Instituto Figura Viva" className="w-full h-full rounded-full object-cover" />
                     </div>
                     <h1 className="font-serif text-4xl text-primary mb-3">Figura <span className="font-light text-gold italic">Viva</span></h1>
                     <p className="text-primary/40 text-[10px] uppercase tracking-[0.4em] font-bold">Ecossistema Digital</p>
