@@ -9,8 +9,8 @@ import { Calendar, MapPin, Clock, ArrowLeft, ExternalLink } from 'lucide-react';
 export default function CourseDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const [course, setCourse] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [lightboxOpen, setLightboxOpen] = useState(false);
+    const [lightboxIndex, setLightboxIndex] = useState(0);
 
     useEffect(() => {
         const fetchCourse = async () => {
@@ -22,8 +22,28 @@ export default function CourseDetail() {
         fetchCourse();
     }, [id]);
 
+    const getCoverImage = () => {
+        if (!course) return '';
+        if (course.images && course.images.length > 0) return course.images[0];
+        return course.image;
+    };
+
+    const getGalleryImages = () => {
+        if (!course || !course.images || course.images.length <= 1) return [];
+        return course.images.slice(1); // Exclude the cover image
+    };
+
+    const openLightbox = (index) => {
+        // Index relative to all images (cover + gallery)
+        setLightboxIndex(index);
+        setLightboxOpen(true);
+    };
+
     if (loading) return <div className="min-h-screen bg-paper flex items-center justify-center font-serif text-3xl">Carregando...</div>;
     if (!course) return <div className="min-h-screen bg-paper flex items-center justify-center font-serif text-3xl">Curso não encontrado.</div>;
+
+    const galleryImages = getGalleryImages();
+    const allImages = course.images && course.images.length > 0 ? course.images : [course.image];
 
     return (
         <div className="bg-paper min-h-screen">
@@ -34,7 +54,7 @@ export default function CourseDetail() {
                         <ArrowLeft size={14} /> Voltar
                     </button>
 
-                    <div className="grid lg:grid-cols-2 gap-20 items-start">
+                    <div className="grid lg:grid-cols-2 gap-20 items-start mb-20">
                         <motion.div
                             initial={{ opacity: 0, x: -30 }}
                             animate={{ opacity: 1, x: 0 }}
@@ -74,19 +94,57 @@ export default function CourseDetail() {
                         <motion.div
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            className="relative"
+                            className="relative cursor-pointer group"
+                            onClick={() => openLightbox(0)}
                         >
                             <div className="aspect-[4/5] rounded-[3rem] overflow-hidden shadow-[0_60px_100px_-20px_rgba(38,58,58,0.2)]">
-                                <img src={course.image} alt={course.title} className="w-full h-full object-cover" />
+                                <img src={getCoverImage()} alt={course.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                             </div>
-                            <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-gold rounded-full flex items-center justify-center p-8 text-center">
+                            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-[3rem]">
+                                <span className="bg-white/20 backdrop-blur text-white px-4 py-2 rounded-full text-xs uppercase tracking-widest font-bold">Ampliar</span>
+                            </div>
+                            <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-gold rounded-full flex items-center justify-center p-8 text-center pointer-events-none">
                                 <span className="text-primary font-serif italic text-lg leading-tight">Vagas Limitadas</span>
                             </div>
                         </motion.div>
                     </div>
+
+                    {/* Gallery Section */}
+                    {galleryImages.length > 0 && (
+                        <div className="border-t border-primary/10 pt-16">
+                            <h3 className="font-serif text-3xl text-primary mb-8">Galeria do Curso</h3>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                                {galleryImages.map((img, idx) => (
+                                    <motion.div
+                                        key={idx}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        viewport={{ once: true }}
+                                        className="aspect-square rounded-2xl overflow-hidden cursor-pointer group relative"
+                                        onClick={() => openLightbox(idx + 1)} // +1 because index 0 is cover
+                                    >
+                                        <img src={img} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt="" />
+                                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    </motion.div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </main>
             <Footer />
+
+            {/* Simple Lightbox */}
+            {lightboxOpen && (
+                <div className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4">
+                    <button onClick={() => setLightboxOpen(false)} className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors">
+                        <ArrowLeft size={32} className="rotate-180" /> {/* Mimic Close/Back */}
+                    </button>
+                    <div className="max-w-5xl max-h-screen">
+                        <img src={allImages[lightboxIndex]} alt="" className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl" />
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

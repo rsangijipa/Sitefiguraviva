@@ -7,13 +7,18 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: '#263A3A', // Deep Green (Brand)
-        accent: '#B86E58',  // Terracotta
-        paper: '#FAFAF9',   // Light Cream (New Background)
-        surface: '#FFFFFF', // Pure White (Cards)
-        text: '#374151',    // Dark Gray (Body)
-        muted: '#9CA3AF',   // Gray (Secondary)
-        gold: '#C5A065',
+        primary: '#412726', // Vinho Profundo (Base forte)
+        secondary: '#7A5A54', // Vinho Médio
+        accent: '#5D7052',  // Verde Botânico Escuro (Ajustado para contraste AA)
+        'accent-light': '#AABEAB', // Verde Botânico Claro (Backgrounds)
+        paper: '#F8F1E5',   // Off-white Papel (Base quente)
+        surface: '#FBFAEC', // Off-white Claro (Cards)
+        text: '#212328',    // Grafite (Leitura)
+        muted: '#8C8C8C',   // Cinza Neutro
+        gold: '#B08D55',    // Dourado Escurecido (Para texto/ícones - Contraste melhor)
+        'gold-light': '#EAE4A6', // Amarelo (Detalhes/Bg)
+        beige: '#E4CDB4',   // Bege
+
       },
       fontFamily: {
         serif: ['"Cormorant Garamond"', 'serif'],

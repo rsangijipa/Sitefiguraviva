@@ -32,7 +32,7 @@ export default function StudentPortal() {
         <div className="bg-paper min-h-screen flex flex-col font-sans text-primary">
             <Navbar />
 
-            <main className="flex-grow container mx-auto px-6 py-40">
+            <main className="flex-grow container mx-auto px-6 py-28 md:py-40">
                 <div className="mb-20 text-center relative">
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gold/5 rounded-full blur-3xl -z-10" />
                     <span className="text-accent font-bold uppercase tracking-[0.4em] text-[10px] mb-6 block">Comunidade Figura Viva</span>
@@ -44,7 +44,7 @@ export default function StudentPortal() {
                 </div>
 
                 {/* Interface similar to Google Drive but Premium */}
-                <div className="bg-white rounded-[2.5rem] shadow-[0_60px_100px_-20px_rgba(38,58,58,0.1)] overflow-hidden border border-primary/5 min-h-[700px] flex flex-col md:flex-row glass">
+                <div className="bg-white rounded-3xl md:rounded-[2.5rem] shadow-[0_60px_100px_-20px_rgba(38,58,58,0.1)] overflow-hidden border border-primary/5 min-h-[700px] flex flex-col md:flex-row glass">
 
                     {/* Sidebar */}
                     <aside className="w-full md:w-80 bg-gray-50/50 p-10 border-r border-primary/5 backdrop-blur-sm">
@@ -92,7 +92,7 @@ export default function StudentPortal() {
                     </aside>
 
                     {/* Content Area */}
-                    <section className="flex-1 p-10 md:p-16">
+                    <section className="flex-1 p-6 md:p-16">
                         <div className="flex justify-between items-center mb-12">
                             <h2 className="font-serif text-3xl text-primary capitalize">
                                 {folders.find(f => f.id === activeFolder)?.label || 'Arquivos'}

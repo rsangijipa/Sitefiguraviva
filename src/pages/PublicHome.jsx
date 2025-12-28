@@ -32,9 +32,19 @@ export default function PublicHome() {
     const [selectedArticle, setSelectedArticle] = useState(null);
     const [isReaderOpen, setIsReaderOpen] = useState(false);
 
+    // Filters
+    const formacoes = courses.filter(c => c.category === 'Formacao');
+    const grupos = courses.filter(c => c.category === 'GrupoEstudos');
+    const cursos = courses.filter(c => !c.category || c.category === 'Curso');
+
     const openReader = (article) => {
         setSelectedArticle(article);
         setIsReaderOpen(true);
+    };
+
+    const getCoverImage = (course) => {
+        if (course.images && course.images.length > 0) return course.images[0];
+        return course.image || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=1000';
     };
 
     return (
@@ -50,20 +60,32 @@ export default function PublicHome() {
             <Navbar />
 
             {/* 2. Minimalist Hero */}
-            <header className="pt-32 pb-24 md:pt-48 md:pb-32 px-6 bg-paper">
+            <header className="pt-32 pb-24 md:pt-48 md:pb-32 px-6 bg-paper relative overflow-hidden">
+                {/* Background Logo Texture */}
+                <div className="absolute top-0 left-0 w-full h-full z-0 select-none">
+                    <img
+                        src="/assets/logo-figura-viva.jpg"
+                        className="w-full h-full object-cover object-center opacity-20"
+                        alt=""
+                        width="1920"
+                        height="1080"
+                    />
+                </div>
+                <div className="absolute top-0 left-0 w-full h-full z-0 bg-paper/80 mix-blend-overlay" />
+                <div className="absolute top-0 left-0 w-full h-full z-0 bg-gradient-to-b from-paper/40 via-paper/60 to-paper" />
                 <div className="container mx-auto max-w-6xl">
                     <motion.div
                         initial="hidden"
                         animate="visible"
                         variants={staggerContainer}
-                        className="max-w-4xl"
+                        className="max-w-4xl relative z-10"
                     >
                         <motion.div variants={fadeInUp} className="flex items-center gap-4 mb-8">
                             <span className="w-12 h-[1px] bg-primary/20"></span>
                             <span className="text-xs font-bold tracking-[0.2em] uppercase text-primary/60">Instituto de Gestalt-Terapia</span>
                         </motion.div>
 
-                        <motion.h1 variants={fadeInUp} className="font-serif text-6xl md:text-8xl text-primary leading-[0.95] tracking-tight mb-8">
+                        <motion.h1 variants={fadeInUp} className="font-serif text-5xl sm:text-6xl md:text-8xl text-primary leading-[0.95] tracking-tight mb-8">
                             Habitar a <span className="italic text-gold font-light">Fronteira</span>
                         </motion.h1>
 
@@ -73,13 +95,14 @@ export default function PublicHome() {
 
                         <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4">
                             <a href="#clinica" className="btn-primary flex items-center justify-center gap-2">
-                                Começar Terapia <ArrowRight size={18} />
+                                Começar Terapia <ArrowRight size={18} aria-hidden="true" />
                             </a>
-                            <button 
+                            <button
                                 onClick={() => navigate('/portal')}
                                 className="btn-secondary flex items-center justify-center gap-2 bg-white"
+                                aria-label="Acessar plataforma de formação profissional"
                             >
-                                Formação Profissional <ArrowUpRight size={18} className="text-gray-400" />
+                                Formação Profissional <ArrowUpRight size={18} className="text-gray-400" aria-hidden="true" />
                             </button>
                         </motion.div>
                     </motion.div>
@@ -87,12 +110,15 @@ export default function PublicHome() {
             </header>
 
             {/* 3. Clean Clinical Section */}
-            <section id="clinica" className="py-24 bg-white border-y border-gray-100">
-                {/* ... existing content ... */}
+            <section id="clinica" className="py-16 md:py-24 bg-surface border-y border-stone-100">
+                {/* Content presumed to be here in original, keeping empty if it was empty or minimal */}
+                <div className="container mx-auto px-6 max-w-6xl text-center">
+                    <p className="text-text/60 italic">Seção clínica em desenvolvimento...</p>
+                </div>
             </section>
 
             {/* NEW: Founder Section */}
-            <section id="fundadora" className="py-24 bg-white">
+            <section id="fundadora" className="py-16 md:py-24 bg-white">
                 <div className="container mx-auto px-6 max-w-6xl">
                     <div className="grid lg:grid-cols-2 gap-16 items-center">
                         <motion.div
@@ -104,7 +130,7 @@ export default function PublicHome() {
                         >
                             <span className="text-xs font-bold tracking-[0.2em] uppercase text-gold mb-4 block">Fundadora</span>
                             <h2 className="text-4xl md:text-5xl font-serif text-primary mb-8 leading-tight">Lilian Vanessa <span className="italic text-gold font-light">Nicacio Gusmão</span></h2>
-                            
+
                             <div className="space-y-6 text-lg text-text/80 leading-relaxed font-light">
                                 <p>
                                     Psicóloga (CRP 20/1228) e Mestre em Ciências Ambientais pela UNITAU, Lilian Vanessa dedica sua trajetória à integração entre a fenomenologia, a natureza e o desenvolvimento humano.
@@ -112,7 +138,7 @@ export default function PublicHome() {
                                 <p>
                                     Com formação sólida em <span className="text-primary font-medium text-base uppercase tracking-wider">Gestalt-Terapia</span> pelo Instituto da Bahia, sua atuação transita entre a clínica, a supervisão e a docência, tendo coordenado a Clínica-Escola de Psicologia da UNIJIPA.
                                 </p>
-                                
+
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-8">
                                     <div className="flex items-start gap-3">
                                         <div className="w-1.5 h-1.5 mt-2 rounded-full bg-gold flex-shrink-0" />
@@ -131,9 +157,9 @@ export default function PublicHome() {
                                 </div>
 
                                 <div className="pt-8">
-                                    <a 
-                                        href="http://lattes.cnpq.br/" 
-                                        target="_blank" 
+                                    <a
+                                        href="http://lattes.cnpq.br/"
+                                        target="_blank"
                                         rel="noopener noreferrer"
                                         className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary border-b border-primary pb-1 hover:text-gold hover:border-gold transition-colors"
                                     >
@@ -151,10 +177,13 @@ export default function PublicHome() {
                             className="order-1 lg:order-2 relative"
                         >
                             <div className="relative z-10 aspect-[4/5] rounded-[2rem] overflow-hidden shadow-2xl">
-                                <img 
-                                    src="/assets/lilian-vanessa.png" 
-                                    alt="Lilian Vanessa Nicacio Gusmão" 
+                                <img
+                                    src="/assets/lilian-vanessa.jpeg"
+                                    alt="Lilian Vanessa Nicacio Gusmão"
                                     className="w-full h-full object-cover"
+                                    loading="lazy"
+                                    width="500"
+                                    height="625"
                                 />
                             </div>
                             <div className="absolute -top-10 -right-10 w-full h-full border-2 border-gold/20 rounded-[2rem] -z-10" />
@@ -168,8 +197,95 @@ export default function PublicHome() {
                 </div>
             </section>
 
-            {/* 4. Institute Section (Expanded) */}
-            <section id="instituto" className="py-24 bg-paper">
+            {/* NEW: Formation Section */}
+            {formacoes.length > 0 && (
+                <section id="formacoes" className="py-16 md:py-24 bg-stone-100/30 border-t border-stone-100">
+                    <div className="container mx-auto px-6 max-w-6xl">
+                        <div className="mb-16">
+                            <span className="text-xs font-bold tracking-[0.2em] uppercase text-purple-600 mb-4 block">Longa Duração</span>
+                            <h2 className="text-4xl md:text-5xl font-serif text-primary leading-tight">Formações em <span className="italic text-gold font-light">Gestalt</span></h2>
+                            <p className="text-lg text-text/80 mt-4 max-w-2xl">Percursos aprofundados para o desenvolvimento da identidade clínica.</p>
+                        </div>
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {formacoes.map((course, index) => (
+                                <motion.div
+                                    key={course.id}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: index * 0.1 }}
+                                    className="bg-white rounded-2xl overflow-hidden border border-purple-100/50 shadow-sm hover:shadow-xl transition-all duration-300 group"
+                                >
+                                    <div className="h-56 overflow-hidden relative">
+                                        <div className="absolute top-0 left-0 w-full h-full bg-purple-900/10 z-10 group-hover:bg-transparent transition-colors duration-500" />
+                                        <span className={`absolute top-4 left-4 z-20 px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded bg-white/90 shadow-sm ${course.status === 'Aberto' ? 'text-green-700' : 'text-red-700'}`}>
+                                            {course.status}
+                                        </span>
+                                        <img
+                                            src={getCoverImage(course)}
+                                            alt={course.title}
+                                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                            loading="lazy"
+                                        />
+                                    </div>
+                                    <div className="p-8">
+                                        <div className="flex items-center gap-2 text-purple-600 text-xs font-bold uppercase tracking-widest mb-4">
+                                            <Calendar size={14} /> {course.date}
+                                        </div>
+                                        <h3 className="font-serif text-2xl text-primary leading-tight mb-4">{course.title}</h3>
+                                        {course.description && <p className="text-sm text-text/60 mb-6 line-clamp-2">{course.description}</p>}
+                                        <button onClick={() => navigate(`/curso/${course.id}`)} className="w-full py-4 border border-purple-100 rounded-xl text-xs font-bold uppercase tracking-widest text-purple-900 hover:bg-purple-600 hover:text-white transition-all flex items-center justify-center gap-2">
+                                            Ver Programa <ArrowUpRight size={14} />
+                                        </button>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            )}
+
+            {/* NEW: Study Groups Section */}
+            {grupos.length > 0 && (
+                <section id="grupos" className="py-16 md:py-24 bg-white border-t border-stone-100">
+                    <div className="container mx-auto px-6 max-w-6xl">
+                        <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+                            <div className="max-w-xl">
+                                <span className="text-xs font-bold tracking-[0.2em] uppercase text-blue-600 mb-4 block">Estudos Contínuos</span>
+                                <h2 className="text-4xl md:text-5xl font-serif text-primary leading-tight">Grupos de <span className="italic text-blue-400 font-light">Estudos</span></h2>
+                            </div>
+                        </div>
+                        <div className="grid md:grid-cols-2 gap-8">
+                            {grupos.map((course, index) => (
+                                <motion.div
+                                    key={course.id}
+                                    initial={{ opacity: 0, x: -20 }}
+                                    whileInView={{ opacity: 1, x: 0 }}
+                                    viewport={{ once: true }}
+                                    className="flex flex-col md:flex-row bg-stone-50 rounded-2xl overflow-hidden border border-stone-100 hover:shadow-lg transition-all duration-300 group"
+                                >
+                                    <div className="w-full md:w-1/3 relative h-48 md:h-auto">
+                                        <img src={getCoverImage(course)} alt={course.title} className="w-full h-full object-cover" loading="lazy" />
+                                    </div>
+                                    <div className="p-8 flex-1 flex flex-col justify-center">
+                                        <div className="flex items-center gap-2 text-blue-600 text-[10px] font-bold uppercase tracking-widest mb-2">
+                                            <Calendar size={14} /> {course.date}
+                                        </div>
+                                        <h3 className="font-serif text-2xl text-primary mb-3">{course.title}</h3>
+                                        {course.description && <p className="text-sm text-text/60 mb-6 line-clamp-2">{course.description}</p>}
+                                        <button onClick={() => navigate(`/curso/${course.id}`)} className="text-xs font-bold uppercase tracking-widest text-primary hover:text-blue-600 flex items-center gap-2 transition-colors">
+                                            Saiba Mais <ArrowRight size={14} />
+                                        </button>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            )}
+
+            {/* 4. Institute Section (Standard Courses) */}
+            <section id="instituto" className="py-16 md:py-24 bg-paper border-t border-stone-100">
                 <div className="container mx-auto px-6 max-w-6xl">
                     <div className="grid lg:grid-cols-2 gap-16 items-center mb-24">
                         <motion.div
@@ -204,10 +320,13 @@ export default function PublicHome() {
                             transition={{ duration: 0.8 }}
                             className="relative"
                         >
-                            <img 
-                                src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&q=80&w=1000" 
-                                alt="Ambiente do Instituto" 
+                            <img
+                                src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&q=80&w=1000"
+                                alt="Ambiente do Instituto"
                                 className="w-full aspect-square object-cover rounded-full border-[12px] border-white shadow-2xl"
+                                loading="lazy"
+                                width="800"
+                                height="800"
                             />
                             <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gold/5 rounded-full blur-3xl" />
                         </motion.div>
@@ -216,7 +335,7 @@ export default function PublicHome() {
                     <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
                         <div className="max-w-xl">
                             <span className="text-xs font-bold tracking-[0.2em] uppercase text-gold mb-4 block">Instituto de Ensino</span>
-                            <h2 className="text-4xl md:text-5xl font-serif text-primary leading-tight">Caminhos de Formação</h2>
+                            <h2 className="text-4xl md:text-5xl font-serif text-primary leading-tight">Cursos Livres</h2>
                         </div>
                         <a href="#" className="hidden md:flex items-center gap-2 text-xs font-bold tracking-[0.2em] uppercase text-text hover:text-primary transition-colors">
                             Ver Calendário Completo <ArrowRight size={14} />
@@ -224,7 +343,7 @@ export default function PublicHome() {
                     </div>
 
                     <div className="grid md:grid-cols-3 gap-8">
-                        {courses.map((course, index) => (
+                        {cursos.length > 0 ? cursos.map((course, index) => (
                             <motion.div
                                 key={course.id}
                                 initial={{ opacity: 0, y: 20 }}
@@ -239,9 +358,10 @@ export default function PublicHome() {
                                         {course.status}
                                     </span>
                                     <img
-                                        src={course.image}
+                                        src={getCoverImage(course)}
                                         alt={course.title}
                                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                        loading="lazy"
                                     />
                                 </div>
                                 <div className="p-8 flex flex-col h-[280px]">
@@ -255,21 +375,25 @@ export default function PublicHome() {
                                         </h3>
                                     </div>
 
-                            <button 
-                                onClick={() => navigate(`/curso/${course.id}`)}
-                                className="w-full py-4 border border-gray-200 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-primary hover:text-white hover:border-primary transition-all flex items-center justify-center gap-2"
-                            >
-                                Ver Detalhes <ArrowUpRight size={14} />
-                            </button>
+                                    <button
+                                        onClick={() => navigate(`/curso/${course.id}`)}
+                                        className="w-full py-4 border border-gray-200 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-primary hover:text-white hover:border-primary transition-all flex items-center justify-center gap-2"
+                                    >
+                                        Ver Detalhes <ArrowUpRight size={14} />
+                                    </button>
                                 </div>
                             </motion.div>
-                        ))}
+                        )) : (
+                            <div className="col-span-3 text-center py-12 text-gray-400">
+                                Nenhum curso breve agendado no momento. Confira nossas Formações e Grupos de Estudos!
+                            </div>
+                        )}
                     </div>
                 </div>
             </section>
 
             {/* 5. Blog Section (Enriched Content) */}
-            <section id="blog" className="py-24 bg-white border-t border-gray-100">
+            <section id="blog" className="py-16 md:py-24 bg-white border-t border-stone-100">
                 <div className="container mx-auto px-6 max-w-6xl">
                     <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
                         <div className="max-w-xl">
@@ -285,82 +409,49 @@ export default function PublicHome() {
                     </div>
 
                     <div className="grid md:grid-cols-3 gap-12">
-                        {/* Biblioteca PDF Estilo Imagem */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            className="bg-white rounded-[2rem] border border-gray-100 overflow-hidden flex flex-col shadow-sm hover:shadow-xl transition-all duration-500 group"
-                        >
-                            <div className="h-64 bg-paper/50 flex items-center justify-center relative overflow-hidden p-8">
-                                <span className="absolute top-6 left-6 z-10 px-3 py-1 text-[8px] font-bold uppercase tracking-widest rounded bg-white shadow-sm text-primary">
-                                    Biblioteca
-                                </span>
-                                <div className="text-primary/10 font-serif text-8xl absolute -right-4 -bottom-4 select-none group-hover:text-gold/10 transition-colors">INTE</div>
-                                <h3 className="font-serif text-6xl text-gold group-hover:scale-105 transition-transform duration-700 select-none">INTE</h3>
-                            </div>
-                            <div className="p-8 flex flex-col flex-1">
-                                <div className="flex items-center gap-2 text-text/40 text-[10px] font-bold uppercase tracking-widest mb-4">
-                                    <FileText size={14} /> Artigo Técnico
+                        {/* Itens da Biblioteca (PDFs) */}
+                        {blogPosts.filter(post => post.type === 'library').map((post, index) => (
+                            <motion.div
+                                key={post.id}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: index * 0.1 }}
+                                className="bg-white rounded-[2rem] border border-gray-100 overflow-hidden flex flex-col shadow-sm hover:shadow-xl transition-all duration-500 group"
+                            >
+                                <div className={`h-64 ${index % 2 === 0 ? 'bg-paper/50' : 'bg-accent/5'} flex items-center justify-center relative overflow-hidden p-8`}>
+                                    <span className="absolute top-6 left-6 z-10 px-3 py-1 text-[8px] font-bold uppercase tracking-widest rounded bg-white shadow-sm text-primary">
+                                        Biblioteca
+                                    </span>
+                                    <div className={`text-primary/10 font-serif text-8xl absolute -right-4 -bottom-4 select-none group-hover:text-gold/10 transition-colors`}>
+                                        {post.title.substring(0, 4).toUpperCase()}
+                                    </div>
+                                    <h3 className={`font-serif text-6xl ${index % 2 === 0 ? 'text-gold' : 'text-accent'} group-hover:scale-105 transition-transform duration-700 select-none`}>
+                                        {post.title.substring(0, 4).toUpperCase()}
+                                    </h3>
                                 </div>
-                                <h4 className="font-serif text-2xl text-primary leading-tight mb-4 group-hover:text-gold transition-colors">
-                                    Intervenção Precoce Em Crianças Com Autismo
-                                </h4>
-                                <p className="text-sm text-text/60 mb-8 leading-relaxed">
-                                    Clique para ler o artigo completo extraído do arquivo PDF original.
-                                </p>
-                                <button 
-                                    onClick={() => openReader({
-                                        title: "Intervenção Precoce Em Crianças Com Autismo",
-                                        reference: "ROGERS, S. J.; DAWSON, G. Intervenção precoce em crianças com autismo: modelo Denver para a promoção da linguagem, da aprendizagem e da socialização. Lisboa: Lidel – Edições Técnicas, Ltda, 2014.",
-                                        content: "O livro Intervenção precoce em crianças com autismo: modelo Denver para a promoção da linguagem, da aprendizagem e da socialização descreve um método para intervir com crianças com Transtorno do Espectro Autista (TEA). A abordagem denominada Modelo Denver de Intervenção Precoce (ESDM – Early Start Denver Model) se propõe a preparar, apoiar, recompensar, aumentar as iniciativas da criança e ajudar no desenvolvimento da criança com autismo..."
-                                    })}
-                                    className="mt-auto text-primary font-bold text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 hover:text-gold transition-colors"
-                                >
-                                    Ler Artigo <ArrowRight size={14} />
-                                </button>
-                            </div>
-                        </motion.div>
-
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: 0.1 }}
-                            className="bg-white rounded-[2rem] border border-gray-100 overflow-hidden flex flex-col shadow-sm hover:shadow-xl transition-all duration-500 group"
-                        >
-                            <div className="h-64 bg-accent/5 flex items-center justify-center relative overflow-hidden p-8">
-                                <span className="absolute top-6 left-6 z-10 px-3 py-1 text-[8px] font-bold uppercase tracking-widest rounded bg-white shadow-sm text-primary">
-                                    Biblioteca
-                                </span>
-                                <div className="text-primary/10 font-serif text-8xl absolute -right-4 -bottom-4 select-none group-hover:text-gold/10 transition-colors">EXPE</div>
-                                <h3 className="font-serif text-6xl text-accent group-hover:scale-105 transition-transform duration-700 select-none">EXPE</h3>
-                            </div>
-                            <div className="p-8 flex flex-col flex-1">
-                                <div className="flex items-center gap-2 text-text/40 text-[10px] font-bold uppercase tracking-widest mb-4">
-                                    <FileText size={14} /> Artigo Técnico
+                                <div className="p-8 flex flex-col flex-1">
+                                    <div className="flex items-center gap-2 text-text/40 text-[10px] font-bold uppercase tracking-widest mb-4">
+                                        <FileText size={14} /> {post.category || 'Artigo Técnico'}
+                                    </div>
+                                    <h4 className="font-serif text-2xl text-primary leading-tight mb-4 group-hover:text-gold transition-colors">
+                                        {post.title}
+                                    </h4>
+                                    <p className="text-sm text-text/60 mb-8 leading-relaxed line-clamp-3">
+                                        {post.excerpt || "Clique para ler o artigo completo extraído do arquivo PDF original."}
+                                    </p>
+                                    <button
+                                        onClick={() => openReader(post)}
+                                        className="mt-auto text-primary font-bold text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 hover:text-gold transition-colors"
+                                    >
+                                        Ler Artigo <ArrowRight size={14} />
+                                    </button>
                                 </div>
-                                <h4 className="font-serif text-2xl text-primary leading-tight mb-4 group-hover:text-gold transition-colors">
-                                    Experiências Em Gestalt Terapia
-                                </h4>
-                                <p className="text-sm text-text/60 mb-8 leading-relaxed">
-                                    Clique para ler o artigo completo extraído do arquivo PDF original.
-                                </p>
-                                <button 
-                                    onClick={() => openReader({
-                                        title: "Experiências Em Gestalt Terapia",
-                                        reference: "Reflexões fenomenológicas sobre a prática clínica contemporânea e o campo do encontro.",
-                                        content: "Este artigo busca descrever as nuances da experiência sentida no aqui-agora do consultório, onde a fronteira de contato se torna o palco da transformação. Através de relatos de experiência, exploramos como o vazio fértil permite a emergência de novas formas de existir..."
-                                    })}
-                                    className="mt-auto text-primary font-bold text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 hover:text-gold transition-colors"
-                                >
-                                    Ler Artigo <ArrowRight size={14} />
-                                </button>
-                            </div>
-                        </motion.div>
+                            </motion.div>
+                        ))}
 
-                        {/* Blog Posts Existentes (Removido o loop para manter a biblioteca em destaque) */}
-                        {blogPosts.slice(0, 1).map((post, index) => (
+                        {/* Blog Posts (Dinâmicos) */}
+                        {blogPosts.filter(post => post.type === 'blog' || !post.type).map((post, index) => (
                             <motion.div
                                 key={post.id}
                                 initial={{ opacity: 0, y: 20 }}
@@ -370,10 +461,11 @@ export default function PublicHome() {
                             >
                                 <Link to={`/blog/${post.id}`} className="group block">
                                     <div className="relative mb-8 overflow-hidden rounded-2xl aspect-[16/10] bg-paper">
-                                        <img 
+                                        <img
                                             src={post.image || `https://images.unsplash.com/photo-${1550000000000 + index}?auto=format&fit=crop&q=80&w=800`}
                                             alt={post.title}
                                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                            loading="lazy"
                                         />
                                         <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
                                             <span className="bg-white/90 backdrop-blur px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest text-primary">
@@ -410,10 +502,10 @@ export default function PublicHome() {
 
             <Footer />
             <AmbientPlayer />
-            <PDFReader 
-                isOpen={isReaderOpen} 
-                onClose={() => setIsReaderOpen(false)} 
-                article={selectedArticle} 
+            <PDFReader
+                isOpen={isReaderOpen}
+                onClose={() => setIsReaderOpen(false)}
+                article={selectedArticle}
             />
         </div>
     );
