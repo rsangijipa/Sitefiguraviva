@@ -230,34 +230,66 @@ export default function PublicHome() {
                 </div>
             </section>
 
-            {/* 5. Minimalist Blog Grid */}
+            {/* 5. Blog Section (Enriched Content) */}
             <section id="blog" className="py-24 bg-white border-t border-gray-100">
                 <div className="container mx-auto px-6 max-w-6xl">
-                    <div className="mb-16">
-                        <span className="text-xs font-bold tracking-[0.2em] uppercase text-text/40 mb-4 block">Diário Visual</span>
-                        <h2 className="text-4xl font-serif text-primary">Arquivo de Sentidos</h2>
+                    <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+                        <div className="max-w-xl">
+                            <span className="text-xs font-bold tracking-[0.2em] uppercase text-gold mb-4 block">Reflexões & Saberes</span>
+                            <h2 className="text-4xl md:text-5xl font-serif text-primary leading-tight">Blog Figura Viva</h2>
+                            <p className="text-lg text-text/60 mt-4">
+                                Artigos, ensaios e pílulas de awareness sobre a clínica, a vida e o encontro.
+                            </p>
+                        </div>
+                        <Link to="/blog" className="flex items-center gap-2 text-xs font-bold tracking-[0.2em] uppercase text-primary hover:text-gold transition-colors">
+                            Ver Todas as Publicações <ArrowRight size={14} />
+                        </Link>
                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-10">
-                        {blogPosts.map((post) => (
-                            <Link to={`/blog/${post.id}`} key={post.id} className="group block cursor-pointer">
-                                <div className="mb-6 overflow-hidden rounded-xl bg-gray-50 aspect-[4/3] relative">
-                                    <div className="absolute inset-0 bg-primary/5 group-hover:bg-transparent transition-colors" />
-                                    {/* Placeholder for blog image if exists, utilizing abstract patterns if not */}
-                                    <div className="w-full h-full flex items-center justify-center text-primary/10">
-                                        <div className="w-16 h-16 rounded-full border-2 border-current" />
+                    <div className="grid md:grid-cols-3 gap-12">
+                        {blogPosts.map((post, index) => (
+                            <motion.div
+                                key={post.id}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: index * 0.1 }}
+                            >
+                                <Link to={`/blog/${post.id}`} className="group block">
+                                    <div className="relative mb-8 overflow-hidden rounded-2xl aspect-[16/10] bg-paper">
+                                        <img 
+                                            src={post.image || `https://images.unsplash.com/photo-${1550000000000 + index}?auto=format&fit=crop&q=80&w=800`}
+                                            alt={post.title}
+                                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                        />
+                                        <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
+                                            <span className="bg-white/90 backdrop-blur px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest text-primary">
+                                                Ler Artigo
+                                            </span>
+                                        </div>
                                     </div>
-                                </div>
-                                <div>
-                                    <span className="text-[10px] font-bold tracking-widest uppercase text-gold mb-3 block">{post.date}</span>
-                                    <h3 className="font-serif text-2xl text-primary mb-3 leading-tight group-hover:underline decoration-1 underline-offset-4">
-                                        {post.title}
-                                    </h3>
-                                    <p className="text-sm text-text/60 line-clamp-3 leading-relaxed">
-                                        {post.excerpt}
-                                    </p>
-                                </div>
-                            </Link>
+                                    <div className="space-y-4">
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-[10px] font-bold tracking-widest uppercase text-gold">
+                                                {post.category || 'Gestalt-Terapia'}
+                                            </span>
+                                            <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+                                            <span className="text-[10px] font-bold tracking-widest uppercase text-text/40">
+                                                {post.date}
+                                            </span>
+                                        </div>
+                                        <h3 className="font-serif text-2xl text-primary leading-snug group-hover:text-gold transition-colors duration-300">
+                                            {post.title}
+                                        </h3>
+                                        <p className="text-sm text-text/60 line-clamp-2 leading-relaxed">
+                                            {post.excerpt}
+                                        </p>
+                                        <div className="pt-2 flex items-center gap-2 text-primary font-bold text-[10px] uppercase tracking-widest">
+                                            Continuar Lendo <ArrowUpRight size={12} />
+                                        </div>
+                                    </div>
+                                </Link>
+                            </motion.div>
                         ))}
                     </div>
                 </div>
