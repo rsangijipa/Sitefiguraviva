@@ -1,10 +1,12 @@
-import { motion } from 'framer-motion';
-import { ArrowRight, Calendar, ExternalLink, Heart, ArrowUpRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowRight, Calendar, ExternalLink, Heart, ArrowUpRight, FileText } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
+import { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import AmbientPlayer from '../components/AmbientPlayer';
+import PDFReader from '../components/PDFReader';
 
 // Minimalist Fade Variant
 const fadeInUp = {
@@ -27,6 +29,13 @@ const staggerContainer = {
 export default function PublicHome() {
     const { courses, alertMessage, blogPosts } = useApp();
     const navigate = useNavigate();
+    const [selectedArticle, setSelectedArticle] = useState(null);
+    const [isReaderOpen, setIsReaderOpen] = useState(false);
+
+    const openReader = (article) => {
+        setSelectedArticle(article);
+        setIsReaderOpen(true);
+    };
 
     return (
         <div className="bg-paper min-h-screen text-text font-sans antialiased selection:bg-accent/20">
@@ -276,7 +285,82 @@ export default function PublicHome() {
                     </div>
 
                     <div className="grid md:grid-cols-3 gap-12">
-                        {blogPosts.map((post, index) => (
+                        {/* Biblioteca PDF Estilo Imagem */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            className="bg-white rounded-[2rem] border border-gray-100 overflow-hidden flex flex-col shadow-sm hover:shadow-xl transition-all duration-500 group"
+                        >
+                            <div className="h-64 bg-paper/50 flex items-center justify-center relative overflow-hidden p-8">
+                                <span className="absolute top-6 left-6 z-10 px-3 py-1 text-[8px] font-bold uppercase tracking-widest rounded bg-white shadow-sm text-primary">
+                                    Biblioteca
+                                </span>
+                                <div className="text-primary/10 font-serif text-8xl absolute -right-4 -bottom-4 select-none group-hover:text-gold/10 transition-colors">INTE</div>
+                                <h3 className="font-serif text-6xl text-gold group-hover:scale-105 transition-transform duration-700 select-none">INTE</h3>
+                            </div>
+                            <div className="p-8 flex flex-col flex-1">
+                                <div className="flex items-center gap-2 text-text/40 text-[10px] font-bold uppercase tracking-widest mb-4">
+                                    <FileText size={14} /> Artigo Técnico
+                                </div>
+                                <h4 className="font-serif text-2xl text-primary leading-tight mb-4 group-hover:text-gold transition-colors">
+                                    Intervenção Precoce Em Crianças Com Autismo
+                                </h4>
+                                <p className="text-sm text-text/60 mb-8 leading-relaxed">
+                                    Clique para ler o artigo completo extraído do arquivo PDF original.
+                                </p>
+                                <button 
+                                    onClick={() => openReader({
+                                        title: "Intervenção Precoce Em Crianças Com Autismo",
+                                        reference: "ROGERS, S. J.; DAWSON, G. Intervenção precoce em crianças com autismo: modelo Denver para a promoção da linguagem, da aprendizagem e da socialização. Lisboa: Lidel – Edições Técnicas, Ltda, 2014.",
+                                        content: "O livro Intervenção precoce em crianças com autismo: modelo Denver para a promoção da linguagem, da aprendizagem e da socialização descreve um método para intervir com crianças com Transtorno do Espectro Autista (TEA). A abordagem denominada Modelo Denver de Intervenção Precoce (ESDM – Early Start Denver Model) se propõe a preparar, apoiar, recompensar, aumentar as iniciativas da criança e ajudar no desenvolvimento da criança com autismo..."
+                                    })}
+                                    className="mt-auto text-primary font-bold text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 hover:text-gold transition-colors"
+                                >
+                                    Ler Artigo <ArrowRight size={14} />
+                                </button>
+                            </div>
+                        </motion.div>
+
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.1 }}
+                            className="bg-white rounded-[2rem] border border-gray-100 overflow-hidden flex flex-col shadow-sm hover:shadow-xl transition-all duration-500 group"
+                        >
+                            <div className="h-64 bg-accent/5 flex items-center justify-center relative overflow-hidden p-8">
+                                <span className="absolute top-6 left-6 z-10 px-3 py-1 text-[8px] font-bold uppercase tracking-widest rounded bg-white shadow-sm text-primary">
+                                    Biblioteca
+                                </span>
+                                <div className="text-primary/10 font-serif text-8xl absolute -right-4 -bottom-4 select-none group-hover:text-gold/10 transition-colors">EXPE</div>
+                                <h3 className="font-serif text-6xl text-accent group-hover:scale-105 transition-transform duration-700 select-none">EXPE</h3>
+                            </div>
+                            <div className="p-8 flex flex-col flex-1">
+                                <div className="flex items-center gap-2 text-text/40 text-[10px] font-bold uppercase tracking-widest mb-4">
+                                    <FileText size={14} /> Artigo Técnico
+                                </div>
+                                <h4 className="font-serif text-2xl text-primary leading-tight mb-4 group-hover:text-gold transition-colors">
+                                    Experiências Em Gestalt Terapia
+                                </h4>
+                                <p className="text-sm text-text/60 mb-8 leading-relaxed">
+                                    Clique para ler o artigo completo extraído do arquivo PDF original.
+                                </p>
+                                <button 
+                                    onClick={() => openReader({
+                                        title: "Experiências Em Gestalt Terapia",
+                                        reference: "Reflexões fenomenológicas sobre a prática clínica contemporânea e o campo do encontro.",
+                                        content: "Este artigo busca descrever as nuances da experiência sentida no aqui-agora do consultório, onde a fronteira de contato se torna o palco da transformação. Através de relatos de experiência, exploramos como o vazio fértil permite a emergência de novas formas de existir..."
+                                    })}
+                                    className="mt-auto text-primary font-bold text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 hover:text-gold transition-colors"
+                                >
+                                    Ler Artigo <ArrowRight size={14} />
+                                </button>
+                            </div>
+                        </motion.div>
+
+                        {/* Blog Posts Existentes (Removido o loop para manter a biblioteca em destaque) */}
+                        {blogPosts.slice(0, 1).map((post, index) => (
                             <motion.div
                                 key={post.id}
                                 initial={{ opacity: 0, y: 20 }}
@@ -326,6 +410,11 @@ export default function PublicHome() {
 
             <Footer />
             <AmbientPlayer />
+            <PDFReader 
+                isOpen={isReaderOpen} 
+                onClose={() => setIsReaderOpen(false)} 
+                article={selectedArticle} 
+            />
         </div>
     );
 }
