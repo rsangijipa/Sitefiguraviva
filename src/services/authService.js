@@ -1,40 +1,49 @@
-const AUTH_KEY = 'fv_auth_session';
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { auth } from "./firebase";
 
-const ADMIN_USER = import.meta.env.VITE_ADMIN_USER || 'admin';
-const ADMIN_HASH = import.meta.env.VITE_ADMIN_PASS_HASH || '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918'; // default to hash of 'admin'
-
-async function hash(string) {
-    const utf8 = new TextEncoder().encode(string);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', utf8);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
+const ALLOWED_EMAILS = [
+    'liliangusmao@figuraviva.com',
+    'richardsangi@figuraviva.com'
+];
 
 export const authService = {
-    async login(username, password) {
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 500));
+    async login(email, password) {
+        try {
+            // 1. Check if email is in the allowlist BEFORE even trying to auth
+            if (!ALLOWED_EMAILS.includes(email)) {
+                throw new Error('Acesso restrito: Este email não tem permissão administrativa.');
+            }
 
-        const passwordHash = await hash(password);
+            // 2. Authenticate with Firebase
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
 
-        if (username === ADMIN_USER && passwordHash === ADMIN_HASH) {
             const session = {
-                user: username,
-                token: 'mock-jwt-token-' + Date.now(),
-                expiry: Date.now() + 3600000 // 1 hour
+                user: user.email,
+                uid: user.uid,
+                token: await user.getIdToken(),
+                expiry: Date.now() + 3600000 // 1 hour (client side tracking)
             };
-            localStorage.setItem(AUTH_KEY, JSON.stringify(session));
+
+            localStorage.setItem('fv_auth_session', JSON.stringify(session));
             return session;
+
+        } catch (error) {
+            console.error("Login Error:", error);
+            if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
+                throw new Error('Credenciais inválidas.');
+            }
+            throw error;
         }
-        throw new Error('Credenciais inválidas');
     },
 
-    logout() {
-        localStorage.removeItem(AUTH_KEY);
+    async logout() {
+        await signOut(auth);
+        localStorage.removeItem('fv_auth_session');
     },
 
     getSession() {
-        const sessionStr = localStorage.getItem(AUTH_KEY);
+        const sessionStr = localStorage.getItem('fv_auth_session');
         if (!sessionStr) return null;
         try {
             const session = JSON.parse(sessionStr);

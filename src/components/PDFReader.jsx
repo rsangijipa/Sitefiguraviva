@@ -16,7 +16,7 @@ const PDFReader = ({ isOpen, onClose, article }) => {
             onClick={onClose}
             className="absolute inset-0 bg-primary/40 backdrop-blur-md"
           />
-          
+
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -30,7 +30,7 @@ const PDFReader = ({ isOpen, onClose, article }) => {
                 <div className="h-4 w-[1px] bg-gray-200" />
                 <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-primary/40">Artigo Técnico</span>
               </div>
-              <button 
+              <button
                 onClick={onClose}
                 className="w-10 h-10 rounded-full bg-paper flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all duration-300"
               >
@@ -59,22 +59,31 @@ const PDFReader = ({ isOpen, onClose, article }) => {
                     <p className="text-sm uppercase tracking-[0.2em] text-text/40 mb-12 transform -rotate-90 origin-left absolute -left-12 top-24 hidden md:block whitespace-nowrap">
                       Licenciado para Figura Viva — 2025
                     </p>
-                    
+
                     <div className="space-y-6">
                       <p className="font-serif text-xl italic text-primary/90 border-b border-gray-100 pb-8 mb-8">
                         {article.reference || "Referência técnica do artigo extraído do arquivo PDF."}
                       </p>
-                      
-                      {article.content ? (
+
+                      {article.pdfUrl ? (
+                        <div className="w-full h-[600px] bg-gray-100 rounded-xl overflow-hidden shadow-inner flex items-center justify-center">
+                          {/* Native Browser PDF Viewer */}
+                          <iframe
+                            src={`${article.pdfUrl}#toolbar=0&navpanes=0&scrollbar=0`}
+                            className="w-full h-full"
+                            title={article.title}
+                          />
+                        </div>
+                      ) : article.content ? (
                         <div dangerouslySetInnerHTML={{ __html: article.content }} />
                       ) : (
                         <>
                           <p>
-                            A Gestalt-terapia, enquanto abordagem fenomenológico-existencial, propõe um olhar integrativo para o sofrimento humano. 
+                            A Gestalt-terapia, enquanto abordagem fenomenológico-existencial, propõe um olhar integrativo para o sofrimento humano.
                             Este artigo explora as nuances da fronteira de contato e a importância da awareness no processo de cura.
                           </p>
                           <p>
-                            Através de uma análise qualitativa, observamos que o fenômeno da 'presença' atua como catalisador para a reorganização do campo. 
+                            Através de uma análise qualitativa, observamos que o fenômeno da 'presença' atua como catalisador para a reorganização do campo.
                             Quando o terapeuta se disponibiliza para o encontro autêntico, as polaridades emergem e encontram seu espaço de integração.
                           </p>
                         </>
@@ -87,7 +96,7 @@ const PDFReader = ({ isOpen, onClose, article }) => {
 
             {/* Footer */}
             <div className="p-6 bg-paper border-t border-gray-100 flex items-center justify-center">
-              <button 
+              <button
                 onClick={() => window.print()}
                 className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-primary hover:text-gold transition-colors"
               >

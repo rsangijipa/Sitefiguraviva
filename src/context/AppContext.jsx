@@ -25,17 +25,30 @@ export function AppProvider({ children }) {
 
     const fetchData = useCallback(async () => {
         setLoading(true);
+        const pdfItem = {
+            id: 'pdf-polaridades',
+            title: 'As polaridades do feminino na contemporaneidade e a depressão pós-parto uma visão gestáltica',
+            type: 'library',
+            category: 'Artigo Científico',
+            excerpt: 'Este artigo explora as nuances da fronteira de contato e a importância da awareness no processo de cura através de uma visão gestáltica.',
+            pdfUrl: '/documents/As polaridades do feminino na contemporaneidade e a depressão pós-parto uma visão gestáltica.pdf',
+            date: '2025'
+        };
+
         try {
             const [coursesData, postsData] = await Promise.all([
                 courseService.getAll(),
                 blogService.getAll()
             ]);
+
             setCourses(coursesData);
-            setBlogPosts(postsData);
+            setBlogPosts([pdfItem, ...postsData]);
             setError(null);
         } catch (err) {
             console.error("Fetch error:", err);
-            setError("Falha ao carregar dados. Usando dados locais.");
+            setError("Falha ao carregar dados remotos. Mostrando conteúdo local disponível.");
+            // Ensure local items are still shown even if remote fetch fails
+            setBlogPosts([pdfItem]);
         } finally {
             setLoading(false);
         }

@@ -42,6 +42,19 @@ export default function PublicHome() {
         setIsReaderOpen(true);
     };
 
+    useEffect(() => {
+        const script = document.createElement('script');
+        script.type = 'module';
+        script.src = 'https://w.behold.so/widget.js';
+        document.head.appendChild(script);
+
+        return () => {
+            if (document.head.contains(script)) {
+                document.head.removeChild(script);
+            }
+        };
+    }, []);
+
     const getCoverImage = (course) => {
         if (course.images && course.images.length > 0) return course.images[0];
         return course.image || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=1000';
@@ -65,7 +78,7 @@ export default function PublicHome() {
                 <div className="absolute top-0 left-0 w-full h-full z-0 select-none">
                     <img
                         src="/assets/logo-figura-viva.jpg"
-                        className="w-full h-full object-cover object-center opacity-20"
+                        className="w-[80vw] h-[80vw] md:w-[60vw] md:h-[60vw] absolute -right-[20%] -top-[10%] object-contain opacity-40 mix-blend-multiply blur-3xl rounded-full"
                         alt=""
                         width="1920"
                         height="1080"
@@ -94,28 +107,27 @@ export default function PublicHome() {
                         </motion.p>
 
                         <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4">
-                            <a href="#clinica" className="btn-primary flex items-center justify-center gap-2">
-                                Começar Terapia <ArrowRight size={18} aria-hidden="true" />
-                            </a>
-                            <button
-                                onClick={() => navigate('/portal')}
-                                className="btn-secondary flex items-center justify-center gap-2 bg-white"
-                                aria-label="Acessar plataforma de formação profissional"
+                            <a
+                                href="https://wa.me/556992481585"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="btn-primary flex items-center justify-center gap-2"
                             >
-                                Formação Profissional <ArrowUpRight size={18} className="text-gray-400" aria-hidden="true" />
-                            </button>
+                                Agendamento <ArrowRight size={18} aria-hidden="true" />
+                            </a>
+                            <a
+                                href="#cursos"
+                                className="btn-secondary flex items-center justify-center gap-2 bg-white"
+                                aria-label="Ver cursos livres"
+                            >
+                                Cursos Livres <ArrowUpRight size={18} className="text-gray-400" aria-hidden="true" />
+                            </a>
                         </motion.div>
                     </motion.div>
                 </div>
             </header>
 
-            {/* 3. Clean Clinical Section */}
-            <section id="clinica" className="py-16 md:py-24 bg-surface border-y border-stone-100">
-                {/* Content presumed to be here in original, keeping empty if it was empty or minimal */}
-                <div className="container mx-auto px-6 max-w-6xl text-center">
-                    <p className="text-text/60 italic">Seção clínica em desenvolvimento...</p>
-                </div>
-            </section>
+
 
             {/* NEW: Founder Section */}
             <section id="fundadora" className="py-16 md:py-24 bg-white">
@@ -321,7 +333,7 @@ export default function PublicHome() {
                             className="relative"
                         >
                             <img
-                                src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&q=80&w=1000"
+                                src="/assets/foto-grupo.jpg"
                                 alt="Ambiente do Instituto"
                                 className="w-full aspect-square object-cover rounded-full border-[12px] border-white shadow-2xl"
                                 loading="lazy"
@@ -497,6 +509,17 @@ export default function PublicHome() {
                             </motion.div>
                         ))}
                     </div>
+                </div>
+            </section>
+
+            {/* NEW: Instagram Section */}
+            <section className="py-16 md:py-24 bg-surface border-t border-stone-100">
+                <div className="container mx-auto px-6 max-w-6xl text-center mb-12">
+                    <span className="text-xs font-bold tracking-[0.2em] uppercase text-gold mb-4 block">@institutofiguraviva</span>
+                    <h2 className="text-3xl md:text-4xl font-serif text-primary">Nos Acompanhe no Instagram</h2>
+                </div>
+                <div className="container mx-auto px-6 max-w-[1400px]">
+                    <behold-widget feed-id="e6Ie6LXMRqDXJvfkbx6U"></behold-widget>
                 </div>
             </section>
 
