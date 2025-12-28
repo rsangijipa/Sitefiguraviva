@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import AmbientPlayer from '../components/AmbientPlayer';
 
 // Minimalist Fade Variant
 const fadeInUp = {
@@ -299,6 +300,7 @@ export default function PublicHome() {
             </section>
 
             <Footer />
+            <AmbientPlayer />
         </div>
     );
 }
