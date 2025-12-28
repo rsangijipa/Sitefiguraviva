@@ -79,58 +79,83 @@ export default function PublicHome() {
 
             {/* 3. Clean Clinical Section */}
             <section id="clinica" className="py-24 bg-white border-y border-gray-100">
-                <div className="container mx-auto px-6 max-w-6xl grid md:grid-cols-2 gap-16 lg:gap-24 items-center">
-                    <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.8 }}
-                    >
-                        <div className="relative">
-                            <img
-                                src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&q=80&w=1000"
-                                alt="Sessão de Terapia"
-                                className="w-full aspect-[4/5] object-cover rounded-2xl shadow-xl"
-                            />
-                            <div className="absolute -bottom-6 -right-6 w-full h-full border border-gray-200 rounded-2xl -z-10" />
-                        </div>
-                    </motion.div>
+                {/* ... existing content ... */}
+            </section>
 
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.8, delay: 0.2 }}
-                    >
-                        <span className="text-xs font-bold tracking-[0.2em] uppercase text-accent mb-4 block">Abordagem Clínica</span>
-                        <h2 className="text-4xl md:text-5xl font-serif text-primary mb-8 leading-tight">A Arte da <span className="italic text-gold font-light">Presença</span></h2>
-                        <p className="text-lg text-text/80 mb-8 leading-relaxed">
-                            Na Gestalt-Terapia, não buscamos apenas "consertar" o que está errado. Buscamos ampliar a <span className="text-primary font-medium">awareness</span> sobre como você existe no mundo, aqui e agora.
-                        </p>
+            {/* NEW: Founder Section */}
+            <section id="fundadora" className="py-24 bg-white">
+                <div className="container mx-auto px-6 max-w-6xl">
+                    <div className="grid lg:grid-cols-2 gap-16 items-center">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.8 }}
+                            className="order-2 lg:order-1"
+                        >
+                            <span className="text-xs font-bold tracking-[0.2em] uppercase text-gold mb-4 block">Fundadora</span>
+                            <h2 className="text-4xl md:text-5xl font-serif text-primary mb-8 leading-tight">Lilian Vanessa <span className="italic text-gold font-light">Nicacio Gusmão</span></h2>
+                            
+                            <div className="space-y-6 text-lg text-text/80 leading-relaxed font-light">
+                                <p>
+                                    Psicóloga (CRP 20/1228) e Mestre em Ciências Ambientais pela UNITAU, Lilian Vanessa dedica sua trajetória à integração entre a fenomenologia, a natureza e o desenvolvimento humano.
+                                </p>
+                                <p>
+                                    Com formação sólida em <span className="text-primary font-medium text-base uppercase tracking-wider">Gestalt-Terapia</span> pelo Instituto da Bahia, sua atuação transita entre a clínica, a supervisão e a docência, tendo coordenado a Clínica-Escola de Psicologia da UNIJIPA.
+                                </p>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-8">
+                                    <div className="flex items-start gap-3">
+                                        <div className="w-1.5 h-1.5 mt-2 rounded-full bg-gold flex-shrink-0" />
+                                        <div>
+                                            <h4 className="font-bold text-primary text-sm uppercase tracking-wider mb-1">Especialista</h4>
+                                            <p className="text-xs text-text/60">Gestalt-Terapia e Psicologia do Trânsito (CFP).</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start gap-3">
+                                        <div className="w-1.5 h-1.5 mt-2 rounded-full bg-gold flex-shrink-0" />
+                                        <div>
+                                            <h4 className="font-bold text-primary text-sm uppercase tracking-wider mb-1">Pesquisadora</h4>
+                                            <p className="text-xs text-text/60">Foco em prevenção de transtornos emocionais e interação natureza-criança.</p>
+                                        </div>
+                                    </div>
+                                </div>
 
-                        <div className="flex flex-col gap-4">
-                            <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-paper transition-colors cursor-default">
-                                <div className="w-2 h-2 mt-2 rounded-full bg-primary flex-shrink-0" />
-                                <div>
-                                    <h4 className="font-bold text-primary mb-1">Atendimento Individual</h4>
-                                    <p className="text-sm text-text/70">Sessões semanais focadas no seu processo de crescimento.</p>
+                                <div className="pt-8">
+                                    <a 
+                                        href="http://lattes.cnpq.br/" 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary border-b border-primary pb-1 hover:text-gold hover:border-gold transition-colors"
+                                    >
+                                        Acesse o Currículo Lattes <ExternalLink size={14} />
+                                    </a>
                                 </div>
                             </div>
-                            <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-paper transition-colors cursor-default">
-                                <div className="w-2 h-2 mt-2 rounded-full bg-accent flex-shrink-0" />
-                                <div>
-                                    <h4 className="font-bold text-primary mb-1">Supervisão Clínica</h4>
-                                    <p className="text-sm text-text/70">Suporte para terapeutas em formação ou profissionais.</p>
-                                </div>
-                            </div>
-                        </div>
+                        </motion.div>
 
-                        <div className="mt-10">
-                            <button className="text-primary font-bold border-b border-primary pb-1 hover:text-accent hover:border-accent transition-colors">
-                                Agendar Sessão de Avaliação
-                            </button>
-                        </div>
-                    </motion.div>
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.8 }}
+                            className="order-1 lg:order-2 relative"
+                        >
+                            <div className="relative z-10 aspect-[4/5] rounded-[2rem] overflow-hidden shadow-2xl">
+                                <img 
+                                    src="/assets/lilian-vanessa.png" 
+                                    alt="Lilian Vanessa Nicacio Gusmão" 
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
+                            <div className="absolute -top-10 -right-10 w-full h-full border-2 border-gold/20 rounded-[2rem] -z-10" />
+                            <div className="absolute -bottom-6 -left-6 bg-paper p-8 rounded-2xl shadow-xl z-20 hidden md:block border border-gray-100">
+                                <p className="font-serif italic text-primary text-lg leading-snug">
+                                    "O encontro é a fronteira onde a vida se renova."
+                                </p>
+                            </div>
+                        </motion.div>
+                    </div>
                 </div>
             </section>
 
