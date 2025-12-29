@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { RefreshCw, Heart, Sparkles, Users, ArrowRight, BookOpen } from 'lucide-react';
+import { RefreshCw, Heart, Sparkles, Users, ArrowRight, BookOpen, ArrowLeft } from 'lucide-react';
 import TreeVisualization from './TreeVisualization';
+import { interactionService } from '../services/interactionService';
 
-// --- CONFIGURAÇÃO ---
 const NUM_LEAVES = 25;
 
-// Cores expandidas (Tons terrosos e naturais)
 const LEAF_COLORS = [
-    '#CFA688', '#D4B491', '#9C9188', '#6B8E23', '#556B2F',
-    '#8FBC8F', '#B0896D', '#A0522D', '#DEB887', '#BC8F8F',
-    '#DAA520', '#CD853F', '#F4A460', '#D2B48C', '#8B4513',
-    '#A52A2A', '#2E8B57', '#66CDAA'
+    '#D8A48F', '#C2B280', '#A89F91', // Muted Earth
+    '#6B8E23', '#556B2F', '#8FBC8F', // Greens
+    '#CD853F', '#DEB887', '#BC8F8F', // Warm Browns
+    '#DAA520', '#B8860B', '#808000'  // Golds
 ];
 
 const MESSAGES = [
@@ -32,24 +31,25 @@ const MESSAGES = [
     "Onde há amor, há expansão.",
     "Seja gentil com seus processos.",
     "A mudança é a única constante.",
-    "Seus limites definem seu contorno, não sua prisão."
+    "Seus limites definem seu contorno, não sua prisão.",
+    "A terapia é um ensaio para a vida.",
+    "O todo é diferente da soma das partes."
 ];
 
-export default function FeelingsTree({ isModal = false }) {
-    // STATES: 'intro' -> 'tree' -> 'message'
-    const [viewState, setViewState] = useState('intro');
+export default function FeelingsTree({ isModal = false, onClose }) {
+    const [viewState, setViewState] = useState('intro'); // 'intro' | 'tree' | 'message'
     const [leaves, setLeaves] = useState([]);
     const [resultMessage, setResultMessage] = useState(null);
     const [accessCount, setAccessCount] = useState(1243);
+    const [selectedColor, setSelectedColor] = useState('#fff');
 
     useEffect(() => {
         generateTree();
-        const stored = localStorage.getItem('tree_access_count');
-        if (stored) {
-            setAccessCount(parseInt(stored, 10));
-        } else {
-            localStorage.setItem('tree_access_count', '1243');
-        }
+        const fetchCount = async () => {
+            const count = await interactionService.getTreeCount();
+            setAccessCount(count);
+        };
+        fetchCount();
     }, []);
 
     const generateTree = () => {
@@ -64,17 +64,22 @@ export default function FeelingsTree({ isModal = false }) {
     };
 
     const handleLeafClick = (leafData) => {
-        const newCount = accessCount + 1;
-        setAccessCount(newCount);
-        localStorage.setItem('tree_access_count', newCount.toString());
-
+        setAccessCount(prev => prev + 1);
+        interactionService.incrementTreeCount();
         setResultMessage(leafData.message);
+        setSelectedColor(leafData.color);
         setViewState('message');
     };
 
     const resetView = () => {
         setResultMessage(null);
         setViewState('tree');
+    };
+
+    // Reconstruct Tree Function (Replaces visual button)
+    const handleReconstruct = () => {
+        // Animation feedback could be added here
+        generateTree();
     };
 
     const StepIndicator = ({ step }) => (
@@ -85,13 +90,22 @@ export default function FeelingsTree({ isModal = false }) {
         </div>
     );
 
-    // --- VIEW RENDERERS ---
-
     const renderIntro = () => (
         <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="flex flex-col items-center justify-center h-full text-center px-6"
+            className="flex flex-col items-center justify-center h-full text-center px-6 relative"
         >
+            <div className="absolute top-6 left-4 md:left-6 z-50">
+                <button
+                    onClick={onClose}
+                    className="flex items-center gap-2 p-3 md:px-5 md:py-2.5 rounded-full bg-white border border-gray-200 text-gray-700 hover:text-primary hover:border-primary/30 font-bold shadow-sm hover:shadow-md transition-all active:scale-95"
+                    aria-label="Voltar"
+                >
+                    <ArrowLeft size={20} />
+                    <span className="hidden md:inline">Voltar</span>
+                </button>
+            </div>
+
             <StepIndicator step={1} />
 
             <div className="bg-stone-100 p-6 rounded-full mb-8">
@@ -119,6 +133,17 @@ export default function FeelingsTree({ isModal = false }) {
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="w-full h-full relative"
         >
+            <div className="absolute top-6 left-4 md:left-6 z-50">
+                <button
+                    onClick={() => setViewState('intro')}
+                    className="flex items-center gap-2 p-3 md:px-5 md:py-2.5 rounded-full bg-white/80 backdrop-blur border border-gray-200 text-gray-700 hover:text-primary hover:border-primary/30 font-bold shadow-sm hover:shadow-md transition-all active:scale-95"
+                    aria-label="Voltar"
+                >
+                    <ArrowLeft size={20} />
+                    <span className="hidden md:inline">Voltar</span>
+                </button>
+            </div>
+
             <StepIndicator step={2} />
 
             <div className="absolute top-16 left-0 right-0 text-center z-20 pointer-events-none">
@@ -126,13 +151,15 @@ export default function FeelingsTree({ isModal = false }) {
                 <p className="text-sm text-stone-400">Gire a árvore e clique na folha que te chamar.</p>
             </div>
 
-            <div className="absolute inset-0 z-10 cursor-move">
+            {/* Tree Container - Above Button */}
+            <div className="absolute top-0 bottom-24 left-0 right-0 z-10 cursor-move">
                 <TreeVisualization emotions={leaves} onLeafClick={handleLeafClick} isModal={isModal} />
             </div>
 
+            {/* Reconstruct/Refresh Button (Bottom Center) */}
             <div className="absolute bottom-12 left-0 right-0 flex justify-center z-30 pointer-events-none">
                 <button
-                    onClick={generateTree}
+                    onClick={handleReconstruct}
                     className="pointer-events-auto flex items-center gap-2 px-5 py-2.5 bg-white/80 hover:bg-white text-stone-600 font-bold rounded-full shadow-sm border border-stone-200 text-xs uppercase tracking-wider transition-all"
                 >
                     <RefreshCw size={14} className="hover:rotate-180 transition-transform duration-500" />
@@ -145,46 +172,68 @@ export default function FeelingsTree({ isModal = false }) {
     const renderMessage = () => (
         <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="flex flex-col items-center justify-center h-full text-center px-6 relative z-50 bg-stone-50/50"
+            className="flex flex-col items-center justify-center h-full text-center px-6 relative z-50 overflow-hidden"
         >
-            <StepIndicator step={3} />
-            <div className="absolute inset-0 z-0 bg-white/40 backdrop-blur-sm" />
-
-            <div className="relative z-10 max-w-lg w-full bg-white p-10 md:p-14 rounded-[2.5rem] shadow-2xl border border-stone-100/50 flex flex-col items-center">
-                <div className="inline-flex items-center justify-center p-4 mb-8 bg-rose-50 text-rose-500 rounded-2xl shadow-inner">
-                    <Heart fill="currentColor" size={32} />
-                </div>
-
-                <blockquote className="text-2xl md:text-3xl font-serif text-stone-800 mb-10 leading-tight italic">
-                    "{resultMessage}"
-                </blockquote>
-
-                <div className="flex flex-col gap-3 w-full">
-                    <button
-                        onClick={resetView}
-                        className="w-full py-4 bg-stone-800 hover:bg-stone-700 text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
-                    >
-                        <RefreshCw size={18} /> Escolher Outra
-                    </button>
-                    {isModal && window.history.length > 1 && (
-                        <button
-                            onClick={() => window.history.back()}
-                            className="hidden w-full py-3 text-stone-400 hover:text-stone-600 text-sm font-bold uppercase tracking-widest transition-colors"
-                        >
-                            Sair
-                        </button>
-                    )}
-                </div>
+            <div className="absolute top-6 left-4 md:left-6 z-50">
+                <button
+                    onClick={() => setViewState('tree')}
+                    className="flex items-center gap-2 p-3 md:px-5 md:py-2.5 rounded-full bg-white border border-gray-200 text-gray-700 hover:text-primary hover:border-primary/30 font-bold shadow-sm hover:shadow-md transition-all active:scale-95"
+                    aria-label="Voltar"
+                >
+                    <ArrowLeft size={20} />
+                    <span className="hidden md:inline">Voltar</span>
+                </button>
             </div>
+
+            <StepIndicator step={3} />
+
+            {/* Background Blur */}
+            <div className="absolute inset-0 z-0 bg-white/60 backdrop-blur-md" />
+
+            {/* LEAF CARD CONTAINER */}
+            <motion.div
+                initial={{ scale: 0.8, rotate: -5 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ type: "spring", bounce: 0.4 }}
+                className="relative z-10 w-full max-w-xl aspect-[4/5] flex flex-col items-center justify-center p-12 md:p-20 shadow-2xl drop-shadow-2xl"
+                style={{
+                    // Leaf Shape Clip Path
+                    clipPath: "path('M250 500 C100 400 0 200 250 50 C500 200 400 400 250 500 Z')",
+                    backgroundColor: selectedColor,
+                    // Subtle texture overlay via gradient
+                    backgroundImage: "radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2), transparent), linear-gradient(to bottom right, rgba(255,255,255,0.1), rgba(0,0,0,0.1))"
+                }}
+            >
+                {/* Simulated Vein */}
+                <div className="absolute inset-0 border-r-2 border-white/20 w-1/2 h-full pointer-events-none" style={{ transform: "skewX(-5deg)" }} />
+
+                <div className="relative z-20 text-white text-center flex flex-col items-center">
+                    <div className="mb-6 opacity-80">
+                        <Sparkles size={32} />
+                    </div>
+
+                    <blockquote className="text-2xl md:text-3xl font-serif leading-snug tracking-wide italic drop-shadow-md">
+                        "{resultMessage}"
+                    </blockquote>
+                </div>
+            </motion.div>
+
+            <div className="relative z-20 mt-12">
+                <button
+                    onClick={resetView}
+                    className="px-8 py-3 bg-stone-800 text-white rounded-full font-bold shadow-lg hover:scale-105 transition-transform"
+                >
+                    Escolher Outra Folha
+                </button>
+            </div>
+
         </motion.div>
     );
 
     return (
-        <section className={`${isModal ? 'h-full w-full bg-[#faf9f6]' : 'py-24 relative overflow-hidden bg-[#faf9f6]'}`}>
-            {/* Background com gradientes sutis */}
+        <section className={`${isModal ? 'h-full w-full bg-[#f2f0e9]' : 'py-24 relative overflow-hidden bg-[#f2f0e9]'}`}>
             <div className="absolute inset-0 pointer-events-none">
-                <div className="absolute inset-0 bg-gradient-to-br from-stone-50 via-warm-50 to-stone-100" />
-                <div className="absolute top-0 left-0 w-full h-full opacity-30 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] mix-blend-multiply" />
+                <div className="absolute top-0 left-0 w-full h-full opacity-40 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] mix-blend-overlay" />
             </div>
 
             <div className="container mx-auto max-w-5xl h-full relative z-10">

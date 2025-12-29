@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react';
 
 const QUESTIONS = [
     { id: 1, text: "Senti pouca energia ou cansaço que não passa.", isInverse: false },
@@ -102,6 +102,18 @@ const Quiz = ({ onComplete, onCancel }) => {
     return (
         <div className="w-full max-w-2xl mx-auto px-4 py-8 animate-fade-in relative z-10">
 
+            {/* Standard Back Button (Moved inside content area relative) */}
+            <div className="mb-6 flex">
+                <button
+                    onClick={onCancel}
+                    className="flex items-center gap-2 p-3 md:px-5 md:py-2.5 rounded-full bg-white border border-gray-200 text-gray-700 hover:text-primary hover:border-primary/30 font-bold shadow-sm hover:shadow-md transition-all active:scale-95 text-sm"
+                    aria-label="Voltar"
+                >
+                    <ArrowLeft size={18} />
+                    <span className="hidden md:inline">Voltar</span>
+                </button>
+            </div>
+
             {/* Progress Bar */}
             <div className="mb-8 w-full h-3 bg-gray-200/50 rounded-full overflow-hidden">
                 <div
@@ -111,12 +123,6 @@ const Quiz = ({ onComplete, onCancel }) => {
             </div>
 
             <div className="bg-white/80 backdrop-blur-md rounded-3xl shadow-lg border border-white/50 p-6 md:p-10 min-h-[400px] flex flex-col justify-center relative">
-                <button
-                    onClick={onCancel}
-                    className="absolute top-6 right-6 text-gray-400 hover:text-accent transition-colors text-sm font-sans"
-                >
-                    Cancelar
-                </button>
 
                 {!isBonusStep && currentQuestion ? (
                     <>
@@ -242,12 +248,14 @@ const Result = ({ data, bonusAlert, onRetake }) => {
                     *Este questionário é uma ferramenta de triagem e autoconhecimento, não substitui um diagnóstico profissional.
                 </p>
 
-                <button
-                    onClick={onRetake}
-                    className="flex items-center gap-2 text-accent hover:text-primary transition-colors font-bold font-sans px-6 py-3 rounded-full hover:bg-white/50"
-                >
-                    Refazer o teste
-                </button>
+                <div className="flex gap-4">
+                    <button
+                        onClick={onRetake}
+                        className="flex items-center gap-2 text-stone-600 font-bold border border-gray-300 hover:bg-white px-6 py-3 rounded-full transition-all"
+                    >
+                        Voltar ao Início
+                    </button>
+                </div>
             </div>
         </div>
     );
@@ -286,16 +294,7 @@ export default function MentalHealthQuiz({ onClose }) {
     };
 
     return (
-        <div className="w-full h-full overflow-y-auto bg-stone-50 flex flex-col relative">
-            {/* Global Close Button (Top Right) */}
-            <button
-                onClick={onClose}
-                className="absolute top-6 right-6 z-50 p-3 bg-white/80 backdrop-blur rounded-full shadow-lg text-primary hover:bg-white transition-all hover:rotate-90"
-            >
-                <AlertCircle size={0} className="hidden" /> {/* Dummy to keep import */}
-                {/* We use Close icon from context usually, or passed in X icon */}
-                <span className="font-sans font-bold text-xl leading-none block h-5 w-3">✕</span>
-            </button>
+        <div className="w-full h-full overflow-y-auto bg-stone-50 flex flex-col relative animate-fade-in">
 
             <div className="flex-1 flex flex-col items-center justify-center min-h-screen py-20">
 
@@ -306,7 +305,20 @@ export default function MentalHealthQuiz({ onClose }) {
                 </div>
 
                 {view === 'intro' && (
-                    <div className="flex flex-col items-center justify-center px-6 text-center animate-fade-in max-w-2xl mx-auto">
+                    <div className="flex flex-col items-center justify-center px-6 text-center animate-fade-in max-w-2xl mx-auto w-full">
+
+                        {/* Standard Back Button */}
+                        <div className="w-full flex justify-start mb-8">
+                            <button
+                                onClick={onClose}
+                                className="flex items-center gap-2 p-3 md:px-5 md:py-2.5 rounded-full bg-white border border-gray-200 text-gray-700 hover:text-primary hover:border-primary/30 font-bold shadow-sm hover:shadow-md transition-all active:scale-95"
+                                aria-label="Voltar"
+                            >
+                                <ArrowLeft size={20} />
+                                <span className="hidden md:inline">Voltar</span>
+                            </button>
+                        </div>
+
                         <div className="w-24 h-24 mb-6 rounded-full bg-accent/10 flex items-center justify-center text-accent animate-pulse">
                             <ArrowRight size={32} />
                         </div>
