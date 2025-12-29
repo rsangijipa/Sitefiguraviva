@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Wind, Sprout, Sparkles, Fingerprint, ArrowLeft } from 'lucide-react';
+import { Wind, Sprout, Sparkles, Fingerprint, ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 import BreathingApp from './resources/BreathingApp';
 import FeelingsTree from './FeelingsTree';
 import MentalHealthQuiz from './resources/MentalHealthQuiz';
@@ -9,6 +9,7 @@ import { useApp } from '../context/AppContext';
 
 export default function ResourcesSection() {
     const [activeResource, setActiveResource] = useState(null); // 'breathing' | 'tree' | 'quiz' | 'somascan'
+    const scrollContainerRef = useRef(null);
 
     const openResource = (resource) => {
         setActiveResource(resource);
@@ -18,6 +19,13 @@ export default function ResourcesSection() {
     const closeResource = () => {
         setActiveResource(null);
         document.body.style.overflow = 'auto';
+    };
+
+    const scroll = (direction) => {
+        if (scrollContainerRef.current) {
+            const scrollAmount = direction === 'left' ? -350 : 350;
+            scrollContainerRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        }
     };
 
     return (
@@ -37,7 +45,11 @@ export default function ResourcesSection() {
                     <div className="absolute left-0 top-0 bottom-12 w-12 bg-gradient-to-r from-surface to-transparent z-10 pointer-events-none" />
                     <div className="absolute right-0 top-0 bottom-12 w-12 bg-gradient-to-l from-surface to-transparent z-10 pointer-events-none" />
 
-                    <div className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-12 px-6 scrollbar-hide" style={{ scrollBehavior: 'smooth', scrollbarWidth: 'none' }}>
+                    <div
+                        ref={scrollContainerRef}
+                        className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-12 px-6 scrollbar-hide"
+                        style={{ scrollBehavior: 'smooth', scrollbarWidth: 'none' }}
+                    >
 
                         {/* Breathing App Card */}
                         <motion.div
@@ -113,8 +125,15 @@ export default function ResourcesSection() {
 
                     </div>
 
-                    {/* Visual Scroll Indicator to prompt user */}
-                    <div className="flex justify-center mt-4 mb-2 opacity-30 pb-4">
+                    {/* Visual Scroll Controls */}
+                    <div className="flex items-center justify-center gap-6 mt-4 mb-2 opacity-50 hover:opacity-100 transition-opacity pb-4">
+                        <button
+                            onClick={() => scroll('left')}
+                            className="p-2 rounded-full hover:bg-stone-100 text-stone-400 hover:text-stone-800 transition-colors"
+                        >
+                            <ChevronLeft size={20} />
+                        </button>
+
                         <div className="w-24 h-1 bg-stone-200 rounded-full overflow-hidden">
                             <motion.div
                                 className="h-full bg-stone-400 w-1/3 rounded-full"
@@ -122,6 +141,13 @@ export default function ResourcesSection() {
                                 transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
                             />
                         </div>
+
+                        <button
+                            onClick={() => scroll('right')}
+                            className="p-2 rounded-full hover:bg-stone-100 text-stone-400 hover:text-stone-800 transition-colors"
+                        >
+                            <ChevronRight size={20} />
+                        </button>
                     </div>
                 </div>
             </div>
