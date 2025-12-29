@@ -58,41 +58,86 @@ function AcademicManager() {
         }
     };
 
+    // Diagnostic: Check connection on mount
+    useEffect(() => {
+        const checkConnection = async () => {
+            console.log("DIAGNOSTIC: Verificando status da conexão com Firebase...");
+            try {
+                // Try to read auth state
+                const user = auth.currentUser;
+                console.log("DIAGNOSTIC: Usuário Autenticado:", user ? user.email : "Nenhum (Problema se estiver tentando salvar)");
+
+                // Try a dummy online check (optional, but good)
+                const isOnline = window.navigator.onLine;
+                console.log("DIAGNOSTIC: Navegador Online:", isOnline);
+
+            } catch (err) {
+                console.error("DIAGNOSTIC ERROR:", err);
+            }
+        };
+        checkConnection();
+    }, []);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        console.log(">>> [1/5] Iniciando submissão...");
         setUploading(true);
 
+        // Safety Timeout extended to 30s
+        const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error("Timeout (30s): Servidor não respondeu. Verifique Firewall/Internet.")), 30000)
+        );
+
         try {
-            if (formData.link && !formData.link.startsWith('http')) {
-                alert("O link deve ser uma URL válida (http/https)");
-                setUploading(false);
-                return;
-            }
+            const submissionPromise = (async () => {
+                const user = auth.currentUser;
+                if (!user) throw new Error("Usuário não autenticado. Faça login novamente.");
+                console.log(">>> [2/5] Auth OK:", user.email);
 
-            // 1. Upload new files if any
-            let uploadedUrls = [];
-            if (selectedFiles.length > 0) {
-                uploadedUrls = await uploadFiles(selectedFiles, 'courses');
-            }
+                if (formData.link && !formData.link.startsWith('http')) {
+                    throw new Error("O link deve ser uma URL válida (http/https)");
+                }
 
-            // 2. Combine existing images with new uploaded URLs
-            const finalImages = [...(formData.images || []), ...uploadedUrls];
+                // 1. Upload new files if any
+                let uploadedUrls = [];
+                if (selectedFiles.length > 0) {
+                    console.log(">>> [3/5] Iniciando upload de imagens (Storage)...");
+                    uploadedUrls = await uploadFiles(selectedFiles, 'courses');
+                    console.log(">>> [3/5] Upload concluído! URLs:", uploadedUrls);
+                } else {
+                    console.log(">>> [3/5] Nenhuma imagem nova para enviar. Pulando Storage.");
+                }
 
-            // Fallback for backward compatibility
-            const mainImage = finalImages.length > 0 ? finalImages[0] : 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=1000';
+                // 2. Combine existing images with new uploaded URLs
+                const finalImages = [...(formData.images || []), ...uploadedUrls];
 
-            const dataToSave = {
-                ...formData,
-                images: finalImages,
-                image: mainImage
-            };
+                // Fallback for backward compatibility
+                const mainImage = finalImages.length > 0 ? finalImages[0] : 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=1000';
 
-            if (currentCourse) {
-                updateCourse(currentCourse.id, dataToSave);
-            } else {
-                addCourse(dataToSave);
-            }
+                const dataToSave = {
+                    ...formData,
+                    images: finalImages,
+                    image: mainImage,
+                    updatedAt: new Date().toISOString(),
+                    updatedBy: user.email // Audit trail
+                };
 
+                console.log(">>> [4/5] Tentando salvar no Firestore (Banco de Dados)...", dataToSave);
+
+                if (currentCourse) {
+                    await updateCourse(currentCourse.id, dataToSave);
+                } else {
+                    await addCourse(dataToSave);
+                }
+
+                console.log(">>> [5/5] Firestore respondeu Sucesso!");
+                return true;
+            })();
+
+            // Race between submission and timeout
+            await Promise.race([submissionPromise, timeoutPromise]);
+
+            console.log("Salvo com sucesso!");
             setIsEditing(false);
             setFormData(initialForm);
             setSelectedFiles([]);
@@ -101,10 +146,15 @@ function AcademicManager() {
             alert("Salvo com sucesso!");
 
         } catch (error) {
-            console.error("Erro ao salvar:", error);
-            alert("Erro ao fazer upload das imagens.");
+            console.error("Erro no processo de salvamento:", error);
+            if (error.message.includes("permission-denied") || error.message.includes("Missing or insufficient permissions")) {
+                alert("Erro de Permissão: Sua sessão pode ter expirado.\n\nClique em 'Desconectar' e faça login novamente.");
+            } else {
+                alert(`Erro ao salvar: ${error.message} (Veja Logs F12)`);
+            }
         } finally {
             setUploading(false);
+            console.log(">>> FIM DO PROCESSO (loading: false)");
         }
     };
 
