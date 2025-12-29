@@ -5,15 +5,16 @@ import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
 
-// Your web app's Firebase configuration
+// Using hardcoded config as requested by USER to eliminate ENV issues
 const firebaseConfig = {
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-    appId: import.meta.env.VITE_FIREBASE_APP_ID,
-    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+    apiKey: "AIzaSyCt0HudxrbW6RN_3FMLxXdwbOOdd7mE01o",
+    authDomain: "elosusgrupos.firebaseapp.com",
+    projectId: "elosusgrupos",
+    // FORCE appspot bucket for uploads to work
+    storageBucket: "elosusgrupos.appspot.com",
+    messagingSenderId: "257423216168",
+    appId: "1:257423216168:web:c66b071490c6ddf8f86f1d",
+    measurementId: "G-4FKDTE85BN"
 };
 
 // Initialize Firebase
@@ -22,5 +23,8 @@ const analytics = getAnalytics(app);
 const db = getFirestore(app);
 const auth = getAuth(app);
 const storage = getStorage(app);
+
+// Log to confirm hardcoded init
+console.log("🔥 Firebase Initialized with HARDCODED config (Bucket: elosusgrupos.appspot.com)");
 
 export { app, analytics, db, auth, storage };

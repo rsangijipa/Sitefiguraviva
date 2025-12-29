@@ -48,7 +48,7 @@ export default function ResourcesSection() {
                     <div
                         ref={scrollContainerRef}
                         className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-12 px-6 scrollbar-hide"
-                        style={{ scrollBehavior: 'smooth', scrollbarWidth: 'none' }}
+                        style={{ scrollBehavior: 'smooth' }}
                     >
 
                         {/* Breathing App Card */}
@@ -126,27 +126,29 @@ export default function ResourcesSection() {
                     </div>
 
                     {/* Visual Scroll Controls */}
-                    <div className="flex items-center justify-center gap-6 mt-4 mb-2 opacity-50 hover:opacity-100 transition-opacity pb-4">
+                    <div className="flex items-center justify-center gap-6 mt-4 opacity-70 hover:opacity-100 transition-opacity pb-4">
                         <button
                             onClick={() => scroll('left')}
-                            className="p-2 rounded-full hover:bg-stone-100 text-stone-400 hover:text-stone-800 transition-colors"
+                            className="p-3 rounded-full hover:bg-stone-100 text-stone-400 hover:text-stone-800 transition-colors border border-transparent hover:border-stone-200"
+                            aria-label="Scroll Left"
                         >
-                            <ChevronLeft size={20} />
+                            <ChevronLeft size={24} />
                         </button>
 
-                        <div className="w-24 h-1 bg-stone-200 rounded-full overflow-hidden">
+                        <div className="w-32 h-1.5 bg-stone-100 rounded-full overflow-hidden">
                             <motion.div
-                                className="h-full bg-stone-400 w-1/3 rounded-full"
-                                animate={{ x: [0, 60, 0] }}
-                                transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                                className="h-full bg-stone-300 w-1/3 rounded-full"
+                                animate={{ x: [0, 80, 0] }}
+                                transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
                             />
                         </div>
 
                         <button
                             onClick={() => scroll('right')}
-                            className="p-2 rounded-full hover:bg-stone-100 text-stone-400 hover:text-stone-800 transition-colors"
+                            className="p-3 rounded-full hover:bg-stone-100 text-stone-400 hover:text-stone-800 transition-colors border border-transparent hover:border-stone-200"
+                            aria-label="Scroll Right"
                         >
-                            <ChevronRight size={20} />
+                            <ChevronRight size={24} />
                         </button>
                     </div>
                 </div>

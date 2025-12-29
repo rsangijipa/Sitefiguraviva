@@ -52,6 +52,7 @@ const AmbientPlayer = () => {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={togglePlay}
+        aria-label={isPlaying ? "Pausar som ambiente" : "Reproduzir som ambiente"}
         className="w-12 h-12 bg-primary/90 backdrop-blur-sm text-paper rounded-full flex items-center justify-center shadow-lg hover:bg-gold transition-colors duration-300"
       >
         {isPlaying ? <Pause size={20} /> : <Play size={20} className="ml-1" />}
@@ -65,7 +66,11 @@ const AmbientPlayer = () => {
             exit={{ opacity: 0, x: -20 }}
             className="flex items-center gap-3 bg-beige/95 backdrop-blur-md px-4 py-2 rounded-full border border-gold/20 shadow-xl"
           >
-            <button onClick={toggleMute} className="text-primary hover:text-gold transition-colors">
+            <button
+              onClick={toggleMute}
+              className="text-primary hover:text-gold transition-colors"
+              aria-label={isMuted ? "Ativar som" : "Desativar som"}
+            >
               {isMuted || volume === 0 ? <VolumeX size={16} /> : <Volume2 size={16} />}
             </button>
 
@@ -77,6 +82,7 @@ const AmbientPlayer = () => {
               value={volume}
               onChange={(e) => setVolume(parseFloat(e.target.value))}
               className="w-20 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
+              aria-label="Volume do som ambiente"
             />
 
             <span className="text-[10px] font-bold text-primary uppercase tracking-widest min-w-[40px]">

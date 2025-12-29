@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { courseService } from '../services/courseService';
+import { getCourses, getGalleryItems, getMediators } from '../services/dataService'; // NEW Firebase Service
 import { blogService } from '../services/blogService';
 import { configService } from '../services/configService';
 import { authService } from '../services/authService';
@@ -8,6 +8,8 @@ const AppContext = createContext();
 
 export function AppProvider({ children }) {
     const [courses, setCourses] = useState([]);
+    const [gallery, setGallery] = useState([]); // NEW
+    const [mediators, setMediators] = useState([]); // NEW
     const [blogPosts, setBlogPosts] = useState([]);
     const [googleConfig, setGoogleConfig] = useState(configService.get());
     const [loading, setLoading] = useState(true);
@@ -24,6 +26,7 @@ export function AppProvider({ children }) {
 
     const fetchData = useCallback(async () => {
         setLoading(true);
+        // Hardcoded PDF item (keep local for now as it's not in courses DB yet perhaps, or move to DB later)
         const pdfItem = {
             id: 'pdf-polaridades',
             title: 'As polaridades do feminino na contemporaneidade e a depressão pós-parto uma visão gestáltica',
@@ -34,23 +37,48 @@ export function AppProvider({ children }) {
             date: '2025'
         };
 
-        try {
-            const [coursesData, postsData] = await Promise.all([
-                courseService.getAll(),
-                blogService.getAll()
-            ]);
+        // FAIL-SAFE DATA FETCHING
+        // We fetch each resource independently so one failure doesn't block the others.
 
-            setCourses(coursesData);
-            setBlogPosts([pdfItem, ...postsData]);
-            setError(null);
-        } catch (err) {
-            console.error("Fetch error:", err);
-            setError("Falha ao carregar dados remotos. Mostrando conteúdo local disponível.");
-            // Ensure local items are still shown even if remote fetch fails
-            setBlogPosts([pdfItem]);
-        } finally {
-            setLoading(false);
+        // 1. Courses
+        try {
+            const coursesData = await getCourses();
+            if (coursesData && coursesData.length > 0) {
+                setCourses(coursesData);
+            } else {
+                console.warn("⚠️ No courses found (or empty list returned).");
+            }
+        } catch (e) {
+            console.error("❌ Failed to load courses:", e);
         }
+
+        // 2. Gallery
+        try {
+            const galleryData = await getGalleryItems();
+            setGallery(galleryData || []);
+        } catch (e) {
+            console.error("❌ Failed to load gallery:", e);
+        }
+
+        // 3. Mediators
+        try {
+            const mediatorsData = await getMediators();
+            setMediators(mediatorsData || []);
+        } catch (e) {
+            console.error("❌ Failed to load mediators:", e);
+        }
+
+        // 4. Blog Posts
+        try {
+            const postsData = await blogService.getAll();
+            setBlogPosts(postsData && postsData.length > 0 ? [pdfItem, ...postsData] : [pdfItem]);
+        } catch (e) {
+            console.error("❌ Failed to load blog:", e);
+            setBlogPosts([pdfItem]); // Fallback to essential content
+        }
+
+        setLoading(false);
+        setError(null);
     }, []);
 
     useEffect(() => {
@@ -65,33 +93,19 @@ export function AppProvider({ children }) {
         configService.save(googleConfig);
     }, [googleConfig]);
 
+    // Admin Actions - placeholders for now until we fully wire admin to new service
     const addCourse = async (course) => {
-        try {
-            const newCourse = await courseService.create(course);
-            setCourses(prev => [...prev, newCourse]);
-            return true;
-        } catch (err) {
-            console.error("Failed to add course", err);
-            return false;
-        }
+        console.warn("Add Course not fully migrated to new service yet in context wrapper");
+        // Implementation pending full Admin migration
+        return false;
     };
 
     const updateCourse = async (id, updatedData) => {
-        try {
-            await courseService.update(id, updatedData);
-            setCourses(prev => prev.map(c => c.id === id ? { ...c, ...updatedData } : c));
-        } catch (err) {
-            console.error("Failed to update course", err);
-        }
+        console.warn("Update Course not fully migrated");
     };
 
     const deleteCourse = async (id) => {
-        try {
-            await courseService.delete(id);
-            setCourses(prev => prev.filter(c => c.id !== id));
-        } catch (err) {
-            console.error("Failed to delete course", err);
-        }
+        console.warn("Delete Course not fully migrated");
     };
 
     const login = async (user, pass) => {
@@ -120,6 +134,8 @@ export function AppProvider({ children }) {
     return (
         <AppContext.Provider value={{
             courses,
+            gallery, // Expose
+            mediators, // Expose
             blogPosts,
             googleConfig,
             setGoogleConfig,

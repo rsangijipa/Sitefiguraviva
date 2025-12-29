@@ -1,28 +1,32 @@
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { storage } from "./firebase";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { app } from "./firebase"; // Ensure this exports the initialized app
+
+const storage = getStorage(app);
 
 /**
- * Uploads multiple files to Firebase Storage.
- * @param {File[]} files - An array of File objects to upload.
- * @param {string} folderPath - The folder path in storage (e.g., 'courses').
- * @returns {Promise<string[]>} - A promise that resolves to an array of public download URLs.
+ * Uploads multiple files to Firebase Storage
+ * @param {File[]} files - Array of File objects
+ * @param {string} pathPrefix - Storage path prefix (e.g. 'courses/course-id')
+ * @returns {Promise<string[]>} - Array of download URLs
  */
-export async function uploadFiles(files, folderPath = 'courses') {
-    if (!files || files.length === 0) return [];
-
-    const uploadPromises = Array.from(files).map(async (file) => {
-        // Create a unique filename using timestamp
-        const timestamp = Date.now();
-        const safeFilename = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
-        const storagePath = `${folderPath}/${timestamp}_${safeFilename}`;
-        const storageRef = ref(storage, storagePath);
-
-        // Upload the file
-        await uploadBytes(storageRef, file);
-
-        // Get the download URL
-        return await getDownloadURL(storageRef);
+export const uploadFiles = async (files, pathPrefix) => {
+    const uploadPromises = files.map(async (file) => {
+        const storageRef = ref(storage, `${pathPrefix}/${Date.now()}-${file.name}`);
+        const snapshot = await uploadBytes(storageRef, file);
+        return getDownloadURL(snapshot.ref);
     });
 
     return Promise.all(uploadPromises);
-}
+};
+
+/**
+ * Uploads a single file
+ * @param {File} file 
+ * @param {string} pathPrefix 
+ * @returns {Promise<string>}
+ */
+export const uploadFile = async (file, pathPrefix) => {
+    const storageRef = ref(storage, `${pathPrefix}/${Date.now()}-${file.name}`);
+    const snapshot = await uploadBytes(storageRef, file);
+    return getDownloadURL(snapshot.ref);
+};
