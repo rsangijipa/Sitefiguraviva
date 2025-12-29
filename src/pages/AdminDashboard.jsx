@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -6,6 +6,13 @@ import {
     Plus, Trash2, Edit, Save, X, AlertTriangle,
     Globe, LayoutTemplate, Database, Youtube, Calendar, Menu, CheckCircle
 } from 'lucide-react';
+
+// DEBUG: Verify Icons
+console.log("DEBUG: Lucide Icons Check:", {
+    LayoutDashboard, BookOpen, PenTool, Settings, LogOut,
+    Plus, Trash2, Edit, Save, X, AlertTriangle
+});
+
 import { useApp } from '../context/AppContext';
 import { blogService } from '../services/blogService';
 import { uploadFiles } from '../services/uploadService';
@@ -15,7 +22,13 @@ import { auth } from '../services/firebase';
 
 // 1. Academic Manager (Courses, Formations, Groups)
 function AcademicManager() {
-    const { courses, addCourse, updateCourse, deleteCourse } = useApp();
+    const context = useApp();
+    console.log("DEBUG: AcademicManager context:", context);
+    const { courses, addCourse, updateCourse, deleteCourse } = context || {};
+
+    // Debug courses explicitly
+    console.log("DEBUG: AcademicManager courses (type):", typeof courses, Array.isArray(courses), courses);
+
     const [isEditing, setIsEditing] = useState(false);
     const [currentCourse, setCurrentCourse] = useState(null);
     const [uploading, setUploading] = useState(false);
@@ -311,32 +324,40 @@ function AcademicManager() {
             )}
 
             <div className="grid gap-4">
-                {courses.map(course => (
-                    <div key={course.id} className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-center group hover:shadow-lg transition-all duration-300">
-                        <div className="flex items-center gap-6 w-full md:w-auto mb-4 md:mb-0">
-                            <div className={`w-3 h-3 rounded-full shrink-0 shadow-sm ${course.status === 'Aberto' ? 'bg-green-500 shadow-green-500/50' : course.status === 'Esgotado' ? 'bg-red-500 shadow-red-500/50' : 'bg-gray-400'}`} />
+                {console.log("Rendering AcademicManager, courses:", courses)}
+                {courses && courses.map((course, idx) => {
+                    try {
+                        return (
+                            <div key={course.id || idx} className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-center group hover:shadow-lg transition-all duration-300">
+                                <div className="flex items-center gap-6 w-full md:w-auto mb-4 md:mb-0">
+                                    <div className={`w-3 h-3 rounded-full shrink-0 shadow-sm ${course.status === 'Aberto' ? 'bg-green-500 shadow-green-500/50' : course.status === 'Esgotado' ? 'bg-red-500 shadow-red-500/50' : 'bg-gray-400'}`} />
 
-                            <img src={course.images && course.images.length > 0 ? course.images[0] : course.image} className="w-12 h-12 rounded-lg object-cover hidden md:block" alt="" />
+                                    <img src={course.images && course.images.length > 0 ? course.images[0] : (course.image || 'https://via.placeholder.com/50')} className="w-12 h-12 rounded-lg object-cover hidden md:block" alt="" />
 
-                            <div>
-                                <div className="flex items-center gap-2 mb-1">
-                                    {getCategoryBadge(course.category || 'Curso')}
+                                    <div>
+                                        <div className="flex items-center gap-2 mb-1">
+                                            {getCategoryBadge(course.category || 'Curso')}
+                                        </div>
+                                        <h4 className="font-bold text-primary text-lg">{course.title}</h4>
+                                        <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">{course.date}</p>
+                                    </div>
                                 </div>
-                                <h4 className="font-bold text-primary text-lg">{course.title}</h4>
-                                <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">{course.date}</p>
-                            </div>
-                        </div>
 
-                        <div className="flex gap-2 w-full md:w-auto justify-end">
-                            <button onClick={() => startEdit(course)} className="p-2 text-primary hover:bg-primary/5 rounded-lg transition-colors" title="Editar">
-                                <Edit size={18} />
-                            </button>
-                            <button onClick={() => deleteCourse(course.id)} className="p-2 text-red-400 hover:bg-red-50 rounded-lg transition-colors" title="Excluir">
-                                <Trash2 size={18} />
-                            </button>
-                        </div>
-                    </div>
-                ))}
+                                <div className="flex gap-2 w-full md:w-auto justify-end">
+                                    <button onClick={() => startEdit(course)} className="p-2 text-primary hover:bg-primary/5 rounded-lg transition-colors" title="Editar">
+                                        <Edit size={18} />
+                                    </button>
+                                    <button onClick={() => deleteCourse(course.id)} className="p-2 text-red-400 hover:bg-red-50 rounded-lg transition-colors" title="Excluir">
+                                        <Trash2 size={18} />
+                                    </button>
+                                </div>
+                            </div>
+                        );
+                    } catch (err) {
+                        console.error("Error rendering course item:", course, err);
+                        return <div key={idx} className="p-4 bg-red-100 text-red-500">Erro ao renderizar item</div>
+                    }
+                })}
             </div>
         </div>
     );
