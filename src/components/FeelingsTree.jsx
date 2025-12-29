@@ -42,6 +42,7 @@ export default function FeelingsTree({ isModal = false, onClose }) {
     const [resultMessage, setResultMessage] = useState(null);
     const [accessCount, setAccessCount] = useState(1243);
     const [selectedColor, setSelectedColor] = useState('#fff');
+    const [treeKey, setTreeKey] = useState(0);
 
     useEffect(() => {
         generateTree();
@@ -76,9 +77,8 @@ export default function FeelingsTree({ isModal = false, onClose }) {
         setViewState('tree');
     };
 
-    // Reconstruct Tree Function (Replaces visual button)
     const handleReconstruct = () => {
-        // Animation feedback could be added here
+        setTreeKey(prev => prev + 1); // Forces full 3D rebuild
         generateTree();
     };
 
@@ -153,7 +153,7 @@ export default function FeelingsTree({ isModal = false, onClose }) {
 
             {/* Tree Container - Above Button */}
             <div className="absolute top-0 bottom-24 left-0 right-0 z-10 cursor-move">
-                <TreeVisualization emotions={leaves} onLeafClick={handleLeafClick} isModal={isModal} />
+                <TreeVisualization key={treeKey} emotions={leaves} onLeafClick={handleLeafClick} isModal={isModal} />
             </div>
 
             {/* Reconstruct/Refresh Button (Bottom Center) */}
@@ -172,7 +172,7 @@ export default function FeelingsTree({ isModal = false, onClose }) {
     const renderMessage = () => (
         <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="flex flex-col items-center justify-center h-full text-center px-6 relative z-50 overflow-hidden"
+            className="flex flex-col items-center justify-center h-full text-center px-4 md:px-6 relative z-50 overflow-hidden"
         >
             <div className="absolute top-6 left-4 md:left-6 z-50">
                 <button
@@ -185,47 +185,110 @@ export default function FeelingsTree({ isModal = false, onClose }) {
                 </button>
             </div>
 
+            <div className="absolute top-6 right-4 md:right-6 z-50">
+                <button
+                    onClick={resetView}
+                    className="flex items-center gap-2 p-3 md:px-5 md:py-2.5 rounded-full bg-stone-800 text-white font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all active:scale-95"
+                    aria-label="Nova Folha"
+                >
+                    <RefreshCw size={18} />
+                    <span className="hidden md:inline">Nova Folha</span>
+                </button>
+            </div>
+
             <StepIndicator step={3} />
 
             {/* Background Blur */}
-            <div className="absolute inset-0 z-0 bg-white/60 backdrop-blur-md" />
-
-            {/* LEAF CARD CONTAINER */}
             <motion.div
-                initial={{ scale: 0.8, rotate: -5 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ type: "spring", bounce: 0.4 }}
-                className="relative z-10 w-full max-w-xl aspect-[4/5] flex flex-col items-center justify-center p-12 md:p-20 shadow-2xl drop-shadow-2xl"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="absolute inset-0 z-0 bg-white/60 backdrop-blur-md"
+            />
+
+            {/* GIANT HORIZONTAL LEAF SVG */}
+            <motion.div
+                initial={{ scale: 0.8, rotate: -2, opacity: 0 }}
+                animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                transition={{ type: "spring", bounce: 0.3, duration: 1 }}
+                className="relative z-10 w-full max-w-2xl aspect-[1.6/1] flex items-center justify-center drop-shadow-2xl filter"
                 style={{
-                    // Leaf Shape Clip Path
-                    clipPath: "path('M250 500 C100 400 0 200 250 50 C500 200 400 400 250 500 Z')",
-                    backgroundColor: selectedColor,
-                    // Subtle texture overlay via gradient
-                    backgroundImage: "radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2), transparent), linear-gradient(to bottom right, rgba(255,255,255,0.1), rgba(0,0,0,0.1))"
+                    filter: "drop-shadow(0px 20px 30px rgba(0,0,0,0.15))"
                 }}
             >
-                {/* Simulated Vein */}
-                <div className="absolute inset-0 border-r-2 border-white/20 w-1/2 h-full pointer-events-none" style={{ transform: "skewX(-5deg)" }} />
+                <svg viewBox="0 0 600 380" className="absolute inset-0 w-full h-full overflow-visible">
+                    <defs>
+                        {/* Gradient for subtle sheen */}
+                        <linearGradient id="leafSheen" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stopColor="rgba(255,255,255,0.2)" />
+                            <stop offset="50%" stopColor="rgba(255,255,255,0)" />
+                            <stop offset="100%" stopColor="rgba(255,255,255,0.1)" />
+                        </linearGradient>
+                        {/* Texture Filter */}
+                        <filter id="noiseFilter">
+                            <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" />
+                            <feColorMatrix type="saturate" values="0" />
+                            <feComponentTransfer>
+                                <feFuncA type="linear" slope="0.1" />
+                            </feComponentTransfer>
+                        </filter>
+                    </defs>
 
-                <div className="relative z-20 text-white text-center flex flex-col items-center">
-                    <div className="mb-6 opacity-80">
-                        <Sparkles size={32} />
+                    {/* Main Leaf Shape - Horizontal & Organic */}
+                    <path
+                        d="M35 190 
+                           C 35 190, 80 80, 250 40 
+                           C 450 0, 565 150, 565 190
+                           C 565 230, 450 380, 250 340
+                           C 80 300, 35 190, 35 190 Z"
+                        fill={selectedColor}
+                        stroke="rgba(0,0,0,0.05)"
+                        strokeWidth="1"
+                    />
+
+                    {/* Texture Overlay */}
+                    <path
+                        d="M35 190 
+                           C 35 190, 80 80, 250 40 
+                           C 450 0, 565 150, 565 190
+                           C 565 230, 450 380, 250 340
+                           C 80 300, 35 190, 35 190 Z"
+                        fill="url(#leafSheen)"
+                        filter="url(#noiseFilter)"
+                        style={{ mixBlendMode: 'overlay' }}
+                    />
+
+                    {/* Central Vein */}
+                    <path
+                        d="M50 190 Q 300 185 550 190"
+                        stroke="rgba(255,255,255,0.3)"
+                        strokeWidth="3"
+                        fill="none"
+                        strokeLinecap="round"
+                    />
+
+                    {/* Side Veins Upper */}
+                    <path d="M150 190 C 160 150, 180 120, 220 80" stroke="rgba(255,255,255,0.15)" strokeWidth="2" fill="none" />
+                    <path d="M280 190 C 290 150, 310 120, 350 80" stroke="rgba(255,255,255,0.15)" strokeWidth="2" fill="none" />
+                    <path d="M410 190 C 420 160, 430 140, 460 110" stroke="rgba(255,255,255,0.15)" strokeWidth="2" fill="none" />
+
+                    {/* Side Veins Lower */}
+                    <path d="M150 190 C 160 230, 180 260, 220 300" stroke="rgba(255,255,255,0.15)" strokeWidth="2" fill="none" />
+                    <path d="M280 190 C 290 230, 310 260, 350 300" stroke="rgba(255,255,255,0.15)" strokeWidth="2" fill="none" />
+                    <path d="M410 190 C 420 220, 430 240, 460 270" stroke="rgba(255,255,255,0.15)" strokeWidth="2" fill="none" />
+
+                </svg>
+
+                {/* Content Overlay */}
+                <div className="relative z-20 px-16 py-8 flex flex-col items-center justify-center text-center h-full w-full">
+                    <div className="mb-4 text-white/90 drop-shadow-sm">
+                        <Sparkles size={28} strokeWidth={1.5} />
                     </div>
 
-                    <blockquote className="text-2xl md:text-3xl font-serif leading-snug tracking-wide italic drop-shadow-md">
+                    <blockquote className="text-xl md:text-3xl font-serif leading-snug tracking-wide italic text-white drop-shadow-md max-w-lg">
                         "{resultMessage}"
                     </blockquote>
                 </div>
             </motion.div>
-
-            <div className="relative z-20 mt-12">
-                <button
-                    onClick={resetView}
-                    className="px-8 py-3 bg-stone-800 text-white rounded-full font-bold shadow-lg hover:scale-105 transition-transform"
-                >
-                    Escolher Outra Folha
-                </button>
-            </div>
 
         </motion.div>
     );
