@@ -138,6 +138,8 @@ const TreeVisualization = ({ emotions = [], onLeafClick }) => {
             controls.maxPolarAngle = Math.PI / 2 - 0.05;
             controls.minDistance = 30;
             controls.maxDistance = 120;
+            controls.autoRotate = true; // Enable auto rotation
+            controls.autoRotateSpeed = 1.0;
             controls.target.set(0, 20, 0);
             controlsRef.current = controls;
 
@@ -387,7 +389,7 @@ const TreeVisualization = ({ emotions = [], onLeafClick }) => {
         });
     }, [emotions]);
 
-    return <div ref={containerRef} style={{ width: '100%', height: '100%', minHeight: '500px' }} />;
+    return <div ref={containerRef} style={{ width: '100%', height: '100%', minHeight: '500px', pointerEvents: 'auto' }} />;
 };
 
 export default TreeVisualization;

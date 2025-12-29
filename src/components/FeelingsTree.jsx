@@ -113,7 +113,7 @@ export default function FeelingsTree() {
                 <div className="relative w-full aspect-[4/5] md:aspect-[16/10] max-h-[700px] bg-white/40 backdrop-blur-xl border border-white/60 rounded-[3rem] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] overflow-hidden flex flex-col">
 
                     {/* --- 3D SCENE CONTAINER --- */}
-                    <div className="absolute inset-0 z-0 cursor-move">
+                    <div className="absolute inset-0 z-10 cursor-move">
                         <TreeVisualization emotions={feelings} />
                     </div>
 
