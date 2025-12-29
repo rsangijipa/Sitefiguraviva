@@ -35,19 +35,19 @@ const AmbientPlayer = () => {
   };
 
   return (
-    <div 
-      className="fixed bottom-8 left-8 z-50 flex items-center gap-3"
+    <div
+      className="fixed bottom-4 right-20 md:bottom-8 md:right-28 z-50 flex items-center gap-3"
       onMouseEnter={() => setShowControls(true)}
       onMouseLeave={() => setShowControls(false)}
     >
-      <audio 
-        ref={audioRef} 
-        src={audioUrl} 
-        loop 
+      <audio
+        ref={audioRef}
+        src={audioUrl}
+        loop
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
       />
-      
+
       <motion.button
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
@@ -63,12 +63,12 @@ const AmbientPlayer = () => {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            className="flex items-center gap-3 bg-white/80 backdrop-blur-md px-4 py-2 rounded-full border border-gray-100 shadow-xl"
+            className="flex items-center gap-3 bg-beige/95 backdrop-blur-md px-4 py-2 rounded-full border border-gold/20 shadow-xl"
           >
             <button onClick={toggleMute} className="text-primary hover:text-gold transition-colors">
               {isMuted || volume === 0 ? <VolumeX size={16} /> : <Volume2 size={16} />}
             </button>
-            
+
             <input
               type="range"
               min="0"
@@ -78,7 +78,7 @@ const AmbientPlayer = () => {
               onChange={(e) => setVolume(parseFloat(e.target.value))}
               className="w-20 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
             />
-            
+
             <span className="text-[10px] font-bold text-primary uppercase tracking-widest min-w-[40px]">
               Ambient
             </span>

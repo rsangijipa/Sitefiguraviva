@@ -7,6 +7,9 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import AmbientPlayer from '../components/AmbientPlayer';
 import PDFReader from '../components/PDFReader';
+import FeelingsTree from '../components/FeelingsTree';
+import CalendarModal from '../components/CalendarModal';
+import WhatsAppButton from '../components/WhatsAppButton';
 
 // Minimalist Fade Variant
 const fadeInUp = {
@@ -31,11 +34,12 @@ export default function PublicHome() {
     const navigate = useNavigate();
     const [selectedArticle, setSelectedArticle] = useState(null);
     const [isReaderOpen, setIsReaderOpen] = useState(false);
+    const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
     // Filters
     const formacoes = courses.filter(c => c.category === 'Formacao');
     const grupos = courses.filter(c => c.category === 'GrupoEstudos');
-    const cursos = courses.filter(c => !c.category || c.category === 'Curso');
+    const cursos = courses.filter(c => c.category === 'Curso');
 
     const openReader = (article) => {
         setSelectedArticle(article);
@@ -115,13 +119,13 @@ export default function PublicHome() {
                                 href="https://wa.me/556992481585"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="btn-primary flex items-center justify-center gap-2"
+                                className="btn-primary flex items-center justify-center gap-2 w-full sm:w-auto"
                             >
                                 Agendamento <ArrowRight size={18} aria-hidden="true" />
                             </a>
                             <a
-                                href="#cursos"
-                                className="btn-secondary flex items-center justify-center gap-2 bg-white"
+                                href="#instituto"
+                                className="btn-secondary flex items-center justify-center gap-2 bg-white w-full sm:w-auto"
                                 aria-label="Ver cursos livres"
                             >
                                 Cursos Livres <ArrowUpRight size={18} className="text-gray-400" aria-hidden="true" />
@@ -145,36 +149,36 @@ export default function PublicHome() {
                             className="order-2 lg:order-1"
                         >
                             <span className="text-xs font-bold tracking-[0.2em] uppercase text-gold mb-4 block">Fundadora</span>
-                            <h2 className="text-4xl md:text-5xl font-serif text-primary mb-8 leading-tight">Lilian Vanessa <span className="italic text-gold font-light">Nicacio Gusmão</span></h2>
+                            <h2 className="text-4xl md:text-5xl font-serif text-primary mb-8 leading-tight">Lilian Vanessa <span className="italic text-gold font-light">Nicacio Gusmão Vianei</span></h2>
 
                             <div className="space-y-6 text-lg text-text/80 leading-relaxed font-light">
                                 <p>
-                                    Psicóloga (CRP 20/1228) e Mestre em Ciências Ambientais pela UNITAU, Lilian Vanessa dedica sua trajetória à integração entre a fenomenologia, a natureza e o desenvolvimento humano.
+                                    Mulher, mineira, migrante, mãe atípica e feminista. Atuo como psicóloga, Gestalt-terapeuta, idealizadora, sócia fundadora e curadora do Instituto de Gestalt-terapia de Rondônia – Figura Viva com ênfase em estudos, vivências a partir de temas feministas, antirracistas, anticapacitistas e decoloniais, que des-cobrem e in-ventam uma presença sensível no campo/organismo/ambiente.
                                 </p>
                                 <p>
-                                    Com formação sólida em <span className="text-primary font-medium text-base uppercase tracking-wider">Gestalt-Terapia</span> pelo Instituto da Bahia, sua atuação transita entre a clínica, a supervisão e a docência, tendo coordenado a Clínica-Escola de Psicologia da UNIJIPA.
+                                    Formação e Pós-formação em Gestalt-terapia, Trauma, Psicoterapia corporal, Neurodiversidades. Escreve com interesse em temas como o lugar da mulher na Gestalt-terapia a partir de Laura Perls, opressões de gênero, violências, solidariedade política entre mulheres brancas e multiétnicas. Mestra em Ciências Ambientais pela UNITAU e graduada em psicologia pela UFMG, docente e a primeira mulher da família a possuir uma graduação.
                                 </p>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-8">
                                     <div className="flex items-start gap-3">
-                                        <div className="w-1.5 h-1.5 mt-2 rounded-full bg-gold flex-shrink-0" />
+                                        <div className="w-2 h-2 mt-2 rounded-full bg-gold flex-shrink-0 shadow-sm" />
                                         <div>
-                                            <h4 className="font-bold text-primary text-sm uppercase tracking-wider mb-1">Especialista</h4>
-                                            <p className="text-xs text-text/60">Gestalt-Terapia e Psicologia do Trânsito (CFP).</p>
+                                            <h4 className="font-bold text-primary text-base uppercase tracking-wider mb-1">Mestra & Psicóloga</h4>
+                                            <p className="text-sm font-medium text-text/80">Ciências Ambientais (UNITAU) e Psicologia (UFMG).</p>
                                         </div>
                                     </div>
                                     <div className="flex items-start gap-3">
-                                        <div className="w-1.5 h-1.5 mt-2 rounded-full bg-gold flex-shrink-0" />
+                                        <div className="w-2 h-2 mt-2 rounded-full bg-gold flex-shrink-0 shadow-sm" />
                                         <div>
-                                            <h4 className="font-bold text-primary text-sm uppercase tracking-wider mb-1">Pesquisadora</h4>
-                                            <p className="text-xs text-text/60">Foco em prevenção de transtornos emocionais e interação natureza-criança.</p>
+                                            <h4 className="font-bold text-primary text-base uppercase tracking-wider mb-1">Gestalt-Terapeuta</h4>
+                                            <p className="text-sm font-medium text-text/80">Foco em Neurodiversidades, Trauma e Temas Feministas.</p>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="pt-8">
                                     <a
-                                        href="http://lattes.cnpq.br/"
+                                        href="http://lattes.cnpq.br/9287840585952055"
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary border-b border-primary pb-1 hover:text-gold hover:border-gold transition-colors"
@@ -212,6 +216,9 @@ export default function PublicHome() {
                     </div>
                 </div>
             </section>
+
+            {/* Feelings Tree Section */}
+            <FeelingsTree />
 
             {/* NEW: Formation Section */}
             {formacoes.length > 0 && (
@@ -353,9 +360,12 @@ export default function PublicHome() {
                             <span className="text-xs font-bold tracking-[0.2em] uppercase text-gold mb-4 block">Instituto de Ensino</span>
                             <h2 className="text-4xl md:text-5xl font-serif text-primary leading-tight">Cursos Livres</h2>
                         </div>
-                        <a href="#" className="hidden md:flex items-center gap-2 text-xs font-bold tracking-[0.2em] uppercase text-text hover:text-primary transition-colors">
+                        <button
+                            onClick={() => setIsCalendarOpen(true)}
+                            className="hidden md:flex items-center gap-2 text-xs font-bold tracking-[0.2em] uppercase text-text hover:text-primary transition-colors"
+                        >
                             Ver Calendário Completo <ArrowRight size={14} />
-                        </a>
+                        </button>
                     </div>
 
                     <div className="grid md:grid-cols-3 gap-8">
@@ -528,11 +538,17 @@ export default function PublicHome() {
             </section>
 
             <Footer />
+            <WhatsAppButton />
             <AmbientPlayer />
             <PDFReader
                 isOpen={isReaderOpen}
                 onClose={() => setIsReaderOpen(false)}
                 article={selectedArticle}
+            />
+            <CalendarModal
+                isOpen={isCalendarOpen}
+                onClose={() => setIsCalendarOpen(false)}
+                courses={courses} // Pass all courses so it can extract dates
             />
         </div>
     );

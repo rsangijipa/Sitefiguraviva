@@ -1,5 +1,6 @@
 import { db } from './firebase';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, getDoc } from 'firebase/firestore';
+import { staticCourses } from '../data/staticCourses';
 
 const COLLECTION_NAME = 'courses';
 
@@ -7,10 +8,14 @@ export const courseService = {
     getAll: async () => {
         try {
             const querySnapshot = await getDocs(collection(db, COLLECTION_NAME));
-            return querySnapshot.docs.map(doc => ({
+            const firebaseCourses = querySnapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
             }));
+
+            // Merge: Static first (so they are always at top or bottom? Let's put static first)
+            // Or prioritize Firebase if ID conflict? Assume distinct IDs.
+            return [...staticCourses, ...firebaseCourses];
         } catch (error) {
             console.error("Error fetching courses from Firestore:", error);
             throw error;
@@ -18,6 +23,11 @@ export const courseService = {
     },
     getById: async (id) => {
         try {
+            // 1. Check static
+            const staticCourse = staticCourses.find(c => c.id === id);
+            if (staticCourse) return staticCourse;
+
+            // 2. Check Firebase
             const docRef = doc(db, COLLECTION_NAME, id);
             const docSnap = await getDoc(docRef);
             if (docSnap.exists()) {
