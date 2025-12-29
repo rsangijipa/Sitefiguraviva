@@ -1,0 +1,5 @@
+{
+  "name": "SomaScan",
+  "description": "A mindful body scan application to increase somatic awareness using AI-guided audio and interactive mapping.",
+  "requestFramePermissions": []
+}
