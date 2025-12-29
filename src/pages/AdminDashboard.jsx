@@ -3,7 +3,7 @@ import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
     LayoutDashboard, BookOpen, PenTool, Settings, LogOut,
-    Globe, Menu, X
+    Globe, Menu, X, Image as ImageIcon, Home
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
@@ -12,6 +12,7 @@ import AcademicManager from '../components/admin/AcademicManager';
 import BlogManager from '../components/admin/BlogManager';
 import GoogleIntegrations from '../components/admin/GoogleIntegrations';
 import SettingsManager from '../components/admin/SettingsManager';
+import GalleryManager from '../components/admin/GalleryManager';
 
 // Dashboard Home (Visão Geral)
 function DashboardHome() {
@@ -50,6 +51,7 @@ export default function AdminDashboard() {
     const navItems = [
         { icon: LayoutDashboard, label: 'Visão Geral', path: '/admin' },
         { icon: BookOpen, label: 'Acadêmico', path: '/admin/academic' },
+        { icon: ImageIcon, label: 'Galeria', path: '/admin/gallery' },
         { icon: Globe, label: 'Google Suite', path: '/admin/google' },
         { icon: PenTool, label: 'Diário Visual', path: '/admin/blog' },
         { icon: Settings, label: 'Configurações', path: '/admin/settings' },
@@ -105,7 +107,16 @@ export default function AdminDashboard() {
                     })}
                 </nav>
 
-                <div className="p-8 border-t border-primary/5">
+                <div className="p-8 border-t border-primary/5 space-y-3">
+                    <Link
+                        to="/"
+                        target="_blank"
+                        className="w-full flex items-center justify-center gap-4 px-6 py-5 bg-white border border-primary/5 text-primary/60 hover:text-primary hover:bm-white rounded-2xl transition-soft text-[10px] font-bold uppercase tracking-[0.2em] group"
+                    >
+                        <Home size={16} className="group-hover:scale-110 transition-transform" />
+                        Ir para o Site
+                    </Link>
+
                     <button
                         onClick={logout}
                         className="w-full flex items-center justify-center gap-4 px-6 py-5 bg-red-50 text-red-400 hover:bg-red-100 rounded-2xl transition-soft text-[10px] font-bold uppercase tracking-[0.2em] group"
@@ -136,6 +147,7 @@ export default function AdminDashboard() {
                 <Routes>
                     <Route path="/" element={<DashboardHome />} />
                     <Route path="/academic" element={<AcademicManager />} />
+                    <Route path="/gallery" element={<GalleryManager />} />
                     <Route path="/blog" element={<BlogManager />} />
                     <Route path="/google" element={<GoogleIntegrations />} />
                     <Route path="/settings" element={<SettingsManager />} />

@@ -19,28 +19,35 @@ export const MEDIATORS_REGISTRY = {
 };
 
 export const getMediatorDetails = (nameOrObject) => {
-    // If it's already an object with full details, return it
-    if (typeof nameOrObject === 'object' && nameOrObject !== null) {
-        return {
-            name: nameOrObject.name || '',
-            image: nameOrObject.image || null,
-            bio: nameOrObject.bio || ''
-        };
-    }
+    // 1. Resolve Name
+    let name = '';
+    let objectData = {};
 
-    // If it's a string, look up in registry
     if (typeof nameOrObject === 'string') {
-        const found = MEDIATORS_REGISTRY[nameOrObject] || MEDIATORS_REGISTRY[Object.keys(MEDIATORS_REGISTRY).find(k => k.includes(nameOrObject))];
+        name = nameOrObject;
+    } else if (typeof nameOrObject === 'object' && nameOrObject !== null) {
+        name = nameOrObject.name || '';
+        objectData = nameOrObject;
+    }
 
-        if (found) return found;
+    // 2. Find Registry Match (Exact or Partial)
+    // We normalize mainly to handle "Lilian" vs "Lílian" potentially, but for now simple check
+    const registryMatch = MEDIATORS_REGISTRY[name] ||
+        MEDIATORS_REGISTRY[Object.keys(MEDIATORS_REGISTRY).find(k => k.includes(name) || name.includes(k))];
 
-        // Fallback if not found in registry
+    // 3. Merge Logic: Object overrides Registry, but Registry fills gaps
+    if (registryMatch) {
         return {
-            name: nameOrObject,
-            image: null,
-            bio: 'Biografia não disponível no momento.'
+            name: objectData.name || registryMatch.name,
+            image: objectData.image || registryMatch.image,
+            bio: (objectData.bio && objectData.bio.trim().length > 0) ? objectData.bio : registryMatch.bio
         };
     }
 
-    return null;
+    // 4. No Registry Match -> Return Object Data or Fallback
+    return {
+        name: name,
+        image: objectData.image || null,
+        bio: objectData.bio || 'Biografia não disponível no momento.'
+    };
 };

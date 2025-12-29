@@ -2,7 +2,7 @@ Title: Supervisão Clínica: CO-VISAR
 Subtitle: Grupo e Individual
 Category: GrupoEstudos
 Status: Aberto
-Mediators: Lílian Gusmão
+Mediador1: Lílian Gusmão
 Tags: Online, Quinzenal, Supervisão
 Description: Um espaço de co-visão para alinhar a sensibilidade e verificar a qualidade da relação terapêutica a partir da intercorporeidade. A clínica contextualizada reconhece as dimensões culturais e estruturais, oferecendo suporte para sustentar travessias. Inclui emissão de NF e suporte emergencial.
 Date: Encontros Quinzenais | On-line (Zoom)
