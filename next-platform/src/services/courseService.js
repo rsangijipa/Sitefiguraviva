@@ -36,6 +36,9 @@ export const courseService = {
             return { id: docRef.id, ...data };
         } catch (error) {
             console.error("Error creating course:", error);
+            if (error.code === 'permission-denied') {
+                console.error("PERMISSION DENIED: Check your Firestore Security Rules in the Firebase Console.");
+            }
             throw error;
         }
     },
@@ -46,6 +49,9 @@ export const courseService = {
             return { id, ...data };
         } catch (error) {
             console.error("Error updating course:", error);
+            if (error.code === 'permission-denied') {
+                console.error("PERMISSION DENIED: Check your Firestore Security Rules in the Firebase Console.");
+            }
             throw error;
         }
     },

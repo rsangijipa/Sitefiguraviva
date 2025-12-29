@@ -9,6 +9,7 @@ import {
 import { useApp } from '../context/AppContext';
 import { blogService } from '../services/blogService';
 import { uploadFiles } from '../services/uploadService';
+import { auth } from '../services/firebase';
 
 // --- Sub-Components ---
 

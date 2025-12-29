@@ -121,9 +121,9 @@ export default function CoursesManager() {
                             </div>
 
                             <div className="md:col-span-2 flex justify-end gap-4 pt-4 border-t border-gray-100">
-                                <button type="button" onClick={() => setIsEditing(false)} className="px-8 py-4 rounded-xl text-[10px] font-bold uppercase tracking-widest text-primary/40 hover:bg-gray-50 transition-colors">Cancelar</button>
-                                <button type="submit" className="bg-primary text-paper px-8 py-4 rounded-xl flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest hover:bg-gold transition-soft shadow-lg">
-                                    <Save size={16} /> Salvar Curso
+                                <button type="button" onClick={() => setIsEditing(false)} className="px-8 py-4 rounded-xl text-[10px] font-bold uppercase tracking-widest text-primary/40 hover:bg-gray-50 transition-colors" disabled={isSubmitting}>Cancelar</button>
+                                <button type="submit" disabled={isSubmitting} className="bg-primary text-paper px-8 py-4 rounded-xl flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest hover:bg-gold transition-soft shadow-lg disabled:opacity-70 disabled:cursor-not-allowed">
+                                    <Save size={16} /> {isSubmitting ? 'Salvando...' : 'Salvar Curso'}
                                 </button>
                             </div>
                         </form>

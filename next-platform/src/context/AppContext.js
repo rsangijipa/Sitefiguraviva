@@ -84,8 +84,10 @@ export function AppProvider({ children }) {
         try {
             await courseService.update(id, updatedData);
             setCourses(prev => prev.map(c => c.id === id ? { ...c, ...updatedData } : c));
+            return true;
         } catch (err) {
             console.error("Failed to update course", err);
+            return false;
         }
     };
 
@@ -93,8 +95,10 @@ export function AppProvider({ children }) {
         try {
             await courseService.delete(id);
             setCourses(prev => prev.filter(c => c.id !== id));
+            return true;
         } catch (err) {
             console.error("Failed to delete course", err);
+            return false;
         }
     };
 
