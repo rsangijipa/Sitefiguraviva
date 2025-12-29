@@ -1,15 +1,19 @@
-import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Image as ImageIcon, Search, Filter, Grid, ArrowRight } from 'lucide-react';
-import galleryData from '../data/gallery.json';
-
-// Fallback if empty
-const safeGallery = Array.isArray(galleryData) ? galleryData : [];
-
-// Extract all unique tags
-const allTags = Array.from(new Set(safeGallery.flatMap(photo => photo.tags))).sort();
+import { useApp } from '../context/AppContext';
 
 export default function GalleryModal({ isOpen, onClose }) {
+    const { gallery } = useApp();
+
+    // Fallback if empty (handling async state or empty DB)
+    const safeGallery = useMemo(() => Array.isArray(gallery) ? gallery : [], [gallery]);
+
+    // Extract all unique tags
+    const allTags = useMemo(() =>
+        Array.from(new Set(safeGallery.flatMap(photo => photo.tags || []))).sort(),
+        [safeGallery]);
+
     // Showroom State
     const [filter, setFilter] = useState("Todos");
     const [search, setSearch] = useState("");
@@ -52,7 +56,7 @@ export default function GalleryModal({ isOpen, onClose }) {
 
         // Filter by Tag
         if (filter !== "Todos") {
-            result = result.filter(p => p.tags.includes(filter));
+            result = result.filter(p => p.tags && p.tags.includes(filter));
         }
 
         // Filter by Search
@@ -71,7 +75,7 @@ export default function GalleryModal({ isOpen, onClose }) {
         }
 
         return result;
-    }, [filter, search, sort]);
+    }, [filter, search, sort, safeGallery]);
 
     // Lightbox Handlers
     const openLightbox = (index) => setSelectedPhotoIndex(index);
@@ -242,7 +246,7 @@ export default function GalleryModal({ isOpen, onClose }) {
                                             <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
                                                 <h3 className="text-white font-serif text-lg leading-tight mb-2 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">{photo.title}</h3>
                                                 <div className="flex gap-2 translate-y-4 group-hover:translate-y-0 transition-transform duration-300 delay-75">
-                                                    {photo.tags.slice(0, 2).map((tag, i) => (
+                                                    {photo.tags && photo.tags.slice(0, 2).map((tag, i) => (
                                                         <span key={i} className="text-[9px] uppercase font-bold tracking-widest text-white/80 bg-white/20 px-2 py-1 rounded">
                                                             {tag}
                                                         </span>
@@ -307,7 +311,7 @@ export default function GalleryModal({ isOpen, onClose }) {
                                         <div className="mt-8 pt-8 border-t border-stone-100">
                                             <p className="text-[10px] font-bold uppercase tracking-widest text-text/30 mb-4">Tags Relacionadas</p>
                                             <div className="flex flex-wrap gap-2">
-                                                {filteredPhotos[selectedPhotoIndex].tags.map(tag => (
+                                                {filteredPhotos[selectedPhotoIndex].tags && filteredPhotos[selectedPhotoIndex].tags.map(tag => (
                                                     <span key={tag} className="text-[10px] uppercase tracking-widest text-primary/60 bg-stone-100 px-3 py-1.5 rounded-full hover:bg-primary hover:text-white transition-colors cursor-default">
                                                         {tag}
                                                     </span>

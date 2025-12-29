@@ -19,7 +19,7 @@ import BlogSection from '../components/home/BlogSection';
 import InstagramSection from '../components/home/InstagramSection';
 
 export default function PublicHome() {
-    const { courses, alertMessage, blogPosts } = useApp();
+    const { courses, alertMessage, blogPosts, loading } = useApp();
     const [searchParams, setSearchParams] = useSearchParams();
 
     // Derive Modal State from URL
@@ -58,11 +58,13 @@ export default function PublicHome() {
 
             <InstituteSection
                 courses={courses}
+                loading={loading}
                 onOpenCalendar={() => setSearchParams({ modal: 'calendar' })}
             />
 
             <BlogSection
                 blogPosts={blogPosts}
+                loading={loading}
                 onOpenReader={openReader}
             />
 

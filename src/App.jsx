@@ -46,6 +46,7 @@ function AppContent() {
           </ProtectedRoute>
         } />
       </Routes>
+
       <Toast
         message={toast.message}
         type={toast.type}

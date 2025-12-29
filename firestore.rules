@@ -1,0 +1,40 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 1. PUBLIC READ (Conteúdo visível no site)
+    // Permite leitura pública, mas escrita apenas para Admin autenticado
+    match /courses/{document=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    match /gallery/{document=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    match /mediators/{document=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    match /blog_posts/{document=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    match /counters/{document=**} {
+        allow read: if true;
+        // Allow public increment (controlled via logic ideally, but open for now)
+        allow write: if true; 
+    }
+    
+    // 2. PROTECTED / ADMIN ONLY
+    // Todas as outras coleções fechadas por padrão
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
