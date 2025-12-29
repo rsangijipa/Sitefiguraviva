@@ -78,7 +78,11 @@ export default function PublicHome() {
                 <div className="absolute top-0 left-0 w-full h-full z-0 select-none">
                     <img
                         src="/assets/logo-figura-viva.jpg"
-                        className="w-[80vw] h-[80vw] md:w-[60vw] md:h-[60vw] absolute -right-[20%] -top-[10%] object-contain opacity-40 mix-blend-multiply blur-3xl rounded-full"
+                        className="w-[80vw] h-[80vw] md:w-[60vw] md:h-[60vw] absolute -right-[20%] -top-[10%] object-contain opacity-80 mix-blend-multiply"
+                        style={{
+                            maskImage: 'radial-gradient(circle, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 80%)',
+                            WebkitMaskImage: 'radial-gradient(circle, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 80%)'
+                        }}
                         alt=""
                         width="1920"
                         height="1080"
