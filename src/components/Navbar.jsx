@@ -29,13 +29,13 @@ export default function Navbar() {
 
                 {/* Desktop Menu */}
                 <div className="hidden md:flex items-center gap-8 font-sans text-xs font-bold tracking-widest uppercase text-text/80">
-                    {['Clínica', 'Fundadora', 'Formações', 'Grupos', 'Instituto', 'Blog'].map((item) => (
+                    {['Clínica', 'Fundadora', 'Instituto', 'Blog'].map((item) => (
                         <a
                             key={item}
                             href={`/#${item.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")}`}
                             className="hover:text-primary transition-colors hover:bg-gray-50 px-3 py-2 rounded-lg"
                         >
-                            {item}
+                            {item === 'Instituto' ? 'Formações e Grupos' : item}
                         </a>
                     ))}
 
@@ -66,14 +66,14 @@ export default function Navbar() {
             {/* Mobile Menu Overlay */}
             {mobileOpen && (
                 <div className="absolute top-full left-0 w-full bg-surface shadow-xl border-t border-paper/10 p-6 flex flex-col gap-4 md:hidden animate-fade-in max-h-[80vh] overflow-y-auto">
-                    {['Clínica', 'Fundadora', 'Formações', 'Grupos', 'Instituto', 'Blog'].map((item) => (
+                    {['Clínica', 'Fundadora', 'Instituto', 'Blog'].map((item) => (
                         <a
                             key={item}
                             href={`/#${item.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")}`}
                             onClick={() => setMobileOpen(false)}
                             className="text-lg font-serif text-primary border-b border-gray-50 pb-2"
                         >
-                            {item}
+                            {item === 'Instituto' ? 'Formações e Grupos' : item}
                         </a>
                     ))}
                     <Link to="/portal" onClick={() => setMobileOpen(false)} className="text-lg font-serif text-accent flex items-center gap-2 pt-2">

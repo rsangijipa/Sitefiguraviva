@@ -3,7 +3,7 @@ import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-const TreeVisualization = ({ emotions = [], onLeafClick }) => {
+const TreeVisualization = ({ emotions = [], onLeafClick, isModal = false }) => {
     const containerRef = useRef(null);
     const sceneRef = useRef(null);
     const cameraRef = useRef(null);
@@ -316,6 +316,34 @@ const TreeVisualization = ({ emotions = [], onLeafClick }) => {
                 if (containerRef.current && renderer.domElement) {
                     containerRef.current.removeChild(renderer.domElement);
                 }
+
+                // Dispose controls
+                controls.dispose();
+
+                // Dispose scene resources
+                scene.traverse((object) => {
+                    if (object.isMesh || object.isSprite) {
+                        if (object.geometry) object.geometry.dispose();
+                        if (object.material) {
+                            if (Array.isArray(object.material)) {
+                                object.material.forEach(mat => {
+                                    if (mat.map) mat.map.dispose();
+                                    mat.dispose();
+                                });
+                            } else {
+                                if (object.material.map) object.material.map.dispose();
+                                object.material.dispose();
+                            }
+                        }
+                    }
+                });
+
+                // Helper materials
+                Object.values(materials).forEach(mat => {
+                    if (mat.map) mat.map.dispose();
+                    mat.dispose();
+                });
+
                 renderer.dispose();
             };
         } catch (e) {
@@ -329,6 +357,7 @@ const TreeVisualization = ({ emotions = [], onLeafClick }) => {
         if (emotions.length === 0) {
             leafMeshesRef.current.forEach((sprite) => {
                 leavesGroupRef.current?.remove(sprite);
+                if (sprite.material.map) sprite.material.map.dispose();
                 sprite.material.dispose();
             });
             leafMeshesRef.current.clear();
@@ -340,6 +369,7 @@ const TreeVisualization = ({ emotions = [], onLeafClick }) => {
         leafMeshesRef.current.forEach((sprite, id) => {
             if (!currentIds.has(id)) {
                 leavesGroupRef.current?.remove(sprite);
+                if (sprite.material.map) sprite.material.map.dispose();
                 sprite.material.dispose();
                 leafMeshesRef.current.delete(id);
             }
@@ -389,7 +419,7 @@ const TreeVisualization = ({ emotions = [], onLeafClick }) => {
         });
     }, [emotions]);
 
-    return <div ref={containerRef} style={{ width: '100%', height: '100%', minHeight: '500px', pointerEvents: 'auto' }} />;
+    return <div ref={containerRef} style={{ width: '100%', height: isModal ? '100vh' : '100%', minHeight: isModal ? 'auto' : '500px', pointerEvents: 'auto' }} />;
 };
 
 export default TreeVisualization;

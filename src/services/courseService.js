@@ -24,7 +24,7 @@ export const courseService = {
     getById: async (id) => {
         try {
             // 1. Check static
-            const staticCourse = staticCourses.find(c => c.id === id);
+            const staticCourse = staticCourses.find(c => String(c.id) === String(id));
             if (staticCourse) return staticCourse;
 
             // 2. Check Firebase

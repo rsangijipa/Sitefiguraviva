@@ -33,7 +33,7 @@ const MESSAGES = [
     "Integre suas sombras para encontrar sua luz."
 ];
 
-export default function FeelingsTree() {
+export default function FeelingsTree({ isModal = false }) {
     const [feelings, setFeelings] = useState([]);
     const [inputValue, setInputValue] = useState('');
     const [resultMessage, setResultMessage] = useState(null);
@@ -80,7 +80,7 @@ export default function FeelingsTree() {
     };
 
     return (
-        <section className="py-24 relative overflow-hidden bg-[#faf9f6]">
+        <section className={`${isModal ? 'h-full grid place-items-center bg-transparent' : 'py-24 relative overflow-hidden bg-[#faf9f6]'}`}>
             {/* Background com gradientes sutis */}
             <div className="absolute inset-0 pointer-events-none">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-50/40 via-purple-50/20 to-orange-50/30" />
@@ -95,7 +95,7 @@ export default function FeelingsTree() {
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/60 border border-stone-200/50 backdrop-blur-sm shadow-sm mb-4"
+                        className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-stone-200/50 backdrop-blur-sm shadow-sm mb-4 ${isModal ? 'bg-white/80' : 'bg-white/60'}`}
                     >
                         <Sparkles size={14} className="text-amber-500/80" />
                         <span className="text-[10px] uppercase tracking-[0.2em] text-stone-500 font-semibold">Autoconhecimento 3D</span>
@@ -110,11 +110,11 @@ export default function FeelingsTree() {
                 </div>
 
                 {/* Card Principal 3D */}
-                <div className="relative w-full aspect-[4/5] md:aspect-[16/10] max-h-[700px] bg-white/40 backdrop-blur-xl border border-white/60 rounded-[3rem] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] overflow-hidden flex flex-col">
+                <div className={`${isModal ? 'w-full h-full border-none shadow-none rounded-none bg-transparent' : 'relative w-full aspect-[4/5] md:aspect-[16/10] max-h-[700px] bg-white/40 backdrop-blur-xl border border-white/60 rounded-[3rem] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)]'} overflow-hidden flex flex-col`}>
 
                     {/* --- 3D SCENE CONTAINER --- */}
                     <div className="absolute inset-0 z-10 cursor-move">
-                        <TreeVisualization emotions={feelings} />
+                        <TreeVisualization emotions={feelings} isModal={isModal} />
                     </div>
 
                     {/* --- UI LAYER: CONTROLES & FEEDBACK --- */}
@@ -134,9 +134,9 @@ export default function FeelingsTree() {
                                     </div>
 
                                     {/* Input Area */}
-                                    <form onSubmit={handleAddFeeling} className="relative group">
-                                        <div className="absolute inset-0 bg-white/40 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                                        <div className="relative flex items-center bg-white/80 backdrop-blur-xl border border-white rounded-full shadow-lg p-1.5 focus-within:ring-2 focus-within:ring-rose-200/50 transition-all">
+                                    <form onSubmit={handleAddFeeling} className="relative group w-full max-w-lg mx-auto">
+                                        <div className={`absolute inset-0 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${isModal ? 'bg-white/60' : 'bg-white/40'}`} />
+                                        <div className={`relative flex items-center border rounded-full shadow-lg p-1.5 focus-within:ring-2 focus-within:ring-rose-200/50 transition-all ${isModal ? 'bg-white/90 border-white/80 shadow-2xl scale-105' : 'bg-white/80 border-white backdrop-blur-xl'}`}>
                                             <input
                                                 type="text"
                                                 value={inputValue}
