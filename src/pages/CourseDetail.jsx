@@ -24,6 +24,8 @@ export default function CourseDetail() {
         fetchCourse();
     }, [id]);
 
+    const [selectedMediator, setSelectedMediator] = useState(null);
+
     const getCoverImage = () => {
         if (!course) return '';
         if (course.images && course.images.length > 0) return course.images[0];
@@ -70,11 +72,40 @@ export default function CourseDetail() {
                                 {course.subtitle && <p className="text-xl md:text-2xl font-serif italic text-gold/80 leading-snug">{course.subtitle}</p>}
                             </div>
 
-                            {/* Mediators */}
-                            {course.mediators && (
+                            {/* Mediators (Interactive) */}
+                            {course.mediators && course.mediators.length > 0 && (
                                 <div className="border-l-4 border-accent/20 pl-6 py-2">
-                                    <h4 className="text-xs font-bold uppercase tracking-widest text-accent mb-1">Mediadoras</h4>
-                                    <p className="text-lg text-primary font-medium">{course.mediators.join(' e ')}</p>
+                                    <h4 className="text-xs font-bold uppercase tracking-widest text-accent mb-3">Mediadoras</h4>
+                                    <div className="flex flex-wrap gap-4">
+                                        {course.mediators.map((mediator, index) => {
+                                            const isObject = typeof mediator === 'object';
+                                            const name = isObject ? mediator.name : mediator;
+                                            const image = isObject ? mediator.image : null;
+
+                                            // If it's just a string, render as text
+                                            if (!isObject) return <span key={index} className="text-lg text-primary font-medium">{name}</span>;
+
+                                            // If object, render interactive button
+                                            return (
+                                                <button
+                                                    key={index}
+                                                    onClick={() => setSelectedMediator(mediator)}
+                                                    className="flex items-center gap-3 bg-white p-2 pr-4 rounded-full shadow-sm hover:shadow-md transition-all border border-transparent hover:border-gold/30 group"
+                                                >
+                                                    <div className="w-10 h-10 rounded-full bg-stone-100 overflow-hidden shrink-0 border border-stone-200">
+                                                        {image ? (
+                                                            <img src={image} alt={name} className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            <div className="w-full h-full flex items-center justify-center text-stone-400 text-xs font-bold">
+                                                                {name.charAt(0)}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <span className="text-sm font-bold text-primary group-hover:text-gold transition-colors">{name}</span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
                                 </div>
                             )}
 
@@ -208,7 +239,7 @@ export default function CourseDetail() {
             </main>
             <Footer />
 
-            {/* Lightbox remains the same */}
+            {/* Lightbox */}
             {lightboxOpen && (
                 <div className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4">
                     <button onClick={() => setLightboxOpen(false)} className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors">
@@ -217,6 +248,41 @@ export default function CourseDetail() {
                     <div className="max-w-5xl max-h-screen">
                         <img src={allImages[lightboxIndex]} alt="" className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl" />
                     </div>
+                </div>
+            )}
+
+            {/* Mediator Modal */}
+            {selectedMediator && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-primary/40 backdrop-blur-sm" onClick={() => setSelectedMediator(null)} />
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-white max-w-2xl w-full rounded-3xl p-8 relative z-10 shadow-2xl max-h-[90vh] overflow-y-auto"
+                    >
+                        <button onClick={() => setSelectedMediator(null)} className="absolute top-6 right-6 text-gray-400 hover:text-primary transition-colors">
+                            <ArrowLeft size={24} className="rotate-180" />
+                        </button>
+
+                        <div className="flex flex-col md:flex-row gap-8 items-start">
+                            <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-stone-100 overflow-hidden shrink-0 border-4 border-white shadow-lg mx-auto md:mx-0">
+                                {selectedMediator.image ? (
+                                    <img src={selectedMediator.image} alt={selectedMediator.name} className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-stone-300 text-4xl font-serif">
+                                        {selectedMediator.name.charAt(0)}
+                                    </div>
+                                )}
+                            </div>
+                            <div>
+                                <h3 className="text-2xl font-serif text-primary mb-2 text-center md:text-left">{selectedMediator.name}</h3>
+                                <div className="w-10 h-1 bg-gold/30 mb-6 mx-auto md:mx-0 rounded-full" />
+                                <p className="text-lg text-gray-600 leading-relaxed font-light whitespace-pre-line text-center md:text-left">
+                                    {selectedMediator.bio || 'Sem biografia disponível.'}
+                                </p>
+                            </div>
+                        </div>
+                    </motion.div>
                 </div>
             )}
         </div>

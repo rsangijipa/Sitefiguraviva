@@ -1,0 +1,63 @@
+[
+  {
+    "id": "iii-formação-clínica-em-gestalt-terapia",
+    "title": "III Formação Clínica em Gestalt-Terapia",
+    "subtitle": "Uma Perspectiva de Travessia Decolonial",
+    "category": "Formacao",
+    "status": "Aberto",
+    "date": "Início das aulas: 25 e 26 de abril 2026",
+    "description": "",
+    "link": "https://docs.google.com/forms/d/1VVvRhQGtmYsavtWVc5MAlxukI905YRO8pvsQuqvaGuM/edit",
+    "image": "/cursos/III Formação Clínica em Gestalt-Terapia/capa.jpeg",
+    "images": [
+      "/cursos/III Formação Clínica em Gestalt-Terapia/capa.jpeg"
+    ],
+    "mediators": [],
+    "tags": [
+      "Presencial",
+      "Online",
+      "Formação"
+    ],
+    "details": {
+      "intro": "",
+      "format": [
+        "Carga Horária: 400 horas",
+        "Formação organizada em 3 eixos temáticos (Eixo I, II e III)",
+        "Workshops I e II e Seminário autoral",
+        "Encontros presenciais e online",
+        "Certificado incluso"
+      ],
+      "schedule": []
+    }
+  },
+  {
+    "id": "supervisão-clínica-co-visar",
+    "title": "Supervisão Clínica: CO-VISAR",
+    "subtitle": "Grupo e Individual",
+    "category": "GrupoEstudos",
+    "status": "Aberto",
+    "date": "Encontros Quinzenais | On-line (Zoom)",
+    "description": "Um espaço de co-visão para alinhar a sensibilidade e verificar a qualidade da relação terapêutica a partir da intercorporeidade. A clínica contextualizada reconhece as dimensões culturais e estruturais, oferecendo suporte para sustentar travessias. Inclui emissão de NF e suporte emergencial.",
+    "link": "https://wa.me/5569992481585",
+    "image": "/cursos/Supervisão Clínica CO-VISAR/capa.jpeg",
+    "images": [
+      "/cursos/Supervisão Clínica CO-VISAR/capa.jpeg"
+    ],
+    "mediators": [],
+    "tags": [
+      "Online",
+      "Quinzenal",
+      "Supervisão"
+    ],
+    "details": {
+      "intro": "Um espaço de co-visão para alinhar a sensibilidade e verificar a qualidade da relação terapêutica a partir da intercorporeidade.",
+      "format": [
+        "Encontros on-line e síncronos pelo Zoom",
+        "Emissão de Nota fiscal para pagamentos das co-visões",
+        "Suporte pelo WhatsApp em situações de emergência",
+        "Calendário dos encontros e materiais disponibilizados pelo grupo no WhatsApp"
+      ],
+      "schedule": []
+    }
+  }
+]

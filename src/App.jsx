@@ -8,6 +8,7 @@ import StudentPortal from './pages/StudentPortal';
 import CourseDetail from './pages/CourseDetail';
 import BlogDetail from './pages/BlogDetail';
 import ScrollToTopButton from './components/ScrollToTopButton';
+import Toast from './components/ui/Toast';
 
 // --- Protected Route Wrapper ---
 function ProtectedRoute({ children }) {
@@ -26,6 +27,7 @@ function ScrollToTop() {
 }
 
 function AppContent() {
+  const { toast, hideToast } = useApp();
   return (
     <>
       <a href="#main-content" className="skip-to-content">Pular para o conteúdo principal</a>
@@ -43,6 +45,12 @@ function AppContent() {
           </ProtectedRoute>
         } />
       </Routes>
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        isVisible={toast.isVisible}
+        onClose={hideToast}
+      />
     </>
   );
 }

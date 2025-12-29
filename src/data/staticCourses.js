@@ -1,3 +1,5 @@
+import generatedCourses from './generatedCourses.json';
+
 export const staticCourses = [
     {
         id: 'experiencia-atemporal',
@@ -28,5 +30,6 @@ export const staticCourses = [
                 '18/09', '09/10', '30/10', '27/11'
             ]
         }
-    }
+    },
+    ...generatedCourses
 ];

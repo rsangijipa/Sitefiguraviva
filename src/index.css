@@ -5,8 +5,12 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
-    @apply bg-paper text-text font-sans antialiased text-base leading-relaxed;
+    @apply bg-paper text-text font-sans antialiased text-base leading-relaxed overflow-x-hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -40,7 +44,37 @@
     @apply inline-flex items-center justify-center border border-gray-300 text-text px-6 py-3 rounded-lg font-bold hover:bg-gray-50 transition-all active:scale-95;
   }
 
+  .card-premium {
+    @apply bg-white rounded-2xl shadow-soft-sm border border-gray-100/50 transition-all duration-500 hover:shadow-soft-xl hover:-translate-y-1 hover:border-accent/20;
+  }
+
+  /* Glassmorphism Variants */
+  .glass-panel {
+    @apply bg-white/70 backdrop-blur-md border border-white/50 shadow-soft-lg;
+  }
+  
+  .glass-panel-dark {
+    @apply bg-black/20 backdrop-blur-md border border-white/10 shadow-soft-lg;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center bg-primary text-white px-8 py-4 rounded-lg font-bold tracking-wide hover:bg-primary/90 transition-all active:scale-95 shadow-lg hover:shadow-xl hover:shadow-primary/20;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center border-2 border-primary/10 bg-white text-primary px-8 py-4 rounded-lg font-bold hover:bg-surface hover:border-primary/20 transition-all active:scale-95 shadow-sm hover:shadow-md;
+  }
+
   .skip-to-content {
     @apply sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-white focus:text-primary focus:px-4 focus:py-2 focus:rounded-md focus:shadow-lg focus:font-bold;
+  }
+
+  /* Typography Utilities */
+  .heading-hero {
+    @apply font-serif font-bold text-fluid-h1 leading-[1.1] text-primary tracking-tight;
+  }
+  
+  .text-body-lg {
+    @apply font-sans text-fluid-body text-gray-600 leading-relaxed;
   }
 }

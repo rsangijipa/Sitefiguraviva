@@ -12,8 +12,7 @@ export function AppProvider({ children }) {
     const [googleConfig, setGoogleConfig] = useState(configService.get());
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
-    // ...
+    const [toast, setToast] = useState({ message: '', type: 'success', isVisible: false });
 
     const [alertMessage, setAlertMessage] = useState(() => {
         return localStorage.getItem('alertMessage') || "Bem-vindos ao Instituto Figura Viva";
@@ -110,6 +109,14 @@ export function AppProvider({ children }) {
         setIsAuthenticated(false);
     };
 
+    const showToast = (message, type = 'success') => {
+        setToast({ message, type, isVisible: true });
+    };
+
+    const hideToast = () => {
+        setToast(prev => ({ ...prev, isVisible: false }));
+    };
+
     return (
         <AppContext.Provider value={{
             courses,
@@ -126,7 +133,10 @@ export function AppProvider({ children }) {
             isAuthenticated,
             login,
             logout,
-            refreshData: fetchData
+            refreshData: fetchData,
+            toast,
+            showToast,
+            hideToast
         }}>
             {children}
         </AppContext.Provider>

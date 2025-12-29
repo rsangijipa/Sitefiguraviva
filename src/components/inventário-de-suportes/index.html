@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inventário de Suportes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Lato', 'sans-serif'],
+              serif: ['Playfair Display', 'serif'],
+            },
+            colors: {
+              paper: '#F2F0E9', // Warm off-white background
+              ink: '#2F2F2F', // Soft charcoal text
+              terra: {
+                100: '#F4E3DD',
+                200: '#E2C2B5',
+                300: '#D0A08D',
+                400: '#C77D63', // Main Terracotta
+                500: '#A85D45',
+                600: '#8A4530',
+              },
+              moss: {
+                100: '#E8EDE9',
+                200: '#CEDAD0',
+                300: '#AFBFB3',
+                400: '#8DA092',
+                500: '#6B7F6F', // Main Sage/Green
+                600: '#4A5D4F',
+                800: '#2E3A32',
+              },
+              stone: {
+                100: '#F5F5F0',
+                200: '#EBEBE0',
+                300: '#DEDEC0',
+                400: '#C4C4A0', // Warm beige/stone
+                500: '#A0A080',
+              }
+            },
+            backgroundImage: {
+              'noise': "url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22 opacity=%220.05%22/%3E%3C/svg%3E')",
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      body {
+        background-color: #F2F0E9;
+        color: #2F2F2F;
+      }
+      .fade-in {
+        animation: fadeIn 0.8s ease-out;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      /* Organic shape utility */
+      .blob-shape {
+        border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+      }
+      .blob-shape-2 {
+        border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
