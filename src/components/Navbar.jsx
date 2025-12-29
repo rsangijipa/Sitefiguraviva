@@ -65,26 +65,31 @@ export default function Navbar() {
 
             {/* Mobile Menu Overlay */}
             {mobileOpen && (
-                <div className="absolute top-full left-0 w-full bg-surface shadow-xl border-t border-paper/10 p-6 flex flex-col gap-4 md:hidden animate-fade-in max-h-[80vh] overflow-y-auto">
+                <div className="absolute top-full left-0 w-full bg-surface shadow-xl border-t border-paper/10 p-4 flex flex-col gap-2 md:hidden animate-fade-in max-h-[85vh] overflow-y-auto">
                     {['Clínica', 'Fundadora', 'Instituto', 'Blog'].map((item) => (
                         <a
                             key={item}
                             href={`/#${item.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")}`}
                             onClick={() => setMobileOpen(false)}
-                            className="text-lg font-serif text-primary border-b border-gray-50 pb-2"
+                            className="block w-full text-left px-6 py-4 rounded-xl hover:bg-stone-50 active:scale-[0.98] active:bg-stone-100 transition-all text-lg font-serif text-primary"
                         >
                             {item === 'Instituto' ? 'Formações e Grupos' : item}
                         </a>
                     ))}
-                    <Link to="/portal" onClick={() => setMobileOpen(false)} className="text-lg font-serif text-accent flex items-center gap-2 pt-2">
+                    <Link
+                        to="/portal"
+                        onClick={() => setMobileOpen(false)}
+                        className="block w-full text-left px-6 py-4 rounded-xl hover:bg-stone-50 active:scale-[0.98] active:bg-stone-100 transition-all text-lg font-serif text-accent flex items-center gap-2"
+                    >
                         Portal do Aluno
                     </Link>
+                    <div className="h-px bg-gray-100 my-2 mx-4" />
                     <button
                         onClick={() => {
                             setMobileOpen(false);
                             navigate(isAuthenticated ? '/admin' : '/admin/login');
                         }}
-                        className="mt-4 bg-primary text-white w-full py-4 rounded-xl font-bold uppercase tracking-widest text-xs"
+                        className="bg-primary text-white w-full py-4 rounded-xl font-bold uppercase tracking-widest text-xs mx-auto shadow-lg active:scale-95 transition-transform"
                     >
                         {isAuthenticated ? 'Acessar Dashboard' : 'Área Administrativa'}
                     </button>

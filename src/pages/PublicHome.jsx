@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -17,13 +17,20 @@ import InstagramSection from '../components/home/InstagramSection';
 
 export default function PublicHome() {
     const { courses, alertMessage, blogPosts } = useApp();
-    const [selectedArticle, setSelectedArticle] = useState(null);
-    const [isReaderOpen, setIsReaderOpen] = useState(false);
-    const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    // Derive Modal State from URL
+    const isCalendarOpen = searchParams.get('modal') === 'calendar';
+    const isReaderOpen = searchParams.get('modal') === 'reader';
+    const articleId = searchParams.get('articleId');
+    const selectedArticle = articleId ? blogPosts.find(p => String(p.id) === String(articleId)) : null;
 
     const openReader = (article) => {
-        setSelectedArticle(article);
-        setIsReaderOpen(true);
+        setSearchParams({ modal: 'reader', articleId: article.id });
+    };
+
+    const closeModals = () => {
+        setSearchParams({});
     };
 
     return (
@@ -47,7 +54,7 @@ export default function PublicHome() {
 
             <InstituteSection
                 courses={courses}
-                onOpenCalendar={() => setIsCalendarOpen(true)}
+                onOpenCalendar={() => setSearchParams({ modal: 'calendar' })}
             />
 
             <BlogSection
@@ -62,12 +69,12 @@ export default function PublicHome() {
             <AmbientPlayer />
             <PDFReader
                 isOpen={isReaderOpen}
-                onClose={() => setIsReaderOpen(false)}
+                onClose={closeModals}
                 article={selectedArticle}
             />
             <CalendarModal
                 isOpen={isCalendarOpen}
-                onClose={() => setIsCalendarOpen(false)}
+                onClose={closeModals}
                 courses={courses} // Pass all courses so it can extract dates
             />
         </div>

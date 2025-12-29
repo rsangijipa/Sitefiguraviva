@@ -23,6 +23,11 @@ export default function HeroSection() {
     return (
         <header className="pt-32 pb-24 md:pt-48 md:pb-32 px-6 bg-paper relative overflow-hidden">
             <OrganicBackground />
+            <img
+                src="/assets/logo-hero.png"
+                alt=""
+                className="absolute right-0 top-1/2 -translate-y-1/2 h-[90%] w-auto object-contain opacity-20 blur-[2px] pointer-events-none mix-blend-multiply"
+            />
             <div className="absolute top-0 left-0 w-full h-full z-0 bg-gradient-to-b from-paper/20 via-paper/50 to-paper pointer-events-none" />
             <div className="container mx-auto max-w-6xl">
                 <motion.div
