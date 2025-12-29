@@ -17,6 +17,7 @@ const TreeVisualization = ({ emotions = [], onLeafClick, isModal = false }) => {
 
     const leafMeshesRef = useRef(new Map());
 
+    // Native leaves for tree fullness
     const createNativeLeafTexture = () => {
         const canvas = document.createElement('canvas');
         canvas.width = 64;
@@ -37,74 +38,61 @@ const TreeVisualization = ({ emotions = [], onLeafClick, isModal = false }) => {
         return new THREE.CanvasTexture(canvas);
     };
 
-    const createLeafTexture = (text, color) => {
+    // Message Leaf Texture (No text, just beautiful color shape)
+    const createLeafTexture = (color) => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         if (!ctx) return null;
 
-        const width = 512;
+        const width = 256;
         const height = 256;
         canvas.width = width;
         canvas.height = height;
-        const centerY = height / 2;
+        const cx = width / 2;
+        const cy = height / 2;
 
+        // Draw Leaf Shape
         ctx.beginPath();
-        ctx.moveTo(40, centerY);
-        ctx.bezierCurveTo(120, 10, 380, 10, 480, centerY);
-        ctx.bezierCurveTo(380, 246, 120, 246, 40, centerY);
+        ctx.moveTo(cx, 240); // Base
+        ctx.bezierCurveTo(20, 180, 20, 60, cx, 20); // Left curve
+        ctx.bezierCurveTo(236, 60, 236, 180, cx, 240); // Right curve
+
         ctx.fillStyle = color;
         ctx.fill();
 
-        ctx.globalCompositeOperation = 'source-atop';
-        const gradient = ctx.createLinearGradient(0, 0, 0, height);
-        gradient.addColorStop(0, 'rgba(255, 255, 255, 0.4)');
-        gradient.addColorStop(0.4, 'rgba(255, 255, 255, 0)');
-        gradient.addColorStop(1, 'rgba(0, 0, 0, 0.3)');
-        ctx.fillStyle = gradient;
+        // Gradient overlay for depth
+        const grad = ctx.createLinearGradient(0, 0, 0, 256);
+        grad.addColorStop(0, 'rgba(255,255,255,0.4)');
+        grad.addColorStop(1, 'rgba(0,0,0,0.2)');
+        ctx.fillStyle = grad;
         ctx.fill();
 
-        ctx.globalCompositeOperation = 'source-over';
-        ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
-        ctx.lineCap = 'round';
-        ctx.lineWidth = 5;
-        ctx.beginPath();
-        ctx.moveTo(40, centerY);
-        ctx.lineTo(470, centerY);
-        ctx.stroke();
-
-        ctx.lineWidth = 3;
-        const startX = 100;
-        const endX = 400;
-        const step = 60;
-        for (let x = startX; x < endX; x += step) {
-            ctx.beginPath();
-            ctx.moveTo(x, centerY);
-            ctx.quadraticCurveTo(x + 30, centerY - 40, x + 50, centerY - 80);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(x, centerY);
-            ctx.quadraticCurveTo(x + 30, centerY + 40, x + 50, centerY + 80);
-            ctx.stroke();
-        }
-
+        // Veins
+        ctx.strokeStyle = 'rgba(0,0,0,0.2)';
         ctx.lineWidth = 4;
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(cx, 240);
+        ctx.lineTo(cx, 40);
         ctx.stroke();
 
-        if (text) {
-            ctx.fillStyle = 'white';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.shadowColor = 'rgba(0,0,0,0.7)';
-            ctx.shadowBlur = 8;
-            ctx.shadowOffsetX = 2;
-            ctx.shadowOffsetY = 2;
-            let fontSize = 48;
-            if (text.length > 8) fontSize = 40;
-            if (text.length > 12) fontSize = 32;
-            ctx.font = `900 ${fontSize}px "Inter", sans-serif`;
-            ctx.fillText(text.toUpperCase(), 240, centerY);
+        // Side veins
+        for (let i = 1; i <= 4; i++) {
+            let y = 240 - i * 40;
+            ctx.beginPath();
+            ctx.moveTo(cx, y);
+            ctx.quadraticCurveTo(cx - 30, y - 20, cx - 60, y - 40);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(cx, y);
+            ctx.quadraticCurveTo(cx + 30, y - 20, cx + 60, y - 40);
+            ctx.stroke();
         }
+
+        // Highlight Stroke
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = 'rgba(255,255,255, 0.5)';
+        ctx.stroke();
 
         return new THREE.CanvasTexture(canvas);
     };
@@ -138,7 +126,7 @@ const TreeVisualization = ({ emotions = [], onLeafClick, isModal = false }) => {
             controls.maxPolarAngle = Math.PI / 2 - 0.05;
             controls.minDistance = 30;
             controls.maxDistance = 120;
-            controls.autoRotate = true; // Enable auto rotation
+            controls.autoRotate = true;
             controls.autoRotateSpeed = 1.0;
             controls.target.set(0, 20, 0);
             controlsRef.current = controls;
@@ -234,6 +222,7 @@ const TreeVisualization = ({ emotions = [], onLeafClick, isModal = false }) => {
 
             leafAnchorsRef.current = [];
             growBranch(new THREE.Vector3(0, 0, 0), 8, 1.2, 0, new THREE.Euler(0, 0, 0));
+            // Shuffle anchors
             leafAnchorsRef.current.sort(() => Math.random() - 0.5);
 
             const onMouseMove = (event) => {
@@ -251,6 +240,18 @@ const TreeVisualization = ({ emotions = [], onLeafClick, isModal = false }) => {
                     const object = intersects[0].object;
                     if (onLeafClick && object.userData) {
                         onLeafClick(object.userData);
+
+                        // "Jump" animation on click
+                        const startY = object.position.y;
+                        const jumpHeight = 5;
+                        let frame = 0;
+                        const jumpAnim = () => {
+                            frame++;
+                            object.position.y = startY + Math.sin(frame * 0.2) * jumpHeight;
+                            if (frame < 15) requestAnimationFrame(jumpAnim);
+                            else object.position.y = startY;
+                        }
+                        jumpAnim();
                     }
                 }
             };
@@ -267,6 +268,7 @@ const TreeVisualization = ({ emotions = [], onLeafClick, isModal = false }) => {
 
                 if (controlsRef.current) controlsRef.current.update();
 
+                // Animate native leaves
                 if (nativeLeavesGroupRef.current) {
                     nativeLeavesGroupRef.current.children.forEach((child, i) => {
                         child.position.x += Math.cos(time + i) * 0.002;
@@ -274,6 +276,7 @@ const TreeVisualization = ({ emotions = [], onLeafClick, isModal = false }) => {
                     });
                 }
 
+                // Interactive Leaves Animation
                 if (cameraRef.current && leavesGroupRef.current) {
                     raycaster.current.setFromCamera(mouse.current, cameraRef.current);
                     const intersects = raycaster.current.intersectObjects(leavesGroupRef.current.children);
@@ -283,7 +286,10 @@ const TreeVisualization = ({ emotions = [], onLeafClick, isModal = false }) => {
                         child.position.y += Math.sin(time * 1.5 + i) * 0.005;
 
                         const isHovered = child === hoveredObject;
-                        const targetScale = isHovered ? 7.0 : 5.0;
+                        // Increased scale by ~20% (Base 6.0/7.0 instead of 5.0)
+                        const targetScale = isHovered ? 8.0 : 6.0;
+
+                        // Lerp scale
                         child.scale.lerp(new THREE.Vector3(targetScale, targetScale / 2, 1), 0.1);
 
                         const targetRotation = isHovered ? 0.3 : 0;
@@ -316,11 +322,7 @@ const TreeVisualization = ({ emotions = [], onLeafClick, isModal = false }) => {
                 if (containerRef.current && renderer.domElement) {
                     containerRef.current.removeChild(renderer.domElement);
                 }
-
-                // Dispose controls
                 controls.dispose();
-
-                // Dispose scene resources
                 scene.traverse((object) => {
                     if (object.isMesh || object.isSprite) {
                         if (object.geometry) object.geometry.dispose();
@@ -337,13 +339,10 @@ const TreeVisualization = ({ emotions = [], onLeafClick, isModal = false }) => {
                         }
                     }
                 });
-
-                // Helper materials
                 Object.values(materials).forEach(mat => {
                     if (mat.map) mat.map.dispose();
                     mat.dispose();
                 });
-
                 renderer.dispose();
             };
         } catch (e) {
@@ -364,28 +363,24 @@ const TreeVisualization = ({ emotions = [], onLeafClick, isModal = false }) => {
             return;
         }
 
-        const currentIds = new Set(emotions.map(e => e.id));
-
-        leafMeshesRef.current.forEach((sprite, id) => {
-            if (!currentIds.has(id)) {
-                leavesGroupRef.current?.remove(sprite);
-                if (sprite.material.map) sprite.material.map.dispose();
-                sprite.material.dispose();
-                leafMeshesRef.current.delete(id);
-            }
+        // Just clear and rebuild for simplicity on "Reconstruct"
+        leafMeshesRef.current.forEach((sprite) => {
+            leavesGroupRef.current?.remove(sprite);
+            if (sprite.material.map) sprite.material.map.dispose();
+            sprite.material.dispose();
         });
+        leafMeshesRef.current.clear();
 
         emotions.forEach((emo, index) => {
-            if (leafMeshesRef.current.has(emo.id)) return;
-
             const totalAnchors = leafAnchorsRef.current.length;
             if (totalAnchors === 0) return;
 
-            const anchorIndex = (index * 2) % totalAnchors;
+            // Pick anchor
+            const anchorIndex = index % totalAnchors;
             const position = leafAnchorsRef.current[anchorIndex];
 
             if (position) {
-                const texture = createLeafTexture(emo.text, emo.color);
+                const texture = createLeafTexture(emo.color); // Pass color only
                 if (texture) {
                     const material = new THREE.SpriteMaterial({
                         map: texture,
@@ -396,19 +391,19 @@ const TreeVisualization = ({ emotions = [], onLeafClick, isModal = false }) => {
                     const sprite = new THREE.Sprite(material);
 
                     sprite.position.copy(position).add(new THREE.Vector3(
-                        (Math.random() - 0.5) * 2,
-                        (Math.random() - 0.5) * 2,
-                        (Math.random() - 0.5) * 2
+                        (Math.random() - 0.5) * 3,
+                        (Math.random() - 0.5) * 3,
+                        (Math.random() - 0.5) * 3
                     ));
 
                     sprite.scale.set(0, 0, 1);
-                    sprite.userData = { ...emo };
+                    sprite.userData = { ...emo }; // pass full emo object to click handler
 
                     leavesGroupRef.current?.add(sprite);
                     leafMeshesRef.current.set(emo.id, sprite);
 
                     let s = 0;
-                    const targetScale = 5.0;
+                    const targetScale = 6.0; // Larger leaves
                     const growInterval = setInterval(() => {
                         s += 0.25;
                         sprite.scale.set(s, s / 2, 1);
@@ -417,7 +412,7 @@ const TreeVisualization = ({ emotions = [], onLeafClick, isModal = false }) => {
                 }
             }
         });
-    }, [emotions]);
+    }, [emotions]); // Re-run when emotions change (e.g., Shuffle)
 
     return <div ref={containerRef} style={{ width: '100%', height: isModal ? '100vh' : '100%', minHeight: isModal ? 'auto' : '500px', pointerEvents: 'auto' }} />;
 };

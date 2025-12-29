@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Analytics } from "@vercel/analytics/react";
 import { AppProvider, useApp } from './context/AppContext';
 import PublicHome from './pages/PublicHome';
 import AdminDashboard from './pages/AdminDashboard';
@@ -51,6 +52,7 @@ function AppContent() {
         isVisible={toast.isVisible}
         onClose={hideToast}
       />
+      <Analytics />
     </>
   );
 }
