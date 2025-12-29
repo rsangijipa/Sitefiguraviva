@@ -1,219 +1,141 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, ArrowUpRight, Calendar } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 
-export default function InstituteSection({ courses, onOpenCalendar }) {
-    const navigate = useNavigate();
+const fadeInUp = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.6, ease: "easeOut" }
+    }
+};
 
-    const formacoes = courses.filter(c => c.category === 'Formacao');
-    const grupos = courses.filter(c => c.category === 'GrupoEstudos');
-    const cursos = courses.filter(c => c.category === 'Curso');
-
-    const getCoverImage = (course) => {
-        if (course.images && course.images.length > 0) return course.images[0];
-        return course.image || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=1000';
-    };
+export default function InstituteSection({ courses = [], onOpenCalendar }) {
+    // 3 latest courses
+    const displayCourses = courses.slice(0, 3);
 
     return (
-        <section id="instituto" className="py-16 md:py-24 bg-paper border-t border-stone-100">
-            <div className="container mx-auto px-6 max-w-6xl">
-
-                {/* Institute Header */}
-                <div className="grid lg:grid-cols-2 gap-16 items-center mb-24">
-                    <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.8 }}
-                    >
-                        <span className="text-xs font-bold tracking-[0.2em] uppercase text-gold mb-4 block">Nossa Essência</span>
-                        <h2 className="text-4xl md:text-5xl font-serif text-primary mb-8 leading-tight">Um Solo Fértil para o <span className="italic text-gold font-light">Devir</span></h2>
-                        <p className="text-lg text-text/80 mb-6 leading-relaxed">
-                            O Instituto Figura Viva nasceu do desejo de criar um espaço onde a clínica e o ensino caminham juntos. Somos uma comunidade dedicada ao estudo e à prática da Gestalt-Terapia, fundamentada na ética do cuidado e na estética do encontro.
-                        </p>
-                        <div className="grid grid-cols-2 gap-8 py-8 border-y border-gray-100">
-                            <div>
-                                <h5 className="font-serif text-3xl text-primary mb-1">10+</h5>
-                                <p className="text-xs font-bold tracking-widest uppercase text-text/50">Anos de Prática</p>
-                            </div>
-                            <div>
-                                <h5 className="font-serif text-3xl text-primary mb-1">500+</h5>
-                                <p className="text-xs font-bold tracking-widest uppercase text-text/50">Alunos Formados</p>
-                            </div>
-                        </div>
-                    </motion.div>
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.8 }}
-                        className="relative"
-                    >
-                        <img
-                            src="/assets/foto-grupo.jpg"
-                            alt="Ambiente do Instituto"
-                            className="w-full aspect-square object-cover rounded-full border-[12px] border-white shadow-2xl"
-                            loading="lazy"
-                            width="800"
-                            height="800"
-                        />
-                        <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gold/5 rounded-full blur-3xl" />
-                    </motion.div>
-                </div>
-
-                {/* UNIFIED LIST OF ACTIVITIES */}
-                <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
-                    <div className="max-w-xl">
-                        <span className="text-xs font-bold tracking-[0.2em] uppercase text-gold mb-4 block">Instituto de Ensino</span>
-                        <h2 className="text-4xl md:text-5xl font-serif text-primary leading-tight">Grupos e <span className="italic text-gold font-light">Formações</span></h2>
-                        <p className="text-lg text-text/80 mt-4 max-w-2xl">
-                            Confira nossa agenda completa de atividades presenciais e online.
+        <section id="instituto" className="py-20 md:py-32 px-6 bg-[#EFECE5]">
+            <div className="container mx-auto max-w-6xl">
+                <motion.div
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true, margin: "-100px" }}
+                    variants={fadeInUp}
+                    className="mb-16 md:flex justify-between items-end"
+                >
+                    <div className="max-w-2xl">
+                        <span className="text-xs font-bold tracking-[0.2em] uppercase text-primary/60 mb-4 block">Formação & Estudos</span>
+                        <h2 className="text-4xl md:text-5xl font-serif text-primary leading-tight mb-6">
+                            Ciclos de <span className="italic text-gold font-light">Aprendizagem</span>
+                        </h2>
+                        <p className="text-lg text-primary/70 leading-relaxed font-light text-balance">
+                            Nossos percursos formativos são convites para habitar a Gestalt-terapia com rigor ético, densidade teórica e sensibilidade clínica.
                         </p>
                     </div>
+                    <div className="hidden md:block">
+                        <button
+                            onClick={onOpenCalendar}
+                            className="text-xs font-bold uppercase tracking-widest text-primary border-b border-primary/20 pb-1 hover:text-gold hover:border-gold transition-colors"
+                        >
+                            Ver Calendário Completo
+                        </button>
+                    </div>
+                </motion.div>
+
+                <div className="grid md:grid-cols-3 gap-8">
+                    {displayCourses.map((course, index) => {
+                        const isClosed = course.status === 'Encerrado' || course.status === 'Esgotado';
+
+                        return (
+                            <motion.article
+                                key={course.id || index}
+                                initial="hidden"
+                                whileInView="visible"
+                                viewport={{ once: true }}
+                                variants={{
+                                    hidden: { opacity: 0, y: 20 },
+                                    visible: {
+                                        opacity: 1,
+                                        y: 0,
+                                        transition: { delay: index * 0.1, duration: 0.6 }
+                                    }
+                                }}
+                                className="group flex flex-col h-full bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow duration-300"
+                            >
+                                <div className="aspect-[4/3] overflow-hidden rounded-xl mb-6 relative">
+                                    {/* Link image also to details */}
+                                    <Link to={`/curso/${course.id}`} className="block w-full h-full">
+                                        <img
+                                            src={course.image || course.images?.[0] || 'https://via.placeholder.com/400x300'}
+                                            alt={course.title}
+                                            className={`w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 ${isClosed ? 'grayscale opacity-70' : ''}`}
+                                        />
+                                    </Link>
+                                    <div className="absolute top-3 left-3 flex flex-wrap gap-2 pointer-events-none">
+                                        {course.category && (
+                                            <span className="bg-white/95 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider text-primary shadow-sm border border-gray-100">
+                                                {course.category === 'Formacao' ? 'Formação' : course.category === 'GrupoEstudos' ? 'Grupo de Estudos' : 'Curso Livre'}
+                                            </span>
+                                        )}
+                                        {isClosed && (
+                                            <span className="bg-red-500/90 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider text-white shadow-sm">
+                                                {course.status}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="flex-1 flex flex-col px-2">
+                                    <div className="mb-4">
+                                        <Link to={`/curso/${course.id}`} className="block">
+                                            <h3 className="text-xl font-bold text-primary mb-2 leading-tight group-hover:text-gold transition-colors">
+                                                {course.title}
+                                            </h3>
+                                        </Link>
+                                        {course.subtitle && (
+                                            <p className="text-sm text-primary/60 italic mb-2">
+                                                {course.subtitle}
+                                            </p>
+                                        )}
+                                        <p className="text-xs font-medium uppercase tracking-wider text-sage">
+                                            {course.date}
+                                        </p>
+                                    </div>
+
+                                    <p className="text-primary/70 text-sm leading-relaxed mb-6 line-clamp-3">
+                                        {course.description || course.details?.intro}
+                                    </p>
+
+                                    <div className="mt-auto pt-4 border-t border-gray-100">
+                                        {isClosed ? (
+                                            <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400 cursor-not-allowed py-2">
+                                                Inscrições Encerradas
+                                            </span>
+                                        ) : (
+                                            <Link
+                                                to={`/curso/${course.id}`}
+                                                className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary group-hover:gap-4 transition-all py-3 px-2 -ml-2 rounded-lg hover:bg-gray-50 bg-transparent active:scale-95 touch-manipulation"
+                                            >
+                                                Saiba Mais <span className="text-gold">→</span>
+                                            </Link>
+                                        )}
+                                    </div>
+                                </div>
+                            </motion.article>
+                        );
+                    })}
+                </div>
+
+                <div className="mt-12 text-center md:hidden">
                     <button
                         onClick={onOpenCalendar}
-                        className="hidden md:flex items-center gap-2 text-xs font-bold tracking-[0.2em] uppercase text-text hover:text-primary transition-colors"
+                        className="text-xs font-bold uppercase tracking-widest text-primary border-b border-primary/20 pb-1 hover:text-gold hover:border-gold transition-colors"
                     >
-                        Ver Calendário Completo <ArrowRight size={14} />
+                        Ver Calendário Completo
                     </button>
                 </div>
-
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {/* Render Formations first */}
-                    {formacoes.map((course, index) => (
-                        <motion.div
-                            key={`fmt-${course.id}`}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: index * 0.1 }}
-                            className="bg-white rounded-2xl overflow-hidden border border-purple-100/50 shadow-sm hover:shadow-xl transition-all duration-300 group h-full flex flex-col"
-                        >
-                            <div className="h-56 overflow-hidden relative shrink-0">
-                                <div className="absolute top-0 left-0 w-full h-full bg-purple-900/10 z-10 group-hover:bg-transparent transition-colors duration-500" />
-                                <span className={`absolute top-4 left-4 z-20 px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded bg-white/90 shadow-sm ${course.status === 'Aberto' ? 'text-green-700' : 'text-red-700'}`}>
-                                    {course.status}
-                                </span>
-                                <img
-                                    src={getCoverImage(course)}
-                                    alt={course.title}
-                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                                    loading="lazy"
-                                />
-                                <div className="absolute bottom-4 right-4 bg-white/90 px-3 py-1 rounded text-[10px] font-bold uppercase tracking-wider text-purple-900 z-20">
-                                    Formação
-                                </div>
-                            </div>
-                            <div className="p-8 flex flex-col flex-grow">
-                                <div className="mb-auto">
-                                    <div className="flex items-center gap-2 text-purple-600 text-xs font-bold uppercase tracking-widest mb-4">
-                                        <Calendar size={14} /> {course.date}
-                                    </div>
-                                    <h3 className="font-serif text-2xl text-primary leading-tight mb-4">{course.title}</h3>
-                                    <p className="text-sm text-text/60 line-clamp-3">{course.description}</p>
-                                </div>
-                                <button onClick={() => navigate(`/curso/${course.id}`)} className="w-full mt-6 py-4 border border-purple-100 rounded-xl text-xs font-bold uppercase tracking-widest text-purple-900 hover:bg-purple-600 hover:text-white transition-all flex items-center justify-center gap-2">
-                                    Ver Programa <ArrowUpRight size={14} />
-                                </button>
-                            </div>
-                        </motion.div>
-                    ))}
-
-                    {/* Render Groups next */}
-                    {grupos.map((course, index) => (
-                        <motion.div
-                            key={`grp-${course.id}`}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: index * 0.1 }}
-                            className="bg-white rounded-2xl overflow-hidden border border-blue-100/50 shadow-sm hover:shadow-xl transition-all duration-300 group h-full flex flex-col"
-                        >
-                            <div className="h-56 overflow-hidden relative shrink-0">
-                                <div className="absolute top-0 left-0 w-full h-full bg-blue-900/5 z-10 group-hover:bg-transparent transition-colors duration-500" />
-                                <span className={`absolute top-4 left-4 z-20 px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded bg-white/90 shadow-sm ${course.status === 'Aberto' ? 'text-green-700' : 'text-red-700'}`}>
-                                    {course.status}
-                                </span>
-                                <img
-                                    src={getCoverImage(course)}
-                                    alt={course.title}
-                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                                    loading="lazy"
-                                />
-                                <div className="absolute bottom-4 right-4 bg-white/90 px-3 py-1 rounded text-[10px] font-bold uppercase tracking-wider text-blue-900 z-20">
-                                    Grupo de Estudos
-                                </div>
-                            </div>
-                            <div className="p-8 flex flex-col flex-grow">
-                                <div className="mb-auto">
-                                    <div className="flex items-center gap-2 text-blue-600 text-xs font-bold uppercase tracking-widest mb-4">
-                                        <Calendar size={14} /> {course.date}
-                                    </div>
-                                    <h3 className="font-serif text-2xl text-primary leading-tight mb-4">{course.title}</h3>
-                                    <p className="text-sm text-text/60 line-clamp-3">{course.description}</p>
-                                </div>
-                                <button onClick={() => navigate(`/curso/${course.id}`)} className="w-full mt-6 py-4 border border-blue-100 rounded-xl text-xs font-bold uppercase tracking-widest text-blue-900 hover:bg-blue-600 hover:text-white transition-all flex items-center justify-center gap-2">
-                                    Saiba Mais <ArrowRight size={14} />
-                                </button>
-                            </div>
-                        </motion.div>
-                    ))}
-
-                    {/* Render Other Courses */}
-                    {cursos.map((course, index) => (
-                        <motion.div
-                            key={`crs-${course.id}`}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: index * 0.1 }}
-                            className="bg-white rounded-2xl overflow-hidden border border-gray-100 card-hover group h-full flex flex-col"
-                        >
-                            <div className="h-56 overflow-hidden relative shrink-0">
-                                <span className={`absolute top-4 left-4 z-10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded bg-white/90 shadow-sm ${course.status === 'Aberto' ? 'text-green-700' : 'text-red-700'
-                                    }`}>
-                                    {course.status}
-                                </span>
-                                <img
-                                    src={getCoverImage(course)}
-                                    alt={course.title}
-                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                                    loading="lazy"
-                                />
-                                <div className="absolute bottom-4 right-4 bg-white/90 px-3 py-1 rounded text-[10px] font-bold uppercase tracking-wider text-gray-500 z-20">
-                                    Curso Livre
-                                </div>
-                            </div>
-                            <div className="p-8 flex flex-col flex-grow">
-                                <div className="mb-auto">
-                                    <div className="flex items-center gap-2 text-accent text-xs font-bold uppercase tracking-widest mb-4">
-                                        <Calendar size={14} />
-                                        {course.date}
-                                    </div>
-                                    <h3 className="font-serif text-2xl text-primary leading-tight mb-4 group-hover:text-gold transition-colors">
-                                        {course.title}
-                                    </h3>
-                                </div>
-
-                                <button
-                                    onClick={() => navigate(`/curso/${course.id}`)}
-                                    className="w-full mt-6 py-4 border border-gray-200 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-primary hover:text-white hover:border-primary transition-all flex items-center justify-center gap-2"
-                                >
-                                    Ver Detalhes <ArrowUpRight size={14} />
-                                </button>
-                            </div>
-                        </motion.div>
-                    ))}
-
-                    {/* Empty State */}
-                    {[...formacoes, ...grupos, ...cursos].length === 0 && (
-                        <div className="col-span-3 text-center py-16 text-gray-400 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
-                            <p className="mb-4 font-serif text-xl text-gray-400">Nenhuma atividade agendada no momento.</p>
-                            <p className="text-xs font-bold uppercase tracking-widest">Acompanhe nossas redes para novidades.</p>
-                        </div>
-                    )}
-                </div>
-
             </div>
         </section>
     );

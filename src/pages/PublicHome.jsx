@@ -7,6 +7,7 @@ import PDFReader from '../components/PDFReader';
 import CalendarModal from '../components/CalendarModal';
 import GalleryModal from '../components/GalleryModal';
 import WhatsAppButton from '../components/WhatsAppButton';
+import ScrollToTopButton from '../components/ScrollToTopButton';
 import ResourcesSection from '../components/ResourcesSection';
 import { Image as ImageIcon, ArrowRight } from 'lucide-react';
 
@@ -66,8 +67,19 @@ export default function PublicHome() {
             />
 
             {/* GALLERY TRIGGER SECTION */}
-            <section className="py-20 bg-stone-100 border-t border-stone-200">
-                <div className="container mx-auto px-6 max-w-6xl text-center">
+            <section className="py-20 relative overflow-hidden bg-stone-100 border-t border-stone-200">
+
+                {/* Background with Blur - User Request */}
+                <div className="absolute inset-0 z-0">
+                    <img
+                        src="/assets/fundo-galeria.png"
+                        alt=""
+                        className="w-full h-full object-cover blur-[8px] opacity-40 scale-105" // scale-105 prevents white edges from blur
+                    />
+                    <div className="absolute inset-0 bg-stone-100/60 mix-blend-overlay" />
+                </div>
+
+                <div className="container mx-auto px-6 max-w-6xl text-center relative z-10">
                     <span className="text-xs font-bold tracking-[0.2em] uppercase text-gold mb-4 block">Memória Viva</span>
                     <h2 className="text-4xl md:text-5xl font-serif text-primary leading-tight mb-8">Galeria <span className="italic text-gold font-light">Visual</span></h2>
 
@@ -91,6 +103,7 @@ export default function PublicHome() {
 
             <Footer />
             <WhatsAppButton />
+            <ScrollToTopButton />
             <AmbientPlayer />
 
             <PDFReader

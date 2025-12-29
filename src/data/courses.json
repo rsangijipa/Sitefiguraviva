@@ -100,11 +100,11 @@
     "category": "GrupoEstudos",
     "status": "Aberto",
     "date": "Encontros Quinzenais | On-line (Zoom)",
-    "description": "",
+    "description": "Um espaço de co-visão para alinhar a sensibilidade e verificar a qualidade da relação terapêutica a partir da intercorporeidade.",
     "link": "https://wa.me/5569992481585",
     "images": [
-      "/cursos/Supervisão Clínica CO-VISAR/capa.jpeg",
-      "/cursos/Supervisão Clínica CO-VISAR/mediador1.jpeg"
+      "/cursos/superviso-clnica-co-visar/capa.jpeg",
+      "/cursos/superviso-clnica-co-visar/mediador1.jpeg"
     ],
     "tags": [
       "Online",
@@ -113,18 +113,25 @@
     ],
     "mediators": [
       {
-        "name": "Lílian Gusmão",
-        "bio": "",
-        "image": "/cursos/Supervisão Clínica CO-VISAR/mediador1.jpeg"
+        "name": "Lílian Vanessa Nicácio Gusmão",
+        "bio": "Lílian Vanessa Nicácio Gusmão. Mulher, mineira, migrante, mãe atípica e feminista. Atuo como psicóloga, Gestalt-terapeuta, idealizadora, sócia fundadora e curadora do Instituto de Gestalt-terapia de Rondônia - Figura Viva com ênfase em estudos, vivências a partir de temas feministas, antirracistas, anticapacitistas e decoloniais, que des-cobrem e in-ventam uma presença sensível no campo/organismo/ambiente. Formação e Pós-formacao em Gestalt-terapia, Trauma, Psicoterapia corporal, Neurodiversidades, escreve com interesse em temas como o lugar da mulher na Gestalt-terapia a partir de Laura Perls, opressões de gênero, violências, solidariedade política entre mulheres brancas e multiétnicas. Mestra em Ciências Ambientais pela UNITAU, e graduada em psicologia pela UFMG, docente e a primeira mulher da família a possuir uma graduação. Atua como psicoterapeuta clínica, atenta a estética e ética dos encontros, a comunicação começa com os corpos das pessoas, uma clínica situada nas dimensões culturais, estruturais, institucionais e constitucionais e violências normatizadas. Facilitadora de grupos, supervisora clínica e professora na graduação de psicologia por dez anos, e em Formações e Grupos de estudos e experimentações em GT. Sustento diante das opressões, como ato ético e íntimo de sustentar suportes para des-viar, des-centrar e encontrar novas possibilidades e horizontes nas relações, esperançar corpas-mundo vivas!",
+        "image": "/cursos/superviso-clnica-co-visar/mediador1.jpeg"
       }
     ],
     "details": {
-      "intro": "",
-      "format": [],
-      "schedule": []
+      "intro": "Um espaço de co-visão para alinhar a sensibilidade e verificar a qualidade da relação terapêutica a partir da intercorporeidade. A clínica contextualizada reconhece as dimensões culturais e estruturais, oferecendo suporte para sustentar travessias. Inclui emissão de NF e suporte emergencial.",
+      "format": [
+        "Encontros on-line e síncronos pelo Zoom;",
+        "Emissão de Nota fiscal para pagamentos das co-visões;",
+        "Suporte pelo WhatsApp em situações de emergência;",
+        "Calendário dos encontros e materiais disponibilizados pelo grupo no WhatsApp"
+      ],
+      "schedule": [
+        "Encontros a cada 15 dias."
+      ]
     },
     "subtitle": "Grupo e Individual",
-    "image": "/cursos/Supervisão Clínica CO-VISAR/capa.jpeg",
-    "id": "Supervisão Clínica CO-VISAR"
+    "image": "/cursos/superviso-clnica-co-visar/capa.jpeg",
+    "id": "superviso-clnica-co-visar"
   }
 ]
