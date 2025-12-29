@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, Edit, Save, X } from 'lucide-react';
+import { Plus, Trash2, Edit, Save, X, RefreshCw } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { uploadFiles } from '../../services/uploadService';
 import { auth } from '../../services/firebase';
@@ -13,6 +13,7 @@ export default function AcademicManager() {
     const [isEditing, setIsEditing] = useState(false);
     const [currentCourse, setCurrentCourse] = useState(null);
     const [uploading, setUploading] = useState(false);
+    const [syncing, setSyncing] = useState(false);
 
     // New state for file handling
     const [selectedFiles, setSelectedFiles] = useState([]);
@@ -73,92 +74,46 @@ export default function AcademicManager() {
         checkConnection();
     }, []);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        console.log(">>> [1/5] Iniciando submissão...");
-        setUploading(true);
-
-        // Safety Timeout extended to 30s
-        const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error("Timeout (30s): Servidor não respondeu. Verifique Firewall/Internet.")), 30000)
-        );
+    const handleDelete = async (course) => {
+        if (!window.confirm(`Tem certeza que deseja excluir "${course.title}"? Isso removerá a pasta do servidor local (se existir).`)) return;
 
         try {
-            const submissionPromise = (async () => {
-                const user = auth.currentUser;
-                if (!user) throw new Error("Usuário não autenticado. Faça login novamente.");
-                console.log(">>> [2/5] Auth OK:", user.email);
+            // Attempt to delete local folder
+            console.log("Deleting local folder if exists...", course.id);
+            await fetch('/api/delete-course', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: course.id })
+            });
 
-                if (formData.link && !formData.link.startsWith('http')) {
-                    throw new Error("O link deve ser uma URL válida (http/https)");
-                }
-
-                // 1. Upload new files if any
-                let uploadedUrls = [];
-                if (selectedFiles.length > 0) {
-                    console.log(">>> [3/5] Iniciando upload de imagens (Storage)...");
-                    uploadedUrls = await uploadFiles(selectedFiles, 'courses');
-                    console.log(">>> [3/5] Upload concluído! URLs:", uploadedUrls);
-                } else {
-                    console.log(">>> [3/5] Nenhuma imagem nova para enviar. Pulando Storage.");
-                }
-
-                // 2. Combine existing images with new uploaded URLs
-                const finalImages = [...(formData.images || []), ...uploadedUrls];
-
-                // Fallback for backward compatibility
-                const mainImage = finalImages.length > 0 ? finalImages[0] : 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=1000';
-
-                const dataToSave = {
-                    ...formData,
-                    images: finalImages,
-                    image: mainImage,
-                    updatedAt: new Date().toISOString(),
-                    updatedBy: user.email // Audit trail
-                };
-
-                console.log(">>> [4/5] Tentando salvar no Firestore (Banco de Dados)...", dataToSave);
-
-                if (currentCourse) {
-                    await updateCourse(currentCourse.id, dataToSave);
-                } else {
-                    await addCourse(dataToSave);
-                }
-
-                console.log(">>> [5/5] Firestore respondeu Sucesso!");
-                return true;
-            })();
-
-            // Race between submission and timeout
-            await Promise.race([submissionPromise, timeoutPromise]);
-
-            console.log("Salvo com sucesso!");
-            setIsEditing(false);
-            setFormData(initialForm);
-            setSelectedFiles([]);
-            setPreviewUrls([]);
-            setCurrentCourse(null);
-            showToast("Salvo com sucesso!", "success");
-
+            // Delete from State/Firebase
+            await deleteCourse(course.id);
+            showToast("Curso removido com sucesso.", "success");
         } catch (error) {
-            console.error("Erro no processo de salvamento:", error);
-            if (error.message.includes("permission-denied") || error.message.includes("Missing or insufficient permissions")) {
-                showToast("Sessão expirada. Faça login novamente.", "error");
+            console.error("Delete error:", error);
+            showToast("Erro ao excluir: " + error.message, "error");
+        }
+    };
+
+    const handleSync = async () => {
+        setSyncing(true);
+        try {
+            const res = await fetch('/api/sync-courses');
+            if (res.ok) {
+                showToast("Sincronização concluída! Recarregando...", "success");
+                setTimeout(() => window.location.reload(), 1500);
             } else {
-                showToast(`Erro ao salvar: ${error.message}`, "error");
+                throw new Error("Falha na sincronização");
             }
+        } catch (error) {
+            showToast("Erro ao sincronizar.", "error");
         } finally {
-            setUploading(false);
-            console.log(">>> FIM DO PROCESSO (loading: false)");
+            setSyncing(false);
         }
     };
 
     const startEdit = (course) => {
         setCurrentCourse(course);
-        const existingImages = course.images || (course.image ? [course.image] : []);
-        setFormData({ ...initialForm, ...course, images: existingImages });
-        setSelectedFiles([]);
-        setPreviewUrls([]);
         setIsEditing(true);
     };
 
@@ -171,18 +126,28 @@ export default function AcademicManager() {
     };
 
     return (
-        <div className="space-y-8 animate-fade-in">
-            <div className="flex justify-between items-center">
+        <div className="space-y-8 animate-fade-in pb-20">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h2 className="text-3xl font-serif text-primary">Gestão Acadêmica</h2>
                     <p className="text-sage text-sm">Gerencie Cursos, Formações e Grupos de Estudos.</p>
                 </div>
-                <button
-                    onClick={() => { setIsEditing(true); setCurrentCourse(null); }}
-                    className="bg-accent text-white px-6 py-3 rounded-lg flex items-center gap-2 text-sm font-bold uppercase tracking-wide hover:bg-accent/90 shadow-lg transform hover:-translate-y-1 transition-all"
-                >
-                    <Plus size={16} /> Novo Item
-                </button>
+                <div className="flex gap-3">
+                    <button
+                        onClick={handleSync}
+                        disabled={syncing}
+                        className="bg-white border border-gray-200 text-gray-600 px-4 py-3 rounded-lg flex items-center gap-2 text-xs font-bold uppercase tracking-wide hover:bg-gray-50 transition-all"
+                    >
+                        <RefreshCw size={16} className={syncing ? "animate-spin" : ""} />
+                        {syncing ? "Sincronizando..." : "Sincronizar"}
+                    </button>
+                    <button
+                        onClick={() => { setIsEditing(true); setCurrentCourse(null); }}
+                        className="bg-accent text-white px-6 py-3 rounded-lg flex items-center gap-2 text-sm font-bold uppercase tracking-wide hover:bg-accent/90 shadow-lg transform hover:-translate-y-1 transition-all"
+                    >
+                        <Plus size={16} /> Novo Item
+                    </button>
+                </div>
             </div>
 
             <CourseModal
@@ -193,8 +158,6 @@ export default function AcademicManager() {
 
             <div className="grid gap-4">
                 {courses && courses.map((course, idx) => {
-                    const isStatic = isNaN(course.id) && !course.id?.toString().includes('firebase'); // Heuristic for static vs dynamic if IDs are strings like 'experiencia-atemporal'
-
                     return (
                         <div key={course.id || idx} className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-center group hover:shadow-lg transition-all duration-300">
                             <div className="flex items-center gap-6 w-full md:w-auto mb-4 md:mb-0">
@@ -205,8 +168,6 @@ export default function AcademicManager() {
                                 <div>
                                     <div className="flex items-center gap-2 mb-1">
                                         {getCategoryBadge(course.category || 'Curso')}
-                                        {/* Identify source for transparency */}
-                                        {/* <span className="text-[9px] uppercase tracking-widest text-gray-300 border px-1 rounded">{typeof course.id === 'string' && course.id.length > 10 ? 'DB' : 'Static'}</span> */}
                                     </div>
                                     <h4 className="font-bold text-primary text-lg">{course.title}</h4>
                                     <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">{course.date}</p>
@@ -214,16 +175,21 @@ export default function AcademicManager() {
                             </div>
 
                             <div className="flex gap-2 w-full md:w-auto justify-end">
-                                <button onClick={() => { setCurrentCourse(course); setIsEditing(true); }} className="p-2 text-primary hover:bg-primary/5 rounded-lg transition-colors" title="Editar Completo">
+                                <button onClick={() => startEdit(course)} className="p-2 text-primary hover:bg-primary/5 rounded-lg transition-colors" title="Editar Completo">
                                     <Edit size={18} />
                                 </button>
-                                <button onClick={() => deleteCourse(course.id)} className="p-2 text-red-400 hover:bg-red-50 rounded-lg transition-colors" title="Excluir">
+                                <button onClick={() => handleDelete(course)} className="p-2 text-red-400 hover:bg-red-50 rounded-lg transition-colors" title="Excluir">
                                     <Trash2 size={18} />
                                 </button>
                             </div>
                         </div>
                     );
                 })}
+                {courses.length === 0 && (
+                    <div className="p-12 text-center text-gray-400 border-2 border-dashed border-gray-200 rounded-xl">
+                        Nenhum curso encontrado. Adicione um novo ou clique em Sincronizar.
+                    </div>
+                )}
             </div>
         </div>
     );

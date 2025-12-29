@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Wind, Sprout, X } from 'lucide-react';
+import { Wind, Sprout, X, Sparkles } from 'lucide-react';
 import BreathingApp from './resources/BreathingApp';
-import FeelingsTree from './FeelingsTree'; // Assuming this will be adapted for modal use
+import FeelingsTree from './FeelingsTree';
+import MentalHealthQuiz from './resources/MentalHealthQuiz';
 import { useApp } from '../context/AppContext';
 
 export default function ResourcesSection() {
-    const [activeResource, setActiveResource] = useState(null); // 'breathing' | 'tree' | null
+    const [activeResource, setActiveResource] = useState(null); // 'breathing' | 'tree' | 'quiz' | null
 
     const openResource = (resource) => {
         setActiveResource(resource);
@@ -29,51 +30,59 @@ export default function ResourcesSection() {
                     </p>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
                     {/* Breathing App Card */}
                     <motion.div
                         whileHover={{ y: -5 }}
-                        className="group relative bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden"
+                        className="group relative bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col items-center text-center"
                         onClick={() => openResource('breathing')}
                     >
-                        <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <Wind size={120} className="text-accent" />
+                        <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center text-accent mb-6 group-hover:scale-110 transition-transform">
+                            <Wind size={32} />
                         </div>
-                        <div className="relative z-10">
-                            <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center text-accent mb-6 group-hover:scale-110 transition-transform">
-                                <Wind size={32} />
-                            </div>
-                            <h3 className="text-2xl font-serif text-primary font-bold mb-2">Guia de Respiração</h3>
-                            <p className="text-text/60 mb-8">
-                                Uma pausa guiada para reduzir a ansiedade e reconectar com o agora.
-                            </p>
-                            <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-accent group-hover:text-primary transition-colors">
-                                Iniciar Prática
-                            </span>
-                        </div>
+                        <h3 className="text-xl font-serif text-primary font-bold mb-2">Guia de Respiração</h3>
+                        <p className="text-text/60 text-sm mb-6 flex-grow">
+                            Uma pausa guiada para reduzir a ansiedade e reconectar com o agora.
+                        </p>
+                        <span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-accent group-hover:text-primary transition-colors">
+                            Iniciar Prática
+                        </span>
                     </motion.div>
 
                     {/* Feelings Tree Card */}
                     <motion.div
                         whileHover={{ y: -5 }}
-                        className="group relative bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden"
+                        className="group relative bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col items-center text-center"
                         onClick={() => openResource('tree')}
                     >
-                        <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <Sprout size={120} className="text-gold" />
+                        <div className="w-16 h-16 rounded-2xl bg-gold/10 flex items-center justify-center text-gold mb-6 group-hover:scale-110 transition-transform">
+                            <Sprout size={32} />
                         </div>
-                        <div className="relative z-10">
-                            <div className="w-16 h-16 rounded-2xl bg-gold/10 flex items-center justify-center text-gold mb-6 group-hover:scale-110 transition-transform">
-                                <Sprout size={32} />
-                            </div>
-                            <h3 className="text-2xl font-serif text-primary font-bold mb-2">Árvore da Awareness</h3>
-                            <p className="text-text/60 mb-8">
-                                Visualize e nomeie suas emoções em uma experiência interativa 3D.
-                            </p>
-                            <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gold group-hover:text-primary transition-colors">
-                                Acessar Árvore
-                            </span>
+                        <h3 className="text-xl font-serif text-primary font-bold mb-2">Árvore da Awareness</h3>
+                        <p className="text-text/60 text-sm mb-6 flex-grow">
+                            Visualize e nomeie suas emoções em uma experiência interativa 3D.
+                        </p>
+                        <span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-gold group-hover:text-primary transition-colors">
+                            Acessar Árvore
+                        </span>
+                    </motion.div>
+
+                    {/* Mental Health Quiz Card */}
+                    <motion.div
+                        whileHover={{ y: -5 }}
+                        className="group relative bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col items-center text-center"
+                        onClick={() => openResource('quiz')}
+                    >
+                        <div className="w-16 h-16 rounded-2xl bg-sage/10 flex items-center justify-center text-sage mb-6 group-hover:scale-110 transition-transform">
+                            <Sparkles size={32} />
                         </div>
+                        <h3 className="text-xl font-serif text-primary font-bold mb-2">Quiz de Saúde Mental</h3>
+                        <p className="text-text/60 text-sm mb-6 flex-grow">
+                            Mindful Roots: Um check-in rápido de 14 dias para sua saúde emocional.
+                        </p>
+                        <span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-sage group-hover:text-primary transition-colors">
+                            Fazer Check-in
+                        </span>
                     </motion.div>
                 </div>
             </div>
@@ -103,6 +112,10 @@ export default function ResourcesSection() {
                                     <FeelingsTree isModal={true} />
                                 </div>
                             </div>
+                        )}
+
+                        {activeResource === 'quiz' && (
+                            <MentalHealthQuiz onClose={closeResource} />
                         )}
                     </motion.div>
                 )}

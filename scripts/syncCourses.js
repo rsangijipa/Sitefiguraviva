@@ -5,175 +5,152 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const PROJECT_ROOT = path.resolve(__dirname, '..');
-const CURSOS_DIR = path.join(PROJECT_ROOT, 'public', 'cursos');
-const OUTPUT_FILE = path.join(PROJECT_ROOT, 'src', 'data', 'generatedCourses.json');
+const COURSES_DIR = path.join(__dirname, '../public/cursos');
+const OUTPUT_FILE = path.join(__dirname, '../src/data/courses.json');
 
-console.log(`Scanning directory: ${CURSOS_DIR}`);
+// Ensure directory exists
+if (!fs.existsSync(COURSES_DIR)) {
+    console.log('Creating cursos directory...');
+    fs.mkdirSync(COURSES_DIR, { recursive: true });
+}
 
-// Helper to parse the txt file
-function parseInstructions(content) {
+function parseCourseTxt(filePath) {
+    const content = fs.readFileSync(filePath, 'utf-8');
     const lines = content.split('\n');
-    const data = { format: [], mediators: [], tags: [] };
-    let currentKey = null;
+    const data = {
+        title: '',
+        category: 'Curso',
+        status: 'Aberto',
+        date: '',
+        description: '',
+        link: '',
+        images: [],
+        tags: [],
+        mediators: [],
+        details: {
+            intro: '',
+            format: [],
+            schedule: []
+        }
+    };
 
-    lines.forEach((line, index) => {
-        line = line.trim();
-        if (!line) return;
+    let currentSection = null;
+    let mediatorBuffer = {}; // To parse "Name | Bio" or separate lines if we change format.
+    // For now assuming existing format: "Mediador1: Name | Bio"
 
-        // Try to identify keys
-        // Standard keys: Title:, Description:, etc.
-        // Custom keys: 8) Link de inscrição:, Início das aulas:, etc.
+    lines.forEach(line => {
+        const cleanLine = line.trim();
 
-        let foundKey = false;
-        let value = '';
+        // Key-Value pairs
+        if (cleanLine.startsWith('Title:')) data.title = cleanLine.substring(6).trim();
+        else if (cleanLine.startsWith('Subtitle:')) data.subtitle = cleanLine.substring(9).trim();
+        else if (cleanLine.startsWith('Category:')) data.category = cleanLine.substring(9).trim();
+        else if (cleanLine.startsWith('Status:')) data.status = cleanLine.substring(7).trim();
+        else if (cleanLine.startsWith('Date:')) data.date = cleanLine.substring(5).trim();
+        else if (cleanLine.startsWith('Link:')) data.link = cleanLine.substring(5).trim();
+        else if (cleanLine.startsWith('Tags:')) data.tags = cleanLine.substring(5).split(',').map(t => t.trim()).filter(Boolean);
 
-        const lowerLine = line.toLowerCase();
-
-        if (lowerLine.startsWith('title:') || lowerLine.startsWith('título:')) {
-            data.title = line.substring(line.indexOf(':') + 1).trim();
-            foundKey = true;
-        } else if (lowerLine.includes('link de inscrição') || lowerLine.startsWith('link:')) {
-            data.link = line.substring(line.indexOf('http')).trim();
-            foundKey = true;
-        } else if (lowerLine.includes('início das aulas') || lowerLine.startsWith('date:') || lowerLine.startsWith('data:')) {
-            data.date = line.substring(line.indexOf(':') + 1).trim();
-            foundKey = true;
-        } else if (/^mediad(or|tor)\d*:?/i.test(lowerLine)) {
-            // Format: Mediador1: Nome Sobrenome | Bio textual...
-            const content = line.substring(line.indexOf(':') + 1).trim();
-            const parts = content.split('|');
-            const name = parts[0].trim();
-            const bio = parts.length > 1 ? parts[1].trim() : '';
-
-            // Extract number to find matching image
-            const match = lowerLine.match(/^mediad(or|tor)(\d+):?/i);
-            let imagePath = null;
-
-            if (match && match[2]) {
-                const index = match[2];
-                // Try to find image with this index in the file list passed to this function? 
-                // We don't have access to files list here easily without passing it.
-                // Let's store the index on the object temp and resolve images later or pass files to this function.
-                // Better: we can assume the caller will fix image paths if we return a structure hinting at it, 
-                // OR better yet, let's pass 'files' and 'folderName' to parseInstructions.
-                // BUT changing function signature is bigger.
-                // Let's just return the "id" or "index" of the mediator and let the main loop resolve images.
-                data.mediators.push({ name, bio, _imageIndex: index });
-            } else {
-                data.mediators.push({ name, bio });
+        // Mediators
+        else if (cleanLine.startsWith('Mediador1:')) {
+            const val = cleanLine.substring(10).trim();
+            if (val) {
+                const parts = val.split('|');
+                data.mediators.push({ name: parts[0].trim(), bio: parts.slice(1).join('|').trim() }); // Join rest as bio if multiple |
             }
-            foundKey = true;
-        } else if (lowerLine.startsWith('description:') || lowerLine.startsWith('descrição:')) {
-            data.description = line.substring(line.indexOf(':') + 1).trim();
-            foundKey = true;
-        } else if (lowerLine.startsWith('subtitle:') || lowerLine.startsWith('subtítulo:')) {
-            data.subtitle = line.substring(line.indexOf(':') + 1).trim();
-            foundKey = true;
-        } else if (lowerLine.startsWith('tags:')) {
-            data.tags = line.substring(line.indexOf(':') + 1).split(',').map(s => s.trim());
-            foundKey = true;
-        } else if (lowerLine.startsWith('intro:')) {
-            data.intro = line.substring(line.indexOf(':') + 1).trim();
-            foundKey = true;
-        } else if (lowerLine.startsWith('format:') || lowerLine.startsWith('formato:')) {
-            const fmt = line.substring(line.indexOf(':') + 1).trim();
-            if (fmt.includes(';')) data.format = fmt.split(';').map(s => s.trim());
-            else data.format.push(fmt);
-            foundKey = true;
-        } else if (lowerLine.includes('carga horária')) {
-            data.format.push(line);
-            foundKey = true;
+        }
+        else if (cleanLine.startsWith('Mediador2:')) {
+            const val = cleanLine.substring(10).trim();
+            if (val) {
+                const parts = val.split('|');
+                data.mediators.push({ name: parts[0].trim(), bio: parts.slice(1).join('|').trim() });
+            }
         }
 
-        // If it's the very first few lines and we haven't found a title yet, assumes it's the title
-        if (!data.title && index < 5 && !foundKey && line.length > 10 && !line.includes('CAPA') && !line.match(/^\d+\)/)) {
-            // Heuristic: If it looks like a title
-            data.title = line;
-        }
+        // Section Headers
+        else if (cleanLine === 'Description:') currentSection = 'description';
+        else if (cleanLine === 'Intro:') currentSection = 'intro';
+        else if (cleanLine === 'Format:') currentSection = 'format';
+        else if (cleanLine === 'Schedule:') currentSection = 'schedule'; // if used
 
+        // Content Accumulation
+        else if (cleanLine.length > 0 && !cleanLine.includes(':')) {
+            if (currentSection === 'description') data.description += (data.description ? '\n' : '') + cleanLine;
+            if (currentSection === 'intro') data.details.intro += (data.details.intro ? '\n' : '') + cleanLine;
+            if (currentSection === 'format') data.details.format.push(cleanLine);
+            if (currentSection === 'schedule') data.details.schedule.push(cleanLine);
+        }
     });
-
-    // Defaults if missing
-    if (!data.category) {
-        if (data.title && data.title.toLowerCase().includes('formação')) data.category = 'Formacao';
-        else if (data.title && data.title.toLowerCase().includes('supervisão')) data.category = 'GrupoEstudos';
-        else data.category = 'Curso';
-    }
 
     return data;
 }
 
-async function syncCourses() {
-    if (!fs.existsSync(CURSOS_DIR)) {
-        console.error('Directory not found:', CURSOS_DIR);
-        return;
-    }
+try {
+    const folders = fs.readdirSync(COURSES_DIR, { withFileTypes: true })
+        .filter(dirent => dirent.isDirectory())
+        .map(dirent => dirent.name);
 
-    const entries = fs.readdirSync(CURSOS_DIR, { withFileTypes: true });
     const courses = [];
 
-    for (const entry of entries) {
-        if (entry.isDirectory()) {
-            const folderPath = path.join(CURSOS_DIR, entry.name);
-            console.log(`Processing folder: ${entry.name}`);
+    console.log(`Found ${folders.length} course folders in ${COURSES_DIR}`);
 
-            const files = fs.readdirSync(folderPath);
+    folders.forEach(folder => {
+        const folderPath = path.join(COURSES_DIR, folder);
+        const infoPath = path.join(folderPath, 'info.txt');
 
-            // 1. Find Image
-            const imageFile = files.find(f => /\.(jpg|jpeg|png|webp)$/i.test(f) && f.toLowerCase().includes('capa'));
+        if (fs.existsSync(infoPath)) {
+            console.log(`Processing ${folder}...`);
+            const courseData = parseCourseTxt(infoPath);
 
-            // 2. Find Instructions (detalhes.txt, instrucoes.txt, or informacoes.txt)
-            const possibleNames = ['detalhes.txt', 'instrucoes.txt', 'informacoes.txt'];
-            const txtFile = files.find(f => possibleNames.includes(f.toLowerCase()));
+            // Look for images in the folder
+            const courseFiles = fs.readdirSync(folderPath);
+            const allImages = courseFiles.filter(f => /\.(jpg|jpeg|png|webp)$/i.test(f));
 
-            if (txtFile) {
-                const txtContent = fs.readFileSync(path.join(folderPath, txtFile), 'utf-8');
-                const parsedData = parseInstructions(txtContent);
-
-                // Construct Course Object
-                const courseId = entry.name.toLowerCase().replace(/\s+/g, '-');
-
-                const course = {
-                    id: courseId,
-                    title: parsedData.title || entry.name,
-                    subtitle: parsedData.subtitle || '',
-                    category: parsedData.category || 'Curso',
-                    status: parsedData.status || 'Aberto',
-                    date: parsedData.date || '',
-                    description: parsedData.description || '',
-                    link: parsedData.link || '',
-                    image: imageFile ? `/cursos/${entry.name}/${imageFile}` : '',
-                    images: imageFile ? [`/cursos/${entry.name}/${imageFile}`] : [],
-                    mediators: parsedData.mediators.map(m => {
-                        if (m._imageIndex) {
-                            const medImg = files.find(f => f.toLowerCase().startsWith(`mediador${m._imageIndex}.`) || f.toLowerCase().startsWith(`mediator${m._imageIndex}.`));
-                            if (medImg) {
-                                m.image = `/cursos/${entry.name}/${medImg}`;
-                            }
-                            delete m._imageIndex;
-                        }
-                        return m;
-                    }) || [],
-                    tags: parsedData.tags || [],
-                    details: {
-                        intro: parsedData.intro || '',
-                        format: parsedData.format || [],
-                        schedule: parsedData.schedule ? parsedData.schedule.split(';') : []
-                    }
-                };
-
-                courses.push(course);
-                console.log(`  > Added course: ${course.title} (${course.id})`);
-            } else {
-                console.warn(`  > Skipping ${entry.name}: No .txt file found.`);
+            // 1. Handle Main Image (Cover)
+            // Look for exact "capa.jpg" or "capa.jpeg" etc
+            const coverImage = allImages.find(f => f.match(/^capa\.(jpg|jpeg|png|webp)$/i));
+            if (coverImage) {
+                courseData.image = `/cursos/${folder}/${coverImage}`;
             }
+
+            // 2. Handle Mediator Images
+            // Expecting mediador1.ext and mediador2.ext
+            if (courseData.mediators && courseData.mediators.length > 0) {
+                // Mediator 1
+                const m1Image = allImages.find(f => f.match(/^mediador1\.(jpg|jpeg|png|webp)$/i));
+                if (m1Image) {
+                    courseData.mediators[0].image = `/cursos/${folder}/${m1Image}`;
+                }
+
+                // Mediator 2
+                if (courseData.mediators.length > 1) {
+                    const m2Image = allImages.find(f => f.match(/^mediador2\.(jpg|jpeg|png|webp)$/i));
+                    if (m2Image) {
+                        courseData.mediators[1].image = `/cursos/${folder}/${m2Image}`;
+                    }
+                }
+            }
+
+            // 3. Fallback / Gallery Images
+            const imagePaths = allImages.map(f => `/cursos/${folder}/${f}`);
+            courseData.images = imagePaths;
+
+            // If no specific cover found, use first available image
+            if (!courseData.image && imagePaths.length > 0) {
+                courseData.image = imagePaths[0];
+            }
+
+            // Ensure 'image' property exists
+            if (!courseData.image) courseData.image = '';
+
+            courseData.id = folder; // Use folder name as ID
+            courses.push(courseData);
         }
-    }
+    });
 
-    // Write to JSON
-    fs.writeFileSync(OUTPUT_FILE, JSON.stringify(courses, null, 2));
-    console.log(`\nSuccessfully generated ${courses.length} courses to ${OUTPUT_FILE}`);
+    const content = JSON.stringify(courses, null, 2);
+    fs.writeFileSync(OUTPUT_FILE, content);
+    console.log(`Successfully generated courses.json with ${courses.length} items.`);
+
+} catch (error) {
+    console.error('Error syncing courses:', error);
 }
-
-syncCourses();

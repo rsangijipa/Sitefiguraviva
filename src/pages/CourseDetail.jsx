@@ -28,7 +28,25 @@ export default function CourseDetail() {
 
     // Derive Mediator State from URL
     const mediatorParam = searchParams.get('mediator');
-    const selectedMediator = mediatorParam ? getMediatorDetails(mediatorParam) : null;
+    let selectedMediator = null;
+
+    if (mediatorParam) {
+        // 1. Try to find in current course context (handles inline objects in generated courses)
+        if (course && course.mediators) {
+            const foundInCourse = course.mediators.find(m => {
+                if (typeof m === 'string') return m === mediatorParam;
+                return m.name === mediatorParam;
+            });
+            if (foundInCourse) {
+                selectedMediator = getMediatorDetails(foundInCourse);
+            }
+        }
+
+        // 2. Fallback to registry (handles direct link or static keys)
+        if (!selectedMediator) {
+            selectedMediator = getMediatorDetails(mediatorParam);
+        }
+    }
 
     const getCoverImage = () => {
         if (!course) return '';
@@ -47,6 +65,19 @@ export default function CourseDetail() {
         setLightboxOpen(true);
     };
 
+    const handleBack = () => {
+        // Navigate to home and ensure we scroll to institute section
+        // We use state or hash. Since PublicHome renders InstituteSection with id="instituto",
+        // using hash usually works if the router supports it or if we handle it manually.
+        // The safest way is to go to '/' and let the browser/component handle the hash.
+        navigate('/#instituto');
+        // Fallback smooth scroll if already on page or just loaded
+        setTimeout(() => {
+            const section = document.getElementById('instituto');
+            if (section) section.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+    }
+
     if (loading) return <div className="min-h-screen bg-paper flex items-center justify-center font-serif text-3xl">Carregando...</div>;
     if (!course) return <div className="min-h-screen bg-paper flex items-center justify-center font-serif text-3xl">Curso não encontrado.</div>;
 
@@ -57,9 +88,23 @@ export default function CourseDetail() {
         <div className="bg-paper min-h-screen">
             <Navbar />
             <main className="pt-32 pb-20 md:pt-40">
-                <div className="container mx-auto px-6 max-w-6xl">
-                    <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-accent font-bold uppercase tracking-widest text-[10px] mb-12 hover:translate-x-[-5px] transition-transform">
-                        <ArrowLeft size={14} /> Voltar
+                <div className="container mx-auto px-6 max-w-6xl relative">
+
+                    {/* Desktop Back Button */}
+                    <button
+                        onClick={handleBack}
+                        className="hidden md:flex items-center gap-2 text-accent font-bold uppercase tracking-widest text-[10px] mb-12 hover:translate-x-[-5px] transition-transform"
+                    >
+                        <ArrowLeft size={14} /> Voltar para Cursos
+                    </button>
+
+                    {/* Mobile Touch Back Button */}
+                    <button
+                        onClick={handleBack}
+                        className="md:hidden fixed z-50 top-24 left-4 bg-white/90 backdrop-blur-md shadow-lg border border-gray-100 w-12 h-12 rounded-full flex items-center justify-center text-primary active:scale-95 transition-transform"
+                        aria-label="Voltar"
+                    >
+                        <ArrowLeft size={20} />
                     </button>
 
                     {/* HERO SECTION */}
@@ -90,7 +135,7 @@ export default function CourseDetail() {
                                             return (
                                                 <button
                                                     key={index}
-                                                    onClick={() => setSearchParams({ mediator: details.name })}
+                                                    onClick={() => setSearchParams({ mediator: typeof mediator === 'string' ? mediator : mediator.name })}
                                                     className="flex items-center gap-3 bg-white p-2 pr-4 rounded-full shadow-sm hover:shadow-md transition-all border border-transparent hover:border-gold/30 group"
                                                 >
                                                     <div className="w-10 h-10 rounded-full bg-stone-100 overflow-hidden shrink-0 border border-stone-200">

@@ -1,14 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save, Image as ImageIcon, Folder, FileText, ChevronRight, Upload, Search } from 'lucide-react';
+import { X, Save, Image as ImageIcon, Folder, FileText, ChevronRight, Upload, Search, Download } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { auth } from '../../services/firebase';
 import { uploadFiles } from '../../services/uploadService';
-// Import the generated manifest (if you are running the node script)
-// import courseAssets from '../../data/courseAssets.json';
-
-// Fallback if json not found or for dynamic usage. 
-// In a real app, you'd fetch this from an API or Context.
-// We will use the one we just generated.
 import localAssets from '../../data/courseAssets.json';
 
 const AVAILABLE_ASSETS = localAssets || [];
@@ -25,12 +19,13 @@ export default function CourseModal({ isOpen, onClose, courseToEdit = null }) {
         category: 'Curso',
         status: 'Aberto',
         date: '',
-        fullDate: '', // For detailed view
+        fullDate: '', // detailed view
         image: '',
         images: [],
         description: '',
         link: '',
-        mediators: [],
+        mediator1: '',
+        mediator2: '',
         tags: [],
         details: {
             intro: '',
@@ -43,11 +38,27 @@ export default function CourseModal({ isOpen, onClose, courseToEdit = null }) {
 
     useEffect(() => {
         if (courseToEdit) {
+            // Helper to parsing mediators back to string if needed
+            // If mediators array exists, map it to strings 'Name | Bio'
+            let m1 = '';
+            let m2 = '';
+            if (courseToEdit.mediators && courseToEdit.mediators.length > 0) {
+                m1 = `${courseToEdit.mediators[0].name}${courseToEdit.mediators[0].bio ? ' | ' + courseToEdit.mediators[0].bio : ''}`;
+                if (courseToEdit.mediators.length > 1) {
+                    m2 = `${courseToEdit.mediators[1].name}${courseToEdit.mediators[1].bio ? ' | ' + courseToEdit.mediators[1].bio : ''}`;
+                }
+            } else {
+                // Fallback to legacy fields
+                m1 = courseToEdit.mediator1 || '';
+                m2 = courseToEdit.mediator2 || '';
+            }
+
             setFormData({
                 ...initialForm,
                 ...courseToEdit,
                 images: courseToEdit.images || (courseToEdit.image ? [courseToEdit.image] : []),
-                mediators: courseToEdit.mediators || [],
+                mediator1: m1,
+                mediator2: m2,
                 tags: courseToEdit.tags || [],
                 details: {
                     intro: courseToEdit.details?.intro || courseToEdit.description || '',
@@ -62,8 +73,6 @@ export default function CourseModal({ isOpen, onClose, courseToEdit = null }) {
 
     // Format handling helpers
     const handleArrayInput = (field, value) => {
-        // Simple comma separated for now, or new line
-        // For mediators and tags
         setFormData(prev => ({
             ...prev,
             [field]: value.split(',').map(item => item.trim()).filter(Boolean)
@@ -71,7 +80,6 @@ export default function CourseModal({ isOpen, onClose, courseToEdit = null }) {
     };
 
     const handleDetailArray = (field, value) => {
-        // New line separated
         setFormData(prev => ({
             ...prev,
             details: {
@@ -89,27 +97,60 @@ export default function CourseModal({ isOpen, onClose, courseToEdit = null }) {
             const user = auth.currentUser;
             if (!user) throw new Error("Usuário não autenticado");
 
+            // Reconstruct mediators array from fields
+            const mediators = [];
+            if (formData.mediator1) {
+                const [name, ...bioParts] = formData.mediator1.split('|');
+                mediators.push({ name: name.trim(), bio: bioParts.join('|').trim() });
+            }
+            if (formData.mediator2) {
+                const [name, ...bioParts] = formData.mediator2.split('|');
+                mediators.push({ name: name.trim(), bio: bioParts.join('|').trim() });
+            }
+
             const dataToSave = {
                 ...formData,
-                image: formData.images[0] || formData.image || '', // Ensure cover is first image
+                mediators, // Save structured mediators
+                image: formData.images[0] || formData.image || '',
                 updatedAt: new Date().toISOString(),
-                updatedBy: user.email
+                updatedBy: user.email,
+                // Pass existing ID if editing to overwrite folder
+                id: courseToEdit ? courseToEdit.id : null
             };
 
-            // Remove id from dataToSave if it exists to avoid overwriting it in the doc data (Firestore handles ID separately usually, but good practice)
-            // But we need it for update.
+            // Remove temporary fields
+            delete dataToSave.mediator1;
+            delete dataToSave.mediator2;
 
+            // 1. SAVE TO FILE SYSTEM (New Priority)
+            console.log("Saving to file system...");
+            const fsResponse = await fetch('/api/save-course', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dataToSave)
+            });
+
+            if (!fsResponse.ok) {
+                const err = await fsResponse.json();
+                throw new Error('Erro ao salvar arquivos locais: ' + err.error);
+            }
+
+            const fsResult = await fsResponse.json();
+            console.log("File system saved:", fsResult);
+
+            // 2. SAVE TO FIREBASE (Backup/Legacy)
             if (courseToEdit && courseToEdit.id) {
-                // Determine if it's a static course we are "overriding" or a firestore course
-                // If the ID is string/number that exists in static, we might need to creating a new doc with that ID in firestore?
-                // The service handles update.
                 await updateCourse(courseToEdit.id, dataToSave);
-                showToast("Curso atualizado com sucesso!", "success");
             } else {
                 await addCourse(dataToSave);
-                showToast("Curso criado com sucesso!", "success");
             }
+
+            showToast("Salvo e Sincronizado com Sucesso!", "success");
             onClose();
+
+            // Optional reload to see file system changes if App pulls from JSON
+            // window.location.reload(); 
+
         } catch (error) {
             console.error("Save error:", error);
             showToast("Erro ao salvar: " + error.message, "error");
@@ -168,7 +209,7 @@ export default function CourseModal({ isOpen, onClose, courseToEdit = null }) {
                         {activeTab === 'details' && (
                             <div className="grid md:grid-cols-2 gap-6 animate-slide-in">
                                 <div className="space-y-4">
-                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide">Título da Atividade</label>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide">Title (Título)</label>
                                     <input
                                         required
                                         value={formData.title}
@@ -178,7 +219,7 @@ export default function CourseModal({ isOpen, onClose, courseToEdit = null }) {
                                     />
                                 </div>
                                 <div className="space-y-4">
-                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide">Subtítulo (Opcional)</label>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide">Subtitle</label>
                                     <input
                                         value={formData.subtitle}
                                         onChange={e => setFormData({ ...formData, subtitle: e.target.value })}
@@ -188,7 +229,7 @@ export default function CourseModal({ isOpen, onClose, courseToEdit = null }) {
                                 </div>
 
                                 <div className="space-y-4">
-                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide">Categoria</label>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide">Category</label>
                                     <select
                                         value={formData.category}
                                         onChange={e => setFormData({ ...formData, category: e.target.value })}
@@ -207,7 +248,7 @@ export default function CourseModal({ isOpen, onClose, courseToEdit = null }) {
                                         onChange={e => setFormData({ ...formData, status: e.target.value })}
                                         className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg focus:ring-1 focus:ring-accent outline-none"
                                     >
-                                        <option value="Aberto">Inscrições Abertas</option>
+                                        <option value="Aberto">Aberto</option>
                                         <option value="Esgotado">Esgotado</option>
                                         <option value="Encerrado">Encerrado</option>
                                         <option value="Breve">Em Breve</option>
@@ -215,7 +256,7 @@ export default function CourseModal({ isOpen, onClose, courseToEdit = null }) {
                                 </div>
 
                                 <div className="space-y-4">
-                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide">Data Resumida (Card)</label>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide">Date</label>
                                     <input
                                         required
                                         value={formData.date}
@@ -226,27 +267,39 @@ export default function CourseModal({ isOpen, onClose, courseToEdit = null }) {
                                 </div>
 
                                 <div className="space-y-4">
-                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide">Data Completa / Local</label>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide">Tags (Separadas por vírgula)</label>
                                     <input
-                                        value={formData.fullDate}
-                                        onChange={e => setFormData({ ...formData, fullDate: e.target.value })}
+                                        value={formData.tags.join(', ')}
+                                        onChange={e => handleArrayInput('tags', e.target.value)}
                                         className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg focus:ring-1 focus:ring-accent outline-none"
-                                        placeholder="Ex: Encontros Quinzenais | On-line"
+                                        placeholder="Ex: gestalt, psicologia, online"
+                                    />
+                                </div>
+
+                                <div className="space-y-4 md:col-span-2">
+                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide">Mediador 1 (Nome | Bio)</label>
+                                    <textarea
+                                        rows={3}
+                                        value={formData.mediator1}
+                                        onChange={e => setFormData({ ...formData, mediator1: e.target.value })}
+                                        className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg focus:ring-1 focus:ring-accent outline-none"
+                                        placeholder="Nome Sobrenome | Breve biografia do mediador..."
+                                    />
+                                </div>
+
+                                <div className="space-y-4 md:col-span-2">
+                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide">Mediador 2 (Nome | Bio)</label>
+                                    <textarea
+                                        rows={3}
+                                        value={formData.mediator2}
+                                        onChange={e => setFormData({ ...formData, mediator2: e.target.value })}
+                                        className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg focus:ring-1 focus:ring-accent outline-none"
+                                        placeholder="Nome Sobrenome | Breve biografia do mediador..."
                                     />
                                 </div>
 
                                 <div className="col-span-2 space-y-4">
-                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide">Mediadores (Separar por vírgula)</label>
-                                    <input
-                                        value={formData.mediators.join(', ')}
-                                        onChange={e => handleArrayInput('mediators', e.target.value)}
-                                        className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg focus:ring-1 focus:ring-accent outline-none"
-                                        placeholder="Ex: Lílian Gusmão, Wanne Belmino"
-                                    />
-                                </div>
-
-                                <div className="col-span-2 space-y-4">
-                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide">Link de Inscrição (WhatsApp/Sympla)</label>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide">Link</label>
                                     <input
                                         value={formData.link}
                                         onChange={e => setFormData({ ...formData, link: e.target.value })}
@@ -260,7 +313,7 @@ export default function CourseModal({ isOpen, onClose, courseToEdit = null }) {
                         {activeTab === 'content' && (
                             <div className="space-y-6 animate-slide-in">
                                 <div className="space-y-4">
-                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide">Descrição Curta (Intro)</label>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide">Description (Intro Curta)</label>
                                     <textarea
                                         rows={3}
                                         value={formData.description}
@@ -271,7 +324,7 @@ export default function CourseModal({ isOpen, onClose, courseToEdit = null }) {
                                 </div>
 
                                 <div className="space-y-4">
-                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide">Introdução Detalhada</label>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide">Intro (Detalhada)</label>
                                     <textarea
                                         rows={4}
                                         value={formData.details.intro}
@@ -283,7 +336,7 @@ export default function CourseModal({ isOpen, onClose, courseToEdit = null }) {
 
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div className="space-y-4">
-                                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide">Formato/Metodologia (Um por linha)</label>
+                                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide">Format (Um item por linha)</label>
                                         <textarea
                                             rows={6}
                                             value={formData.details.format.join('\n')}
@@ -293,7 +346,7 @@ export default function CourseModal({ isOpen, onClose, courseToEdit = null }) {
                                         />
                                     </div>
                                     <div className="space-y-4">
-                                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide">Cronograma (Um por linha)</label>
+                                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide">Cronograma (Opcional - Um por linha)</label>
                                         <textarea
                                             rows={6}
                                             value={formData.details.schedule.join('\n')}
@@ -380,6 +433,12 @@ export default function CourseModal({ isOpen, onClose, courseToEdit = null }) {
                                 </div>
                             </div>
                         )}
+
+                        <div className="bg-blue-50 p-4 rounded-lg text-xs text-blue-800 border border-blue-100">
+                            <strong>Atenção:</strong> Ao salvar, uma pasta será criada/atualizada em <code>public/cursos</code> com os dados.
+                            Lembre-se de fazer <code>git commit</code> e <code>git push</code> para que as alterações apareçam ONLINE no Vercel.
+                        </div>
+
                     </form>
                 </div>
 
@@ -398,7 +457,7 @@ export default function CourseModal({ isOpen, onClose, courseToEdit = null }) {
                         disabled={loading}
                         className={`px-8 py-3 rounded-xl bg-primary text-white font-bold uppercase tracking-widest text-xs hover:bg-primary/90 transition-colors shadow-lg flex items-center gap-2 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
-                        {loading ? 'Salvando...' : (<><Save size={16} /> Salvar Curso</>)}
+                        {loading ? 'Salvando...' : (<><Save size={16} /> Salvar & Sincronizar</>)}
                     </button>
                 </div>
             </div>
