@@ -52,7 +52,7 @@ export const authService = {
                 return null;
             }
             return session;
-        } catch (e) {
+        } catch {
             this.logout();
             return null;
         }
