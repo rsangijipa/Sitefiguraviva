@@ -8,56 +8,64 @@ interface BreathingAnimationProps {
   onPhaseChange?: (phase: string) => void;
 }
 
-export const BreathingAnimation: React.FC<BreathingAnimationProps> = ({ 
-  technique, 
+export const BreathingAnimation: React.FC<BreathingAnimationProps> = ({
+  technique,
   isActive,
   onPhaseChange
 }) => {
   const [phase, setPhase] = useState<'inhale' | 'hold' | 'exhale' | 'wait'>('inhale');
-  
+
   useEffect(() => {
     if (!isActive) return;
 
     let timeoutId: number;
+    let isMounted = true;
 
     const runCycle = () => {
+      if (!isMounted) return;
+
       // Start Inhale
       setPhase('inhale');
       onPhaseChange?.('Inspire...');
 
       // Schedule Hold or Exhale
       timeoutId = window.setTimeout(() => {
+        if (!isMounted) return;
+
         if (technique.holdDuration > 0) {
           setPhase('hold');
           onPhaseChange?.('Segure...');
-          
+
           timeoutId = window.setTimeout(() => {
+            if (!isMounted) return;
             setPhase('exhale');
             onPhaseChange?.('Expire...');
-            
+
             timeoutId = window.setTimeout(() => {
-               if (technique.holdAfterExhale > 0) {
-                 setPhase('wait');
-                 onPhaseChange?.('Pausa...');
-                 timeoutId = window.setTimeout(runCycle, technique.holdAfterExhale * 1000);
-               } else {
-                 runCycle();
-               }
+              if (!isMounted) return;
+              if (technique.holdAfterExhale > 0) {
+                setPhase('wait');
+                onPhaseChange?.('Pausa...');
+                timeoutId = window.setTimeout(runCycle, technique.holdAfterExhale * 1000);
+              } else {
+                runCycle();
+              }
             }, technique.exhaleDuration * 1000);
           }, technique.holdDuration * 1000);
 
         } else {
           setPhase('exhale');
           onPhaseChange?.('Expire...');
-           
+
           timeoutId = window.setTimeout(() => {
+            if (!isMounted) return;
             if (technique.holdAfterExhale > 0) {
-                 setPhase('wait');
-                 onPhaseChange?.('Pausa...');
-                 timeoutId = window.setTimeout(runCycle, technique.holdAfterExhale * 1000);
-               } else {
-                 runCycle();
-               }
+              setPhase('wait');
+              onPhaseChange?.('Pausa...');
+              timeoutId = window.setTimeout(runCycle, technique.holdAfterExhale * 1000);
+            } else {
+              runCycle();
+            }
           }, technique.exhaleDuration * 1000);
         }
       }, technique.inhaleDuration * 1000);
@@ -65,152 +73,135 @@ export const BreathingAnimation: React.FC<BreathingAnimationProps> = ({
 
     runCycle();
 
-    return () => clearTimeout(timeoutId);
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+    };
   }, [isActive, technique, onPhaseChange]);
 
-  // Determine colors based on technique for a more sophisticated look
-  const getGradientColors = () => {
+  // Soft, Pastel Colors for Peace
+  const getColors = () => {
     if (technique.id === '4-6') {
-      // Earthy Greens
+      // Very Soft Sage & Sand
       return {
-        start: 'from-[#A3B18A] to-[#DAD7CD]',
-        active: 'from-[#588157] to-[#A3B18A]',
-        shadow: 'rgba(88, 129, 87, 0.4)'
+        primary: '#8FA893',    // Muted Sage
+        secondary: '#CCD5AE',  // Pale Green
+        tertiary: '#E9EDC9',   // Light Yellow/Green
+        accent: '#FAEDCD'      // Soft Sand
       };
     }
-    // Pursed Lips (Rust/Warm)
+    // Pursed Lips (Warm/Cozy)
     return {
-      start: 'from-[#E6AD9B] to-[#F2E8CF]',
-      active: 'from-[#C45B50] to-[#E6AD9B]',
-      shadow: 'rgba(196, 91, 80, 0.4)'
+      primary: '#D4A373',
+      secondary: '#E6CCB2',
+      tertiary: '#F4E4D3',
+      accent: '#FAF4EB'
     };
   };
 
-  const colors = getGradientColors();
+  const colors = getColors();
 
-  // --- VARIANTS ---
+  // --- ORGANIC FLOW VARIANTS ---
 
-  // The Core Shape (Solid)
   const coreVariants: Variants = {
-    inhale: { 
-      scale: 1.6,
-      rotate: 0,
-      borderRadius: ["40% 60% 70% 30% / 40% 50% 60% 50%", "50% 50% 50% 50% / 50% 50% 50% 50%", "30% 70% 70% 30% / 30% 30% 70% 70%"],
+    inhale: {
+      scale: 1.8,
+      opacity: 1,
+      filter: "blur(2px)",
       transition: { duration: technique.inhaleDuration, ease: "easeInOut" }
     },
-    hold: { 
-      scale: 1.65,
-      rotate: 5,
-      borderRadius: ["30% 70% 70% 30% / 30% 30% 70% 70%", "40% 60% 60% 40% / 40% 40% 60% 60%"],
-      transition: { duration: technique.holdDuration, ease: "easeInOut", repeat: Infinity, repeatType: "reverse" }
+    hold: {
+      scale: 1.9,
+      opacity: 0.9,
+      filter: "blur(4px)",
+      transition: { duration: technique.holdDuration, ease: "linear" }
     },
-    exhale: { 
-      scale: 0.8, 
-      rotate: 0,
-      borderRadius: ["30% 70% 70% 30% / 30% 30% 70% 70%", "50% 50% 30% 70% / 50% 50% 70% 30%", "60% 40% 30% 70% / 60% 30% 70% 40%"],
-      transition: { 
-        duration: technique.exhaleDuration, 
-        ease: [0.42, 0.0, 0.58, 1.0] 
-      }
-    },
-    wait: {
-      scale: 0.8,
-      borderRadius: "60% 40% 30% 70% / 60% 30% 70% 40%",
-      transition: { duration: technique.holdAfterExhale, ease: "linear" }
-    }
-  };
-
-  // The "Aura" Shape (Transparent/Blurry layer)
-  const auraVariants: Variants = {
-    inhale: { 
-      scale: 2.2,
-      opacity: 0.4,
-      rotate: -10,
-      borderRadius: ["50% 50% 50% 50%", "60% 40% 30% 70% / 60% 30% 70% 40%"],
-      transition: { duration: technique.inhaleDuration, ease: "easeOut" }
-    },
-    hold: { 
-      scale: 2.3, 
-      opacity: 0.3,
-      rotate: -5,
-      transition: { duration: technique.holdDuration, ease: "easeInOut", repeat: Infinity, repeatType: "reverse" }
-    },
-    exhale: { 
-      scale: 1.0, 
-      opacity: 0.1,
-      rotate: 0,
-      borderRadius: "50% 50% 50% 50%",
+    exhale: {
+      scale: 1.0,
+      opacity: 0.8,
+      filter: "blur(2px)",
       transition: { duration: technique.exhaleDuration, ease: "easeInOut" }
     },
     wait: {
-      scale: 1.0, 
-      opacity: 0,
+      scale: 1.0,
+      opacity: 0.6,
+      filter: "blur(0px)",
       transition: { duration: technique.holdAfterExhale, ease: "linear" }
     }
   };
 
+  const rippleVariants: Variants = {
+    inhale: { scale: 2.2, opacity: 0, transition: { duration: technique.inhaleDuration, ease: "easeOut" } },
+    hold: { scale: 2.3, opacity: 0, transition: { duration: technique.holdDuration } },
+    exhale: { scale: 1, opacity: 0.5, transition: { duration: technique.exhaleDuration, ease: "easeIn" } },
+    wait: { scale: 1, opacity: 0 }
+  }
+
   const textVariants = {
-    initial: { opacity: 0, y: 5, filter: 'blur(4px)' },
+    initial: { opacity: 0, y: 10, filter: 'blur(5px)' },
     animate: { opacity: 1, y: 0, filter: 'blur(0px)' },
-    exit: { opacity: 0, y: -5, filter: 'blur(4px)' }
+    exit: { opacity: 0, y: -10, filter: 'blur(5px)' }
   };
 
   const getInstructionText = () => {
-    switch(phase) {
-      case 'inhale': return technique.icon === 'nose' ? 'Inspire pelo nariz' : 'Inspire';
-      case 'hold': return 'Segure...';
-      case 'exhale': return technique.id === 'pursed-lips' ? 'Expire com bico' : 'Expire pela boca';
-      case 'wait': return 'Aguarde';
+    switch (phase) {
+      case 'inhale': return technique.icon === 'nose' ? 'Inspire suavemente...' : 'Inspire...';
+      case 'hold': return 'Segure o ar...';
+      case 'exhale': return 'Solte o ar...';
+      case 'wait': return 'Relaxe...';
       default: return 'Prepare-se';
     }
   };
 
   return (
     <div className="flex flex-col items-center justify-center py-12">
-      <div className="relative w-72 h-72 flex items-center justify-center">
-        
-        {/* Background Ambient Glow */}
+      <div className="relative w-80 h-80 flex items-center justify-center">
+
+        {/* Background Aura (Static Glow) */}
+        <div className="absolute inset-0 rounded-full blur-[60px] opacity-20 bg-gradient-to-tr from-white to-transparent" />
+
+        {/* --- ORGANIC LAYERS --- */}
+
+        {/* Layer 1: Expansion Ripple */}
         <motion.div
-           className="absolute inset-0 rounded-full blur-3xl opacity-20"
-           animate={{
-             background: phase === 'inhale' || phase === 'hold' ? colors.shadow : 'rgba(0,0,0,0)',
-             scale: phase === 'inhale' ? 1.5 : 1
-           }}
-           transition={{ duration: 2 }}
+          className="absolute rounded-full w-32 h-32 opacity-30"
+          style={{ backgroundColor: colors.tertiary }}
+          variants={rippleVariants}
+          animate={phase}
         />
 
-        {/* Aura Layer (Glassy/Ethereal) */}
+        {/* Layer 2: Soft Bloom */}
         <motion.div
-          className={`absolute w-32 h-32 bg-gradient-to-tr ${colors.start} mix-blend-multiply filter blur-md`}
-          animate={phase}
-          variants={auraVariants}
-        />
-
-        {/* Core Layer (Main Shape) */}
-        <motion.div
-          className={`w-32 h-32 bg-gradient-to-br ${colors.active} shadow-inner`}
-          animate={phase}
+          className="absolute rounded-full w-32 h-32 mix-blend-multiply blur-xl"
+          style={{ backgroundColor: colors.secondary }}
           variants={coreVariants}
-          style={{ 
-            boxShadow: 'inset -10px -10px 20px rgba(0,0,0,0.1), inset 10px 10px 20px rgba(255,255,255,0.4)' 
-          }}
+          animate={phase}
         />
-        
-        {/* Center Text Indicator */}
-        <div className="absolute z-20 pointer-events-none flex flex-col items-center justify-center">
-          <motion.span 
-            className="text-white/90 font-sans text-3xl font-light tracking-widest mix-blend-overlay"
-            animate={{ 
-              opacity: phase === 'wait' ? 0.5 : 1,
-              scale: phase === 'inhale' ? 1.2 : 1 
+
+        {/* Layer 3: Core Light */}
+        <motion.div
+          className="absolute rounded-full w-24 h-24 bg-white/40 blur-md"
+          animate={{
+            scale: phase === 'inhale' ? 1.5 : 1,
+            opacity: phase === 'hold' ? 0.6 : 0.3
+          }}
+          transition={{ duration: technique.inhaleDuration }}
+        />
+
+        {/* Center Text Indicator (Minimalist) */}
+        <div className="absolute z-30 pointer-events-none flex flex-col items-center justify-center">
+          <motion.span
+            className="text-stone-600 font-serif text-lg font-light tracking-[0.2em] opacity-50"
+            animate={{
+              opacity: phase === 'wait' ? 0.3 : 0.6,
             }}
           >
-           {phase === 'inhale' ? 'IN' : phase === 'exhale' ? 'EX' : phase === 'hold' ? 'HOLD' : ''}
+            {phase === 'inhale' ? 'IN' : phase === 'exhale' ? 'EX' : ''}
           </motion.span>
         </div>
       </div>
 
-      <div className="h-16 mt-2 flex items-center justify-center">
+      <div className="h-20 mt-4 flex items-center justify-center">
         <AnimatePresence mode='wait'>
           <motion.p
             key={phase}
@@ -218,8 +209,8 @@ export const BreathingAnimation: React.FC<BreathingAnimationProps> = ({
             initial="initial"
             animate="animate"
             exit="exit"
-            transition={{ duration: 0.4 }}
-            className="text-2xl font-serif text-ink tracking-tight text-center"
+            transition={{ duration: 0.8 }}
+            className="text-3xl font-serif text-stone-600/80 tracking-tight text-center"
           >
             {getInstructionText()}
           </motion.p>

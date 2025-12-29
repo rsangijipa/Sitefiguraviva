@@ -1,11 +1,10 @@
-
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Send, RefreshCw, Heart, Sparkles } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { RefreshCw, Heart, Sparkles, Users, ArrowRight, BookOpen } from 'lucide-react';
 import TreeVisualization from './TreeVisualization';
 
 // --- CONFIGURAÇÃO ---
-const MAX_FEELINGS = 12;
+const NUM_LEAVES = 25;
 
 // Cores expandidas (Tons terrosos e naturais)
 const LEAF_COLORS = [
@@ -15,7 +14,6 @@ const LEAF_COLORS = [
     '#A52A2A', '#2E8B57', '#66CDAA'
 ];
 
-// --- BANCO DE MENSAGENS ---
 const MESSAGES = [
     "A consciência é o primeiro passo para a cura.",
     "O aqui e agora é o único lugar onde a vida acontece.",
@@ -30,171 +28,171 @@ const MESSAGES = [
     "Confie na autorregulação do seu organismo.",
     "O corpo fala o que a boca cala. Escute-o.",
     "A beleza está na autenticidade do ser.",
-    "Integre suas sombras para encontrar sua luz."
+    "Integre suas sombras para encontrar sua luz.",
+    "Onde há amor, há expansão.",
+    "Seja gentil com seus processos.",
+    "A mudança é a única constante.",
+    "Seus limites definem seu contorno, não sua prisão."
 ];
 
 export default function FeelingsTree({ isModal = false }) {
-    const [feelings, setFeelings] = useState([]);
-    const [inputValue, setInputValue] = useState('');
+    // STATES: 'intro' -> 'tree' -> 'message'
+    const [viewState, setViewState] = useState('intro');
+    const [leaves, setLeaves] = useState([]);
     const [resultMessage, setResultMessage] = useState(null);
+    const [accessCount, setAccessCount] = useState(1243);
 
-    const showMessage = () => {
-        setTimeout(() => {
-            const randomMsg = MESSAGES[Math.floor(Math.random() * MESSAGES.length)];
-            setResultMessage(randomMsg);
-        }, 500);
-    };
+    useEffect(() => {
+        generateTree();
+        const stored = localStorage.getItem('tree_access_count');
+        if (stored) {
+            setAccessCount(parseInt(stored, 10));
+        } else {
+            localStorage.setItem('tree_access_count', '1243');
+        }
+    }, []);
 
-    const handleAddFeeling = (e) => {
-        e.preventDefault();
-        if (!inputValue.trim()) return;
-
-        const newFeeling = {
-            id: Date.now().toString(),
-            text: inputValue,
+    const generateTree = () => {
+        const newLeaves = Array.from({ length: NUM_LEAVES }).map((_, i) => ({
+            id: `leaf-${Date.now()}-${i}`,
             color: LEAF_COLORS[Math.floor(Math.random() * LEAF_COLORS.length)],
-        };
-
-        const newFeelingsList = [...feelings, newFeeling];
-        setFeelings(newFeelingsList);
-        setInputValue('');
-
-        if (newFeelingsList.length === MAX_FEELINGS) {
-            setTimeout(() => {
-                const randomMsg = MESSAGES[Math.floor(Math.random() * MESSAGES.length)];
-                setResultMessage(randomMsg);
-            }, 1500);
-        }
-    };
-
-    const handleEarlyFinish = () => {
-        if (feelings.length > 0) {
-            showMessage();
-        }
-    };
-
-    const resetTree = () => {
-        setFeelings([]);
+            message: MESSAGES[Math.floor(Math.random() * MESSAGES.length)],
+            text: ''
+        }));
+        setLeaves(newLeaves);
         setResultMessage(null);
-        setInputValue('');
     };
 
-    return (
-        <section className={`${isModal ? 'h-full grid place-items-center bg-transparent' : 'py-24 relative overflow-hidden bg-[#faf9f6]'}`}>
-            {/* Background com gradientes sutis */}
-            <div className="absolute inset-0 pointer-events-none">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-50/40 via-purple-50/20 to-orange-50/30" />
-                <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-sky-100/40 via-transparent to-transparent opacity-70" />
+    const handleLeafClick = (leafData) => {
+        const newCount = accessCount + 1;
+        setAccessCount(newCount);
+        localStorage.setItem('tree_access_count', newCount.toString());
+
+        setResultMessage(leafData.message);
+        setViewState('message');
+    };
+
+    const resetView = () => {
+        setResultMessage(null);
+        setViewState('tree');
+    };
+
+    const StepIndicator = ({ step }) => (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 flex items-center gap-2 z-40">
+            {[1, 2, 3].map(s => (
+                <div key={s} className={`h-1.5 rounded-full transition-all duration-500 ${s <= step ? 'w-6 bg-stone-500/80 shadow-sm' : 'w-2 bg-stone-300/50'}`} />
+            ))}
+        </div>
+    );
+
+    // --- VIEW RENDERERS ---
+
+    const renderIntro = () => (
+        <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="flex flex-col items-center justify-center h-full text-center px-6"
+        >
+            <StepIndicator step={1} />
+
+            <div className="bg-stone-100 p-6 rounded-full mb-8">
+                <Sparkles size={48} className="text-stone-600" />
+            </div>
+            <h2 className="text-4xl md:text-5xl font-serif text-stone-800 mb-6">Árvore da Awareness</h2>
+            <p className="max-w-md text-lg text-stone-600 mb-10 leading-relaxed font-light">
+                Nesta árvore, cada folha guarda uma mensagem de sabedoria gestáltica. Conecte-se com sua intuição e escolha uma.
+            </p>
+            <button
+                onClick={() => setViewState('tree')}
+                className="group relative inline-flex items-center gap-3 px-8 py-4 bg-stone-800 text-white rounded-full font-bold shadow-xl hover:bg-stone-700 transition-all hover:scale-105"
+            >
+                <span>Entrar no Jardim</span>
+                <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+            </button>
+            <div className="mt-8 text-xs font-bold text-stone-400 uppercase tracking-widest">
+                {accessCount.toLocaleString()} pessoas já visitaram
+            </div>
+        </motion.div>
+    );
+
+    const renderTree = () => (
+        <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="w-full h-full relative"
+        >
+            <StepIndicator step={2} />
+
+            <div className="absolute top-16 left-0 right-0 text-center z-20 pointer-events-none">
+                <h3 className="text-2xl font-serif text-stone-600 mb-1">Colha uma Folha</h3>
+                <p className="text-sm text-stone-400">Gire a árvore e clique na folha que te chamar.</p>
             </div>
 
-            <div className="container mx-auto px-4 max-w-5xl relative z-10 flex flex-col items-center">
+            <div className="absolute inset-0 z-10 cursor-move">
+                <TreeVisualization emotions={leaves} onLeafClick={handleLeafClick} isModal={isModal} />
+            </div>
 
-                {/* Cabeçalho */}
-                <div className="text-center mb-12 max-w-2xl">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-stone-200/50 backdrop-blur-sm shadow-sm mb-4 ${isModal ? 'bg-white/80' : 'bg-white/60'}`}
+            <div className="absolute bottom-12 left-0 right-0 flex justify-center z-30 pointer-events-none">
+                <button
+                    onClick={generateTree}
+                    className="pointer-events-auto flex items-center gap-2 px-5 py-2.5 bg-white/80 hover:bg-white text-stone-600 font-bold rounded-full shadow-sm border border-stone-200 text-xs uppercase tracking-wider transition-all"
+                >
+                    <RefreshCw size={14} className="hover:rotate-180 transition-transform duration-500" />
+                    Novas Folhas
+                </button>
+            </div>
+        </motion.div>
+    );
+
+    const renderMessage = () => (
+        <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="flex flex-col items-center justify-center h-full text-center px-6 relative z-50 bg-stone-50/50"
+        >
+            <StepIndicator step={3} />
+            <div className="absolute inset-0 z-0 bg-white/40 backdrop-blur-sm" />
+
+            <div className="relative z-10 max-w-lg w-full bg-white p-10 md:p-14 rounded-[2.5rem] shadow-2xl border border-stone-100/50 flex flex-col items-center">
+                <div className="inline-flex items-center justify-center p-4 mb-8 bg-rose-50 text-rose-500 rounded-2xl shadow-inner">
+                    <Heart fill="currentColor" size={32} />
+                </div>
+
+                <blockquote className="text-2xl md:text-3xl font-serif text-stone-800 mb-10 leading-tight italic">
+                    "{resultMessage}"
+                </blockquote>
+
+                <div className="flex flex-col gap-3 w-full">
+                    <button
+                        onClick={resetView}
+                        className="w-full py-4 bg-stone-800 hover:bg-stone-700 text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
                     >
-                        <Sparkles size={14} className="text-amber-500/80" />
-                        <span className="text-[10px] uppercase tracking-[0.2em] text-stone-500 font-semibold">Autoconhecimento 3D</span>
-                    </motion.div>
-                    <h2 className="text-4xl md:text-5xl font-serif text-stone-800 mb-4 tracking-tight">
-                        Árvore da Awareness
-                    </h2>
-                    <p className="text-lg text-stone-500 font-light leading-relaxed">
-                        Plante seus sentimentos e veja sua árvore crescer. <br className="hidden md:block" />
-                        (Interaja com a árvore girando e aproximando)
-                    </p>
+                        <RefreshCw size={18} /> Escolher Outra
+                    </button>
+                    {isModal && window.history.length > 1 && (
+                        <button
+                            onClick={() => window.history.back()}
+                            className="hidden w-full py-3 text-stone-400 hover:text-stone-600 text-sm font-bold uppercase tracking-widest transition-colors"
+                        >
+                            Sair
+                        </button>
+                    )}
                 </div>
+            </div>
+        </motion.div>
+    );
 
-                {/* Card Principal 3D */}
-                <div className={`${isModal ? 'w-full h-full border-none shadow-none rounded-none bg-transparent' : 'relative w-full aspect-[4/5] md:aspect-[16/10] max-h-[700px] bg-white/40 backdrop-blur-xl border border-white/60 rounded-[3rem] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)]'} overflow-hidden flex flex-col`}>
+    return (
+        <section className={`${isModal ? 'h-full w-full bg-[#faf9f6]' : 'py-24 relative overflow-hidden bg-[#faf9f6]'}`}>
+            {/* Background com gradientes sutis */}
+            <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute inset-0 bg-gradient-to-br from-stone-50 via-warm-50 to-stone-100" />
+                <div className="absolute top-0 left-0 w-full h-full opacity-30 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] mix-blend-multiply" />
+            </div>
 
-                    {/* --- 3D SCENE CONTAINER --- */}
-                    <div className="absolute inset-0 z-10 cursor-move">
-                        <TreeVisualization emotions={feelings} isModal={isModal} />
-                    </div>
-
-                    {/* --- UI LAYER: CONTROLES & FEEDBACK --- */}
-                    <div className="relative z-20 mt-auto w-full flex flex-col items-center pb-8 md:pb-12 px-6 pointer-events-none">
-                        {/* Wrapper para tornar inputs clicáveis */}
-                        <div className="w-full max-w-lg pointer-events-auto">
-                            {!resultMessage ? (
-                                <div className="space-y-4">
-                                    {/* Contador */}
-                                    <div className="flex justify-between items-end px-2">
-                                        <div className="text-xs font-bold uppercase tracking-widest text-stone-400">
-                                            Seus Sentimentos
-                                        </div>
-                                        <div className="bg-white/50 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-stone-600 shadow-sm border border-white/60">
-                                            {feelings.length} / {MAX_FEELINGS}
-                                        </div>
-                                    </div>
-
-                                    {/* Input Area */}
-                                    <form onSubmit={handleAddFeeling} className="relative group w-full max-w-lg mx-auto">
-                                        <div className={`absolute inset-0 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${isModal ? 'bg-white/60' : 'bg-white/40'}`} />
-                                        <div className={`relative flex items-center border rounded-full shadow-lg p-1.5 focus-within:ring-2 focus-within:ring-rose-200/50 transition-all ${isModal ? 'bg-white/90 border-white/80 shadow-2xl scale-105' : 'bg-white/80 border-white backdrop-blur-xl'}`}>
-                                            <input
-                                                type="text"
-                                                value={inputValue}
-                                                onChange={(e) => setInputValue(e.target.value)}
-                                                placeholder={feelings.length === 0 ? "Como você se sente agora?" : "Mais algum sentimento?"}
-                                                disabled={feelings.length >= MAX_FEELINGS}
-                                                className="flex-1 bg-transparent border-none px-6 py-3 text-stone-700 placeholder:text-stone-400 focus:outline-none text-lg font-medium"
-                                                aria-label="Digite um sentimento"
-                                            />
-                                            <button
-                                                type="submit"
-                                                disabled={!inputValue.trim() || feelings.length >= MAX_FEELINGS}
-                                                className="p-3 bg-stone-800 text-white rounded-full hover:bg-stone-700 disabled:opacity-30 transition-all shadow-md active:scale-95"
-                                                aria-label="Adicionar Sentimento"
-                                            >
-                                                <Send size={20} />
-                                            </button>
-                                        </div>
-                                    </form>
-
-                                    {feelings.length > 0 && feelings.length < MAX_FEELINGS && (
-                                        <motion.button
-                                            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                                            onClick={handleEarlyFinish}
-                                            className="w-full text-center text-xs text-stone-500 hover:text-stone-800 underline decoration-stone-300 underline-offset-4 transition-colors py-2"
-                                        >
-                                            Já é o suficiente, ver mensagem agora
-                                        </motion.button>
-                                    )}
-                                </div>
-                            ) : (
-                                /* CARD MENSAGEM FINAL */
-                                <motion.div
-                                    initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                                    className="w-full"
-                                >
-                                    <div className="bg-white/90 backdrop-blur-2xl p-8 md:p-12 rounded-[2rem] shadow-2xl border border-white text-center relative overflow-hidden">
-                                        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-rose-200 via-amber-200 to-blue-200" />
-                                        <div className="inline-flex items-center justify-center p-3 mb-6 bg-rose-50 text-rose-500 rounded-2xl shadow-inner">
-                                            <Heart fill="currentColor" size={28} />
-                                        </div>
-                                        <blockquote className="text-2xl md:text-3xl font-serif text-stone-800 mb-8 leading-tight">
-                                            "{resultMessage}"
-                                        </blockquote>
-                                        <button
-                                            onClick={resetTree}
-                                            className="group inline-flex items-center gap-2 px-8 py-3 bg-stone-100 hover:bg-white text-stone-600 font-semibold rounded-full border border-stone-200 hover:border-stone-300 hover:shadow-md transition-all duration-300 pointer-events-auto"
-                                        >
-                                            <RefreshCw size={16} className="group-hover:-rotate-180 transition-transform duration-700" />
-                                            <span>Plantamos novamente?</span>
-                                        </button>
-                                    </div>
-                                </motion.div>
-                            )}
-                        </div>
-                    </div>
-                </div>
+            <div className="container mx-auto max-w-5xl h-full relative z-10">
+                <AnimatePresence mode="wait">
+                    {viewState === 'intro' && renderIntro()}
+                    {viewState === 'tree' && renderTree()}
+                    {viewState === 'message' && renderMessage()}
+                </AnimatePresence>
             </div>
         </section>
     );
