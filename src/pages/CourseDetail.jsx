@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { courseService } from '../services/courseService';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { motion } from 'framer-motion';
 import { Calendar, MapPin, Clock, ArrowLeft, ExternalLink } from 'lucide-react';
+import { getMediatorDetails } from '../data/mediators';
 
 export default function CourseDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
     const [lightboxOpen, setLightboxOpen] = useState(false);
     const [lightboxIndex, setLightboxIndex] = useState(0);
     const [course, setCourse] = useState(null);
@@ -24,7 +26,9 @@ export default function CourseDetail() {
         fetchCourse();
     }, [id]);
 
-    const [selectedMediator, setSelectedMediator] = useState(null);
+    // Derive Mediator State from URL
+    const mediatorParam = searchParams.get('mediator');
+    const selectedMediator = mediatorParam ? getMediatorDetails(mediatorParam) : null;
 
     const getCoverImage = () => {
         if (!course) return '';
@@ -76,32 +80,29 @@ export default function CourseDetail() {
                             {course.mediators && course.mediators.length > 0 && (
                                 <div className="border-l-4 border-accent/20 pl-6 py-2">
                                     <h4 className="text-xs font-bold uppercase tracking-widest text-accent mb-3">Mediadoras</h4>
+
+
                                     <div className="flex flex-wrap gap-4">
                                         {course.mediators.map((mediator, index) => {
-                                            const isObject = typeof mediator === 'object';
-                                            const name = isObject ? mediator.name : mediator;
-                                            const image = isObject ? mediator.image : null;
+                                            const details = getMediatorDetails(mediator);
+                                            if (!details) return null;
 
-                                            // If it's just a string, render as text
-                                            if (!isObject) return <span key={index} className="text-lg text-primary font-medium">{name}</span>;
-
-                                            // If object, render interactive button
                                             return (
                                                 <button
                                                     key={index}
-                                                    onClick={() => setSelectedMediator(mediator)}
+                                                    onClick={() => setSearchParams({ mediator: details.name })}
                                                     className="flex items-center gap-3 bg-white p-2 pr-4 rounded-full shadow-sm hover:shadow-md transition-all border border-transparent hover:border-gold/30 group"
                                                 >
                                                     <div className="w-10 h-10 rounded-full bg-stone-100 overflow-hidden shrink-0 border border-stone-200">
-                                                        {image ? (
-                                                            <img src={image} alt={name} className="w-full h-full object-cover" />
+                                                        {details.image ? (
+                                                            <img src={details.image} alt={details.name} className="w-full h-full object-cover" />
                                                         ) : (
                                                             <div className="w-full h-full flex items-center justify-center text-stone-400 text-xs font-bold">
-                                                                {name.charAt(0)}
+                                                                {details.name.charAt(0)}
                                                             </div>
                                                         )}
                                                     </div>
-                                                    <span className="text-sm font-bold text-primary group-hover:text-gold transition-colors">{name}</span>
+                                                    <span className="text-sm font-bold text-primary group-hover:text-gold transition-colors">{details.name}</span>
                                                 </button>
                                             );
                                         })}
@@ -254,32 +255,34 @@ export default function CourseDetail() {
             {/* Mediator Modal */}
             {selectedMediator && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-primary/40 backdrop-blur-sm" onClick={() => setSelectedMediator(null)} />
+                    <div className="absolute inset-0 bg-primary/40 backdrop-blur-sm" onClick={() => setSearchParams({})} />
                     <motion.div
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="bg-white max-w-2xl w-full rounded-3xl p-8 relative z-10 shadow-2xl max-h-[90vh] overflow-y-auto"
+                        className="bg-white max-w-2xl w-full rounded-3xl relative z-10 shadow-2xl max-h-[90vh] flex flex-col overflow-hidden"
                     >
-                        <button onClick={() => setSelectedMediator(null)} className="absolute top-6 right-6 text-gray-400 hover:text-primary transition-colors">
+                        <button onClick={() => setSearchParams({})} className="absolute top-6 right-6 text-gray-400 hover:text-primary transition-colors z-20">
                             <ArrowLeft size={24} className="rotate-180" />
                         </button>
 
-                        <div className="flex flex-col md:flex-row gap-8 items-start">
-                            <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-stone-100 overflow-hidden shrink-0 border-4 border-white shadow-lg mx-auto md:mx-0">
-                                {selectedMediator.image ? (
-                                    <img src={selectedMediator.image} alt={selectedMediator.name} className="w-full h-full object-cover" />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-stone-300 text-4xl font-serif">
-                                        {selectedMediator.name.charAt(0)}
-                                    </div>
-                                )}
-                            </div>
-                            <div>
-                                <h3 className="text-2xl font-serif text-primary mb-2 text-center md:text-left">{selectedMediator.name}</h3>
-                                <div className="w-10 h-1 bg-gold/30 mb-6 mx-auto md:mx-0 rounded-full" />
-                                <p className="text-lg text-gray-600 leading-relaxed font-light whitespace-pre-line text-center md:text-left">
-                                    {selectedMediator.bio || 'Sem biografia disponível.'}
-                                </p>
+                        <div className="overflow-y-auto p-8">
+                            <div className="flex flex-col md:flex-row gap-8 items-start">
+                                <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-stone-100 overflow-hidden shrink-0 border-4 border-white shadow-lg mx-auto md:mx-0">
+                                    {selectedMediator.image ? (
+                                        <img src={selectedMediator.image} alt={selectedMediator.name} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center text-stone-300 text-4xl font-serif">
+                                            {selectedMediator.name.charAt(0)}
+                                        </div>
+                                    )}
+                                </div>
+                                <div>
+                                    <h3 className="text-2xl font-serif text-primary mb-2 text-center md:text-left">{selectedMediator.name}</h3>
+                                    <div className="w-10 h-1 bg-gold/30 mb-6 mx-auto md:mx-0 rounded-full" />
+                                    <p className="text-lg text-gray-600 leading-relaxed font-light whitespace-pre-line text-center md:text-left">
+                                        {selectedMediator.bio || 'Sem biografia disponível.'}
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </motion.div>

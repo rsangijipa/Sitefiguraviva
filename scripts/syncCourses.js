@@ -39,14 +39,30 @@ function parseInstructions(content) {
         } else if (lowerLine.includes('início das aulas') || lowerLine.startsWith('date:') || lowerLine.startsWith('data:')) {
             data.date = line.substring(line.indexOf(':') + 1).trim();
             foundKey = true;
-        } else if (lowerLine.startsWith('mediator:') || lowerLine.startsWith('mediador:')) {
-            // Format: Mediador: Nome Sobrenome | Bio textual...
+        } else if (/^mediad(or|tor)\d*:?/i.test(lowerLine)) {
+            // Format: Mediador1: Nome Sobrenome | Bio textual...
             const content = line.substring(line.indexOf(':') + 1).trim();
             const parts = content.split('|');
             const name = parts[0].trim();
             const bio = parts.length > 1 ? parts[1].trim() : '';
 
-            data.mediators.push({ name, bio });
+            // Extract number to find matching image
+            const match = lowerLine.match(/^mediad(or|tor)(\d+):?/i);
+            let imagePath = null;
+
+            if (match && match[2]) {
+                const index = match[2];
+                // Try to find image with this index in the file list passed to this function? 
+                // We don't have access to files list here easily without passing it.
+                // Let's store the index on the object temp and resolve images later or pass files to this function.
+                // Better: we can assume the caller will fix image paths if we return a structure hinting at it, 
+                // OR better yet, let's pass 'files' and 'folderName' to parseInstructions.
+                // BUT changing function signature is bigger.
+                // Let's just return the "id" or "index" of the mediator and let the main loop resolve images.
+                data.mediators.push({ name, bio, _imageIndex: index });
+            } else {
+                data.mediators.push({ name, bio });
+            }
             foundKey = true;
         } else if (lowerLine.startsWith('description:') || lowerLine.startsWith('descrição:')) {
             data.description = line.substring(line.indexOf(':') + 1).trim();
@@ -129,7 +145,16 @@ async function syncCourses() {
                     link: parsedData.link || '',
                     image: imageFile ? `/cursos/${entry.name}/${imageFile}` : '',
                     images: imageFile ? [`/cursos/${entry.name}/${imageFile}`] : [],
-                    mediators: parsedData.mediators || [],
+                    mediators: parsedData.mediators.map(m => {
+                        if (m._imageIndex) {
+                            const medImg = files.find(f => f.toLowerCase().startsWith(`mediador${m._imageIndex}.`) || f.toLowerCase().startsWith(`mediator${m._imageIndex}.`));
+                            if (medImg) {
+                                m.image = `/cursos/${entry.name}/${medImg}`;
+                            }
+                            delete m._imageIndex;
+                        }
+                        return m;
+                    }) || [],
                     tags: parsedData.tags || [],
                     details: {
                         intro: parsedData.intro || '',
