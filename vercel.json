@@ -1,27 +1,16 @@
 {
-    "rewrites": [
+    "version": 2,
+    "builds": [
         {
-            "source": "/(.*)",
-            "destination": "/index.html"
+            "src": "next-platform/package.json",
+            "use": "@vercel/next"
         }
     ],
-    "headers": [
+    "routes": [
         {
-            "source": "/(.*)",
-            "headers": [
-                {
-                    "key": "X-Content-Type-Options",
-                    "value": "nosniff"
-                },
-                {
-                    "key": "X-Frame-Options",
-                    "value": "DENY"
-                },
-                {
-                    "key": "X-XSS-Protection",
-                    "value": "1; mode=block"
-                }
-            ]
+            "src": "/(.*)",
+            "dest": "/next-platform/$1"
         }
-    ]
+    ],
+    "installCommand": "npm install --prefix next-platform"
 }
