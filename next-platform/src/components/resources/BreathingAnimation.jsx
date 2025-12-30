@@ -34,7 +34,7 @@ const Mandala = ({ phase, theme, scale }) => {
                     key={ringIndex}
                     className="absolute inset-0 flex items-center justify-center"
                     style={{
-                        animation: `spin ${80 + ringIndex * 20}s linear infinite ${ring.speed < 0 ? 'reverse' : 'normal'}`
+                        animation: `spin ${120 + ringIndex * 40}s linear infinite ${ring.speed < 0 ? 'reverse' : 'normal'}`
                     }}
                 >
                     {Array.from({ length: ring.count }).map((_, i) => {
@@ -42,18 +42,19 @@ const Mandala = ({ phase, theme, scale }) => {
                         return (
                             <div
                                 key={i}
-                                className="absolute origin-center transition-all duration-1000"
+                                className="absolute transition-all duration-1000"
                                 style={{
                                     width: `${ring.size}px`,
                                     height: `${ring.size}px`,
-                                    background: `linear-gradient(135deg, ${theme.primary}88, ${theme.secondary}88)`,
-                                    transform: `rotate(${rotation}deg) translate(${ring.radius}px) rotate(45deg)`,
+                                    background: `linear-gradient(135deg, ${theme.primary}55, ${theme.secondary}55)`,
+                                    transform: `rotate(${rotation}deg) translateY(-${ring.radius}px) rotate(45deg)`,
+                                    transformOrigin: 'center center',
                                     borderRadius: '50% 0 50% 0',
-                                    opacity: ring.opacity,
-                                    backdropFilter: 'blur(2px)',
-                                    border: '1px solid rgba(255,255,255,0.1)',
-                                    boxShadow: `0 0 15px ${theme.secondary}40`,
-                                    mixBlendMode: 'screen',
+                                    opacity: ring.opacity * 0.6,
+                                    backdropFilter: 'blur(1px)',
+                                    border: '1px solid rgba(255,255,255,0.08)',
+                                    boxShadow: `0 0 10px ${theme.secondary}30`,
+                                    mixBlendMode: 'normal',
                                     filter: `hue-rotate(${ring.hueOffset}deg)`,
                                 }}
                             />
