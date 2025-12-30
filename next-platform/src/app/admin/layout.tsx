@@ -6,7 +6,7 @@ import { useApp } from '../../context/AppContext';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    LayoutDashboard, BookOpen, PenTool, Settings, LogOut, Globe, Loader2, Home, X
+    LayoutDashboard, BookOpen, PenTool, Settings, LogOut, Globe, Loader2, Home, X, FileText
 } from 'lucide-react';
 
 export default function AdminLayout({ children }) {
@@ -66,6 +66,7 @@ export default function AdminLayout({ children }) {
         { icon: Globe, label: 'Google Suite', path: '/admin/google' },
         { icon: PenTool, label: 'Diário Visual', path: '/admin/blog' },
         { icon: BookOpen, label: 'Galeria', path: '/admin/gallery' },
+        { icon: FileText, label: 'Documentos', path: '/admin/documents' },
         { icon: Settings, label: 'Configurações', path: '/admin/settings' },
     ];
 

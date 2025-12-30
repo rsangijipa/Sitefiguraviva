@@ -33,7 +33,7 @@ export default function AdminContentPage() {
 
         setUploading(true);
         try {
-            const urls = await uploadFiles([file], 'courses'); // Use 'courses' bucket as it exists
+            const urls = await uploadFiles([file], 'avatars'); // Consistently use 'avatars' bucket
             const url = urls[0];
 
             if (target === 'founder') {
