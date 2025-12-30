@@ -2,7 +2,19 @@
 
 import { motion } from 'framer-motion';
 import { FileText } from 'lucide-react';
-import { libraryContent } from '../../data/staticContent';
+const libraryContent = {
+    title: "Biblioteca Virtual",
+    items: [
+        {
+            id: '1',
+            title: 'Em breve',
+            coverText: '...',
+            type: 'PDF',
+            description: 'Conteúdo em atualização.',
+            fileUrl: '#'
+        }
+    ]
+};
 import { Card, CardContent } from '../ui/Card';
 
 export default function LibrarySection() {
