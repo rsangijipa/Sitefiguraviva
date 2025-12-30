@@ -5,6 +5,8 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
+import { Skeleton } from '../ui/Skeleton';
+import { Card } from '../ui/Card';
 
 const fadeInUp = {
     hidden: { opacity: 0, y: 20 },
@@ -56,7 +58,7 @@ export default function CoursesSection({ courses = [], onOpenCalendar, loading =
                 >
                     <div className="max-w-2xl">
                         <span className="text-xs font-bold tracking-[0.2em] uppercase text-primary/60 mb-4 block">Formação & Estudos</span>
-                        <h2 className="text-4xl md:text-5xl font-serif text-primary leading-tight mb-6">
+                        <h2 className="heading-section mb-6">
                             Ciclos de <span className="italic text-gold font-light">Aprendizagem</span>
                         </h2>
                         <p className="text-lg text-primary/70 leading-relaxed font-light text-balance">
@@ -74,11 +76,11 @@ export default function CoursesSection({ courses = [], onOpenCalendar, loading =
                         {loading ? (
                             [1, 2, 3].map((i) => (
                                 <div key={i} className="flex-shrink-0 w-80 md:w-96 snap-center">
-                                    <div className="flex flex-col h-full bg-white rounded-2xl p-4 shadow-sm animate-pulse border border-gray-100/50">
-                                        <div className="aspect-[4/3] bg-gray-200 rounded-xl mb-6 relative overflow-hidden" />
+                                    <div className="flex flex-col h-full bg-white rounded-2xl p-4 shadow-sm border border-stone-100/50">
+                                        <Skeleton className="aspect-[4/3] w-full rounded-xl mb-6" />
                                         <div className="space-y-4 flex-1">
-                                            <div className="h-6 bg-gray-200 rounded w-3/4" />
-                                            <div className="h-4 bg-gray-200 rounded w-1/4" />
+                                            <Skeleton className="h-6 w-3/4 rounded" />
+                                            <Skeleton className="h-4 w-1/4 rounded" />
                                         </div>
                                     </div>
                                 </div>
@@ -97,68 +99,70 @@ export default function CoursesSection({ courses = [], onOpenCalendar, loading =
                                         whileInView={{ opacity: 1, x: 0 }}
                                         viewport={{ once: true }}
                                         transition={{ delay: index * 0.1 }}
-                                        className="flex-shrink-0 w-80 md:w-96 snap-center group flex flex-col h-full bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow duration-300"
+                                        className="flex-shrink-0 w-80 md:w-96 snap-center group h-full"
                                     >
-                                        <div className="aspect-[4/3] overflow-hidden rounded-xl mb-6 relative">
-                                            <Link href={`/curso/${course.id}`} className="block w-full h-full relative">
-                                                <Image
-                                                    src={course.image || course.images?.[0] || 'https://via.placeholder.com/400x300'}
-                                                    alt={course.title}
-                                                    fill
-                                                    sizes="(max-width: 768px) 100vw, 33vw"
-                                                    className={`object-cover transition-transform duration-700 ease-out group-hover:scale-105 ${isClosed ? 'grayscale opacity-70' : ''}`}
-                                                />
-                                            </Link>
-                                            <div className="absolute top-3 left-3 flex flex-wrap gap-2 pointer-events-none">
-                                                {course.category && (
-                                                    <span className="bg-white/95 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider text-primary shadow-sm border border-gray-100">
-                                                        {course.category === 'Formacao' ? 'Formação' : course.category === 'GrupoEstudos' ? 'Grupo de Estudos' : 'Curso Livre'}
-                                                    </span>
-                                                )}
-                                                {isClosed && (
-                                                    <span className="bg-red-500/90 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider text-white shadow-sm">
-                                                        {course.status}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        <div className="flex-1 flex flex-col px-2">
-                                            <div className="mb-4">
-                                                <Link href={`/curso/${course.id}`} className="block">
-                                                    <h3 className="text-xl font-bold text-primary mb-2 leading-tight group-hover:text-gold transition-colors">
-                                                        {course.title}
-                                                    </h3>
+                                        <Card className="h-full p-4">
+                                            <div className="aspect-[4/3] overflow-hidden rounded-xl mb-6 relative">
+                                                <Link href={`/curso/${course.id}`} className="block w-full h-full relative">
+                                                    <Image
+                                                        src={course.image || course.images?.[0] || 'https://via.placeholder.com/400x300'}
+                                                        alt={course.title}
+                                                        fill
+                                                        sizes="(max-width: 768px) 100vw, 33vw"
+                                                        className={`object-cover transition-transform duration-700 ease-out group-hover:scale-105 ${isClosed ? 'grayscale opacity-70' : ''}`}
+                                                    />
                                                 </Link>
-                                                {course.subtitle && (
-                                                    <p className="text-sm text-primary/60 italic mb-2">
-                                                        {course.subtitle}
-                                                    </p>
-                                                )}
-                                                <p className="text-xs font-medium uppercase tracking-wider text-sage">
-                                                    {course.date}
-                                                </p>
+                                                <div className="absolute top-3 left-3 flex flex-wrap gap-2 pointer-events-none">
+                                                    {course.category && (
+                                                        <span className="bg-white/95 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider text-primary shadow-sm border border-gray-100">
+                                                            {course.category === 'Formacao' ? 'Formação' : course.category === 'GrupoEstudos' ? 'Grupo de Estudos' : 'Curso Livre'}
+                                                        </span>
+                                                    )}
+                                                    {isClosed && (
+                                                        <span className="bg-red-500/90 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider text-white shadow-sm">
+                                                            {course.status}
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </div>
 
-                                            <p className="text-primary/70 text-sm leading-relaxed mb-6 line-clamp-3">
-                                                {course.description || course.details?.intro}
-                                            </p>
-
-                                            <div className="mt-auto pt-4 border-t border-gray-100">
-                                                {isClosed ? (
-                                                    <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400 cursor-not-allowed py-2">
-                                                        Inscrições Encerradas
-                                                    </span>
-                                                ) : (
-                                                    <Link
-                                                        href={`/curso/${course.id}`}
-                                                        className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary group-hover:gap-4 transition-all py-3 px-2 -ml-2 rounded-lg hover:bg-gray-50 bg-transparent active:scale-95 touch-manipulation"
-                                                    >
-                                                        Saiba Mais <span className="text-gold">→</span>
+                                            <div className="flex-1 flex flex-col px-2">
+                                                <div className="mb-4">
+                                                    <Link href={`/curso/${course.id}`} className="block">
+                                                        <h3 className="text-xl font-bold text-primary mb-2 leading-tight group-hover:text-gold transition-colors">
+                                                            {course.title}
+                                                        </h3>
                                                     </Link>
-                                                )}
+                                                    {course.subtitle && (
+                                                        <p className="text-sm text-primary/60 italic mb-2">
+                                                            {course.subtitle}
+                                                        </p>
+                                                    )}
+                                                    <p className="text-xs font-medium uppercase tracking-wider text-sage">
+                                                        {course.date}
+                                                    </p>
+                                                </div>
+
+                                                <p className="text-primary/70 text-sm leading-relaxed mb-6 line-clamp-3">
+                                                    {course.description || course.details?.intro}
+                                                </p>
+
+                                                <div className="mt-auto pt-4 border-t border-gray-100">
+                                                    {isClosed ? (
+                                                        <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400 cursor-not-allowed py-2">
+                                                            Inscrições Encerradas
+                                                        </span>
+                                                    ) : (
+                                                        <Link
+                                                            href={`/curso/${course.id}`}
+                                                            className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary group-hover:gap-4 transition-all py-3 px-2 -ml-2 rounded-lg hover:bg-gray-50 bg-transparent active:scale-95 touch-manipulation"
+                                                        >
+                                                            Saiba Mais <span className="text-gold">→</span>
+                                                        </Link>
+                                                    )}
+                                                </div>
                                             </div>
-                                        </div>
+                                        </Card>
                                     </motion.article>
                                 );
                             })

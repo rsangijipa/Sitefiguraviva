@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import { ArrowRight, ArrowUpRight, FileText } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { Skeleton } from '../ui/Skeleton';
+import { Card, CardContent } from '../ui/Card';
 
 interface BlogPost {
     id: string | number;
@@ -28,7 +30,7 @@ export default function BlogSection({ blogPosts = [], onOpenReader, loading = fa
                 <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
                     <div className="max-w-xl">
                         <span className="text-xs font-bold tracking-[0.2em] uppercase text-gold mb-4 block">Reflexões & Saberes</span>
-                        <h2 className="text-4xl md:text-5xl font-serif text-primary leading-tight">Blog Figura Viva</h2>
+                        <h2 className="heading-section">Blog Figura Viva</h2>
                         <p className="text-lg text-text/60 mt-4">
                             Artigos, ensaios e pílulas de awareness sobre a clínica, a vida e o encontro.
                         </p>
@@ -41,19 +43,17 @@ export default function BlogSection({ blogPosts = [], onOpenReader, loading = fa
                 <div className="grid md:grid-cols-3 gap-12">
                     {loading ? (
                         [1, 2, 3].map((i) => (
-                            <div key={i} className="animate-pulse">
-                                <div className="aspect-[16/10] bg-gray-200 rounded-2xl mb-8 relative overflow-hidden">
-                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-[shimmer_1.5s_infinite]" />
-                                </div>
+                            <div key={i}>
+                                <Skeleton className="aspect-[16/10] rounded-2xl mb-8 w-full" />
                                 <div className="space-y-4">
                                     <div className="flex gap-3">
-                                        <div className="h-3 bg-gray-200 rounded w-1/4" />
-                                        <div className="h-3 bg-gray-200 rounded w-1/5" />
+                                        <Skeleton className="h-3 w-1/4 rounded" />
+                                        <Skeleton className="h-3 w-1/5 rounded" />
                                     </div>
-                                    <div className="h-8 bg-gray-200 rounded w-3/4" />
+                                    <Skeleton className="h-8 w-3/4 rounded" />
                                     <div className="space-y-2">
-                                        <div className="h-4 bg-gray-200 rounded w-full" />
-                                        <div className="h-4 bg-gray-200 rounded w-2/3" />
+                                        <Skeleton className="h-4 w-full rounded" />
+                                        <Skeleton className="h-4 w-2/3 rounded" />
                                     </div>
                                 </div>
                             </div>
@@ -67,36 +67,37 @@ export default function BlogSection({ blogPosts = [], onOpenReader, loading = fa
                                     whileInView={{ opacity: 1, y: 0 }}
                                     viewport={{ once: true }}
                                     transition={{ delay: index * 0.1 }}
-                                    className="bg-white rounded-[2rem] border border-gray-100 overflow-hidden flex flex-col shadow-sm hover:shadow-xl transition-all duration-500 group"
                                 >
-                                    <div className={`h-64 ${index % 2 === 0 ? 'bg-paper/50' : 'bg-accent/5'} flex items-center justify-center relative overflow-hidden p-8`}>
-                                        <span className="absolute top-6 left-6 z-10 px-3 py-1 text-[8px] font-bold uppercase tracking-widest rounded bg-white shadow-sm text-primary">
-                                            Biblioteca
-                                        </span>
-                                        <div className={`text-primary/10 font-serif text-8xl absolute -right-4 -bottom-4 select-none group-hover:text-gold/10 transition-colors`}>
-                                            {post.title.substring(0, 4).toUpperCase()}
+                                    <Card className="rounded-[2rem] overflow-hidden group h-full flex flex-col border-gray-100 hover:border-gold/30">
+                                        <div className={`h-64 ${index % 2 === 0 ? 'bg-paper/50' : 'bg-accent/5'} flex items-center justify-center relative overflow-hidden p-8 shrink-0`}>
+                                            <span className="absolute top-6 left-6 z-10 px-3 py-1 text-[8px] font-bold uppercase tracking-widest rounded bg-white shadow-sm text-primary">
+                                                Biblioteca
+                                            </span>
+                                            <div className={`text-primary/10 font-serif text-8xl absolute -right-4 -bottom-4 select-none group-hover:text-gold/10 transition-colors`}>
+                                                {post.title.substring(0, 4).toUpperCase()}
+                                            </div>
+                                            <h3 className={`font-serif text-6xl ${index % 2 === 0 ? 'text-gold' : 'text-accent'} group-hover:scale-105 transition-transform duration-700 select-none`}>
+                                                {post.title.substring(0, 4).toUpperCase()}
+                                            </h3>
                                         </div>
-                                        <h3 className={`font-serif text-6xl ${index % 2 === 0 ? 'text-gold' : 'text-accent'} group-hover:scale-105 transition-transform duration-700 select-none`}>
-                                            {post.title.substring(0, 4).toUpperCase()}
-                                        </h3>
-                                    </div>
-                                    <div className="p-8 flex flex-col flex-1">
-                                        <div className="flex items-center gap-2 text-text/40 text-[10px] font-bold uppercase tracking-widest mb-4">
-                                            <FileText size={14} /> {post.category || 'Artigo Técnico'}
-                                        </div>
-                                        <h4 className="font-serif text-2xl text-primary leading-tight mb-4 group-hover:text-gold transition-colors">
-                                            {post.title}
-                                        </h4>
-                                        <p className="text-sm text-text/60 mb-8 leading-relaxed line-clamp-3">
-                                            {post.excerpt || "Clique para ler o artigo completo extraído do arquivo PDF original."}
-                                        </p>
-                                        <button
-                                            onClick={() => onOpenReader(post)}
-                                            className="mt-auto text-primary font-bold text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 hover:text-gold transition-colors"
-                                        >
-                                            Ler Artigo <ArrowRight size={14} />
-                                        </button>
-                                    </div>
+                                        <CardContent className="p-8 flex flex-col flex-1">
+                                            <div className="flex items-center gap-2 text-text/40 text-[10px] font-bold uppercase tracking-widest mb-4">
+                                                <FileText size={14} /> {post.category || 'Artigo Técnico'}
+                                            </div>
+                                            <h4 className="font-serif text-2xl text-primary leading-tight mb-4 group-hover:text-gold transition-colors">
+                                                {post.title}
+                                            </h4>
+                                            <p className="text-sm text-text/60 mb-8 leading-relaxed line-clamp-3">
+                                                {post.excerpt || "Clique para ler o artigo completo extraído do arquivo PDF original."}
+                                            </p>
+                                            <button
+                                                onClick={() => onOpenReader(post)}
+                                                className="mt-auto text-primary font-bold text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 hover:text-gold transition-colors"
+                                            >
+                                                Ler Artigo <ArrowRight size={14} />
+                                            </button>
+                                        </CardContent>
+                                    </Card>
                                 </motion.div>
                             ))}
 
@@ -108,41 +109,45 @@ export default function BlogSection({ blogPosts = [], onOpenReader, loading = fa
                                     viewport={{ once: true }}
                                     transition={{ delay: index * 0.1 }}
                                 >
-                                    <Link href={`/blog/${post.id}`} className="group block">
-                                        <div className="relative mb-8 overflow-hidden rounded-2xl aspect-[16/10] bg-paper">
-                                            <Image
-                                                src={post.image || `https://images.unsplash.com/photo-${1550000000000 + index}?auto=format&fit=crop&q=80&w=800`}
-                                                alt={post.title}
-                                                fill
-                                                sizes="(max-width: 768px) 100vw, 33vw"
-                                                className="object-cover transition-transform duration-700 group-hover:scale-110"
-                                            />
-                                            <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
-                                                <span className="bg-white/90 backdrop-blur px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest text-primary">
-                                                    Ler Artigo
-                                                </span>
+                                    <Link href={`/blog/${post.id}`} className="group block h-full">
+                                        <Card className="h-full border-transparent shadow-none hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-0 overflow-hidden rounded-2xl bg-transparent hover:bg-white group-hover:border-gray-100/50">
+                                            <div className="relative mb-6 overflow-hidden aspect-[16/10] bg-paper rounded-2xl">
+                                                <Image
+                                                    src={post.image || `https://images.unsplash.com/photo-${1550000000000 + index}?auto=format&fit=crop&q=80&w=800`}
+                                                    alt={post.title}
+                                                    fill
+                                                    sizes="(max-width: 768px) 100vw, 33vw"
+                                                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                                                />
+                                                <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
+                                                    <span className="bg-white/90 backdrop-blur px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest text-primary">
+                                                        Ler Artigo
+                                                    </span>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div className="space-y-4">
-                                            <div className="flex items-center gap-3">
-                                                <span className="text-[10px] font-bold tracking-widest uppercase text-gold">
-                                                    {post.category || 'Gestalt-Terapia'}
-                                                </span>
-                                                <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-                                                <span className="text-[10px] font-bold tracking-widest uppercase text-text/40">
-                                                    {post.date}
-                                                </span>
-                                            </div>
-                                            <h3 className="font-serif text-2xl text-primary leading-snug group-hover:text-gold transition-colors duration-300">
-                                                {post.title}
-                                            </h3>
-                                            <p className="text-sm text-text/60 line-clamp-2 leading-relaxed">
-                                                {post.excerpt}
-                                            </p>
-                                            <div className="pt-2 flex items-center gap-2 text-primary font-bold text-[10px] uppercase tracking-widest">
-                                                Continuar Lendo <ArrowUpRight size={12} />
-                                            </div>
-                                        </div>
+                                            <CardContent className="p-2 pt-0 md:p-4 md:pt-0">
+                                                <div className="space-y-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="text-[10px] font-bold tracking-widest uppercase text-gold">
+                                                            {post.category || 'Gestalt-Terapia'}
+                                                        </span>
+                                                        <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+                                                        <span className="text-[10px] font-bold tracking-widest uppercase text-text/40">
+                                                            {post.date}
+                                                        </span>
+                                                    </div>
+                                                    <h3 className="font-serif text-2xl text-primary leading-snug group-hover:text-gold transition-colors duration-300">
+                                                        {post.title}
+                                                    </h3>
+                                                    <p className="text-sm text-text/60 line-clamp-2 leading-relaxed">
+                                                        {post.excerpt}
+                                                    </p>
+                                                    <div className="pt-2 flex items-center gap-2 text-primary font-bold text-[10px] uppercase tracking-widest group-hover:gap-3 transition-all">
+                                                        Continuar Lendo <ArrowUpRight size={12} />
+                                                    </div>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
                                     </Link>
                                 </motion.div>
                             ))}

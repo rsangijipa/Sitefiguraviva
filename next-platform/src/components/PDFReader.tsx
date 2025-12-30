@@ -10,6 +10,7 @@ interface PDFReaderProps {
     article: {
         title: string;
         pdfUrl?: string;
+        pdf_url?: string;
         content?: string;
     } | null;
 }
@@ -38,9 +39,9 @@ const PDFReader = ({ isOpen, onClose, article }: PDFReaderProps) => {
 
                     {/* Main Content Area */}
                     <div className="flex-1 w-full h-full bg-gray-100 relative overflow-hidden">
-                        {article.pdfUrl ? (
+                        {(article.pdf_url || article.pdfUrl) ? (
                             <iframe
-                                src={`${article.pdfUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`}
+                                src={`${article.pdf_url || article.pdfUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`}
                                 className="w-full h-full border-none block"
                                 title={article.title}
                             />

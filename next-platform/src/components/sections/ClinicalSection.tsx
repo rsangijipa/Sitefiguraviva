@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { MessageCircle, FileText } from 'lucide-react';
+import { buttonVariants } from '../ui/Button';
 
 export default function ClinicalSection() {
     return (
@@ -38,7 +39,7 @@ export default function ClinicalSection() {
                     transition={{ duration: 1, delay: 0.2, ease: [0.23, 1, 0.32, 1] }}
                 >
                     <span className="text-accent font-bold uppercase tracking-[0.3em] text-[10px] mb-8 block">Espaço Clínico</span>
-                    <h2 className="font-serif text-5xl md:text-7xl text-primary mb-10 leading-[1.1]">A Arte da <br /><span className="italic text-gold italic font-light">Presença</span></h2>
+                    <h2 className="heading-section mb-10 text-balance">A Arte da <br /><span className="italic text-gold italic font-light">Presença</span></h2>
                     <p className="text-primary/70 mb-12 leading-relaxed font-light text-xl text-balance">
                         Na Gestalt-Terapia, não buscamos apenas "consertar" o que está errado. Buscamos ampliar a <span className="text-primary font-medium italic">awareness</span> sobre como você existe no mundo aqui e agora.
                     </p>
@@ -47,7 +48,11 @@ export default function ClinicalSection() {
                         <motion.button
                             whileHover={{ y: -5, scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
-                            className="flex items-center justify-center gap-4 bg-[#25D366] text-white px-8 py-5 rounded-2xl shadow-xl shadow-green-900/10 hover:shadow-green-900/20 transition-soft active:shadow-inner"
+                            className={buttonVariants({
+                                variant: 'primary',
+                                size: 'lg',
+                                className: 'bg-[#25D366] hover:bg-[#20bd5a] text-white shadow-xl shadow-green-900/10 hover:shadow-green-900/20 rounded-2xl gap-4'
+                            })}
                         >
                             <MessageCircle size={20} />
                             <span className="font-bold text-[11px] uppercase tracking-widest">Agendar via WhatsApp</span>
@@ -56,7 +61,11 @@ export default function ClinicalSection() {
                         <motion.button
                             whileHover={{ y: -5, scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
-                            className="flex items-center justify-center gap-4 bg-white border border-primary/5 text-primary px-8 py-5 rounded-2xl hover:bg-gray-50 transition-soft shadow-sm hover:shadow-lg"
+                            className={buttonVariants({
+                                variant: 'secondary',
+                                size: 'lg',
+                                className: 'rounded-2xl gap-4 border-primary/5'
+                            })}
                             onClick={() => window.open('https://docs.google.com/forms/u/0/', '_blank')}
                         >
                             <FileText size={20} />

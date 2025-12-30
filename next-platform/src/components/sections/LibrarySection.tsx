@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { FileText } from 'lucide-react';
 import { libraryContent } from '../../data/staticContent';
+import { Card, CardContent } from '../ui/Card';
 
 export default function LibrarySection() {
     return (
@@ -20,36 +21,37 @@ export default function LibrarySection() {
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
-                            className="bg-white rounded-[2rem] border border-gray-100 overflow-hidden flex flex-col shadow-sm hover:shadow-xl transition-all duration-500 group"
                         >
-                            <div className="h-64 bg-paper/50 flex items-center justify-center relative overflow-hidden p-8">
-                                <span className="absolute top-6 left-6 z-10 px-3 py-1 text-[8px] font-bold uppercase tracking-widest rounded bg-white shadow-sm text-primary">
-                                    {item.title}
-                                </span>
-                                <div className="text-primary/10 font-serif text-8xl absolute -right-4 -bottom-4 select-none group-hover:text-gold/10 transition-colors">
-                                    {item.coverText}
+                            <Card className="rounded-[2rem] overflow-hidden group h-full flex flex-col border-gray-100 hover:border-gold/30">
+                                <div className="h-64 bg-paper/50 flex items-center justify-center relative overflow-hidden p-8 shrink-0">
+                                    <span className="absolute top-6 left-6 z-10 px-3 py-1 text-[8px] font-bold uppercase tracking-widest rounded bg-white shadow-sm text-primary">
+                                        {item.title}
+                                    </span>
+                                    <div className="text-primary/10 font-serif text-8xl absolute -right-4 -bottom-4 select-none group-hover:text-gold/10 transition-colors">
+                                        {item.coverText}
+                                    </div>
+                                    <h3 className="font-serif text-6xl text-gold group-hover:scale-105 transition-transform duration-700 select-none">
+                                        {item.coverText}
+                                    </h3>
                                 </div>
-                                <h3 className="font-serif text-6xl text-gold group-hover:scale-105 transition-transform duration-700 select-none">
-                                    {item.coverText}
-                                </h3>
-                            </div>
-                            <div className="p-8 flex flex-col flex-1">
-                                <div className="flex items-center gap-2 text-primary/40 text-[10px] font-bold uppercase tracking-widest mb-4">
-                                    <FileText size={14} /> {item.type}
-                                </div>
-                                <h4 className="font-serif text-2xl text-primary leading-tight mb-4 group-hover:text-gold transition-colors">
-                                    {item.title}
-                                </h4>
-                                <p className="text-sm text-primary/60 mb-8 leading-relaxed">
-                                    {item.description}
-                                </p>
-                                <button
-                                    onClick={() => window.open(item.fileUrl, '_blank')}
-                                    className="w-full py-4 border border-gray-200 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-primary hover:text-white hover:border-primary transition-all flex items-center justify-center gap-2"
-                                >
-                                    Ler PDF <FileText size={14} />
-                                </button>
-                            </div>
+                                <CardContent className="p-8 flex flex-col flex-1">
+                                    <div className="flex items-center gap-2 text-primary/40 text-[10px] font-bold uppercase tracking-widest mb-4">
+                                        <FileText size={14} /> {item.type}
+                                    </div>
+                                    <h4 className="font-serif text-2xl text-primary leading-tight mb-4 group-hover:text-gold transition-colors">
+                                        {item.title}
+                                    </h4>
+                                    <p className="text-sm text-primary/60 mb-8 leading-relaxed">
+                                        {item.description}
+                                    </p>
+                                    <button
+                                        onClick={() => window.open(item.fileUrl, '_blank')}
+                                        className="mt-auto w-full py-4 border border-gray-200 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-primary hover:text-white hover:border-primary transition-all flex items-center justify-center gap-2"
+                                    >
+                                        Ler PDF <FileText size={14} />
+                                    </button>
+                                </CardContent>
+                            </Card>
                         </motion.div>
                     ))}
                 </div>

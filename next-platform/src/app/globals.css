@@ -2,6 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* Brand Colors */
+  --color-primary: #412726;
+  --color-secondary: #7A5A54;
+  --color-accent: #5D7052;
+  --color-accent-light: #AABEAB;
+
+  /* Surface & Background */
+  --color-paper: #F8F1E5;
+  --color-surface: #FBFAEC;
+  --color-text: #212328;
+  --color-muted: #8C8C8C;
+
+  /* Highlights */
+  --color-gold: #B08D55;
+  --color-gold-dark: #8C6A30;
+  --color-gold-light: #EAE4A6;
+  --color-beige: #E4CDB4;
+
+  /* Feedback */
+  --color-success: #5D7052;
+  --color-error: #991B1B;
+
+  /* Touch Targets */
+  --min-touch-target: 44px;
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;
@@ -62,6 +89,14 @@
   /* Typography Utilities */
   .heading-hero {
     @apply font-serif font-bold text-fluid-h1 leading-[1.1] text-primary tracking-tight;
+  }
+
+  .heading-section {
+    @apply font-serif font-bold text-fluid-h2 text-primary leading-tight;
+  }
+
+  .heading-card {
+    @apply font-serif font-bold text-fluid-h3 text-primary leading-snug;
   }
 
   .text-body-lg {

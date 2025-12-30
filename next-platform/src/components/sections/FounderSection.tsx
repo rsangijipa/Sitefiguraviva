@@ -16,7 +16,7 @@ export default function FounderSection() {
                         className="order-2 lg:order-1"
                     >
                         <span className="text-xs font-bold tracking-[0.2em] uppercase text-gold mb-4 block">Fundadora</span>
-                        <h2 className="text-4xl md:text-5xl font-serif text-primary mb-8 leading-tight">Lilian Vanessa <span className="italic text-gold font-light">Nicacio Gusmão Vianei</span></h2>
+                        <h2 className="heading-section mb-8">Lilian Vanessa <span className="italic text-gold font-light">Nicacio Gusmão Vianei</span></h2>
 
                         <div className="space-y-6 text-lg text-text/80 leading-relaxed font-light">
                             <p>

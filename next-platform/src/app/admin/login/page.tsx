@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useApp } from '@/context/AppContext';
@@ -12,9 +12,11 @@ export default function AdminLogin() {
     const router = useRouter();
 
     // Redirect if already authenticated
-    if (isAuthenticated) {
-        router.push('/admin');
-    }
+    useEffect(() => {
+        if (isAuthenticated) {
+            router.replace('/admin');
+        }
+    }, [isAuthenticated, router]);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();

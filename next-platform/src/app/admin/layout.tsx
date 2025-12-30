@@ -59,9 +59,15 @@ export default function AdminLayout({ children }) {
             <aside className="w-80 bg-primary text-paper flex flex-col fixed h-full z-20 shadow-[20px_0_60px_rgba(0,0,0,0.05)]">
                 <div className="p-12">
                     <h1 className="font-serif text-3xl tracking-tight mb-2">Figura <span className="font-light text-gold italic">Viva</span></h1>
-                    <div className="flex items-center gap-2 opacity-40">
-                        <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-                        <p className="text-[9px] uppercase tracking-[0.3em] font-bold">Admin Panel v2.0</p>
+                    <div className="flex flex-col gap-4 mt-4">
+                        <Link
+                            href="/"
+                            className="flex items-center gap-2 text-[9px] uppercase tracking-[0.3em] font-bold text-paper/40 hover:text-gold transition-colors w-fit group py-2"
+                        >
+                            <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                            Admin Panel v2.0
+                            <span className="opacity-0 group-hover:opacity-100 transition-opacity ml-2">← Voltar ao Site</span>
+                        </Link>
                     </div>
                 </div>
 
