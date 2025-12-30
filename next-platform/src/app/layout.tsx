@@ -18,10 +18,29 @@ const lato = Lato({
 });
 
 export const metadata: Metadata = {
-    title: "Instituto Figura Viva | Gestalt-Terapia",
-    description: "Um espaço vivo de acolhimento clínico e formação profissional em Gestalt-Terapia.",
+    title: {
+        default: "Instituto Figura Viva | Gestalt-Terapia & Formação",
+        template: "%s | Instituto Figura Viva"
+    },
+    description: "Um espaço vivo de acolhimento clínico e formação profissional em Gestalt-Terapia. Encontros que transformam e florescem.",
+    keywords: ["Gestalt-Terapia", "Psicologia", "Formação Clínica", "Instituto Figura Viva", "Porto Velho", "Richard Sangi"],
+    authors: [{ name: "Instituto Figura Viva" }],
+    creator: "Richard Sangi",
+    openGraph: {
+        type: "website",
+        locale: "pt_BR",
+        url: "https://figuraviva.com.br",
+        title: "Instituto Figura Viva | Gestalt-Terapia",
+        description: "Acolhimento clínico e formação profissional em Gestalt-Terapia.",
+        siteName: "Instituto Figura Viva",
+    },
+    robots: {
+        index: true,
+        follow: true,
+    },
     icons: {
         icon: "/favicon.ico",
+        apple: "/apple-touch-icon.png",
     },
 };
 

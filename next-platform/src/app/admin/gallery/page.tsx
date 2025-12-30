@@ -66,21 +66,25 @@ export default function GalleryManager() {
             // Prepare payload
             const payload = {
                 ...formData,
-                tags: typeof formData.tags === 'string' ? formData.tags.split(',').map(t => t.trim()).filter(Boolean) : formData.tags
+                // The database schema uses TEXT for tags, so we should join them back if they were split
+                tags: typeof formData.tags === 'string'
+                    ? formData.tags
+                    : (Array.isArray(formData.tags) ? formData.tags.join(', ') : '')
             };
 
             if (formData.id) {
-                // Update implementation would go here if service supports it
-                // await galleryService.update(formData.id, payload);
-                addToast("Edição em breve!", 'info'); // Placeholder as noted in logs
+                await galleryService.update(formData.id, payload);
+                addToast('Imagem atualizada com sucesso!', 'success');
             } else {
-                await galleryService.create(payload);
+                // Remove id from payload for new entries
+                const { id, ...createPayload } = payload;
+                await galleryService.create(createPayload);
+                addToast('Imagem salva com sucesso!', 'success');
             }
 
             await fetchGallery();
             setFormData(initialForm);
             setIsEditing(false);
-            addToast('Imagem salva com sucesso!', 'success');
         } catch (error) {
             console.error("Error saving gallery item:", error);
             addToast('Erro ao salvar item.', 'error');
@@ -109,22 +113,61 @@ export default function GalleryManager() {
         setIsEditing(true);
     };
 
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('Todos');
+
+    const filteredGallery = gallery.filter(item => {
+        const matchesSearch = item.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            item.caption?.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesCategory = selectedCategory === 'Todos' || item.category === selectedCategory;
+        return matchesSearch && matchesCategory;
+    });
+
     return (
         <div className="space-y-12 pb-20">
-            <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+            <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
                 <div>
                     <h3 className="font-serif text-3xl mb-2 text-primary">Galeria de Imagens</h3>
-                    <p className="text-primary/40 text-sm max-w-lg">Gerencie as imagens exibidas na galeria do site. Adicione fotos de eventos, workshops e momentos especiais.</p>
+                    <p className="text-primary/40 text-sm max-w-lg">Gerencie as imagens exibidas na galeria do site. Adicione fotos de encontros e momentos especiais.</p>
                 </div>
                 <button
                     onClick={() => { setIsEditing(true); setFormData(initialForm); }}
-                    className="bg-primary text-paper px-6 py-4 rounded-xl flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest hover:bg-gold transition-soft hover:shadow-lg transform active:scale-95 shadow-xl"
+                    className="bg-primary text-paper px-8 py-4 rounded-xl flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest hover:bg-gold transition-soft hover:shadow-xl transform active:scale-95 shadow-lg border border-primary/10"
                 >
                     <Plus size={16} /> Nova Imagem
                 </button>
             </header>
 
+            {/* Filters & Search */}
+            <div className="flex flex-col md:flex-row gap-6 items-end bg-white/40 backdrop-blur-md p-6 rounded-[2rem] border border-stone-200/60 shadow-sm">
+                <div className="flex-1 w-full space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-primary/40 ml-2">Buscar</label>
+                    <input
+                        type="text"
+                        placeholder="Filtrar por título ou legenda..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full bg-white border border-stone-200 rounded-xl px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gold/20 focus:border-gold transition-all"
+                    />
+                </div>
+                <div className="w-full md:w-64 space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-primary/40 ml-2">Filtrar Categoria</label>
+                    <select
+                        value={selectedCategory}
+                        onChange={(e) => setSelectedCategory(e.target.value)}
+                        className="w-full bg-white border border-stone-200 rounded-xl px-5 py-3 text-sm focus:outline-none focus:border-gold cursor-pointer"
+                    >
+                        <option value="Todos">Todas as Categorias</option>
+                        <option value="Geral">Geral</option>
+                        <option value="Eventos">Eventos</option>
+                        <option value="Workshops">Workshops</option>
+                        <option value="Espaço">Espaço</option>
+                    </select>
+                </div>
+            </div>
+
             <AnimatePresence>
+                {/* ... (Modal code remains identical but I'll make sure it's wrapped correctly) */}
                 {isEditing && (
                     <motion.div
                         initial={{ opacity: 0, scale: 0.98 }}
@@ -221,7 +264,7 @@ export default function GalleryManager() {
                     </div>
                 ) : (
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                        {gallery.map((item) => (
+                        {filteredGallery.map((item) => (
                             <div
                                 key={item.id}
                                 className="group relative aspect-square rounded-[2rem] overflow-hidden cursor-pointer border-2 border-transparent hover:border-gold/30 shadow-sm transition-all"
@@ -241,9 +284,9 @@ export default function GalleryManager() {
                                 </button>
                             </div>
                         ))}
-                        {gallery.length === 0 && (
+                        {filteredGallery.length === 0 && (
                             <div className="col-span-full py-20 text-center text-primary/30 border-2 border-dashed border-gray-100 rounded-[2rem]">
-                                Nenhuma imagem na galeria.
+                                Nenhuma imagem encontrada com os filtros atuais.
                             </div>
                         )}
                     </div>

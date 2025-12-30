@@ -12,9 +12,14 @@ export default function GalleryModal({ isOpen, onClose, gallery }) {
     const safeGallery = useMemo(() => Array.isArray(gallery) ? gallery : [], [gallery]);
 
     // Extract all unique tags
-    const allTags = useMemo(() =>
-        Array.from(new Set(safeGallery.flatMap(photo => photo.tags || []))).sort(),
-        [safeGallery]);
+    const allTags = useMemo(() => {
+        const tags = safeGallery.flatMap(photo => {
+            if (Array.isArray(photo.tags)) return photo.tags;
+            if (typeof photo.tags === 'string') return photo.tags.split(',').map(t => t.trim()).filter(Boolean);
+            return [];
+        });
+        return Array.from(new Set(tags)).sort();
+    }, [safeGallery]);
 
     // Showroom State
     const [filter, setFilter] = useState("Todos");
@@ -22,23 +27,36 @@ export default function GalleryModal({ isOpen, onClose, gallery }) {
     const [sort, setSort] = useState("curadoria"); // curadoria | az
     const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(null);
 
+    // Helper to check if photo has a tag
+    const hasTag = (photo, targetTag) => {
+        if (Array.isArray(photo.tags)) return photo.tags.includes(targetTag);
+        if (typeof photo.tags === 'string') {
+            return photo.tags.split(',').map(t => t.trim()).includes(targetTag);
+        }
+        return false;
+    };
+
     // Filtering Logic
     const filteredPhotos = useMemo(() => {
         let result = [...safeGallery];
 
         // Filter by Tag
         if (filter !== "Todos") {
-            result = result.filter(p => p.tags && p.tags.includes(filter));
+            result = result.filter(p => hasTag(p, filter));
         }
 
         // Filter by Search
         if (search) {
             const q = search.toLowerCase();
-            result = result.filter(p =>
-                p.title.toLowerCase().includes(q) ||
-                (p.caption && p.caption.toLowerCase().includes(q)) ||
-                (p.tags && p.tags.some(t => t.toLowerCase().includes(q)))
-            );
+            result = result.filter(p => {
+                const titleMatch = p.title?.toLowerCase().includes(q);
+                const captionMatch = p.caption?.toLowerCase().includes(q);
+                const tagsList = Array.isArray(p.tags)
+                    ? p.tags
+                    : (typeof p.tags === 'string' ? p.tags.split(',').map(t => t.trim()) : []);
+                const tagMatch = tagsList.some(t => t.toLowerCase().includes(q));
+                return titleMatch || captionMatch || tagMatch;
+            });
         }
 
         // Sorting
@@ -293,7 +311,12 @@ export default function GalleryModal({ isOpen, onClose, gallery }) {
                                         <div className="mt-8 pt-8 border-t border-stone-100">
                                             <p className="text-[10px] font-bold uppercase tracking-widest text-text/30 mb-4">Tags Relacionadas</p>
                                             <div className="flex flex-wrap gap-2">
-                                                {filteredPhotos[selectedPhotoIndex].tags && filteredPhotos[selectedPhotoIndex].tags.map(tag => (
+                                                {(Array.isArray(filteredPhotos[selectedPhotoIndex].tags)
+                                                    ? filteredPhotos[selectedPhotoIndex].tags
+                                                    : (typeof filteredPhotos[selectedPhotoIndex].tags === 'string'
+                                                        ? filteredPhotos[selectedPhotoIndex].tags.split(',').map(t => t.trim()).filter(Boolean)
+                                                        : [])
+                                                ).map(tag => (
                                                     <span key={tag} className="text-[10px] uppercase tracking-widest text-primary/60 bg-stone-100 px-3 py-1.5 rounded-full hover:bg-primary hover:text-white transition-colors cursor-default">
                                                         {tag}
                                                     </span>
