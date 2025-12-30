@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, MapPin, ArrowLeft, ExternalLink, X } from 'lucide-react';
-import { getMediatorDetails } from '@/data/mediators';
+import { getMediatorDetails } from '@/utils/mediators';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 

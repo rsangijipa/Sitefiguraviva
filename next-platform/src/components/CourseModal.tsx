@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, MapPin, ExternalLink, X, ArrowLeft } from 'lucide-react';
-import { getMediatorDetails } from '@/data/mediators';
+import { getMediatorDetails } from '@/utils/mediators';
 import { Modal, ModalContent } from './ui/Modal';
 import { useState } from 'react';
 
