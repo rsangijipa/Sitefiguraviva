@@ -67,9 +67,9 @@ export default function BlogPostModal({ isOpen, onClose, post }: BlogPostModalPr
                             {/* Tags */}
                             {post.tags && Array.isArray(post.tags) && post.tags.length > 0 && (
                                 <div className="mt-12 pt-8 border-t border-stone-100 flex flex-wrap gap-2">
-                                    {post.tags.map((tag: string) => (
-                                        <span key={tag} className="px-3 py-1 bg-white border border-stone-100 rounded text-[10px] uppercase font-bold text-stone-400">
-                                            #{tag}
+                                    {(Array.isArray(post.tags) ? post.tags : (typeof post.tags === 'string' ? post.tags.split(',') : [])).map((tag: string) => (
+                                        <span key={tag} className="px-3 py-1 bg-primary/5 text-primary rounded-full text-[10px] font-bold uppercase tracking-widest">
+                                            {tag}
                                         </span>
                                     ))}
                                 </div>

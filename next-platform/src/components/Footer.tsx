@@ -84,8 +84,10 @@ export default function Footer() {
                 <div className="flex flex-col md:flex-row justify-between items-center text-[10px] text-paper/30 font-bold tracking-[0.2em] uppercase">
                     <p>&copy; {new Date().getFullYear()} Instituto Figura Viva • Todos os direitos reservados</p>
                     <div className="flex gap-10 mt-6 md:mt-0">
-                        <a href="#" className="hover:text-paper transition-soft">Privacidade</a>
-                        <a href="#" className="hover:text-paper transition-soft">Termos</a>
+                        <div className="flex gap-10 mt-6 md:mt-0">
+                            <button onClick={() => window.location.href = '/?modal=privacy'} className="hover:text-paper transition-soft min-h-[44px] flex items-center">Privacidade</button>
+                            <button onClick={() => window.location.href = '/?modal=terms'} className="hover:text-paper transition-soft min-h-[44px] flex items-center">Termos</button>
+                        </div>
                     </div>
                 </div>
 

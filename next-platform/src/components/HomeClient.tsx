@@ -20,6 +20,7 @@ import Image from 'next/image';
 import CourseModal from './CourseModal';
 import BlogPostModal from './BlogPostModal';
 import InstituteSection from './sections/InstituteSection';
+import LegalModal from './LegalModal';
 
 interface HomeClientProps {
     courses: any[];
@@ -41,6 +42,9 @@ export default function HomeClient({ courses, blogPosts, gallery }: HomeClientPr
     // New Modal types for Course and Blog
     const isCourseOpen = modalType === 'course';
     const isBlogOpen = modalType === 'blog';
+    const isPrivacyOpen = modalType === 'privacy';
+    const isTermsOpen = modalType === 'terms';
+    const legalType = isPrivacyOpen ? 'privacy' : isTermsOpen ? 'terms' : null;
 
     // Item IDs
     const articleId = searchParams.get('articleId');
@@ -161,6 +165,11 @@ export default function HomeClient({ courses, blogPosts, gallery }: HomeClientPr
                 isOpen={isGalleryOpen}
                 onClose={closeModals}
                 gallery={gallery}
+            />
+            <LegalModal
+                isOpen={!!legalType}
+                onClose={closeModals}
+                type={legalType}
             />
         </div>
     );
