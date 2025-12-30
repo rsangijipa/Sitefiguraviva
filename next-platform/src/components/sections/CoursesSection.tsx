@@ -1,100 +1,202 @@
 "use client";
 
+import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
+
+const fadeInUp = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.6, ease: "easeOut" }
+    }
+};
 
 interface Course {
     id: string | number;
     title: string;
+    subtitle?: string;
     date: string;
     status: string;
-    image: string;
-    link: string;
+    image?: string;
+    images?: string[];
     description?: string;
+    details?: { intro: string };
+    category?: string;
 }
 
 interface CoursesSectionProps {
     courses: Course[];
+    onOpenCalendar: () => void;
+    loading?: boolean;
 }
 
-export default function CoursesSection({ courses }: CoursesSectionProps) {
-    return (
-        <section id="instituto" className="py-24 md:py-48 bg-primary text-paper relative overflow-hidden">
-            {/* Background Textures */}
-            <div className="absolute inset-0 opacity-20 pointer-events-none overflow-hidden">
-                <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-gold/10 rounded-full blur-[150px]" />
-                <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-accent/5 rounded-full blur-[150px]" />
-            </div>
+export default function CoursesSection({ courses = [], onOpenCalendar, loading = false }: CoursesSectionProps) {
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-            <div className="container mx-auto px-6 relative z-10">
+    const scroll = (direction: 'left' | 'right') => {
+        if (scrollContainerRef.current) {
+            const scrollAmount = direction === 'left' ? -400 : 400;
+            scrollContainerRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        }
+    };
+
+    return (
+        <section id="instituto" className="py-20 md:py-32 px-6 bg-[#EFECE5] overflow-hidden">
+            <div className="container mx-auto max-w-6xl">
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    className="text-center mb-24 md:mb-32"
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true, margin: "-100px" }}
+                    variants={fadeInUp}
+                    className="mb-12 md:flex justify-between items-end"
                 >
-                    <span className="text-gold font-bold uppercase tracking-[0.4em] text-[10px] mb-6 block">Conhecimento que Transforma</span>
-                    <h2 className="font-serif text-5xl md:text-[5rem] mb-10 leading-none">Formação & Cursos</h2>
-                    <div className="w-24 h-[1px] bg-gold/30 mx-auto" />
+                    <div className="max-w-2xl">
+                        <span className="text-xs font-bold tracking-[0.2em] uppercase text-primary/60 mb-4 block">Formação & Estudos</span>
+                        <h2 className="text-4xl md:text-5xl font-serif text-primary leading-tight mb-6">
+                            Ciclos de <span className="italic text-gold font-light">Aprendizagem</span>
+                        </h2>
+                        <p className="text-lg text-primary/70 leading-relaxed font-light text-balance">
+                            Nossos percursos formativos são convites para habitar a Gestalt-terapia com rigor ético, densidade teórica e sensibilidade clínica.
+                        </p>
+                    </div>
                 </motion.div>
 
-                {/* Horizontal Snap Scroll for Mobile */}
-                <div className="flex md:grid md:grid-cols-3 gap-8 lg:gap-16 overflow-x-auto pb-8 snap-x snap-mandatory md:overflow-visible">
-                    {courses.map((course, index) => (
-                        <motion.div
-                            key={course.id}
-                            initial={{ opacity: 0, y: 50 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: index * 0.1, duration: 1, ease: [0.23, 1, 0.32, 1] }}
-                            className="group relative min-w-[300px] snap-center w-full"
-                        >
-                            <div className="bg-paper text-primary rounded-3xl overflow-hidden shadow-2xl transition-soft group-hover:-translate-y-4 group-hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.4)] h-full flex flex-col">
-                                <div className="h-72 overflow-hidden relative shrink-0">
-                                    <div className={`absolute top-6 left-6 z-20 px-4 py-1.5 text-[9px] font-bold uppercase tracking-[0.2em] rounded-full backdrop-blur-xl border border-white/20 shadow-sm transition-soft ${course.status === 'Aberto' ? 'bg-white/90 text-green-800' :
-                                        course.status === 'Esgotado' ? 'bg-white/90 text-red-800' : 'bg-gray-200/90 text-gray-600'
-                                        }`}>
-                                        {course.status}
-                                    </div>
-                                    <motion.img
-                                        whileHover={{ scale: 1.15 }}
-                                        transition={{ duration: 1.2 }}
-                                        src={course.image}
-                                        alt={course.title}
-                                        className="w-full h-full object-cover grayscale transition-soft group-hover:grayscale-0"
-                                    />
-                                    <div className="absolute inset-0 bg-primary/20 group-hover:bg-transparent transition-soft mix-blend-multiply" />
-                                </div>
-
-                                <div className="p-10 flex-1 flex flex-col">
-                                    <div className="flex items-center gap-3 text-accent font-bold mb-6">
-                                        <Calendar size={14} />
-                                        <span className="text-[10px] uppercase tracking-[0.2em]">{course.date}</span>
-                                    </div>
-                                    <h3 className="font-serif text-3xl mb-8 leading-tight line-clamp-2">{course.title}</h3>
-
-                                    <div className="flex gap-4 mt-auto">
-                                        <Link
-                                            href={`/curso/${course.id}`} // Using next/link behavior
-                                            className="flex-1 py-4 rounded-xl border border-primary/5 bg-gray-50 flex items-center justify-center gap-2 transition-soft hover:bg-white hover:shadow-xl group/btn"
-                                        >
-                                            <span className="font-bold uppercase text-[9px] tracking-[0.2em] text-primary/60">Detalhes</span>
-                                        </Link>
-                                        <button
-                                            onClick={() => window.open(course.link, '_blank')}
-                                            className="flex-[2] py-4 rounded-xl bg-primary text-paper flex items-center justify-center gap-2 transition-soft hover:bg-gold hover:shadow-xl group/btn"
-                                        >
-                                            <span className="font-bold uppercase text-[9px] tracking-[0.2em]">
-                                                {course.status === 'Aberto' ? 'Garantir Vaga' : 'Saiba Mais'}
-                                            </span>
-                                            <ExternalLink size={14} className="transition-transform group-hover/btn:translate-x-1" />
-                                        </button>
+                <div className="relative group/scroll">
+                    <div
+                        ref={scrollContainerRef}
+                        className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-8 -mx-6 px-6 md:mx-0 md:px-0 scrollbar-hide"
+                        style={{ scrollBehavior: 'smooth' }}
+                    >
+                        {loading ? (
+                            [1, 2, 3].map((i) => (
+                                <div key={i} className="flex-shrink-0 w-80 md:w-96 snap-center">
+                                    <div className="flex flex-col h-full bg-white rounded-2xl p-4 shadow-sm animate-pulse border border-gray-100/50">
+                                        <div className="aspect-[4/3] bg-gray-200 rounded-xl mb-6 relative overflow-hidden" />
+                                        <div className="space-y-4 flex-1">
+                                            <div className="h-6 bg-gray-200 rounded w-3/4" />
+                                            <div className="h-4 bg-gray-200 rounded w-1/4" />
+                                        </div>
                                     </div>
                                 </div>
+                            ))
+                        ) : courses.length === 0 ? (
+                            <div className="w-full text-center py-12 bg-white/50 rounded-2xl border border-dashed border-gray-300">
+                                <p className="text-primary/50 text-sm font-medium">Nenhuma formação aberta no momento.</p>
                             </div>
-                        </motion.div>
-                    ))}
+                        ) : (
+                            courses.map((course, index) => {
+                                const isClosed = course.status === 'Encerrado' || course.status === 'Esgotado';
+                                return (
+                                    <motion.article
+                                        key={course.id || index}
+                                        initial={{ opacity: 0, x: 20 }}
+                                        whileInView={{ opacity: 1, x: 0 }}
+                                        viewport={{ once: true }}
+                                        transition={{ delay: index * 0.1 }}
+                                        className="flex-shrink-0 w-80 md:w-96 snap-center group flex flex-col h-full bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow duration-300"
+                                    >
+                                        <div className="aspect-[4/3] overflow-hidden rounded-xl mb-6 relative">
+                                            <Link href={`/curso/${course.id}`} className="block w-full h-full">
+                                                <img
+                                                    src={course.image || course.images?.[0] || 'https://via.placeholder.com/400x300'}
+                                                    alt={course.title}
+                                                    className={`w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 ${isClosed ? 'grayscale opacity-70' : ''}`}
+                                                />
+                                            </Link>
+                                            <div className="absolute top-3 left-3 flex flex-wrap gap-2 pointer-events-none">
+                                                {course.category && (
+                                                    <span className="bg-white/95 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider text-primary shadow-sm border border-gray-100">
+                                                        {course.category === 'Formacao' ? 'Formação' : course.category === 'GrupoEstudos' ? 'Grupo de Estudos' : 'Curso Livre'}
+                                                    </span>
+                                                )}
+                                                {isClosed && (
+                                                    <span className="bg-red-500/90 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider text-white shadow-sm">
+                                                        {course.status}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="flex-1 flex flex-col px-2">
+                                            <div className="mb-4">
+                                                <Link href={`/curso/${course.id}`} className="block">
+                                                    <h3 className="text-xl font-bold text-primary mb-2 leading-tight group-hover:text-gold transition-colors">
+                                                        {course.title}
+                                                    </h3>
+                                                </Link>
+                                                {course.subtitle && (
+                                                    <p className="text-sm text-primary/60 italic mb-2">
+                                                        {course.subtitle}
+                                                    </p>
+                                                )}
+                                                <p className="text-xs font-medium uppercase tracking-wider text-sage">
+                                                    {course.date}
+                                                </p>
+                                            </div>
+
+                                            <p className="text-primary/70 text-sm leading-relaxed mb-6 line-clamp-3">
+                                                {course.description || course.details?.intro}
+                                            </p>
+
+                                            <div className="mt-auto pt-4 border-t border-gray-100">
+                                                {isClosed ? (
+                                                    <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400 cursor-not-allowed py-2">
+                                                        Inscrições Encerradas
+                                                    </span>
+                                                ) : (
+                                                    <Link
+                                                        href={`/curso/${course.id}`}
+                                                        className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary group-hover:gap-4 transition-all py-3 px-2 -ml-2 rounded-lg hover:bg-gray-50 bg-transparent active:scale-95 touch-manipulation"
+                                                    >
+                                                        Saiba Mais <span className="text-gold">→</span>
+                                                    </Link>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </motion.article>
+                                );
+                            })
+                        )}
+                        <div className="w-6 md:w-0 flex-shrink-0" />
+                    </div>
+
+                    <div className="flex items-center justify-center gap-6 mt-6 opacity-70 hover:opacity-100 transition-opacity">
+                        <button
+                            onClick={() => scroll('left')}
+                            className="p-3 rounded-full hover:bg-stone-200/50 text-stone-400 hover:text-primary transition-colors border border-transparent hover:border-stone-300"
+                            aria-label="Scroll Left"
+                        >
+                            <ArrowLeft size={24} />
+                        </button>
+
+                        <div className="w-32 h-1.5 bg-stone-200 rounded-full overflow-hidden">
+                            <motion.div
+                                className="h-full bg-primary/30 rounded-full"
+                                animate={{ x: ['-100%', '0%', '100%'] }}
+                                transition={{ repeat: Infinity, duration: 3, ease: "linear" }}
+                            />
+                        </div>
+
+                        <button
+                            onClick={() => scroll('right')}
+                            className="p-3 rounded-full hover:bg-stone-200/50 text-stone-400 hover:text-primary transition-colors border border-transparent hover:border-stone-300"
+                            aria-label="Scroll Right"
+                        >
+                            <ArrowRight size={24} />
+                        </button>
+                    </div>
+
+                    <div className="mt-8 text-center">
+                        <button
+                            onClick={onOpenCalendar}
+                            className="text-xs font-bold uppercase tracking-widest text-primary border-b border-primary/20 pb-1 hover:text-gold hover:border-gold transition-colors"
+                        >
+                            Ver Calendário Completo
+                        </button>
+                    </div>
                 </div>
             </div>
         </section>

@@ -4,13 +4,13 @@ import { Facebook, Instagram, Mail, MapPin } from 'lucide-react';
 
 export default function Footer() {
     return (
-        <footer className="bg-primary text-paper py-32 relative overflow-hidden">
+        <footer className="bg-[#4a3b32] text-paper py-16 md:py-32 relative overflow-hidden">
             {/* Background elements */}
             <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-gold/5 rounded-full blur-[120px] -translate-y-1/2" />
             <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-accent/5 rounded-full blur-[100px] translate-y-1/4 translate-x-1/4" />
 
             <div className="container mx-auto px-6 relative z-10">
-                <div className="grid md:grid-cols-12 gap-16 md:gap-24 mb-24 pb-16 border-b border-paper/10">
+                <div className="grid md:grid-cols-12 gap-12 md:gap-24 mb-16 md:mb-24 pb-16 border-b border-paper/10">
 
                     <div className="md:col-span-4 lg:col-span-5">
                         <h3 className="font-serif text-5xl mb-8">Figura <span className="font-light text-gold italic">Viva</span></h3>
@@ -18,26 +18,29 @@ export default function Footer() {
                             Habitando a fronteira do encontro, cultivando awareness e transformando vidas através da Gestalt-Terapia.
                         </p>
                         <div className="flex gap-6">
-                            {[Instagram, Facebook, Mail].map((Icon, i) => (
-                                <a
-                                    key={i}
-                                    href="#"
-                                    className="w-12 h-12 rounded-full border border-paper/10 flex items-center justify-center hover:bg-paper hover:text-primary transition-soft group"
-                                >
-                                    <Icon size={20} className="group-hover:scale-110 transition-transform" />
-                                </a>
-                            ))}
+                            <a
+                                href="https://www.instagram.com/institutofiguraviva/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-12 h-12 rounded-full border border-paper/10 flex items-center justify-center hover:bg-paper hover:text-primary transition-soft group"
+                            >
+                                <Instagram size={20} className="group-hover:scale-110 transition-transform" />
+                            </a>
+                            <a
+                                href="mailto:contato@figuraviva.com"
+                                className="w-12 h-12 rounded-full border border-paper/10 flex items-center justify-center hover:bg-paper hover:text-primary transition-soft group"
+                            >
+                                <Mail size={20} className="group-hover:scale-110 transition-transform" />
+                            </a>
                         </div>
                     </div>
 
                     <div className="md:col-span-2">
                         <h4 className="font-sans font-bold uppercase tracking-[0.3em] text-[10px] mb-10 text-gold">Explorar</h4>
                         <ul className="space-y-6 font-light text-sm text-paper/70">
-                            {['Sobre Nós', 'Cursos e Eventos', 'Atendimento Clínico', 'Portal do Aluno'].map((item) => (
-                                <li key={item}>
-                                    <a href="#" className="hover:text-gold transition-soft">{item}</a>
-                                </li>
-                            ))}
+                            <li><a href="#instituto" className="hover:text-gold transition-soft">Formações</a></li>
+                            <li><a href="#clinica" className="hover:text-gold transition-soft">Clínica</a></li>
+                            <li><a href="/portal" className="hover:text-gold transition-soft">Portal do Aluno</a></li>
                         </ul>
                     </div>
 
@@ -48,14 +51,15 @@ export default function Footer() {
                                 <div className="flex items-start gap-4 mb-8">
                                     <MapPin size={18} className="text-gold shrink-0 mt-1" />
                                     <p className="font-light text-sm text-paper/70 leading-relaxed">
-                                        Av. Paulista, 1000, Sala 142<br />
-                                        Bela Vista, São Paulo - SP<br />
-                                        CEP 01310-100
+                                        Rua Pinheiro Machado, 2033 - Central<br />
+                                        Porto Velho - RO<br />
+                                        CEP 76801-057<br />
+                                        (69) 99248-1585
                                     </p>
                                 </div>
                                 <button
                                     onClick={() => window.open('https://maps.google.com', '_blank')} // Simple event handler is fine in Server Component if no state? No, onClick requires Client Component or just make it an anchor
-                                    className="px-8 py-4 bg-paper/5 border border-paper/10 rounded-xl text-[10px] font-bold tracking-[0.2em] uppercase hover:bg-paper hover:text-primary transition-soft"
+                                    className="bg-primary text-white border border-transparent px-6 py-2.5 rounded-lg hover:bg-primary/90 transition-all transform active:scale-95 shadow-sm"
                                 >
                                     Traçar Rota
                                 </button>

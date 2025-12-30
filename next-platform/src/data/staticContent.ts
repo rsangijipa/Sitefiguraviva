@@ -1,24 +1,24 @@
 export const founderContent = {
   name: "Lilian Vanessa",
-  surname: "Nicacio Gusmão",
+  surname: "Nicacio Gusmão Vianei",
   role: "Fundadora",
   description: [
-    "Psicóloga (CRP 20/1228) e Mestre em Ciências Ambientais pela UNITAU, Lilian Vanessa dedica sua trajetória à integração entre a fenomenologia, a natureza e o desenvolvimento humano.",
-    "Com formação sólida em Gestalt-Terapia pelo Instituto da Bahia, sua atuação transita entre a clínica, a supervisão e a docência, tendo coordenado a Clínica-Escola de Psicologia da UNIJIPA."
+    "Mulher, mineira, migrante, mãe atípica e feminista. Atuo como psicóloga, Gestalt-terapeuta, idealizadora, sócia fundadora e curadora do Instituto de Gestalt-terapia de Rondônia – Figura Viva com ênfase em estudos, vivências a partir de temas feministas, antirracistas, anticapacitistas e decoloniais, que des-cobrem e in-ventam uma presença sensível no campo/organismo/ambiente.",
+    "Formação e Pós-formação em Gestalt-terapia, Trauma, Psicoterapia corporal, Neurodiversidades. Escreve com interesse em temas como o lugar da mulher na Gestalt-terapia a partir de Laura Perls, opressões de gênero, violências, solidariedade política entre mulheres brancas e multiétnicas. Mestra em Ciências Ambientais pela UNITAU e graduada em psicologia pela UFMG, docente e a primeira mulher da família a possuir uma graduação."
   ],
   specializations: [
     {
-      title: "Especialista",
-      description: "Gestalt-Terapia e Psicologia do Trânsito (CFP)."
+      title: "Mestra & Psicóloga",
+      description: "Ciências Ambientais (UNITAU) e Psicologia (UFMG)."
     },
     {
-      title: "Pesquisadora",
-      description: "Foco em prevenção de transtornos emocionais e interação natureza-criança."
+      title: "Gestalt-Terapeuta",
+      description: "Foco em Neurodiversidades, Trauma e Temas Feministas."
     }
   ],
-  lattesLink: "http://lattes.cnpq.br/",
+  lattesLink: "http://lattes.cnpq.br/9287840585952055",
   quote: "O encontro é a fronteira onde a vida se renova.",
-  image: "/assets/lilian-vanessa.png"
+  image: "/assets/lilian-vanessa.jpeg"
 };
 
 export const libraryContent = {

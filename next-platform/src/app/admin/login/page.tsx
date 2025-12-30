@@ -3,105 +3,105 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Lock, Loader2 } from 'lucide-react';
-import { useApp } from '../../../context/AppContext';
+import { useApp } from '@/context/AppContext';
+import { ArrowLeft } from 'lucide-react';
 
 export default function AdminLogin() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-
+    const [loading, setLoading] = useState(false);
+    const { login, isAuthenticated } = useApp();
     const router = useRouter();
-    const { login } = useApp();
 
-    const handleSubmit = async (e) => {
+    // Redirect if already authenticated
+    if (isAuthenticated) {
+        router.push('/admin');
+    }
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        setError('');
-        setIsLoading(true);
+        const form = e.currentTarget;
+        const email = (form.elements.namedItem('email') as HTMLInputElement).value;
+        const password = (form.elements.namedItem('password') as HTMLInputElement).value;
 
+        setLoading(true);
         const success = await login(email, password);
+        setLoading(false);
 
         if (success) {
             router.push('/admin');
         } else {
-            setError('Credenciais inválidas. Tente novamente.');
-            setIsLoading(false);
+            alert("Acesso negado. Verifique suas credenciais.");
         }
     };
 
     return (
-        <div className="min-h-screen bg-paper flex items-center justify-center relative overflow-hidden">
-            {/* Background Decorations */}
-            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-gold/5 rounded-full blur-[120px]" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-primary/5 rounded-full blur-[120px]" />
+        <div className="min-h-screen flex items-center justify-center bg-paper relative overflow-hidden">
+            {/* Navigation Button */}
+            <button
+                onClick={() => router.push('/')}
+                className="absolute top-8 left-8 z-20 flex items-center gap-2 text-primary/40 hover:text-primary transition-colors font-bold uppercase tracking-widest text-xs"
+            >
+                <ArrowLeft size={16} /> Voltar ao Início
+            </button>
+
+            {/* Artistic background */}
+            <div className="absolute inset-0 z-0">
+                <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-gold/5 rounded-full blur-[120px]" />
+                <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-accent/5 rounded-full blur-[120px]" />
             </div>
 
             <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
-                className="bg-white p-12 md:p-16 rounded-[3rem] shadow-[0_60px_100px_-20px_rgba(38,58,58,0.1)] w-full max-w-md relative z-10 border border-primary/5"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
+                className="bg-white/40 backdrop-blur-3xl p-8 md:p-16 rounded-[2rem] md:rounded-[3rem] shadow-[0_80px_150px_-30px_rgba(38,58,58,0.15)] w-full max-w-md relative z-10 border border-white/60 text-center mx-4"
             >
-                <div className="text-center mb-12">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/5 rounded-2xl text-gold mb-6">
-                        <Lock size={24} />
+                <div className="flex flex-col items-center mb-12">
+                    <div className="w-24 h-24 rounded-full mb-8 flex items-center justify-center p-1 border border-primary/10 shadow-xl bg-paper overflow-hidden">
+                        <img src="/assets/logo.jpeg" alt="Instituto Figura Viva" className="w-full h-full rounded-full object-cover" />
                     </div>
-                    <h1 className="font-serif text-3xl text-primary mb-2">Acesso Restrito</h1>
-                    <p className="text-primary/40 text-sm">Insira suas credenciais para continuar.</p>
+                    <h1 className="font-serif text-4xl text-primary mb-3">Figura <span className="font-light text-gold italic">Viva</span></h1>
+                    <p className="text-primary/40 text-[10px] uppercase tracking-[0.4em] font-bold">Ecossistema Digital</p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="space-y-2">
-                        <label htmlFor="email" className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/60 ml-2">Email</label>
-                        <input
-                            id="email"
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-gold/20 focus:border-gold transition-all text-primary font-medium"
-                            placeholder="admin@exemplo.com"
-                            required
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <label htmlFor="password" className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/60 ml-2">Senha</label>
-                        <input
-                            id="password"
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-gold/20 focus:border-gold transition-all text-primary font-medium"
-                            placeholder="••••••••"
-                            required
-                        />
-                    </div>
-
-                    {error && (
-                        <motion.p
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="text-red-500 text-xs font-bold text-center bg-red-50 py-2 rounded-lg"
+                <div className="space-y-6">
+                    <form onSubmit={handleSubmit} className="space-y-4 text-left">
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-primary/40 ml-1">E-mail</label>
+                            <input
+                                name="email"
+                                type="email"
+                                placeholder="exemplo@figuraviva.com"
+                                required
+                                className="w-full bg-white/80 border border-gray-200 p-4 rounded-xl text-primary font-medium focus:ring-2 focus:ring-gold outline-none transition-all shadow-sm"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-primary/40 ml-1">Senha</label>
+                            <input
+                                name="password"
+                                type="password"
+                                placeholder="••••••••"
+                                required
+                                className="w-full bg-white/80 border border-gray-200 p-4 rounded-xl text-primary font-medium focus:ring-2 focus:ring-gold outline-none transition-all shadow-sm"
+                            />
+                        </div>
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className={`w-full bg-primary text-white py-5 rounded-xl font-bold uppercase tracking-[0.2em] text-[10px] hover:bg-gold transition-all shadow-xl mt-4 ${loading ? 'opacity-50 cursor-wait' : ''}`}
                         >
-                            {error}
-                        </motion.p>
-                    )}
+                            {loading ? 'Verificando...' : 'Acessar Painel'}
+                        </button>
+                    </form>
 
-                    <button
-                        type="submit"
-                        disabled={isLoading}
-                        className="w-full bg-primary text-paper py-5 rounded-2xl font-bold uppercase tracking-[0.2em] text-xs hover:bg-gold transition-soft disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-8 group"
-                    >
-                        {isLoading ? (
-                            <Loader2 size={18} className="animate-spin" />
-                        ) : (
-                            "Entrar"
-                        )}
-                    </button>
-                </form>
-            </motion.div>
-        </div>
+                    <div className="flex flex-col items-center gap-6 mt-8">
+                        <div className="w-8 h-[1px] bg-primary/10" />
+                        <p className="text-[9px] text-primary/30 uppercase font-bold tracking-[0.3em] leading-relaxed max-w-[200px]">
+                            Acesso restrito para administradores.
+                        </p>
+                    </div>
+                </div >
+            </motion.div >
+        </div >
     );
 }

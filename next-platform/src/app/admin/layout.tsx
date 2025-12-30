@@ -49,6 +49,7 @@ export default function AdminLayout({ children }) {
         { icon: BookOpen, label: 'Cursos', path: '/admin/courses' },
         { icon: Globe, label: 'Google Suite', path: '/admin/google' },
         { icon: PenTool, label: 'Diário Visual', path: '/admin/blog' },
+        { icon: BookOpen, label: 'Galeria', path: '/admin/gallery' },
         { icon: Settings, label: 'Configurações', path: '/admin/settings' },
     ];
 
