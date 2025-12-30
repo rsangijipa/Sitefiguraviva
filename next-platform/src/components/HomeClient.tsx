@@ -19,6 +19,7 @@ import { Image as ImageIcon } from 'lucide-react';
 import Image from 'next/image';
 import CourseModal from './CourseModal';
 import BlogPostModal from './BlogPostModal';
+import InstituteSection from './sections/InstituteSection';
 
 interface HomeClientProps {
     courses: any[];
@@ -79,12 +80,17 @@ export default function HomeClient({ courses, blogPosts, gallery }: HomeClientPr
             <main>
                 <HeroSection />
                 <FounderSection />
-                <ResourcesSection />
+
                 <CoursesSection
                     courses={courses}
                     onOpenCalendar={() => openModal('calendar')}
                     onSelectCourse={selectCourse}
                 />
+
+                <InstituteSection />
+
+                <ResourcesSection />
+
                 <BlogSection
                     blogPosts={blogPosts}
                     onSelectPost={selectPost}
