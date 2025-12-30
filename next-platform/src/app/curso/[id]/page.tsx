@@ -1,14 +1,11 @@
 import { createClient } from '@/utils/supabase/server';
-import { getMediatorDetails } from '@/data/mediators';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import { Suspense } from 'react';
 import CourseDetailClient from './CourseDetailClient';
 import { notFound } from 'next/navigation';
 
-export default async function CourseDetail({ params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params;
+export const dynamic = 'force-dynamic';
 
-    // Fetch data on the server
+async function CourseContent({ id }: { id: string }) {
     const supabase = await createClient();
 
     console.log(`🔍 Buscando detalhes do curso ID: ${id}`);
@@ -30,4 +27,21 @@ export default async function CourseDetail({ params }: { params: Promise<{ id: s
 
     console.log(`✅ Detalhes carregados para: ${course.title}`);
     return <CourseDetailClient course={course} />;
+}
+
+export default async function CourseDetail({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
+
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center bg-paper">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-12 h-12 border-4 border-gold border-t-transparent rounded-full animate-spin" />
+                    <p className="text-primary/60 font-serif animate-pulse text-xs tracking-widest uppercase">Tecendo o Encontro...</p>
+                </div>
+            </div>
+        }>
+            <CourseContent id={id} />
+        </Suspense>
+    );
 }
