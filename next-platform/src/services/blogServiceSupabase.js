@@ -3,6 +3,15 @@ import { createClient } from '@/utils/supabase/client';
 const supabase = createClient();
 const TABLE_NAME = 'posts';
 
+const generateSlug = (title) => {
+    return title
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^\w\s-]/g, '')
+        .replace(/\s+/g, '-');
+};
+
 export const blogService = {
     getAll: async () => {
         const { data, error } = await supabase
@@ -43,9 +52,10 @@ export const blogService = {
         return data;
     },
     create: async (postData) => {
+        const slug = generateSlug(postData.title);
         const { data, error } = await supabase
             .from(TABLE_NAME)
-            .insert([postData])
+            .insert([{ ...postData, slug }])
             .select()
             .single();
 
@@ -56,9 +66,14 @@ export const blogService = {
         return data;
     },
     update: async (id, postData) => {
+        const updates = { ...postData };
+        if (updates.title) {
+            updates.slug = generateSlug(updates.title);
+        }
+        
         const { data, error } = await supabase
             .from(TABLE_NAME)
-            .update(postData)
+            .update(updates)
             .eq('id', id)
             .select()
             .single();

@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Image as ImageIcon, Search, Filter, Grid, ArrowRight } from 'lucide-react';
+import Image from 'next/image';
 
 
 export default function GalleryModal({ isOpen, onClose, gallery }) {
@@ -93,6 +94,7 @@ export default function GalleryModal({ isOpen, onClose, gallery }) {
         }
     };
 
+    /** @type {any} */
     const containerVariants = {
         hidden: { opacity: 0 },
         visible: {
@@ -105,6 +107,7 @@ export default function GalleryModal({ isOpen, onClose, gallery }) {
         exit: { opacity: 0 }
     };
 
+    /** @type {any} */
     const itemVariants = {
         hidden: { y: 20, opacity: 0 },
         visible: {
@@ -238,11 +241,14 @@ export default function GalleryModal({ isOpen, onClose, gallery }) {
                                             onClick={() => openLightbox(index)}
                                             whileHover={{ y: -5 }}
                                         >
-                                            <img
+                                            <Image
                                                 src={photo.src}
                                                 alt={photo.title}
-                                                loading="lazy"
+                                                width={0}
+                                                height={0}
+                                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                                 className="w-full h-auto object-cover opacity-95 group-hover:opacity-100 transition-opacity"
+                                                style={{ width: '100%', height: 'auto' }}
                                             />
                                             {/* Hover Overlay */}
                                             <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
@@ -276,11 +282,16 @@ export default function GalleryModal({ isOpen, onClose, gallery }) {
                                 >
                                     {/* Image Container */}
                                     <div className="flex-1 bg-stone-50 relative flex items-center justify-center p-4 lg:p-12">
-                                        <img
-                                            src={filteredPhotos[selectedPhotoIndex].src}
-                                            alt={filteredPhotos[selectedPhotoIndex].title}
-                                            className="max-w-full max-h-[70vh] object-contain rounded-lg shadow-lg"
-                                        />
+                                        <div className="relative w-full h-full max-h-[70vh]">
+                                            <Image
+                                                src={filteredPhotos[selectedPhotoIndex].src}
+                                                alt={filteredPhotos[selectedPhotoIndex].title}
+                                                fill
+                                                className="object-contain rounded-lg shadow-lg"
+                                                sizes="100vw"
+                                                priority
+                                            />
+                                        </div>
 
                                         {/* Nav Buttons */}
                                         <button onClick={(e) => { e.stopPropagation(); prevPhoto(); }} className="absolute left-4 top-1/2 -translate-y-1/2 p-4 bg-white/80 hover:bg-gold hover:text-white text-primary rounded-full transition-all shadow-lg backdrop-blur">

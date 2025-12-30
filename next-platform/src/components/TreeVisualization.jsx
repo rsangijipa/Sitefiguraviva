@@ -3,6 +3,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+// @ts-ignore
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 const TreeVisualization = ({ emotions = [], onLeafClick, isModal = false }) => {

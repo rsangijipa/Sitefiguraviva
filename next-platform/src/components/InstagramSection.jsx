@@ -23,6 +23,7 @@ export default function InstagramSection() {
                 <h2 className="text-3xl md:text-4xl font-serif text-primary">Nos Acompanhe no Instagram</h2>
             </div>
             <div className="container mx-auto px-6 max-w-[1400px]">
+                {/* @ts-ignore */}
                 <behold-widget feed-id="e6Ie6LXMRqDXJvfkbx6U"></behold-widget>
             </div>
         </section>
