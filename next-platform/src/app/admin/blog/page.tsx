@@ -53,15 +53,30 @@ export default function BlogManager() {
         }
     };
 
+    const handleEdit = (post: any) => {
+        setFormData({
+            ...post,
+        });
+        setCurrentPost(post);
+        setIsEditing(true);
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
         try {
-            const success = await addBlogPost(formData);
+            let success;
+            if (currentPost) {
+                success = await updateBlogPost(currentPost.id, formData);
+            } else {
+                success = await addBlogPost(formData);
+            }
+
             if (success) {
                 setFormData(initialForm);
+                setCurrentPost(null);
                 setIsEditing(false);
-                addToast('Publicação salva com sucesso!', 'success');
+                addToast(currentPost ? 'Publicação atualizada!' : 'Publicação salva com sucesso!', 'success');
             } else {
                 addToast('Erro ao salvar publicação.', 'error');
             }
@@ -81,7 +96,7 @@ export default function BlogManager() {
                     <p className="text-primary/40 text-sm max-w-lg">Gerencie artigos do blog e materiais da biblioteca (PDFs).</p>
                 </div>
                 <button
-                    onClick={() => { setIsEditing(true); setFormData(initialForm); }}
+                    onClick={() => { setIsEditing(true); setCurrentPost(null); setFormData(initialForm); }}
                     className="bg-primary text-paper px-6 py-4 rounded-xl flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest hover:bg-gold transition-soft hover:shadow-lg transform active:scale-95 shadow-xl"
                 >
                     <Plus size={16} /> Nova Publicação
@@ -99,7 +114,7 @@ export default function BlogManager() {
                         <div className="bg-white w-full max-w-3xl rounded-[2rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
                             <div className="p-8 border-b border-gray-100 flex justify-between items-center bg-stone-50/50">
                                 <div>
-                                    <h3 className="font-serif text-2xl text-primary">Nova Publicação</h3>
+                                    <h3 className="font-serif text-2xl text-primary">{currentPost ? 'Editar Publicação' : 'Nova Publicação'}</h3>
                                     <p className="text-[10px] font-bold uppercase tracking-widest text-primary/40 mt-1">Artigo ou Material</p>
                                 </div>
                                 <button onClick={() => setIsEditing(false)} className="p-2 hover:bg-gray-200 rounded-full transition-colors"><X size={24} className="text-primary/40" /></button>
@@ -181,7 +196,7 @@ export default function BlogManager() {
                                 <div className="pt-4 flex justify-end gap-4">
                                     <button type="button" onClick={() => setIsEditing(false)} className="px-8 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest text-primary/40 hover:bg-gray-50 transition-colors" disabled={isSubmitting}>Cancelar</button>
                                     <button type="submit" disabled={isSubmitting || (formData.type === 'library' && !formData.pdf_url)} className="bg-primary text-paper px-8 py-3 rounded-xl flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest hover:bg-gold transition-soft shadow-lg disabled:opacity-70 disabled:cursor-not-allowed">
-                                        <Save size={16} /> {isSubmitting ? 'Salvando...' : 'Publicar'}
+                                        <Save size={16} /> {isSubmitting ? 'Salvando...' : 'Salvar Publicação'}
                                     </button>
                                 </div>
                             </form>
@@ -216,6 +231,9 @@ export default function BlogManager() {
                         </div>
 
                         <div className="flex gap-2">
+                            <button onClick={() => handleEdit(post)} className="p-3 rounded-xl hover:bg-gold/10 text-primary/60 hover:text-gold transition-colors" title="Editar">
+                                <Edit size={18} />
+                            </button>
                             <button onClick={() => { if (confirm('Excluir?')) deleteBlogPost(post.id) }} className="p-3 rounded-xl hover:bg-red-50 text-red-300 hover:text-red-500 transition-colors" title="Excluir">
                                 <Trash2 size={18} />
                             </button>

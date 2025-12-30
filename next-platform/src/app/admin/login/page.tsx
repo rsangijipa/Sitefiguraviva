@@ -13,8 +13,12 @@ export default function AdminLogin() {
     const { addToast } = useToast();
     const router = useRouter();
 
-    // Auto-redirect removed to prevent loops.
-    // Dashboard access is handled by the UI below if authenticated.
+    // Auto-redirect to dashboard if authenticated
+    useEffect(() => {
+        if (!authLoading && isAuthenticated) {
+            router.push('/admin');
+        }
+    }, [isAuthenticated, authLoading, router]);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -74,12 +78,6 @@ export default function AdminLogin() {
                             className="w-full bg-primary text-white py-4 rounded-xl font-bold uppercase tracking-[0.2em] text-[10px] hover:bg-gold transition-all shadow-xl"
                         >
                             Ir para o Painel
-                        </button>
-                        <button
-                            onClick={() => { login('', ''); window.location.reload(); }} // Force logout/clear
-                            className="mt-4 text-[10px] uppercase font-bold tracking-widest text-primary/40 hover:text-red-500 transition-colors"
-                        >
-                            Sair e trocar de conta
                         </button>
                     </div>
                 ) : (

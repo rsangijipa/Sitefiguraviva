@@ -21,6 +21,8 @@ export default function AdminLayout({ children }) {
 
     // Redirect logic removed to prevent loops. Showing manual access screen instead.
 
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
     if (!isClient) return null; // Avoid hydration mismatch
 
     const isLoginPage = pathname?.startsWith('/admin/login');
@@ -70,8 +72,19 @@ export default function AdminLayout({ children }) {
 
     return (
         <div className="flex min-h-screen bg-paper selection:bg-gold/20">
+            {/* Mobile Toggle */}
+            <button
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                className="lg:hidden fixed bottom-6 right-6 z-50 p-4 bg-primary text-white rounded-full shadow-2xl transition-transform active:scale-90"
+            >
+                {isSidebarOpen ? <X size={24} /> : <LayoutDashboard size={24} />}
+            </button>
+
             {/* Sidebar */}
-            <aside className="w-80 bg-white/60 backdrop-blur-2xl border-r border-stone-200/60 flex flex-col fixed h-full z-20 transition-all duration-300">
+            <aside className={`
+                w-80 bg-white/60 backdrop-blur-2xl border-r border-stone-200/60 flex flex-col fixed h-full z-40 transition-all duration-500
+                ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+            `}>
                 <div className="p-10">
                     <h1 className="font-serif text-3xl text-primary tracking-tight mb-1">Figura <span className="font-light text-gold italic">Viva</span></h1>
                     <div className="flex items-center gap-2">
@@ -87,6 +100,7 @@ export default function AdminLayout({ children }) {
                             <Link
                                 key={item.path}
                                 href={item.path}
+                                onClick={() => setIsSidebarOpen(false)}
                                 className={`flex items-center gap-4 px-6 py-4 rounded-xl transition-all duration-300 group ${isActive
                                     ? 'bg-primary text-white shadow-lg shadow-primary/20 translate-x-2'
                                     : 'text-stone-500 hover:text-primary hover:bg-stone-100/80 hover:translate-x-1'
@@ -122,8 +136,21 @@ export default function AdminLayout({ children }) {
                 </div>
             </aside>
 
+            {/* Mobile Overlay */}
+            <AnimatePresence>
+                {isSidebarOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setIsSidebarOpen(false)}
+                        className="fixed inset-0 bg-primary/20 backdrop-blur-sm z-30 lg:hidden"
+                    />
+                )}
+            </AnimatePresence>
+
             {/* Main Content */}
-            <main className="flex-1 ml-80 p-12 md:p-16 min-h-screen relative overflow-x-hidden">
+            <main className="flex-1 lg:ml-80 p-6 md:p-12 lg:p-16 min-h-screen relative overflow-x-hidden">
                 {/* Organic Background Elements */}
                 <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
                     <div className="absolute top-[-5%] right-[-5%] w-[40%] h-[40%] bg-gold/5 rounded-full blur-[120px] mix-blend-multiply animate-pulse" style={{ animationDuration: '8s' }} />
