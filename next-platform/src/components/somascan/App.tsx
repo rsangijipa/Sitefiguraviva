@@ -27,7 +27,7 @@ const App: React.FC = () => {
       {/* Organic Background Shapes */}
       <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-[#f5f5f4] rounded-full blur-[80px] opacity-60 pointer-events-none animate-float" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#e7e5e4] rounded-full blur-[100px] opacity-50 pointer-events-none" />
-      <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] bg-[#fff7ed] rounded-full blur-[60px] opacity-70 pointer-events-none animate-float" style={{animationDelay: '2s'}} />
+      <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] bg-[#fff7ed] rounded-full blur-[60px] opacity-70 pointer-events-none animate-float" style={{ animationDelay: '2s' }} />
 
       {/* Header */}
       <header className="absolute top-0 w-full p-8 flex justify-between items-center z-10">
@@ -47,12 +47,12 @@ const App: React.FC = () => {
                 Escute o <br /> <span className="text-clay italic">seu corpo.</span>
               </h1>
               <p className="text-xl text-stone-500 font-light leading-relaxed max-w-md mx-auto">
-                Amplie a consciência corporal sem tentar "consertar" nada. 
+                Amplie a consciência corporal sem tentar &quot;consertar&quot; nada.
                 Apenas note tensão, calor e peso.
               </p>
-              
+
               <div className="pt-12">
-                <button 
+                <button
                   onClick={handleStart}
                   className="group relative px-10 py-4 bg-stone-800 hover:bg-stone-700 text-[#fdfbf7] rounded-full font-medium tracking-widest text-xs transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
                 >

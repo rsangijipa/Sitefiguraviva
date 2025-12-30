@@ -1,13 +1,12 @@
 "use client";
 
-import React, { useEffect, useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Image as ImageIcon, Search, Filter, Grid, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
-
+import { Modal, ModalContent } from './ui/Modal';
 
 export default function GalleryModal({ isOpen, onClose, gallery }) {
-
 
     // Fallback if empty (handling async state or empty DB)
     const safeGallery = useMemo(() => Array.isArray(gallery) ? gallery : [], [gallery]);
@@ -22,36 +21,6 @@ export default function GalleryModal({ isOpen, onClose, gallery }) {
     const [search, setSearch] = useState("");
     const [sort, setSort] = useState("curadoria"); // curadoria | az
     const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(null);
-    const previousFocusRef = useRef(null);
-
-    // Lock body scroll when modal is open
-    useEffect(() => {
-        if (isOpen) {
-            document.body.style.overflow = 'hidden';
-            previousFocusRef.current = document.activeElement;
-        } else {
-            document.body.style.overflow = 'unset';
-            if (previousFocusRef.current) {
-                previousFocusRef.current.focus();
-            }
-        }
-        return () => { document.body.style.overflow = 'unset'; };
-    }, [isOpen]);
-
-    // Close on Escape
-    useEffect(() => {
-        const handleKeyDown = (e) => {
-            if (e.key === 'Escape') {
-                if (selectedPhotoIndex !== null) {
-                    setSelectedPhotoIndex(null);
-                } else {
-                    onClose();
-                }
-            }
-        };
-        document.addEventListener('keydown', handleKeyDown);
-        return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [onClose, selectedPhotoIndex]);
 
     // Filtering Logic
     const filteredPhotos = useMemo(() => {
@@ -117,21 +86,21 @@ export default function GalleryModal({ isOpen, onClose, gallery }) {
         }
     };
 
-    if (!isOpen) return null;
+    const handleModalClose = () => {
+        if (selectedPhotoIndex !== null) {
+            setSelectedPhotoIndex(null);
+        } else {
+            onClose();
+        }
+    };
 
     return (
-        <AnimatePresence>
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="fixed inset-0 z-[100] bg-paper overflow-y-auto font-sans"
-            >
+        <Modal isOpen={isOpen} onClose={handleModalClose}>
+            <ModalContent size="full" className="bg-paper overflow-y-auto">
                 {/* Close Button */}
                 <button
                     onClick={onClose}
-                    className="fixed top-6 right-6 z-50 p-3 bg-white/50 hover:bg-gold text-primary hover:text-white rounded-full transition-all duration-300 shadow-lg border border-primary/10 backdrop-blur-md"
+                    className="fixed top-6 right-6 z-[110] p-3 bg-white/50 hover:bg-gold text-primary hover:text-white rounded-full transition-all duration-300 shadow-lg border border-primary/10 backdrop-blur-md"
                     aria-label="Fechar Galeria"
                 >
                     <X size={24} />
@@ -338,7 +307,7 @@ export default function GalleryModal({ isOpen, onClose, gallery }) {
 
                     </motion.div>
                 </div>
-            </motion.div>
-        </AnimatePresence>
+            </ModalContent>
+        </Modal>
     );
 }

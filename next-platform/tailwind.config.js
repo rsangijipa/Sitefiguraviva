@@ -1,3 +1,5 @@
+const colors = require('tailwindcss/colors')
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
     content: [
@@ -9,17 +11,19 @@ module.exports = {
     theme: {
         extend: {
             colors: {
-                primary: '#412726', // Vinho Profundo (Base forte)
-                secondary: '#7A5A54', // Vinho Médio
-                accent: '#5D7052',  // Verde Botânico Escuro (Ajustado para contraste AA)
-                'accent-light': '#AABEAB', // Verde Botânico Claro (Backgrounds)
-                paper: '#F8F1E5',   // Off-white Papel (Base quente)
-                surface: '#FBFAEC', // Off-white Claro (Cards)
-                text: '#212328',    // Grafite (Leitura)
-                muted: '#8C8C8C',   // Cinza Neutro
-                gold: '#B08D55',    // Dourado Escurecido (Para texto/ícones - Contraste melhor)
-                'gold-light': '#EAE4A6', // Amarelo (Detalhes/Bg)
-                beige: '#E4CDB4',   // Bege
+                gray: colors.stone, // Enforce organic gray
+                primary: 'var(--color-primary)',
+                secondary: 'var(--color-secondary)',
+                accent: 'var(--color-accent)',
+                'accent-light': 'var(--color-accent-light)',
+                paper: 'var(--color-paper)',
+                surface: 'var(--color-surface)',
+                text: 'var(--color-text)',
+                muted: 'var(--color-muted)',
+                gold: 'var(--color-gold)',
+                'gold-light': 'var(--color-gold-light)',
+                'gold-dark': 'var(--color-gold-dark)',
+                beige: 'var(--color-beige)',
             },
             fontFamily: {
                 serif: ['var(--font-serif)', 'serif'],

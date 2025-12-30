@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import OrganicBackground from '../ui/OrganicBackground';
 import WaveLines from '../ui/WaveLines';
+import { buttonVariants } from '../ui/Button';
 
 const fadeInUp = {
     hidden: { opacity: 0, y: 20 },
@@ -47,7 +48,7 @@ export default function HeroSection() {
                         <span className="text-xs font-bold tracking-[0.2em] uppercase text-primary/60">Instituto de Gestalt-Terapia</span>
                     </motion.div>
 
-                    <motion.h1 variants={fadeInUp} className="font-serif text-5xl sm:text-6xl md:text-8xl text-primary leading-[0.95] tracking-tight mb-8 text-balance">
+                    <motion.h1 variants={fadeInUp} className="heading-hero mb-8 text-balance">
                         Habitar a <span className="italic text-gold font-light">Fronteira</span>
                     </motion.h1>
 
@@ -55,18 +56,21 @@ export default function HeroSection() {
                         Um espaço vivo de acolhimento clínico e formação profissional, onde o encontro transforma.
                     </motion.p>
 
+
+                    {/* ... (inside component) */}
+
                     <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4">
                         <a
                             href="https://wa.me/556992481585"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="btn-primary flex items-center justify-center gap-2 w-full sm:w-auto"
+                            className={buttonVariants({ variant: 'primary', className: 'w-full sm:w-auto gap-2' })}
                         >
                             Agendamento <ArrowRight size={18} aria-hidden="true" />
                         </a>
                         <a
                             href="#instituto"
-                            className="btn-secondary flex items-center justify-center gap-2 bg-white w-full sm:w-auto"
+                            className={buttonVariants({ variant: 'secondary', className: 'w-full sm:w-auto gap-2 bg-white' })}
                             aria-label="Ver cursos livres"
                         >
                             Cursos Livres <ArrowUpRight size={18} className="text-gray-400" aria-hidden="true" />

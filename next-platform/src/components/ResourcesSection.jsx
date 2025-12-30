@@ -8,6 +8,7 @@ import FeelingsTree from './FeelingsTree';
 import MentalHealthQuiz from './resources/MentalHealthQuiz';
 import SomaScan from './somascan/App';
 import { useApp } from '../context/AppContext';
+import { Modal, ModalContent } from './ui/Modal';
 
 export default function ResourcesSection() {
     const [activeResource, setActiveResource] = useState(null); // 'breathing' | 'tree' | 'quiz' | 'somascan'
@@ -15,12 +16,10 @@ export default function ResourcesSection() {
 
     const openResource = (resource) => {
         setActiveResource(resource);
-        document.body.style.overflow = 'hidden';
     };
 
     const closeResource = () => {
         setActiveResource(null);
-        document.body.style.overflow = 'auto';
     };
 
     const scroll = (direction) => {
@@ -35,7 +34,7 @@ export default function ResourcesSection() {
             <div className="container mx-auto px-6 max-w-7xl relative z-10">
                 <div className="mb-12 text-center max-w-2xl mx-auto">
                     <span className="text-xs font-bold tracking-[0.2em] uppercase text-accent mb-4 block">Ferramentas de Cuidado</span>
-                    <h2 className="text-4xl md:text-5xl font-serif text-primary leading-tight">Recursos <span className="italic text-accent font-light">Interativos</span></h2>
+                    <h2 className="heading-section">Recursos <span className="italic text-accent font-light">Interativos</span></h2>
                     <p className="text-lg text-text/80 mt-4">
                         Espaços digitais desenhados para cultivar a presença e a awareness no seu dia a dia.
                     </p>
@@ -157,44 +156,38 @@ export default function ResourcesSection() {
             </div>
 
             {/* Full Screen Transition Overlay */}
-            <AnimatePresence>
-                {activeResource && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-50 bg-paper overflow-y-auto"
-                    >
-                        {activeResource === 'breathing' && (
-                            <BreathingApp onClose={closeResource} />
-                        )}
+            {/* Full Screen Transition Overlay */}
+            <Modal isOpen={!!activeResource} onClose={closeResource}>
+                <ModalContent size="full" className="bg-paper overflow-y-auto">
+                    {activeResource === 'breathing' && (
+                        <BreathingApp onClose={closeResource} />
+                    )}
 
-                        {activeResource === 'tree' && (
-                            <FeelingsTree isModal={true} onClose={closeResource} />
-                        )}
+                    {activeResource === 'tree' && (
+                        <FeelingsTree isModal={true} onClose={closeResource} />
+                    )}
 
-                        {activeResource === 'somascan' && (
-                            <div className="w-full h-full relative min-h-screen bg-[#faf9f6]">
-                                {/* Wrapper Exit Button for Somascan */}
-                                <div className="absolute top-6 left-6 z-50">
-                                    <button
-                                        onClick={closeResource}
-                                        className="flex items-center gap-2 p-3 md:px-5 md:py-2.5 rounded-full bg-white/50 backdrop-blur border border-stone-200 text-stone-600 hover:text-stone-900 hover:border-stone-400 font-bold shadow-sm hover:shadow-md transition-all active:scale-95"
-                                    >
-                                        <ArrowLeft size={20} />
-                                        <span className="hidden md:inline">Voltar</span>
-                                    </button>
-                                </div>
-                                <SomaScan />
+                    {activeResource === 'somascan' && (
+                        <div className="w-full h-full relative min-h-screen bg-[#faf9f6]">
+                            {/* Wrapper Exit Button for Somascan */}
+                            <div className="absolute top-6 left-6 z-50">
+                                <button
+                                    onClick={closeResource}
+                                    className="flex items-center gap-2 p-3 md:px-5 md:py-2.5 rounded-full bg-white/50 backdrop-blur border border-stone-200 text-stone-600 hover:text-stone-900 hover:border-stone-400 font-bold shadow-sm hover:shadow-md transition-all active:scale-95"
+                                >
+                                    <ArrowLeft size={20} />
+                                    <span className="hidden md:inline">Voltar</span>
+                                </button>
                             </div>
-                        )}
+                            <SomaScan />
+                        </div>
+                    )}
 
-                        {activeResource === 'quiz' && (
-                            <MentalHealthQuiz onClose={closeResource} />
-                        )}
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                    {activeResource === 'quiz' && (
+                        <MentalHealthQuiz onClose={closeResource} />
+                    )}
+                </ModalContent>
+            </Modal>
         </section>
     );
 }

@@ -38,9 +38,9 @@ export default function Footer() {
                     <div className="md:col-span-2">
                         <h4 className="font-sans font-bold uppercase tracking-[0.3em] text-[10px] mb-10 text-gold">Explorar</h4>
                         <ul className="space-y-6 font-light text-sm text-paper/70">
-                            <li><a href="#instituto" className="hover:text-gold transition-soft">Formações</a></li>
-                            <li><a href="#clinica" className="hover:text-gold transition-soft">Clínica</a></li>
-                            <li><a href="/portal" className="hover:text-gold transition-soft">Portal do Aluno</a></li>
+                            <li><a href="#instituto" className="hover:text-gold transition-soft py-2 block min-h-[44px] flex items-center">Formações</a></li>
+                            <li><a href="#clinica" className="hover:text-gold transition-soft py-2 block min-h-[44px] flex items-center">Clínica</a></li>
+                            <li><a href="/portal" className="hover:text-gold transition-soft py-2 block min-h-[44px] flex items-center">Portal do Aluno</a></li>
                         </ul>
                     </div>
 

@@ -17,7 +17,7 @@ export async function getCourses() {
 export async function getBlogPosts() {
   const supabase = await createClient();
   const { data, error } = await supabase
-    .from('blog_posts')
+    .from('posts')
     .select('*')
     .order('date', { ascending: false });
 

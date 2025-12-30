@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import Button from './ui/Button';
 
 export default function Navbar() {
     const [scrolled, setScrolled] = useState(false);
@@ -43,7 +44,7 @@ export default function Navbar() {
                         <a
                             key={item.label}
                             href={item.href}
-                            className="hover:text-primary transition-colors hover:bg-gray-50 px-3 py-2 rounded-lg"
+                            className="hover:text-primary transition-colors hover:bg-gray-50 px-4 py-3 rounded-lg min-h-[44px] flex items-center"
                         >
                             {item.display || item.label}
                         </a>
@@ -51,21 +52,22 @@ export default function Navbar() {
 
                     <div className="h-6 w-[1px] bg-gray-200" />
 
-                    <Link href="/portal" className="text-accent hover:text-accent/80 transition-colors">
+                    <Link href="/portal" className="text-accent hover:text-accent/80 transition-colors py-3 flex items-center min-h-[44px]">
                         Portal do Aluno
                     </Link>
 
-                    <button
+                    <Button
                         onClick={() => router.push(isAuthenticated ? '/admin' : '/admin/login')}
-                        className="bg-primary text-white border border-transparent px-6 py-2.5 rounded-lg hover:bg-primary/90 transition-all transform active:scale-95 shadow-sm"
+                        variant="primary"
+                        className="shadow-sm"
                     >
                         {isAuthenticated ? 'Dashboard' : 'Admin'}
-                    </button>
+                    </Button>
                 </div>
 
                 {/* Mobile Toggle */}
                 <button
-                    className="md:hidden text-primary p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                    className="md:hidden text-primary w-12 h-12 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors"
                     onClick={() => setMobileOpen(!mobileOpen)}
                     aria-label={mobileOpen ? "Fechar menu" : "Abrir menu"}
                 >
