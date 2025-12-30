@@ -241,7 +241,10 @@ export default function GalleryModal({ isOpen, onClose, gallery }) {
                                             <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
                                                 <h3 className="text-white font-serif text-lg leading-tight mb-2 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">{photo.title}</h3>
                                                 <div className="flex gap-2 translate-y-4 group-hover:translate-y-0 transition-transform duration-300 delay-75">
-                                                    {photo.tags && photo.tags.slice(0, 2).map((tag, i) => (
+                                                    {(Array.isArray(photo.tags)
+                                                        ? photo.tags
+                                                        : (typeof photo.tags === 'string' ? photo.tags.split(',').map(t => t.trim()).filter(Boolean) : [])
+                                                    ).slice(0, 2).map((tag, i) => (
                                                         <span key={i} className="text-[9px] uppercase font-bold tracking-widest text-white/80 bg-white/20 px-2 py-1 rounded">
                                                             {tag}
                                                         </span>

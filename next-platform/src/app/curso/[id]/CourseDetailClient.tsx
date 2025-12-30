@@ -128,7 +128,7 @@ export default function CourseDetailClient({ course }: { course: any }) {
                                 </div>
                                 {course.tags && Array.isArray(course.tags) && (
                                     <div className="flex flex-wrap gap-2 pt-2">
-                                        {course.tags.map((tag: string) => (
+                                        {(Array.isArray(course.tags) ? course.tags : (typeof course.tags === 'string' ? course.tags.split(',') : [])).map((tag: string) => (
                                             <span key={tag} className="px-3 py-1 bg-white border border-gray-100 rounded text-[10px] uppercase font-bold text-gray-400">{tag}</span>
                                         ))}
                                     </div>
