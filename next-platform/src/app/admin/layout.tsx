@@ -6,7 +6,7 @@ import { useApp } from '../../context/AppContext';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import {
-    LayoutDashboard, BookOpen, PenTool, Settings, LogOut, Globe, Loader2
+    LayoutDashboard, BookOpen, PenTool, Settings, LogOut, Globe, Loader2, Home
 } from 'lucide-react';
 
 export default function AdminLayout({ children }) {
@@ -53,72 +53,93 @@ export default function AdminLayout({ children }) {
         { icon: Settings, label: 'Configurações', path: '/admin/settings' },
     ];
 
+
     return (
-        <div className="flex min-h-screen bg-[#FDFCF9]">
+        <div className="flex min-h-screen bg-paper selection:bg-gold/20">
             {/* Sidebar */}
-            <aside className="w-80 bg-primary text-paper flex flex-col fixed h-full z-20 shadow-[20px_0_60px_rgba(0,0,0,0.05)]">
-                <div className="p-12">
-                    <h1 className="font-serif text-3xl tracking-tight mb-2">Figura <span className="font-light text-gold italic">Viva</span></h1>
-                    <div className="flex flex-col gap-4 mt-4">
-                        <Link
-                            href="/"
-                            className="flex items-center gap-2 text-[9px] uppercase tracking-[0.3em] font-bold text-paper/40 hover:text-gold transition-colors w-fit group py-2"
-                        >
-                            <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-                            Admin Panel v2.0
-                            <span className="opacity-0 group-hover:opacity-100 transition-opacity ml-2">← Voltar ao Site</span>
-                        </Link>
+            <aside className="w-80 bg-white/60 backdrop-blur-2xl border-r border-stone-200/60 flex flex-col fixed h-full z-20 transition-all duration-300">
+                <div className="p-10">
+                    <h1 className="font-serif text-3xl text-primary tracking-tight mb-1">Figura <span className="font-light text-gold italic">Viva</span></h1>
+                    <div className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
+                        <span className="text-[9px] uppercase tracking-[0.25em] font-bold text-stone-400">Admin Panel v2.0</span>
                     </div>
                 </div>
 
-                <nav className="flex-1 px-8 space-y-2">
+                <nav className="flex-1 px-6 space-y-2 overflow-y-auto custom-scrollbar">
                     {navItems.map(item => {
                         const isActive = pathname === item.path;
                         return (
                             <Link
                                 key={item.path}
                                 href={item.path}
-                                className={`flex items-center gap-4 px-6 py-5 rounded-[1.25rem] transition-soft group relative ${isActive ? 'bg-paper text-primary shadow-2xl scale-[1.02]' : 'text-paper/40 hover:text-paper hover:bg-white/5'}`}
+                                className={`flex items-center gap-4 px-6 py-4 rounded-xl transition-all duration-300 group ${isActive
+                                    ? 'bg-primary text-white shadow-lg shadow-primary/20 translate-x-2'
+                                    : 'text-stone-500 hover:text-primary hover:bg-stone-100/80 hover:translate-x-1'
+                                    }`}
                             >
-                                <item.icon size={18} className={`transition-transform duration-500 ${isActive ? 'text-gold' : 'group-hover:scale-110'}`} />
+                                <item.icon size={18} className={`transition-transform duration-300 ${isActive ? 'text-gold-light' : 'group-hover:scale-110 group-hover:text-gold'}`} />
                                 <span className={`text-[11px] font-bold uppercase tracking-widest ${isActive ? 'opacity-100' : 'opacity-80'}`}>{item.label}</span>
-                                {isActive && (
-                                    <motion.div
-                                        layoutId="activeTab"
-                                        className="absolute right-4 w-1.5 h-1.5 bg-gold rounded-full"
-                                    />
-                                )}
                             </Link>
                         )
                     })}
                 </nav>
 
-                <div className="p-8 border-t border-white/5">
+                <div className="p-6 border-t border-stone-200/60 space-y-3 bg-white/40">
+                    <Link
+                        href="/"
+                        className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-white border border-stone-200 text-stone-600 hover:border-gold hover:text-gold rounded-xl transition-all duration-300 text-[10px] font-bold uppercase tracking-[0.2em] group shadow-sm hover:shadow-md"
+                    >
+                        <Home size={16} className="group-hover:scale-110 transition-transform" />
+                        Ir para o Site
+                    </Link>
+
                     <button
                         onClick={() => { logout(); router.push('/admin/login'); }}
-                        className="w-full flex items-center justify-center gap-4 px-6 py-5 bg-red-500/5 text-red-400 hover:bg-red-500 hover:text-white rounded-2xl transition-soft text-[10px] font-bold uppercase tracking-[0.2em] group"
+                        className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-red-50 text-red-400 hover:bg-red-100 hover:text-red-500 rounded-xl transition-all duration-300 text-[10px] font-bold uppercase tracking-[0.2em] group"
                     >
                         <LogOut size={16} className="group-hover:-translate-x-1 transition-transform" />
-                        Desconectar
+                        Sair
                     </button>
+
+                    <p className="text-center text-[9px] text-stone-300 font-bold tracking-widest pt-2 opacity-60">
+                        © 2024 INSTITUTO FIGURA VIVA
+                    </p>
                 </div>
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 ml-80 p-16 overflow-y-auto min-h-screen">
-                <header className="mb-12 flex justify-between items-center">
-                    <div>
-                        <h2 className="font-serif text-4xl text-primary mb-2">Painel de Controle</h2>
-                        <p className="text-primary/40 text-sm font-light">Gerencie sua presença digital e conexões Google.</p>
-                    </div>
-                    <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-full glass border border-primary/5 flex items-center justify-center text-primary/30">
-                            <Settings size={20} />
+            <main className="flex-1 ml-80 p-12 md:p-16 min-h-screen relative overflow-x-hidden">
+                {/* Organic Background Elements */}
+                <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+                    <div className="absolute top-[-5%] right-[-5%] w-[40%] h-[40%] bg-gold/5 rounded-full blur-[120px] mix-blend-multiply animate-pulse" style={{ animationDuration: '8s' }} />
+                    <div className="absolute bottom-[5%] left-[0%] w-[35%] h-[35%] bg-accent/5 rounded-full blur-[100px] mix-blend-multiply animate-pulse" style={{ animationDuration: '10s' }} />
+                </div>
+
+                <div className="relative z-10 max-w-7xl mx-auto animate-fade-in-up">
+                    <header className="mb-12 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                        <div>
+                            <h2 className="font-serif text-4xl md:text-5xl text-primary mb-3 tracking-tight">Painel de Controle</h2>
+                            <p className="text-stone-500 text-sm md:text-base font-light max-w-md leading-relaxed">
+                                Gerencie sua presença digital, cursos e conteúdos com organicidade e fluidez.
+                            </p>
                         </div>
-                    </div>
-                </header>
-                {children}
+
+                        <div className="flex items-center gap-4 bg-white/60 backdrop-blur-md p-2 rounded-full border border-white/50 shadow-sm">
+                            <div className="flex flex-col items-end px-4 hidden md:flex">
+                                <span className="text-xs font-bold text-primary">Richards A.</span>
+                                <span className="text-[10px] text-stone-400 uppercase tracking-wider">Administrador</span>
+                            </div>
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gold/20 to-primary/10 border border-white flex items-center justify-center text-primary shadow-inner">
+                                <Settings size={18} />
+                            </div>
+                        </div>
+                    </header>
+
+                    {children}
+                </div>
             </main>
         </div>
     );
+
 }
