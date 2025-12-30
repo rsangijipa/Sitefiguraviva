@@ -26,6 +26,10 @@ export const authService = {
     },
 
     onAuthStateChanged: (callback) => {
+        if (!auth) {
+            console.warn("Auth not initialized");
+            return () => {};
+        }
         return onAuthStateChanged(auth, callback);
     }
 };

@@ -15,18 +15,33 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-const db = getFirestore(app);
-const auth = getAuth(app);
-const storage = getStorage(app);
-
+let app;
+let db;
+let auth;
+let storage;
 let analytics = null;
-if (typeof window !== "undefined") {
-    isSupported().then((yes) => {
-        if (yes) {
-            analytics = getAnalytics(app);
+
+if (typeof window === 'undefined' && !firebaseConfig.apiKey) {
+    // During build or server-side without config, we might want to skip initialization
+    // or provide a mock to avoid build errors if pages are statically generated.
+    console.warn("Firebase config missing during server-side rendering/build.");
+} else {
+    try {
+        app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+        db = getFirestore(app);
+        auth = getAuth(app);
+        storage = getStorage(app);
+
+        if (typeof window !== "undefined") {
+            isSupported().then((yes) => {
+                if (yes) {
+                    analytics = getAnalytics(app);
+                }
+            });
         }
-    });
+    } catch (error) {
+        console.error("Firebase initialization error:", error);
+    }
 }
 
 export { app, analytics, db, auth, storage };

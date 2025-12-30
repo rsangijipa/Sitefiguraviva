@@ -5,6 +5,7 @@ const COLLECTION_NAME = 'posts';
 
 export const blogService = {
     getAll: async () => {
+        if (!db) return [];
         try {
             const querySnapshot = await getDocs(collection(db, COLLECTION_NAME));
             return querySnapshot.docs.map(doc => ({
