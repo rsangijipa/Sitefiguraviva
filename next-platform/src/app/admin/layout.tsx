@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useApp } from '../../context/AppContext';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
-    LayoutDashboard, BookOpen, PenTool, Settings, LogOut, Globe, Loader2, Home
+    LayoutDashboard, BookOpen, PenTool, Settings, LogOut, Globe, Loader2, Home, X
 } from 'lucide-react';
 
 export default function AdminLayout({ children }) {
