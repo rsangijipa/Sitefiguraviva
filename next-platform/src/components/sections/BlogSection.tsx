@@ -163,20 +163,3 @@ export default function BlogSection({ blogPosts = [], onSelectPost, loading = fa
         </section>
     );
 }
-{
-    blogPosts.length === 0 && (
-        <div className="col-span-full">
-            <EmptyState
-                title="Nenhum artigo encontrado"
-                message="Nossa biblioteca está sendo atualizada. Volte em breve para novas reflexões."
-            />
-        </div>
-    )
-}
-                        </>
-                    )}
-                </div >
-            </div >
-        </section >
-    );
-}
