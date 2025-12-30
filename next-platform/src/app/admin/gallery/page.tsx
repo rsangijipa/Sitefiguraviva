@@ -5,6 +5,7 @@ import { Camera, Save, Image as ImageIcon, Hash, FileText, Info, RefreshCw, Chec
 import { motion, AnimatePresence } from 'framer-motion';
 import { galleryService } from '../../../services/galleryServiceSupabase';
 import { uploadFiles } from '../../../services/uploadServiceSupabase';
+import { auditService } from '../../../services/auditService';
 import { useToast } from '@/context/ToastContext';
 
 export default function GalleryManager() {
@@ -48,7 +49,7 @@ export default function GalleryManager() {
 
         setUploading(true);
         try {
-            const urls = await uploadFiles(files, 'gallery'); // Ensure 'gallery' bucket exists or use 'courses'
+            const urls = await uploadFiles(files, 'gallery');
             setFormData(prev => ({ ...prev, src: urls[0] }));
             addToast("Upload realizado com sucesso!", 'success');
         } catch (error) {
@@ -72,11 +73,13 @@ export default function GalleryManager() {
 
             if (formData.id) {
                 await galleryService.update(formData.id, payload);
+                await auditService.log('UPDATE', 'GALLERY', formData.id, payload); // Log update
                 addToast('Imagem atualizada com sucesso!', 'success');
             } else {
                 // Remove id from payload for new entries
                 const { id, ...createPayload } = payload;
-                await galleryService.create(createPayload);
+                const newImg = await galleryService.create(createPayload);
+                if (newImg?.id) await auditService.log('CREATE', 'GALLERY', newImg.id, createPayload); // Log create
                 addToast('Imagem salva com sucesso!', 'success');
             }
 
@@ -95,6 +98,7 @@ export default function GalleryManager() {
         if (!confirm('Tem certeza que deseja excluir esta imagem?')) return;
         try {
             await galleryService.delete(id);
+            await auditService.log('DELETE', 'GALLERY', id); // Log delete
             await fetchGallery();
             addToast('Imagem excluída!', 'success');
         } catch (error) {

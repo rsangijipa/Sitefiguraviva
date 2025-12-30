@@ -6,13 +6,12 @@ import { Users, BookOpen, Eye, Calendar } from 'lucide-react';
 import { Card, CardContent } from '../../components/ui/Card';
 
 export default function AdminDashboard() {
-    const { courses, blogPosts } = useApp();
+    const { courses, blogPosts, gallery } = useApp();
 
     const stats = [
-        { label: 'Total de Cursos', value: courses.length, icon: BookOpen, change: '+2 esse mês' },
-        { label: 'Artigos Publicados', value: blogPosts.length, icon: Eye, change: '+1 essa semana' },
-        { label: 'Alunos Ativos', value: '324', icon: Users, change: '+12 novos' },
-        { label: 'Eventos Agendados', value: '8', icon: Calendar, change: 'Próximo em 2 dias' },
+        { label: 'Total de Cursos', value: courses.length, icon: BookOpen, change: 'Cadastrados' },
+        { label: 'Artigos Publicados', value: blogPosts.length, icon: Eye, change: 'No Blog' },
+        { label: 'Itens na Galeria', value: gallery.length, icon: Users, change: 'Media' }, // Using Users icon temporarily or switch to Image icon if available
     ];
 
     return (

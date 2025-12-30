@@ -6,23 +6,25 @@ import { Folder, FileText, Download, Search } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import PDFReader from '@/components/PDFReader';
+import { useApp } from '@/context/AppContext';
 
 export default function StudentPortal() {
     const [activeFolder, setActiveFolder] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedPdf, setSelectedPdf] = useState<any>(null);
 
-    const resources = [
-        {
-            id: 'doc-1',
-            name: "As polaridades do feminino na contemporaneidade e a depressão pós-parto uma visão gestáltica.pdf",
-            title: "As polaridades do feminino na contemporaneidade e a depressão pós-parto: uma visão gestáltica",
-            type: 'pdf',
-            folder: 'documents',
-            path: '/documents/As polaridades do feminino na contemporaneidade e a depressão pós-parto uma visão gestáltica.pdf',
-            size: '220 KB'
-        }
-    ];
+    const { documents } = useApp();
+
+    // Map database documents to UI format
+    const resources = documents ? documents.map((doc: any) => ({
+        id: doc.id,
+        name: doc.title, // Map backend 'title' to UI 'name'
+        title: doc.title,
+        type: doc.file_type || 'pdf',
+        folder: doc.category || 'documents',
+        path: doc.file_url,
+        size: doc.file_size || 'Unknown'
+    })) : [];
 
     const folders = [
         { id: 'all', label: 'Todos os Arquivos' },

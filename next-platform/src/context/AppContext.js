@@ -7,6 +7,7 @@ import { contentService } from '../services/contentServiceSupabase';
 import { configService } from '../services/configService';
 import { authService } from '../services/authServiceSupabase';
 import { galleryService } from '../services/galleryServiceSupabase';
+import { documentService } from '../services/documentServiceSupabase';
 
 const AppContext = createContext(null);
 
@@ -23,6 +24,7 @@ export function AppProvider({ children }) {
     const [alertMessage, setAlertMessage] = useState("Bem-vindos ao Instituto Figura Viva");
     const [user, setUser] = useState(null);
     const [authLoading, setAuthLoading] = useState(true);
+    const [documents, setDocuments] = useState([]);
 
     // Auth State Listener
     useEffect(() => {
@@ -44,13 +46,14 @@ export function AppProvider({ children }) {
     const fetchData = useCallback(async () => {
         setLoading(true);
         try {
-            const [coursesData, postsData, galleryData, founderRes, instituteRes, teamRes] = await Promise.all([
+            const [coursesData, postsData, galleryData, founderRes, instituteRes, teamRes, docsData] = await Promise.all([
                 courseService.getAll(),
                 blogService.getAll(),
                 galleryService.getAll(),
                 contentService.getContent('founder'),
                 contentService.getContent('institute'),
-                contentService.getTeamMembers()
+                contentService.getTeamMembers(),
+                documentService.getAll()
             ]);
             setCourses(coursesData);
             setBlogPosts(postsData);
@@ -58,6 +61,7 @@ export function AppProvider({ children }) {
             setFounderData(founderRes);
             setInstituteData(instituteRes);
             setTeamMembers(teamRes);
+            setDocuments(docsData);
             setError(null);
         } catch (err) {
             console.error("Fetch error:", err);
@@ -249,7 +253,28 @@ export function AppProvider({ children }) {
             user,
             authLoading,
             googleConfig,
-            setGoogleConfig
+            setGoogleConfig,
+            documents,
+            addDocument: async (doc) => {
+                try {
+                    const newDoc = await documentService.create(doc);
+                    setDocuments(prev => [newDoc, ...prev]);
+                    return true;
+                } catch (err) {
+                    console.error("Failed to add document", err);
+                    return false;
+                }
+            },
+            deleteDocument: async (id) => {
+                try {
+                    await documentService.delete(id);
+                    setDocuments(prev => prev.filter(d => d.id !== id));
+                    return true;
+                } catch (err) {
+                    console.error("Failed to delete document", err);
+                    return false;
+                }
+            }
         }}>
             {children}
         </AppContext.Provider>
