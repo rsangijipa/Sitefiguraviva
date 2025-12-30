@@ -1,16 +1,18 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { courseService } from '../services/courseService';
+import { courseService } from '../services/courseServiceSupabase';
 import { blogService } from '../services/blogService';
 import { configService } from '../services/configService';
 import { authService } from '../services/authService';
+import { galleryService } from '../services/galleryService';
 
 const AppContext = createContext(null);
 
 export function AppProvider({ children }) {
     const [courses, setCourses] = useState([]);
     const [blogPosts, setBlogPosts] = useState([]);
+    const [gallery, setGallery] = useState([]);
     const [googleConfig, setGoogleConfig] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -38,12 +40,14 @@ export function AppProvider({ children }) {
     const fetchData = useCallback(async () => {
         setLoading(true);
         try {
-            const [coursesData, postsData] = await Promise.all([
+            const [coursesData, postsData, galleryData] = await Promise.all([
                 courseService.getAll(),
-                blogService.getAll()
+                blogService.getAll(),
+                galleryService.getAll()
             ]);
             setCourses(coursesData);
             setBlogPosts(postsData);
+            setGallery(galleryData);
             setError(null);
         } catch (err) {
             console.error("Fetch error:", err);
@@ -131,6 +135,41 @@ export function AppProvider({ children }) {
             addCourse,
             updateCourse,
             deleteCourse,
+            addBlogPost: async (post) => {
+                try {
+                    const newPost = await blogService.create(post);
+                    setBlogPosts(prev => [newPost, ...prev]);
+                    return true;
+                } catch (err) {
+                    console.error("Failed to add post", err);
+                    return false;
+                }
+            },
+            updateBlogPost: async (id, post) => {
+                try {
+                    await blogService.update(id, post);
+                    setBlogPosts(prev => prev.map(p => p.id === id ? { ...p, ...post } : p));
+                    return true;
+                } catch (err) {
+                    console.error("Failed to update post", err);
+                    return false;
+                }
+            },
+            deleteBlogPost: async (id) => {
+                try {
+                    await blogService.delete(id);
+                    setBlogPosts(prev => prev.filter(p => p.id !== id));
+                    return true;
+                } catch (err) {
+                    console.error("Failed to delete post", err);
+                    return false;
+                }
+            },
+            gallery,
+            fetchGallery: async () => {
+                const data = await galleryService.getAll();
+                setGallery(data);
+            },
             login,
             logout,
             isAuthenticated: !!user,

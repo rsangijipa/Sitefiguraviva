@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { useApp } from '../../../context/AppContext';
-import { Plus, Trash2, Edit, Save, X, Calendar, Link as LinkIcon, Image as ImageIcon } from 'lucide-react';
+import { Plus, Trash2, Edit, Save, X, Calendar, Link as LinkIcon, Image as ImageIcon, Upload, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { uploadFiles } from '../../../services/uploadServiceSupabase';
 
 export default function CoursesManager() {
     const { courses, addCourse, updateCourse, deleteCourse } = useApp();
@@ -11,17 +12,43 @@ export default function CoursesManager() {
     const [currentCourse, setCurrentCourse] = useState(null);
     const initialForm = { title: '', date: '', status: 'Aberto', link: '', image: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=1000' };
     const [formData, setFormData] = useState(initialForm);
+    const [uploading, setUploading] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (currentCourse) {
-            updateCourse(currentCourse.id, formData);
-        } else {
-            addCourse(formData);
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files || e.target.files.length === 0) return;
+        const files = Array.from(e.target.files);
+
+        setUploading(true);
+        try {
+            const urls = await uploadFiles(files, 'courses');
+            setFormData({ ...formData, image: urls[0] });
+        } catch (error) {
+            console.error("Upload error:", error);
+            alert("Erro ao enviar imagem.");
+        } finally {
+            setUploading(false);
         }
-        setIsEditing(false);
-        setFormData(initialForm);
-        setCurrentCourse(null);
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        try {
+            if (currentCourse) {
+                await updateCourse(currentCourse.id, formData);
+            } else {
+                await addCourse(formData);
+            }
+            setIsEditing(false);
+            setFormData(initialForm);
+            setCurrentCourse(null);
+        } catch (error) {
+            console.error("Submit error:", error);
+            alert("Erro ao salvar curso.");
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const startEdit = (course) => {
@@ -110,14 +137,37 @@ export default function CoursesManager() {
 
                             <div className="md:col-span-2 space-y-2">
                                 <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-primary/60 ml-2">
-                                    <ImageIcon size={12} /> URL da Imagem
+                                    <ImageIcon size={12} /> Imagem do Curso
                                 </label>
-                                <input
-                                    value={formData.image}
-                                    onChange={e => setFormData({ ...formData, image: e.target.value })}
-                                    className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-gold/20 focus:border-gold transition-all text-sm font-mono text-primary/80"
-                                    placeholder="https://..."
-                                />
+                                <div className="flex gap-4 items-center">
+                                    <input
+                                        value={formData.image}
+                                        onChange={e => setFormData({ ...formData, image: e.target.value })}
+                                        className="flex-1 bg-gray-50 border border-gray-200 rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-gold/20 focus:border-gold transition-all text-sm font-mono text-primary/80"
+                                        placeholder="URL da Imagem..."
+                                    />
+                                    <div className="relative">
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            className="absolute inset-0 opacity-0 cursor-pointer"
+                                            onChange={handleFileUpload}
+                                            disabled={uploading}
+                                        />
+                                        <button
+                                            type="button"
+                                            className="bg-paper border border-primary/10 px-6 py-4 rounded-xl flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest hover:bg-gray-50 transition-colors"
+                                        >
+                                            {uploading ? <RefreshCw className="animate-spin" size={16} /> : <Upload size={16} />}
+                                            Upload
+                                        </button>
+                                    </div>
+                                </div>
+                                {formData.image && (
+                                    <div className="mt-4 w-32 h-32 rounded-2xl overflow-hidden border border-gray-100">
+                                        <img src={formData.image} alt="Preview" className="w-full h-full object-cover" />
+                                    </div>
+                                )}
                             </div>
 
                             <div className="md:col-span-2 flex justify-end gap-4 pt-4 border-t border-gray-100">
