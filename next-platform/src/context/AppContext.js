@@ -2,10 +2,10 @@
 
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { courseService } from '../services/courseServiceSupabase';
-import { blogService } from '../services/blogService';
+import { blogService } from '../services/blogServiceSupabase';
 import { configService } from '../services/configService';
-import { authService } from '../services/authService';
-import { galleryService } from '../services/galleryService';
+import { authService } from '../services/authServiceSupabase';
+import { galleryService } from '../services/galleryServiceSupabase';
 
 const AppContext = createContext(null);
 

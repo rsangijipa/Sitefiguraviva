@@ -4,6 +4,7 @@ import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
+import Image from 'next/image';
 
 const fadeInUp = {
     hidden: { opacity: 0, y: 20 },
@@ -99,11 +100,13 @@ export default function CoursesSection({ courses = [], onOpenCalendar, loading =
                                         className="flex-shrink-0 w-80 md:w-96 snap-center group flex flex-col h-full bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow duration-300"
                                     >
                                         <div className="aspect-[4/3] overflow-hidden rounded-xl mb-6 relative">
-                                            <Link href={`/curso/${course.id}`} className="block w-full h-full">
-                                                <img
+                                            <Link href={`/curso/${course.id}`} className="block w-full h-full relative">
+                                                <Image
                                                     src={course.image || course.images?.[0] || 'https://via.placeholder.com/400x300'}
                                                     alt={course.title}
-                                                    className={`w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 ${isClosed ? 'grayscale opacity-70' : ''}`}
+                                                    fill
+                                                    sizes="(max-width: 768px) 100vw, 33vw"
+                                                    className={`object-cover transition-transform duration-700 ease-out group-hover:scale-105 ${isClosed ? 'grayscale opacity-70' : ''}`}
                                                 />
                                             </Link>
                                             <div className="absolute top-3 left-3 flex flex-wrap gap-2 pointer-events-none">

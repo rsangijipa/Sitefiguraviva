@@ -273,7 +273,7 @@ export default function BreathingApp({ onClose }) {
                 </div>
 
                 <div className="relative mb-8 w-full flex justify-center scale-110">
-                    <BreathingAnimation technique={activeTechnique} isActive={sessionActive} />
+                    <BreathingAnimation technique={activeTechnique} isActive={sessionActive} onPhaseChange={() => {}} />
                 </div>
 
                 <div className="mb-8">
@@ -301,7 +301,7 @@ export default function BreathingApp({ onClose }) {
         >
             <StepIndicator step={4} />
 
-            <PaperCard className="py-16 flex flex-col items-center bg-white/90">
+            <PaperCard className="py-16 flex flex-col items-center bg-white/90" onClick={() => {}}>
                 <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}

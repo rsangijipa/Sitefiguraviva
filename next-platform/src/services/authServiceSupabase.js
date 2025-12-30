@@ -2,10 +2,10 @@ import { createClient } from '@/utils/supabase/client';
 
 const supabase = createClient();
 
-const ALLOWED_EMAILS = [
-    'liliangusmao@figuraviva.com',
-    'richardsangi@figuraviva.com'
-];
+const ALLOWED_EMAILS = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || '')
+    .split(',')
+    .map(email => email.trim())
+    .filter(Boolean);
 
 export const authService = {
     async login(email, password) {
