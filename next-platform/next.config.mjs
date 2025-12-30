@@ -1,8 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    rootDir: './',
-    remotePatterns: [{ protocol: 'https', hostname: '**' }],
-},
+    images: {
+        remotePatterns: [{ protocol: 'https', hostname: '**' }],
+    },
     poweredByHeader: false,
     async headers() {
         return [
