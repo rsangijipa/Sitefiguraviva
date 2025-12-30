@@ -1,7 +1,8 @@
 "use client";
 
+import { useRef } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, ArrowUpRight, FileText } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ArrowUpRight, FileText } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Skeleton } from '../ui/Skeleton';
@@ -41,10 +42,12 @@ const getDynamicStyle = (title: string, index: number) => {
 };
 
 export default function BlogSection({ blogPosts = [], onSelectPost, loading = false }: BlogSectionProps) {
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+
     return (
-        <section id="blog" className="py-16 md:py-24 bg-white border-t border-stone-100">
+        <section id="blog" className="py-12 md:py-16 bg-white border-t border-stone-100 overflow-hidden">
             <div className="container mx-auto px-6 max-w-6xl">
-                <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+                <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
                     <div className="max-w-xl">
                         <span className="text-xs font-bold tracking-[0.2em] uppercase text-gold mb-4 block">Reflexões & Saberes</span>
                         <h2 className="heading-section">Blog Figura Viva</h2>
@@ -54,7 +57,7 @@ export default function BlogSection({ blogPosts = [], onSelectPost, loading = fa
                     </div>
                 </div>
 
-                <div className="grid md:grid-cols-3 gap-12">
+                <div ref={scrollContainerRef} className="flex overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-3 gap-6 md:gap-12 pb-8 -mx-6 px-6 md:mx-0 md:px-0 scrollbar-hide">
                     {loading ? (
                         [1, 2, 3].map((i) => (
                             <div key={i}>
@@ -85,6 +88,7 @@ export default function BlogSection({ blogPosts = [], onSelectPost, loading = fa
                                         whileInView={{ opacity: 1, y: 0 }}
                                         viewport={{ once: true }}
                                         transition={{ delay: index * 0.1 }}
+                                        className="snap-center sm:w-[350px] md:w-auto w-[85vw] flex-shrink-0 h-full"
                                     >
                                         <div
                                             onClick={() => onSelectPost(post)}
@@ -104,7 +108,7 @@ export default function BlogSection({ blogPosts = [], onSelectPost, loading = fa
 
                                                         {/* Main Typography */}
                                                         <div className="relative z-10 w-full text-center">
-                                                            <h3 className="font-serif text-3xl md:text-4xl leading-tight font-bold mix-blend-overlay opacity-90 break-words line-clamp-4">
+                                                            <h3 className="font-serif text-3xl md:text-4xl leading-tight font-bold mix-blend-overlay opacity-90 break-words line-clamp-3">
                                                                 {post.title}
                                                             </h3>
                                                         </div>
@@ -113,7 +117,7 @@ export default function BlogSection({ blogPosts = [], onSelectPost, loading = fa
                                                         <div className="flex items-center gap-2 text-text/40 text-[10px] font-bold uppercase tracking-widest mb-4">
                                                             <FileText size={14} /> {post.category || 'Biblioteca'}
                                                         </div>
-                                                        <h4 className="font-serif text-2xl text-primary leading-tight mb-4 group-hover:text-gold transition-colors line-clamp-2">
+                                                        <h4 className="font-serif text-2xl text-primary leading-tight mb-4 group-hover:text-gold transition-colors line-clamp-2 min-h-[3.5rem]">
                                                             {post.title}
                                                         </h4>
                                                         <p className="text-sm text-text/60 mb-8 leading-relaxed line-clamp-3">
@@ -125,8 +129,8 @@ export default function BlogSection({ blogPosts = [], onSelectPost, loading = fa
                                                     </CardContent>
                                                 </Card>
                                             ) : (
-                                                <Card className="h-full border border-stone-200/60 shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 p-0 overflow-hidden rounded-2xl bg-white">
-                                                    <div className="relative mb-6 overflow-hidden aspect-[16/10] bg-paper border-b border-stone-100">
+                                                <Card className="h-full border border-stone-200/60 shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 p-0 overflow-hidden rounded-2xl bg-white flex flex-col">
+                                                    <div className="relative mb-6 overflow-hidden aspect-[16/10] bg-paper border-b border-stone-100 shrink-0">
                                                         <Image
                                                             src={post.image || `https://source.unsplash.com/random/800x600?nature,sig=${index}`}
                                                             alt={post.title}
@@ -140,8 +144,8 @@ export default function BlogSection({ blogPosts = [], onSelectPost, loading = fa
                                                             </span>
                                                         </div>
                                                     </div>
-                                                    <CardContent className="p-6 pt-0">
-                                                        <div className="space-y-4">
+                                                    <CardContent className="p-6 pt-0 flex flex-col flex-1">
+                                                        <div className="space-y-4 flex flex-col flex-1">
                                                             <div className="flex items-center gap-3">
                                                                 <span className="text-[10px] font-bold tracking-widest uppercase text-gold">
                                                                     {post.category || 'Gestalt-Terapia'}
@@ -151,13 +155,13 @@ export default function BlogSection({ blogPosts = [], onSelectPost, loading = fa
                                                                     {post.date}
                                                                 </span>
                                                             </div>
-                                                            <h3 className="font-serif text-2xl text-primary leading-snug group-hover:text-gold transition-colors duration-300">
+                                                            <h3 className="font-serif text-2xl text-primary leading-snug group-hover:text-gold transition-colors duration-300 line-clamp-2 min-h-[3.5rem]">
                                                                 {post.title}
                                                             </h3>
-                                                            <p className="text-sm text-text/60 line-clamp-2 leading-relaxed">
+                                                            <p className="text-sm text-text/60 line-clamp-3 leading-relaxed mb-4 flex-1">
                                                                 {post.excerpt}
                                                             </p>
-                                                            <div className="pt-2 flex items-center gap-2 text-primary font-bold text-[10px] uppercase tracking-widest group-hover:gap-3 transition-all">
+                                                            <div className="pt-2 flex items-center gap-2 text-primary font-bold text-[10px] uppercase tracking-widest group-hover:gap-3 transition-all mt-auto">
                                                                 Continuar Lendo <ArrowUpRight size={12} />
                                                             </div>
                                                         </div>
@@ -178,6 +182,41 @@ export default function BlogSection({ blogPosts = [], onSelectPost, loading = fa
                             )}
                         </>
                     )}
+                </div>
+
+                {/* Scroll Controls (Desktop/Mobile) - Consistent Style */}
+                <div className="flex items-center justify-center gap-6 mt-6 opacity-70 hover:opacity-100 transition-opacity md:hidden">
+                    <button
+                        onClick={() => {
+                            if (scrollContainerRef.current) {
+                                scrollContainerRef.current.scrollBy({ left: -300, behavior: 'smooth' });
+                            }
+                        }}
+                        className="p-3 rounded-full hover:bg-stone-100 text-stone-400 hover:text-primary transition-colors border border-transparent hover:border-stone-200"
+                        aria-label="Scroll Left"
+                    >
+                        <ArrowLeft size={24} />
+                    </button>
+
+                    <div className="w-32 h-1.5 bg-stone-100 rounded-full overflow-hidden">
+                        <motion.div
+                            className="h-full bg-primary/30 rounded-full"
+                            animate={{ x: ['-100%', '0%', '100%'] }}
+                            transition={{ repeat: Infinity, duration: 3, ease: "linear" }}
+                        />
+                    </div>
+
+                    <button
+                        onClick={() => {
+                            if (scrollContainerRef.current) {
+                                scrollContainerRef.current.scrollBy({ left: 300, behavior: 'smooth' });
+                            }
+                        }}
+                        className="p-3 rounded-full hover:bg-stone-100 text-stone-400 hover:text-primary transition-colors border border-transparent hover:border-stone-200"
+                        aria-label="Scroll Right"
+                    >
+                        <ArrowRight size={24} />
+                    </button>
                 </div>
             </div>
         </section>

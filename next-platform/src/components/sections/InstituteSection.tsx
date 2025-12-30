@@ -1,13 +1,32 @@
 "use client";
 
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '@/context/AppContext';
 import { ArrowRight, MapPin, Phone, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
-export default function InstituteSection() {
+export default function InstituteSection({ gallery = [] }: { gallery?: any[] }) {
     const { instituteData, teamMembers } = useApp();
+    const [currentIndex, setCurrentIndex] = useState(0);
+
+    // Filter images for the slideshow (prefer 'Espaço' or 'Instituto')
+    const instituteImages = gallery?.filter((item: any) =>
+        item.category === 'Espaço' ||
+        item.category === 'Instituto' ||
+        (item.tags && item.tags.toLowerCase().includes('instituto'))
+    ) || [];
+
+    const slides = instituteImages.length > 0 ? instituteImages : (gallery.length > 0 ? gallery : []);
+
+    useEffect(() => {
+        if (slides.length <= 1) return;
+        const interval = setInterval(() => {
+            setCurrentIndex((prev) => (prev + 1) % slides.length);
+        }, 6000); // 6s per slide
+        return () => clearInterval(interval);
+    }, [slides.length]);
 
     // Fallback data if DB is empty
     const data = instituteData || {
@@ -21,10 +40,10 @@ export default function InstituteSection() {
     };
 
     return (
-        <section id="instituto-sobre" className="py-24 bg-white relative overflow-hidden">
+        <section id="instituto-sobre" className="py-16 md:py-24 bg-white relative overflow-hidden">
             {/* Header */}
             <div className="container mx-auto px-6 max-w-6xl relative z-10">
-                <div className="text-center max-w-3xl mx-auto mb-20 animate-fade-in-up">
+                <div className="text-center max-w-3xl mx-auto mb-12 animate-fade-in-up">
                     <span className="text-xs font-bold tracking-[0.2em] uppercase text-gold mb-4 block">Sobre Nós</span>
                     <h2 className="font-serif text-4xl md:text-6xl text-primary leading-tight mb-6">
                         {data.title}
@@ -61,16 +80,40 @@ export default function InstituteSection() {
                 </div >
 
                 <div className="grid md:grid-cols-2 gap-16 items-center mb-24">
-                    <div className="order-2 md:order-1 relative">
-                        <div className="aspect-[4/5] rounded-[2rem] overflow-hidden relative z-10">
-                            <Image
-                                src="/assets/foto-instituto.jpg"
-                                alt="Instituto Figura Viva"
-                                fill
-                                className="object-cover"
-                                sizes="(max-width: 768px) 100vw, 50vw"
-                                priority
-                            />
+                    <div className="order-2 md:order-1 relative w-[85%] mx-auto">
+                        <div className="aspect-[4/5] rounded-[2rem] overflow-hidden relative z-10 bg-stone-100 shadow-xl">
+                            <AnimatePresence mode="popLayout">
+                                {slides.length > 0 ? (
+                                    <motion.div
+                                        key={currentIndex}
+                                        initial={{ opacity: 0, scale: 1.05 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        transition={{ duration: 1.2, ease: "easeOut" }}
+                                        className="absolute inset-0 w-full h-full"
+                                    >
+                                        <Image
+                                            src={slides[currentIndex].src}
+                                            alt={slides[currentIndex].title || "Instituto Figura Viva"}
+                                            fill
+                                            className="object-cover"
+                                            sizes="(max-width: 768px) 100vw, 50vw"
+                                            priority
+                                        />
+                                        {/* Optional gradient overlay for better text contrast if needed later */}
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-60" />
+                                    </motion.div>
+                                ) : (
+                                    <Image
+                                        src="/assets/foto-instituto.jpg"
+                                        alt="Instituto Figura Viva"
+                                        fill
+                                        className="object-cover"
+                                        sizes="(max-width: 768px) 100vw, 50vw"
+                                        priority
+                                    />
+                                )}
+                            </AnimatePresence>
                         </div>
                         <div className="absolute top-10 -left-10 w-full h-full border-2 border-gold/30 rounded-[2rem] -z-0 hidden md:block" />
                     </div>

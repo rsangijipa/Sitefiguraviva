@@ -18,7 +18,7 @@ export default function FounderSection() {
     };
 
     return (
-        <section id="fundadora" className="py-20 bg-stone-50 border-t border-stone-200">
+        <section id="fundadora" className="py-16 bg-stone-50 border-t border-stone-200">
             <div className="container mx-auto px-6 max-w-5xl">
                 <div className="flex flex-col md:flex-row items-center gap-10 md:gap-16">
                     {/* Image - Compact */}

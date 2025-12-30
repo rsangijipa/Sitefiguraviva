@@ -87,7 +87,7 @@ export default function HomeClient({ courses, blogPosts, gallery }: HomeClientPr
                     onSelectCourse={selectCourse}
                 />
 
-                <InstituteSection />
+                <InstituteSection gallery={gallery} />
 
                 <ResourcesSection />
 

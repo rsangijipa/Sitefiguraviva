@@ -20,9 +20,10 @@ export default function Navbar() {
     }, []);
 
     const navItems = [
-        { label: 'Clínica', href: '/#clinica' },
+        { label: 'Instituto', href: '/#instituto-sobre' },
         { label: 'Fundadora', href: '/#fundadora' },
-        { label: 'Instituto', href: '/#instituto', display: 'Formações e Grupos' },
+        { label: 'Formações', href: '/#instituto', display: 'Formações e Grupos' },
+        { label: 'Recursos', href: '/#recursos-interativos' },
         { label: 'Blog', href: '/#blog' },
     ];
 
