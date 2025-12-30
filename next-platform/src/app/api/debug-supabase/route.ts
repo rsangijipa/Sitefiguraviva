@@ -16,22 +16,41 @@ export async function GET() {
         const supabase = await createClient();
         const url_preview = (process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || "").substring(0, 20) + "...";
 
-        // Test posts fetch
-        const { data: postsData, error: postsError } = await supabase.from('posts').select('id').limit(1);
+        // Real count and list for courses
+        const { data: coursesData, error: coursesError, count: coursesTotal } = await supabase
+            .from('courses')
+            .select('id, title', { count: 'exact' });
 
-        // Test courses fetch
-        const { data: coursesData, error: coursesError } = await supabase.from('courses').select('id').limit(1);
+        // Real count for gallery
+        const { data: galleryData, error: galleryError, count: galleryTotal } = await supabase
+            .from('gallery')
+            .select('id', { count: 'exact' });
 
-        // Test gallery fetch
-        const { data: galleryData, error: galleryError } = await supabase.from('gallery').select('id').limit(1);
+        // Real count for posts
+        const { data: postsData, error: postsError, count: postsTotal } = await supabase
+            .from('posts')
+            .select('id', { count: 'exact' });
 
         return NextResponse.json({
             env,
             url_preview,
-            tables: {
-                posts: { success: !postsError, error: postsError?.message, code: postsError?.code, count: postsData?.length || 0 },
-                courses: { success: !coursesError, error: coursesError?.message, code: coursesError?.code, count: coursesData?.length || 0 },
-                gallery: { success: !galleryError, error: galleryError?.message, code: galleryError?.code, count: galleryData?.length || 0 },
+            results: {
+                courses: {
+                    success: !coursesError,
+                    total: coursesTotal,
+                    items: coursesData?.map(c => c.title),
+                    error: coursesError?.message
+                },
+                gallery: {
+                    success: !galleryError,
+                    total: galleryTotal,
+                    error: galleryError?.message
+                },
+                posts: {
+                    success: !postsError,
+                    total: postsTotal,
+                    error: postsError?.message
+                }
             },
             timestamp: new Date().toISOString()
         });

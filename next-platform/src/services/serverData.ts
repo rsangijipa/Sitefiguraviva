@@ -10,53 +10,75 @@ const getSupabaseConfig = () => {
   return { url, key, isConfigured: !!url && !!key };
 };
 
-const config = getSupabaseConfig();
-
 export async function getCourses() {
+  const config = getSupabaseConfig();
   if (!config.isConfigured) {
-    console.warn('Supabase is not configured. Check env vars.', config);
+    console.error('❌ Supabase is NOT configured in getCourses');
     return [];
   }
 
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from('courses')
-    .select('*')
-    .order('created_at', { ascending: false });
+  try {
+    const supabase = await createClient();
+    console.log(`🌐 Fetching courses from: ${config.url?.substring(0, 20)}...`);
 
-  if (error) {
-    console.error('Error fetching courses:', error.message, error.details);
+    const { data, error } = await supabase
+      .from('courses')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('❌ Error fetching courses:', error.message, error.details);
+      return [];
+    }
+
+    console.log(`✅ Fetched ${data?.length || 0} courses`);
+    return data || [];
+  } catch (err) {
+    console.error('💥 Crash in getCourses:', err);
     return [];
   }
-  return data || [];
 }
 
 export async function getBlogPosts() {
+  const config = getSupabaseConfig();
   if (!config.isConfigured) return [];
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from('posts')
-    .select('*')
-    .order('date', { ascending: false });
 
-  if (error) {
-    console.error('Error fetching blog posts:', error.message, error.details);
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from('posts')
+      .select('*')
+      .order('date', { ascending: false });
+
+    if (error) {
+      console.error('❌ Error fetching blog posts:', error.message, error.details);
+      return [];
+    }
+    return data || [];
+  } catch (err) {
+    console.error('💥 Crash in getBlogPosts:', err);
     return [];
   }
-  return data || [];
 }
 
 export async function getGallery() {
+  const config = getSupabaseConfig();
   if (!config.isConfigured) return [];
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from('gallery')
-    .select('*')
-    .order('created_at', { ascending: false });
 
-  if (error) {
-    console.error('Error fetching gallery:', error.message, error.details);
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from('gallery')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('❌ Error fetching gallery:', error.message, error.details);
+      return [];
+    }
+    return data || [];
+  } catch (err) {
+    console.error('💥 Crash in getGallery:', err);
     return [];
   }
-  return data || [];
 }
