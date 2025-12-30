@@ -2,7 +2,8 @@ import { Suspense } from 'react';
 import HomeClient from '../components/HomeClient';
 import { getCourses, getBlogPosts, getGallery } from '../services/serverData';
 
-export const revalidate = 3600; // Revalidar a cada 1 hora (ISR)
+// export const revalidate = 3600; // Revalidar a cada 1 hora (ISR)
+export const dynamic = 'force-dynamic'; // Forçar renderização dinâmica para debug e consistência imediata
 
 export default async function Home() {
     // Fetch data in parallel
@@ -21,10 +22,10 @@ export default async function Home() {
                 </div>
             </div>
         }>
-            <HomeClient 
-                courses={courses} 
-                blogPosts={blogPosts} 
-                gallery={gallery} 
+            <HomeClient
+                courses={courses}
+                blogPosts={blogPosts}
+                gallery={gallery}
             />
         </Suspense>
     );

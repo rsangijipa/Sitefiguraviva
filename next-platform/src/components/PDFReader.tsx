@@ -3,6 +3,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
+import Tooltip from './ui/Tooltip';
 
 interface PDFReaderProps {
     isOpen: boolean;
@@ -29,12 +30,14 @@ const PDFReader = ({ isOpen, onClose, article }: PDFReaderProps) => {
                             <p className="text-xs text-white/70 truncate max-w-[200px] md:max-w-md">{article.title}</p>
                         </div>
 
-                        <button
-                            onClick={onClose}
-                            className="p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
-                        >
-                            <X size={20} />
-                        </button>
+                        <Tooltip content="Fechar Leitor">
+                            <button
+                                onClick={onClose}
+                                className="p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
+                            >
+                                <X size={20} />
+                            </button>
+                        </Tooltip>
                     </div>
 
                     {/* Main Content Area */}
@@ -46,19 +49,19 @@ const PDFReader = ({ isOpen, onClose, article }: PDFReaderProps) => {
                                 title={article.title}
                             />
                         ) : (
-                            <div className="overflow-y-auto h-full p-8 md:p-16">
-                                <div className="max-w-3xl mx-auto bg-white p-12 md:p-20 shadow-xl min-h-full">
-                                    <header className="text-center mb-16">
-                                        <h1 className="font-serif text-4xl md:text-5xl text-primary leading-tight mb-8">
+                            <div className="overflow-y-auto h-full p-6 md:p-12 scrollbar-hide">
+                                <div className="max-w-4xl mx-auto bg-white p-8 md:p-16 shadow-soft-xl rounded-2xl min-h-full">
+                                    <header className="text-center mb-12">
+                                        <h1 className="font-serif text-3xl md:text-5xl text-primary leading-tight mb-6">
                                             {article.title}
                                         </h1>
-                                        <div className="w-16 h-[1px] bg-gold/30 mx-auto" />
+                                        <div className="w-24 h-px bg-gold/20 mx-auto" />
                                     </header>
-                                    <div className="prose prose-stone max-w-none text-primary/80 leading-relaxed font-light">
+                                    <div className="prose-organic px-2 md:px-4">
                                         {article.content ? (
                                             <div dangerouslySetInnerHTML={{ __html: article.content }} />
                                         ) : (
-                                            <p className="text-center text-gray-400 italic">Conteúdo não disponível.</p>
+                                            <p className="text-center text-primary/40 italic">Conteúdo não disponível.</p>
                                         )}
                                     </div>
                                 </div>

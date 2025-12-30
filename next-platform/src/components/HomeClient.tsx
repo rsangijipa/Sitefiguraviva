@@ -10,9 +10,7 @@ import BlogSection from './sections/BlogSection';
 import FounderSection from './sections/FounderSection';
 import ResourcesSection from './ResourcesSection';
 import InstagramSection from './InstagramSection';
-import WhatsAppButton from './WhatsAppButton';
-import ScrollToTopButton from './ScrollToTopButton';
-import AmbientPlayer from './AmbientPlayer';
+import FloatingControls from './ui/FloatingControls';
 import GalleryModal from './GalleryModal';
 import CalendarModal from './CalendarModal';
 import PDFReader from './PDFReader';
@@ -100,10 +98,7 @@ export default function HomeClient({ courses, blogPosts, gallery }: HomeClientPr
             </main>
 
             <Footer />
-
-            <WhatsAppButton />
-            <ScrollToTopButton />
-            <AmbientPlayer />
+            <FloatingControls />
 
             <PDFReader
                 isOpen={isReaderOpen}

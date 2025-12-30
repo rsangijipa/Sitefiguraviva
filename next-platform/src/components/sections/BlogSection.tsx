@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Skeleton } from '../ui/Skeleton';
 import { Card, CardContent } from '../ui/Card';
+import EmptyState from '../ui/EmptyState';
 
 interface BlogPost {
     id: string | number;
@@ -151,6 +152,14 @@ export default function BlogSection({ blogPosts = [], onOpenReader, loading = fa
                                     </Link>
                                 </motion.div>
                             ))}
+                            {blogPosts.length === 0 && (
+                                <div className="col-span-full">
+                                    <EmptyState
+                                        title="Nenhum artigo encontrado"
+                                        message="Nossa biblioteca está sendo atualizada. Volte em breve para novas reflexões."
+                                    />
+                                </div>
+                            )}
                         </>
                     )}
                 </div>
