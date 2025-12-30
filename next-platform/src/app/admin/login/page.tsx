@@ -53,7 +53,12 @@ export default function AdminLogin() {
                 transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
                 className="bg-white/40 backdrop-blur-3xl p-8 md:p-16 rounded-[2rem] md:rounded-[3rem] shadow-[0_80px_150px_-30px_rgba(38,58,58,0.15)] w-full max-w-md relative z-10 border border-white/60 text-center mx-4"
             >
-                {isAuthenticated ? (
+                {authLoading ? (
+                    <div className="flex flex-col items-center justify-center py-12 animate-pulse">
+                        <div className="w-12 h-12 border-4 border-gold border-t-transparent rounded-full animate-spin mb-4" />
+                        <p className="text-primary/40 text-[10px] uppercase tracking-widest font-bold">Verificando acesso...</p>
+                    </div>
+                ) : isAuthenticated ? (
                     <div className="flex flex-col items-center mb-8 animate-fade-in-up">
                         <div className="w-20 h-20 rounded-full mb-6 flex items-center justify-center bg-green-100 text-green-600 border border-green-200">
                             <span className="text-2xl">✓</span>
