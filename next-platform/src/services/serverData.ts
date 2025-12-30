@@ -1,10 +1,20 @@
 import { createClient } from "@/utils/supabase/server";
 
-const isConfigured = !!process.env.NEXT_PUBLIC_SUPABASE_URL && (!!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || !!process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY);
+const getSupabaseConfig = () => {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    process.env.SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY ||
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.SUPABASE_SERVICE_ROLE;
+  return { url, key, isConfigured: !!url && !!key };
+};
+
+const config = getSupabaseConfig();
 
 export async function getCourses() {
-  if (!isConfigured) {
-    console.warn('Supabase is not configured. Check NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY');
+  if (!config.isConfigured) {
+    console.warn('Supabase is not configured. Check env vars.', config);
     return [];
   }
 
@@ -22,7 +32,7 @@ export async function getCourses() {
 }
 
 export async function getBlogPosts() {
-  if (!isConfigured) return [];
+  if (!config.isConfigured) return [];
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('posts')
@@ -37,7 +47,7 @@ export async function getBlogPosts() {
 }
 
 export async function getGallery() {
-  if (!isConfigured) return [];
+  if (!config.isConfigured) return [];
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('gallery')
