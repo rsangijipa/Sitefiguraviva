@@ -19,13 +19,7 @@ export default function AdminLayout({ children }) {
         setIsClient(true);
     }, []);
 
-    useEffect(() => {
-        const isLoginPage = pathname?.startsWith('/admin/login');
-        if (isClient && !authLoading && !isAuthenticated && !isLoginPage) {
-            console.log("AdminLayout: Redirecting to login...");
-            router.replace('/admin/login');
-        }
-    }, [isAuthenticated, authLoading, isClient, pathname, router]);
+    // Redirect logic removed to prevent loops. Showing manual access screen instead.
 
     if (!isClient) return null; // Avoid hydration mismatch
 
@@ -45,8 +39,24 @@ export default function AdminLayout({ children }) {
         );
     }
 
-    // If not authenticated (and not on login), show nothing (will redirect)
-    if (!isAuthenticated) return null;
+    // If not authenticated (and not on login), show Access Restricted screen
+    if (!isAuthenticated) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center bg-paper p-6 text-center">
+                <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center text-red-400 mb-6">
+                    <LogOut size={24} />
+                </div>
+                <h1 className="font-serif text-3xl text-primary mb-2">Acesso Restrito</h1>
+                <p className="text-stone-500 mb-8 max-w-md">Para acessar o painel administrativo, você precisa realizar o login.</p>
+                <button
+                    onClick={() => router.push('/admin/login')}
+                    className="bg-primary text-white px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-gold transition-colors shadow-lg"
+                >
+                    Ir para Login
+                </button>
+            </div>
+        );
+    }
 
     const navItems = [
         { icon: LayoutDashboard, label: 'Visão Geral', path: '/admin' },
