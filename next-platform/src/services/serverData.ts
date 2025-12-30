@@ -1,4 +1,4 @@
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@supabase/supabase-js";
 
 const getSupabaseConfig = () => {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
@@ -18,8 +18,7 @@ export async function getCourses() {
   }
 
   try {
-    const supabase = await createClient();
-    console.log(`🌐 Fetching courses from: ${config.url?.substring(0, 20)}...`);
+    const supabase = createClient(config.url!, config.key!);
 
     const { data, error } = await supabase
       .from('courses')
@@ -27,11 +26,9 @@ export async function getCourses() {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('❌ Error fetching courses:', error.message, error.details);
+      console.error('❌ Error fetching courses:', error.message);
       return [];
     }
-
-    console.log(`✅ Fetched ${data?.length || 0} courses`);
     return data || [];
   } catch (err) {
     console.error('💥 Crash in getCourses:', err);
@@ -44,14 +41,14 @@ export async function getBlogPosts() {
   if (!config.isConfigured) return [];
 
   try {
-    const supabase = await createClient();
+    const supabase = createClient(config.url!, config.key!);
     const { data, error } = await supabase
       .from('posts')
       .select('*')
       .order('date', { ascending: false });
 
     if (error) {
-      console.error('❌ Error fetching blog posts:', error.message, error.details);
+      console.error('❌ Error fetching blog posts:', error.message);
       return [];
     }
     return data || [];
@@ -66,14 +63,14 @@ export async function getGallery() {
   if (!config.isConfigured) return [];
 
   try {
-    const supabase = await createClient();
+    const supabase = createClient(config.url!, config.key!);
     const { data, error } = await supabase
       .from('gallery')
       .select('*')
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('❌ Error fetching gallery:', error.message, error.details);
+      console.error('❌ Error fetching gallery:', error.message);
       return [];
     }
     return data || [];
