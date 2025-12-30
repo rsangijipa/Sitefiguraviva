@@ -8,7 +8,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 export default function InstituteSection({ gallery = [] }: { gallery?: any[] }) {
-    const { instituteData, teamMembers } = useApp();
+    const { instituteData, teamMembers, founderData } = useApp();
     const [currentIndex, setCurrentIndex] = useState(0);
 
     // Filter images for the slideshow (prefer 'Espaço' or 'Instituto')
@@ -164,22 +164,22 @@ export default function InstituteSection({ gallery = [] }: { gallery?: any[] }) 
                             <div className="flex items-center gap-4 mb-4">
                                 <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gold/20 relative">
                                     <Image
-                                        src="/assets/lilian.jpeg"
-                                        alt="Lilian Vanessa"
+                                        src={founderData?.image || "/assets/lilian.jpeg"}
+                                        alt={founderData?.name || "Lilian Vanessa"}
                                         fill
                                         className="object-cover"
                                         sizes="64px"
                                     />
                                 </div>
                                 <div>
-                                    <h4 className="font-bold text-primary text-lg">Lilian Vanessa</h4>
+                                    <h4 className="font-bold text-primary text-lg">{founderData?.name?.split(' ')[0] + ' ' + (founderData?.name?.split(' ')[1] || '')}</h4>
                                     <span className="text-xs font-bold text-gold uppercase tracking-wider">Fundadora</span>
                                 </div>
                             </div>
-                            <p className="text-sm text-primary/70 leading-relaxed mb-4">
-                                Psicóloga, gestalt-terapeuta e pesquisadora. Mestre em Psicologia.
+                            <p className="text-sm text-primary/70 leading-relaxed mb-4 line-clamp-3">
+                                {founderData?.bio || "Psicóloga, gestalt-terapeuta e pesquisadora. Mestre em Psicologia."}
                             </p>
-                            <a href="http://lattes.cnpq.br/" target="_blank" className="text-[10px] font-bold uppercase tracking-widest text-primary hover:text-gold flex items-center gap-2">
+                            <a href={founderData?.link || "http://lattes.cnpq.br/"} target="_blank" className="text-[10px] font-bold uppercase tracking-widest text-primary hover:text-gold flex items-center gap-2">
                                 Ver Currículo Lattes <ArrowRight size={12} />
                             </a>
                         </div>

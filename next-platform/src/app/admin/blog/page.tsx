@@ -2,12 +2,14 @@
 
 import { useState } from 'react';
 import { useApp } from '../../../context/AppContext';
+import { useToast } from '@/context/ToastContext';
 import { Plus, Trash2, Edit, Save, X, FileText, Calendar, Type, Loader2, Upload, BookOpen } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { uploadFiles } from '../../../services/uploadServiceSupabase'; // Ensure this is imported
 
 export default function BlogManager() {
     const { blogPosts, addBlogPost, updateBlogPost, deleteBlogPost, loading } = useApp();
+    const { addToast } = useToast();
     const [isEditing, setIsEditing] = useState(false);
     const [currentPost, setCurrentPost] = useState<any>(null);
 
@@ -32,7 +34,7 @@ export default function BlogManager() {
 
         // Validate PDF if type is library
         if (formData.type === 'library' && file.type !== 'application/pdf') {
-            alert('Por favor, envie um arquivo PDF.');
+            addToast('Por favor, envie um arquivo PDF.', 'error');
             return;
         }
 
@@ -42,9 +44,10 @@ export default function BlogManager() {
             // Using 'courses' for consistency with CourseManager/GalleryManager which work.
             const urls = await uploadFiles([file], 'courses');
             setFormData(prev => ({ ...prev, pdf_url: urls[0] }));
+            addToast('Arquivo enviado com sucesso!', 'success');
         } catch (error) {
             console.error("Upload error:", error);
-            alert("Erro ao enviar arquivo.");
+            addToast("Erro ao enviar arquivo.", 'error');
         } finally {
             setUploading(false);
         }
@@ -54,12 +57,17 @@ export default function BlogManager() {
         e.preventDefault();
         setIsSubmitting(true);
         try {
-            await addBlogPost(formData);
-            setFormData(initialForm);
-            setIsEditing(false);
+            const success = await addBlogPost(formData);
+            if (success) {
+                setFormData(initialForm);
+                setIsEditing(false);
+                addToast('Publicação salva com sucesso!', 'success');
+            } else {
+                addToast('Erro ao salvar publicação.', 'error');
+            }
         } catch (error) {
             console.error("Error saving post:", error);
-            alert("Erro ao salvar publicação.");
+            addToast("Erro ao salvar publicação.", 'error');
         } finally {
             setIsSubmitting(false);
         }
