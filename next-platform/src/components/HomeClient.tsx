@@ -17,6 +17,8 @@ import PDFReader from './PDFReader';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Image as ImageIcon } from 'lucide-react';
 import Image from 'next/image';
+import CourseModal from './CourseModal';
+import BlogPostModal from './BlogPostModal';
 
 interface HomeClientProps {
     courses: any[];
@@ -30,18 +32,43 @@ export default function HomeClient({ courses, blogPosts, gallery }: HomeClientPr
     const router = useRouter();
 
     // Modal states derived from URL
-    const isCalendarOpen = searchParams.get('modal') === 'calendar';
-    const isReaderOpen = searchParams.get('modal') === 'reader';
-    const isGalleryOpen = searchParams.get('modal') === 'gallery';
+    const modalType = searchParams.get('modal');
+    const isCalendarOpen = modalType === 'calendar';
+    const isReaderOpen = modalType === 'reader';
+    const isGalleryOpen = modalType === 'gallery';
+
+    // New Modal types for Course and Blog
+    const isCourseOpen = modalType === 'course';
+    const isBlogOpen = modalType === 'blog';
+
+    // Item IDs
     const articleId = searchParams.get('articleId');
+    const courseId = searchParams.get('courseId');
+    const postId = searchParams.get('postId');
+
+    // Resolve selections
     const selectedArticle = articleId ? blogPosts.find((p: any) => String(p.id) === String(articleId)) : null;
+    const selectedCourse = courseId ? courses.find((c: any) => String(c.id) === String(courseId)) : null;
+    const selectedPost = postId ? blogPosts.find((p: any) => String(p.id) === String(postId)) : null;
 
     const closeModals = () => {
-        router.push('/');
+        router.push('/', { scroll: false });
     };
 
     const openModal = (name: string) => {
-        router.push(`/?modal=${name}`);
+        router.push(`/?modal=${name}`, { scroll: false });
+    };
+
+    const selectCourse = (course: any) => {
+        router.push(`/?modal=course&courseId=${course.id}`, { scroll: false });
+    };
+
+    const selectPost = (post: any) => {
+        if (post.type === 'library') {
+            router.push(`/?modal=reader&articleId=${post.id}`, { scroll: false });
+        } else {
+            router.push(`/?modal=blog&postId=${post.id}`, { scroll: false });
+        }
     };
 
     return (
@@ -56,10 +83,11 @@ export default function HomeClient({ courses, blogPosts, gallery }: HomeClientPr
                 <CoursesSection
                     courses={courses}
                     onOpenCalendar={() => openModal('calendar')}
+                    onSelectCourse={selectCourse}
                 />
                 <BlogSection
                     blogPosts={blogPosts}
-                    onOpenReader={(post) => openModal(`reader&articleId=${post.id}`)}
+                    onSelectPost={selectPost}
                 />
 
                 {/* GALLERY TRIGGER SECTION */}
@@ -99,6 +127,19 @@ export default function HomeClient({ courses, blogPosts, gallery }: HomeClientPr
 
             <Footer />
             <FloatingControls />
+
+            {/* MODALS */}
+            <CourseModal
+                isOpen={isCourseOpen}
+                onClose={closeModals}
+                course={selectedCourse}
+            />
+
+            <BlogPostModal
+                isOpen={isBlogOpen}
+                onClose={closeModals}
+                post={selectedPost}
+            />
 
             <PDFReader
                 isOpen={isReaderOpen}
