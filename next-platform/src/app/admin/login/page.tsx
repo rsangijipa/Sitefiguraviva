@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useApp } from '@/context/AppContext';
+import { useToast } from '@/context/ToastContext';
 import { ArrowLeft } from 'lucide-react';
 
 export default function AdminLogin() {
     const [loading, setLoading] = useState(false);
     const { login, isAuthenticated, authLoading } = useApp();
+    const { addToast } = useToast();
     const router = useRouter();
 
     // Auto-redirect removed to prevent loops.
@@ -25,9 +27,10 @@ export default function AdminLogin() {
         setLoading(false);
 
         if (success) {
+            addToast('Login realizado com sucesso!', 'success');
             router.push('/admin');
         } else {
-            alert("Acesso negado. Verifique suas credenciais.");
+            addToast("Acesso negado. Verifique suas credenciais.", 'error');
         }
     };
 

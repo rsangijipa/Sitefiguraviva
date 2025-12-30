@@ -5,10 +5,12 @@ import { Camera, Save, Image as ImageIcon, Hash, FileText, Info, RefreshCw, Chec
 import { motion, AnimatePresence } from 'framer-motion';
 import { galleryService } from '../../../services/galleryServiceSupabase';
 import { uploadFiles } from '../../../services/uploadServiceSupabase';
+import { useToast } from '@/context/ToastContext';
 
 export default function GalleryManager() {
     const [gallery, setGallery] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const { addToast } = useToast();
     const initialForm = {
         title: '',
         category: 'Geral', // Added category
@@ -34,6 +36,7 @@ export default function GalleryManager() {
             setGallery(data);
         } catch (error) {
             console.error(error);
+            addToast("Erro ao carregar galeria.", 'error');
         } finally {
             setLoading(false);
         }
@@ -45,11 +48,12 @@ export default function GalleryManager() {
 
         setUploading(true);
         try {
-            const urls = await uploadFiles(files, 'gallery');
+            const urls = await uploadFiles(files, 'gallery'); // Ensure 'gallery' bucket exists or use 'courses'
             setFormData(prev => ({ ...prev, src: urls[0] }));
+            addToast("Upload realizado com sucesso!", 'success');
         } catch (error) {
             console.error("Upload error:", error);
-            alert("Erro ao enviar imagem.");
+            addToast("Erro ao enviar imagem.", 'error');
         } finally {
             setUploading(false);
         }
@@ -68,19 +72,18 @@ export default function GalleryManager() {
             if (formData.id) {
                 // Update implementation would go here if service supports it
                 // await galleryService.update(formData.id, payload);
-                alert("Edição em breve!"); // Placeholder as noted in logs
+                addToast("Edição em breve!", 'info'); // Placeholder as noted in logs
             } else {
-                await galleryService.add(payload);
+                await galleryService.create(payload);
             }
 
             await fetchGallery();
             setFormData(initialForm);
             setIsEditing(false);
-            setStatus({ type: 'success', message: 'Imagem salva com sucesso!' });
-            setTimeout(() => setStatus({ type: '', message: '' }), 3000);
+            addToast('Imagem salva com sucesso!', 'success');
         } catch (error) {
             console.error("Error saving gallery item:", error);
-            setStatus({ type: 'error', message: 'Erro ao salvar item.' });
+            addToast('Erro ao salvar item.', 'error');
         } finally {
             setIsSubmitting(false);
         }
@@ -91,10 +94,10 @@ export default function GalleryManager() {
         try {
             await galleryService.delete(id);
             await fetchGallery();
-            setStatus({ type: 'success', message: 'Imagem excluída!' });
+            addToast('Imagem excluída!', 'success');
         } catch (error) {
             console.error("Delete error:", error);
-            alert("Erro ao excluir.");
+            addToast("Erro ao excluir.", 'error');
         }
     };
 

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
+import { useToast } from '@/context/ToastContext';
 import { Save, Plus, Trash2, Edit2, Check, X, Upload, Loader2, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
@@ -13,6 +14,7 @@ export default function AdminContentPage() {
         instituteData, updateInstitute,
         teamMembers, addTeamMember, updateTeamMember, deleteTeamMember
     } = useApp();
+    const { addToast } = useToast();
 
     const [activeTab, setActiveTab] = useState<'founder' | 'institute' | 'team'>('founder');
     const [loading, setLoading] = useState(false);
@@ -31,7 +33,7 @@ export default function AdminContentPage() {
 
         setUploading(true);
         try {
-            const urls = await uploadFiles([file], 'public'); // Default generic bucket or 'team'
+            const urls = await uploadFiles([file], 'courses'); // Use 'courses' bucket as it exists
             const url = urls[0];
 
             if (target === 'founder') {
@@ -39,9 +41,10 @@ export default function AdminContentPage() {
             } else if (target === 'team') {
                 setMemberForm(prev => ({ ...prev, image: url }));
             }
+            addToast('Imagem enviada com sucesso!', 'success');
         } catch (error) {
             console.error("Upload error:", error);
-            alert("Erro ao enviar imagem.");
+            addToast("Erro ao enviar imagem.", 'error');
         } finally {
             setUploading(false);
         }
@@ -54,28 +57,37 @@ export default function AdminContentPage() {
 
     const handleFounderSave = async () => {
         setLoading(true);
-        await updateFounder(founderForm);
+        const success = await updateFounder(founderForm);
         setLoading(false);
-        alert('Dados da fundadora atualizados!');
+        if (success) addToast('Dados da fundadora atualizados!', 'success');
+        else addToast('Erro ao atualizar dados.', 'error');
     };
 
     const handleInstituteSave = async () => {
         setLoading(true);
-        await updateInstitute(instituteForm);
+        const success = await updateInstitute(instituteForm);
         setLoading(false);
-        alert('Dados do instituto atualizados!');
+        if (success) addToast('Dados do instituto atualizados!', 'success');
+        else addToast('Erro ao atualizar dados.', 'error');
     };
 
     const handleSaveMember = async () => {
         setLoading(true);
+        let success;
         if (editingMember) {
-            await updateTeamMember(editingMember, memberForm);
+            success = await updateTeamMember(editingMember, memberForm);
             setEditingMember(null);
         } else {
-            await addTeamMember(memberForm);
+            success = await addTeamMember(memberForm);
             setIsAddingMember(false);
         }
-        setMemberForm({ name: '', role: '', bio: '', image: '' }); // Reset
+
+        if (success) {
+            addToast(`Membro ${editingMember ? 'atualizado' : 'adicionado'} com sucesso!`, 'success');
+            setMemberForm({ name: '', role: '', bio: '', image: '' }); // Reset
+        } else {
+            addToast('Erro ao salvar membro da equipe.', 'error');
+        }
         setLoading(false);
     };
 
@@ -86,10 +98,12 @@ export default function AdminContentPage() {
     };
 
     const handleDeleteMember = async (id: string) => {
-        if (confirm("Tem certeza?")) {
+        if (confirm("Tem certeza que deseja remover este membro?")) {
             setLoading(true);
-            await deleteTeamMember(id);
+            const success = await deleteTeamMember(id);
             setLoading(false);
+            if (success) addToast('Membro removido com sucesso.', 'success');
+            else addToast('Erro ao remover membro.', 'error');
         }
     };
 
