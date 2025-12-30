@@ -1,0 +1,31 @@
+import { createClient } from '@supabase/supabase-js';
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config({ path: path.resolve(__dirname, './.env') });
+
+const supabaseUrl = "https://ponhrxfdfbzaronotelp.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvbmhyeGZkZmJ6YXJvbm90ZWxwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NzA0NDYxNSwiZXhwIjoyMDgyNjIwNjE1fQ.0Pwy1Usmtc2UFCgBo4j4jvxFNDtEy2HPTeXLNFvt4F8";
+
+if (!supabaseUrl) {
+    console.error('❌ Supabase URL missing');
+    process.exit(1);
+}
+
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+async function check() {
+    const { data: courses, error: err1 } = await supabase.from('courses').select('id, title');
+    console.log('--- COURSES ---');
+    console.log(JSON.stringify(courses, null, 2));
+
+    const { data: posts, error: err2 } = await supabase.from('posts').select('id, title');
+    console.log('--- POSTS ---');
+    console.log(JSON.stringify(posts, null, 2));
+}
+
+check();
