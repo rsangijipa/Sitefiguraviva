@@ -3,10 +3,10 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Image as ImageIcon, Search, Filter, Grid, ArrowRight } from 'lucide-react';
-import { useApp } from '../context/AppContext';
+
 
 export default function GalleryModal({ isOpen, onClose, gallery }) {
-    const { gallery } = useApp();
+
 
     // Fallback if empty (handling async state or empty DB)
     const safeGallery = useMemo(() => Array.isArray(gallery) ? gallery : [], [gallery]);

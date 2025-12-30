@@ -12,7 +12,7 @@ dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 // Use the secret key provided by the user
-const supabaseKey = 'sb_secret_w0cdteqKuERD0rdjw7AyZA_EGWsq4wV';
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE;
 
 if (!supabaseUrl) {
     console.error('❌ Supabase URL missing in .env');

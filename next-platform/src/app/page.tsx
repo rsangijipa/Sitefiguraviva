@@ -1,4 +1,4 @@
-"use client";
+
 
 import { useApp } from '../context/AppContext';
 import { useState, Suspense } from 'react';
@@ -22,6 +22,7 @@ import CalendarModal from '../components/CalendarModal';
 import PDFReader from '../components/PDFReader';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Image as ImageIcon } from 'lucide-react';
+import Image from 'next/image';
 
 function HomeContent() {
     const { courses, alertMessage, blogPosts, gallery, loading } = useApp();
@@ -75,9 +76,10 @@ function HomeContent() {
                 {/* GALLERY TRIGGER SECTION */}
                 <section className="py-20 relative overflow-hidden bg-stone-100 border-t border-stone-200">
                     <div className="absolute inset-0 z-0">
-                        <img
+                        <Image
                             src="/assets/fundo-galeria.png"
-                            alt=""
+                            alt="Galeria de fundo"
+                            fill
                             className="w-full h-full object-cover blur-[8px] opacity-40 scale-105"
                         />
                         <div className="absolute inset-0 bg-stone-100/60 mix-blend-overlay" />
