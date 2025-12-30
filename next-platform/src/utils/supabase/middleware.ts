@@ -51,7 +51,17 @@ export const updateSession = async (request: NextRequest) => {
         );
 
         // This is necessary to refresh the session
-        await supabase.auth.getUser();
+        const { data: { user }, error } = await supabase.auth.getUser();
+
+        // Protected Routes Logic
+        const path = request.nextUrl.pathname;
+        if (path.startsWith('/admin') && path !== '/admin/login') {
+            if (error || !user) {
+                const url = request.nextUrl.clone();
+                url.pathname = '/admin/login';
+                return NextResponse.redirect(url);
+            }
+        }
 
         return supabaseResponse;
     } catch (e) {
