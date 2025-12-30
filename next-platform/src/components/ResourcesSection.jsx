@@ -82,7 +82,8 @@ export default function ResourcesSection() {
                         <motion.div
                             initial={{ opacity: 0, x: 20 }}
                             whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true, delay: 0.1 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.1 }}
                             whileHover={{ y: -5 }}
                             className="flex-shrink-0 w-80 md:w-96 snap-center group relative bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col items-center text-center"
                             onClick={() => openResource('tree')}
@@ -103,7 +104,8 @@ export default function ResourcesSection() {
                         <motion.div
                             initial={{ opacity: 0, x: 20 }}
                             whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true, delay: 0.2 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.2 }}
                             whileHover={{ y: -5 }}
                             className="flex-shrink-0 w-80 md:w-96 snap-center group relative bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col items-center text-center"
                             onClick={() => openResource('somascan')}
@@ -124,7 +126,8 @@ export default function ResourcesSection() {
                         <motion.div
                             initial={{ opacity: 0, x: 20 }}
                             whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true, delay: 0.3 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.3 }}
                             whileHover={{ y: -5 }}
                             className="flex-shrink-0 w-80 md:w-96 snap-center group relative bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col items-center text-center"
                             onClick={() => openResource('quiz')}
