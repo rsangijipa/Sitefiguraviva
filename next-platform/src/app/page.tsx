@@ -7,11 +7,18 @@ export const dynamic = 'force-dynamic'; // Forçar renderização dinâmica para
 
 export default async function Home() {
     // Fetch data in parallel
-    const [courses, blogPosts, gallery] = await Promise.all([
-        getCourses(),
-        getBlogPosts(),
-        getGallery()
-    ]);
+    // Fetch data in parallel with error handling
+    let courses = [], blogPosts = [], gallery = [];
+    try {
+        [courses, blogPosts, gallery] = await Promise.all([
+            getCourses(),
+            getBlogPosts(),
+            getGallery()
+        ]);
+    } catch (error) {
+        console.error("CRITICAL: Failed to load initial data", error);
+        // Fallback to empty to allow page load
+    }
 
     return (
         <Suspense fallback={
