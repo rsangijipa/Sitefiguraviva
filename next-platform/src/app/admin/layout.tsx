@@ -20,15 +20,16 @@ export default function AdminLayout({ children }) {
     }, []);
 
     useEffect(() => {
-        const isLoginPage = pathname === '/admin/login' || pathname === '/admin/login/';
+        const isLoginPage = pathname?.startsWith('/admin/login');
         if (isClient && !authLoading && !isAuthenticated && !isLoginPage) {
+            console.log("AdminLayout: Redirecting to login...");
             router.replace('/admin/login');
         }
     }, [isAuthenticated, authLoading, isClient, pathname, router]);
 
     if (!isClient) return null; // Avoid hydration mismatch
 
-    const isLoginPage = pathname === '/admin/login' || pathname === '/admin/login/';
+    const isLoginPage = pathname?.startsWith('/admin/login');
 
     // If on login page, render without sidebar
     if (isLoginPage) {
