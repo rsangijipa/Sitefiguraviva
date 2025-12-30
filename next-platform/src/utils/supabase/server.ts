@@ -1,12 +1,20 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+const supabaseKey =
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    process.env.SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY ||
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.SUPABASE_SERVICE_ROLE;
 
 if (!supabaseUrl || !supabaseKey) {
     if (process.env.NODE_ENV === 'production') {
-        console.error('❌ CRITICAL: Supabase environment variables are missing on Vercel!');
+        console.error('❌ CRITICAL: Supabase environment variables are missing on Vercel!', {
+            hasUrl: !!supabaseUrl,
+            hasKey: !!supabaseKey,
+        });
     }
 }
 
