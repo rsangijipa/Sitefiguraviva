@@ -66,10 +66,8 @@ export default function GalleryManager() {
             // Prepare payload
             const payload = {
                 ...formData,
-                // The database schema uses TEXT for tags, so we should join them back if they were split
-                tags: typeof formData.tags === 'string'
-                    ? formData.tags
-                    : (Array.isArray(formData.tags) ? formData.tags.join(', ') : '')
+                // The database schema uses TEXT for tags. formData.tags is always string in our state.
+                tags: formData.tags
             };
 
             if (formData.id) {
@@ -167,7 +165,6 @@ export default function GalleryManager() {
             </div>
 
             <AnimatePresence>
-                {/* ... (Modal code remains identical but I'll make sure it's wrapped correctly) */}
                 {isEditing && (
                     <motion.div
                         initial={{ opacity: 0, scale: 0.98 }}
