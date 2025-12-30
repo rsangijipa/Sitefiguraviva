@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { courseService } from '../services/courseServiceSupabase';
 import { blogService } from '../services/blogServiceSupabase';
+import { contentService } from '../services/contentServiceSupabase';
 import { configService } from '../services/configService';
 import { authService } from '../services/authServiceSupabase';
 import { galleryService } from '../services/galleryServiceSupabase';
@@ -13,6 +14,9 @@ export function AppProvider({ children }) {
     const [courses, setCourses] = useState([]);
     const [blogPosts, setBlogPosts] = useState([]);
     const [gallery, setGallery] = useState([]);
+    const [founderData, setFounderData] = useState(null);
+    const [instituteData, setInstituteData] = useState(null);
+    const [teamMembers, setTeamMembers] = useState([]);
     const [googleConfig, setGoogleConfig] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -40,14 +44,20 @@ export function AppProvider({ children }) {
     const fetchData = useCallback(async () => {
         setLoading(true);
         try {
-            const [coursesData, postsData, galleryData] = await Promise.all([
+            const [coursesData, postsData, galleryData, founderRes, instituteRes, teamRes] = await Promise.all([
                 courseService.getAll(),
                 blogService.getAll(),
-                galleryService.getAll()
+                galleryService.getAll(),
+                contentService.getContent('founder'),
+                contentService.getContent('institute'),
+                contentService.getTeamMembers()
             ]);
             setCourses(coursesData);
             setBlogPosts(postsData);
             setGallery(galleryData);
+            setFounderData(founderRes);
+            setInstituteData(instituteRes);
+            setTeamMembers(teamRes);
             setError(null);
         } catch (err) {
             console.error("Fetch error:", err);
@@ -124,10 +134,69 @@ export function AppProvider({ children }) {
         }
     };
 
+    // Content Update Helpers
+    const updateFounder = async (data) => {
+        try {
+            const updated = await contentService.updateContent('founder', data);
+            setFounderData(updated);
+            return true;
+        } catch (err) {
+            console.error("Failed to update founder", err);
+            return false;
+        }
+    };
+
+    const updateInstitute = async (data) => {
+        try {
+            const updated = await contentService.updateContent('institute', data);
+            setInstituteData(updated);
+            return true;
+        } catch (err) {
+            console.error("Failed to update institute", err);
+            return false;
+        }
+    };
+
+    // Team Helpers
+    const addTeamMember = async (member) => {
+        try {
+            const newMember = await contentService.addTeamMember(member);
+            setTeamMembers(prev => [...prev, newMember]);
+            return true;
+        } catch (err) {
+            console.error(err); return false;
+        }
+    };
+
+    const updateTeamMember = async (id, updates) => {
+        try {
+            const updated = await contentService.updateTeamMember(id, updates);
+            setTeamMembers(prev => prev.map(m => m.id === id ? updated : m));
+            return true;
+        } catch (err) {
+            console.error(err); return false;
+        }
+    };
+
+    const deleteTeamMember = async (id) => {
+        try {
+            await contentService.deleteTeamMember(id);
+            setTeamMembers(prev => prev.filter(m => m.id !== id));
+            return true;
+        } catch (err) {
+            console.error(err); return false;
+        }
+    };
+
+
     return (
         <AppContext.Provider value={{
             courses,
             blogPosts,
+            gallery,
+            founderData,
+            instituteData,
+            teamMembers,
             loading,
             error,
             alertMessage,
@@ -165,7 +234,11 @@ export function AppProvider({ children }) {
                     return false;
                 }
             },
-            gallery,
+            updateFounder,
+            updateInstitute,
+            addTeamMember,
+            updateTeamMember,
+            deleteTeamMember,
             fetchGallery: async () => {
                 const data = await galleryService.getAll();
                 setGallery(data);
