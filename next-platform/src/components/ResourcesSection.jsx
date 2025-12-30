@@ -32,13 +32,18 @@ export default function ResourcesSection() {
     return (
         <section id="recursos-interativos" className="py-24 bg-surface border-t border-stone-100 relative overflow-hidden">
             <div className="container mx-auto px-6 max-w-7xl relative z-10">
-                <div className="mb-12 text-center max-w-2xl mx-auto">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="mb-12 text-center max-w-2xl mx-auto"
+                >
                     <span className="text-xs font-bold tracking-[0.2em] uppercase text-accent mb-4 block">Ferramentas de Cuidado</span>
                     <h2 className="heading-section">Recursos <span className="italic text-accent font-light">Interativos</span></h2>
                     <p className="text-lg text-text/80 mt-4">
                         Espaços digitais desenhados para cultivar a presença e a awareness no seu dia a dia.
                     </p>
-                </div>
+                </motion.div>
 
                 {/* Horizontal Scroll Container */}
                 <div className="relative w-full">
@@ -54,6 +59,9 @@ export default function ResourcesSection() {
 
                         {/* Breathing App Card */}
                         <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
                             whileHover={{ y: -5 }}
                             className="flex-shrink-0 w-80 md:w-96 snap-center group relative bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col items-center text-center"
                             onClick={() => openResource('breathing')}
@@ -72,6 +80,9 @@ export default function ResourcesSection() {
 
                         {/* Feelings Tree Card */}
                         <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true, delay: 0.1 }}
                             whileHover={{ y: -5 }}
                             className="flex-shrink-0 w-80 md:w-96 snap-center group relative bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col items-center text-center"
                             onClick={() => openResource('tree')}
@@ -90,6 +101,9 @@ export default function ResourcesSection() {
 
                         {/* SomaScan Card (NEW) */}
                         <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true, delay: 0.2 }}
                             whileHover={{ y: -5 }}
                             className="flex-shrink-0 w-80 md:w-96 snap-center group relative bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col items-center text-center"
                             onClick={() => openResource('somascan')}
@@ -108,6 +122,9 @@ export default function ResourcesSection() {
 
                         {/* Mental Health Quiz Card */}
                         <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true, delay: 0.3 }}
                             whileHover={{ y: -5 }}
                             className="flex-shrink-0 w-80 md:w-96 snap-center group relative bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col items-center text-center"
                             onClick={() => openResource('quiz')}

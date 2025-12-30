@@ -7,6 +7,8 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import { Skeleton } from '../ui/Skeleton';
 import { Card } from '../ui/Card';
+import EmptyState from '../ui/EmptyState';
+import { Calendar } from 'lucide-react';
 
 const fadeInUp = {
     hidden: { opacity: 0, y: 20 },
@@ -86,8 +88,20 @@ export default function CoursesSection({ courses = [], onOpenCalendar, loading =
                                 </div>
                             ))
                         ) : courses.length === 0 ? (
-                            <div className="w-full text-center py-12 bg-white/50 rounded-2xl border border-dashed border-gray-300">
-                                <p className="text-primary/50 text-sm font-medium">Nenhuma formação aberta no momento.</p>
+                            <div className="w-full">
+                                <EmptyState
+                                    title="Nenhuma formação aberta"
+                                    message="No momento não temos inscrições abertas, mas você pode consultar nosso calendário para ver as próximas datas."
+                                    icon={<Calendar size={48} />}
+                                    action={
+                                        <button
+                                            onClick={onOpenCalendar}
+                                            className="text-xs font-bold uppercase tracking-widest text-primary border-b border-primary/20 pb-1 hover:text-gold hover:border-gold transition-colors"
+                                        >
+                                            Ver Calendário
+                                        </button>
+                                    }
+                                />
                             </div>
                         ) : (
                             courses.map((course, index) => {
