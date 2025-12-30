@@ -8,15 +8,15 @@ import { ArrowLeft } from 'lucide-react';
 
 export default function AdminLogin() {
     const [loading, setLoading] = useState(false);
-    const { login, isAuthenticated } = useApp();
+    const { login, isAuthenticated, authLoading } = useApp();
     const router = useRouter();
 
     // Redirect if already authenticated
     useEffect(() => {
-        if (isAuthenticated) {
+        if (!authLoading && isAuthenticated) {
             router.replace('/admin');
         }
-    }, [isAuthenticated, router]);
+    }, [isAuthenticated, authLoading, router]);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
