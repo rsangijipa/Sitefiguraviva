@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
-import { Save, Plus, Trash2, Edit2, Check, X } from 'lucide-react';
+import { Save, Plus, Trash2, Edit2, Check, X, Upload, Loader2, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import { uploadFiles } from '../../../services/uploadServiceSupabase';
 
 export default function AdminContentPage() {
     const {
@@ -15,6 +16,7 @@ export default function AdminContentPage() {
 
     const [activeTab, setActiveTab] = useState<'founder' | 'institute' | 'team'>('founder');
     const [loading, setLoading] = useState(false);
+    const [uploading, setUploading] = useState(false);
     const [founderForm, setFounderForm] = useState<any>({});
     const [instituteForm, setInstituteForm] = useState<any>({});
 
@@ -22,6 +24,28 @@ export default function AdminContentPage() {
     const [editingMember, setEditingMember] = useState<string | null>(null);
     const [memberForm, setMemberForm] = useState({ name: '', role: '', bio: '', image: '' });
     const [isAddingMember, setIsAddingMember] = useState(false);
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, target: 'founder' | 'team') => {
+        if (!e.target.files || e.target.files.length === 0) return;
+        const file = e.target.files[0];
+
+        setUploading(true);
+        try {
+            const urls = await uploadFiles([file], 'public'); // Default generic bucket or 'team'
+            const url = urls[0];
+
+            if (target === 'founder') {
+                setFounderForm(prev => ({ ...prev, image: url }));
+            } else if (target === 'team') {
+                setMemberForm(prev => ({ ...prev, image: url }));
+            }
+        } catch (error) {
+            console.error("Upload error:", error);
+            alert("Erro ao enviar imagem.");
+        } finally {
+            setUploading(false);
+        }
+    };
 
     useEffect(() => {
         if (founderData) setFounderForm(founderData);
@@ -122,12 +146,43 @@ export default function AdminContentPage() {
                             />
                         </div>
                         <div>
-                            <label className="block text-xs font-bold uppercase tracking-widest text-primary/60 mb-2">URL Foto</label>
-                            <input
-                                className="w-full p-3 bg-stone-50 border border-stone-200 rounded-lg"
-                                value={founderForm.image || ''}
-                                onChange={e => setFounderForm({ ...founderForm, image: e.target.value })}
-                            />
+                            <label className="block text-xs font-bold uppercase tracking-widest text-primary/60 mb-2">Foto da Fundadora</label>
+                            <div className="flex gap-6 items-start">
+                                <div className="w-32 h-32 rounded-full overflow-hidden bg-stone-100 border relative group">
+                                    {founderForm.image ? (
+                                        <div className="w-full h-full relative">
+                                            <Image src={founderForm.image} alt="Founder" fill className="object-cover" />
+                                            <button
+                                                onClick={() => setFounderForm({ ...founderForm, image: '' })}
+                                                className="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
+                                            >
+                                                <X size={20} />
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center text-stone-300">
+                                            <User size={32} />
+                                        </div>
+                                    )}
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="absolute inset-0 opacity-0 cursor-pointer"
+                                        onChange={(e) => handleFileUpload(e, 'founder')}
+                                        disabled={uploading}
+                                    />
+                                    {uploading && <div className="absolute inset-0 bg-white/80 flex items-center justify-center"><Loader2 className="animate-spin" size={20} /></div>}
+                                </div>
+                                <div className="flex-1">
+                                    <p className="text-sm text-stone-500 mb-2">Clique na imagem para alterar a foto (Upload).</p>
+                                    <input
+                                        className="w-full p-3 bg-stone-50 border border-stone-200 rounded-lg text-xs"
+                                        value={founderForm.image || ''}
+                                        onChange={e => setFounderForm({ ...founderForm, image: e.target.value })}
+                                        placeholder="Ou cole uma URL aqui..."
+                                    />
+                                </div>
+                            </div>
                         </div>
                         <button
                             onClick={handleFounderSave}
@@ -230,41 +285,68 @@ export default function AdminContentPage() {
                         <div className="bg-white p-6 rounded-xl border-l-4 border-gold shadow-md">
                             <h4 className="font-bold text-primary mb-4">{editingMember ? 'Editar Membro' : 'Novo Membro'}</h4>
                             <div className="grid md:grid-cols-2 gap-4 mb-4">
-                                <input
-                                    placeholder="Nome"
-                                    className="p-3 bg-stone-50 border rounded-lg"
-                                    value={memberForm.name}
-                                    onChange={e => setMemberForm({ ...memberForm, name: e.target.value })}
-                                />
-                                <input
-                                    placeholder="Papel/Cargo"
-                                    className="p-3 bg-stone-50 border rounded-lg"
-                                    value={memberForm.role}
-                                    onChange={e => setMemberForm({ ...memberForm, role: e.target.value })}
-                                />
-                                <input
-                                    placeholder="URL da Foto"
-                                    className="p-3 bg-stone-50 border rounded-lg"
-                                    value={memberForm.image}
-                                    onChange={e => setMemberForm({ ...memberForm, image: e.target.value })}
-                                />
-                                <input
-                                    placeholder="Bio curta"
-                                    className="p-3 bg-stone-50 border rounded-lg"
-                                    value={memberForm.bio}
-                                    onChange={e => setMemberForm({ ...memberForm, bio: e.target.value })}
-                                />
-                            </div>
-                            <div className="flex gap-2">
-                                <button onClick={handleSaveMember} disabled={loading} className="bg-primary text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest flex items-center gap-2">
-                                    <Save size={14} /> Salvar
-                                </button>
-                                <button onClick={() => setIsAddingMember(false)} className="bg-stone-200 text-stone-600 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest">
-                                    Cancelar
-                                </button>
+                                <div className="flex gap-4 items-center">
+                                    <div className="w-20 h-20 rounded-lg overflow-hidden bg-stone-100 border relative group">
+                                        {memberForm.image ? (
+                                            <div className="w-full h-full relative">
+                                                <Image src={memberForm.image} alt="Preview" fill className="object-cover" />
+                                                <button
+                                                    onClick={() => setMemberForm({ ...memberForm, image: '' })}
+                                                    className="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
+                                                >
+                                                    <X size={16} />
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center text-stone-300">
+                                                <Upload size={24} />
+                                            </div>
+                                        )}
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            className="absolute inset-0 opacity-0 cursor-pointer"
+                                            onChange={(e) => handleFileUpload(e, 'team')}
+                                            disabled={uploading}
+                                        />
+                                        {uploading && <div className="absolute inset-0 bg-white/80 flex items-center justify-center"><Loader2 className="animate-spin" size={16} /></div>}
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-1">Foto do Membro</p>
+                                        <input
+                                            placeholder="Nome"
+                                            className="w-full p-3 bg-stone-50 border rounded-lg mb-2"
+                                            value={memberForm.name}
+                                            onChange={e => setMemberForm({ ...memberForm, name: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="grid md:grid-cols-2 gap-4 mb-4">
+                                    <input
+                                        placeholder="Papel/Cargo"
+                                        className="p-3 bg-stone-50 border rounded-lg"
+                                        value={memberForm.role}
+                                        onChange={e => setMemberForm({ ...memberForm, role: e.target.value })}
+                                    />
+                                    <input
+                                        placeholder="Bio curta"
+                                        className="p-3 bg-stone-50 border rounded-lg"
+                                        value={memberForm.bio}
+                                        onChange={e => setMemberForm({ ...memberForm, bio: e.target.value })}
+                                    />
+                                </div>
+                                <div className="flex gap-2">
+                                    <button onClick={handleSaveMember} disabled={loading} className="bg-primary text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest flex items-center gap-2">
+                                        <Save size={14} /> Salvar
+                                    </button>
+                                    <button onClick={() => setIsAddingMember(false)} className="bg-stone-200 text-stone-600 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest">
+                                        Cancelar
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    )}
+                    )
+                    }
 
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {teamMembers.map((member: any) => (
@@ -299,8 +381,8 @@ export default function AdminContentPage() {
                             </div>
                         ))}
                     </div>
-                </div>
+                </div >
             )}
-        </div>
+        </div >
     );
 }

@@ -50,7 +50,7 @@ export default function CoursesSection({ courses = [], onOpenCalendar, onSelectC
     };
 
     return (
-        <section id="instituto" className="py-20 md:py-32 px-6 bg-[#EFECE5] overflow-hidden">
+        <section id="instituto" className="py-16 md:py-24 px-6 bg-[#EFECE5] overflow-hidden">
             <div className="container mx-auto max-w-6xl">
                 <motion.div
                     initial="hidden"
@@ -117,8 +117,8 @@ export default function CoursesSection({ courses = [], onOpenCalendar, onSelectC
                                         className="flex-shrink-0 w-80 md:w-96 snap-center group h-full cursor-pointer"
                                         onClick={() => onSelectCourse(course)}
                                     >
-                                        <Card className="h-full p-4">
-                                            <div className="aspect-[4/3] overflow-hidden rounded-xl mb-6 relative">
+                                        <Card className="h-full p-4 flex flex-col">
+                                            <div className="aspect-[4/3] overflow-hidden rounded-xl mb-6 relative shrink-0">
                                                 <div className="block w-full h-full relative">
                                                     <Image
                                                         src={course.image || course.images?.[0] || 'https://via.placeholder.com/400x300'}
@@ -143,12 +143,12 @@ export default function CoursesSection({ courses = [], onOpenCalendar, onSelectC
                                             </div>
 
                                             <div className="flex-1 flex flex-col px-2">
-                                                <div className="mb-4">
-                                                    <h3 className="text-xl font-bold text-primary mb-2 leading-tight group-hover:text-gold transition-colors">
+                                                <div className="mb-4 min-h-[5rem]">
+                                                    <h3 className="text-xl font-bold text-primary mb-2 leading-tight group-hover:text-gold transition-colors line-clamp-2">
                                                         {course.title}
                                                     </h3>
                                                     {course.subtitle && (
-                                                        <p className="text-sm text-primary/60 italic mb-2">
+                                                        <p className="text-sm text-primary/60 italic mb-2 line-clamp-1">
                                                             {course.subtitle}
                                                         </p>
                                                     )}
@@ -157,7 +157,7 @@ export default function CoursesSection({ courses = [], onOpenCalendar, onSelectC
                                                     </p>
                                                 </div>
 
-                                                <p className="text-primary/70 text-sm leading-relaxed mb-6 line-clamp-3">
+                                                <p className="text-primary/70 text-sm leading-relaxed mb-6 line-clamp-3 min-h-[4.5em]">
                                                     {course.description || course.details?.intro}
                                                 </p>
 

@@ -11,12 +11,8 @@ export default function AdminLogin() {
     const { login, isAuthenticated, authLoading } = useApp();
     const router = useRouter();
 
-    // Redirect if already authenticated
-    useEffect(() => {
-        if (!authLoading && isAuthenticated) {
-            router.replace('/admin');
-        }
-    }, [isAuthenticated, authLoading, router]);
+    // Auto-redirect removed to prevent loops.
+    // Dashboard access is handled by the UI below if authenticated.
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -57,52 +53,77 @@ export default function AdminLogin() {
                 transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
                 className="bg-white/40 backdrop-blur-3xl p-8 md:p-16 rounded-[2rem] md:rounded-[3rem] shadow-[0_80px_150px_-30px_rgba(38,58,58,0.15)] w-full max-w-md relative z-10 border border-white/60 text-center mx-4"
             >
-                <div className="flex flex-col items-center mb-12">
-                    <div className="w-24 h-24 rounded-full mb-8 flex items-center justify-center p-1 border border-primary/10 shadow-xl bg-paper overflow-hidden">
-                        <img src="/assets/logo.jpeg" alt="Instituto Figura Viva" className="w-full h-full rounded-full object-cover" />
-                    </div>
-                    <h1 className="font-serif text-4xl text-primary mb-3">Figura <span className="font-light text-gold italic">Viva</span></h1>
-                    <p className="text-primary/40 text-[10px] uppercase tracking-[0.4em] font-bold">Ecossistema Digital</p>
-                </div>
+                {isAuthenticated ? (
+                    <div className="flex flex-col items-center mb-8 animate-fade-in-up">
+                        <div className="w-20 h-20 rounded-full mb-6 flex items-center justify-center bg-green-100 text-green-600 border border-green-200">
+                            <span className="text-2xl">✓</span>
+                        </div>
+                        <h2 className="font-serif text-2xl text-primary mb-2">Login realizado</h2>
+                        <p className="text-primary/60 mb-8 text-sm">Você já está autenticado.</p>
 
-                <div className="space-y-6">
-                    <form onSubmit={handleSubmit} className="space-y-4 text-left">
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-bold uppercase tracking-widest text-primary/40 ml-1">E-mail</label>
-                            <input
-                                name="email"
-                                type="email"
-                                placeholder="exemplo@figuraviva.com"
-                                required
-                                className="w-full bg-white/80 border border-gray-200 p-4 rounded-xl text-primary font-medium focus:ring-2 focus:ring-gold outline-none transition-all shadow-sm"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-bold uppercase tracking-widest text-primary/40 ml-1">Senha</label>
-                            <input
-                                name="password"
-                                type="password"
-                                placeholder="••••••••"
-                                required
-                                className="w-full bg-white/80 border border-gray-200 p-4 rounded-xl text-primary font-medium focus:ring-2 focus:ring-gold outline-none transition-all shadow-sm"
-                            />
-                        </div>
                         <button
-                            type="submit"
-                            disabled={loading}
-                            className={`w-full bg-primary text-white py-5 rounded-xl font-bold uppercase tracking-[0.2em] text-[10px] hover:bg-gold transition-all shadow-xl mt-4 ${loading ? 'opacity-50 cursor-wait' : ''}`}
+                            onClick={() => router.push('/admin')}
+                            className="w-full bg-primary text-white py-4 rounded-xl font-bold uppercase tracking-[0.2em] text-[10px] hover:bg-gold transition-all shadow-xl"
                         >
-                            {loading ? 'Verificando...' : 'Acessar Painel'}
+                            Ir para o Painel
                         </button>
-                    </form>
-
-                    <div className="flex flex-col items-center gap-6 mt-8">
-                        <div className="w-8 h-[1px] bg-primary/10" />
-                        <p className="text-[9px] text-primary/30 uppercase font-bold tracking-[0.3em] leading-relaxed max-w-[200px]">
-                            Acesso restrito para administradores.
-                        </p>
+                        <button
+                            onClick={() => { login('', ''); window.location.reload(); }} // Force logout/clear
+                            className="mt-4 text-[10px] uppercase font-bold tracking-widest text-primary/40 hover:text-red-500 transition-colors"
+                        >
+                            Sair e trocar de conta
+                        </button>
                     </div>
-                </div >
+                ) : (
+                    <>
+                        <div className="flex flex-col items-center mb-12">
+                            <div className="w-24 h-24 rounded-full mb-8 flex items-center justify-center p-1 border border-primary/10 shadow-xl bg-paper overflow-hidden">
+                                <img src="/assets/logo.jpeg" alt="Instituto Figura Viva" className="w-full h-full rounded-full object-cover" />
+                            </div>
+                            <h1 className="font-serif text-4xl text-primary mb-3">Figura <span className="font-light text-gold italic">Viva</span></h1>
+                            <p className="text-primary/40 text-[10px] uppercase tracking-[0.4em] font-bold">Ecossistema Digital</p>
+                        </div>
+
+                        <div className="space-y-6">
+                            <form onSubmit={handleSubmit} className="space-y-4 text-left">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-bold uppercase tracking-widest text-primary/40 ml-1">E-mail</label>
+                                    <input
+                                        name="email"
+                                        type="email"
+                                        placeholder="exemplo@figuraviva.com"
+                                        required
+                                        className="w-full bg-white/80 border border-gray-200 p-4 rounded-xl text-primary font-medium focus:ring-2 focus:ring-gold outline-none transition-all shadow-sm"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-bold uppercase tracking-widest text-primary/40 ml-1">Senha</label>
+                                    <input
+                                        name="password"
+                                        type="password"
+                                        placeholder="••••••••"
+                                        required
+                                        className="w-full bg-white/80 border border-gray-200 p-4 rounded-xl text-primary font-medium focus:ring-2 focus:ring-gold outline-none transition-all shadow-sm"
+                                    />
+                                </div>
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className={`w-full bg-primary text-white py-5 rounded-xl font-bold uppercase tracking-[0.2em] text-[10px] hover:bg-gold transition-all shadow-xl mt-4 ${loading ? 'opacity-50 cursor-wait' : ''}`}
+                                >
+                                    {loading ? 'Verificando...' : 'Acessar Painel'}
+                                </button>
+                            </form>
+
+                            <div className="flex flex-col items-center gap-6 mt-8">
+                                <div className="w-8 h-[1px] bg-primary/10" />
+                                <p className="text-[9px] text-primary/30 uppercase font-bold tracking-[0.3em] leading-relaxed max-w-[200px]">
+                                    Acesso restrito para administradores.
+                                </p>
+                            </div>
+                        </div >
+                    </>
+                )}
             </motion.div >
         </div >
     );
