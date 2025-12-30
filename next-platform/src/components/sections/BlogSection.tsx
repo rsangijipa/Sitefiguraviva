@@ -20,11 +20,11 @@ interface BlogPost {
 
 interface BlogSectionProps {
     blogPosts: BlogPost[];
-    onOpenReader: (post: BlogPost) => void;
+    onSelectPost: (post: BlogPost) => void;
     loading?: boolean;
 }
 
-export default function BlogSection({ blogPosts = [], onOpenReader, loading = false }: BlogSectionProps) {
+export default function BlogSection({ blogPosts = [], onSelectPost, loading = false }: BlogSectionProps) {
     return (
         <section id="blog" className="py-16 md:py-24 bg-white border-t border-stone-100">
             <div className="container mx-auto px-6 max-w-6xl">
@@ -36,9 +36,6 @@ export default function BlogSection({ blogPosts = [], onOpenReader, loading = fa
                             Artigos, ensaios e pílulas de awareness sobre a clínica, a vida e o encontro.
                         </p>
                     </div>
-                    <Link href="/blog" className="flex items-center gap-2 text-xs font-bold tracking-[0.2em] uppercase text-primary hover:text-gold transition-colors">
-                        Ver Todas as Publicações <ArrowRight size={14} />
-                    </Link>
                 </div>
 
                 <div className="grid md:grid-cols-3 gap-12">
@@ -69,7 +66,7 @@ export default function BlogSection({ blogPosts = [], onOpenReader, loading = fa
                                     viewport={{ once: true }}
                                     transition={{ delay: index * 0.1 }}
                                 >
-                                    <Card className="rounded-[2rem] overflow-hidden group h-full flex flex-col border-gray-100 hover:border-gold/30">
+                                    <Card className="rounded-[2rem] overflow-hidden group h-full flex flex-col border-gray-100 hover:border-gold/30 cursor-pointer" onClick={() => onSelectPost(post)}>
                                         <div className={`h-64 ${index % 2 === 0 ? 'bg-paper/50' : 'bg-accent/5'} flex items-center justify-center relative overflow-hidden p-8 shrink-0`}>
                                             <span className="absolute top-6 left-6 z-10 px-3 py-1 text-[8px] font-bold uppercase tracking-widest rounded bg-white shadow-sm text-primary">
                                                 Biblioteca
@@ -91,12 +88,11 @@ export default function BlogSection({ blogPosts = [], onOpenReader, loading = fa
                                             <p className="text-sm text-text/60 mb-8 leading-relaxed line-clamp-3">
                                                 {post.excerpt || "Clique para ler o artigo completo extraído do arquivo PDF original."}
                                             </p>
-                                            <button
-                                                onClick={() => onOpenReader(post)}
+                                            <span
                                                 className="mt-auto text-primary font-bold text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 hover:text-gold transition-colors"
                                             >
                                                 Ler Artigo <ArrowRight size={14} />
-                                            </button>
+                                            </span>
                                         </CardContent>
                                     </Card>
                                 </motion.div>
@@ -110,7 +106,7 @@ export default function BlogSection({ blogPosts = [], onOpenReader, loading = fa
                                     viewport={{ once: true }}
                                     transition={{ delay: index * 0.1 }}
                                 >
-                                    <Link href={`/blog/${post.id}`} className="group block h-full">
+                                    <div onClick={() => onSelectPost(post)} className="group block h-full cursor-pointer">
                                         <Card className="h-full border-transparent shadow-none hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-0 overflow-hidden rounded-2xl bg-transparent hover:bg-white group-hover:border-gray-100/50">
                                             <div className="relative mb-6 overflow-hidden aspect-[16/10] bg-paper rounded-2xl">
                                                 <Image
@@ -149,7 +145,7 @@ export default function BlogSection({ blogPosts = [], onOpenReader, loading = fa
                                                 </div>
                                             </CardContent>
                                         </Card>
-                                    </Link>
+                                    </div>
                                 </motion.div>
                             ))}
                             {blogPosts.length === 0 && (
@@ -165,5 +161,22 @@ export default function BlogSection({ blogPosts = [], onOpenReader, loading = fa
                 </div>
             </div>
         </section>
+    );
+}
+{
+    blogPosts.length === 0 && (
+        <div className="col-span-full">
+            <EmptyState
+                title="Nenhum artigo encontrado"
+                message="Nossa biblioteca está sendo atualizada. Volte em breve para novas reflexões."
+            />
+        </div>
+    )
+}
+                        </>
+                    )}
+                </div >
+            </div >
+        </section >
     );
 }

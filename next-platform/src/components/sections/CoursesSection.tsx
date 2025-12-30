@@ -35,10 +35,11 @@ interface Course {
 interface CoursesSectionProps {
     courses: Course[];
     onOpenCalendar: () => void;
+    onSelectCourse: (course: Course) => void;
     loading?: boolean;
 }
 
-export default function CoursesSection({ courses = [], onOpenCalendar, loading = false }: CoursesSectionProps) {
+export default function CoursesSection({ courses = [], onOpenCalendar, onSelectCourse, loading = false }: CoursesSectionProps) {
     const scrollContainerRef = useRef<HTMLDivElement>(null);
 
     const scroll = (direction: 'left' | 'right') => {
@@ -113,11 +114,12 @@ export default function CoursesSection({ courses = [], onOpenCalendar, loading =
                                         whileInView={{ opacity: 1, x: 0 }}
                                         viewport={{ once: true }}
                                         transition={{ delay: index * 0.1 }}
-                                        className="flex-shrink-0 w-80 md:w-96 snap-center group h-full"
+                                        className="flex-shrink-0 w-80 md:w-96 snap-center group h-full cursor-pointer"
+                                        onClick={() => onSelectCourse(course)}
                                     >
                                         <Card className="h-full p-4">
                                             <div className="aspect-[4/3] overflow-hidden rounded-xl mb-6 relative">
-                                                <Link href={`/curso/${course.id}`} className="block w-full h-full relative">
+                                                <div className="block w-full h-full relative">
                                                     <Image
                                                         src={course.image || course.images?.[0] || 'https://via.placeholder.com/400x300'}
                                                         alt={course.title}
@@ -125,7 +127,7 @@ export default function CoursesSection({ courses = [], onOpenCalendar, loading =
                                                         sizes="(max-width: 768px) 100vw, 33vw"
                                                         className={`object-cover transition-transform duration-700 ease-out group-hover:scale-105 ${isClosed ? 'grayscale opacity-70' : ''}`}
                                                     />
-                                                </Link>
+                                                </div>
                                                 <div className="absolute top-3 left-3 flex flex-wrap gap-2 pointer-events-none">
                                                     {course.category && (
                                                         <span className="bg-white/95 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider text-primary shadow-sm border border-gray-100">
@@ -142,11 +144,9 @@ export default function CoursesSection({ courses = [], onOpenCalendar, loading =
 
                                             <div className="flex-1 flex flex-col px-2">
                                                 <div className="mb-4">
-                                                    <Link href={`/curso/${course.id}`} className="block">
-                                                        <h3 className="text-xl font-bold text-primary mb-2 leading-tight group-hover:text-gold transition-colors">
-                                                            {course.title}
-                                                        </h3>
-                                                    </Link>
+                                                    <h3 className="text-xl font-bold text-primary mb-2 leading-tight group-hover:text-gold transition-colors">
+                                                        {course.title}
+                                                    </h3>
                                                     {course.subtitle && (
                                                         <p className="text-sm text-primary/60 italic mb-2">
                                                             {course.subtitle}
@@ -167,12 +167,11 @@ export default function CoursesSection({ courses = [], onOpenCalendar, loading =
                                                             Inscrições Encerradas
                                                         </span>
                                                     ) : (
-                                                        <Link
-                                                            href={`/curso/${course.id}`}
+                                                        <button
                                                             className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary group-hover:gap-4 transition-all py-3 px-2 -ml-2 rounded-lg hover:bg-gray-50 bg-transparent active:scale-95 touch-manipulation"
                                                         >
                                                             Saiba Mais <span className="text-gold">→</span>
-                                                        </Link>
+                                                        </button>
                                                     )}
                                                 </div>
                                             </div>
