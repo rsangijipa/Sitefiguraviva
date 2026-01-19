@@ -1,19 +1,76 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useApp } from '@/context/AppContext';
+import { db } from '@/lib/firebase/client';
+import { doc, updateDoc, setDoc, addDoc, collection, deleteDoc } from 'firebase/firestore';
+import { usePageContent, useTeamMembers } from '@/hooks/useContent';
 import { useToast } from '@/context/ToastContext';
 import { Save, Plus, Trash2, Edit2, Check, X, Upload, Loader2, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { uploadFiles } from '../../../services/uploadServiceSupabase';
+import { uploadFiles } from '@/services/uploadService';
+// useApp removed
 
 export default function AdminContentPage() {
-    const {
-        founderData, updateFounder,
-        instituteData, updateInstitute,
-        teamMembers, addTeamMember, updateTeamMember, deleteTeamMember
-    } = useApp();
+    const { data: founderData, refetch: refetchFounder } = usePageContent('founder');
+    const { data: instituteData, refetch: refetchInstitute } = usePageContent('institute');
+    const { data: teamMembers = [], refetch: refetchTeam } = useTeamMembers();
+
+    // Helper functions for CRUD
+    const updateFounder = async (data: any) => {
+        try {
+            await setDoc(doc(db, 'pages', 'founder'), data, { merge: true });
+            refetchFounder();
+            return true;
+        } catch (e) {
+            console.error(e);
+            return false;
+        }
+    };
+
+    const updateInstitute = async (data: any) => {
+        try {
+            await setDoc(doc(db, 'pages', 'institute'), data, { merge: true });
+            refetchInstitute();
+            return true;
+        } catch (e) {
+            console.error(e);
+            return false;
+        }
+    };
+
+    const addTeamMember = async (member: any) => {
+        try {
+            await addDoc(collection(db, 'team_members'), member);
+            refetchTeam();
+            return true;
+        } catch (e) {
+            console.error(e);
+            return false;
+        }
+    };
+
+    const updateTeamMember = async (id: string, updates: any) => {
+        try {
+            await updateDoc(doc(db, 'team_members', id), updates);
+            refetchTeam();
+            return true;
+        } catch (e) {
+            console.error(e);
+            return false;
+        }
+    };
+
+    const deleteTeamMember = async (id: string) => {
+        try {
+            await deleteDoc(doc(db, 'team_members', id));
+            refetchTeam();
+            return true;
+        } catch (e) {
+            console.error(e);
+            return false;
+        }
+    };
     const { addToast } = useToast();
 
     const [activeTab, setActiveTab] = useState<'founder' | 'institute' | 'team'>('founder');

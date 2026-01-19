@@ -3,15 +3,22 @@
 import { useState, useEffect } from 'react';
 import { Camera, Save, Image as ImageIcon, Hash, FileText, Info, RefreshCw, CheckCircle2, AlertCircle, Trash2, Upload, Loader2, Plus, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { galleryService } from '../../../services/galleryServiceSupabase';
-import { uploadFiles } from '../../../services/uploadServiceSupabase';
-import { auditService } from '../../../services/auditService';
+// import { galleryService } from '../../../services/galleryServiceSupabase'; // REMOVE
+// import { uploadFiles } from '../../../services/uploadServiceSupabase'; // REMOVE
+import { useAuth } from '@/context/AuthContext';
+import { useGallery } from '@/hooks/useContent';
 import { useToast } from '@/context/ToastContext';
+import ImageUpload from '@/components/admin/ImageUpload';
+import { db } from '@/lib/firebase/client';
+import { collection, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
 
 export default function GalleryManager() {
-    const [gallery, setGallery] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
+    // const [gallery, setGallery] = useState<any[]>([]);
+    // const [loading, setLoading] = useState(true);
+    const { data: gallery = [], isLoading: loading, refetch } = useGallery(true);
+    const { user } = useAuth();
     const { addToast } = useToast();
+
     const initialForm = {
         title: '',
         category: 'Geral', // Added category
@@ -23,42 +30,15 @@ export default function GalleryManager() {
     const [formData, setFormData] = useState(initialForm);
     const [isEditing, setIsEditing] = useState(false);
     const [status, setStatus] = useState({ type: '', message: '' });
-    const [uploading, setUploading] = useState(false);
+    // const [uploading, setUploading] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    useEffect(() => {
-        fetchGallery();
-    }, []);
+    // useEffect(() => {
+    //    fetchGallery();
+    // }, []);
 
-    const fetchGallery = async () => {
-        setLoading(true);
-        try {
-            const data = await galleryService.getAll();
-            setGallery(data);
-        } catch (error) {
-            console.error(error);
-            addToast("Erro ao carregar galeria.", 'error');
-        } finally {
-            setLoading(false);
-        }
-    };
+    // const fetchGallery = async () => { ... } // Replaced by hook
 
-    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (!e.target.files || e.target.files.length === 0) return;
-        const files = Array.from(e.target.files);
-
-        setUploading(true);
-        try {
-            const urls = await uploadFiles(files, 'gallery');
-            setFormData(prev => ({ ...prev, src: urls[0] }));
-            addToast("Upload realizado com sucesso!", 'success');
-        } catch (error) {
-            console.error("Upload error:", error);
-            addToast("Erro ao enviar imagem.", 'error');
-        } finally {
-            setUploading(false);
-        }
-    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -68,22 +48,26 @@ export default function GalleryManager() {
             const payload = {
                 ...formData,
                 // The database schema uses TEXT for tags. formData.tags is always string in our state.
-                tags: formData.tags
+                tags: formData.tags,
+                updated_at: serverTimestamp(),
+                isPublished: true
             };
 
+            // Remove ID from payload to avoid saving it in doc data if new
+            const { id, ...savePayload } = payload;
+
             if (formData.id) {
-                await galleryService.update(formData.id, payload);
-                await auditService.log('UPDATE', 'GALLERY', formData.id, payload); // Log update
+                await updateDoc(doc(db, 'gallery', formData.id), savePayload);
                 addToast('Imagem atualizada com sucesso!', 'success');
             } else {
-                // Remove id from payload for new entries
-                const { id, ...createPayload } = payload;
-                const newImg = await galleryService.create(createPayload);
-                if (newImg?.id) await auditService.log('CREATE', 'GALLERY', newImg.id, createPayload); // Log create
+                await addDoc(collection(db, 'gallery'), {
+                    ...savePayload,
+                    created_at: serverTimestamp()
+                });
                 addToast('Imagem salva com sucesso!', 'success');
             }
 
-            await fetchGallery();
+            refetch();
             setFormData(initialForm);
             setIsEditing(false);
         } catch (error) {
@@ -97,15 +81,15 @@ export default function GalleryManager() {
     const handleDelete = async (id: string) => {
         if (!confirm('Tem certeza que deseja excluir esta imagem?')) return;
         try {
-            await galleryService.delete(id);
-            await auditService.log('DELETE', 'GALLERY', id); // Log delete
-            await fetchGallery();
+            await deleteDoc(doc(db, 'gallery', id));
+            refetch();
             addToast('Imagem excluída!', 'success');
         } catch (error) {
             console.error("Delete error:", error);
             addToast("Erro ao excluir.", 'error');
         }
     };
+
 
     const handleEdit = (item: any) => {
         setFormData({
@@ -204,22 +188,13 @@ export default function GalleryManager() {
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/40 ml-2">Imagem</label>
                                     <div className="flex gap-4 items-start">
-                                        <div className="w-24 h-24 rounded-2xl bg-gray-100 border border-gray-200 overflow-hidden shrink-0 relative group">
-                                            {formData.src ? (
-                                                <img src={formData.src} alt="Preview" className="w-full h-full object-cover" />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-gray-300"><ImageIcon size={24} /></div>
-                                            )}
-                                        </div>
-                                        <div className="flex-1 space-y-2">
-                                            <input value={formData.src} onChange={e => setFormData({ ...formData, src: e.target.value })} className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-xs font-mono text-gray-500 focus:outline-none focus:border-gold" placeholder="URL da imagem..." />
-                                            <div className="relative inline-block">
-                                                <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handleFileUpload} disabled={uploading} />
-                                                <button type="button" className="bg-white border border-gray-200 px-6 py-3 rounded-xl flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest hover:bg-gold hover:text-white transition-colors">
-                                                    {uploading ? <Loader2 className="animate-spin" size={14} /> : <Upload size={14} />}
-                                                    Fazer Upload
-                                                </button>
-                                            </div>
+                                        <div className="w-full">
+                                            <ImageUpload
+                                                defaultImage={formData.src}
+                                                onUpload={(url) => setFormData(prev => ({ ...prev, src: url }))}
+                                                className="w-full h-64 rounded-2xl"
+                                                showPreview={true}
+                                            />
                                         </div>
                                     </div>
                                 </div>

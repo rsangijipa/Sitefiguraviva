@@ -1,28 +1,28 @@
-import { createClient } from '@/utils/supabase/server';
-import { Suspense } from 'react';
-import BlogDetailClient from './BlogDetailClient';
+import { db } from '@/lib/firebase/admin';
 import { notFound } from 'next/navigation';
-
-export const dynamic = 'force-dynamic';
+import BlogDetailClient from './BlogDetailClient';
 
 async function BlogContent({ id }: { id: string }) {
-    const supabase = await createClient();
+    try {
+        const docRef = db.collection('posts').doc(id);
+        const docSnap = await docRef.get();
 
-    const { data: post, error } = await supabase
-        .from('posts')
-        .select('*')
-        .eq('id', id)
-        .maybeSingle();
+        if (!docSnap.exists) {
+            notFound();
+        }
 
-    if (error) {
-        console.error('❌ Blog Fetch Error:', error.message);
-    }
+        const post = {
+            id: docSnap.id,
+            ...docSnap.data(),
+            created_at: docSnap.data()?.created_at?.toDate().toISOString() || null,
+            updated_at: docSnap.data()?.updated_at?.toDate().toISOString() || null
+        };
 
-    if (!post) {
+        return <BlogDetailClient post={post} />;
+    } catch (error) {
+        console.error('❌ Blog Fetch Error:', error);
         notFound();
     }
-
-    return <BlogDetailClient post={post} />;
 }
 
 export default async function BlogDetail({ params }: { params: Promise<{ id: string }> }) {

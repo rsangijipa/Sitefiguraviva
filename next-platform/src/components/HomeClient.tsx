@@ -1,6 +1,8 @@
 "use client";
 
-import { useApp } from '../context/AppContext';
+import { useState, useEffect } from 'react';
+
+// import { useApp } from '../context/AppContext'; (Removed)
 import Navbar from './Navbar';
 import Footer from './Footer';
 import AlertBar from './AlertBar';
@@ -22,14 +24,32 @@ import BlogPostModal from './BlogPostModal';
 import InstituteSection from './sections/InstituteSection';
 import LegalModal from './LegalModal';
 
+// interface HomeClientProps removed
+
+
+import { useCourses, useBlogPosts, useGallery } from '../hooks/useContent';
+
 interface HomeClientProps {
-    courses: any[];
-    blogPosts: any[];
-    gallery: any[];
+    initialData?: {
+        courses: any[];
+        posts: any[];
+        gallery: any[];
+    }
 }
 
-export default function HomeClient({ courses, blogPosts, gallery }: HomeClientProps) {
-    const { alertMessage } = useApp();
+export default function HomeClient({ initialData }: HomeClientProps = {}) {
+    const { data: courses = [], isLoading: loadingCourses } = useCourses(false, { initialData: initialData?.courses });
+    const { data: blogPosts = [], isLoading: loadingPosts } = useBlogPosts(false, { initialData: initialData?.posts });
+    const { data: gallery = [], isLoading: loadingGallery } = useGallery({ initialData: initialData?.gallery });
+
+    const [alertMessage, setAlertMessage] = useState("Bem-vindos ao Instituto Figura Viva");
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('alertMessage');
+            if (saved) setAlertMessage(saved);
+        }
+    }, []);
     const searchParams = useSearchParams();
     const router = useRouter();
 

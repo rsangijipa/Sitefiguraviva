@@ -42,18 +42,36 @@
 }
 
 .dark {
-  --color-primary: #f0f0eb;
-  --color-secondary: #c2c9c0;
-  --color-accent: #a5b59a;
-  --color-accent-light: #3d4a36;
-  --color-paper: #0d0f0c;
-  --color-surface: #151813;
-  --color-text: #e2e8e1;
-  --color-muted: #717d6c;
-  --color-border: #242921;
-  --color-gold: #cfb262;
-  --color-gold-dark: #917d44;
-  --color-gold-light: #1c1f18;
+  /* Premium Organic Dark Palette */
+  /* Main Background: Deepest warm charcoal/forest hint */
+  --color-paper: #0c0e0d;
+
+  /* Surface: Component background (Cards, Modals), slightly lighter */
+  --color-surface: #141715;
+
+  /* Text: High contrast off-white for headings, never pure white */
+  --color-text: #e1e3e0;
+
+  /* Primary: Used for headings mostly, can equate to Text in dark mode or be Gold */
+  --color-primary: #f2f0e9;
+
+  /* Muted: Readable secondary text */
+  --color-muted: #8e968e;
+
+  /* Border: Sufficient contrast against Paper and Surface */
+  --color-border: #242924;
+
+  /* Accents */
+  --color-secondary: #c9d1c8;
+  --color-accent: #8fa08a;
+  --color-accent-light: #1f2620;
+  /* Dark background for accent areas */
+
+  /* Gold: Luminous but not neon */
+  --color-gold: #dcb86c;
+  --color-gold-dark: #bba060;
+  --color-gold-light: #211e16;
+  /* Very dark gold tint for badges */
 }
 
 @layer base {
