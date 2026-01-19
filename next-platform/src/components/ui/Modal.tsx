@@ -84,7 +84,7 @@ export function ModalContent({ children, className, size = 'md', ...props }: Mod
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             className={cn(
-                "relative w-full bg-white rounded-[2rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]",
+                "relative w-full bg-white dark:bg-paper rounded-[2rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] border border-transparent dark:border-border",
                 sizes[size],
                 className
             )}
@@ -100,17 +100,17 @@ export function ModalContent({ children, className, size = 'md', ...props }: Mod
 export function ModalHeader({ children, className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
     const { onClose } = React.useContext(ModalContext)!;
     return (
-        <div className={cn("p-5 md:p-8 border-b border-gray-100 flex items-start justify-between bg-stone-50 shrink-0", className)} {...props}>
+        <div className={cn("p-5 md:p-8 border-b border-gray-100 dark:border-border flex items-start justify-between bg-stone-50 dark:bg-surface shrink-0", className)} {...props}>
             <div className="flex-1">{children}</div>
             <button
                 onClick={onClose}
-                className="group flex items-center gap-2 bg-white border border-gray-200 pl-3 pr-2 py-2 rounded-full text-primary hover:bg-primary hover:text-white transition-all focus:outline-none focus:ring-2 focus:ring-primary ml-4 shadow-sm hover:translate-y-[-1px]"
+                className="group flex items-center gap-2 bg-white dark:bg-paper border border-gray-200 dark:border-border pl-3 pr-2 py-2 rounded-full text-primary dark:text-text hover:bg-primary hover:text-white dark:hover:bg-gold dark:hover:text-paper transition-all focus:outline-none focus:ring-2 focus:ring-primary ml-4 shadow-sm hover:translate-y-[-1px]"
                 aria-label="Close"
             >
                 <span className="text-[10px] font-bold uppercase tracking-widest opacity-0 w-0 group-hover:w-auto group-hover:opacity-100 transition-all duration-300 overflow-hidden whitespace-nowrap">
                     Fechar
                 </span>
-                <div className="w-6 h-6 flex items-center justify-center rounded-full bg-stone-100 group-hover:bg-white/20 transition-colors">
+                <div className="w-6 h-6 flex items-center justify-center rounded-full bg-stone-100 dark:bg-surface group-hover:bg-white/20 transition-colors">
                     <X size={14} />
                 </div>
             </button>
@@ -121,7 +121,7 @@ export function ModalHeader({ children, className, ...props }: React.HTMLAttribu
 /* --- BODY --- */
 export function ModalBody({ children, className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
     return (
-        <div className={cn("overflow-y-auto custom-scrollbar flex-1 relative", className)} {...props}>
+        <div className={cn("overflow-y-auto custom-scrollbar flex-1 relative bg-white dark:bg-paper", className)} {...props}>
             <div className="p-5 md:p-8">
                 {children}
             </div>
@@ -132,7 +132,7 @@ export function ModalBody({ children, className, ...props }: React.HTMLAttribute
 /* --- FOOTER --- */
 export function ModalFooter({ children, className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
     return (
-        <div className={cn("p-5 md:p-8 border-t border-gray-100 bg-stone-50 shrink-0", className)} {...props}>
+        <div className={cn("p-5 md:p-8 border-t border-gray-100 dark:border-border bg-stone-50 dark:bg-surface shrink-0", className)} {...props}>
             {children}
         </div>
     );

@@ -1,8 +1,10 @@
-import { type NextRequest } from "next/server";
-import { updateSession } from "./utils/supabase/middleware";
+import { type NextRequest, NextResponse } from "next/server";
 
+// Middleware removed as it was only for Supabase Auth. 
+// Firebase Auth handling is done client-side or via specific server routes if needed.
+// For now, we pass through.
 export async function middleware(request: NextRequest) {
-    return await updateSession(request);
+    return NextResponse.next();
 }
 
 export const config = {

@@ -50,7 +50,7 @@ export default function CoursesSection({ courses = [], onOpenCalendar, onSelectC
     };
 
     return (
-        <section id="instituto" className="py-16 md:py-24 px-6 bg-[#EFECE5] overflow-hidden">
+        <section id="instituto" className="py-16 md:py-24 px-6 bg-[#EFECE5] dark:bg-paper overflow-hidden transition-colors duration-500">
             <div className="container mx-auto max-w-6xl">
                 <motion.div
                     initial="hidden"
@@ -60,11 +60,11 @@ export default function CoursesSection({ courses = [], onOpenCalendar, onSelectC
                     className="mb-12 md:flex justify-between items-end"
                 >
                     <div className="max-w-2xl">
-                        <span className="text-xs font-bold tracking-[0.2em] uppercase text-primary/60 mb-4 block">Formação & Estudos</span>
-                        <h2 className="heading-section mb-6">
+                        <span className="text-xs font-bold tracking-[0.2em] uppercase text-primary/60 dark:text-text/60 mb-4 block">Formação & Estudos</span>
+                        <h2 className="heading-section text-primary dark:text-text">
                             Ciclos de <span className="italic text-gold font-light">Aprendizagem</span>
                         </h2>
-                        <p className="text-lg text-primary/70 leading-relaxed font-light text-balance">
+                        <p className="text-lg text-primary/70 dark:text-text/70 leading-relaxed font-light text-balance">
                             Nossos percursos formativos são convites para habitar a Gestalt-terapia com rigor ético, densidade teórica e sensibilidade clínica.
                         </p>
                     </div>
@@ -79,11 +79,11 @@ export default function CoursesSection({ courses = [], onOpenCalendar, onSelectC
                         {loading ? (
                             [1, 2, 3].map((i) => (
                                 <div key={i} className="flex-shrink-0 w-80 md:w-96 snap-center">
-                                    <div className="flex flex-col h-full bg-white rounded-2xl p-4 shadow-sm border border-stone-100/50">
-                                        <Skeleton className="aspect-[4/3] w-full rounded-xl mb-6" />
+                                    <div className="flex flex-col h-full bg-white dark:bg-surface rounded-2xl p-4 shadow-sm border border-stone-100/50 dark:border-white/5">
+                                        <Skeleton className="aspect-[4/3] w-full rounded-xl mb-6 bg-stone-200 dark:bg-white/10" />
                                         <div className="space-y-4 flex-1">
-                                            <Skeleton className="h-6 w-3/4 rounded" />
-                                            <Skeleton className="h-4 w-1/4 rounded" />
+                                            <Skeleton className="h-6 w-3/4 rounded bg-stone-200 dark:bg-white/10" />
+                                            <Skeleton className="h-4 w-1/4 rounded bg-stone-200 dark:bg-white/10" />
                                         </div>
                                     </div>
                                 </div>
@@ -97,7 +97,7 @@ export default function CoursesSection({ courses = [], onOpenCalendar, onSelectC
                                     action={
                                         <button
                                             onClick={onOpenCalendar}
-                                            className="text-xs font-bold uppercase tracking-widest text-primary border-b border-primary/20 pb-1 hover:text-gold hover:border-gold transition-colors"
+                                            className="text-xs font-bold uppercase tracking-widest text-primary dark:text-text border-b border-primary/20 dark:border-white/20 pb-1 hover:text-gold hover:border-gold transition-colors"
                                         >
                                             Ver Calendário
                                         </button>

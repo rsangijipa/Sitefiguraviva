@@ -1,0 +1,72 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // --- Helpers ---
+
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+
+    function isBelowMaxSize() {
+      return request.resource.size < 20 * 1024 * 1024; // 20MB limit
+    }
+    
+    // Check Firestore for active enrollment
+    function isEnrolled(courseId) {
+       return firestore.exists(/databases/(default)/documents/users/$(request.auth.uid)/enrollments/$(courseId))
+              && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)/enrollments/$(courseId)).data.status == 'active';
+    }
+
+    // Default deny
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+
+    // --- Public Assets ---
+
+    // Blog Covers & Content
+    match /blog/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin() && isBelowMaxSize();
+    }
+    
+    // Gallery Images
+    match /gallery/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin() && request.resource.contentType.matches('image/.*') && isBelowMaxSize();
+    }
+
+    // Public Course Assets (Covers)
+    match /courses/covers/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin() && request.resource.contentType.matches('image/.*') && isBelowMaxSize();
+    }
+
+    // Public Institutional Documents (New "publicDocs")
+    match /public/docs/{allPaths=**} {
+       allow read: if true;
+       allow write: if isAdmin() && isBelowMaxSize();
+    }
+
+    // --- Restricted Academic Content ---
+
+    // Course Materials: courses/{courseId}/materials/{filename}
+    // Deep match to capture courseId
+    match /courses/{courseId}/materials/{allPaths=**} {
+      allow read: if isAdmin() || (request.auth != null && isEnrolled(courseId));
+      allow write: if isAdmin() && isBelowMaxSize();
+    }
+    
+    // --- Legacy Clean-up Paths (Optional support during migration) ---
+    match /images/{allPaths=**} {
+       allow read: if true;
+       allow write: if isAdmin();
+    }
+    match /documents/{allPaths=**} {
+       allow read: if request.auth != null; 
+       allow write: if isAdmin();
+    }
+  }
+}

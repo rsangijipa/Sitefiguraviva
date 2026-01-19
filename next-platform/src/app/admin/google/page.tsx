@@ -1,28 +1,47 @@
 "use client";
 
 import { useState } from 'react';
-import { useApp } from '../../../context/AppContext';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Save, RefreshCw, CheckCircle, ExternalLink, AlertCircle } from 'lucide-react';
+import { db } from '@/lib/firebase/client';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { useEffect } from 'react';
 
 export default function GoogleIntegrations() {
-    const { googleConfig, setGoogleConfig } = useApp();
-    const [config, setConfig] = useState(googleConfig || {
+    // const { googleConfig, setGoogleConfig } = useApp(); // Removed
+    const [config, setConfig] = useState({
         calendarId: '',
         driveFolderId: '',
         formsUrl: '',
         youtubeId: ''
     });
-    const [toast, setToast] = useState(null); // { message, type: 'success' | 'error' }
+    const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
 
-    const showToast = (message, type = 'success') => {
+    useEffect(() => {
+        const fetchConfig = async () => {
+            try {
+                const docSnap = await getDoc(doc(db, 'pages', 'config')); // Storing in pages/config
+                if (docSnap.exists()) {
+                    setConfig(docSnap.data() as any);
+                }
+            } catch (e) {
+                console.error("Error fetching config", e);
+            }
+        };
+        fetchConfig();
+    }, []);
+
+    const showToast = (message: string, type: 'success' | 'error' = 'success') => {
         setToast({ message, type });
         setTimeout(() => setToast(null), 3000);
     };
 
-    const handleSave = () => {
-        setGoogleConfig(config);
-        showToast('Configurações salvas e aplicadas com sucesso!');
+    const handleSave = async () => {
+        try {
+            await setDoc(doc(db, 'pages', 'config'), config, { merge: true });
+            showToast('Configurações salvas e aplicadas com sucesso!');
+        } catch (e) {
+            console.error(e);
+            showToast('Erro ao salvar.', 'error');
+        }
     };
 
     const handleChange = (e) => {

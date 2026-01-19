@@ -1,74 +1,58 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useApp } from '@/context/AppContext';
-import { Plus, Trash2, Save, X, Search, FileText, Download, Loader2, Upload } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { Plus, Trash2, X, Search, FileText, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { uploadFiles } from '../../../services/uploadServiceSupabase'; // Adjust path if needed
 import { useToast } from '@/context/ToastContext';
+import { db, storage } from '@/lib/firebase/client';
+import { collection, addDoc, deleteDoc, doc, serverTimestamp, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { ref, deleteObject } from 'firebase/storage';
+import FileUpload from '@/components/admin/FileUpload';
 
 export default function DocumentManager() {
-    const { documents, addDocument, deleteDocument } = useApp();
+    const [documents, setDocuments] = useState<any[]>([]);
+    const { user } = useAuth();
     const { addToast } = useToast();
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('Todos');
 
+    // Fetch documents manually since we might not have a hook yet
+    useEffect(() => {
+        const q = query(collection(db, 'publicDocs'), orderBy('created_at', 'desc'));
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setDocuments(docs);
+        });
+        return () => unsubscribe();
+    }, []);
+
     // Form State
     const initialForm = {
         title: '',
-        category: 'documents', // Default category
+        category: 'public', // Default category
         file_url: '',
+        file_path: '',
         file_size: '',
-        file_type: ''
+        file_type: 'pdf',
+        isPublished: true // Public docs usually default to published
     };
     const [formData, setFormData] = useState(initialForm);
     const [isAdding, setIsAdding] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [uploading, setUploading] = useState(false);
 
     // Filter Logic
     const filteredDocuments = documents ? documents.filter(doc => {
-        const matchesSearch = doc.title.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesSearch = doc.title?.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesCategory = selectedCategory === 'Todos' || doc.category === selectedCategory;
         return matchesSearch && matchesCategory;
     }) : [];
 
     const categories = [
-        { id: 'documents', label: 'Documentos' },
-        { id: 'portal', label: 'Portal Aluno' },
-        { id: 'financeiro', label: 'Financeiro' },
-        { id: 'outros', label: 'Outros' }
+        { id: 'public', label: 'Público' },
+        { id: 'institucional', label: 'Institucional' },
+        { id: 'editais', label: 'Editais' }
     ];
-
-    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (!e.target.files || e.target.files.length === 0) return;
-        const file = e.target.files[0];
-
-        setUploading(true);
-        try {
-            // Upload to 'documents' bucket
-            const urls = await uploadFiles([file], 'documents');
-            const url = urls[0];
-
-            // Calculate size string
-            const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
-            const sizeStr = sizeInMB + ' MB';
-            const typeStr = file.name.split('.').pop() || 'file';
-
-            setFormData(prev => ({
-                ...prev,
-                file_url: url,
-                file_size: sizeStr,
-                file_type: typeStr
-            }));
-            addToast("Arquivo enviado com sucesso!", 'success');
-        } catch (error) {
-            console.error("Upload error:", error);
-            addToast("Erro ao enviar arquivo.", 'error');
-        } finally {
-            setUploading(false);
-        }
-    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -76,18 +60,22 @@ export default function DocumentManager() {
 
         try {
             if (!formData.file_url) {
-                addToast('Por favor, faça o upload de um arquivo.', 'error');
+                addToast('Por favor, envie um arquivo PDF.', 'error');
+                setIsSubmitting(false);
                 return;
             }
 
-            const success = await addDocument(formData);
-            if (success) {
-                addToast('Documento adicionado com sucesso!', 'success');
-                setFormData(initialForm);
-                setIsAdding(false);
-            } else {
-                addToast('Erro ao salvar documento.', 'error');
-            }
+            // Document creation in Firestore
+            await addDoc(collection(db, 'publicDocs'), {
+                ...formData,
+                created_at: serverTimestamp(),
+                createdBy: user?.uid
+            });
+
+            addToast('Documento público adicionado!', 'success');
+            setFormData(initialForm);
+            setIsAdding(false);
+
         } catch (error) {
             console.error("Error saving document:", error);
             addToast('Erro ao salvar documento.', 'error');
@@ -96,12 +84,23 @@ export default function DocumentManager() {
         }
     };
 
-    const handleDelete = async (id: string) => {
+    const handleDelete = async (docObj: any) => {
         if (!confirm('Tem certeza que deseja excluir este documento?')) return;
-        const success = await deleteDocument(id);
-        if (success) {
+        try {
+            // 1. Delete from Firestore
+            await deleteDoc(doc(db, 'publicDocs', docObj.id));
+
+            // 2. Delete from Storage if path exists
+            if (docObj.file_path) {
+                const fileRef = ref(storage, docObj.file_path);
+                await deleteObject(fileRef).catch(err => {
+                    console.warn("Storage file not found or already deleted:", err);
+                });
+            }
+
             addToast('Documento excluído!', 'success');
-        } else {
+        } catch (error) {
+            console.error("Delete error", error);
             addToast('Erro ao excluir documento.', 'error');
         }
     };
@@ -110,16 +109,16 @@ export default function DocumentManager() {
         <div className="space-y-12 pb-20">
             <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
                 <div>
-                    <h3 className="font-serif text-3xl mb-2 text-primary">Gerenciador de Arquivos</h3>
+                    <h3 className="font-serif text-3xl mb-2 text-primary">Documentos Públicos</h3>
                     <p className="text-primary/40 text-sm max-w-lg">
-                        Adicione arquivos PDF e documentos para o Portal do Aluno.
+                        Adicione arquivos institucionais públicos (Editais, Manuais, etc).
                     </p>
                 </div>
                 <button
                     onClick={() => setIsAdding(true)}
                     className="bg-primary text-paper px-8 py-4 rounded-xl flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest hover:bg-gold transition-soft hover:shadow-xl transform active:scale-95 shadow-lg border border-primary/10"
                 >
-                    <Plus size={16} /> Novo Arquivo
+                    <Plus size={16} /> Novo Documento
                 </button>
             </header>
 
@@ -162,7 +161,7 @@ export default function DocumentManager() {
                                 <FileText size={24} />
                             </div>
                             <button
-                                onClick={() => handleDelete(doc.id)}
+                                onClick={() => handleDelete(doc)}
                                 className="p-2 text-stone-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                             >
                                 <Trash2 size={16} />
@@ -231,38 +230,26 @@ export default function DocumentManager() {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-bold uppercase tracking-widest text-primary/40 ml-2">Arquivo (PDF/Doc)</label>
-                                    <div className="border border-dashed border-gray-300 rounded-xl p-6 text-center hover:bg-stone-50 transition-colors relative">
-                                        <input
-                                            type="file"
-                                            onChange={handleFileUpload}
-                                            disabled={uploading}
-                                            className="absolute inset-0 opacity-0 cursor-pointer"
-                                            accept=".pdf,.doc,.docx"
-                                        />
-                                        {uploading ? (
-                                            <div className="flex flex-col items-center gap-2 text-gold">
-                                                <Loader2 className="animate-spin" />
-                                                <span className="text-xs font-bold">Enviando...</span>
-                                            </div>
-                                        ) : formData.file_url ? (
-                                            <div className="flex flex-col items-center gap-2 text-green-600">
-                                                <FileText size={24} />
-                                                <span className="text-xs font-bold">Arquivo selecionado!</span>
-                                                <span className="text-[10px] text-stone-400">{formData.file_size}</span>
-                                            </div>
-                                        ) : (
-                                            <div className="flex flex-col items-center gap-2 text-gray-400">
-                                                <Upload size={24} />
-                                                <span className="text-xs font-bold">Clique para upload</span>
-                                            </div>
-                                        )}
-                                    </div>
+                                    <label className="text-[10px] font-bold uppercase tracking-widest text-primary/40 ml-2">Arquivo (PDF)</label>
+                                    <FileUpload
+                                        folder="public/docs"
+                                        defaultFile={formData.file_url}
+                                        defaultName={formData.title} // Or filename if we kept it separately
+                                        onUpload={(data) => {
+                                            setFormData(prev => ({
+                                                ...prev,
+                                                file_url: data.url,
+                                                file_path: data.path,
+                                                file_size: data.size,
+                                                file_type: 'pdf'
+                                            }));
+                                        }}
+                                    />
                                 </div>
 
                                 <button
                                     type="submit"
-                                    disabled={isSubmitting || uploading || !formData.file_url}
+                                    disabled={isSubmitting || !formData.file_url}
                                     className="w-full bg-primary text-white py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-gold transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg mt-4"
                                 >
                                     {isSubmitting ? 'Salvando...' : 'Adicionar Documento'}
@@ -274,4 +261,5 @@ export default function DocumentManager() {
             </AnimatePresence>
         </div>
     );
+
 }

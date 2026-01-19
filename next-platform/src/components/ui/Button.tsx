@@ -15,9 +15,9 @@ export const buttonVariants = ({
 
     const variants = {
         primary: "bg-primary text-white hover:bg-primary/90 shadow-lg hover:shadow-primary/20",
-        secondary: "bg-white border border-gray-200 text-primary hover:bg-gray-50 shadow-sm",
-        outline: "border-2 border-primary text-primary hover:bg-primary/5",
-        ghost: "text-primary hover:bg-primary/5 hover:text-primary/80"
+        secondary: "bg-white dark:bg-surface border border-gray-200 dark:border-border text-primary dark:text-text hover:bg-gray-50 dark:hover:bg-white/5 shadow-sm",
+        outline: "border-2 border-primary dark:border-gold text-primary dark:text-gold hover:bg-primary/5 dark:hover:bg-gold/10",
+        ghost: "text-primary dark:text-gold hover:bg-primary/5 dark:hover:bg-gold/10 hover:text-primary/80"
     };
 
     const sizes = {

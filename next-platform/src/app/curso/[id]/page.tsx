@@ -1,32 +1,31 @@
-import { createClient } from '@/utils/supabase/server';
-import { Suspense } from 'react';
-import CourseDetailClient from './CourseDetailClient';
+import { db } from '@/lib/firebase/admin';
 import { notFound } from 'next/navigation';
-
-export const dynamic = 'force-dynamic';
+import CourseDetailClient from './CourseDetailClient';
 
 async function CourseContent({ id }: { id: string }) {
-    const supabase = await createClient();
+    try {
+        console.log(`🔍 Buscando detalhes do curso ID: ${id}`);
+        const docRef = db.collection('courses').doc(id);
+        const docSnap = await docRef.get();
 
-    console.log(`🔍 Buscando detalhes do curso ID: ${id}`);
+        if (!docSnap.exists) {
+            console.warn(`⚠️ Curso não encontrado no banco para o ID: ${id}`);
+            notFound();
+        }
 
-    const { data: course, error } = await supabase
-        .from('courses')
-        .select('*')
-        .eq('id', id)
-        .maybeSingle();
+        const course = {
+            id: docSnap.id,
+            ...docSnap.data(),
+            created_at: docSnap.data()?.created_at?.toDate().toISOString() || null,
+            updated_at: docSnap.data()?.updated_at?.toDate().toISOString() || null
+        };
 
-    if (error) {
-        console.error('❌ Erro Supabase no detalhe:', error.message);
-    }
-
-    if (!course) {
-        console.warn(`⚠️ Curso não encontrado no banco para o ID: ${id}`);
+        console.log(`✅ Detalhes carregados para: ${course.title}`);
+        return <CourseDetailClient course={course} />;
+    } catch (error) {
+        console.error('❌ Blog Fetch Error:', error);
         notFound();
     }
-
-    console.log(`✅ Detalhes carregados para: ${course.title}`);
-    return <CourseDetailClient course={course} />;
 }
 
 export default async function CourseDetail({ params }: { params: Promise<{ id: string }> }) {

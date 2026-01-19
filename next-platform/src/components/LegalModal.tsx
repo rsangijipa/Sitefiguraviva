@@ -37,9 +37,14 @@ export default function LegalModal({ isOpen, onClose, type }: LegalModalProps) {
                     </div>
                     <button
                         onClick={onClose}
-                        className="w-10 h-10 rounded-full hover:bg-stone-200/50 flex items-center justify-center text-primary/40 hover:text-primary transition-colors"
+                        className="group flex items-center gap-2 bg-white border border-stone-100 pl-3 pr-2 py-2 rounded-full text-primary hover:bg-gold hover:text-white transition-all focus:outline-none focus:ring-2 focus:ring-primary shadow-sm hover:translate-y-[-1px]"
                     >
-                        <X size={20} />
+                        <span className="text-[10px] font-bold uppercase tracking-widest opacity-0 w-0 group-hover:w-auto group-hover:opacity-100 transition-all duration-300 overflow-hidden whitespace-nowrap">
+                            Fechar
+                        </span>
+                        <div className="w-6 h-6 flex items-center justify-center rounded-full bg-stone-100 group-hover:bg-white/20 transition-colors">
+                            <X size={14} />
+                        </div>
                     </button>
                 </div>
 

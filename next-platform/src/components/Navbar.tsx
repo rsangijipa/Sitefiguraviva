@@ -4,13 +4,14 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
-import { useApp } from '../context/AppContext';
+import { useAuth } from '@/context/AuthContext';
 import Button from './ui/Button';
 
 export default function Navbar() {
     const [scrolled, setScrolled] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
-    const { isAuthenticated } = useApp();
+    const { user } = useAuth();
+    const isAuthenticated = !!user;
     const router = useRouter();
 
     useEffect(() => {

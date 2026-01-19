@@ -45,13 +45,13 @@ export default function BlogSection({ blogPosts = [], onSelectPost, loading = fa
     const scrollContainerRef = useRef<HTMLDivElement>(null);
 
     return (
-        <section id="blog" className="py-12 md:py-16 bg-white border-t border-stone-100 overflow-hidden">
+        <section id="blog" className="py-12 md:py-16 bg-white dark:bg-paper border-t border-stone-100 dark:border-white/5 overflow-hidden transition-colors duration-500">
             <div className="container mx-auto px-6 max-w-6xl">
                 <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
                     <div className="max-w-xl">
                         <span className="text-xs font-bold tracking-[0.2em] uppercase text-gold mb-4 block">Reflexões & Saberes</span>
-                        <h2 className="heading-section">Blog Figura Viva</h2>
-                        <p className="text-lg text-text/60 mt-4">
+                        <h2 className="heading-section text-primary dark:text-text">Blog Figura Viva</h2>
+                        <p className="text-lg text-text/60 dark:text-text/50 mt-4">
                             Artigos, ensaios e pílulas de awareness sobre a clínica, a vida e o encontro.
                         </p>
                     </div>

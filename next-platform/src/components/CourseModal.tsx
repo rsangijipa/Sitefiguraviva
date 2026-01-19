@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, MapPin, ExternalLink, X, ArrowLeft } from 'lucide-react';
 import { getMediatorDetails } from '@/utils/mediators';
-import { Modal, ModalContent } from './ui/Modal';
+import { Modal, ModalContent, ModalBody } from './ui/Modal';
 import { useState } from 'react';
 
 interface CourseModalProps {
@@ -25,15 +25,21 @@ export default function CourseModal({ isOpen, onClose, course }: CourseModalProp
 
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
-            <ModalContent size="xl" className="bg-paper overflow-y-auto max-h-[90vh]">
-                <div className="relative">
-                    {/* Close Button */}
-                    <button
-                        onClick={onClose}
-                        className="absolute top-6 right-6 z-50 w-10 h-10 rounded-full bg-white/80 backdrop-blur border border-stone-200 flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all shadow-sm"
-                    >
-                        <X size={20} />
-                    </button>
+            <ModalContent size="xl" className="bg-paper p-0">
+                {/* Close Button - Premium Style */}
+                <button
+                    onClick={onClose}
+                    className="absolute top-6 right-6 z-50 group flex items-center gap-2 bg-white/80 backdrop-blur border border-stone-200 pl-3 pr-2 py-2 rounded-full text-primary hover:bg-gold hover:text-white transition-all focus:outline-none focus:ring-2 focus:ring-primary shadow-sm hover:translate-y-[-1px]"
+                >
+                    <span className="text-[10px] font-bold uppercase tracking-widest opacity-0 w-0 group-hover:w-auto group-hover:opacity-100 transition-all duration-300 overflow-hidden whitespace-nowrap">
+                        Fechar
+                    </span>
+                    <div className="w-6 h-6 flex items-center justify-center rounded-full bg-stone-100 group-hover:bg-white/20 transition-colors">
+                        <X size={14} />
+                    </div>
+                </button>
+
+                <ModalBody className="p-0">
 
                     <div className="p-8 md:p-12">
                         <div className="grid lg:grid-cols-2 gap-12 items-start">
@@ -158,8 +164,7 @@ export default function CourseModal({ isOpen, onClose, course }: CourseModalProp
                             </div>
                         </div>
                     </div>
-                </div>
-
+                </ModalBody>
                 {/* Mediator Sub-modal/Overlay */}
                 <AnimatePresence>
                     {selectedMediator && (

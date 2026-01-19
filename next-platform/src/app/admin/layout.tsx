@@ -2,15 +2,19 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { useApp } from '../../context/AppContext';
+import { useAuth } from '@/context/AuthContext';
+
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    LayoutDashboard, BookOpen, PenTool, Settings, LogOut, Globe, Loader2, Home, X, FileText
+    LayoutDashboard, BookOpen, PenTool, Settings, LogOut, Globe, Loader2, Home, X, FileText, Users
 } from 'lucide-react';
 
 export default function AdminLayout({ children }) {
-    const { isAuthenticated, logout, authLoading } = useApp();
+    const { user, loading: authLoading, signOut } = useAuth();
+    const isAuthenticated = !!user;
+    // const { logout } = useApp(); // Used to use logout from AppContext, now using signOut from AuthContext. But let's check further down usage.
+
     const router = useRouter();
     const pathname = usePathname();
     const [isClient, setIsClient] = useState(false);
@@ -63,10 +67,11 @@ export default function AdminLayout({ children }) {
     const navItems = [
         { icon: LayoutDashboard, label: 'Visão Geral', path: '/admin' },
         { icon: BookOpen, label: 'Cursos', path: '/admin/courses' },
+        { icon: Users, label: 'Alunos & Matrículas', path: '/admin/enrollments' },
         { icon: Globe, label: 'Google Suite', path: '/admin/google' },
         { icon: PenTool, label: 'Diário Visual', path: '/admin/blog' },
         { icon: BookOpen, label: 'Galeria', path: '/admin/gallery' },
-        { icon: FileText, label: 'Documentos', path: '/admin/documents' },
+        { icon: FileText, label: 'Documentos', path: '/admin/public-docs' },
         { icon: Settings, label: 'Configurações', path: '/admin/settings' },
     ];
 
@@ -124,7 +129,7 @@ export default function AdminLayout({ children }) {
                     </Link>
 
                     <button
-                        onClick={() => { logout(); router.push('/admin/login'); }}
+                        onClick={() => { signOut(); router.push('/admin/login'); }}
                         className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-red-50 text-red-400 hover:bg-red-100 hover:text-red-500 rounded-xl transition-all duration-300 text-[10px] font-bold uppercase tracking-[0.2em] group"
                     >
                         <LogOut size={16} className="group-hover:-translate-x-1 transition-transform" />

@@ -3,22 +3,31 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { useApp } from '@/context/AppContext';
+// import { useApp } from '@/context/AppContext';
 import { useToast } from '@/context/ToastContext';
 import { ArrowLeft } from 'lucide-react';
 
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/lib/firebase/client';
+import { useAuth } from '@/context/AuthContext';
+
 export default function AdminLogin() {
     const [loading, setLoading] = useState(false);
-    const { login, isAuthenticated, authLoading } = useApp();
+    const { user, isAdmin, loading: authLoading } = useAuth();
     const { addToast } = useToast();
     const router = useRouter();
 
-    // Auto-redirect to dashboard if authenticated
+    const isAuthenticated = !!user;
+
+    // Auto-redirect to dashboard if authenticated AND admin
     useEffect(() => {
-        if (!authLoading && isAuthenticated) {
+        if (!authLoading && isAuthenticated && isAdmin) {
             router.push('/admin');
+        } else if (!authLoading && isAuthenticated && !isAdmin) {
+            addToast("Acesso negado: Você não é administrador.", 'error');
+            // Optionally logout
         }
-    }, [isAuthenticated, authLoading, router]);
+    }, [isAuthenticated, isAdmin, authLoading, router]);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -27,14 +36,15 @@ export default function AdminLogin() {
         const password = (form.elements.namedItem('password') as HTMLInputElement).value;
 
         setLoading(true);
-        const success = await login(email, password);
-        setLoading(false);
-
-        if (success) {
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
             addToast('Login realizado com sucesso!', 'success');
-            router.push('/admin');
-        } else {
-            addToast("Acesso negado. Verifique suas credenciais.", 'error');
+            // The useEffect will redirect
+        } catch (error: any) {
+            console.error("Login failed", error);
+            addToast(`Falha no login: ${error.message}`, 'error');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -58,20 +68,20 @@ export default function AdminLogin() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
-                className="bg-white/40 backdrop-blur-3xl p-8 md:p-16 rounded-[2rem] md:rounded-[3rem] shadow-[0_80px_150px_-30px_rgba(38,58,58,0.15)] w-full max-w-md relative z-10 border border-white/60 text-center mx-4"
+                className="bg-white/40 dark:bg-black/40 backdrop-blur-3xl p-8 md:p-16 rounded-[2rem] md:rounded-[3rem] shadow-[0_80px_150px_-30px_rgba(38,58,58,0.15)] w-full max-w-md relative z-10 border border-white/60 dark:border-white/10 text-center mx-4"
             >
                 {authLoading ? (
                     <div className="flex flex-col items-center justify-center py-12 animate-pulse">
                         <div className="w-12 h-12 border-4 border-gold border-t-transparent rounded-full animate-spin mb-4" />
-                        <p className="text-primary/40 text-[10px] uppercase tracking-widest font-bold">Verificando acesso...</p>
+                        <p className="text-primary/40 dark:text-white/40 text-[10px] uppercase tracking-widest font-bold">Verificando acesso...</p>
                     </div>
                 ) : isAuthenticated ? (
                     <div className="flex flex-col items-center mb-8 animate-fade-in-up">
                         <div className="w-20 h-20 rounded-full mb-6 flex items-center justify-center bg-green-100 text-green-600 border border-green-200">
                             <span className="text-2xl">✓</span>
                         </div>
-                        <h2 className="font-serif text-2xl text-primary mb-2">Login realizado</h2>
-                        <p className="text-primary/60 mb-8 text-sm">Você já está autenticado.</p>
+                        <h2 className="font-serif text-2xl text-primary dark:text-white mb-2">Login realizado</h2>
+                        <p className="text-primary/60 dark:text-white/60 mb-8 text-sm">Você já está autenticado.</p>
 
                         <button
                             onClick={() => router.push('/admin')}
@@ -86,30 +96,30 @@ export default function AdminLogin() {
                             <div className="w-24 h-24 rounded-full mb-8 flex items-center justify-center p-1 border border-primary/10 shadow-xl bg-paper overflow-hidden">
                                 <img src="/assets/logo.jpeg" alt="Instituto Figura Viva" className="w-full h-full rounded-full object-cover" />
                             </div>
-                            <h1 className="font-serif text-4xl text-primary mb-3">Figura <span className="font-light text-gold italic">Viva</span></h1>
-                            <p className="text-primary/40 text-[10px] uppercase tracking-[0.4em] font-bold">Ecossistema Digital</p>
+                            <h1 className="font-serif text-4xl text-primary dark:text-white mb-3">Figura <span className="font-light text-gold italic">Viva</span></h1>
+                            <p className="text-primary/40 dark:text-white/40 text-[10px] uppercase tracking-[0.4em] font-bold">Ecossistema Digital</p>
                         </div>
 
                         <div className="space-y-6">
                             <form onSubmit={handleSubmit} className="space-y-4 text-left">
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-bold uppercase tracking-widest text-primary/40 ml-1">E-mail</label>
+                                    <label className="text-[10px] font-bold uppercase tracking-widest text-primary/40 dark:text-white/40 ml-1">E-mail</label>
                                     <input
                                         name="email"
                                         type="email"
                                         placeholder="exemplo@figuraviva.com"
                                         required
-                                        className="w-full bg-white/80 border border-gray-200 p-4 rounded-xl text-primary font-medium focus:ring-2 focus:ring-gold outline-none transition-all shadow-sm"
+                                        className="w-full bg-white/80 dark:bg-black/20 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-primary dark:text-white font-medium focus:ring-2 focus:ring-gold outline-none transition-all shadow-sm placeholder:text-gray-400 dark:placeholder:text-white/20"
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-bold uppercase tracking-widest text-primary/40 ml-1">Senha</label>
+                                    <label className="text-[10px] font-bold uppercase tracking-widest text-primary/40 dark:text-white/40 ml-1">Senha</label>
                                     <input
                                         name="password"
                                         type="password"
                                         placeholder="••••••••"
                                         required
-                                        className="w-full bg-white/80 border border-gray-200 p-4 rounded-xl text-primary font-medium focus:ring-2 focus:ring-gold outline-none transition-all shadow-sm"
+                                        className="w-full bg-white/80 dark:bg-black/20 border border-gray-200 dark:border-white/10 p-4 rounded-xl text-primary dark:text-white font-medium focus:ring-2 focus:ring-gold outline-none transition-all shadow-sm placeholder:text-gray-400 dark:placeholder:text-white/20"
                                     />
                                 </div>
                                 <button
