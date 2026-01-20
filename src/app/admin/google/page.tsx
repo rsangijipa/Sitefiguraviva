@@ -1,18 +1,25 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase/client';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { useEffect } from 'react';
+import { CheckCircle, AlertCircle, ExternalLink, Save } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function GoogleIntegrations() {
-    // const { googleConfig, setGoogleConfig } = useApp(); // Removed
     const [config, setConfig] = useState({
         calendarId: '',
         driveFolderId: '',
         formsUrl: '',
         youtubeId: ''
     });
+    // Default empty config for discard action
+    const emptyConfig = {
+        calendarId: '',
+        driveFolderId: '',
+        formsUrl: '',
+        youtubeId: ''
+    };
     const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
 
     useEffect(() => {
@@ -121,7 +128,7 @@ export default function GoogleIntegrations() {
 
                 <div className="mt-12 pt-8 border-t border-gray-100 flex justify-end gap-4">
                     <button
-                        onClick={() => setConfig(googleConfig)}
+                        onClick={() => setConfig(emptyConfig)}
                         className="px-8 py-4 rounded-xl text-[10px] font-bold uppercase tracking-widest text-primary/40 hover:bg-gray-50 transition-colors"
                     >
                         Descartar

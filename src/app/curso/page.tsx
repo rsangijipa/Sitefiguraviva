@@ -6,7 +6,7 @@ import { Calendar, ArrowRight, BookOpen } from 'lucide-react';
 // Revalidate every hour
 export const revalidate = 3600;
 
-async function getCourses() {
+async function getCourses(): Promise<any[]> {
     try {
         const coursesSnap = await db.collection('courses')
             .where('isPublished', '==', true)

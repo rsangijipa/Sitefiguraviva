@@ -7,7 +7,7 @@ import { Suspense } from 'react';
 // Revalidate every hour
 export const revalidate = 3600;
 
-async function getPosts() {
+async function getPosts(): Promise<any[]> {
     try {
         const postsSnap = await db.collection('posts')
             .where('isPublished', '==', true)

@@ -32,7 +32,7 @@ export interface Post {
 }
 
 // --- Fetchers ---
-const fetchCollection = async (colName: string, publishedOnly = true) => {
+const fetchCollection = async (colName: string, publishedOnly = true): Promise<any[]> => {
     const constraints = [];
     if (publishedOnly) {
         constraints.push(where("isPublished", "==", true));

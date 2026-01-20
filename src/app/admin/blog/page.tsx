@@ -217,8 +217,8 @@ export default function BlogManager() {
                                                     <p className="text-sm text-primary/40 font-bold">Upload do PDF</p>
                                                 </div>
                                             )}
-                                            <input type="file" accept="application/pdf" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handleFileUpload} disabled={uploading} />
-                                            {uploading && (
+                                            <input type="file" accept="application/pdf" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handleFileUpload} disabled={uploadingPdf} />
+                                            {uploadingPdf && (
                                                 <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10">
                                                     <Loader2 size={32} className="animate-spin text-gold" />
                                                 </div>

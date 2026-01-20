@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { db } from '@/lib/firebase/admin';
 import { notFound } from 'next/navigation';
 import CourseDetailClient from './CourseDetailClient';
@@ -13,7 +14,7 @@ async function CourseContent({ id }: { id: string }) {
             notFound();
         }
 
-        const course = {
+        const course: any = {
             id: docSnap.id,
             ...docSnap.data(),
             created_at: docSnap.data()?.created_at?.toDate().toISOString() || null,

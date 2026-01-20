@@ -15,7 +15,7 @@ import { collection, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from '
 export default function GalleryManager() {
     // const [gallery, setGallery] = useState<any[]>([]);
     // const [loading, setLoading] = useState(true);
-    const { data: gallery = [], isLoading: loading, refetch } = useGallery(true);
+    const { data: gallery = [], isLoading: loading, refetch } = useGallery();
     const { user } = useAuth();
     const { addToast } = useToast();
 
@@ -193,7 +193,6 @@ export default function GalleryManager() {
                                                 defaultImage={formData.src}
                                                 onUpload={(url) => setFormData(prev => ({ ...prev, src: url }))}
                                                 className="w-full h-64 rounded-2xl"
-                                                showPreview={true}
                                             />
                                         </div>
                                     </div>
