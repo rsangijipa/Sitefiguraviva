@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { db } from '@/lib/firebase/admin';
 import { notFound } from 'next/navigation';
 import BlogDetailClient from './BlogDetailClient';
@@ -11,7 +12,7 @@ async function BlogContent({ id }: { id: string }) {
             notFound();
         }
 
-        const post = {
+        const post: any = {
             id: docSnap.id,
             ...docSnap.data(),
             created_at: docSnap.data()?.created_at?.toDate().toISOString() || null,
