@@ -25,25 +25,50 @@ if (!admin.apps.length) {
     });
 }
 
-const uid = process.argv[2];
+const identifier = process.argv[2];
 
-if (!uid) {
-    console.error("Usage: node scripts/set-admin.js <uid>");
+if (!identifier) {
+    console.error("Usage: node scripts/set-admin.js <uid_or_email>");
     process.exit(1);
 }
 
-async function setAdmin(uid) {
+async function setAdmin(input) {
     try {
+        let user;
+
+        // Check if input looks like an email
+        if (input.includes('@')) {
+            try {
+                user = await admin.auth().getUserByEmail(input);
+                console.log(`🔍 Found user by email: ${user.email} (${user.uid})`);
+            } catch (e) {
+                console.error(`❌ No user found with email: ${input}`);
+                return;
+            }
+        } else {
+            try {
+                user = await admin.auth().getUser(input);
+                console.log(`🔍 Found user by UID: ${user.uid}`);
+            } catch (e) {
+                console.error(`❌ No user found with UID: ${input}`);
+                return;
+            }
+        }
+
+        const uid = user.uid;
+
+        // Set the Claim
         await admin.auth().setCustomUserClaims(uid, { admin: true });
-        console.log(`✅ Successfully made user ${uid} an ADMIN.`);
+        console.log(`✅ Successfully made user ${user.email} (${uid}) an ADMIN.`);
 
         // Verify
-        const user = await admin.auth().getUser(uid);
-        console.log("Current Claims:", user.customClaims);
+        const updatedUser = await admin.auth().getUser(uid);
+        console.log("Current Claims:", updatedUser.customClaims);
+        console.log("⚠️  User may need to logout and login again/refresh token to see changes.");
 
     } catch (error) {
         console.error("❌ Error setting admin claim:", error);
     }
 }
 
-setAdmin(uid);
+setAdmin(identifier);

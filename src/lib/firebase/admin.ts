@@ -104,4 +104,5 @@ const storageProxy = new Proxy({}, {
     }
 }) as admin.storage.Storage;
 
-export { dbProxy as db, authProxy as auth, storageProxy as storage };
+// Export aliases for backward compatibility or clarity
+export { dbProxy as db, authProxy as auth, storageProxy as storage, dbProxy as adminDb, authProxy as adminAuth };

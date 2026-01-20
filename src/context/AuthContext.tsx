@@ -33,10 +33,15 @@ const AuthContext = createContext<AuthContextType>({
     updateProfile: async () => { throw new Error("Not implemented"); },
 });
 
+import { useUserSync } from "@/hooks/useUserSync";
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
     const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(true);
+
+    // Call the sync hook
+    useUserSync();
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -46,18 +51,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 const token = await currentUser.getIdTokenResult(true);
                 setIsAdmin(!!token.claims.admin);
 
-                // Sync user to Firestore
-                try {
-                    await setDoc(doc(db, "users", currentUser.uid), {
-                        email: currentUser.email,
-                        displayName: currentUser.displayName,
-                        photoURL: currentUser.photoURL,
-                        lastLogin: serverTimestamp(),
-                        uid: currentUser.uid
-                    }, { merge: true });
-                } catch (error) {
-                    console.error("Error syncing user:", error);
-                }
+                // Sync logic moved to useUserSync hook
             } else {
                 setIsAdmin(false);
             }

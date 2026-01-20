@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase/client';
-import { collection, query, orderBy, limit, onSnapshot, where, addDoc, deleteDoc, doc, serverTimestamp, getDocs } from 'firebase/firestore';
-import { Search, User, Plus, GraduationCap, X, Trash2 } from 'lucide-react';
+import { collection, query, orderBy, limit, onSnapshot, where, setDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { Search, User, Plus, GraduationCap, X } from 'lucide-react';
 import { useToast } from '@/context/ToastContext';
 import { useCourses } from '@/hooks/useContent';
-import { Card } from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
+import { EnrollmentCard } from './EnrollmentCard';
 
 export default function EnrollmentsManager() {
     const [users, setUsers] = useState<any[]>([]);
@@ -20,8 +20,6 @@ export default function EnrollmentsManager() {
     const [selectedCourse, setSelectedCourse] = useState('');
 
     // Fetch Users 
-    // Ideally use algolia or simple search if 'users' collection exists.
-    // For now, fetch recent 50 users.
     useEffect(() => {
         const q = query(collection(db, 'users'), orderBy('lastLogin', 'desc'), limit(50));
         const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -31,21 +29,32 @@ export default function EnrollmentsManager() {
         return () => unsubscribe();
     }, []);
 
-    // Filter users locally for MVP
+    // Filter users locally
     const filteredUsers = users.filter(u =>
         u.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         u.displayName?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // Fetch Enrollments for Selected User
+    // Fetch Enrollments for Selected User (From ROOT collection)
     useEffect(() => {
         if (!selectedUser) {
             setEnrollments([]);
             return;
         }
-        const q = query(collection(db, 'users', selectedUser.id, 'enrollments'), orderBy('enrolledAt', 'desc'));
+        // New Schema: Root collection 'enrollments'
+        const q = query(
+            collection(db, 'enrollments'),
+            where('userId', '==', selectedUser.id)
+            // Note: Compound queries might need index if we order by enrolledAt. 
+            // Let's try flexible ordering or client-side sort if small.
+            // Ideally: orderBy('enrolledAt', 'desc') requires index on userId + enrolledAt.
+        );
+
         const unsubscribe = onSnapshot(q, (snapshot) => {
-            setEnrollments(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
+            const docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+            // Client-side sort to avoid index creation delay for MVP
+            docs.sort((a: any, b: any) => (b.enrolledAt?.seconds || 0) - (a.enrolledAt?.seconds || 0));
+            setEnrollments(docs);
         });
         return () => unsubscribe();
     }, [selectedUser]);
@@ -53,29 +62,24 @@ export default function EnrollmentsManager() {
     const handleEnroll = async () => {
         if (!selectedCourse || !selectedUser) return;
         try {
-            await addDoc(collection(db, 'users', selectedUser.id, 'enrollments'), {
+            const enrollmentId = `${selectedUser.id}_${selectedCourse}`;
+
+            // Write to Root Collection
+            await setDoc(doc(db, 'enrollments', enrollmentId), {
+                userId: selectedUser.id,
                 courseId: selectedCourse,
                 enrolledAt: serverTimestamp(),
                 status: 'active',
-                createdBy: 'admin' // Could put admin uid here
+                createdBy: 'admin',
+                source: 'manual_admin'
             });
+
             addToast('Aluno matriculado com sucesso!', 'success');
             setIsEnrolling(false);
             setSelectedCourse('');
         } catch (error) {
             console.error(error);
             addToast('Erro ao matricular.', 'error');
-        }
-    };
-
-    const handleRevoke = async (enrollmentId: string) => {
-        if (!confirm('Remover matrícula? O aluno perderá acesso.')) return;
-        try {
-            await deleteDoc(doc(db, 'users', selectedUser.id, 'enrollments', enrollmentId));
-            addToast('Matrícula removida.', 'success');
-        } catch (error) {
-            console.error(error);
-            addToast('Erro ao remover.', 'error');
         }
     };
 
@@ -165,23 +169,12 @@ export default function EnrollmentsManager() {
                                 enrollments.map(enrollment => {
                                     const course = courses?.find((c: any) => c.id === enrollment.courseId);
                                     return (
-                                        <Card key={enrollment.id} className="p-4 flex items-center justify-between group hover:border-gold/30 transition-all">
-                                            <div className="flex items-center gap-4">
-                                                {course?.image && <img src={course.image} className="w-12 h-12 rounded-lg object-cover bg-stone-100" />}
-                                                <div>
-                                                    <p className="font-bold text-primary">{course?.title || 'Curso Desconhecido'}</p>
-                                                    <p className="text-xs text-stone-400">Matriculado em: {enrollment.enrolledAt?.toDate().toLocaleDateString()}</p>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center gap-4">
-                                                <span className="px-3 py-1 bg-green-50 text-green-600 rounded-full text-[10px] font-bold uppercase tracking-wide">
-                                                    {enrollment.status}
-                                                </span>
-                                                <button onClick={() => handleRevoke(enrollment.id)} className="p-2 text-stone-300 hover:text-red-500 transition-colors" title="Revogar acesso">
-                                                    <Trash2 size={16} />
-                                                </button>
-                                            </div>
-                                        </Card>
+                                        <EnrollmentCard
+                                            key={enrollment.id}
+                                            enrollment={enrollment}
+                                            course={course}
+                                            userId={selectedUser.id}
+                                        />
                                     );
                                 })
                             )}

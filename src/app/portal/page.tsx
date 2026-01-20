@@ -1,86 +1,101 @@
-"use client";
 
-import { useAuth } from '@/context/AuthContext';
-import { db } from '@/lib/firebase/client';
-import { collection, query, orderBy, onSnapshot, getDocs, where, documentId } from 'firebase/firestore';
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { auth, db } from '@/lib/firebase/admin';
 import { Card } from '@/components/ui/Card';
 import { BookOpen, Calendar, ArrowRight } from 'lucide-react';
-import { motion } from 'framer-motion';
+import Link from 'next/link';
+import { FieldPath } from 'firebase-admin/firestore';
 
-export default function PortalDashboard() {
-    const { user } = useAuth(); // User is guaranteed by layout
-    const [enrollments, setEnrollments] = useState<any[]>([]);
-    const [enrolledCourses, setEnrolledCourses] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
+export default async function PortalDashboard() {
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get('session')?.value;
 
-    // 1. Fetch User Enrollments
-    useEffect(() => {
-        if (!user) return;
+    if (!sessionCookie) {
+        redirect('/login');
+    }
 
-        const q = query(collection(db, 'users', user.uid, 'enrollments'), orderBy('enrolledAt', 'desc'));
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            setEnrollments(docs);
-            if (docs.length === 0) setLoading(false);
+    let uid;
+    try {
+        const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
+        uid = decodedClaims.uid;
+    } catch (error) {
+        redirect('/login');
+    }
+
+    // 1. Fetch User Enrollments (Server-side from Root Collection)
+    const enrollmentsSnap = await db.collection('enrollments')
+        .where('userId', '==', uid)
+        // .orderBy('enrolledAt', 'desc') // Checking if index exists or if field exists. Safe to fetch and sort in memory for now given low volume?
+        .get();
+
+    const enrollments = enrollmentsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    let enrolledCourses: any[] = [];
+
+    if (enrollments.length > 0) {
+        // 2. Fetch Course Details
+        const courseIds = enrollments.map((e: any) => e.courseId);
+
+        // Chunking for Firestore 'in' query limit (10)
+        const chunks = [];
+        const chunkSize = 10;
+        for (let i = 0; i < courseIds.length; i += chunkSize) {
+            chunks.push(courseIds.slice(i, i + chunkSize));
+        }
+
+        const coursesData = [];
+        const coursePromises = chunks.map(chunk =>
+            db.collection('courses').where(FieldPath.documentId(), 'in', chunk).get()
+        );
+
+        const courseSnapshots = await Promise.all(coursePromises);
+
+        for (const snap of courseSnapshots) {
+            coursesData.push(...snap.docs.map(doc => {
+                const data = doc.data();
+                return {
+                    id: doc.id,
+                    title: data.title,
+                    subtitle: data.subtitle,
+                    description: data.description,
+                    image: data.image,
+                    // slug: data.slug 
+                };
+            }));
+        }
+
+        // Merge
+        const merged = coursesData.map(course => {
+            const enrollment = enrollments.find((e: any) => e.courseId === course.id);
+            // Serialize timestamps for cleaner passing to components if needed, or keeping as dates?
+            // Next.js Server Components can render Date objects directly BUT it warns if passed to Client Components.
+            // We are rendering mostly server side here, but let's be safe.
+            return { ...course, enrollment };
         });
 
-        return () => unsubscribe();
-    }, [user]);
-
-    // 2. Fetch Details for Enrolled Courses
-    useEffect(() => {
-        const fetchCourseDetails = async () => {
-            if (enrollments.length === 0) return;
-
-            setLoading(true);
-            const courseIds = enrollments.map(e => e.courseId);
-
-            try {
-                // Optimized approach: Query by documentId IN [...] if <= 10
-                const chunks = [];
-                for (let i = 0; i < courseIds.length; i += 10) {
-                    chunks.push(courseIds.slice(i, i + 10));
-                }
-
-                const coursesData = [];
-                for (const chunk of chunks) {
-                    const q = query(collection(db, 'courses'), where(documentId(), 'in', chunk));
-                    const snap = await getDocs(q);
-                    coursesData.push(...snap.docs.map(d => ({ id: d.id, ...d.data() })));
-                }
-
-                // Merge enrollment data (like status) with course data
-                const merged = coursesData.map(course => {
-                    const enrollment = enrollments.find(e => e.courseId === course.id);
-                    return { ...course, enrollment };
-                });
-
-                setEnrolledCourses(merged);
-            } catch (error) {
-                console.error("Error fetching courses:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        if (enrollments.length > 0) {
-            fetchCourseDetails();
-        }
-    }, [enrollments]);
-
+        // Sort by enrollment date
+        enrolledCourses = merged.sort((a, b) => {
+            const dateA = a.enrollment.enrolledAt.toDate().getTime();
+            const dateB = b.enrollment.enrolledAt.toDate().getTime();
+            return dateB - dateA;
+        });
+    }
 
     return (
         <main className="max-w-7xl mx-auto px-6 md:px-12 py-12">
+            <header className="mb-10 animate-fade-in-up">
+                <h1 className="font-serif text-3xl text-primary">Meus Cursos</h1>
+                <p className="text-stone-500 font-light text-sm">Continue sua jornada de aprendizado.</p>
+            </header>
+
             {enrolledCourses.length > 0 ? (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {enrolledCourses.map((course, idx) => (
-                        <motion.div
+                        <div
                             key={course.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: idx * 0.1 }}
+                            className="animate-fade-in-up"
+                            style={{ animationDelay: `${idx * 0.1}s`, opacity: 0 }}
                         >
                             <Link href={`/portal/course/${course.id}`} className="block h-full">
                                 <Card className="h-full group hover:border-gold/50 transition-all duration-300 overflow-hidden flex flex-col">
@@ -109,7 +124,7 @@ export default function PortalDashboard() {
                                         <div className="flex items-center justify-between border-t border-stone-100 pt-6 mt-auto">
                                             <div className="text-[10px] font-bold uppercase tracking-widest text-primary/40 flex items-center gap-2">
                                                 <Calendar size={12} />
-                                                {course.enrollment?.enrolledAt?.toDate().toLocaleDateString()}
+                                                {course.enrollment?.enrolledAt?.toDate?.()?.toLocaleDateString() ?? 'N/A'}
                                             </div>
                                             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary group-hover:translate-x-1 transition-transform">
                                                 Acessar <ArrowRight size={14} />
@@ -118,11 +133,11 @@ export default function PortalDashboard() {
                                     </div>
                                 </Card>
                             </Link>
-                        </motion.div>
+                        </div>
                     ))}
                 </div>
             ) : (
-                <div className="text-center py-20 bg-white rounded-[3rem] border border-stone-100 shadow-sm">
+                <div className="text-center py-20 bg-white rounded-[3rem] border border-stone-100 shadow-sm animate-fade-in-up">
                     <div className="w-24 h-24 bg-stone-50 rounded-full flex items-center justify-center mx-auto mb-6 text-stone-300">
                         <BookOpen size={40} />
                     </div>

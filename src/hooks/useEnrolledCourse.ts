@@ -11,12 +11,13 @@ interface EnrolledCourseData {
     status: string;
 }
 
-export function useEnrolledCourse(courseId: string, userId: string | undefined) {
+export function useEnrolledCourse(courseId: string, userId: string | undefined, initialData?: EnrolledCourseData | null) {
     const queryClient = useQueryClient();
 
     // 1. Main Query: Fetch all course data
     const { data, isLoading, error, isError } = useQuery<EnrolledCourseData, Error>({
         queryKey: ['enrolled-course', courseId, userId],
+        initialData: initialData || undefined,
         queryFn: async () => {
             if (!userId || !courseId) throw new Error("Missing params");
 
@@ -25,14 +26,16 @@ export function useEnrolledCourse(courseId: string, userId: string | undefined) 
             if (!courseDoc.exists()) throw new Error("Course not found");
             const course = { id: courseDoc.id, ...courseDoc.data() };
 
-            // B. Check Enrollment
+            // B. Check Enrollment (Root Collection source of truth)
             const enrollmentQ = query(
-                collection(db, 'users', userId, 'enrollments'),
+                collection(db, 'enrollments'),
+                where('userId', '==', userId),
                 where('courseId', '==', courseId)
             );
             const enrollmentSnap = await getDocs(enrollmentQ);
             let enrollmentData = null;
             let status = 'none';
+            let progressData: any = {};
 
             if (!enrollmentSnap.empty) {
                 enrollmentData = { id: enrollmentSnap.docs[0].id, ...enrollmentSnap.docs[0].data() };
@@ -50,6 +53,16 @@ export function useEnrolledCourse(courseId: string, userId: string | undefined) 
                 };
             }
 
+            // Fetch Progress (Separate Collection)
+            try {
+                const progressDoc = await getDoc(doc(db, 'progress', `${userId}_${courseId}`));
+                if (progressDoc.exists()) {
+                    progressData = progressDoc.data();
+                }
+            } catch (e) {
+                console.warn("Error fetching progress:", e);
+            }
+
             // C. Fetch Materials (Only if Active)
             const materialsQ = query(collection(db, 'courses', courseId, 'materials'), orderBy('created_at', 'desc'));
             const materialsSnap = await getDocs(materialsQ);
@@ -65,7 +78,8 @@ export function useEnrolledCourse(courseId: string, userId: string | undefined) 
 
                 const lessons: Lesson[] = lessonsSnap.docs.map(lDoc => {
                     const lData = lDoc.data();
-                    const progress = enrollmentData.progress || {};
+                    // Use separated progress data
+                    const progress = progressData.lessonProgress || {};
                     const isCompleted = !!progress[lDoc.id]?.completed;
 
                     return {
@@ -90,6 +104,12 @@ export function useEnrolledCourse(courseId: string, userId: string | undefined) 
 
             const modules = await Promise.all(modulesPromises);
 
+            // Merge progress lastLessonId into enrollment for UI consumption if needed, or handle separately
+            // The UI uses enrollment.lastLessonId. Let's merge it back into the enrollment object we return
+            if (enrollmentData && progressData.lastLessonId) {
+                enrollmentData.lastLessonId = progressData.lastLessonId;
+            }
+
             return { course, modules, materials, enrollment: enrollmentData, status };
         },
         enabled: !!userId && !!courseId,
@@ -97,17 +117,22 @@ export function useEnrolledCourse(courseId: string, userId: string | undefined) 
         retry: false
     });
 
-    // 2. Mutations to update progress
+    // 2. Mutations to update progress (Target 'progress' collection)
     const updateLastAccessMutation = useMutation({
         mutationFn: async (lessonId: string) => {
-            if (!data?.enrollment?.id || !userId) return;
-            await setDoc(doc(db, 'users', userId, 'enrollments', data.enrollment.id), {
+            if (!userId) return;
+            const progressRef = doc(db, 'progress', `${userId}_${courseId}`);
+
+            // Ensure doc exists (upsert)
+            await setDoc(progressRef, {
+                userId,
+                courseId,
                 lastLessonId: lessonId,
                 lastAccessedAt: Timestamp.now()
             }, { merge: true });
         },
         onSuccess: (_, lessonId) => {
-            // Update cache optimistically or invalidate
+            // Update cache optimistically
             queryClient.setQueryData(['enrolled-course', courseId, userId], (old: EnrolledCourseData | undefined) => {
                 if (!old) return old;
                 return {
@@ -120,16 +145,20 @@ export function useEnrolledCourse(courseId: string, userId: string | undefined) 
 
     const markCompleteMutation = useMutation({
         mutationFn: async (lessonId: string) => {
-            if (!data?.enrollment?.id || !userId) return;
+            if (!userId) return;
+            const progressRef = doc(db, 'progress', `${userId}_${courseId}`);
+
             const progressUpdate = {
-                [`progress.${lessonId}`]: {
+                userId, // Ensure ownership field for rules
+                courseId,
+                [`lessonProgress.${lessonId}`]: {
                     completed: true,
                     completedAt: Timestamp.now()
                 },
                 lastLessonId: lessonId,
                 lastAccessedAt: Timestamp.now()
             };
-            await setDoc(doc(db, 'users', userId, 'enrollments', data.enrollment.id), progressUpdate, { merge: true });
+            await setDoc(progressRef, progressUpdate, { merge: true });
         },
         onSuccess: (_, lessonId) => {
             queryClient.setQueryData(['enrolled-course', courseId, userId], (old: EnrolledCourseData | undefined) => {
