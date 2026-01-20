@@ -25,6 +25,14 @@ export default function LoginPage() {
         try {
             const userCredential = await signIn(email, password);
             const user = userCredential.user;
+            const token = await user.getIdToken();
+
+            // Set session cookie
+            await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ idToken: token }),
+            });
 
             // Force refresh token to ensure claims are up to date
             const tokenResult = await user.getIdTokenResult(true);

@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
 
             case 'invoice.paid': {
                 const invoice = session as Stripe.Invoice;
-                const subscriptionId = invoice.subscription as string;
+                const subscriptionId = (invoice as any).subscription as string;
 
                 // We need to find the enrollment by subscriptionId since invoice might not have metadata
                 // Query global enrollments
@@ -93,8 +93,8 @@ export async function POST(req: NextRequest) {
                     const batch = adminDb.batch();
                     const userEnrollmentRef = adminDb.collection('users').doc(uid).collection('enrollments').doc(courseId);
 
-                    batch.update(enrollmentDoc.ref, updateData);
-                    batch.update(userEnrollmentRef, updateData);
+                    batch.set(enrollmentDoc.ref, updateData, { merge: true });
+                    batch.set(userEnrollmentRef, updateData, { merge: true });
                     await batch.commit();
                     console.log(`Access granted (Active) for user ${uid}, course ${courseId}`);
                 } else {
@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
 
             case 'invoice.payment_failed': {
                 const invoice = session as Stripe.Invoice;
-                const subscriptionId = invoice.subscription as string;
+                const subscriptionId = (invoice as any).subscription as string;
 
                 const enrollmentQuery = await adminDb.collection('enrollments')
                     .where('stripe.subscriptionId', '==', subscriptionId)
@@ -126,8 +126,8 @@ export async function POST(req: NextRequest) {
                     const batch = adminDb.batch();
                     const userEnrollmentRef = adminDb.collection('users').doc(uid).collection('enrollments').doc(courseId);
 
-                    batch.update(enrollmentDoc.ref, updateData);
-                    batch.update(userEnrollmentRef, updateData);
+                    batch.set(enrollmentDoc.ref, updateData, { merge: true });
+                    batch.set(userEnrollmentRef, updateData, { merge: true });
                     await batch.commit();
                     console.log(`Payment failed for user ${uid}, course ${courseId}. status: past_due`);
                 }
