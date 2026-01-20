@@ -17,6 +17,33 @@ export default function BreathingApp({ onClose }) {
 
     const activeTechnique = TECHNIQUES[selectedTechniqueId];
 
+    const completeSession = () => {
+        setSessionActive(false);
+        if (timerRef.current) clearInterval(timerRef.current);
+        setAppState('completed');
+    };
+
+    const resetSession = () => {
+        setAppState('menu');
+        setSecondsRemaining(SESSION_DURATION_SECONDS);
+    };
+
+    const stopSession = () => {
+        setSessionActive(false);
+        if (timerRef.current) clearInterval(timerRef.current);
+        setAppState('menu');
+        setSecondsRemaining(SESSION_DURATION_SECONDS);
+    };
+
+    const startSession = () => {
+        setAppState('active');
+        setSessionActive(true);
+    };
+
+    const goToInstructions = () => {
+        setAppState('instructions');
+    }
+
     // Timer Logic
     useEffect(() => {
         if (sessionActive && secondsRemaining > 0) {
@@ -31,33 +58,6 @@ export default function BreathingApp({ onClose }) {
             if (timerRef.current) clearInterval(timerRef.current);
         };
     }, [sessionActive, secondsRemaining]);
-
-    const goToInstructions = () => {
-        setAppState('instructions');
-    }
-
-    const startSession = () => {
-        setAppState('active');
-        setSessionActive(true);
-    };
-
-    const stopSession = () => {
-        setSessionActive(false);
-        if (timerRef.current) clearInterval(timerRef.current);
-        setAppState('menu');
-        setSecondsRemaining(SESSION_DURATION_SECONDS);
-    };
-
-    const completeSession = () => {
-        setSessionActive(false);
-        if (timerRef.current) clearInterval(timerRef.current);
-        setAppState('completed');
-    };
-
-    const resetSession = () => {
-        setAppState('menu');
-        setSecondsRemaining(SESSION_DURATION_SECONDS);
-    };
 
     const formatTime = (seconds) => {
         const m = Math.floor(seconds / 60);
@@ -273,7 +273,7 @@ export default function BreathingApp({ onClose }) {
                 </div>
 
                 <div className="relative mb-8 w-full flex justify-center scale-110">
-                    <BreathingAnimation technique={activeTechnique} isActive={sessionActive} />
+                    <BreathingAnimation technique={activeTechnique} isActive={sessionActive} onPhaseChange={() => { }} />
                 </div>
 
                 <div className="mb-8">
@@ -301,7 +301,7 @@ export default function BreathingApp({ onClose }) {
         >
             <StepIndicator step={4} />
 
-            <PaperCard className="py-16 flex flex-col items-center bg-white/90">
+            <PaperCard className="py-16 flex flex-col items-center bg-white/90" onClick={() => { }}>
                 <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
