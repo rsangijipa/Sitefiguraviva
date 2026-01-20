@@ -1,100 +1,76 @@
 "use client";
 
 import { useAuth } from '@/context/AuthContext';
-import { db } from '@/lib/firebase/client';
-import { doc, getDoc, collection, query, orderBy, getDocs, where } from 'firebase/firestore';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
-import { useParams, useRouter } from 'next/navigation';
-import { Card } from '@/components/ui/Card';
-import { BookOpen, Calendar, ArrowLeft, Loader2, Lock, FileText, Download, PlayCircle } from 'lucide-react';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { BookOpen, Calendar, ArrowLeft, Loader2, Lock, FileText, Download, PlayCircle, ArrowRight } from 'lucide-react';
 import Button from '@/components/ui/Button';
+import { CoursePlayer } from '@/components/portal/CoursePlayer';
+import { Module, Lesson } from '@/components/portal/LessonSidebar';
+import { useEnrolledCourse } from '@/hooks/useEnrolledCourse';
 
-export default function CourseViewer() {
+// Separate component to handle search params usage inside Suspense
+function CourseContent() {
     const { id } = useParams();
-    const { user, loading: authLoading } = useAuth();
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const { user } = useAuth();
+
+    // ID Processing
+    const courseId = typeof id === 'string' ? id : '';
+    const initialLessonId = searchParams.get('lesson');
 
     // State
-    const [course, setCourse] = useState<any>(null);
-    const [materials, setMaterials] = useState<any[]>([]);
-    const [enrollment, setEnrollment] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
-    const [accessDenied, setAccessDenied] = useState(false);
+    const {
+        data,
+        isLoading,
+        isAccessDenied,
+        updateLastAccess,
+        markComplete
+    } = useEnrolledCourse(courseId, user?.uid);
 
+    const course = data?.course;
+    const modules = data?.modules || [];
+    const materials = data?.materials || [];
+    const enrollment = data?.enrollment;
+
+    // Player State
+    const [activeLessonId, setActiveLessonId] = useState<string | null>(initialLessonId);
+
+    // Update active lesson if URL changes (back/forward navigation)
     useEffect(() => {
-        const fetchCourseData = async () => {
-            if (!user || !id) return;
-            setLoading(true);
-
-            try {
-                // 1. Check Enrollment
-                // We query users/{uid}/enrollments where courseId == id
-                // Alternatively, if we store the docId as courseId, we can just getDoc.
-                // In Dashboard we added doc with random ID but field courseId. So we MUST query.
-                const enrollmentQ = query(
-                    collection(db, 'users', user.uid, 'enrollments'),
-                    where('courseId', '==', id)
-                );
-
-                const enrollmentSnap = await getDocs(enrollmentQ);
-
-                if (enrollmentSnap.empty && !user.uid /* TODO: Allow admin bypass */) {
-                    setAccessDenied(true);
-                    setLoading(false);
-                    return;
-                }
-
-                // Allow admin to bypass enrollment check logic if needed via claims, 
-                // but for now let's enforce enrollment presence or handle "Admin View" separately.
-                // Actually, let's allow if admin via claims?
-                // For now strict enrollment check.
-                if (enrollmentSnap.empty) {
-                    // Check if admin?
-                    // const token = await user.getIdTokenResult();
-                    // if (!token.claims.admin) { ... }
-                    // For simplicity, strict check for now.
-                    setAccessDenied(true);
-                    setLoading(false);
-                    return;
-                }
-
-                setEnrollment(enrollmentSnap.docs[0].data());
-
-                // 2. Fetch Course Details
-                const courseDoc = await getDoc(doc(db, 'courses', id as string));
-                if (!courseDoc.exists()) {
-                    // Course error
-                    return;
-                }
-                setCourse({ id: courseDoc.id, ...courseDoc.data() });
-
-                // 3. Fetch Materials (Subcollection)
-                // Security Rules should allow this because of enrollment.
-                const materialsQ = query(collection(db, 'courses', id as string, 'materials'), orderBy('created_at', 'desc'));
-                const materialsSnap = await getDocs(materialsQ);
-                setMaterials(materialsSnap.docs.map(d => ({ id: d.id, ...d.data() })));
-
-            } catch (error) {
-                console.error("Error fetching course data:", error);
-                // Likely Permission Denied if rules are working and user not enrolled
-                if (error.code === 'permission-denied') {
-                    setAccessDenied(true);
-                }
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        if (user && id) {
-            fetchCourseData();
-        } else if (!authLoading && !user) {
-            setLoading(false); // No user
+        if (initialLessonId !== undefined) {
+            setActiveLessonId(initialLessonId);
         }
-    }, [user, id, authLoading]);
+    }, [initialLessonId]);
 
+    // Handlers
+    const handleSelectLesson = (lessonId: string) => {
+        setActiveLessonId(lessonId);
 
-    if (authLoading || (loading && user && !accessDenied)) {
+        // Update URL without reload to support sharing/bookmarks
+        const params = new URLSearchParams(searchParams.toString());
+        params.set('lesson', lessonId);
+        router.push(`/portal/course/${courseId}?${params.toString()}`, { scroll: false });
+
+        // Update Firebase via Mutation
+        updateLastAccess(lessonId);
+    };
+
+    const handleMarkComplete = (lessonId: string) => {
+        markComplete(lessonId);
+    };
+
+    const getContinueLessonId = () => {
+        if (enrollment?.lastLessonId) return enrollment.lastLessonId;
+        if (modules.length > 0 && modules[0].lessons.length > 0) return modules[0].lessons[0].id;
+        return null;
+    };
+
+    // --- RENDER ---
+
+    if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-[#FDFCF9]">
                 <Loader2 className="w-8 h-8 animate-spin text-primary/30" />
@@ -102,35 +78,177 @@ export default function CourseViewer() {
         );
     }
 
-    if (!user) {
-        // Redirect or show login
-        return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-[#FDFCF9]">
-                <Lock className="w-12 h-12 text-primary/20 mb-4" />
-                <h2 className="text-xl font-serif text-primary">Acesso Restrito</h2>
-                <Link href="/login" className="mt-4 text-xs font-bold uppercase tracking-widest text-gold hover:underline">Fazer Login</Link>
-            </div>
-        )
-    }
+    // --- SUBSCRIPTION HANDLERS ---
+    const [checkoutLoading, setCheckoutLoading] = useState(false);
+    const { user: authUser } = useAuth(); // Need auth for headers (handled by cookie ideally but efficient enough to pass if we used client interaction)
+    // Actually our API checks ID Token from header. We need to get it.
 
-    if (accessDenied) {
+    // Helper to get token
+    const getToken = async () => authUser?.getIdToken();
+
+    const handleSubscribe = async () => {
+        try {
+            setCheckoutLoading(true);
+            const token = await getToken();
+            const res = await fetch('/api/billing/checkout-subscription', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ courseId })
+            });
+            const data = await res.json();
+            if (data.url) {
+                window.location.href = data.url;
+            } else {
+                alert(data.error || 'Erro ao iniciar checkout');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Erro de conexão');
+        } finally {
+            setCheckoutLoading(false);
+        }
+    };
+
+    const handlePortal = async () => {
+        try {
+            setCheckoutLoading(true);
+            const token = await getToken();
+            const res = await fetch('/api/billing/customer-portal', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            const data = await res.json();
+            if (data.url) {
+                window.location.href = data.url;
+            } else {
+                alert(data.error || 'Erro ao abrir portal');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Erro de conexão');
+        } finally {
+            setCheckoutLoading(false);
+        }
+    };
+
+    const status = data?.status || 'none';
+
+    // PAYWALL / STATUS HANDLING
+    if (status !== 'active' && !isLoading) {
+        // If Status is 'none' (Not enrolled) -> Paywall
+        // If Status is 'past_due' -> Regularize
+        // If Status is 'pending' -> Wait
+        // If Status is 'canceled' -> Resubscribe
+
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-[#FDFCF9] text-center p-6">
-                <div className="w-20 h-20 bg-stone-100 rounded-full flex items-center justify-center mb-6 text-stone-300">
-                    <Lock size={32} />
+            <div className="min-h-screen flex flex-col items-center justify-center bg-[#FDFCF9] text-center p-6 relative overflow-hidden">
+                {/* Background Decor */}
+                <div className="absolute inset-0 bg-primary/5 z-0" />
+                <div className="relative z-10 max-w-lg w-full bg-white p-8 md:p-12 rounded-3xl shadow-xl border border-stone-100">
+
+                    {/* Icon based on status */}
+                    <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl shadow-sm ${status === 'past_due' ? 'bg-red-50 text-red-500' :
+                        status === 'pending' ? 'bg-yellow-50 text-yellow-500' :
+                            'bg-gold/10 text-gold'
+                        }`}>
+                        {status === 'past_due' ? <Lock size={32} /> :
+                            status === 'pending' ? <Loader2 size={32} className="animate-spin" /> :
+                                <Lock size={32} />}
+                    </div>
+
+                    <h1 className="font-serif text-3xl text-primary mb-4 leading-tight">
+                        {status === 'pending' ? 'Matrícula em Processamento' :
+                            status === 'past_due' ? 'Pagamento Pendente' :
+                                status === 'canceled' ? 'Assinatura Cancelada' :
+                                    course?.title || 'Conteúdo Exclusivo'}
+                    </h1>
+
+                    <p className="text-stone-500 mb-8 leading-relaxed">
+                        {status === 'pending' ? 'Aguarde alguns instantes enquanto confirmamos seu pagamento. Você pode atualizar a página.' :
+                            status === 'past_due' ? 'Houve um problema com seu último pagamento. Atualize seus dados para recuperar o acesso.' :
+                                status === 'canceled' ? 'Sua assinatura foi cancelada. Reative para continuar seus estudos.' :
+                                    'Para acessar este curso completo, aulas e materiais, torne-se um assinante.'}
+                    </p>
+
+                    <div className="space-y-4">
+                        {status === 'none' || status === 'canceled' ? (
+                            <Button
+                                onClick={handleSubscribe}
+                                isLoading={checkoutLoading}
+                                rightIcon={<ArrowRight size={18} />}
+                                className="w-full justify-center py-4 text-base"
+                            >
+                                Assinar Mensalmente
+                            </Button>
+                        ) : status === 'past_due' ? (
+                            <Button
+                                onClick={handlePortal}
+                                isLoading={checkoutLoading}
+                                className="w-full justify-center py-4 text-base bg-red-500 hover:bg-red-600 border-none text-white"
+                            >
+                                Regularizar Pagamento
+                            </Button>
+                        ) : status === 'pending' ? (
+                            <Button
+                                onClick={() => window.location.reload()}
+                                variant="outline"
+                                className="w-full justify-center"
+                            >
+                                Atualizar Página
+                            </Button>
+                        ) : null}
+
+                        <Link href="/portal" className="block">
+                            <span className="text-xs font-bold uppercase tracking-widest text-stone-400 hover:text-primary transition-colors">
+                                Voltar para Meus Cursos
+                            </span>
+                        </Link>
+                    </div>
                 </div>
-                <h1 className="font-serif text-3xl text-primary mb-4">Acesso Negado</h1>
-                <p className="text-stone-500 max-w-md mb-8">
-                    Você não possui uma matrícula ativa para este curso. Entre em contato com a secretaria se acreditar que isso é um erro.
-                </p>
-                <Link href="/portal">
-                    <Button leftIcon={<ArrowLeft size={16} />}>Voltar para Meus Cursos</Button>
-                </Link>
             </div>
         );
     }
 
-    if (!course) return null; // Should ideally show 404
+    if (!course) return null;
+
+    // View: PLAYER MODE
+    if (activeLessonId) {
+        const activeLesson = modules.flatMap(m => m.lessons).find(l => l.id === activeLessonId) || null;
+
+        // Find next/prev for navigation
+        const allLessons = modules.flatMap(m => m.lessons);
+        const currentIndex = allLessons.findIndex(l => l.id === activeLessonId);
+        const prevLessonId = currentIndex > 0 ? allLessons[currentIndex - 1].id : undefined;
+        const nextLessonId = currentIndex < allLessons.length - 1 ? allLessons[currentIndex + 1].id : undefined;
+
+        // If lesson ID in URL is invalid, fallback gracefully
+        if (!activeLesson && modules.length > 0 && !loading) {
+            // If data is loaded but lesson not found, it might be a bad ID. 
+            // We can show the course info instead or a "Lesson not found" state.
+            // For now, let's keep rendering to avoid layout shift, but CoursePlayer might handle null activeLesson.
+            // Actually CoursePlayer handles activeLesson={null} by showing "Select a lesson".
+        }
+
+        return (
+            <CoursePlayer
+                course={{ id: course.id, title: course.title, backLink: `/portal/course/${course.id}` }} // Back link clears query param
+                modules={modules}
+                activeLesson={activeLesson}
+                onSelectLesson={handleSelectLesson}
+                onMarkComplete={handleMarkComplete}
+                prevLessonId={prevLessonId}
+                nextLessonId={nextLessonId}
+            />
+        );
+    }
+
+    // View: COURSE INFO (Welcome Page)
+    const continueLessonId = getContinueLessonId();
 
     return (
         <div className="min-h-screen bg-[#FDFCF9] pb-20">
@@ -150,6 +268,21 @@ export default function CourseViewer() {
                         {enrollment && <span className="px-3 py-1 bg-white/10 rounded-full text-white border border-white/20">Matrícula Ativa</span>}
                         <span className="flex items-center gap-2"><Calendar size={14} /> {course.date}</span>
                     </div>
+
+                    <div className="mt-12">
+                        {modules.length > 0 ? (
+                            <Button
+                                onClick={() => continueLessonId && handleSelectLesson(continueLessonId)}
+                                variant="primary"
+                                className="bg-white text-primary hover:bg-stone-100 border-none px-8 py-4 h-auto text-sm"
+                                rightIcon={<PlayCircle size={20} />}
+                            >
+                                {enrollment?.lastLessonId ? 'Continuar de Onde Parei' : 'Começar Aula'}
+                            </Button>
+                        ) : (
+                            <Button disabled variant="outline" className="text-white border-white/30">Em Breve</Button>
+                        )}
+                    </div>
                 </div>
             </header>
 
@@ -157,6 +290,45 @@ export default function CourseViewer() {
 
                 {/* Main Content */}
                 <div className="md:col-span-2 space-y-12">
+                    {/* Modules List (Preview) */}
+                    <section>
+                        <h3 className="font-serif text-2xl text-primary mb-6">Conteúdo do Curso</h3>
+                        <div className="space-y-4">
+                            {modules.map((module, idx) => (
+                                <div key={module.id} className="bg-white border border-stone-100 rounded-xl overflow-hidden">
+                                    <div className="p-4 bg-stone-50 border-b border-stone-100 flex justify-between items-center">
+                                        <h4 className="font-bold text-primary">{module.title}</h4>
+                                        <span className="text-[10px] uppercase font-bold text-stone-400">{module.lessons.length} Aulas</span>
+                                    </div>
+                                    <div className="divide-y divide-stone-50">
+                                        {module.lessons.map(lesson => (
+                                            <div
+                                                key={lesson.id}
+                                                onClick={() => !lesson.isLocked && handleSelectLesson(lesson.id)}
+                                                className={`p-4 flex items-center gap-4 hover:bg-stone-50 transition-colors cursor-pointer group ${lesson.isLocked ? 'opacity-50 pointer-events-none' : ''}`}
+                                            >
+                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${lesson.isCompleted ? 'bg-green-100 text-green-600' : 'bg-stone-100 text-stone-300 group-hover:bg-primary group-hover:text-white transition-colors'}`}>
+                                                    {lesson.isCompleted ? <FileText size={14} /> : <PlayCircle size={14} />}
+                                                </div>
+                                                <div className="flex-1">
+                                                    <h5 className="text-sm font-bold text-stone-700 group-hover:text-primary transition-colors">{lesson.title}</h5>
+                                                    {lesson.duration && <p className="text-xs text-stone-400">{lesson.duration}</p>}
+                                                </div>
+                                                {lesson.isLocked && <Lock size={14} className="text-stone-300" />}
+                                                {lesson.id === enrollment?.lastLessonId && (
+                                                    <div className="text-[10px] bg-gold/10 text-gold px-2 py-1 rounded font-bold uppercase">Continuar</div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                            {modules.length === 0 && (
+                                <p className="text-stone-400 italic">Nenhum módulo disponível ainda.</p>
+                            )}
+                        </div>
+                    </section>
+
                     {/* Introduction */}
                     <section>
                         <h3 className="font-serif text-2xl text-primary mb-6">Sobre o Curso</h3>
@@ -166,47 +338,45 @@ export default function CourseViewer() {
                     </section>
 
                     {/* Materials Section */}
-                    <section>
-                        <h3 className="font-serif text-2xl text-primary mb-6 flex items-center gap-3">
-                            <span className="w-8 h-8 rounded-full bg-gold/10 text-gold flex items-center justify-center text-sm"><FileText size={16} /></span>
-                            Materiais Didáticos
-                        </h3>
+                    {materials.length > 0 && (
+                        <section>
+                            <h3 className="font-serif text-2xl text-primary mb-6 flex items-center gap-3">
+                                <span className="w-8 h-8 rounded-full bg-gold/10 text-gold flex items-center justify-center text-sm"><FileText size={16} /></span>
+                                Materiais Complementares
+                            </h3>
 
-                        <div className="space-y-4">
-                            {materials.length > 0 ? materials.map(item => (
-                                <div key={item.id} className="bg-white p-6 rounded-2xl border border-stone-100 flex items-center justify-between group hover:border-gold/30 hover:shadow-lg hover:shadow-gold/5 transition-all duration-300">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 rounded-xl bg-stone-50 text-stone-400 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
-                                            <FileText size={24} />
+                            <div className="space-y-4">
+                                {materials.map(item => (
+                                    <div key={item.id} className="bg-white p-6 rounded-2xl border border-stone-100 flex items-center justify-between group hover:border-gold/30 hover:shadow-lg hover:shadow-gold/5 transition-all duration-300">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 rounded-xl bg-stone-50 text-stone-400 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+                                                <FileText size={24} />
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-primary group-hover:text-gold transition-colors">{item.title}</h4>
+                                                <p className="text-xs text-stone-400">{item.file_type?.toUpperCase() || 'PDF'} • {item.file_size || 'N/A'}</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h4 className="font-bold text-primary group-hover:text-gold transition-colors">{item.title}</h4>
-                                            <p className="text-xs text-stone-400">{item.file_type?.toUpperCase() || 'PDF'} • {item.file_size || 'N/A'}</p>
-                                        </div>
+                                        <a
+                                            href={item.file_url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="w-10 h-10 rounded-full border border-stone-200 flex items-center justify-center text-stone-400 hover:border-gold hover:text-gold hover:bg-gold/5 transition-all"
+                                            download
+                                        >
+                                            <Download size={18} />
+                                        </a>
                                     </div>
-                                    <a
-                                        href={item.file_url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="w-10 h-10 rounded-full border border-stone-200 flex items-center justify-center text-stone-400 hover:border-gold hover:text-gold hover:bg-gold/5 transition-all"
-                                        download
-                                    >
-                                        <Download size={18} />
-                                    </a>
-                                </div>
-                            )) : (
-                                <div className="text-center py-12 bg-white rounded-2xl border border-stone-100 border-dashed text-stone-400">
-                                    <p>Nenhum material disponível no momento.</p>
-                                </div>
-                            )}
-                        </div>
-                    </section>
+                                ))}
+                            </div>
+                        </section>
+                    )}
                 </div>
 
                 {/* Sidebar Info */}
                 <aside className="space-y-8">
                     <div className="bg-white p-6 rounded-3xl border border-stone-100 shadow-sm sticky top-24">
-                        <h4 className="font-bold text-xs uppercase tracking-widest text-primary/40 mb-6">Formato & Cronograma</h4>
+                        <h4 className="font-bold text-xs uppercase tracking-widest text-primary/40 mb-6">Informações</h4>
 
                         {course.details?.format && (
                             <div className="mb-6">
@@ -230,32 +400,26 @@ export default function CourseViewer() {
                                     rel="noreferrer"
                                     className="block w-full text-center bg-stone-50 text-stone-500 py-3 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-stone-100 transition-colors"
                                 >
-                                    Link Original
+                                    Link Externo
                                 </a>
                             </div>
                         )}
                     </div>
-
-                    {/* Mediators */}
-                    {course.mediators?.length > 0 && (
-                        <div className="space-y-4">
-                            <h4 className="font-bold text-xs uppercase tracking-widest text-primary/40">Equipe</h4>
-                            {course.mediators.map((m: any, idx: number) => (
-                                <div key={idx} className="flex items-center gap-4 bg-white p-4 rounded-2xl border border-stone-100">
-                                    <div className="w-10 h-10 rounded-full bg-stone-200 overflow-hidden">
-                                        {m.photo ? <img src={m.photo} className="w-full h-full object-cover" /> : null}
-                                    </div>
-                                    <div>
-                                        <p className="font-bold text-sm text-primary">{m.name}</p>
-                                        <p className="text-[10px] text-stone-400 line-clamp-1">{m.bio}</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
                 </aside>
 
             </main>
         </div>
+    );
+}
+
+export default function CoursePage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center bg-[#FDFCF9]">
+                <Loader2 className="w-8 h-8 animate-spin text-primary/30" />
+            </div>
+        }>
+            <CourseContent />
+        </Suspense>
     );
 }

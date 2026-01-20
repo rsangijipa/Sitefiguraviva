@@ -1,5 +1,8 @@
 rules_version = '2';
 
+// Craft rules based on data in your Firestore database
+// allow write: if firestore.get(
+//    /databases/(default)/documents/users/$(request.auth.uid)).data.isAdmin;
 service firebase.storage {
   match /b/{bucket}/o {
     
@@ -9,45 +12,46 @@ service firebase.storage {
       return request.auth != null && request.auth.token.admin == true;
     }
 
-    function isBelowMaxSize() {
-      return request.resource.size < 20 * 1024 * 1024; // 20MB limit
+    function isBelowMaxSize(sizeMB) {
+      return request.resource.size < sizeMB * 1024 * 1024;
     }
     
-    // Check Firestore for active enrollment
-    function isEnrolled(courseId) {
-       return firestore.exists(/databases/(default)/documents/users/$(request.auth.uid)/enrollments/$(courseId))
-              && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)/enrollments/$(courseId)).data.status == 'active';
+    // Strict enrollment check (Active status)
+    function isEnrolledActive(courseId) {
+       return request.auth != null && 
+              firestore.exists(/databases/(default)/documents/users/$(request.auth.uid)/enrollments/$(courseId)) &&
+              firestore.get(/databases/(default)/documents/users/$(request.auth.uid)/enrollments/$(courseId)).data.status == 'active';
     }
 
-    // Default deny
+    // Default Deny
     match /{allPaths=**} {
       allow read, write: if false;
     }
 
     // --- Public Assets ---
 
-    // Blog Covers & Content
+    // Blog Images
     match /blog/{allPaths=**} {
       allow read: if true;
-      allow write: if isAdmin() && isBelowMaxSize();
+      allow write: if isAdmin() && isBelowMaxSize(10);
     }
     
-    // Gallery Images
+    // Gallery
     match /gallery/{allPaths=**} {
       allow read: if true;
-      allow write: if isAdmin() && request.resource.contentType.matches('image/.*') && isBelowMaxSize();
+      allow write: if isAdmin() && request.resource.contentType.matches('image/.*') && isBelowMaxSize(10);
     }
 
-    // Public Course Assets (Covers)
+    // Course Covers
     match /courses/covers/{allPaths=**} {
       allow read: if true;
-      allow write: if isAdmin() && request.resource.contentType.matches('image/.*') && isBelowMaxSize();
+      allow write: if isAdmin() && request.resource.contentType.matches('image/.*') && isBelowMaxSize(5);
     }
 
-    // Public Institutional Documents (New "publicDocs")
+    // Public Documents
     match /public/docs/{allPaths=**} {
        allow read: if true;
-       allow write: if isAdmin() && isBelowMaxSize();
+       allow write: if isAdmin() && isBelowMaxSize(20);
     }
 
     // --- Restricted Academic Content ---

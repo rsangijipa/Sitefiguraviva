@@ -21,9 +21,14 @@ export default function AdminLayout({ children }) {
 
     useEffect(() => {
         setIsClient(true);
-    }, []);
-
-    // Redirect logic removed to prevent loops. Showing manual access screen instead.
+        if (user) {
+            user.getIdTokenResult().then(token => {
+                if (!token.claims.admin) {
+                    router.push('/portal');
+                }
+            });
+        }
+    }, [user, router]);
 
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
