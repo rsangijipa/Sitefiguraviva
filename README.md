@@ -1,16 +1,42 @@
-# React + Vite
+# Instituto Figura Viva - Plataforma Next.js
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Este projeto foi migrado para Next.js 14+ (App Router) com foco em performance, SEO e uma UX premium.
 
-Currently, two official plugins are available:
+## Estrutura do Projeto
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- `src/app/`: Rotas da aplicação (App Router).
+  - `page.tsx`: Home pública.
+  - `curso/[id]/`: Detalhes do curso.
+  - `blog/[slug]/`: Detalhes do post.
+  - `portal/`: Área do aluno (com login simulado).
+  - `admin/`: Painel administrativo (protegido).
+- `src/components/`: Componentes reutilizáveis (Navbar, Footer, CustomCursor).
+- `src/context/`: Gerenciamento de estado global (AppContext).
+- `src/services/`: Camada de dados (API Mock/Real).
 
-## React Compiler
+## Funcionalidades Implementadas
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Design System Premium**: Tailwind CSS configurado com fontes, cores e animações personalizadas.
+- **Micro-interações**: Framer Motion para entradas suaves, hover effects e cursor personalizado.
+- **Admin Panel**: Gestão de cursos e configurações de integração Google.
+- **Integrações (Simuladas)**: Google Calendar, Drive, Forms e YouTube.
+- **Responsividade**: Mobile-first com menus adaptativos e scroll-snap.
 
-## Expanding the ESLint configuration
+## Como Rodar
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1. Instale as dependências:
+   ```bash
+   npm install
+   ```
+
+2. Inicie o servidor de desenvolvimento:
+   ```bash
+   npm run dev
+   ```
+
+3. Acesse `http://localhost:3000`.
+
+## Credenciais de Admin
+
+- **Usuário**: admin
+- **Senha**: admin

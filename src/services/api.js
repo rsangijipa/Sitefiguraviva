@@ -1,5 +1,5 @@
 // Base API service with mock support
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '';
 
 async function handleResponse(response) {
     if (!response.ok) {
