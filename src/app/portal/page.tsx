@@ -97,8 +97,11 @@ export default async function PortalDashboard() {
                             className="animate-fade-in-up"
                             style={{ animationDelay: `${idx * 0.1}s`, opacity: 0 }}
                         >
-                            <Link href={`/portal/course/${course.id}`} className="block h-full">
-                                <Card className="h-full group hover:border-gold/50 transition-all duration-300 overflow-hidden flex flex-col">
+                            <Link
+                                href={course.enrollment?.status === 'active' ? `/portal/course/${course.id}` : '#'}
+                                className={`block h-full ${course.enrollment?.status !== 'active' ? 'cursor-default' : ''}`}
+                            >
+                                <Card className={`h-full group transition-all duration-300 overflow-hidden flex flex-col ${course.enrollment?.status === 'active' ? 'hover:border-gold/50' : 'opacity-80'}`}>
                                     <div className="h-48 overflow-hidden relative bg-stone-100">
                                         {course.image ? (
                                             <img src={course.image} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
@@ -108,27 +111,55 @@ export default async function PortalDashboard() {
                                             </div>
                                         )}
                                         <div className="absolute top-4 left-4">
-                                            <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-sm ${course.enrollment?.status === 'active' ? 'bg-green-500 text-white' : 'bg-stone-500 text-white'}`}>
-                                                {course.enrollment?.status === 'active' ? 'Em Andamento' : 'Concluído'}
+                                            <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-sm ${course.enrollment?.status === 'active' ? 'bg-green-500 text-white' :
+                                                    course.enrollment?.status === 'pending_approval' ? 'bg-gold text-white' :
+                                                        course.enrollment?.status === 'rejected' ? 'bg-red-500 text-white' :
+                                                            'bg-stone-500 text-white'
+                                                }`}>
+                                                {course.enrollment?.status === 'active' ? 'Em Andamento' :
+                                                    course.enrollment?.status === 'pending_approval' ? 'Em Análise' :
+                                                        course.enrollment?.status === 'rejected' ? 'Rejeitado' :
+                                                            'Aguardando'}
                                             </span>
                                         </div>
                                     </div>
                                     <div className="p-8 flex flex-col flex-1">
-                                        <h3 className="font-serif text-2xl text-primary mb-2 group-hover:text-gold transition-colors line-clamp-2">
+                                        <h3 className="font-serif text-2xl text-primary mb-2 transition-colors line-clamp-2 group-hover:text-gold">
                                             {course.title}
                                         </h3>
-                                        <p className="text-sm text-stone-500 font-light mb-6 line-clamp-3 flex-1">
-                                            {course.description || course.subtitle}
-                                        </p>
+
+                                        {course.enrollment?.status === 'pending_approval' ? (
+                                            <div className="bg-gold/5 border border-gold/20 rounded-xl p-4 my-4">
+                                                <p className="text-xs text-stone-600 leading-relaxed">
+                                                    Sua matrícula está em análise. O acesso será liberado após a aprovação do administrador.
+                                                </p>
+                                            </div>
+                                        ) : course.enrollment?.status === 'rejected' ? (
+                                            <div className="bg-red-50 border border-red-100 rounded-xl p-4 my-4">
+                                                <p className="text-xs text-red-600 leading-relaxed">
+                                                    Sua inscrição não foi aprovada. Entre em contato com o suporte para mais detalhes.
+                                                </p>
+                                            </div>
+                                        ) : (
+                                            <p className="text-sm text-stone-500 font-light mb-6 line-clamp-3 flex-1">
+                                                {course.description || course.subtitle}
+                                            </p>
+                                        )}
 
                                         <div className="flex items-center justify-between border-t border-stone-100 pt-6 mt-auto">
                                             <div className="text-[10px] font-bold uppercase tracking-widest text-primary/40 flex items-center gap-2">
                                                 <Calendar size={12} />
                                                 {course.enrollment?.enrolledAt?.toDate?.()?.toLocaleDateString() ?? 'N/A'}
                                             </div>
-                                            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary group-hover:translate-x-1 transition-transform">
-                                                Acessar <ArrowRight size={14} />
-                                            </div>
+                                            {course.enrollment?.status === 'active' ? (
+                                                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary group-hover:translate-x-1 transition-transform">
+                                                    Acessar <ArrowRight size={14} />
+                                                </div>
+                                            ) : (
+                                                <div className="text-[10px] font-bold uppercase tracking-widest text-stone-400">
+                                                    Bloqueado
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </Card>

@@ -4,6 +4,9 @@ import { adminDb } from '@/lib/firebase/admin';
 import { FieldValue } from 'firebase-admin/firestore';
 import Stripe from 'stripe';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 export async function POST(req: NextRequest) {
     const body = await req.text();
     const signature = req.headers.get('stripe-signature') as string;
@@ -37,6 +40,7 @@ export async function POST(req: NextRequest) {
                 if (checkoutSession.mode === 'subscription') {
                     const uid = checkoutSession.metadata?.uid;
                     const courseId = checkoutSession.metadata?.courseId;
+                    const applicationId = checkoutSession.metadata?.applicationId; // NEW
                     const subscriptionId = checkoutSession.subscription as string;
                     const customerId = checkoutSession.customer as string;
 
@@ -51,13 +55,14 @@ export async function POST(req: NextRequest) {
                             status: 'pending', // Wait for invoice.paid
                             'stripe.customerId': customerId,
                             'stripe.subscriptionId': subscriptionId,
+                            applicationId: applicationId || null, // Link application
                             updatedAt: FieldValue.serverTimestamp(),
                         };
-
-                        const batch = adminDb.batch();
+                        // Note: Global enrollment is now the Single Source of Truth
                         const userEnrollmentRef = adminDb.collection('users').doc(uid).collection('enrollments').doc(courseId);
                         const globalEnrollmentRef = adminDb.collection('enrollments').doc(`${uid}_${courseId}`);
 
+                        const batch = adminDb.batch();
                         batch.set(userEnrollmentRef, updateData, { merge: true });
                         batch.set(globalEnrollmentRef, updateData, { merge: true });
                         await batch.commit();
@@ -82,7 +87,9 @@ export async function POST(req: NextRequest) {
                     const { uid, courseId } = enrollmentDoc.data();
 
                     const updateData = {
-                        status: 'active',
+                        status: 'pending_approval', // Change: Wait for Admin Approval
+                        paymentStatus: 'paid',      // NEW: Track payment separately
+                        approvalStatus: 'pending_review', // NEW: Track approval separately
                         activatedAt: FieldValue.serverTimestamp(),
                         updatedAt: FieldValue.serverTimestamp(),
                         'stripe.latestInvoiceId': invoice.id,
@@ -96,7 +103,10 @@ export async function POST(req: NextRequest) {
                     batch.set(enrollmentDoc.ref, updateData, { merge: true });
                     batch.set(userEnrollmentRef, updateData, { merge: true });
                     await batch.commit();
-                    console.log(`Access granted (Active) for user ${uid}, course ${courseId}`);
+                    console.log(`Payment confirmed (Pending Approval) for user ${uid}, course ${courseId}`);
+
+                    // TODO: Trigger Welcome Email
+                    // await sendEmail({ to: userEmail, template: 'welcome_course', data: { courseId } });
                 } else {
                     console.warn(`No enrollment found for subscription ${subscriptionId}`);
                 }
@@ -130,6 +140,9 @@ export async function POST(req: NextRequest) {
                     batch.set(userEnrollmentRef, updateData, { merge: true });
                     await batch.commit();
                     console.log(`Payment failed for user ${uid}, course ${courseId}. status: past_due`);
+
+                    // TODO: Trigger Payment Failed Email
+                    // await sendEmail({ to: userEmail, template: 'payment_failed', data: { link: portalUrl } });
                 }
                 break;
             }
@@ -161,6 +174,8 @@ export async function POST(req: NextRequest) {
                     batch.update(userEnrollmentRef, updateData);
                     await batch.commit();
                     console.log(`Subscription canceled for user ${uid}, course ${courseId}`);
+
+                    // TODO: Trigger Cancellation Email
                 }
                 break;
             }

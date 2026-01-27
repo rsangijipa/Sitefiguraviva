@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
         }
 
         const courseData = courseDoc.data();
-        if (!courseData?.published) {
+        if (!courseData?.isPublished) {
             return NextResponse.json({ error: 'Course is not available' }, { status: 400 });
         }
 
@@ -49,16 +49,19 @@ export async function POST(req: NextRequest) {
                     quantity: 1,
                 },
             ],
-            success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/portal/course/${courseId}?success=true`,
-            cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/portal/course/${courseId}?canceled=true`,
+            // Redirect to internal enrollment flow success/cancel pages
+            success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/inscricao/${courseId}/sucesso?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/inscricao/${courseId}/cancelado`,
             metadata: {
                 uid: uid,
                 courseId: courseId,
+                applicationId: `${uid}_${courseId}`, // Link to application doc
             },
             subscription_data: {
                 metadata: {
                     uid: uid,
                     courseId: courseId,
+                    applicationId: `${uid}_${courseId}`,
                 }
             }
         });

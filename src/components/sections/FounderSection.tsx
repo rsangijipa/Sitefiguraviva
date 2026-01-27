@@ -41,13 +41,13 @@ export default function FounderSection() {
                         <span className="text-xs font-bold tracking-[0.2em] uppercase text-gold mb-2 block">
                             Curadoria
                         </span>
-                        <h2 className="font-serif text-3xl md:text-4xl text-primary dark:text-text mb-2">
+                        <h2 className="font-serif text-3xl md:text-4xl text-primary mb-2">
                             {data.name}
                         </h2>
-                        <p className="text-sm font-bold uppercase tracking-wider text-primary/40 dark:text-text/40 mb-6">
+                        <p className="text-sm font-bold uppercase tracking-wider text-primary/40 mb-6">
                             {data.role}
                         </p>
-                        <p className="text-primary/70 dark:text-text/70 leading-relaxed mb-6 max-w-2xl font-light text-lg">
+                        <p className="text-primary/70 leading-relaxed mb-6 max-w-2xl font-light text-lg">
                             {data.bio}
                         </p>
 

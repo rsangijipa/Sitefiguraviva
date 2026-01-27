@@ -1,77 +1,33 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    LayoutDashboard, BookOpen, PenTool, Settings, LogOut, Globe, Loader2, Home, X, FileText, Users
+    LayoutDashboard, BookOpen, PenTool, Settings, LogOut, Globe, Home, X, FileText, Users, Check
 } from 'lucide-react';
 
-export default function AdminLayout({ children }) {
-    const { user, loading: authLoading, signOut } = useAuth();
-    const isAuthenticated = !!user;
-    // const { logout } = useApp(); // Used to use logout from AppContext, now using signOut from AuthContext. But let's check further down usage.
-
+export default function AdminShell({ children }: { children: React.ReactNode }) {
+    const { signOut } = useAuth(); // Still needed for Logout button
     const router = useRouter();
     const pathname = usePathname();
-    const [isClient, setIsClient] = useState(false);
-
-    useEffect(() => {
-        setIsClient(true);
-        if (user) {
-            user.getIdTokenResult().then(token => {
-                if (!token.claims.admin) {
-                    router.push('/portal');
-                }
-            });
-        }
-    }, [user, router]);
-
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-    if (!isClient) return null; // Avoid hydration mismatch
+    // Note: Auth checking is now done Server-Side in layout.tsx.
+    // UseClient is only for UI state (Sidebar, Animations).
 
     const isLoginPage = pathname?.startsWith('/admin/login');
 
-    // If on login page, render without sidebar
     if (isLoginPage) {
         return <>{children}</>;
-    }
-
-    // Show loading state while checking auth
-    if (authLoading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-[#FDFCF9]">
-                <Loader2 className="w-8 h-8 animate-spin text-primary/30" />
-            </div>
-        );
-    }
-
-    // If not authenticated (and not on login), show Access Restricted screen
-    if (!isAuthenticated) {
-        return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-paper p-6 text-center">
-                <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center text-red-400 mb-6">
-                    <LogOut size={24} />
-                </div>
-                <h1 className="font-serif text-3xl text-primary mb-2">Acesso Restrito</h1>
-                <p className="text-stone-500 mb-8 max-w-md">Para acessar o painel administrativo, você precisa realizar o login.</p>
-                <button
-                    onClick={() => router.push('/admin/login')}
-                    className="bg-primary text-white px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-gold transition-colors shadow-lg"
-                >
-                    Ir para Login
-                </button>
-            </div>
-        );
     }
 
     const navItems = [
         { icon: LayoutDashboard, label: 'Visão Geral', path: '/admin' },
         { icon: BookOpen, label: 'Cursos', path: '/admin/courses' },
+        { icon: Check, label: 'Aprovações', path: '/admin/approvals' },
         { icon: Users, label: 'Alunos & Matrículas', path: '/admin/enrollments' },
         { icon: Globe, label: 'Google Suite', path: '/admin/google' },
         { icon: PenTool, label: 'Diário Visual', path: '/admin/blog' },
@@ -79,7 +35,6 @@ export default function AdminLayout({ children }) {
         { icon: FileText, label: 'Documentos', path: '/admin/public-docs' },
         { icon: Settings, label: 'Configurações', path: '/admin/settings' },
     ];
-
 
     return (
         <div className="flex min-h-screen bg-paper selection:bg-gold/20">
@@ -193,5 +148,4 @@ export default function AdminLayout({ children }) {
             </main>
         </div>
     );
-
 }

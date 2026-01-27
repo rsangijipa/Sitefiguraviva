@@ -28,12 +28,12 @@ export default function HeroSection() {
         <header className="pt-32 pb-24 md:pt-48 md:pb-32 px-6 bg-paper relative overflow-hidden">
             <OrganicBackground />
             <img
-                src="/assets/logo-hero.png"
+                src="/assets/hero-bg-custom.jpg"
                 alt=""
-                className="absolute right-0 top-1/2 -translate-y-1/2 h-[90%] w-auto object-contain opacity-20 dark:opacity-10 blur-[2px] pointer-events-none mix-blend-multiply dark:mix-blend-overlay"
+                className="absolute left-1/2 -translate-x-1/2 top-[55%] -translate-y-1/2 h-[80%] w-auto object-contain opacity-30 pointer-events-none mix-blend-multiply transition-all duration-700"
             />
             {/* Soft colored waves overlay */}
-            <WaveLines className="z-0 mix-blend-multiply dark:mix-blend-soft-light opacity-80" />
+            <WaveLines className="z-0 mix-blend-multiply opacity-80" />
 
             <div className="absolute top-0 left-0 w-full h-full z-0 bg-gradient-to-b from-paper/20 via-paper/50 to-paper pointer-events-none" />
             <div className="container mx-auto max-w-6xl">

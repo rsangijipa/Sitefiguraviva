@@ -40,7 +40,7 @@ export default function EmptyState({
                     >
                         <path d="M40,100 Q40,40 100,40 Q160,40 160,100 Q160,160 100,160 Q40,160 40,100" />
                         <motion.path
-                            d="M60,100 Q60,60 100,60 Q140,60 140,100 Q140,140 100,140 Q60,140 60,100"
+                            initial={{ d: "M60,100 Q60,60 100,60 Q140,60 140,100 Q140,140 100,140 Q60,140 60,100" }}
                             animate={{
                                 d: [
                                     "M60,100 Q60,60 100,60 Q140,60 140,100 Q140,140 100,140 Q60,140 60,100",
@@ -57,10 +57,10 @@ export default function EmptyState({
                 )}
             </motion.div>
 
-            <h3 className="font-serif text-2xl text-primary dark:text-white mb-3">
+            <h3 className="font-serif text-2xl text-primary mb-3">
                 {title}
             </h3>
-            <p className="text-primary/60 dark:text-white/60 text-sm max-w-sm mb-8 leading-relaxed">
+            <p className="text-primary/60 text-sm max-w-sm mb-8 leading-relaxed">
                 {message}
             </p>
 

@@ -42,31 +42,31 @@ export default function InstituteSection({ gallery = [] }: { gallery?: any[] }) 
     };
 
     return (
-        <section id="instituto-sobre" className="py-16 md:py-24 bg-white dark:bg-surface relative overflow-hidden transition-colors duration-500">
+        <section id="instituto-sobre" className="py-16 md:py-24 bg-white relative overflow-hidden transition-colors duration-500">
             {/* Header */}
             <div className="container mx-auto px-6 max-w-6xl relative z-10">
                 <div className="text-center max-w-3xl mx-auto mb-12 animate-fade-in-up">
                     <span className="text-xs font-bold tracking-[0.2em] uppercase text-gold mb-4 block">Sobre Nós</span>
-                    <h2 className="font-serif text-4xl md:text-6xl text-primary dark:text-text leading-tight mb-6">
+                    <h2 className="font-serif text-4xl md:text-6xl text-primary leading-tight mb-6">
                         {data.title}
                     </h2>
-                    <p className="text-lg md:text-xl text-primary/60 dark:text-text/60 font-serif italic mb-8">
+                    <p className="text-lg md:text-xl text-primary/60 font-serif italic mb-8">
                         {data.subtitle}
                     </p>
-                    <p className="text-primary/70 dark:text-text/70 leading-relaxed mb-10 max-w-2xl mx-auto">
+                    <p className="text-primary/70 leading-relaxed mb-10 max-w-2xl mx-auto">
                         Aqui, Gestalt-terapia não é vitrine. É caminho. Um campo de estudo, prática e presença para quem quer cuidar e se formar com densidade teórica e sensibilidade clínica.
                     </p>
 
                     <div className="flex flex-col md:flex-row items-center justify-center gap-4">
                         <Link
                             href="/#clinica"
-                            className="bg-primary text-white dark:text-paper dark:bg-gold px-8 py-4 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-gold dark:hover:bg-white transition-colors shadow-lg hover:shadow-xl hover:-translate-y-1"
+                            className="bg-primary text-white px-8 py-4 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-gold transition-colors shadow-lg hover:shadow-xl hover:-translate-y-1"
                         >
                             Conhecer a Clínica
                         </Link>
                         <Link
                             href="/#instituto"
-                            className="bg-white dark:bg-paper border border-stone-200 dark:border-white/10 text-primary dark:text-text px-8 py-4 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-stone-50 dark:hover:bg-white/5 transition-colors"
+                            className="bg-white border border-stone-200 text-primary px-8 py-4 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-stone-50 transition-colors"
                         >
                             Ver Formações
                         </Link>
@@ -74,7 +74,7 @@ export default function InstituteSection({ gallery = [] }: { gallery?: any[] }) 
                             href={`https://wa.me/5569992481585`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-2 text-primary dark:text-text font-bold text-xs uppercase tracking-widest hover:text-green-600 transition-colors p-4"
+                            className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-widest hover:text-green-600 transition-colors p-4"
                         >
                             <MessageCircle size={16} /> WhatsApp
                         </a >
@@ -83,7 +83,7 @@ export default function InstituteSection({ gallery = [] }: { gallery?: any[] }) 
 
                 <div className="grid md:grid-cols-2 gap-16 items-center mb-24">
                     <div className="order-2 md:order-1 relative w-[85%] mx-auto">
-                        <div className="aspect-[4/5] rounded-[2rem] overflow-hidden relative z-10 bg-stone-100 dark:bg-white/5 shadow-xl">
+                        <div className="aspect-[4/5] rounded-[2rem] overflow-hidden relative z-10 bg-stone-100 shadow-xl">
                             <AnimatePresence mode="popLayout">
                                 {slides.length > 0 ? (
                                     <motion.div
@@ -122,15 +122,15 @@ export default function InstituteSection({ gallery = [] }: { gallery?: any[] }) 
 
                     <div className="order-1 md:order-2 space-y-8">
                         <div>
-                            <span className="text-xs font-bold tracking-[0.2em] uppercase text-primary/40 dark:text-text/40 mb-2 block">Manifesto</span>
-                            <h3 className="font-serif text-3xl text-primary dark:text-text mb-6">{data.manifesto_title}</h3>
-                            <p className="text-lg text-primary/70 dark:text-text/70 leading-relaxed whitespace-pre-line">
+                            <span className="text-xs font-bold tracking-[0.2em] uppercase text-primary/40 mb-2 block">Manifesto</span>
+                            <h3 className="font-serif text-3xl text-primary mb-6">{data.manifesto_title}</h3>
+                            <p className="text-lg text-primary/70 leading-relaxed whitespace-pre-line">
                                 {data.manifesto_text}
                             </p>
                         </div>
 
-                        <blockquote className="border-l-4 border-gold pl-6 py-2 my-8 bg-stone-50 dark:bg-white/5 rounded-r-xl p-6">
-                            <p className="font-serif text-2xl text-primary dark:text-text italic mb-2">
+                        <blockquote className="border-l-4 border-gold pl-6 py-2 my-8 bg-stone-50 rounded-r-xl p-6">
+                            <p className="font-serif text-2xl text-primary italic mb-2">
                                 "{data.quote}"
                             </p>
                         </blockquote>
@@ -142,9 +142,9 @@ export default function InstituteSection({ gallery = [] }: { gallery?: any[] }) 
                                 { title: "Travessia decolonial", text: "Compromisso ético-político situado." },
                                 { title: "Clínica como encontro", text: "A relação é o nosso método." }
                             ].map((card, i) => (
-                                <div key={i} className="bg-stone-50 dark:bg-white/5 p-4 rounded-xl border border-stone-100 dark:border-white/5 hover:border-gold/30 transition-colors">
-                                    <h4 className="font-bold text-primary dark:text-text text-sm mb-1">{card.title}</h4>
-                                    <p className="text-xs text-primary/60 dark:text-text/60">{card.text}</p>
+                                <div key={i} className="bg-stone-50 p-4 rounded-xl border border-stone-100 hover:border-gold/30 transition-colors">
+                                    <h4 className="font-bold text-primary text-sm mb-1">{card.title}</h4>
+                                    <p className="text-xs text-primary/60">{card.text}</p>
                                 </div>
                             ))}
                         </div>
@@ -154,19 +154,19 @@ export default function InstituteSection({ gallery = [] }: { gallery?: any[] }) 
                 {/* Team / Curatorship */}
                 <div className="mb-24">
                     <div className="text-center mb-12">
-                        <h3 className="font-serif text-3xl text-primary dark:text-text mb-4">Fundação e Curadoria</h3>
-                        <p className="text-primary/60 dark:text-text/60 max-w-2xl mx-auto">
+                        <h3 className="font-serif text-3xl text-primary mb-4">Fundação e Curadoria</h3>
+                        <p className="text-primary/60 max-w-2xl mx-auto">
                             Uma equipe comprometida com a ética do cuidado e a contínua formação.
                         </p>
                     </div>
 
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {/* Founder */}
-                        <div className="group bg-white dark:bg-paper rounded-2xl p-6 border border-stone-100 dark:border-white/10 hover:border-gold/30 shadow-sm hover:shadow-xl transition-all">
+                        <div className="group bg-white rounded-2xl p-6 border border-stone-100 hover:border-gold/30 shadow-sm hover:shadow-xl transition-all">
                             <div className="flex items-center gap-4 mb-4">
                                 <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gold/20 relative">
                                     <Image
-                                        src={founderData?.image || "/assets/lilian.jpeg"}
+                                        src={founderData?.image || "/assets/lilian-vanessa.jpeg"}
                                         alt={founderData?.name || "Lilian Vanessa"}
                                         fill
                                         className="object-cover"
@@ -174,23 +174,23 @@ export default function InstituteSection({ gallery = [] }: { gallery?: any[] }) 
                                     />
                                 </div>
                                 <div>
-                                    <h4 className="font-bold text-primary dark:text-text text-lg">{founderData?.name?.split(' ')[0] + ' ' + (founderData?.name?.split(' ')[1] || '')}</h4>
+                                    <h4 className="font-bold text-primary text-lg">{founderData?.name?.split(' ')[0] + ' ' + (founderData?.name?.split(' ')[1] || '')}</h4>
                                     <span className="text-xs font-bold text-gold uppercase tracking-wider">Fundadora</span>
                                 </div>
                             </div>
-                            <p className="text-sm text-primary/70 dark:text-text/70 leading-relaxed mb-4 line-clamp-3">
+                            <p className="text-sm text-primary/70 leading-relaxed mb-4 line-clamp-3">
                                 {founderData?.bio || "Psicóloga, gestalt-terapeuta e pesquisadora. Mestre em Psicologia."}
                             </p>
-                            <a href={founderData?.link || "http://lattes.cnpq.br/"} target="_blank" className="text-[10px] font-bold uppercase tracking-widest text-primary dark:text-text hover:text-gold dark:hover:text-gold flex items-center gap-2">
+                            <a href={founderData?.link || "http://lattes.cnpq.br/"} target="_blank" className="text-[10px] font-bold uppercase tracking-widest text-primary hover:text-gold flex items-center gap-2">
                                 Ver Currículo Lattes <ArrowRight size={12} />
                             </a>
                         </div>
 
                         {/* Dynamic Team Members */}
                         {teamMembers.map((member: any) => (
-                            <div key={member.id} className="group bg-white dark:bg-paper rounded-2xl p-6 border border-stone-100 dark:border-white/10 hover:border-gold/30 shadow-sm hover:shadow-xl transition-all">
+                            <div key={member.id} className="group bg-white rounded-2xl p-6 border border-stone-100 hover:border-gold/30 shadow-sm hover:shadow-xl transition-all">
                                 <div className="flex items-center gap-4 mb-4">
-                                    <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-stone-100 dark:border-white/10 bg-stone-50 dark:bg-surface relative">
+                                    <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-stone-100 bg-stone-50 relative">
                                         {member.image ? (
                                             <Image
                                                 src={member.image}
@@ -200,17 +200,17 @@ export default function InstituteSection({ gallery = [] }: { gallery?: any[] }) 
                                                 sizes="64px"
                                             />
                                         ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-stone-300 dark:text-white/20 font-bold text-xl">
+                                            <div className="w-full h-full flex items-center justify-center text-stone-300 font-bold text-xl">
                                                 {member.name.charAt(0)}
                                             </div>
                                         )}
                                     </div>
                                     <div>
-                                        <h4 className="font-bold text-primary dark:text-text text-lg">{member.name}</h4>
-                                        <span className="text-xs font-bold text-stone-400 dark:text-text/50 uppercase tracking-wider">{member.role}</span>
+                                        <h4 className="font-bold text-primary text-lg">{member.name}</h4>
+                                        <span className="text-xs font-bold text-stone-400 uppercase tracking-wider">{member.role}</span>
                                     </div>
                                 </div>
-                                <p className="text-sm text-primary/70 dark:text-text/70 leading-relaxed">
+                                <p className="text-sm text-primary/70 leading-relaxed">
                                     {member.bio}
                                 </p>
                             </div>
@@ -219,14 +219,14 @@ export default function InstituteSection({ gallery = [] }: { gallery?: any[] }) 
                 </div>
 
                 {/* Location */}
-                <div className="bg-paper dark:bg-paper rounded-[3rem] p-8 md:p-16 text-center border border-transparent dark:border-white/5">
-                    <h3 className="font-serif text-3xl text-primary dark:text-gold mb-6">Presença local, campo aberto</h3>
-                    <p className="text-primary/70 dark:text-text/70 max-w-2xl mx-auto mb-10 leading-relaxed">
+                <div className="bg-paper rounded-[3rem] p-8 md:p-16 text-center border border-transparent">
+                    <h3 className="font-serif text-3xl text-primary mb-6">Presença local, campo aberto</h3>
+                    <p className="text-primary/70 max-w-2xl mx-auto mb-10 leading-relaxed">
                         Estamos em Porto Velho (RO), com o compromisso de construir um campo vivo de cuidado e formação.
                         Um lugar para chegar com perguntas, ficar com presença e sair com mais mundo por dentro.
                     </p>
 
-                    <div className="flex flex-col md:flex-row justify-center gap-8 md:gap-16 text-sm text-primary/60 dark:text-text/60 mb-10">
+                    <div className="flex flex-col md:flex-row justify-center gap-8 md:gap-16 text-sm text-primary/60 mb-10">
                         <div className="flex items-center justify-center gap-3">
                             <MapPin className="text-gold" size={20} />
                             <span>{data.address || "Porto Velho - RO"}</span>
@@ -241,7 +241,7 @@ export default function InstituteSection({ gallery = [] }: { gallery?: any[] }) 
                         href={`https://wa.me/5569992481585`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-3 bg-primary dark:bg-gold text-white dark:text-paper px-10 py-5 rounded-full text-xs font-bold uppercase tracking-[0.2em] hover:bg-gold dark:hover:bg-white hover:scale-105 transition-all shadow-xl"
+                        className="inline-flex items-center gap-3 bg-primary text-white px-10 py-5 rounded-full text-xs font-bold uppercase tracking-[0.2em] hover:bg-gold hover:scale-105 transition-all shadow-xl"
                     >
                         Agendar Conversa
                     </a>

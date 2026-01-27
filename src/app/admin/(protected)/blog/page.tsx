@@ -9,8 +9,9 @@ import { Plus, Trash2, Edit, Save, X, FileText, Calendar, Type, Loader2, Upload,
 import { motion, AnimatePresence } from 'framer-motion';
 // import { uploadFiles } from '../../../services/uploadServiceSupabase'; 
 import ImageUpload from '@/components/admin/ImageUpload'; // Use new component
-import { db } from '@/lib/firebase/client';
+import { db, storage } from '@/lib/firebase/client';
 import { collection, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 export default function BlogManager() {
     // const { blogPosts, addBlogPost, updateBlogPost, deleteBlogPost, loading } = useApp();
@@ -108,8 +109,34 @@ export default function BlogManager() {
     // Previous code had handleFileUpload. Let's keep a simplified version or rely on ImageUpload for images.
     // The previous code had a specific pdf check.
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        // ... (Logic to be replaced or kept if manual upload is still in JSX)
-        console.warn("Manual upload logic needs update to Firebase Storage if used.");
+        const file = e.target.files?.[0];
+        if (!file || file.type !== 'application/pdf') {
+            addToast("Por favor, selecione um arquivo PDF.", "error");
+            return;
+        }
+
+        setUploadingPdf(true);
+        try {
+            // Slugify the filename to avoid issues with special characters and spaces
+            const cleanName = file.name
+                .toLowerCase()
+                .normalize('NFD') // Decompose accented characters
+                .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+                .replace(/[^a-z0-9.]/g, '_') // Replace anything not alphanumeric or dot with underscore
+                .replace(/_{2,}/g, '_'); // Collapse multiple underscores
+
+            const storageRef = ref(storage, `library/${Date.now()}_${cleanName}`);
+            const snapshot = await uploadBytes(storageRef, file);
+            const downloadURL = await getDownloadURL(snapshot.ref);
+
+            setFormData(prev => ({ ...prev, pdf_url: downloadURL }));
+            addToast("PDF enviado com sucesso!", "success");
+        } catch (error) {
+            console.error("PDF Upload failed", error);
+            addToast("Falha ao enviar PDF.", "error");
+        } finally {
+            setUploadingPdf(false);
+        }
     };
 
     return (

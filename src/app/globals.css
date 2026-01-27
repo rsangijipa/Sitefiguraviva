@@ -41,39 +41,6 @@
   --min-touch-target: 44px;
 }
 
-.dark {
-  /* Premium Organic Dark Palette */
-  /* Main Background: Deepest warm charcoal/forest hint */
-  --color-paper: #0c0e0d;
-
-  /* Surface: Component background (Cards, Modals), slightly lighter */
-  --color-surface: #141715;
-
-  /* Text: High contrast off-white for headings, never pure white */
-  --color-text: #e1e3e0;
-
-  /* Primary: Used for headings mostly, can equate to Text in dark mode or be Gold */
-  --color-primary: #f2f0e9;
-
-  /* Muted: Readable secondary text */
-  --color-muted: #8e968e;
-
-  /* Border: Sufficient contrast against Paper and Surface */
-  --color-border: #242924;
-
-  /* Accents */
-  --color-secondary: #c9d1c8;
-  --color-accent: #8fa08a;
-  --color-accent-light: #1f2620;
-  /* Dark background for accent areas */
-
-  /* Gold: Luminous but not neon */
-  --color-gold: #dcb86c;
-  --color-gold-dark: #bba060;
-  --color-gold-light: #211e16;
-  /* Very dark gold tint for badges */
-}
-
 @layer base {
   html {
     scroll-behavior: smooth;
@@ -119,11 +86,11 @@
 
   /* Glassmorphism Variants */
   .glass-panel {
-    @apply bg-white/70 backdrop-blur-md border border-white/50 shadow-soft-lg dark:bg-white/5 dark:border-white/10;
+    @apply bg-white/70 backdrop-blur-md border border-white/50 shadow-soft-lg;
   }
 
   .glass-panel-dark {
-    @apply bg-black/20 backdrop-blur-md border border-white/10 shadow-soft-lg dark:bg-black/40;
+    @apply bg-black/20 backdrop-blur-md border border-white/10 shadow-soft-lg;
   }
 
   .skip-to-content {
