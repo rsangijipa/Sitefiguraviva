@@ -98,7 +98,7 @@ export default function FloatingControls() {
                                     whileHover={{ scale: 1.1 }}
                                     whileTap={{ scale: 0.95 }}
                                     onClick={toggleTheme}
-                                    className="w-10 h-10 rounded-full bg-white dark:bg-surface border border-stone-200 dark:border-white/10 text-primary dark:text-gold shadow-md flex items-center justify-center transition-colors"
+                                    className="w-10 h-10 rounded-full bg-white border border-stone-200 text-primary shadow-md flex items-center justify-center transition-colors"
                                 >
                                     {theme === "light" ? <Sun size={18} /> : <Moon size={18} />}
                                 </motion.button>
@@ -111,8 +111,8 @@ export default function FloatingControls() {
                                     whileTap={{ scale: 0.95 }}
                                     onClick={toggleAudio}
                                     className={`w-10 h-10 rounded-full shadow-md flex items-center justify-center transition-all border ${isPlaying
-                                            ? 'bg-gold border-gold text-white'
-                                            : 'bg-white dark:bg-surface border-stone-200 dark:border-white/10 text-primary dark:text-gold'
+                                        ? 'bg-gold border-gold text-white'
+                                        : 'bg-white border-stone-200 text-primary'
                                         }`}
                                 >
                                     {isPlaying ? <Pause size={18} /> : <Music size={18} />}
@@ -145,7 +145,7 @@ export default function FloatingControls() {
                                 whileHover={{ scale: 1.1 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={scrollToTop}
-                                className="w-10 h-10 rounded-full bg-white/20 dark:bg-white/5 backdrop-blur-md border border-white/10 text-primary dark:text-white shadow-lg flex items-center justify-center transition-all hover:bg-gold hover:text-white dark:hover:bg-gold"
+                                className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/10 text-primary shadow-lg flex items-center justify-center transition-all hover:bg-gold hover:text-white"
                             >
                                 <ArrowUp size={20} />
                             </motion.button>
