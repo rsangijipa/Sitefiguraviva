@@ -21,7 +21,7 @@ async function getPosts(): Promise<any[]> {
         }));
 
         // Sort in-memory to avoid composite index requirement
-        return posts.sort((a, b) => {
+        return (posts as any[]).sort((a, b) => {
             const dateA = a._raw_created_at?.toDate?.() || new Date(0);
             const dateB = b._raw_created_at?.toDate?.() || new Date(0);
             return dateB.getTime() - dateA.getTime();

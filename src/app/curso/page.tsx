@@ -19,7 +19,7 @@ async function getCourses(): Promise<any[]> {
         }));
 
         // Sort in-memory to avoid composite index requirement
-        return courses.sort((a, b) => {
+        return (courses as any[]).sort((a, b) => {
             const dateA = a.created_at?.toDate?.() || new Date(0);
             const dateB = b.created_at?.toDate?.() || new Date(0);
             return dateB.getTime() - dateA.getTime();
