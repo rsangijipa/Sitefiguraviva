@@ -11,14 +11,27 @@ async function getPosts(): Promise<any[]> {
     try {
         const postsSnap = await db.collection('posts')
             .where('isPublished', '==', true)
-            .orderBy('created_at', 'desc')
             .get();
 
-        return postsSnap.docs.map(doc => ({
+        const posts = postsSnap.docs.map(doc => ({
             id: doc.id,
             ...doc.data(),
-            created_at: doc.data().created_at?.toDate().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }) || null
+            // Keep original timestamp for sorting before formatting
+            _raw_created_at: doc.data().created_at
         }));
+
+        // Sort in-memory to avoid composite index requirement
+        return posts.sort((a, b) => {
+            const dateA = a._raw_created_at?.toDate?.() || new Date(0);
+            const dateB = b._raw_created_at?.toDate?.() || new Date(0);
+            return dateB.getTime() - dateA.getTime();
+        }).map(post => {
+            const { _raw_created_at, ...rest } = post;
+            return {
+                ...rest,
+                created_at: _raw_created_at?.toDate?.().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }) || null
+            };
+        });
     } catch (error) {
         console.error("Error fetching posts:", error);
         return [];

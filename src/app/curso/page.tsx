@@ -10,14 +10,20 @@ async function getCourses(): Promise<any[]> {
     try {
         const coursesSnap = await db.collection('courses')
             .where('isPublished', '==', true)
-            .orderBy('created_at', 'desc')
             .get();
 
-        return coursesSnap.docs.map(doc => ({
+        const courses = coursesSnap.docs.map(doc => ({
             id: doc.id,
             ...doc.data(),
             date: doc.data().date || 'Data a definir'
         }));
+
+        // Sort in-memory to avoid composite index requirement
+        return courses.sort((a, b) => {
+            const dateA = a.created_at?.toDate?.() || new Date(0);
+            const dateB = b.created_at?.toDate?.() || new Date(0);
+            return dateB.getTime() - dateA.getTime();
+        });
     } catch (error) {
         console.error("Error fetching courses:", error);
         return [];

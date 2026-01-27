@@ -10,8 +10,8 @@ async function getHomeData() {
         // Parallel fetching
         const [coursesSnap, postsSnap, gallerySnap] = await Promise.all([
             db.collection('courses').where('isPublished', '==', true).get(),
-            db.collection('posts').where('isPublished', '==', true).orderBy('created_at', 'desc').limit(4).get(), // Fetch recent posts
-            db.collection('gallery').orderBy('created_at', 'desc').limit(12).get()
+            db.collection('posts').where('isPublished', '==', true).get(), // Get posts without order to avoid index
+            db.collection('gallery').get() // Get gallery without order to avoid index
         ]);
 
         const courses = coursesSnap.docs.map(doc => {
@@ -30,14 +30,22 @@ async function getHomeData() {
             ...doc.data(),
             created_at: doc.data().created_at?.toDate().toISOString() || null,
             updated_at: doc.data().updated_at?.toDate().toISOString() || null
-        }));
+        })).sort((a: any, b: any) => {
+            const dateA = new Date(a.created_at || 0).getTime();
+            const dateB = new Date(b.created_at || 0).getTime();
+            return dateB - dateA;
+        }).slice(0, 4);
 
         const gallery = gallerySnap.docs.map(doc => ({
             id: doc.id,
             ...doc.data(),
             created_at: doc.data().created_at?.toDate().toISOString() || null,
             updated_at: doc.data().updated_at?.toDate().toISOString() || null
-        }));
+        })).sort((a: any, b: any) => {
+            const dateA = new Date(a.created_at || 0).getTime();
+            const dateB = new Date(b.created_at || 0).getTime();
+            return dateB - dateA;
+        }).slice(0, 12);
 
         return { courses, posts, gallery };
     } catch (error) {
