@@ -27,13 +27,10 @@ export async function getCourseData(courseId: string, userId: string) {
     // 1. Fetch Course & Enrollment (Parallel)
     const coursePromise = db.collection('courses').doc(courseId).get();
 
-    const enrollmentPromise = db.collection('enrollments')
-        .where('userId', '==', userId)
-        .where('courseId', '==', courseId)
-        .limit(1)
-        .get();
+    const enrollmentId = `${userId}_${courseId}`;
+    const enrollmentPromise = db.collection('enrollments').doc(enrollmentId).get();
 
-    const [courseDoc, enrollmentSnap] = await Promise.all([coursePromise, enrollmentPromise]);
+    const [courseDoc, enrollmentDoc] = await Promise.all([coursePromise, enrollmentPromise]);
 
     if (!courseDoc.exists) return null; // Or throw 404
 
@@ -41,8 +38,8 @@ export async function getCourseData(courseId: string, userId: string) {
     let enrollmentData = null;
     let status = 'none';
 
-    if (!enrollmentSnap.empty) {
-        enrollmentData = { id: enrollmentSnap.docs[0].id, ...enrollmentSnap.docs[0].data() };
+    if (enrollmentDoc.exists) {
+        enrollmentData = { id: enrollmentDoc.id, ...enrollmentDoc.data() };
         status = enrollmentData.status || 'none'; // @ts-ignore
     }
 

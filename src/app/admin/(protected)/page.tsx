@@ -1,10 +1,10 @@
 "use client";
 
-// import { useApp } from '../../context/AppContext';
-import { useCourses, useBlogPosts, useGallery } from '../../hooks/useContent';
+// import { useApp } from '@/context/AppContext';
+import { useCourses, useBlogPosts, useGallery } from '@/hooks/useContent';
 import { motion } from 'framer-motion';
-import { Users, BookOpen, Eye, FileText, Image as ImageIcon, Activity } from 'lucide-react';
-import { Card, CardContent } from '../../components/ui/Card';
+import { BarChart, Users, BookOpen, DollarSign, Activity, FileText, Eye, Image as ImageIcon } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/Card';
 import { useMemo } from 'react';
 
 export default function AdminDashboard() {

@@ -29,7 +29,7 @@ export default function Navbar() {
     ];
 
     return (
-        <nav className={`fixed w-full z-50 top-0 left-0 bg-white dark:bg-paper transition-all duration-300 ${scrolled ? 'shadow-md py-4' : 'shadow-sm py-5'} dark:border-b dark:border-white/5`}>
+        <nav className={`fixed w-full z-50 top-0 left-0 bg-white transition-all duration-300 ${scrolled ? 'shadow-md py-4' : 'shadow-sm py-5'}`}>
             <div className="container mx-auto px-6 max-w-7xl flex items-center justify-between">
                 {/* Logo */}
                 <Link href="/" className="flex items-center gap-2 group focus-visible:ring-2 focus-visible:ring-primary rounded-lg p-1">
@@ -80,7 +80,7 @@ export default function Navbar() {
 
             {/* Mobile Menu Overlay */}
             {mobileOpen && (
-                <div className="absolute top-full left-0 w-full bg-white dark:bg-surface shadow-xl border-t border-gray-100 dark:border-white/5 p-6 flex flex-col gap-3 md:hidden animate-fade-in max-h-[85vh] overflow-y-auto">
+                <div className="absolute top-full left-0 w-full bg-white shadow-xl border-t border-gray-100 p-6 flex flex-col gap-3 md:hidden animate-fade-in max-h-[85vh] overflow-y-auto">
                     {navItems.map((item) => (
                         <a
                             key={item.label}
@@ -98,7 +98,7 @@ export default function Navbar() {
                     >
                         Portal do Aluno
                     </Link>
-                    <div className="h-px bg-gray-100 dark:bg-white/5 my-4 mx-2" />
+                    <div className="h-px bg-gray-100 my-4 mx-2" />
                     <Button
                         onClick={() => {
                             setMobileOpen(false);

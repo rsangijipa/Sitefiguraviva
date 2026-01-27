@@ -96,10 +96,13 @@ export default function CourseModal({ isOpen, onClose, course }: CourseModalProp
                                 </div>
 
                                 <button
-                                    onClick={() => window.open(course.link, '_blank')}
+                                    onClick={() => {
+                                        onClose();
+                                        window.location.href = `/inscricao/${course.id}`;
+                                    }}
                                     className="w-full md:w-auto px-8 py-4 bg-primary text-paper rounded-xl font-bold uppercase tracking-[0.2em] text-xs shadow-xl hover:bg-gold hover:translate-y-[-2px] transition-all flex items-center justify-center gap-3"
                                 >
-                                    Inscrever-se Agora <ExternalLink size={14} />
+                                    Fazer Inscrição <ExternalLink size={14} />
                                 </button>
                             </div>
 

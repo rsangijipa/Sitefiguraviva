@@ -156,14 +156,6 @@ export default function LoginPage() {
                         </button>
                     </form>
 
-                    <div className="text-center pt-4 border-t border-stone-100">
-                        <p className="text-stone-500 text-sm">
-                            Ainda não tem uma conta?{' '}
-                            <Link href="/signup" className="text-primary font-bold hover:underline">
-                                Cadastre-se
-                            </Link>
-                        </p>
-                    </div>
                 </div>
             </div>
         </main>

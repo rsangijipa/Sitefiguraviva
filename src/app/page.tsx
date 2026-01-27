@@ -14,12 +14,16 @@ async function getHomeData() {
             db.collection('gallery').orderBy('created_at', 'desc').limit(12).get()
         ]);
 
-        const courses = coursesSnap.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-            created_at: doc.data().created_at?.toDate().toISOString() || null,
-            updated_at: doc.data().updated_at?.toDate().toISOString() || null
-        }));
+        const courses = coursesSnap.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                ...data,
+                image: (data.image && data.image.trim() !== "") ? data.image : null,
+                created_at: data.created_at?.toDate().toISOString() || null,
+                updated_at: data.updated_at?.toDate().toISOString() || null
+            };
+        });
 
         const posts = postsSnap.docs.map(doc => ({
             id: doc.id,
