@@ -5,7 +5,7 @@ import { buttonVariants } from '@/components/ui/Button';
 export default function NotFound() {
     return (
         <div className="min-h-screen bg-paper flex flex-col items-center justify-center p-6 text-center">
-            <div className="bg-white/50 backdrop-blur-sm p-12 rounded-[2.5rem] shadow-soft-xl max-w-lg w-full border border-stone-100 dark:border-white/5">
+            <div className="bg-white/50 backdrop-blur-sm p-12 rounded-[2.5rem] shadow-soft-xl max-w-lg w-full border border-stone-100">
                 <div className="w-24 h-24 bg-gold/10 rounded-full flex items-center justify-center mx-auto mb-8 text-gold">
                     <FileQuestion size={48} />
                 </div>

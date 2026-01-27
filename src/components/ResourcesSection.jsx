@@ -29,7 +29,7 @@ export default function ResourcesSection() {
     };
 
     return (
-        <section id="recursos-interativos" className="py-24 bg-surface dark:bg-black/20 border-t border-stone-100 dark:border-white/5 relative overflow-hidden transition-colors duration-500">
+        <section id="recursos-interativos" className="py-24 bg-surface border-t border-stone-100 relative overflow-hidden transition-colors duration-500">
             <div className="container mx-auto px-6 max-w-7xl relative z-10">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -38,8 +38,8 @@ export default function ResourcesSection() {
                     className="mb-12 text-center max-w-2xl mx-auto"
                 >
                     <span className="text-xs font-bold tracking-[0.2em] uppercase text-accent mb-4 block">Ferramentas de Cuidado</span>
-                    <h2 className="heading-section text-primary dark:text-text">Recursos <span className="italic text-accent font-light">Interativos</span></h2>
-                    <p className="text-lg text-text/80 dark:text-text/60 mt-4">
+                    <h2 className="heading-section text-primary">Recursos <span className="italic text-accent font-light">Interativos</span></h2>
+                    <p className="text-lg text-text/80 mt-4">
                         Espaços digitais desenhados para cultivar a presença e a awareness no seu dia a dia.
                     </p>
                 </motion.div>
@@ -47,8 +47,8 @@ export default function ResourcesSection() {
                 {/* Horizontal Scroll Container */}
                 <div className="relative w-full">
                     {/* Fade Edges */}
-                    <div className="absolute left-0 top-0 bottom-12 w-12 bg-gradient-to-r from-surface dark:from-black/0 to-transparent z-10 pointer-events-none" />
-                    <div className="absolute right-0 top-0 bottom-12 w-12 bg-gradient-to-l from-surface dark:from-black/0 to-transparent z-10 pointer-events-none" />
+                    <div className="absolute left-0 top-0 bottom-12 w-12 bg-gradient-to-r from-surface to-transparent z-10 pointer-events-none" />
+                    <div className="absolute right-0 top-0 bottom-12 w-12 bg-gradient-to-l from-surface to-transparent z-10 pointer-events-none" />
 
                     <div
                         ref={scrollContainerRef}
@@ -62,17 +62,17 @@ export default function ResourcesSection() {
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
                             whileHover={{ y: -5 }}
-                            className="flex-shrink-0 w-80 md:w-96 snap-center group relative bg-white dark:bg-surface rounded-[2rem] p-8 border border-gray-100 dark:border-white/5 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col items-center text-center"
+                            className="flex-shrink-0 w-80 md:w-96 snap-center group relative bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col items-center text-center"
                             onClick={() => openResource('breathing')}
                         >
                             <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center text-accent mb-6 group-hover:scale-110 transition-transform">
                                 <Wind size={32} />
                             </div>
-                            <h3 className="text-xl font-serif text-primary dark:text-text font-bold mb-2">Guia de Respiração</h3>
-                            <p className="text-text/60 dark:text-text/50 text-sm mb-6 flex-grow">
+                            <h3 className="text-xl font-serif text-primary font-bold mb-2">Guia de Respiração</h3>
+                            <p className="text-text/60 text-sm mb-6 flex-grow">
                                 Uma pausa guiada para reduzir a ansiedade e reconectar com o agora.
                             </p>
-                            <span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-accent group-hover:text-primary dark:group-hover:text-gold transition-colors">
+                            <span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-accent group-hover:text-primary transition-colors">
                                 Iniciar Prática
                             </span>
                         </motion.div>
@@ -84,17 +84,17 @@ export default function ResourcesSection() {
                             viewport={{ once: true }}
                             transition={{ delay: 0.1 }}
                             whileHover={{ y: -5 }}
-                            className="flex-shrink-0 w-80 md:w-96 snap-center group relative bg-white dark:bg-surface rounded-[2rem] p-8 border border-gray-100 dark:border-white/5 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col items-center text-center"
+                            className="flex-shrink-0 w-80 md:w-96 snap-center group relative bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col items-center text-center"
                             onClick={() => openResource('tree')}
                         >
                             <div className="w-16 h-16 rounded-2xl bg-gold/10 flex items-center justify-center text-gold mb-6 group-hover:scale-110 transition-transform">
                                 <Sprout size={32} />
                             </div>
-                            <h3 className="text-xl font-serif text-primary dark:text-text font-bold mb-2">Árvore da Awareness</h3>
-                            <p className="text-text/60 dark:text-text/50 text-sm mb-6 flex-grow">
+                            <h3 className="text-xl font-serif text-primary font-bold mb-2">Árvore da Awareness</h3>
+                            <p className="text-text/60 text-sm mb-6 flex-grow">
                                 Visualize e nomeie suas emoções em uma experiência interativa 3D.
                             </p>
-                            <span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-gold group-hover:text-primary dark:group-hover:text-white transition-colors">
+                            <span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-gold group-hover:text-primary transition-colors">
                                 Acessar Árvore
                             </span>
                         </motion.div>
@@ -106,17 +106,17 @@ export default function ResourcesSection() {
                             viewport={{ once: true }}
                             transition={{ delay: 0.2 }}
                             whileHover={{ y: -5 }}
-                            className="flex-shrink-0 w-80 md:w-96 snap-center group relative bg-white dark:bg-surface rounded-[2rem] p-8 border border-gray-100 dark:border-white/5 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col items-center text-center"
+                            className="flex-shrink-0 w-80 md:w-96 snap-center group relative bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col items-center text-center"
                             onClick={() => openResource('somascan')}
                         >
-                            <div className="w-16 h-16 rounded-2xl bg-stone-100 dark:bg-white/5 flex items-center justify-center text-stone-600 dark:text-stone-300 mb-6 group-hover:scale-110 transition-transform">
+                            <div className="w-16 h-16 rounded-2xl bg-stone-100 flex items-center justify-center text-stone-600 mb-6 group-hover:scale-110 transition-transform">
                                 <Fingerprint size={32} />
                             </div>
-                            <h3 className="text-xl font-serif text-primary dark:text-text font-bold mb-2">SomaScan</h3>
-                            <p className="text-text/60 dark:text-text/50 text-sm mb-6 flex-grow">
+                            <h3 className="text-xl font-serif text-primary font-bold mb-2">SomaScan</h3>
+                            <p className="text-text/60 text-sm mb-6 flex-grow">
                                 Mapeamento corporal consciente para escutar o que o corpo diz.
                             </p>
-                            <span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-stone-600 dark:text-stone-400 group-hover:text-primary dark:group-hover:text-white transition-colors">
+                            <span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-stone-600 group-hover:text-primary transition-colors">
                                 Iniciar Scan
                             </span>
                         </motion.div>
@@ -128,17 +128,17 @@ export default function ResourcesSection() {
                             viewport={{ once: true }}
                             transition={{ delay: 0.3 }}
                             whileHover={{ y: -5 }}
-                            className="flex-shrink-0 w-80 md:w-96 snap-center group relative bg-white dark:bg-surface rounded-[2rem] p-8 border border-gray-100 dark:border-white/5 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col items-center text-center"
+                            className="flex-shrink-0 w-80 md:w-96 snap-center group relative bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col items-center text-center"
                             onClick={() => openResource('quiz')}
                         >
-                            <div className="w-16 h-16 rounded-2xl bg-sage/10 dark:bg-accent/10 flex items-center justify-center text-sage dark:text-accent mb-6 group-hover:scale-110 transition-transform">
+                            <div className="w-16 h-16 rounded-2xl bg-sage/10 flex items-center justify-center text-sage mb-6 group-hover:scale-110 transition-transform">
                                 <Sparkles size={32} />
                             </div>
-                            <h3 className="text-xl font-serif text-primary dark:text-text font-bold mb-2">Quiz de Saúde Mental</h3>
-                            <p className="text-text/60 dark:text-text/50 text-sm mb-6 flex-grow">
+                            <h3 className="text-xl font-serif text-primary font-bold mb-2">Quiz de Saúde Mental</h3>
+                            <p className="text-text/60 text-sm mb-6 flex-grow">
                                 Mindful Roots: Um check-in rápido de 14 dias para sua saúde emocional.
                             </p>
-                            <span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-sage dark:text-accent group-hover:text-primary dark:group-hover:text-white transition-colors">
+                            <span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-sage group-hover:text-primary transition-colors">
                                 Fazer Check-in
                             </span>
                         </motion.div>

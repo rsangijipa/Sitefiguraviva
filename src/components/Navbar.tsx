@@ -86,7 +86,7 @@ export default function Navbar() {
                             key={item.label}
                             href={item.href}
                             onClick={() => setMobileOpen(false)}
-                            className="block w-full text-left px-6 py-4 rounded-xl hover:bg-stone-50 dark:hover:bg-white/5 active:scale-[0.98] active:bg-stone-100 dark:active:bg-white/10 transition-all text-xl font-serif text-primary border border-transparent active:border-primary/10"
+                            className="block w-full text-left px-6 py-4 rounded-xl hover:bg-stone-50 active:scale-[0.98] active:bg-stone-100 transition-all text-xl font-serif text-primary border border-transparent active:border-primary/10"
                         >
                             {item.display || item.label}
                         </a>
@@ -94,7 +94,7 @@ export default function Navbar() {
                     <Link
                         href="/portal"
                         onClick={() => setMobileOpen(false)}
-                        className="block w-full text-left px-6 py-4 rounded-xl hover:bg-stone-50 dark:hover:bg-white/5 active:scale-[0.98] active:bg-stone-100 dark:active:bg-white/10 transition-all text-xl font-serif text-accent"
+                        className="block w-full text-left px-6 py-4 rounded-xl hover:bg-stone-50 active:scale-[0.98] active:bg-stone-100 transition-all text-xl font-serif text-accent"
                     >
                         Portal do Aluno
                     </Link>
