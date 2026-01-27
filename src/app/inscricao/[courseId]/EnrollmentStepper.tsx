@@ -42,6 +42,10 @@ export default function EnrollmentStepper({ courseId, initialData }: { courseId:
         router.push(`/login?next=/inscricao/${courseId}`);
     };
 
+    const handleSignup = () => {
+        router.push(`/signup?next=/inscricao/${courseId}`);
+    };
+
     const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
@@ -145,12 +149,20 @@ export default function EnrollmentStepper({ courseId, initialData }: { courseId:
                                 <p className="text-stone-500 mb-8 max-w-md mx-auto">
                                     Para se inscrever, você precisa entrar com sua conta ou criar uma nova. É rápido e seguro.
                                 </p>
-                                <button
-                                    onClick={handleLogin}
-                                    className="px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg hover:bg-primary/90 transition-all flex items-center gap-2 mx-auto"
-                                >
-                                    Entrar ou Criar Conta <ArrowRight size={18} />
-                                </button>
+                                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                                    <button
+                                        onClick={handleLogin}
+                                        className="px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg hover:bg-primary/90 transition-all flex items-center justify-center gap-2"
+                                    >
+                                        Já possuo uma conta <ArrowRight size={18} />
+                                    </button>
+                                    <button
+                                        onClick={handleSignup}
+                                        className="px-8 py-4 bg-white border-2 border-primary text-primary font-bold rounded-xl hover:bg-stone-50 transition-all flex items-center justify-center gap-2"
+                                    >
+                                        Criar nova conta <User size={18} />
+                                    </button>
+                                </div>
                             </div>
                         </motion.div>
                     )}
