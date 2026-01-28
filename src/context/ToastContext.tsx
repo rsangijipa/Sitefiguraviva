@@ -49,39 +49,45 @@ const ToastItem = ({ toast, onRemove }: { toast: Toast; onRemove: (id: string) =
     useEffect(() => {
         const timer = setTimeout(() => {
             onRemove(toast.id);
-        }, 4000); // Auto remove after 4s
+        }, 5000); // Increased to 5s for better readability
 
         return () => clearTimeout(timer);
     }, [toast.id, onRemove]);
 
     const icons = {
-        success: <CheckCircle size={20} className="text-green-500" />,
-        error: <AlertCircle size={20} className="text-red-500" />,
-        info: <Info size={20} className="text-blue-500" />,
+        success: <CheckCircle size={18} className="text-green-500" />,
+        error: <AlertCircle size={18} className="text-red-500" />,
+        info: <Info size={18} className="text-blue-500" />,
     };
 
-    const bgColors = {
-        success: 'bg-white border-l-4 border-green-500 text-stone-800',
-        error: 'bg-white border-l-4 border-red-500 text-stone-800',
-        info: 'bg-white border-l-4 border-blue-500 text-stone-800',
+    const variants = {
+        success: 'border-green-500/30 bg-green-50/80 shadow-[0_4px_20px_-4px_rgba(34,197,94,0.1)]',
+        error: 'border-red-500/30 bg-red-50/80 shadow-[0_4px_20px_-4px_rgba(239,68,68,0.1)]',
+        info: 'border-blue-500/30 bg-blue-50/80 shadow-[0_4px_20px_-4px_rgba(59,130,246,0.1)]',
     };
 
     return (
         <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            className={`pointer-events-auto min-w-[300px] max-w-sm p-4 rounded-r-lg shadow-lg flex items-start gap-3 ${bgColors[toast.type]}`}
+            initial={{ opacity: 0, x: 50, scale: 0.95 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: 20, scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            className={`pointer-events-auto w-[320px] p-4 rounded-xl backdrop-blur-xl border flex items-start gap-4 ${variants[toast.type]}`}
         >
-            <div className="mt-0.5 shrink-0">{icons[toast.type]}</div>
+            <div className={`mt-0.5 shrink-0 p-1 rounded-full ${toast.type === 'success' ? 'bg-green-100' : toast.type === 'error' ? 'bg-red-100' : 'bg-blue-100'}`}>
+                {icons[toast.type]}
+            </div>
             <div className="flex-1">
-                <p className="text-sm font-medium">{toast.message}</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-stone-500 mb-0.5">
+                    {toast.type === 'error' ? 'Erro' : toast.type === 'success' ? 'Sucesso' : 'Info'}
+                </p>
+                <p className="text-sm font-medium text-stone-800 leading-snug">{toast.message}</p>
             </div>
             <button
                 onClick={() => onRemove(toast.id)}
-                className="text-stone-400 hover:text-stone-600 transition-colors"
+                className="text-stone-400 hover:text-stone-600 transition-colors p-1"
             >
-                <X size={16} />
+                <X size={14} />
             </button>
         </motion.div>
     );

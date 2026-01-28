@@ -1,46 +1,25 @@
 import { db } from '@/lib/firebase/admin';
-import { FieldPath } from 'firebase-admin/firestore';
-
-export type LessonType = 'video' | 'text' | 'quiz';
-
-export interface Lesson {
-    id: string;
-    title: string;
-    duration?: string;
-    videoUrl?: string; // Should be provider ID in future, mostly null for secure
-    description?: string;
-    thumbnail?: string;
-    isCompleted: boolean;
-    isLocked: boolean;
-    type: LessonType;
-}
-
-export interface Module {
-    id: string;
-    title: string;
-    lessons: Lesson[];
-}
+import { Course, Module, Lesson, Block } from '@/types/lms';
 
 export async function getCourseData(courseId: string, userId: string) {
     if (!courseId || !userId) return null;
 
     // 1. Fetch Course & Enrollment (Parallel)
     const coursePromise = db.collection('courses').doc(courseId).get();
-
     const enrollmentId = `${userId}_${courseId}`;
     const enrollmentPromise = db.collection('enrollments').doc(enrollmentId).get();
 
     const [courseDoc, enrollmentDoc] = await Promise.all([coursePromise, enrollmentPromise]);
 
-    if (!courseDoc.exists) return null; // Or throw 404
+    if (!courseDoc.exists) return null;
 
-    const courseData = { id: courseDoc.id, ...courseDoc.data() };
+    const courseData = { id: courseDoc.id, ...courseDoc.data() } as Course;
     let enrollmentData = null;
     let status = 'none';
 
     if (enrollmentDoc.exists) {
         enrollmentData = { id: enrollmentDoc.id, ...enrollmentDoc.data() };
-        status = enrollmentData.status || 'none'; // @ts-ignore
+        status = enrollmentData.status || 'none';
     }
 
     // Paywall gate: If not active, return limited data
@@ -48,7 +27,6 @@ export async function getCourseData(courseId: string, userId: string) {
         return {
             course: courseData,
             modules: [],
-            materials: [],
             enrollment: enrollmentData,
             status,
             isAccessDenied: true
@@ -62,26 +40,13 @@ export async function getCourseData(courseId: string, userId: string) {
         progressData = progressDoc.data();
     }
 
-    // 3. Fetch Materials & Modules (Parallel)
-    const materialsPromise = db.collection('courses').doc(courseId).collection('materials')
-        .orderBy('created_at', 'desc').get();
-
-    const modulesPromise = db.collection('courses').doc(courseId).collection('modules')
+    // 3. Fetch Modules & Lessons
+    // Fetch all modules
+    const modulesSnap = await db.collection('courses').doc(courseId).collection('modules')
         .orderBy('order', 'asc').get();
 
-    const [materialsSnap, modulesSnap] = await Promise.all([materialsPromise, modulesPromise]);
-
-    const materials = materialsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-
-    // 4. Fetch Lessons for modules
-    // Note: This can be N+1. Ideally we structure modules/lessons better or use a recursive fetch function?
-    // Admin SDK doesn't support collectionGroup queries constrained to specific parent well without ID.
-    // Iteration is acceptable for reasonable module counts (usually < 20).
-    const moduleDocs = modulesSnap.docs;
-    const modules: Module[] = [];
-
-    // Use Promise.all for parallel lesson fetching
-    const modulesWithLessons = await Promise.all(moduleDocs.map(async (mDoc) => {
+    const modules: Module[] = await Promise.all(modulesSnap.docs.map(async (mDoc) => {
+        // Fetch lessons for each module
         const lessonsSnap = await db.collection('courses').doc(courseId).collection('modules').doc(mDoc.id).collection('lessons')
             .orderBy('order', 'asc').get();
 
@@ -92,35 +57,91 @@ export async function getCourseData(courseId: string, userId: string) {
 
             return {
                 id: lDoc.id,
+                moduleId: mDoc.id,
+                courseId: courseId,
                 title: lData.title,
-                duration: lData.duration,
-                videoUrl: lData.videoUrl,
                 description: lData.description,
+                order: lData.order,
+                isPublished: lData.isPublished,
+                duration: lData.duration, // Estimated minutes
                 thumbnail: lData.thumbnail,
-                isCompleted,
-                isLocked: lData.isLocked || false,
-                type: (lData.type || 'video') as LessonType
-            };
+                // Add completion status to the runtime object (not in DB type, but useful for UI)
+                // @ts-ignore
+                isCompleted: isCompleted,
+                isLocked: false // Implement lock logic if needed
+            } as Lesson;
         });
 
         return {
             id: mDoc.id,
+            courseId,
             title: mDoc.data().title,
+            description: mDoc.data().description,
+            order: mDoc.data().order,
+            isPublished: mDoc.data().isPublished,
             lessons
-        };
+        } as Module;
     }));
-
-    // Merge progress lastAccess
-    if (enrollmentData && progressData.lastLessonId) { // @ts-ignore
-        enrollmentData.lastLessonId = progressData.lastLessonId;
-    }
 
     return {
         course: courseData,
-        modules: modulesWithLessons,
-        materials,
+        modules,
         enrollment: enrollmentData,
         status,
         isAccessDenied: false
     };
+}
+
+export async function getLessonContent(courseId: string, moduleId: string, lessonId: string) {
+    // Fetch specific lesson and its blocks
+    const lessonRef = db.collection('courses').doc(courseId).collection('modules').doc(moduleId).collection('lessons').doc(lessonId);
+
+    const [lessonDoc, blocksSnap] = await Promise.all([
+        lessonRef.get(),
+        lessonRef.collection('blocks').orderBy('order', 'asc').get()
+    ]);
+
+    if (!lessonDoc.exists) return null;
+
+    const lesson = { id: lessonDoc.id, ...lessonDoc.data() } as Lesson;
+
+    const blocks = blocksSnap.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+    })) as Block[];
+
+    return {
+        lesson,
+        blocks
+    };
+}
+
+export async function saveLessonContent(courseId: string, moduleId: string, lessonId: string, blocks: Block[]) {
+    const lessonRef = db.collection('courses').doc(courseId).collection('modules').doc(moduleId).collection('lessons').doc(lessonId);
+    const blocksRef = lessonRef.collection('blocks');
+
+    // Batch write for atomicity
+    const batch = db.batch();
+
+    // 1. Delete existing blocks (simple replacement strategy for MVP)
+    // In a real optimized app, we would diff changes.
+    const existingBlocksSnap = await blocksRef.get();
+    existingBlocksSnap.docs.forEach((doc) => {
+        batch.delete(doc.ref);
+    });
+
+    // 2. Add new blocks
+    blocks.forEach((block) => {
+        const docRef = blocksRef.doc(block.id);
+        const { id, ...blockData } = block; // Ensure ID is not in data if using doc(id)
+        batch.set(docRef, blockData);
+    });
+
+    // 3. Update lesson timestamp/count
+    batch.update(lessonRef, {
+        updatedAt: new Date(),
+        publishedBlocksCount: blocks.filter(b => b.isPublished).length
+    });
+
+    return batch.commit();
 }

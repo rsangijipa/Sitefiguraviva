@@ -1,0 +1,49 @@
+﻿
+> next-platform@0.1.0 build
+> next build
+
+   Ôû▓ Next.js 15.1.0
+   - Environments: .env.local, .env
+
+   Creating an optimized production build ...
+ Ô£ô Compiled successfully
+   Linting and checking validity of types ...
+node.exe : Failed to compile.
+No linha:1 caractere:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Failed to co 
+   mpile.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+./src/app/admin/(protected)/AdminShell.tsx:29:17
+Type error: Cannot find name 'UserPlus'.
+
+[0m [90m 27 |[39m     [36mconst[39m navItems 
+[33m=[39m [[0m
+[0m [90m 28 |[39m         { icon[33m:[39m 
+[33mLayoutDashboard[39m[33m,[39m label[33m:[39m 
+[32m'Vis├úo Geral'[39m[33m,[39m path[33m:[39m 
+[32m'/admin'[39m }[33m,[39m[0m
+[0m[31m[1m>[22m[39m[90m 29 |[39m         { 
+icon[33m:[39m [33mUserPlus[39m[33m,[39m 
+label[33m:[39m [32m'Interessados'[39m[33m,[39m 
+path[33m:[39m [32m'/admin/applications'[39m 
+}[33m,[39m[0m
+[0m [90m    |[39m                 
+[31m[1m^[22m[39m[0m
+[0m [90m 30 |[39m         { icon[33m:[39m 
+[33mBookOpen[39m[33m,[39m label[33m:[39m 
+[32m'Cursos'[39m[33m,[39m path[33m:[39m 
+[32m'/admin/courses'[39m }[33m,[39m[0m
+[0m [90m 31 |[39m         { icon[33m:[39m 
+[33mCheck[39m[33m,[39m label[33m:[39m 
+[32m'Aprova├º├Áes'[39m[33m,[39m path[33m:[39m 
+[32m'/admin/approvals'[39m }[33m,[39m[0m
+[0m [90m 32 |[39m         { icon[33m:[39m 
+[33mUsers[39m[33m,[39m label[33m:[39m [32m'Alunos 
+& Matr├¡culas'[39m[33m,[39m path[33m:[39m 
+[32m'/admin/enrollments'[39m }[33m,[39m[0m

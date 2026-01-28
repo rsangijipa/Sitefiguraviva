@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { BookOpen, Calendar, ArrowLeft, Loader2, Lock, FileText, Download, PlayCircle, ArrowRight } from 'lucide-react';
 import Button from '@/components/ui/Button';
-import { CoursePlayer } from '@/components/portal/CoursePlayer';
+import { LessonPlayer } from '@/components/lms/LessonPlayer';
 import { useEnrolledCourse } from '@/hooks/useEnrolledCourse';
 
 // Separate component to handle search params usage inside Suspense
@@ -236,7 +236,7 @@ function CourseContent({ initialData }: { initialData?: any }) {
         }
 
         return (
-            <CoursePlayer
+            <LessonPlayer
                 course={{ id: course.id, title: course.title, backLink: `/portal/course/${course.id}` }} // Back link clears query param
                 modules={modules}
                 activeLesson={activeLesson}

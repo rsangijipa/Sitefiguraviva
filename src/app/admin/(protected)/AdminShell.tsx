@@ -6,8 +6,9 @@ import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    LayoutDashboard, BookOpen, PenTool, Settings, LogOut, Globe, Home, X, FileText, Users, Check
+    LayoutDashboard, BookOpen, PenTool, Settings, LogOut, Globe, Home, X, FileText, Users, Check, UserPlus, Activity
 } from 'lucide-react';
+import PageShell from '@/components/ui/PageShell';
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {
     const { signOut } = useAuth(); // Still needed for Logout button
@@ -26,6 +27,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
     const navItems = [
         { icon: LayoutDashboard, label: 'Visão Geral', path: '/admin' },
+        { icon: UserPlus, label: 'Interessados', path: '/admin/applications' },
         { icon: BookOpen, label: 'Cursos', path: '/admin/courses' },
         { icon: Check, label: 'Aprovações', path: '/admin/approvals' },
         { icon: Users, label: 'Alunos & Matrículas', path: '/admin/enrollments' },
@@ -33,11 +35,12 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         { icon: PenTool, label: 'Diário Visual', path: '/admin/blog' },
         { icon: BookOpen, label: 'Galeria', path: '/admin/gallery' },
         { icon: FileText, label: 'Documentos', path: '/admin/public-docs' },
+        { icon: Activity, label: 'Logs de Sistema', path: '/admin/logs' },
         { icon: Settings, label: 'Configurações', path: '/admin/settings' },
     ];
 
     return (
-        <div className="flex min-h-screen bg-paper selection:bg-gold/20">
+        <PageShell variant="admin" className="flex min-h-screen selection:bg-gold/20">
             {/* Mobile Toggle */}
             <button
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -117,12 +120,6 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
             {/* Main Content */}
             <main className="flex-1 lg:ml-80 p-6 md:p-12 lg:p-16 min-h-screen relative overflow-x-hidden">
-                {/* Organic Background Elements */}
-                <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-                    <div className="absolute top-[-5%] right-[-5%] w-[40%] h-[40%] bg-gold/5 rounded-full blur-[120px] mix-blend-multiply animate-pulse" style={{ animationDuration: '8s' }} />
-                    <div className="absolute bottom-[5%] left-[0%] w-[35%] h-[35%] bg-accent/5 rounded-full blur-[100px] mix-blend-multiply animate-pulse" style={{ animationDuration: '10s' }} />
-                </div>
-
                 <div className="relative z-10 max-w-7xl mx-auto animate-fade-in-up">
                     <header className="mb-12 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                         <div>
@@ -146,6 +143,6 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                     {children}
                 </div>
             </main>
-        </div>
+        </PageShell>
     );
 }

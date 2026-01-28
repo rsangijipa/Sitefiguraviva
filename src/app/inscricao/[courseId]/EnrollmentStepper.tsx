@@ -5,9 +5,12 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Loader2, Lock, ArrowRight, CreditCard, User, Clock } from 'lucide-react';
 import Link from 'next/link';
+import { Input } from '@/components/ui/Input';
+import { useToast } from '@/context/ToastContext';
 
 export default function EnrollmentStepper({ courseId, initialData }: { courseId: string, initialData: any }) {
     const router = useRouter();
+    const { addToast } = useToast();
     const { course, enrollment, application, uid } = initialData;
 
     // Determine initial step
@@ -69,7 +72,7 @@ export default function EnrollmentStepper({ courseId, initialData }: { courseId:
             router.refresh();
         } catch (err) {
             console.error(err);
-            alert('Erro ao salvar inscrição. Tente novamente.');
+            addToast('Ocorreu um erro ao salvar sua inscrição. Tente novamente.', 'error');
         } finally {
             setLoading(false);
         }
@@ -96,16 +99,26 @@ export default function EnrollmentStepper({ courseId, initialData }: { courseId:
             }
         } catch (err) {
             console.error(err);
-            alert('Erro ao iniciar pagamento.');
+            addToast('Não foi possível iniciar o pagamento. Verifique sua conexão.', 'error');
             setLoading(false);
         }
     };
 
-    // Firebase Token Helper (Simplified integration)
+    // Firebase Token Helper (Robust)
     const getIdToken = async () => {
         const { auth } = await import('@/lib/firebase/client');
-        if (!auth.currentUser) throw new Error("User not valid");
-        return auth.currentUser.getIdToken();
+        if (auth.currentUser) return auth.currentUser.getIdToken();
+
+        return new Promise<string>((resolve, reject) => {
+            const unsubscribe = auth.onAuthStateChanged(async (user) => {
+                unsubscribe();
+                if (user) {
+                    resolve(await user.getIdToken());
+                } else {
+                    reject(new Error("User not valid"));
+                }
+            });
+        });
     };
 
 
@@ -135,32 +148,32 @@ export default function EnrollmentStepper({ courseId, initialData }: { courseId:
             </div>
 
             {/* Content Card */}
-            <div className="bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-stone-100">
+            <div className="bg-white/80 backdrop-blur-xl rounded-[2.5rem] p-8 md:p-12 shadow-soft-xl border border-white/60">
                 <AnimatePresence mode='wait'>
 
                     {/* STEP 1: LOGIN */}
                     {currentStep === 1 && (
                         <motion.div key="step1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                             <div className="text-center">
-                                <div className="w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-6 text-primary">
+                                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-6 text-primary shadow-soft-md border border-stone-100">
                                     <User size={32} />
                                 </div>
-                                <h2 className="font-serif text-2xl text-primary mb-4">Primeiro, identifique-se</h2>
-                                <p className="text-stone-500 mb-8 max-w-md mx-auto">
+                                <h2 className="font-serif text-3xl text-primary mb-4">Primeiro, identifique-se</h2>
+                                <p className="text-stone-500 mb-10 max-w-md mx-auto leading-relaxed">
                                     Para se inscrever, você precisa entrar com sua conta ou criar uma nova. É rápido e seguro.
                                 </p>
                                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                                     <button
                                         onClick={handleLogin}
-                                        className="px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg hover:bg-primary/90 transition-all flex items-center justify-center gap-2"
+                                        className="px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg hover:bg-primary/90 transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-xs"
                                     >
-                                        Já possuo uma conta <ArrowRight size={18} />
+                                        Já possuo uma conta <ArrowRight size={16} />
                                     </button>
                                     <button
                                         onClick={handleSignup}
-                                        className="px-8 py-4 bg-white border-2 border-primary text-primary font-bold rounded-xl hover:bg-stone-50 transition-all flex items-center justify-center gap-2"
+                                        className="px-8 py-4 bg-white border border-stone-200 text-stone-600 font-bold rounded-xl hover:border-primary hover:text-primary transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-xs"
                                     >
-                                        Criar nova conta <User size={18} />
+                                        Criar nova conta <User size={16} />
                                     </button>
                                 </div>
                             </div>
@@ -170,29 +183,36 @@ export default function EnrollmentStepper({ courseId, initialData }: { courseId:
                     {/* STEP 2: FORM */}
                     {currentStep === 2 && (
                         <motion.div key="step2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                            <h2 className="font-serif text-2xl text-primary mb-6">Seus Dados</h2>
+                            <h2 className="font-serif text-3xl text-primary mb-8">Seus Dados</h2>
                             <form onSubmit={handleFormSubmit} className="space-y-6">
                                 <div className="grid md:grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-bold uppercase tracking-widest text-stone-500">Nome Completo</label>
-                                        <input required className="w-full px-4 py-3 rounded-lg border border-stone-200 focus:ring-1 focus:ring-primary outline-none"
-                                            value={formData.fullName} onChange={e => setFormData({ ...formData, fullName: e.target.value })} />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-bold uppercase tracking-widest text-stone-500">Telefone / WhatsApp</label>
-                                        <input required className="w-full px-4 py-3 rounded-lg border border-stone-200 focus:ring-1 focus:ring-primary outline-none"
-                                            value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} placeholder="(11) 99999-9999" />
-                                    </div>
+                                    <Input
+                                        label="Nome Completo"
+                                        required
+                                        value={formData.fullName}
+                                        onChange={e => setFormData({ ...formData, fullName: e.target.value })}
+                                        className="bg-white/50"
+                                    />
+                                    <Input
+                                        label="Telefone / WhatsApp"
+                                        required
+                                        placeholder="(11) 99999-9999"
+                                        value={formData.phone}
+                                        onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                                        className="bg-white/50"
+                                    />
                                 </div>
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold uppercase tracking-widest text-stone-500">Profissão / Área de Atuação</label>
-                                    <input required className="w-full px-4 py-3 rounded-lg border border-stone-200 focus:ring-1 focus:ring-primary outline-none"
-                                        value={formData.profession} onChange={e => setFormData({ ...formData, profession: e.target.value })} />
-                                </div>
+                                <Input
+                                    label="Profissão / Área de Atuação"
+                                    required
+                                    value={formData.profession}
+                                    onChange={e => setFormData({ ...formData, profession: e.target.value })}
+                                    className="bg-white/50"
+                                />
 
-                                <div className="pt-6 border-t border-stone-100 flex justify-end">
-                                    <button type="submit" disabled={loading} className="px-8 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-all flex items-center gap-2">
-                                        {loading ? <Loader2 className="animate-spin" /> : <>Continuar para Pagamento <ArrowRight size={18} /></>}
+                                <div className="pt-8 border-t border-stone-200/50 flex justify-end">
+                                    <button type="submit" disabled={loading} className="px-8 py-4 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-all flex items-center gap-2 shadow-lg shadow-primary/20 uppercase tracking-widest text-xs">
+                                        {loading ? <Loader2 className="animate-spin" size={18} /> : <>Continuar para Pagamento <ArrowRight size={16} /></>}
                                     </button>
                                 </div>
                             </form>
