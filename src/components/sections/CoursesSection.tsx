@@ -7,7 +7,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import { Skeleton } from '../ui/Skeleton';
 import { Card } from '../ui/Card';
-import EmptyState from '../ui/EmptyState';
+import { EmptyState } from '../ui/EmptyState';
 import { Calendar } from 'lucide-react';
 
 const fadeInUp = {
@@ -92,8 +92,8 @@ export default function CoursesSection({ courses = [], onOpenCalendar, onSelectC
                             <div className="w-full">
                                 <EmptyState
                                     title="Nenhuma formação aberta"
-                                    message="No momento não temos inscrições abertas, mas você pode consultar nosso calendário para ver as próximas datas."
-                                    icon={<Calendar size={48} />}
+                                    description="No momento não temos inscrições abertas, mas você pode consultar nosso calendário para ver as próximas datas."
+                                    icon={<Calendar size={32} />}
                                     action={
                                         <button
                                             onClick={onOpenCalendar}

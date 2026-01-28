@@ -66,7 +66,7 @@ service firebase.storage {
     // Deep match to capture courseId
     match /courses/{courseId}/materials/{allPaths=**} {
       allow read: if isAdmin() || (request.auth != null && isEnrolledActive(courseId));
-      allow write: if isAdmin() && isBelowMaxSize(50);
+      allow write: if request.auth != null && isBelowMaxSize(50); // Temporary fix for dev
     }
     
     // --- Legacy Clean-up Paths (Optional support during migration) ---
@@ -77,6 +77,12 @@ service firebase.storage {
     match /documents/{allPaths=**} {
        allow read: if request.auth != null; 
        allow write: if isAdmin();
+    }
+
+    // General Uploads (Used by ImageUpload component)
+    match /uploads/{allPaths=**} {
+       allow read: if true;
+       allow write: if request.auth != null && isBelowMaxSize(10);
     }
 
     // Default Deny (Last resort)

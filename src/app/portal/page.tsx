@@ -3,9 +3,11 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { auth, db } from '@/lib/firebase/admin';
 import { Card } from '@/components/ui/Card';
-import { BookOpen, Calendar, ArrowRight } from 'lucide-react';
+import { BookOpen, Calendar, ArrowRight, Clock, AlertCircle, Ban } from 'lucide-react';
 import Link from 'next/link';
 import { FieldPath } from 'firebase-admin/firestore';
+import Button from '@/components/ui/Button'; // Assuming we have this, or use standard link styling
+import { EmptyState } from '@/components/ui/EmptyState';
 
 export default async function PortalDashboard() {
     const cookieStore = await cookies();
@@ -26,7 +28,6 @@ export default async function PortalDashboard() {
     // 1. Fetch User Enrollments (Server-side from Root Collection)
     const enrollmentsSnap = await db.collection('enrollments')
         .where('userId', '==', uid)
-        // .orderBy('enrolledAt', 'desc') // Checking if index exists or if field exists. Safe to fetch and sort in memory for now given low volume?
         .get();
 
     const enrollments = enrollmentsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -60,7 +61,6 @@ export default async function PortalDashboard() {
                     subtitle: data.subtitle,
                     description: data.description,
                     image: data.image,
-                    // slug: data.slug 
                 };
             }));
         }
@@ -68,116 +68,157 @@ export default async function PortalDashboard() {
         // Merge
         const merged = coursesData.map(course => {
             const enrollment = enrollments.find((e: any) => e.courseId === course.id);
-            // Serialize timestamps for cleaner passing to components if needed, or keeping as dates?
-            // Next.js Server Components can render Date objects directly BUT it warns if passed to Client Components.
-            // We are rendering mostly server side here, but let's be safe.
             return { ...course, enrollment };
         });
 
         // Sort by enrollment date
         enrolledCourses = merged.sort((a, b) => {
-            const dateA = a.enrollment.enrolledAt.toDate().getTime();
-            const dateB = b.enrollment.enrolledAt.toDate().getTime();
-            return dateB - dateA;
+            const dateA = a.enrollment.enrolledAt?.toDate?.()?.getTime() || 0;
+            const dateB = b.enrollment.enrolledAt?.toDate?.()?.getTime() || 0;
+            return dateB - dateA; // Newest first
         });
     }
+
+    // Helper to render Status Badge
+    const renderStatusBadge = (status: string) => {
+        switch (status) {
+            case 'active':
+                return <span className="bg-green-500 text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-sm">Em Andamento</span>;
+            case 'awaiting_approval':
+            case 'pending_review': // Fallback legacy
+                return <span className="bg-gold text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-sm flex items-center gap-1"><Clock size={10} /> Em Análise</span>;
+            case 'rejected':
+                return <span className="bg-red-500 text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-sm flex items-center gap-1"><Ban size={10} /> Recusado</span>;
+            case 'awaiting_payment':
+                return <span className="bg-stone-500 text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-sm">Aguardando Pagamento</span>;
+            case 'blocked':
+            case 'canceled':
+                return <span className="bg-stone-800 text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-sm">Inativo</span>;
+            default:
+                return <span className="bg-stone-300 text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-sm">Pendente</span>;
+        }
+    };
 
     return (
         <main className="max-w-7xl mx-auto px-6 md:px-12 py-12">
             <header className="mb-10 animate-fade-in-up">
                 <h1 className="font-serif text-3xl text-primary">Meus Cursos</h1>
-                <p className="text-stone-500 font-light text-sm">Continue sua jornada de aprendizado.</p>
+                <p className="text-stone-500 font-light text-sm">Acompanhe seu progresso e status de aprovação.</p>
             </header>
 
             {enrolledCourses.length > 0 ? (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {enrolledCourses.map((course, idx) => (
-                        <div
-                            key={course.id}
-                            className="animate-fade-in-up"
-                            style={{ animationDelay: `${idx * 0.1}s`, opacity: 0 }}
-                        >
-                            <Link
-                                href={course.enrollment?.status === 'active' ? `/portal/course/${course.id}` : '#'}
-                                className={`block h-full ${course.enrollment?.status !== 'active' ? 'cursor-default' : ''}`}
+                    {enrolledCourses.map((course, idx) => {
+                        const status = course.enrollment?.status || 'pending';
+                        const isInteractive = status === 'active' || status === 'awaiting_payment';
+                        const targetLink = status === 'active' ? `/portal/course/${course.id}` :
+                            status === 'awaiting_payment' ? `/inscricao/${course.id}` : '#';
+
+                        return (
+                            <div
+                                key={course.id}
+                                className="animate-fade-in-up"
+                                style={{ animationDelay: `${idx * 0.1}s`, opacity: 0 }}
                             >
-                                <Card className={`h-full group transition-all duration-300 overflow-hidden flex flex-col ${course.enrollment?.status === 'active' ? 'hover:border-gold/50' : 'opacity-80'}`}>
-                                    <div className="h-48 overflow-hidden relative bg-stone-100">
-                                        {course.image ? (
-                                            <img src={course.image} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-primary/10">
-                                                <BookOpen size={48} />
-                                            </div>
-                                        )}
-                                        <div className="absolute top-4 left-4">
-                                            <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-sm ${course.enrollment?.status === 'active' ? 'bg-green-500 text-white' :
-                                                    course.enrollment?.status === 'pending_approval' ? 'bg-gold text-white' :
-                                                        course.enrollment?.status === 'rejected' ? 'bg-red-500 text-white' :
-                                                            'bg-stone-500 text-white'
-                                                }`}>
-                                                {course.enrollment?.status === 'active' ? 'Em Andamento' :
-                                                    course.enrollment?.status === 'pending_approval' ? 'Em Análise' :
-                                                        course.enrollment?.status === 'rejected' ? 'Rejeitado' :
-                                                            'Aguardando'}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div className="p-8 flex flex-col flex-1">
-                                        <h3 className="font-serif text-2xl text-primary mb-2 transition-colors line-clamp-2 group-hover:text-gold">
-                                            {course.title}
-                                        </h3>
+                                <Link
+                                    href={targetLink}
+                                    className={`block h-full ${!isInteractive ? 'cursor-default' : ''}`}
+                                    onClick={!isInteractive ? (e) => e.preventDefault() : undefined}
+                                >
+                                    <Card variant="glass" className={`h-full group transition-all duration-500 overflow-hidden flex flex-col ${status === 'active' ? 'hover:border-gold/50 hover:shadow-glow-gold' : 'opacity-90 grayscale-[0.2]'}`}>
 
-                                        {course.enrollment?.status === 'pending_approval' ? (
-                                            <div className="bg-gold/5 border border-gold/20 rounded-xl p-4 my-4">
-                                                <p className="text-xs text-stone-600 leading-relaxed">
-                                                    Sua matrícula está em análise. O acesso será liberado após a aprovação do administrador.
-                                                </p>
-                                            </div>
-                                        ) : course.enrollment?.status === 'rejected' ? (
-                                            <div className="bg-red-50 border border-red-100 rounded-xl p-4 my-4">
-                                                <p className="text-xs text-red-600 leading-relaxed">
-                                                    Sua inscrição não foi aprovada. Entre em contato com o suporte para mais detalhes.
-                                                </p>
-                                            </div>
-                                        ) : (
-                                            <p className="text-sm text-stone-500 font-light mb-6 line-clamp-3 flex-1">
-                                                {course.description || course.subtitle}
-                                            </p>
-                                        )}
-
-                                        <div className="flex items-center justify-between border-t border-stone-100 pt-6 mt-auto">
-                                            <div className="text-[10px] font-bold uppercase tracking-widest text-primary/40 flex items-center gap-2">
-                                                <Calendar size={12} />
-                                                {course.enrollment?.enrolledAt?.toDate?.()?.toLocaleDateString() ?? 'N/A'}
-                                            </div>
-                                            {course.enrollment?.status === 'active' ? (
-                                                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary group-hover:translate-x-1 transition-transform">
-                                                    Acessar <ArrowRight size={14} />
-                                                </div>
+                                        {/* Image Header */}
+                                        <div className="h-48 overflow-hidden relative bg-stone-100">
+                                            {course.image ? (
+                                                <img src={course.image} alt={course.title} className={`w-full h-full object-cover transition-transform duration-700 ${status === 'active' ? 'group-hover:scale-105' : ''}`} />
                                             ) : (
-                                                <div className="text-[10px] font-bold uppercase tracking-widest text-stone-400">
-                                                    Bloqueado
+                                                <div className="w-full h-full flex items-center justify-center text-primary/10">
+                                                    <BookOpen size={48} />
                                                 </div>
                                             )}
+                                            <div className="absolute top-4 left-4">
+                                                {renderStatusBadge(status)}
+                                            </div>
                                         </div>
-                                    </div>
-                                </Card>
-                            </Link>
-                        </div>
-                    ))}
+
+                                        {/* Content Body */}
+                                        <div className="p-8 flex flex-col flex-1 relative">
+                                            <h3 className="font-serif text-2xl text-primary mb-2 transition-colors line-clamp-2 leading-tight">
+                                                {course.title}
+                                            </h3>
+
+                                            {/* Dynamic Status Content */}
+                                            <div className="flex-1 mt-2">
+                                                {status === 'awaiting_approval' || status === 'pending_review' ? (
+                                                    <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 my-2">
+                                                        <div className="flex items-start gap-2">
+                                                            <Clock className="text-amber-500 mt-0.5 shrink-0" size={16} />
+                                                            <div>
+                                                                <p className="text-xs font-bold text-amber-800 uppercase tracking-wide mb-1">Pagamento Confirmado</p>
+                                                                <p className="text-xs text-amber-700 leading-relaxed">
+                                                                    Sua inscrição está sendo analisada pela nossa equipe. O acesso será liberado em até 24h úteis.
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ) : status === 'rejected' ? (
+                                                    <div className="bg-red-50 border border-red-100 rounded-xl p-4 my-2">
+                                                        <div className="flex items-start gap-2">
+                                                            <AlertCircle className="text-red-500 mt-0.5 shrink-0" size={16} />
+                                                            <div>
+                                                                <p className="text-xs font-bold text-red-800 uppercase tracking-wide mb-1">Inscrição Recusada</p>
+                                                                <p className="text-xs text-red-700 leading-relaxed italic mb-3">
+                                                                    "{course.enrollment?.rejectionReason || 'Não atende aos critérios.'}"
+                                                                </p>
+                                                                <Link href={`/inscricao/${course.id}?retry=true`} className="text-xs font-bold text-red-600 underline hover:text-red-800">
+                                                                    Tentar Novamente
+                                                                </Link>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ) : status === 'awaiting_payment' ? (
+                                                    <div className="bg-stone-50 border border-stone-100 rounded-xl p-4 my-2 text-center">
+                                                        <p className="text-xs text-stone-500 mb-2">Finalize sua inscrição para acessar.</p>
+                                                        <span className="text-xs font-bold text-primary underline">Ir para Pagamento</span>
+                                                    </div>
+                                                ) : (
+                                                    <p className="text-sm text-stone-500 font-light mb-6 line-clamp-3">
+                                                        {course.description || course.subtitle}
+                                                    </p>
+                                                )}
+                                            </div>
+
+                                            {/* Footer */}
+                                            <div className="flex items-center justify-between border-t border-stone-100 pt-6 mt-6">
+                                                <div className="text-[10px] font-bold uppercase tracking-widest text-primary/40 flex items-center gap-2">
+                                                    <Calendar size={12} />
+                                                    {course.enrollment?.enrolledAt?.toDate?.()?.toLocaleDateString() ?? 'Recentemente'}
+                                                </div>
+
+                                                {status === 'active' && (
+                                                    <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary group-hover:translate-x-1 transition-transform">
+                                                        Acessar <ArrowRight size={14} />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </Card>
+                                </Link>
+                            </div>
+                        );
+                    })}
                 </div>
             ) : (
-                <div className="text-center py-20 bg-white rounded-[3rem] border border-stone-100 shadow-sm animate-fade-in-up">
-                    <div className="w-24 h-24 bg-stone-50 rounded-full flex items-center justify-center mx-auto mb-6 text-stone-300">
-                        <BookOpen size={40} />
-                    </div>
-                    <h3 className="font-serif text-2xl text-primary mb-2">Nenhum curso encontrado</h3>
-                    <p className="text-stone-400 max-w-md mx-auto mb-8">Você ainda não está matriculado em nenhum curso.</p>
-                    <Link href="/" className="text-primary font-bold uppercase tracking-widest text-xs border-b border-gold pb-1 hover:text-gold transition-colors">
-                        Explorar Cursos Disponíveis
-                    </Link>
-                </div>
+                <EmptyState
+                    icon={<BookOpen size={32} />}
+                    title="Nenhum curso encontrado"
+                    description="Você ainda não está matriculado em nenhum curso. Entre em contato com a administração para liberar seu acesso."
+                    action={
+                        <Link href="/" className="px-6 py-3 bg-white border border-stone-200 text-primary font-bold uppercase tracking-widest text-xs rounded-xl hover:bg-stone-50 hover:border-gold/50 hover:text-gold transition-all shadow-sm">
+                            Explorar Cursos Disponíveis
+                        </Link>
+                    }
+                />
             )}
         </main>
     );

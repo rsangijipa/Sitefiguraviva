@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { auth, db } from '@/lib/firebase/admin';
 import EnrollmentStepper from './EnrollmentStepper';
+import PageShell from '@/components/ui/PageShell';
 
 export default async function EnrollmentPage({ params }: { params: Promise<{ courseId: string }> }) {
     const { courseId } = await params;
@@ -53,12 +54,18 @@ export default async function EnrollmentPage({ params }: { params: Promise<{ cou
         uid
     };
 
+
+
+    // ... imports remain the same
+
+    // ... code ...
+
     return (
-        <main className="min-h-screen bg-[#FDFCF9] py-12 px-4">
+        <PageShell variant="default" className="py-12 px-4">
             <EnrollmentStepper
                 courseId={courseId}
                 initialData={initialData}
             />
-        </main>
+        </PageShell>
     );
 }

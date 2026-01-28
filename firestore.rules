@@ -145,5 +145,17 @@ service cloud.firestore {
       allow read: if isAdmin();
       allow write: if false; // Only Admin SDK writes here
     }
+
+    // System Logs (Observability)
+    match /system_logs/{logId} {
+        allow read: if isAdmin();
+        allow write: if false; // Only Admin SDK writes here (client logs should go via API if needed)
+    }
+
+    // Audit Logs
+    match /audit_logs/{logId} {
+        allow read: if isAdmin();
+        allow write: if false; 
+    }
   }
 }

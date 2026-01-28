@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { LogOut, LayoutDashboard, User, Menu, X } from "lucide-react";
+import PageShell from "@/components/ui/PageShell";
 
 export default function PortalLayout({ children }: { children: React.ReactNode }) {
     const { user, loading, signOut } = useAuth();
@@ -28,16 +29,18 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
 
     if (!user) return null;
 
+    if (!user) return null;
+
     return (
-        <div className="min-h-screen bg-[#FDFCF9] flex flex-col">
-            {/* Unified Top Navigation */}
-            <header className="bg-white border-b border-stone-100 h-16 px-6 flex items-center justify-between sticky top-0 z-50">
+        <PageShell variant="portal" className="flex flex-col">
+            {/* Unified Top Navigation (Glass) */}
+            <header className="h-16 px-6 flex items-center justify-between sticky top-0 z-50 bg-white/60 backdrop-blur-md border-b border-white/40 shadow-sm transition-all">
                 <div className="flex items-center gap-8">
                     <Link href="/portal" className="font-serif text-xl text-primary font-bold">
                         Instituto Figura Viva
                     </Link>
                     <nav className="hidden md:flex items-center gap-6">
-                        <Link href="/portal" className="text-xs font-bold uppercase tracking-widest text-stone-500 hover:text-primary transition-colors flex items-center gap-2">
+                        <Link href="/portal" className="text-[10px] font-bold uppercase tracking-widest text-stone-500 hover:text-primary transition-colors flex items-center gap-2">
                             <LayoutDashboard size={14} /> Meus Cursos
                         </Link>
                     </nav>
@@ -48,7 +51,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
                         <span className="text-xs font-bold text-primary">{user.displayName}</span>
                         <span className="text-[10px] text-stone-400 uppercase tracking-wider">Aluno</span>
                     </div>
-                    <div className="w-8 h-8 bg-stone-100 rounded-full flex items-center justify-center text-stone-400">
+                    <div className="w-8 h-8 bg-white/50 border border-white rounded-full flex items-center justify-center text-stone-400 shadow-inner">
                         {user.photoURL ? <img src={user.photoURL} alt={user.displayName || ""} className="w-full h-full rounded-full" /> : <User size={16} />}
                     </div>
 
@@ -73,7 +76,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
 
             {/* Mobile Menu Overlay */}
             {mobileMenuOpen && (
-                <div className="md:hidden fixed inset-0 z-40 bg-white pt-20 px-6">
+                <div className="md:hidden fixed inset-0 z-40 bg-white/95 backdrop-blur-xl pt-20 px-6">
                     <nav className="flex flex-col gap-6">
                         <div className="flex items-center gap-4 pb-6 border-b border-stone-100">
                             <div className="w-10 h-10 bg-stone-100 rounded-full flex items-center justify-center text-stone-400">
@@ -102,9 +105,9 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
             )}
 
             {/* Main Content Area */}
-            <main className="flex-1">
+            <main className="flex-1 relative z-10 w-full max-w-7xl mx-auto p-6 md:p-8">
                 {children}
             </main>
-        </div >
+        </PageShell>
     );
 }

@@ -7,7 +7,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Skeleton } from '../ui/Skeleton';
 import { Card, CardContent } from '../ui/Card';
-import EmptyState from '../ui/EmptyState';
+import { EmptyState } from '../ui/EmptyState';
 
 interface BlogPost {
     id: string | number;
@@ -175,8 +175,9 @@ export default function BlogSection({ blogPosts = [], onSelectPost, loading = fa
                             {blogPosts.length === 0 && (
                                 <div className="col-span-full">
                                     <EmptyState
+                                        icon={<FileText size={32} />}
                                         title="Nenhum artigo encontrado"
-                                        message="Nossa biblioteca está sendo atualizada. Volte em breve para novas reflexões."
+                                        description="Nossa biblioteca está sendo atualizada. Volte em breve para novas reflexões."
                                     />
                                 </div>
                             )}
