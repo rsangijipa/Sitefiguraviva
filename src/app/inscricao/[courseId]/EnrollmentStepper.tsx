@@ -43,7 +43,7 @@ export default function EnrollmentStepper({ courseId, initialData }: { courseId:
     };
 
     const handleSignup = () => {
-        router.push(`/signup?next=/inscricao/${courseId}`);
+        router.push(`/login?mode=signup&next=/inscricao/${courseId}`);
     };
 
     const handleFormSubmit = async (e: React.FormEvent) => {

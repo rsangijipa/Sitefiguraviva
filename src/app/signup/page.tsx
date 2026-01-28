@@ -11,7 +11,7 @@ export default function SignupPage() {
 
     // Redirect to login as registration is only allowed during enrollment
     useEffect(() => {
-        router.replace('/login');
+        router.replace('/login?mode=signup');
     }, [router]);
 
     return null; // Don't render anything while redirecting

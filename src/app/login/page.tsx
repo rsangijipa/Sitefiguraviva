@@ -4,18 +4,46 @@ import { useAuth } from '@/context/AuthContext';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Eye, EyeOff, Loader2, ArrowRight } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Eye, EyeOff, Loader2, ArrowRight, UserPlus, LogIn, ChevronDown } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useCourses } from '@/hooks/useContent';
+import { useSearchParams } from 'next/navigation';
+import { db } from '@/lib/firebase/client';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
-export default function LoginPage() {
-    const { signIn } = useAuth();
+import { Suspense } from 'react';
+
+function LoginContent() {
+    const { signIn, signUp, updateProfile } = useAuth();
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const { data: courses = [] } = useCourses();
 
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const mode = searchParams.get('mode');
+    const next = searchParams.get('next');
+
+    // Determine initial state
+    const [isSignup, setIsSignup] = useState(mode === 'signup');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+
+    // Common fields
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+
+    // Signup specific fields
+    const [fullName, setFullName] = useState('');
+    const [phone, setPhone] = useState('');
+
+    // Extract courseId from 'next' if it's an enrollment path
+    const getInitialCourse = () => {
+        if (next && next.includes('/inscricao/')) {
+            return next.split('/').pop() || '';
+        }
+        return '';
+    };
+    const [selectedCourse, setSelectedCourse] = useState(getInitialCourse());
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -23,8 +51,32 @@ export default function LoginPage() {
         setLoading(true);
 
         try {
-            const userCredential = await signIn(email, password);
-            const user = userCredential.user;
+            let user;
+            if (isSignup) {
+                // signup
+                const userCredential = await signUp(email, password);
+                user = userCredential.user;
+
+                // Set Display Name
+                await updateProfile({ displayName: fullName });
+
+                // Create user document with extra info
+                await setDoc(doc(db, "users", user.uid), {
+                    uid: user.uid,
+                    email,
+                    displayName: fullName,
+                    phone,
+                    selectedCourse,
+                    createdAt: serverTimestamp(),
+                    lastLogin: serverTimestamp(),
+                }, { merge: true });
+
+            } else {
+                // login
+                const userCredential = await signIn(email, password);
+                user = userCredential.user;
+            }
+
             const token = await user.getIdToken();
 
             // Set session cookie
@@ -39,6 +91,8 @@ export default function LoginPage() {
 
             if (tokenResult.claims.admin === true) {
                 router.push('/admin');
+            } else if (next) {
+                router.push(next);
             } else {
                 router.push('/portal');
             }
@@ -92,11 +146,88 @@ export default function LoginPage() {
 
                 <div className="w-full max-w-md space-y-8">
                     <div className="text-center md:text-left">
-                        <h2 className="font-serif text-3xl md:text-4xl text-primary mb-2">Bem-vindo(a)</h2>
-                        <p className="text-stone-500">Faça login para acessar sua área do aluno.</p>
+                        <h2 className="font-serif text-3xl md:text-4xl text-primary mb-2">
+                            {isSignup ? 'Crie sua conta' : 'Bem-vindo(a)'}
+                        </h2>
+                        <p className="text-stone-500">
+                            {isSignup
+                                ? 'Preencha os dados abaixo para se cadastrar.'
+                                : 'Faça login para acessar sua área do aluno.'}
+                        </p>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="flex p-1 bg-stone-100 rounded-xl">
+                        <button
+                            onClick={() => { setIsSignup(false); setError(''); }}
+                            className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-bold rounded-lg transition-all ${!isSignup ? 'bg-white text-primary shadow-sm' : 'text-stone-500 hover:text-primary'}`}
+                        >
+                            <LogIn size={16} /> Login
+                        </button>
+                        <button
+                            onClick={() => { setIsSignup(true); setError(''); }}
+                            className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-bold rounded-lg transition-all ${isSignup ? 'bg-white text-primary shadow-sm' : 'text-stone-500 hover:text-primary'}`}
+                        >
+                            <UserPlus size={16} /> Cadastro
+                        </button>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="space-y-5">
+                        <AnimatePresence mode='wait'>
+                            {isSignup && (
+                                <motion.div
+                                    key="signup-fields"
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    className="space-y-5 overflow-hidden"
+                                >
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold uppercase tracking-widest text-stone-500">Nome Completo</label>
+                                        <input
+                                            type="text"
+                                            required
+                                            value={fullName}
+                                            onChange={(e) => setFullName(e.target.value)}
+                                            className="w-full h-12 px-4 rounded-xl border border-stone-200 bg-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                                            placeholder="Seu nome"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold uppercase tracking-widest text-stone-500">Telefone</label>
+                                        <input
+                                            type="tel"
+                                            required
+                                            value={phone}
+                                            onChange={(e) => setPhone(e.target.value)}
+                                            className="w-full h-12 px-4 rounded-xl border border-stone-200 bg-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                                            placeholder="(00) 00000-0000"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold uppercase tracking-widest text-stone-500">Interesse em Curso</label>
+                                        <div className="relative">
+                                            <select
+                                                required
+                                                value={selectedCourse}
+                                                onChange={(e) => setSelectedCourse(e.target.value)}
+                                                className="w-full h-12 px-4 rounded-xl border border-stone-200 bg-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all appearance-none"
+                                            >
+                                                <option value="" disabled>Selecione um curso</option>
+                                                {courses.map((course: any) => (
+                                                    <option key={course.id} value={course.id}>
+                                                        {course.title}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            <ChevronDown size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none" />
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+
                         <div className="space-y-2">
                             <label className="text-xs font-bold uppercase tracking-widest text-stone-500">E-mail</label>
                             <input
@@ -150,14 +281,31 @@ export default function LoginPage() {
                         >
                             {loading ? <Loader2 className="animate-spin" size={20} /> : (
                                 <>
-                                    Entrar na Plataforma <ArrowRight size={18} />
+                                    {isSignup ? 'Criar Conta e Continuar' : 'Entrar na Plataforma'} <ArrowRight size={18} />
                                 </>
                             )}
                         </button>
                     </form>
 
+                    <div className="text-center">
+                        <button
+                            onClick={() => setIsSignup(!isSignup)}
+                            className="text-sm text-stone-500 hover:text-primary transition-colors"
+                        >
+                            {isSignup ? 'Já possui uma conta? Faça login' : 'Ainda não é aluno? Crie uma conta'}
+                        </button>
+                    </div>
+
                 </div>
             </div>
         </main>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-[#FDFCF9]"><Loader2 className="animate-spin text-primary" /></div>}>
+            <LoginContent />
+        </Suspense>
     );
 }
