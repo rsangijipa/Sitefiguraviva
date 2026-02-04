@@ -1,14 +1,34 @@
 import { Play } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 interface VideoPlayerProps {
     url: string;
     poster?: string;
     autoPlay?: boolean;
+    initialTime?: number;
+    onTimeUpdate?: (currentTime: number) => void;
+    onPause?: () => void;
+    onEnded?: () => void;
 }
 
-export const VideoPlayer = ({ url, poster, autoPlay = false }: VideoPlayerProps) => {
+export const VideoPlayer = ({
+    url,
+    poster,
+    autoPlay = false,
+    initialTime = 0,
+    onTimeUpdate,
+    onPause,
+    onEnded
+}: VideoPlayerProps) => {
     const [isPlaying, setIsPlaying] = useState(autoPlay);
+    const videoRef = useRef<HTMLVideoElement>(null);
+
+    // Set initial time on mount/url change
+    useEffect(() => {
+        if (videoRef.current && initialTime > 0) {
+            videoRef.current.currentTime = initialTime;
+        }
+    }, [url, initialTime]);
 
     const isDirectFile = url.endsWith('.mp4') || url.endsWith('.webm') || url.endsWith('.ogg');
 
@@ -38,12 +58,16 @@ export const VideoPlayer = ({ url, poster, autoPlay = false }: VideoPlayerProps)
         <div className="relative w-full aspect-video bg-black rounded-xl overflow-hidden shadow-2xl group">
             {isDirectFile ? (
                 <video
+                    ref={videoRef}
                     src={url}
                     poster={poster}
                     className="w-full h-full object-contain"
                     controls
                     autoPlay={autoPlay}
                     playsInline
+                    onTimeUpdate={(e) => onTimeUpdate?.(e.currentTarget.currentTime)}
+                    onPause={onPause}
+                    onEnded={onEnded}
                 />
             ) : (
                 <iframe

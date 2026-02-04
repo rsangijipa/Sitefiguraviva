@@ -32,8 +32,8 @@ export default function Navbar() {
         <nav className={`fixed w-full z-50 top-0 left-0 bg-white transition-all duration-300 ${scrolled ? 'shadow-md py-4' : 'shadow-sm py-5'}`}>
             <div className="container mx-auto px-6 max-w-7xl flex items-center justify-between">
                 {/* Logo */}
-                <Link href="/" className="flex items-center gap-2 group focus-visible:ring-2 focus-visible:ring-primary rounded-lg p-1">
-                    <img src="/assets/logo.jpeg" alt="Logo" className="w-10 h-10 rounded-full object-cover border border-primary/10" />
+                <Link href="/" className="flex items-center gap-2 group focus-visible:ring-2 focus-visible:ring-primary rounded-lg p-1" aria-label="Ir para a página inicial">
+                    <img src="/assets/logo.jpeg" alt="Logo Instituto Figura Viva" className="w-10 h-10 rounded-full object-cover border border-primary/10" />
                     <span className="text-xl font-serif text-primary tracking-tight font-bold">
                         Figura <span className="font-light text-gold italic">Viva</span>
                     </span>

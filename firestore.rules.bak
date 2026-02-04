@@ -1,0 +1,114 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() { return request.auth != null; }
+    function uid() { return request.auth.uid; }
+
+    function isAdmin() {
+      return isSignedIn()
+        && get(/databases/$(database)/documents/users/$(uid())).data.role == 'admin'
+        && get(/databases/$(database)/documents/users/$(uid())).data.isActive == true;
+    }
+
+    function isEnrolled(courseId) {
+      // Check both global enrollment collection (flat) and ensure active status
+      // We use the composite key pattern: userId_courseId
+      return exists(/databases/$(database)/documents/enrollments/$(uid() + '_' + courseId))
+             && get(/databases/$(database)/documents/enrollments/$(uid() + '_' + courseId)).data.status == 'active';
+    }
+
+    function isTeam(courseId) {
+      return exists(/databases/$(database)/documents/courses/$(courseId)/team/$(uid()));
+    }
+
+    // USERS
+    match /users/{userId} {
+      allow read: if isAdmin() || (isSignedIn() && userId == uid());
+      allow write: if isAdmin(); // profile updates via server action preferred
+    }
+
+    // COURSES
+    match /courses/{courseId} {
+      allow read: if isAdmin() || isTeam(courseId) || isEnrolled(courseId) || resource.data.status == 'open'; // Open catalog
+      allow write: if isAdmin() || isTeam(courseId);
+
+      match /modules/{moduleId} {
+        allow read: if isAdmin() || isTeam(courseId) || isEnrolled(courseId);
+        allow write: if isAdmin() || isTeam(courseId);
+      }
+
+      match /lessons/{lessonId} {
+        allow read: if isAdmin() || isTeam(courseId) || isEnrolled(courseId);
+        allow write: if isAdmin() || isTeam(courseId);
+
+        match /blocks/{blockId} {
+            allow read: if isAdmin() || isTeam(courseId) || isEnrolled(courseId);
+            allow write: if isAdmin() || isTeam(courseId);
+        }
+      }
+
+      match /materials/{materialId} {
+        allow read: if isAdmin() || isTeam(courseId) || isEnrolled(courseId);
+        allow write: if isAdmin() || isTeam(courseId);
+      }
+
+      match /announcements/{announcementId} {
+        allow read: if isAdmin() || isTeam(courseId) || isEnrolled(courseId);
+        allow write: if isAdmin() || isTeam(courseId);
+      }
+
+      match /communityThreads/{threadId} {
+        allow read: if isAdmin() || isTeam(courseId) || isEnrolled(courseId);
+        allow create: if isEnrolled(courseId);
+        allow update, delete: if isAdmin() || isTeam(courseId);
+
+        match /replies/{replyId} {
+          allow read: if isAdmin() || isTeam(courseId) || isEnrolled(courseId);
+          allow create: if isEnrolled(courseId);
+          allow update, delete: if isAdmin() || isTeam(courseId) || (isSignedIn() && request.resource.data.createdBy == uid());
+        }
+      }
+
+      match /team/{memberId} {
+        allow read: if isAdmin() || isTeam(courseId);
+        allow write: if isAdmin() || isTeam(courseId);
+      }
+    }
+
+    // GLOBAL ENROLLMENTS (Crucial for queries)
+    match /enrollments/{enrollmentId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == uid());
+      allow write: if isAdmin(); // Enrollment processed by backend/stripe
+    }
+
+    // GLOBAL PROGRESS
+    match /progress/{progressId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == uid()) || isTeam(resource.data.courseId);
+      allow write: if isSignedIn() && request.resource.data.userId == uid();
+    }
+
+    // GLOBAL CERTIFICATES
+    match /certificates/{certificateId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == uid());
+      allow write: if isAdmin(); // Issued by backend
+    }
+    
+    // EVENTS
+    match /events/{eventId} {
+         allow read: if isAdmin() || resource.data.isPublic == true || (resource.data.enrolledOnly == true && isEnrolled(resource.data.courseId));
+         allow write: if isAdmin();
+    }
+    
+    // SYSTEM & AUDIT (Admin only)
+    match /audit_logs/{logId} {
+      allow read: if isAdmin();
+      allow write: if false; // Backend only
+    }
+    
+    match /system_logs/{logId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+  }
+}

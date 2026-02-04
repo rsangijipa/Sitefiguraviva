@@ -42,18 +42,15 @@ export default function EnrollmentsManager() {
             return;
         }
         // New Schema: Root collection 'enrollments'
+        // New Schema: Root collection 'enrollments'
         const q = query(
             collection(db, 'enrollments'),
-            where('userId', '==', selectedUser.id)
-            // Note: Compound queries might need index if we order by enrolledAt. 
-            // Let's try flexible ordering or client-side sort if small.
-            // Ideally: orderBy('enrolledAt', 'desc') requires index on userId + enrolledAt.
+            where('userId', '==', selectedUser.id),
+            orderBy('enrolledAt', 'desc')
         );
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-            // Client-side sort to avoid index creation delay for MVP
-            docs.sort((a: any, b: any) => (b.enrolledAt?.seconds || 0) - (a.enrolledAt?.seconds || 0));
             setEnrollments(docs);
         });
         return () => unsubscribe();

@@ -63,6 +63,7 @@ export default function CourseDetailClient({ course }: { course: any }) {
                     <button
                         onClick={() => router.push('/#instituto')}
                         className="hidden md:flex items-center gap-2 text-accent font-bold uppercase tracking-widest text-[10px] mb-12 hover:translate-x-[-5px] transition-transform"
+                        aria-label="Voltar para a lista de cursos"
                     >
                         <ArrowLeft size={14} /> Voltar para Cursos
                     </button>
@@ -237,11 +238,11 @@ export default function CourseDetailClient({ course }: { course: any }) {
                         exit={{ opacity: 0 }}
                         className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4"
                     >
-                        <button onClick={() => setLightboxOpen(false)} className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors">
+                        <button onClick={() => setLightboxOpen(false)} className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors" aria-label="Fechar galeria">
                             <X size={32} />
                         </button>
                         <div className="max-w-5xl max-h-screen">
-                            <img src={allImages[lightboxIndex]} alt="" className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl" />
+                            <img src={allImages[lightboxIndex]} alt={`Imagem ${lightboxIndex + 1} da galeria do curso`} className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl" />
                         </div>
                     </motion.div>
                 )}
@@ -266,7 +267,7 @@ export default function CourseDetailClient({ course }: { course: any }) {
                                 const current = new URLSearchParams(Array.from(searchParams.entries()));
                                 current.delete('mediator');
                                 router.push(`${pathname}?${current.toString()}`);
-                            }} className="absolute top-6 right-6 text-gray-400 hover:text-primary transition-colors z-20">
+                            }} className="absolute top-6 right-6 text-gray-400 hover:text-primary transition-colors z-20" aria-label="Fechar detalhes da mediadora">
                                 <X size={24} />
                             </button>
 

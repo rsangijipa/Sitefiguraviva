@@ -6,7 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    LayoutDashboard, BookOpen, PenTool, Settings, LogOut, Globe, Home, X, FileText, Users, Check, UserPlus, Activity
+    LayoutDashboard, BookOpen, PenTool, Settings, LogOut, Globe, Home, X, FileText, Users, Check, UserPlus, Activity, Shield, Calendar
 } from 'lucide-react';
 import PageShell from '@/components/ui/PageShell';
 
@@ -27,9 +27,12 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
     const navItems = [
         { icon: LayoutDashboard, label: 'Visão Geral', path: '/admin' },
+        { icon: Shield, label: 'Usuários & Permissões', path: '/admin/users' },
         { icon: UserPlus, label: 'Interessados', path: '/admin/applications' },
         { icon: BookOpen, label: 'Cursos', path: '/admin/courses' },
         { icon: Check, label: 'Aprovações', path: '/admin/approvals' },
+        { icon: FileText, label: 'Avaliações (Provas)', path: '/admin/assessments' },
+        { icon: Calendar, label: 'Eventos Ao Vivo', path: '/admin/events' },
         { icon: Users, label: 'Alunos & Matrículas', path: '/admin/enrollments' },
         { icon: Globe, label: 'Google Suite', path: '/admin/google' },
         { icon: PenTool, label: 'Diário Visual', path: '/admin/blog' },

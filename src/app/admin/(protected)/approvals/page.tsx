@@ -2,13 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase/client';
-import { collection, query, where, onSnapshot, doc, updateDoc, serverTimestamp, getDoc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, doc, getDoc } from 'firebase/firestore';
 import { Check, X, Clock, User, ExternalLink, ShieldCheck, Mail, Info, CreditCard, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/context/ToastContext';
 import { Card } from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
-import { computeAccessStatus } from '@/lib/enrollmentStatus';
-import { logSystemError } from '@/lib/logging'; // Note: Client side logging might need API route or be omitted for now
+import { approveEnrollment, rejectEnrollment } from './actions';
 
 export default function ApprovalsPage() {
     const [pendingEnrollments, setPendingEnrollments] = useState<any[]>([]);
@@ -67,30 +66,13 @@ export default function ApprovalsPage() {
         setProcessingId(enrollment.id);
 
         try {
-            // Recalculate status locally to ensure consistency
-            const newStatus = computeAccessStatus(
-                enrollment.paymentStatus,
-                'approved',
-                enrollment['stripe.subscriptionStatus'] || 'active'
-            );
+            const result = await approveEnrollment(enrollment.id, enrollment.uid, enrollment.courseId, enrollment);
 
-            const updateData = {
-                status: newStatus, // Should be 'active'
-                approvalStatus: 'approved',
-                approvedAt: serverTimestamp(),
-                // approvedBy: auth.currentUser.uid // We need auth context here potentially
-                updatedAt: serverTimestamp()
-            };
-
-            const batch = [];
-            batch.push(updateDoc(doc(db, 'enrollments', enrollment.id), updateData));
-            batch.push(updateDoc(doc(db, 'users', enrollment.uid, 'enrollments', enrollment.courseId), updateData));
-
-            // Log Audit (Separate collection as requested)
-            // batch.push(addDoc(collection(db, 'audit_logs'), { ... })) // Client side batch limit?
-
-            await Promise.all(batch);
-            addToast('Aprovado com sucesso!', 'success');
+            if (result.success) {
+                addToast('Aprovado com sucesso!', 'success');
+            } else {
+                addToast(result.error || 'Erro ao aprovar.', 'error');
+            }
         } catch (error) {
             console.error(error);
             addToast('Erro ao aprovar.', 'error');
@@ -106,26 +88,13 @@ export default function ApprovalsPage() {
         setProcessingId(enrollment.id);
 
         try {
-            const newStatus = computeAccessStatus(
-                enrollment.paymentStatus,
-                'rejected',
-                enrollment['stripe.subscriptionStatus'] || 'active'
-            );
+            const result = await rejectEnrollment(enrollment.id, enrollment.uid, enrollment.courseId, reason);
 
-            const updateData = {
-                status: newStatus, // 'rejected'
-                approvalStatus: 'rejected',
-                rejectionReason: reason,
-                rejectedAt: serverTimestamp(),
-                updatedAt: serverTimestamp()
-            };
-
-            const batch = [];
-            batch.push(updateDoc(doc(db, 'enrollments', enrollment.id), updateData));
-            batch.push(updateDoc(doc(db, 'users', enrollment.uid, 'enrollments', enrollment.courseId), updateData));
-
-            await Promise.all(batch);
-            addToast('Matrícula rejeitada.', 'info');
+            if (result.success) {
+                addToast('Matrícula rejeitada.', 'info');
+            } else {
+                addToast(result.error || 'Erro ao rejeitar.', 'error');
+            }
         } catch (error) {
             console.error(error);
             addToast('Erro ao rejeitar.', 'error');

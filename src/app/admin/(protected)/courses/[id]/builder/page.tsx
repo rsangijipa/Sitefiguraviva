@@ -31,8 +31,8 @@ export default function BuilderPage() {
                 {
                     id: 'm1', courseId, title: 'Módulo 1: Introdução', order: 1, isPublished: true,
                     lessons: [
-                        { id: 'l1', moduleId: 'm1', courseId, title: 'Boas Vindas', order: 1, isPublished: true, videoUrl: '' },
-                        { id: 'l2', moduleId: 'm1', courseId, title: 'Visão Geral', order: 2, isPublished: false, videoUrl: '' }
+                        { id: 'l1', moduleId: 'm1', courseId, title: 'Boas Vindas', order: 1, isPublished: true, videoUrl: '', type: 'video' },
+                        { id: 'l2', moduleId: 'm1', courseId, title: 'Visão Geral', order: 2, isPublished: false, videoUrl: '', type: 'video' }
                     ]
                 }
             ]);

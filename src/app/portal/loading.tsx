@@ -1,10 +1,11 @@
 export default function Loading() {
     return (
-        <div className="min-h-screen bg-paper p-8 flex flex-col gap-6">
-            <div className="h-40 w-full bg-stone-100 animate-pulse rounded-[2.5rem]" />
-            <div className="grid md:grid-cols-3 gap-6">
-                {[1, 2, 3, 4, 5, 6].map((i) => (
-                    <div key={i} className="h-64 bg-stone-100 animate-pulse rounded-[2rem]" />
+        <div className="space-y-8 p-4 animate-pulse">
+            <div className="h-8 bg-stone-100 rounded-lg w-1/3 mb-8"></div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[1, 2, 3].map(i => (
+                    <div key={i} className="aspect-video bg-stone-100 rounded-xl border border-stone-50"></div>
                 ))}
             </div>
         </div>
