@@ -30,7 +30,7 @@ if (!email) {
 async function setAdmin() {
     try {
         const user = await admin.auth().getUserByEmail(email);
-        await admin.auth().setCustomUserClaims(user.uid, { admin: true });
+        await admin.auth().setCustomUserClaims(user.uid, { admin: true, role: 'admin' });
         console.log(`Sucesso! O usuário ${email} agora é um administrador.`);
         process.exit(0);
     } catch (error) {

@@ -1,161 +1,143 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // --- Helper Functions ---
+
+    function isSignedIn() { 
+      return request.auth != null; 
+    }
     
-    // Helper Functions
+    function uid() { 
+      return request.auth.uid; 
+    }
+
     function isAdmin() {
-      return request.auth != null && request.auth.token.admin == true;
+      // Robust admin check: must have 'admin' role in user doc AND be active
+      return isSignedIn()
+        && get(/databases/$(database)/documents/users/$(uid())).data.role == 'admin'
+        && get(/databases/$(database)/documents/users/$(uid())).data.isActive == true;
     }
 
-    function isOwner(uid) {
-      return request.auth != null && request.auth.uid == uid;
+    function isEnrolled(courseId) {
+      // STRICT CHECK: Enrollment ID must be {uid}_{courseId}
+      // This allows cheap 'exists' check instead of expensive query
+      return exists(/databases/$(database)/documents/enrollments/$(uid() + '_' + courseId))
+             && get(/databases/$(database)/documents/enrollments/$(uid() + '_' + courseId)).data.status == 'active';
     }
 
-    function isPublished(resourceData) {
-      return resourceData.published == true;
-    }
-
-    // Check if user has an ACTIVE enrollment for the course (ROOT Collection based)
-    function isEnrolledActive(courseId) {
-       let enrollmentId = request.auth.uid + '_' + courseId;
-       return request.auth != null && 
-              exists(/databases/$(database)/documents/enrollments/$(enrollmentId)) &&
-              (
-                get(/databases/$(database)/documents/enrollments/$(enrollmentId)).data.status == 'active'
-                // || get(/databases/$(database)/documents/enrollments/$(enrollmentId)).data.status == 'grace' // Future-proof
-              );
+    function isTeam(courseId) {
+      // Check if user is a member of the course team/staff
+      return exists(/databases/$(database)/documents/courses/$(courseId)/team/$(uid()));
     }
 
     // --- Collections ---
 
-    // Posts (Blog)
-    match /posts/{postId} {
-      allow read: if isPublished(resource.data) || isAdmin();
+    // USERS (Strict Privacy)
+    match /users/{userId} {
+      allow read: if isAdmin() || (isSignedIn() && userId == uid());
+      // Updates strictly controlled via server actions or limited fields
       allow write: if isAdmin();
     }
 
-    // Public Docs (Policies, etc)
-    match /publicDocs/{docId} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
-
-    // Pages (Content)
-    match /pages/{pageId} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
-
-    // Gallery
-    match /gallery/{imageId} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
-
-    // Courses
+    // COURSES (Catalog & Content)
     match /courses/{courseId} {
-      allow read: if isPublished(resource.data) || isAdmin();
-      allow write: if isAdmin();
+      // Read: Public/Open OR Enrolled OR Admin/Team
+      allow read: if isAdmin() || isTeam(courseId) || isEnrolled(courseId) || resource.data.status == 'open'; 
+      allow write: if isAdmin() || isTeam(courseId);
 
-      // Subcollections: Modules, Lessons, Materials
+      // Subcollections inherit logic but specific rules apply
       match /modules/{moduleId} {
-        allow read: if isAdmin() || (isPublished(get(/databases/$(database)/documents/courses/$(courseId)).data) && isEnrolledActive(courseId));
-        allow write: if isAdmin();
+        allow read: if isAdmin() || isTeam(courseId) || isEnrolled(courseId);
+        allow write: if isAdmin() || isTeam(courseId);
+      }
 
-        match /lessons/{lessonId} {
-          allow read: if isAdmin() || (isPublished(get(/databases/$(database)/documents/courses/$(courseId)).data) && isEnrolledActive(courseId));
-          allow write: if isAdmin();
+      match /lessons/{lessonId} {
+        allow read: if isAdmin() || isTeam(courseId) || isEnrolled(courseId);
+        allow write: if isAdmin() || isTeam(courseId);
+
+        match /blocks/{blockId} {
+            allow read: if isAdmin() || isTeam(courseId) || isEnrolled(courseId);
+            allow write: if isAdmin() || isTeam(courseId);
         }
       }
 
       match /materials/{materialId} {
-        allow read: if isAdmin() || (isPublished(get(/databases/$(database)/documents/courses/$(courseId)).data) && isEnrolledActive(courseId));
-        allow write: if isAdmin();
+        allow read: if isAdmin() || isTeam(courseId) || isEnrolled(courseId);
+        allow write: if isAdmin() || isTeam(courseId);
+      }
+
+      match /announcements/{announcementId} {
+        allow read: if isAdmin() || isTeam(courseId) || isEnrolled(courseId);
+        allow write: if isAdmin() || isTeam(courseId);
+      }
+
+      // Community Subcollection (Preferred approach)
+      match /communityThreads/{threadId} {
+        allow read: if isAdmin() || isTeam(courseId) || isEnrolled(courseId);
+        allow create: if isEnrolled(courseId);
+        allow update: if (isAdmin() || isTeam(courseId)) || (isSignedIn() && request.resource.data.authorId == uid() && resource.data.authorId == uid() && !("isPinned" in request.resource.data) && !("isLocked" in request.resource.data));
+        allow delete: if isAdmin() || isTeam(courseId); // Soft delete preferred via update
+
+        match /replies/{replyId} {
+          allow read: if isAdmin() || isTeam(courseId) || isEnrolled(courseId);
+          allow create: if isEnrolled(courseId);
+          allow update: if (isAdmin() || isTeam(courseId)) || (isSignedIn() && request.resource.data.authorId == uid());
+          allow delete: if isAdmin() || isTeam(courseId);
+        }
+      }
+
+      match /team/{memberId} {
+        allow read: if isAdmin() || isTeam(courseId);
+        allow write: if isAdmin() || isTeam(courseId);
       }
     }
 
-    // Users
-    match /users/{userId} {
-      allow read: if isOwner(userId) || isAdmin();
-      allow write: if isOwner(userId) || isAdmin(); 
-
-      // User Enrollments (Strictly Read-Only for User, managed by Backend/Stripe)
-      match /enrollments/{enrollmentId} {
-        allow read: if isOwner(userId) || isAdmin();
-        allow write: if isAdmin(); 
-      }
-    }
-
-    // Global Enrollments Ledger (Redundant but useful for Admin queries)
+    // GLOBAL ENROLLMENTS (The Ledger)
     match /enrollments/{enrollmentId} {
-       // User can only read their own enrollment
-       allow read: if isAdmin() || (resource.data.userId == request.auth.uid);
-       // Only Admin (or Backend via Admin SDK) can write enrollments
-       allow write: if isAdmin();
+      // ID scheme: {uid}_{courseId}
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == uid());
+      allow write: if isAdmin(); // System/Admin managed
     }
 
-    // Documents (Private)
-    match /documents/{docId} {
-       allow read: if request.auth != null || isAdmin(); 
-       allow write: if isAdmin();
+    // GLOBAL PROGRESS
+    match /progress/{progressId} {
+      // ID scheme: {uid}_{courseId} usually, or auto-id
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == uid()) || isTeam(resource.data.courseId);
+      
+      // Student can update their own progress
+      allow create: if isSignedIn() && request.resource.data.userId == uid();
+      allow update: if isSignedIn() && resource.data.userId == uid() && request.resource.data.userId == uid();
+    }
+
+    // GLOBAL CERTIFICATES
+    match /certificates/{certificateId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == uid());
+      allow write: if isAdmin(); // Server issued
     }
     
-    match /logs/{logId} {
+    // EVENTS (Live Sessions)
+    match /events/{eventId} {
+         allow read: if isAdmin() || resource.data.isPublic == true || (resource.data.enrolledOnly == true && isEnrolled(resource.data.courseId));
+         allow write: if isAdmin();
+    }
+    
+    // SECURITY & AUDIT
+    match /audit_logs/{logId} {
       allow read: if isAdmin();
       allow write: if false; 
     }
-
-    // User Progress (High volume writes)
-    match /progress/{progressId} {
-      allow read: if isAdmin() || (resource.data.userId == request.auth.uid);
-      
-      // Create: Must be for self
-      allow create: if isAdmin() || (request.resource.data.userId == request.auth.uid);
-      
-      // Update: Must be own, AND cannot change the owner (immutable userId)
-      // Update: Must be own, AND cannot change the owner (immutable userId)
-      allow update: if isAdmin() || (
-        resource.data.userId == request.auth.uid && 
-        request.resource.data.userId == request.auth.uid &&
-        request.resource.data.userId == resource.data.userId
-      );
+    
+    match /system_logs/{logId} {
+      allow read: if isAdmin();
+      allow write: if false;
     }
     
-    // Applications (Internal Forms)
-    match /applications/{applicationId} {
-      allow read: if isAdmin() || (resource.data.uid == request.auth.uid);
-      
-      allow create: if isAdmin() || (
-        request.auth != null &&
-        request.resource.data.uid == request.auth.uid &&
-        applicationId == request.resource.data.uid + '_' + request.resource.data.courseId
-      );
-
-      allow update: if isAdmin() || (
-        request.auth != null &&
-        request.resource.data.uid == request.auth.uid &&
-        applicationId == request.resource.data.uid + '_' + request.resource.data.courseId &&
-        resource.data.status != 'submitted' // Lock after submission
-      );
-    }
-
-    // Stripe Events (Idempotency Audit)
-    match /stripe_events/{eventId} {
-      allow read: if isAdmin();
-      allow write: if false; // Only Admin SDK writes here
-    }
-
-    // System Logs (Observability)
-    match /system_logs/{logId} {
-        allow read: if isAdmin();
-        allow write: if false; // Only Admin SDK writes here (client logs should go via API if needed)
-    }
-
-    // Audit Logs
-    match /audit_logs/{logId} {
-        allow read: if isAdmin();
-        allow write: if false; 
+    // NOTIFICATIONS
+    match /users/{userId}/notifications/{notificationId} {
+      allow read: if isSignedIn() && userId == uid();
+      allow update: if isSignedIn() && userId == uid(); // Only for marking as read
+      allow create: if isAdmin(); // Or server action
     }
   }
 }

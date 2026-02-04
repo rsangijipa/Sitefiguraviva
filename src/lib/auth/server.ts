@@ -22,7 +22,7 @@ export async function verifySession() {
 export async function requireAdmin() {
     const claims = await verifySession();
 
-    if (!claims || !claims.admin) {
+    if (!claims || (!claims.admin && claims.role !== 'admin')) {
         redirect('/admin/login');
     }
 

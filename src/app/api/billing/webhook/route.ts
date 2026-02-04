@@ -5,6 +5,7 @@ import { FieldValue } from 'firebase-admin/firestore';
 import Stripe from 'stripe';
 import { computeAccessStatus, AccessStatus, PaymentStatus, StripeSubscriptionStatus } from '@/lib/enrollmentStatus';
 import { logSystemError } from '@/lib/logging';
+import { logAudit } from '@/lib/audit';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -170,6 +171,14 @@ export async function POST(req: NextRequest) {
                     batch.set(enrollmentDoc.ref, updateData, { merge: true });
                     batch.set(userEnrollmentRef, updateData, { merge: true });
                     await batch.commit();
+
+                    await logAudit({
+                        actor: { uid: 'system', role: 'webhook' },
+                        action: 'billing.invoice_paid',
+                        target: { collection: 'enrollments', id: enrollmentDoc.id, summary: `Invoice ${invoice.id} paid. Access Granted/Renewed.` },
+                        metadata: { subscriptionId, invoiceId: invoice.id, amount: invoice.amount_paid },
+                        diff: { after: updateData }
+                    });
                 } else {
                     console.warn(`No enrollment found for subscription ${subscriptionId}`);
                     await logSystemError('webhook', 'Missing enrollment for paid invoice', { subscriptionId, invoiceId: invoice.id }, 'warning');
@@ -234,10 +243,10 @@ export async function POST(req: NextRequest) {
                     // Update ONLY stripe status in our inputs
                     const finalStatus = computeAccessStatus(currentPayment, currentApproval, stripeStatus);
 
-                    const updateData: any = {
+                    const updateData: Record<string, unknown> = {
                         status: finalStatus,
                         'stripe.subscriptionStatus': stripeStatus,
-                        'stripe.currentPeriodEnd': (subscription as any).current_period_end ? new Date((subscription as any).current_period_end * 1000) : null,
+                        'stripe.currentPeriodEnd': typeof (subscription as any).current_period_end === 'number' ? new Date((subscription as any).current_period_end * 1000) : null,
                         updatedAt: FieldValue.serverTimestamp(),
                     };
 
@@ -287,6 +296,14 @@ export async function POST(req: NextRequest) {
                     batch.update(docSnap.ref, updateData);
                     batch.update(userEnrollmentRef, updateData);
                     await batch.commit();
+
+                    await logAudit({
+                        actor: { uid: 'system', role: 'webhook' },
+                        action: 'billing.subscription_canceled',
+                        target: { collection: 'enrollments', id: docSnap.id, summary: `Subscription ${subscriptionId} canceled. Access Revoked.` },
+                        metadata: { subscriptionId },
+                        diff: { after: updateData }
+                    });
                 }
                 break;
             }

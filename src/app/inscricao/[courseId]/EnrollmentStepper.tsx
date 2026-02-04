@@ -126,7 +126,7 @@ export default function EnrollmentStepper({ courseId, initialData }: { courseId:
         <div className="max-w-3xl mx-auto">
             {/* Header */}
             <div className="mb-12 text-center">
-                <Link href="/" className="text-primary/50 text-xs font-bold uppercase tracking-widest hover:text-primary mb-4 block">
+                <Link href="/" className="text-primary/80 text-xs font-bold uppercase tracking-widest hover:text-primary mb-4 block transition-colors" aria-label="Voltar para a página inicial">
                     &larr; Voltar para Home
                 </Link>
                 <h1 className="font-serif text-3xl md:text-4xl text-primary mb-4">{course.title}</h1>

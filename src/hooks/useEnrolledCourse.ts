@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { db } from '@/lib/firebase/client';
 import { doc, getDoc, collection, query, orderBy, getDocs, where, Timestamp, setDoc } from 'firebase/firestore';
-import { Module, Lesson } from '@/components/portal/LessonSidebar';
+import { Module, Lesson } from '@/types/lms';
 
 interface EnrolledCourseData {
     course: any;
@@ -63,17 +63,28 @@ export function useEnrolledCourse(courseId: string, userId: string | undefined, 
                 console.warn("Error fetching progress:", e);
             }
 
-            // C. Fetch Materials (Only if Active)
-            const materialsQ = query(collection(db, 'courses', courseId, 'materials'), orderBy('created_at', 'desc'));
+            // C. Fetch Materials (Only if Active) -- Visbility Filter in memory
+            const materialsQ = query(collection(db, 'courses', courseId, 'materials'), orderBy('createdAt', 'desc'));
             const materialsSnap = await getDocs(materialsQ);
-            const materials = materialsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+            const materials = materialsSnap.docs
+                .map(d => ({ id: d.id, ...d.data() } as any))
+                .filter(m => !m.visibility || m.visibility === 'enrolled' || m.visibility === 'after_completion'); // Default to enrolled if missing
 
             // D. Fetch Modules & Lessons (Only if Active)
-            const modulesQ = query(collection(db, 'courses', courseId, 'modules'), orderBy('order', 'asc'));
+            // Filter by isPublished: true
+            const modulesQ = query(
+                collection(db, 'courses', courseId, 'modules'),
+                where('isPublished', '==', true),
+                orderBy('order', 'asc')
+            );
             const modulesSnap = await getDocs(modulesQ);
 
             const modulesPromises = modulesSnap.docs.map(async (mDoc) => {
-                const lessonsQ = query(collection(db, 'courses', courseId, 'modules', mDoc.id, 'lessons'), orderBy('order', 'asc'));
+                const lessonsQ = query(
+                    collection(db, 'courses', courseId, 'modules', mDoc.id, 'lessons'),
+                    where('isPublished', '==', true),
+                    orderBy('order', 'asc')
+                );
                 const lessonsSnap = await getDocs(lessonsQ);
 
                 const lessons: Lesson[] = lessonsSnap.docs.map(lDoc => {
@@ -84,6 +95,8 @@ export function useEnrolledCourse(courseId: string, userId: string | undefined, 
 
                     return {
                         id: lDoc.id,
+                        moduleId: mDoc.id,
+                        courseId: courseId,
                         title: lData.title,
                         duration: lData.duration,
                         videoUrl: lData.videoUrl,
@@ -91,15 +104,20 @@ export function useEnrolledCourse(courseId: string, userId: string | undefined, 
                         thumbnail: lData.thumbnail,
                         isCompleted,
                         isLocked: lData.isLocked || false,
-                        type: (lData.type || 'video') as 'video' | 'text' | 'quiz'
+                        type: (lData.type || 'video') as 'video' | 'text' | 'quiz',
+                        order: lData.order || 0,
+                        isPublished: lData.isPublished !== false
                     };
                 });
 
                 return {
                     id: mDoc.id,
+                    courseId,
                     title: mDoc.data().title,
+                    order: mDoc.data().order,
+                    isPublished: true,
                     lessons
-                };
+                } as Module;
             });
 
             const modules = await Promise.all(modulesPromises);

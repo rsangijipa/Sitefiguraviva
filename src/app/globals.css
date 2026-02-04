@@ -73,7 +73,7 @@
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center bg-primary text-white px-6 py-3 rounded-lg font-bold tracking-wide hover:bg-primary/90 transition-all active:scale-95 shadow-lg;
+    @apply inline-flex items-center justify-center bg-primary text-white px-6 py-3 rounded-lg font-bold tracking-wide hover:opacity-90 transition-all active:scale-95 shadow-lg;
   }
 
   .btn-secondary {

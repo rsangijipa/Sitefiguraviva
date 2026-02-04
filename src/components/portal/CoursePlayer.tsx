@@ -2,9 +2,11 @@ import { ArrowLeft, CheckCircle, ChevronLeft, ChevronRight, Menu, X } from "luci
 import Link from "next/link";
 import { useState } from "react";
 import { VideoPlayer } from "./VideoPlayer";
-import { Lesson, LessonSidebar, Module } from "./LessonSidebar";
+import { LessonSidebar } from "./LessonSidebar";
+import { Lesson, Module } from "@/types/lms";
 import Button from "../ui/Button";
 import { cn } from "@/lib/utils";
+import { useProgress } from "@/hooks/useProgress";
 
 interface CoursePlayerProps {
     course: {
@@ -20,6 +22,25 @@ interface CoursePlayerProps {
     prevLessonId?: string;
     loading?: boolean;
 }
+
+// Wrapper component to isolate hook usage per lesson
+const CourseVideoWrapper = ({ courseId, lesson, onMarkComplete }: { courseId: string, lesson: Lesson, onMarkComplete: (id: string) => void }) => {
+    const { progress, updateProgress, triggerSync } = useProgress(courseId, lesson.id);
+
+    return (
+        <VideoPlayer
+            url={lesson.type === 'video' ? (lesson as any).videoUrl : ''}
+            poster={(lesson as any).thumbnail}
+            initialTime={progress?.seekPosition || 0}
+            onTimeUpdate={(t) => updateProgress(t, false)}
+            onPause={() => triggerSync()}
+            onEnded={() => {
+                triggerSync();
+                onMarkComplete(lesson.id);
+            }}
+        />
+    );
+};
 
 export const CoursePlayer = ({
     course,
@@ -78,9 +99,10 @@ export const CoursePlayer = ({
                             sidebarOpen ? "aspect-video md:aspect-video" : "aspect-video md:h-[60vh]"
                         )}>
                             {activeLesson && (
-                                <VideoPlayer
-                                    url={activeLesson.type === 'video' ? (activeLesson as any).videoUrl : ''}
-                                    poster={(activeLesson as any).thumbnail}
+                                <CourseVideoWrapper
+                                    courseId={course.id}
+                                    lesson={activeLesson}
+                                    onMarkComplete={onMarkComplete}
                                 />
                             )}
                         </div>

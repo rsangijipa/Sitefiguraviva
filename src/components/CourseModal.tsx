@@ -5,6 +5,7 @@ import { Calendar, MapPin, ExternalLink, X, ArrowLeft } from 'lucide-react';
 import { getMediatorDetails } from '@/utils/mediators';
 import { Modal, ModalContent, ModalBody } from './ui/Modal';
 import { useState } from 'react';
+import Image from 'next/image';
 
 interface CourseModalProps {
     isOpen: boolean;
@@ -69,7 +70,13 @@ export default function CourseModal({ isOpen, onClose, course }: CourseModalProp
                                                     >
                                                         <div className="w-10 h-10 rounded-full bg-stone-100 overflow-hidden shrink-0 border border-stone-200">
                                                             {details.image ? (
-                                                                <img src={details.image} alt={details.name} className="w-full h-full object-cover" />
+                                                                <Image
+                                                                    src={details.image}
+                                                                    alt={details.name}
+                                                                    fill
+                                                                    className="object-cover"
+                                                                    sizes="(max-width: 768px) 100vw, 300px"
+                                                                />
                                                             ) : (
                                                                 <div className="w-full h-full flex items-center justify-center text-stone-400 text-xs font-bold">
                                                                     {details.name.charAt(0)}
@@ -109,7 +116,13 @@ export default function CourseModal({ isOpen, onClose, course }: CourseModalProp
                             {/* Right Column: Image */}
                             <div className="relative">
                                 <div className="aspect-[4/5] rounded-[2rem] overflow-hidden shadow-xl border-4 border-white">
-                                    <img src={getCoverImage()} alt={course.title} className="w-full h-full object-cover" />
+                                    <Image
+                                        src={getCoverImage() || '/assets/logo.jpeg'}
+                                        alt={course.title}
+                                        fill
+                                        className="object-cover"
+                                        sizes="(max-width: 768px) 100vw, 500px"
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -185,7 +198,13 @@ export default function CourseModal({ isOpen, onClose, course }: CourseModalProp
                                 <div className="flex flex-col items-center text-center">
                                     <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg mb-6">
                                         {selectedMediator.image ? (
-                                            <img src={selectedMediator.image} alt={selectedMediator.name} className="w-full h-full object-cover" />
+                                            <Image
+                                                src={selectedMediator.image}
+                                                alt={selectedMediator.name}
+                                                fill
+                                                className="object-cover"
+                                                sizes="(max-width: 768px) 100vw, 300px"
+                                            />
                                         ) : (
                                             <div className="w-full h-full bg-stone-100 flex items-center justify-center text-stone-300 text-4xl">
                                                 {selectedMediator.name.charAt(0)}

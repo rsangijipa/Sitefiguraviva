@@ -1,30 +1,25 @@
 import { Suspense } from 'react';
-import { db } from '@/lib/firebase/admin';
 import { notFound } from 'next/navigation';
 import CourseDetailClient from './CourseDetailClient';
+
+import { getCourseById } from '@/data/courses';
 
 async function CourseContent({ id }: { id: string }) {
     try {
         console.log(`🔍 Buscando detalhes do curso ID: ${id}`);
-        const docRef = db.collection('courses').doc(id);
-        const docSnap = await docRef.get();
+        // TODO: Pass userId to check strictly for admin access if unpublished. 
+        // Currently passing true (includeUnpublished) to maintain existing behavior (viewable if ID implies knowledge).
+        const course = await getCourseById(id, true);
 
-        if (!docSnap.exists) {
-            console.warn(`⚠️ Curso não encontrado no banco para o ID: ${id}`);
+        if (!course) {
+            console.warn(`⚠️ Curso não encontrado ou acesso negado para o ID: ${id}`);
             notFound();
         }
-
-        const course: any = {
-            id: docSnap.id,
-            ...docSnap.data(),
-            created_at: docSnap.data()?.created_at?.toDate().toISOString() || null,
-            updated_at: docSnap.data()?.updated_at?.toDate().toISOString() || null
-        };
 
         console.log(`✅ Detalhes carregados para: ${course.title}`);
         return <CourseDetailClient course={course} />;
     } catch (error) {
-        console.error('❌ Blog Fetch Error:', error);
+        console.error('❌ Course Fetch Error:', error);
         notFound();
     }
 }

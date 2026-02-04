@@ -147,7 +147,8 @@ export function LessonEditor({ moduleId, lessonId, initialData }: LessonEditorPr
                     title: 'Aula Carregada ' + lessonId.substring(0, 4),
                     order: 1,
                     isPublished: false,
-                    duration: 10
+                    duration: 0,
+                    type: 'text' // Default
                 });
                 // In real app, fetch blocks here or pass them in
                 setBlocks([

@@ -3,23 +3,7 @@ import { CheckCircle2, Circle, Lock, PlayCircle, ChevronDown, ChevronRight } fro
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 
-export interface Lesson {
-    id: string;
-    title: string;
-    duration?: string;
-    isCompleted?: boolean;
-    isLocked?: boolean;
-    type?: 'video' | 'text' | 'quiz';
-    videoUrl?: string;
-    description?: string;
-    thumbnail?: string;
-}
-
-export interface Module {
-    id: string;
-    title: string;
-    lessons: Lesson[];
-}
+import { Lesson, Module } from "@/types/lms";
 
 interface LessonSidebarProps {
     modules: Module[];

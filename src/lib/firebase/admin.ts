@@ -46,11 +46,10 @@ const createProxy = (name: string) => {
                 const service = name === 'firestore' ? admin.firestore() :
                     name === 'auth' ? admin.auth() :
                         admin.storage();
-                // @ts-ignore
-                const value = service[prop];
+                const value = service[prop as keyof typeof service];
                 // If it's a function, bind it to the service
                 if (typeof value === 'function') {
-                    return value.bind(service);
+                    return (value as Function).bind(service);
                 }
                 return value;
             }
@@ -72,9 +71,8 @@ const dbProxy = new Proxy({}, {
     get: (_target, prop) => {
         if (admin.apps.length) {
             const instance = admin.firestore();
-            // @ts-ignore
-            const val = instance[prop];
-            return typeof val === 'function' ? val.bind(instance) : val;
+            const val = instance[prop as keyof typeof instance];
+            return typeof val === 'function' ? (val as Function).bind(instance) : val;
         }
         throw new Error(`Firebase Admin SDK not initialized (Firestore). Missing: ${missingEnvVars.join(', ')}`);
     }
@@ -84,9 +82,8 @@ const authProxy = new Proxy({}, {
     get: (_target, prop) => {
         if (admin.apps.length) {
             const instance = admin.auth();
-            // @ts-ignore
-            const val = instance[prop];
-            return typeof val === 'function' ? val.bind(instance) : val;
+            const val = instance[prop as keyof typeof instance];
+            return typeof val === 'function' ? (val as Function).bind(instance) : val;
         }
         throw new Error(`Firebase Admin SDK not initialized (Auth). Missing: ${missingEnvVars.join(', ')}`);
     }
@@ -96,9 +93,8 @@ const storageProxy = new Proxy({}, {
     get: (_target, prop) => {
         if (admin.apps.length) {
             const instance = admin.storage();
-            // @ts-ignore
-            const val = instance[prop];
-            return typeof val === 'function' ? val.bind(instance) : val;
+            const val = instance[prop as keyof typeof instance];
+            return typeof val === 'function' ? (val as Function).bind(instance) : val;
         }
         throw new Error(`Firebase Admin SDK not initialized (Storage). Missing: ${missingEnvVars.join(', ')}`);
     }

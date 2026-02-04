@@ -9,12 +9,10 @@ service firebase.storage {
     // --- Helpers ---
 
     function isAdmin() {
-      return request.auth != null && (
-        request.auth.token.admin == true || 
-        request.auth.token.role == 'admin' ||
-        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.isAdmin == true ||
-        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin'
-      );
+      // Prioriza Custom Claims (Custo Zero de BD) e short-circuit
+      return (request.auth.token.admin == true || request.auth.token.role == 'admin') ||
+             // Fallback apenas se necessário (Custa $$)
+             firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
     function isBelowMaxSize(sizeMB) {
@@ -23,10 +21,12 @@ service firebase.storage {
     }
     
     // Strict enrollment check (Active status)
+    // Strict enrollment check (Active status) - Root Collection as SoT
     function isEnrolledActive(courseId) {
+       let enrollmentId = request.auth.uid + '_' + courseId;
        return request.auth != null && 
-              firestore.exists(/databases/(default)/documents/users/$(request.auth.uid)/enrollments/$(courseId)) &&
-              firestore.get(/databases/(default)/documents/users/$(request.auth.uid)/enrollments/$(courseId)).data.status == 'active';
+              firestore.exists(/databases/(default)/documents/enrollments/$(enrollmentId)) &&
+              firestore.get(/databases/(default)/documents/enrollments/$(enrollmentId)).data.status == 'active';
     }
 
     // --- Public Assets ---
@@ -66,7 +66,7 @@ service firebase.storage {
     // Deep match to capture courseId
     match /courses/{courseId}/materials/{allPaths=**} {
       allow read: if isAdmin() || (request.auth != null && isEnrolledActive(courseId));
-      allow write: if request.auth != null && isBelowMaxSize(50); // Temporary fix for dev
+      allow write: if isAdmin() && isBelowMaxSize(50);
     }
     
     // --- Legacy Clean-up Paths (Optional support during migration) ---
@@ -79,10 +79,10 @@ service firebase.storage {
        allow write: if isAdmin();
     }
 
-    // General Uploads (Used by ImageUpload component)
-    match /uploads/{allPaths=**} {
+    // General Uploads (Users can only upload to their own folder)
+    match /uploads/{userId}/{allPaths=**} {
        allow read: if true;
-       allow write: if request.auth != null && isBelowMaxSize(10);
+       allow write: if request.auth != null && request.auth.uid == userId && isBelowMaxSize(10);
     }
 
     // Default Deny (Last resort)

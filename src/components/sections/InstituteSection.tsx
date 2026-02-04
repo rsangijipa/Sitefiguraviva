@@ -95,7 +95,7 @@ export default function InstituteSection({ gallery = [] }: { gallery?: any[] }) 
                                         className="absolute inset-0 w-full h-full"
                                     >
                                         <Image
-                                            src={slides[currentIndex].src}
+                                            src={slides[currentIndex].src || slides[currentIndex].url || slides[currentIndex].image || "/assets/foto-grupo.jpg"}
                                             alt={slides[currentIndex].title || "Instituto Figura Viva"}
                                             fill
                                             className="object-cover"
