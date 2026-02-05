@@ -30,6 +30,12 @@ export interface CourseDoc {
     coverImage?: string; // URL
     thumbnail?: string; // URL
 
+    // Quick Details
+    instructor?: string;
+    duration?: string;
+    level?: string;
+    category?: string;
+
     // Status & Visibility
     isPublished: boolean;
     status: 'draft' | 'open' | 'closed' | 'archived';

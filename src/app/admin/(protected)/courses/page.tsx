@@ -64,10 +64,16 @@ export default function CoursesPage() {
         }
     };
 
-    const filteredCourses = courses.filter(c =>
-        c.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        c.status.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredCourses = courses
+        .filter(c =>
+            c.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            c.status.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+        .sort((a, b) => {
+            const dateA = (a.createdAt as any)?.seconds || 0;
+            const dateB = (b.createdAt as any)?.seconds || 0;
+            return dateB - dateA;
+        });
 
     return (
         <div className="space-y-8 pb-20 max-w-7xl mx-auto">

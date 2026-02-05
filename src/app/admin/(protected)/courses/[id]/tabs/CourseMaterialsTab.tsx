@@ -33,7 +33,12 @@ export default function CourseMaterialsTab({ courseId }: { courseId: string }) {
         setLoading(true);
         try {
             const data = await adminCourseService.getMaterials(courseId);
-            setMaterials(data);
+            const sorted = data.sort((a, b) => {
+                const dateA = a.createdAt?.seconds || 0;
+                const dateB = b.createdAt?.seconds || 0;
+                return dateB - dateA;
+            });
+            setMaterials(sorted);
         } catch (error) {
             console.error(error);
         } finally {
