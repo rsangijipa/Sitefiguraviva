@@ -11,7 +11,9 @@ export default function FloatingControls() {
     const [isPlaying, setIsPlaying] = useState(false);
     const [expanded, setExpanded] = useState(false);
     const audioRef = useRef<HTMLAudioElement>(null);
-    const audioUrl = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
+    const audioUrl = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3"; // Temporário: Trocarei por um link de sons de natureza meditativos realistas se disponível, ou usarei um CDN confiável.
+    // Usando um link de som de natureza (chuva/floresta) mais adequado para meditação.
+    const meditationMusic = "https://cdn.pixabay.com/audio/2022/02/10/audio_f30064375b.mp3"; // Forest/Nature loops
 
     // Theme Logic
     useEffect(() => {
@@ -66,7 +68,7 @@ export default function FloatingControls() {
 
     return (
         <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end pointer-events-none">
-            <audio ref={audioRef} src={audioUrl} loop />
+            <audio ref={audioRef} src={meditationMusic} loop />
 
             <div className="flex flex-col items-end gap-3 pointer-events-auto">
                 {/* 1. WhatsApp (Static - Top) */}
