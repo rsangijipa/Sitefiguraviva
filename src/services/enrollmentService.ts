@@ -23,14 +23,21 @@ export const enrollmentService = {
 
         try {
             // Query ROOT collection 'enrollments'
+            // We removed orderBy to avoid index requirement
             const q = query(
                 collection(db, 'enrollments'),
-                where('userId', '==', userId),
-                orderBy('enrolledAt', 'desc')
+                where('userId', '==', userId)
             );
 
             const snapshot = await getDocs(q);
-            return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Enrollment));
+            const enrollments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Enrollment));
+
+            // Sort in memory (Newest first)
+            return enrollments.sort((a, b) => {
+                const tA = a.enrolledAt?.seconds || 0;
+                const tB = b.enrolledAt?.seconds || 0;
+                return tB - tA;
+            });
         } catch (error) {
             console.error("Error fetching enrollments:", error);
             throw error;

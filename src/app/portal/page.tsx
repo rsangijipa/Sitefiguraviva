@@ -228,7 +228,7 @@ export default function PortalDashboard() {
                                         title={event.title}
                                         course={event.courseId ? "Curso Exclusivo" : "Evento Ao Vivo"} // We could lookup course title if map available
                                         type={event.meetingUrl ? "live" : "exam"} // Simple heuristic
-                                        date={event.startsAt?.toDate().toLocaleDateString('pt-BR', { weekday: 'short', hour: '2-digit', minute: '2-digit' })}
+                                        date={event.startsAt ? ((event.startsAt as any).toDate ? (event.startsAt as any).toDate() : new Date(event.startsAt as any)).toLocaleDateString('pt-BR', { weekday: 'short', hour: '2-digit', minute: '2-digit' }) : 'A definir'}
                                     />
                                 ))
                             ) : (

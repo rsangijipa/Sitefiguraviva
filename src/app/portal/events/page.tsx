@@ -19,19 +19,30 @@ export default async function EventsPage() {
     } catch { redirect('/login'); }
 
     // Fetch Events (Ordered by start date)
-    // In production, filter by enrolled courses or public visibility
+    // Removed orderBy to avoid index requirement - sorting after fetch
     const eventsSnap = await db.collection('events')
         .where('status', '!=', 'cancelled')
-        .orderBy('status') // Constraint: inequality field must be first in orderBy
-        .orderBy('startsAt', 'asc')
         .get();
 
     let events: LiveEvent[] = eventsSnap.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
-        startsAt: doc.data().startsAt, // Ensure Timestamp is passed correctly
+        startsAt: doc.data().startsAt,
         endsAt: doc.data().endsAt
     } as LiveEvent));
+
+    // Sort in memory (Status logical group then date)
+    events.sort((a, b) => {
+        // First priority: Not ended events
+        const aEnded = a.status === 'ended';
+        const bEnded = b.status === 'ended';
+        if (aEnded !== bEnded) return aEnded ? 1 : -1;
+
+        // Second priority: Chronological startsAt
+        const tA = (a.startsAt as any)?._seconds || 0;
+        const tB = (b.startsAt as any)?._seconds || 0;
+        return tA - tB;
+    });
 
     // If empty, mock data for demonstration if allowMock=true or just empty state
     // For Development, let's inject a mock event if database is empty so review is possible

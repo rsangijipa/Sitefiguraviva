@@ -17,11 +17,9 @@ export default async function CommunityPage() {
     let uid;
     try { await auth.verifySessionCookie(sessionCookie, true); } catch { redirect('/login'); }
 
-    // Fetch Posts (Real + Mock)
+    // Fetch Posts (Removed orderBy to avoid index requirements)
     const postsSnap = await db.collection('posts')
-        .orderBy('isPinned', 'desc')
-        .orderBy('createdAt', 'desc')
-        .limit(20)
+        .limit(50) // Fetch a larger window to sort in memory
         .get();
 
     let posts: Post[] = postsSnap.docs.map(doc => ({
@@ -30,6 +28,14 @@ export default async function CommunityPage() {
         createdAt: doc.data().createdAt,
         updatedAt: doc.data().updatedAt
     } as Post));
+
+    // Sort in memory: Pinned first, then by date descending
+    posts.sort((a, b) => {
+        if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
+        const tA = (a.createdAt as any)?._seconds || 0;
+        const tB = (b.createdAt as any)?._seconds || 0;
+        return tB - tA;
+    });
 
     // Mock Data if empty
     if (posts.length === 0) {

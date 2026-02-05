@@ -61,7 +61,7 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
                     <div className="mt-12 flex items-end justify-between w-full max-w-2xl pt-12">
                         <div className="text-center">
                             <div className="text-sm font-bold text-stone-800">
-                                {cert.issuedAt?.toDate ? cert.issuedAt.toDate().toLocaleDateString('pt-BR') : 'Data Inválida'}
+                                {cert.issuedAt ? ((cert.issuedAt as any).toDate ? (cert.issuedAt as any).toDate() : new Date(cert.issuedAt as any)).toLocaleDateString('pt-BR') : 'Data Inválida'}
                             </div>
                             <div className="border-t border-stone-300 mt-2 pt-1 text-xs text-stone-400 uppercase tracking-widest">Data de Emissão</div>
                         </div>

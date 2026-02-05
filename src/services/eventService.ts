@@ -17,17 +17,25 @@ export interface EventDoc {
 export const eventService = {
     async getUpcomingEvents(limitCount = 3): Promise<EventDoc[]> {
         const now = new Date();
+        // Removed orderBy and complex where to avoid index complexity
         const q = query(
             collection(db, 'events'),
-            where('status', 'in', ['scheduled', 'live']),
-            where('startsAt', '>=', now),
-            orderBy('startsAt', 'asc'),
-            limit(limitCount)
+            where('status', 'in', ['scheduled', 'live'])
         );
 
         try {
             const snapshot = await getDocs(q);
-            return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as EventDoc));
+            const events = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as EventDoc));
+
+            // Filter by date and sort in memory
+            return events
+                .filter(e => e.startsAt?.toDate() >= now)
+                .sort((a, b) => {
+                    const tA = a.startsAt?.seconds || 0;
+                    const tB = b.startsAt?.seconds || 0;
+                    return tA - tB; // Chronological order
+                })
+                .slice(0, limitCount);
         } catch (error) {
             console.error("Error fetching events:", error);
             return [];
@@ -38,12 +46,18 @@ export const eventService = {
         const now = new Date();
         const q = query(
             collection(db, 'events'),
-            where('courseId', '==', courseId),
-            where('startsAt', '>=', now),
-            orderBy('startsAt', 'asc')
+            where('courseId', '==', courseId)
         );
 
         const snapshot = await getDocs(q);
-        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as EventDoc));
+        const events = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as EventDoc));
+
+        return events
+            .filter(e => e.startsAt?.toDate() >= now)
+            .sort((a, b) => {
+                const tA = a.startsAt?.seconds || 0;
+                const tB = b.startsAt?.seconds || 0;
+                return tA - tB;
+            });
     }
 };

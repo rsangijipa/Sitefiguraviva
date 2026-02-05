@@ -14,34 +14,60 @@ async function getHomeData() {
             db.collection('gallery').get() // Get gallery without order to avoid index
         ]);
 
+        const toISO = (val: any) => {
+            if (!val) return null;
+            if (typeof val.toDate === 'function') return val.toDate().toISOString();
+            if (val instanceof Date) return val.toISOString();
+            if (typeof val === 'string') return new Date(val).toISOString();
+            return null;
+        };
+
+        const sanitize = (obj: any) => JSON.parse(JSON.stringify(obj));
+
         const courses = coursesSnap.docs.map(doc => {
             const data = doc.data();
-            return {
+            return sanitize({
                 id: doc.id,
-                ...data,
+                title: data.title || '',
+                subtitle: data.subtitle || '',
+                description: data.description || '',
                 image: (data.image && data.image.trim() !== "") ? data.image : null,
-                created_at: data.created_at?.toDate().toISOString() || null,
-                updated_at: data.updated_at?.toDate().toISOString() || null
-            };
+                coverImage: data.coverImage || '',
+                status: data.status || '',
+                details: data.details || {},
+                created_at: toISO(data.created_at),
+                updated_at: toISO(data.updated_at)
+            });
         });
 
-        const posts = postsSnap.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-            created_at: doc.data().created_at?.toDate().toISOString() || null,
-            updated_at: doc.data().updated_at?.toDate().toISOString() || null
-        })).sort((a: any, b: any) => {
+        const posts = postsSnap.docs.map(doc => {
+            const data = doc.data();
+            return sanitize({
+                id: doc.id,
+                title: data.title || '',
+                excerpt: data.excerpt || '',
+                content: data.content || '',
+                type: data.type || 'blog',
+                image: data.image || '',
+                created_at: toISO(data.created_at),
+                updated_at: toISO(data.updated_at)
+            });
+        }).sort((a: any, b: any) => {
             const dateA = new Date(a.created_at || 0).getTime();
             const dateB = new Date(b.created_at || 0).getTime();
             return dateB - dateA;
         }).slice(0, 4);
 
-        const gallery = gallerySnap.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-            created_at: doc.data().created_at?.toDate().toISOString() || null,
-            updated_at: doc.data().updated_at?.toDate().toISOString() || null
-        })).sort((a: any, b: any) => {
+        const gallery = gallerySnap.docs.map(doc => {
+            const data = doc.data();
+            return sanitize({
+                id: doc.id,
+                url: data.url || '',
+                title: data.title || '',
+                created_at: toISO(data.created_at),
+                updated_at: toISO(data.updated_at)
+            });
+        }).sort((a: any, b: any) => {
             const dateA = new Date(a.created_at || 0).getTime();
             const dateB = new Date(b.created_at || 0).getTime();
             return dateB - dateA;

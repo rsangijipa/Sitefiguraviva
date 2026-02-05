@@ -165,8 +165,8 @@ export default function CourseAnnouncementsTab({ courseId }: { courseId: string 
                             </div>
                             <p className="text-sm text-stone-500 line-clamp-2">{item.content}</p>
                             <div className="flex items-center gap-4 mt-2 text-xs text-stone-400">
-                                <span className="flex items-center gap-1"><Calendar size={12} /> {item.publishAt?.toDate ? item.publishAt.toDate().toLocaleString() : 'N/A'}</span>
-                                {item.publishAt?.toDate() > new Date() && <span className="text-orange-500 font-bold">Agendado</span>}
+                                <span className="flex items-center gap-1"><Calendar size={12} /> {item.publishAt ? ((item.publishAt as any).toDate ? (item.publishAt as any).toDate().toLocaleString() : new Date(item.publishAt as any).toLocaleString()) : 'N/A'}</span>
+                                {item.publishAt && ((item.publishAt as any).toDate ? (item.publishAt as any).toDate() : new Date(item.publishAt as any)) > new Date() && <span className="text-orange-500 font-bold">Agendado</span>}
                             </div>
                         </div>
                         <button onClick={() => handleDelete(item.id)} className="p-2 text-stone-300 hover:text-red-500 transition-colors">

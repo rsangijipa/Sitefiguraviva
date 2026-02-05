@@ -122,14 +122,14 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             </AnimatePresence>
 
             {/* Main Content */}
-            <main className="flex-1 lg:ml-80 p-6 md:p-12 lg:p-16 min-h-screen relative overflow-y-auto custom-scrollbar">
+            <main className="flex-1 lg:ml-80 p-4 md:p-12 lg:p-16 min-h-screen relative overflow-y-auto custom-scrollbar">
                 <div className="relative z-10 max-w-7xl mx-auto animate-fade-in-up">
-                    <header className="mb-12 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                    <header className="mb-8 md:mb-12 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6">
                         <div className="flex items-center gap-4">
                             {/* Global Back to Site Button for context if needed, but existing Home link is there. */}
                             <div>
-                                <h2 className="font-serif text-4xl md:text-5xl text-primary mb-3 tracking-tight">Painel de Controle</h2>
-                                <p className="text-stone-500 text-sm md:text-base font-light max-w-md leading-relaxed">
+                                <h2 className="font-serif text-3xl md:text-5xl text-primary mb-2 md:mb-3 tracking-tight">Painel de Controle</h2>
+                                <p className="text-stone-500 text-xs md:text-base font-light max-w-md leading-relaxed">
                                     Gerencie sua presença digital, cursos e conteúdos com organicidade e fluidez.
                                 </p>
                             </div>

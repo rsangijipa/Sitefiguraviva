@@ -14,11 +14,12 @@ service cloud.firestore {
 
     function isAdmin() {
       // Robust admin check: check Custom Claims (fastest/safest) OR Firestore Doc (backup)
+      // We handle case-insensitive "admin" and "administrador"
       return isSignedIn() && (
-        request.auth.token.role in ['admin', 'ADMIN', 'administrador', 'ADMINISTRADOR'] || 
         request.auth.token.admin == true ||
+        (request.auth.token.get('role', '').lower() in ['admin', 'administrador']) ||
         (exists(/databases/$(database)/documents/users/$(uid())) && 
-         get(/databases/$(database)/documents/users/$(uid())).data.role in ['admin', 'ADMIN', 'administrador', 'ADMINISTRADOR'])
+         get(/databases/$(database)/documents/users/$(uid())).data.get('role', 'student').lower() in ['admin', 'administrador'])
       );
     }
 
@@ -60,15 +61,15 @@ service cloud.firestore {
       match /modules/{moduleId} {
         allow read: if isAdmin() || isTeam(courseId) || isEnrolled(courseId);
         allow write: if isAdmin() || isTeam(courseId);
-      }
 
-      match /lessons/{lessonId} {
-        allow read: if isAdmin() || isTeam(courseId) || isEnrolled(courseId);
-        allow write: if isAdmin() || isTeam(courseId);
+        match /lessons/{lessonId} {
+          allow read: if isAdmin() || isTeam(courseId) || isEnrolled(courseId);
+          allow write: if isAdmin() || isTeam(courseId);
 
-        match /blocks/{blockId} {
-            allow read: if isAdmin() || isTeam(courseId) || isEnrolled(courseId);
-            allow write: if isAdmin() || isTeam(courseId);
+          match /blocks/{blockId} {
+              allow read: if isAdmin() || isTeam(courseId) || isEnrolled(courseId);
+              allow write: if isAdmin() || isTeam(courseId);
+          }
         }
       }
 
@@ -112,8 +113,14 @@ service cloud.firestore {
 
     // GLOBAL PROGRESS
     match /progress/{progressId} {
-      // ID scheme: {uid}_{courseId} usually, or auto-id
-      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == uid()) || isTeam(resource.data.courseId);
+      // ID scheme: {uid}_{courseId}
+      // Allow read if admin, or doc doesn't exist (to allow 404), or it belongs to user
+      allow read: if isSignedIn() && (
+        isAdmin() || 
+        resource == null || 
+        resource.data.userId == uid() || 
+        isTeam(resource.data.courseId)
+      );
       
       // Student can update their own progress
       allow create: if isSignedIn() && request.resource.data.userId == uid();
@@ -128,7 +135,9 @@ service cloud.firestore {
     
     // EVENTS (Live Sessions)
     match /events/{eventId} {
-         allow read: if isAdmin() || resource.data.isPublic == true || (resource.data.enrolledOnly == true && isEnrolled(resource.data.courseId));
+         // Allow reading any event metadata for signed in users
+         // (Required for general agenda queries)
+         allow read: if isSignedIn(); 
          allow write: if isAdmin();
     }
     
@@ -148,6 +157,12 @@ service cloud.firestore {
       allow read: if isSignedIn() && userId == uid();
       allow update: if isSignedIn() && userId == uid(); // Only for marking as read
       allow create: if isAdmin(); // Or server action
+    }
+
+    // CMS PAGES & CONFIG
+    match /pages/{pageId} {
+      allow read: if true;
+      allow write: if isAdmin();
     }
   }
 }

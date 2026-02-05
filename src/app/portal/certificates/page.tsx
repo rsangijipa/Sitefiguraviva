@@ -17,17 +17,23 @@ export default async function CertificatesPage() {
         uid = decodedClaims.uid;
     } catch { redirect('/login'); }
 
-    // Fetch Certificates
+    // Fetch Certificates (Removed orderBy to avoid index requirement)
     const certsSnap = await db.collection('certificates')
         .where('userId', '==', uid)
-        .orderBy('issuedAt', 'desc')
         .get();
 
-    const certificates = certsSnap.docs.map(doc => ({
+    let certificates = certsSnap.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
         issuedAt: doc.data().issuedAt
     } as Certificate));
+
+    // Sort in memory (Newest first)
+    certificates.sort((a, b) => {
+        const tA = (a.issuedAt as any)?._seconds || 0;
+        const tB = (b.issuedAt as any)?._seconds || 0;
+        return tB - tA;
+    });
 
     return (
         <div className="max-w-4xl mx-auto p-4 md:p-8 animate-fade-in-up">

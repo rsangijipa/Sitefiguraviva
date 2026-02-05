@@ -12,11 +12,23 @@ async function BlogContent({ id }: { id: string }) {
             notFound();
         }
 
+        const data = docSnap.data();
+        const toISO = (val: any) => {
+            if (!val) return null;
+            if (typeof val.toDate === 'function') return val.toDate().toISOString();
+            if (val instanceof Date) return val.toISOString();
+            if (typeof val === 'string') return new Date(val).toISOString();
+            return null;
+        };
+
         const post: any = {
             id: docSnap.id,
-            ...docSnap.data(),
-            created_at: docSnap.data()?.created_at?.toDate().toISOString() || null,
-            updated_at: docSnap.data()?.updated_at?.toDate().toISOString() || null
+            title: data?.title || '',
+            content: data?.content || '',
+            image: data?.image || '',
+            author: data?.author || '',
+            created_at: toISO(data?.created_at),
+            updated_at: toISO(data?.updated_at)
         };
 
         return <BlogDetailClient post={post} />;

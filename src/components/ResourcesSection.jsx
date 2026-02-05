@@ -52,7 +52,7 @@ export default function ResourcesSection() {
 
                     <div
                         ref={scrollContainerRef}
-                        className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-12 px-6 scrollbar-hide"
+                        className="flex md:grid md:grid-cols-2 lg:grid-cols-4 overflow-x-auto md:overflow-visible snap-x snap-mandatory gap-6 pb-12 px-6 md:px-0 scrollbar-hide"
                         style={{ scrollBehavior: 'smooth' }}
                     >
 
@@ -62,7 +62,7 @@ export default function ResourcesSection() {
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
                             whileHover={{ y: -5 }}
-                            className="flex-shrink-0 w-80 md:w-96 snap-center group relative bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col items-center text-center"
+                            className="flex-shrink-0 w-80 md:w-auto snap-center group relative bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col items-center text-center"
                             onClick={() => openResource('breathing')}
                         >
                             <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center text-accent mb-6 group-hover:scale-110 transition-transform">
@@ -84,7 +84,7 @@ export default function ResourcesSection() {
                             viewport={{ once: true }}
                             transition={{ delay: 0.1 }}
                             whileHover={{ y: -5 }}
-                            className="flex-shrink-0 w-80 md:w-96 snap-center group relative bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col items-center text-center"
+                            className="flex-shrink-0 w-80 md:w-auto snap-center group relative bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col items-center text-center"
                             onClick={() => openResource('tree')}
                         >
                             <div className="w-16 h-16 rounded-2xl bg-gold/10 flex items-center justify-center text-gold mb-6 group-hover:scale-110 transition-transform">
@@ -106,7 +106,7 @@ export default function ResourcesSection() {
                             viewport={{ once: true }}
                             transition={{ delay: 0.2 }}
                             whileHover={{ y: -5 }}
-                            className="flex-shrink-0 w-80 md:w-96 snap-center group relative bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col items-center text-center"
+                            className="flex-shrink-0 w-80 md:w-auto snap-center group relative bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col items-center text-center"
                             onClick={() => openResource('somascan')}
                         >
                             <div className="w-16 h-16 rounded-2xl bg-stone-100 flex items-center justify-center text-stone-600 mb-6 group-hover:scale-110 transition-transform">
@@ -128,7 +128,7 @@ export default function ResourcesSection() {
                             viewport={{ once: true }}
                             transition={{ delay: 0.3 }}
                             whileHover={{ y: -5 }}
-                            className="flex-shrink-0 w-80 md:w-96 snap-center group relative bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col items-center text-center"
+                            className="flex-shrink-0 w-80 md:w-auto snap-center group relative bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col items-center text-center"
                             onClick={() => openResource('quiz')}
                         >
                             <div className="w-16 h-16 rounded-2xl bg-sage/10 flex items-center justify-center text-sage mb-6 group-hover:scale-110 transition-transform">
@@ -146,7 +146,7 @@ export default function ResourcesSection() {
                     </div>
 
                     {/* Visual Scroll Controls */}
-                    <div className="flex items-center justify-center gap-6 mt-4 opacity-70 hover:opacity-100 transition-opacity pb-4">
+                    <div className="flex md:hidden items-center justify-center gap-6 mt-4 opacity-70 hover:opacity-100 transition-opacity pb-4">
                         <button
                             onClick={() => scroll('left')}
                             className="p-3 rounded-full hover:bg-stone-100 text-stone-400 hover:text-stone-800 transition-colors border border-transparent hover:border-stone-200"

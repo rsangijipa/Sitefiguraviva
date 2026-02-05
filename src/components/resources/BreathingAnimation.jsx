@@ -168,10 +168,12 @@ export const BreathingAnimation = ({
     };
 
     return (
-        <div className="flex flex-col items-center justify-center py-8">
-            {/* Mandala com animação de escala */}
-            <div className="relative flex items-center justify-center" style={{ width: '500px', height: '500px' }}>
-                <Mandala phase={phase} theme={mandalaTheme} scale={scale} />
+        <div className="flex flex-col items-center justify-center py-4 md:py-8">
+            {/* Mandala com animação de escala - Responsivo para Mobile */}
+            <div className="relative flex items-center justify-center w-[280px] h-[280px] md:w-[500px] md:h-[500px]">
+                <div className="scale-[0.45] md:scale-100 flex items-center justify-center">
+                    <Mandala phase={phase} theme={mandalaTheme} scale={scale} />
+                </div>
             </div>
 
             {/* Texto de Instrução */}

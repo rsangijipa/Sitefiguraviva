@@ -34,7 +34,7 @@ export default async function CertificateView({ params }: { params: Promise<{ id
         redirect('/portal/certificates');
     }
 
-    const date = cert.issuedAt instanceof Timestamp ? cert.issuedAt.toDate() : cert.issuedAt;
+    const dateObj = cert.issuedAt ? (cert.issuedAt instanceof Timestamp ? cert.issuedAt.toDate() : new Date(cert.issuedAt)) : new Date();
 
     return (
         <div className="min-h-screen bg-stone-100 flex flex-col">
@@ -107,7 +107,7 @@ export default async function CertificateView({ params }: { params: Promise<{ id
 
                         <div className="flex flex-col items-center">
                             <div className="font-serif text-lg text-stone-800 font-bold mb-2">
-                                {date.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                {dateObj.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })}
                             </div>
                             <span className="text-xs font-bold text-stone-400 uppercase tracking-widest border-t border-stone-300 pt-2 w-40">Data de Emissão</span>
                         </div>
