@@ -51,10 +51,9 @@ export default function Footer() {
                                 <div className="flex items-start gap-4 mb-8">
                                     <MapPin size={18} className="text-gold shrink-0 mt-1" />
                                     <p className="font-light text-sm text-paper/70 leading-relaxed">
-                                        Rua Pinheiro Machado, 2033 - Central<br />
-                                        Porto Velho - RO<br />
-                                        CEP 76801-057<br />
-                                        (69) 99248-1585
+                                        Rua Santos Dumont, 156 - Uniao<br />
+                                        Ouro Preto D'Oeste - RO<br />
+                                        CEP 76920-000
                                     </p>
                                 </div>
                                 <button
