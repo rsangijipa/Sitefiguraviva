@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
+import Image from 'next/image';
 import OrganicBackground from '../ui/OrganicBackground';
 import WaveLines from '../ui/WaveLines';
 import { buttonVariants } from '../ui/Button';
@@ -27,11 +28,16 @@ export default function HeroSection() {
     return (
         <header className="pt-32 pb-24 md:pt-48 md:pb-32 px-6 bg-paper relative overflow-hidden">
             <OrganicBackground />
-            <img
-                src="/assets/hero-bg-custom.jpg"
-                alt=""
-                className="absolute left-1/2 -translate-x-1/2 top-[55%] -translate-y-1/2 h-[80%] w-auto object-contain opacity-30 pointer-events-none mix-blend-multiply transition-all duration-700"
-            />
+            <div className="absolute left-1/2 -translate-x-1/2 top-[60%] md:top-[55%] -translate-y-1/2 h-[60%] md:h-[80%] aspect-square pointer-events-none opacity-30 mix-blend-multiply">
+                <Image
+                    src="/assets/hero-bg-custom.jpg"
+                    alt=""
+                    fill
+                    className="object-contain transition-all duration-700"
+                    priority
+                    sizes="(max-width: 768px) 100vw, 80vw"
+                />
+            </div>
             {/* Soft colored waves overlay */}
             <WaveLines className="z-0 mix-blend-multiply opacity-80" />
 

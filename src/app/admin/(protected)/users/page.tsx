@@ -83,8 +83,8 @@ export default function UsersPage() {
             </header>
 
             {/* Filters & Search */}
-            <div className="bg-white/40 backdrop-blur-md p-6 rounded-[2rem] border border-stone-200/60 shadow-sm space-y-4">
-                <div className="flex flex-col md:flex-row gap-4">
+            <div className="bg-white/40 backdrop-blur-md p-4 md:p-6 rounded-[2rem] border border-stone-200/60 shadow-sm space-y-4">
+                <div className="flex flex-col lg:flex-row gap-4">
                     <div className="flex-1 flex items-center gap-3 bg-white px-4 py-3 rounded-xl border border-stone-200 focus-within:ring-2 focus-within:ring-gold/20 transition-all">
                         <Search className="text-stone-400" size={18} />
                         <input
@@ -96,11 +96,11 @@ export default function UsersPage() {
                         />
                     </div>
 
-                    <div className="flex gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <select
                             value={roleFilter}
                             onChange={(e) => setRoleFilter(e.target.value as any)}
-                            className="bg-white border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-600 focus:outline-none focus:border-gold cursor-pointer"
+                            className="bg-white border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-600 focus:outline-none focus:border-gold cursor-pointer w-full"
                         >
                             <option value="All">Todos os Papéis</option>
                             <option value="student">Aluno</option>
@@ -111,7 +111,7 @@ export default function UsersPage() {
                         <select
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value as any)}
-                            className="bg-white border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-600 focus:outline-none focus:border-gold cursor-pointer"
+                            className="bg-white border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-600 focus:outline-none focus:border-gold cursor-pointer w-full"
                         >
                             <option value="All">Todos os Status</option>
                             <option value="active">Ativo</option>

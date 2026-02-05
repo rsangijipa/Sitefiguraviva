@@ -69,7 +69,7 @@ export default async function AdminEventsPage() {
                     </thead>
                     <tbody className="divide-y divide-stone-100">
                         {events.map(item => {
-                            const date = (item.startsAt as any).toDate ? (item.startsAt as any).toDate() : new Date(item.startsAt as any);
+                            const date = (item.startsAt as any)?.toDate ? (item.startsAt as any).toDate() : (item.startsAt ? new Date(item.startsAt as any) : new Date());
                             return (
                                 <tr key={item.id} className="hover:bg-stone-50/50 transition-colors">
                                     <td className="px-6 py-4">

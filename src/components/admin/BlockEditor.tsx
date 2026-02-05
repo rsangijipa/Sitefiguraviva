@@ -146,6 +146,7 @@ export default function BlockEditor({ initialBlocks, onSave, isSaving }: BlockEd
                                     <ImageUpload
                                         defaultImage={block.content.url}
                                         onUpload={(url) => updateBlockContent(block.id, { url })}
+                                        folder="courses/content"
                                         className="w-32 h-32"
                                     />
                                     <div className="flex-1 space-y-2">

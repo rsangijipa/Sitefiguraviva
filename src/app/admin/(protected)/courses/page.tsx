@@ -155,7 +155,7 @@ export default function CoursesPage() {
                                     <p className="text-sm text-stone-500 line-clamp-2 mb-4 flex-1">{course.subtitle || course.description || 'Sem descrição.'}</p>
 
                                     <div className="flex items-center justify-between text-xs font-medium text-stone-400 border-t border-stone-50 pt-4 mt-auto">
-                                        <span>{course.details?.duration || (course.createdAt as any)?.toDate ? (course.createdAt as any).toDate().toLocaleDateString() : 'Sem data'}</span>
+                                        <span>{course.details?.duration || (course.createdAt ? ((course.createdAt as any).toDate ? (course.createdAt as any).toDate().toLocaleDateString() : new Date(course.createdAt as any).toLocaleDateString()) : 'Sem data')}</span>
                                         <div className="flex gap-2">
                                             <button
                                                 onClick={(e) => handleDelete(e, course.id)}

@@ -73,11 +73,11 @@
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center bg-primary text-white px-6 py-3 rounded-lg font-bold tracking-wide hover:opacity-90 transition-all active:scale-95 shadow-lg;
+    @apply inline-flex items-center justify-center bg-primary text-white px-8 py-3.5 rounded-xl font-bold tracking-wide hover:opacity-90 transition-all active:scale-95 shadow-lg min-h-[44px] touch-manipulation;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center border border-gray-300 text-text px-6 py-3 rounded-lg font-bold hover:bg-gray-50 transition-all active:scale-95 shadow-sm;
+    @apply inline-flex items-center justify-center border border-gray-300 text-text px-8 py-3.5 rounded-xl font-bold hover:bg-gray-50 transition-all active:scale-95 shadow-sm min-h-[44px] touch-manipulation;
   }
 
   .card-premium {
@@ -99,15 +99,15 @@
 
   /* Typography Utilities */
   .heading-hero {
-    @apply font-serif font-bold text-fluid-h1 leading-[1.1] text-primary tracking-tight;
+    @apply font-serif font-bold text-fluid-h1 leading-[1.1] text-primary tracking-tight text-balance;
   }
 
   .heading-section {
-    @apply font-serif font-bold text-fluid-h2 text-primary leading-tight px-4 md:px-0;
+    @apply font-serif font-bold text-fluid-h2 text-primary leading-tight text-balance;
   }
 
   .heading-card {
-    @apply font-serif font-bold text-fluid-h3 text-primary leading-snug;
+    @apply font-serif font-bold text-fluid-h3 text-primary leading-snug text-balance;
   }
 
   .text-body-lg {

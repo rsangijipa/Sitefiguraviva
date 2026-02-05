@@ -73,7 +73,7 @@ export default function CoursesSection({ courses = [], onOpenCalendar, onSelectC
                 <div className="relative group/scroll">
                     <div
                         ref={scrollContainerRef}
-                        className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-8 -mx-6 px-6 md:mx-0 md:px-0 scrollbar-hide"
+                        className="flex md:grid md:grid-cols-2 lg:grid-cols-3 overflow-x-auto md:overflow-visible snap-x snap-mandatory gap-6 pb-8 -mx-6 px-6 md:mx-0 md:px-0 scrollbar-hide"
                         style={{ scrollBehavior: 'smooth' }}
                     >
                         {loading ? (
@@ -114,7 +114,7 @@ export default function CoursesSection({ courses = [], onOpenCalendar, onSelectC
                                         whileInView={{ opacity: 1, x: 0 }}
                                         viewport={{ once: true }}
                                         transition={{ delay: index * 0.1 }}
-                                        className="flex-shrink-0 w-80 md:w-96 snap-center group h-full cursor-pointer"
+                                        className="flex-shrink-0 w-80 md:w-auto snap-center group h-full cursor-pointer"
                                         onClick={() => onSelectCourse(course)}
                                     >
                                         <Card className="h-full p-4 flex flex-col">
@@ -180,10 +180,10 @@ export default function CoursesSection({ courses = [], onOpenCalendar, onSelectC
                                 );
                             })
                         )}
-                        <div className="w-6 md:w-0 flex-shrink-0" />
+                        <div className="w-6 md:hidden flex-shrink-0" />
                     </div>
 
-                    <div className="flex items-center justify-center gap-6 mt-6 opacity-70 hover:opacity-100 transition-opacity">
+                    <div className="flex md:hidden items-center justify-center gap-6 mt-6 opacity-70 hover:opacity-100 transition-opacity">
                         <button
                             onClick={() => scroll('left')}
                             className="p-3 rounded-full hover:bg-stone-200/50 text-stone-400 hover:text-primary transition-colors border border-transparent hover:border-stone-300"

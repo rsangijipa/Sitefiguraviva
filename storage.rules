@@ -9,10 +9,17 @@ service firebase.storage {
     // --- Helpers ---
 
     function isAdmin() {
-      // Prioriza Custom Claims (Custo Zero de BD) e short-circuit
-      return (request.auth.token.admin == true || request.auth.token.role == 'admin') ||
-             // Fallback apenas se necessário (Custa $$)
-             firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      // Robust admin check: check Custom Claims (fastest/safest) OR Firestore Doc (backup)
+      return request.auth != null && (
+        request.auth.token.admin == true ||
+        request.auth.token.role == 'admin' ||
+        request.auth.token.role == 'administrador' ||
+        (firestore.exists(/databases/(default)/documents/users/$(request.auth.uid)) && 
+         (firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'administrador' ||
+          firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'ADMIN' ||
+          firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'ADMINISTRADOR'))
+      );
     }
 
     function isBelowMaxSize(sizeMB) {
@@ -48,10 +55,15 @@ service firebase.storage {
       allow write: if isAdmin() && request.resource.contentType.matches('image/.*') && isBelowMaxSize(10);
     }
 
-    // Course Covers
+    // Course Covers & Content
     match /courses/covers/{allPaths=**} {
       allow read: if true;
       allow write: if isAdmin() && request.resource.contentType.matches('image/.*') && isBelowMaxSize(5);
+    }
+
+    match /courses/content/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin() && isBelowMaxSize(10);
     }
 
     // Public Documents
@@ -82,12 +94,15 @@ service firebase.storage {
     // General Uploads (Users can only upload to their own folder)
     match /uploads/{userId}/{allPaths=**} {
        allow read: if true;
-       allow write: if request.auth != null && request.auth.uid == userId && isBelowMaxSize(10);
+       allow write: if (isAdmin() || (request.auth != null && request.auth.uid == userId)) && isBelowMaxSize(10);
     }
 
-    // Default Deny (Last resort)
+    // --- UNIVERSAL ADMIN ACCESS ---
+    // This allows admins to write ANYWHERE, overriding more specific rules if they fall through,
+    // and serves as a catch-all for legitimate administrative operations.
     match /{allPaths=**} {
-      allow read, write: if false;
+      allow read: if true; // Global read for simplicity, can be narrowed if needed
+      allow write: if isAdmin();
     }
   }
 }
