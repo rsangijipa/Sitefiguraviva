@@ -13,10 +13,13 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      // Robust admin check: must have 'admin' role in user doc AND be active
-      return isSignedIn()
-        && get(/databases/$(database)/documents/users/$(uid())).data.role == 'admin'
-        && get(/databases/$(database)/documents/users/$(uid())).data.isActive == true;
+      // Robust admin check: check Custom Claims (fastest/safest) OR Firestore Doc (backup)
+      return isSignedIn() && (
+        request.auth.token.role in ['admin', 'ADMIN', 'administrador', 'ADMINISTRADOR'] || 
+        request.auth.token.admin == true ||
+        (exists(/databases/$(database)/documents/users/$(uid())) && 
+         get(/databases/$(database)/documents/users/$(uid())).data.role in ['admin', 'ADMIN', 'administrador', 'ADMINISTRADOR'])
+      );
     }
 
     function isEnrolled(courseId) {
@@ -36,8 +39,15 @@ service cloud.firestore {
     // USERS (Strict Privacy)
     match /users/{userId} {
       allow read: if isAdmin() || (isSignedIn() && userId == uid());
-      // Updates strictly controlled via server actions or limited fields
-      allow write: if isAdmin();
+      allow create: if isSignedIn() && userId == uid();
+      // Allow users to update their own profile, but NOT their role
+      allow update: if isAdmin() || (isSignedIn() && userId == uid() && !("role" in request.resource.data));
+    }
+
+    // APPLICATIONS (Interessados)
+    match /applications/{appId} {
+      allow read, write: if isAdmin();
+      allow create: if true; // Public lead capture
     }
 
     // COURSES (Catalog & Content)

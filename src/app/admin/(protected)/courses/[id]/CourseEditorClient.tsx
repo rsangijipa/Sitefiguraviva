@@ -46,14 +46,7 @@ export default function CourseEditorClient({ initialCourse }: { initialCourse: C
     const handleSaveCourse = async () => {
         setIsSaving(true);
         try {
-            await adminCourseService.updateCourse(course.id, {
-                title: course.title,
-                subtitle: course.subtitle,
-                description: course.description,
-                coverImage: course.coverImage,
-                status: course.status,
-                // ... map other fields
-            });
+            await adminCourseService.updateCourse(course.id, course);
             addToast("Curso salvo com sucesso", 'success');
         } catch (error) {
             addToast("Erro ao salvar", 'error');
@@ -67,8 +60,12 @@ export default function CourseEditorClient({ initialCourse }: { initialCourse: C
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-4">
-                    <Link href="/admin/courses" className="p-2 hover:bg-stone-100 rounded-full text-stone-400 hover:text-stone-800 transition-colors">
-                        <ArrowLeft size={20} />
+                    <Link
+                        href="/admin/courses"
+                        className="flex items-center gap-2 px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-600 rounded-lg transition-all text-xs font-bold uppercase tracking-widest"
+                    >
+                        <ArrowLeft size={16} />
+                        Voltar
                     </Link>
                     <div>
                         <h1 className="font-serif text-2xl text-stone-800 font-bold">{course.title || 'Novo Curso'}</h1>
@@ -145,14 +142,59 @@ export default function CourseEditorClient({ initialCourse }: { initialCourse: C
                                     placeholder="Uma frase de efeito..."
                                 />
                             </div>
+                            <div className="grid grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold uppercase tracking-widest text-stone-400">Instrutor</label>
+                                    <input
+                                        value={course.instructor || ''}
+                                        onChange={e => setCourse({ ...course, instructor: e.target.value })}
+                                        className="w-full p-4 bg-stone-50 rounded-xl border-transparent focus:bg-white focus:border-primary border transition-all outline-none"
+                                        placeholder="Nome do Instrutor"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold uppercase tracking-widest text-stone-400">Duração</label>
+                                    <input
+                                        value={course.duration || ''}
+                                        onChange={e => setCourse({ ...course, duration: e.target.value })}
+                                        className="w-full p-4 bg-stone-50 rounded-xl border-transparent focus:bg-white focus:border-primary border transition-all outline-none"
+                                        placeholder="Ex: 20 horas"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold uppercase tracking-widest text-stone-400">Nível</label>
+                                    <select
+                                        value={course.level || 'beginner'}
+                                        onChange={e => setCourse({ ...course, level: e.target.value })}
+                                        className="w-full p-4 bg-stone-50 rounded-xl border-transparent focus:bg-white focus:border-primary border transition-all outline-none appearance-none"
+                                    >
+                                        <option value="beginner">Iniciante</option>
+                                        <option value="intermediate">Intermediário</option>
+                                        <option value="advanced">Avançado</option>
+                                    </select>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold uppercase tracking-widest text-stone-400">Categoria</label>
+                                    <input
+                                        value={course.category || ''}
+                                        onChange={e => setCourse({ ...course, category: e.target.value })}
+                                        className="w-full p-4 bg-stone-50 rounded-xl border-transparent focus:bg-white focus:border-primary border transition-all outline-none"
+                                        placeholder="Ex: Gestalt-Terapia"
+                                    />
+                                </div>
+                            </div>
+
                             <div className="space-y-2">
-                                <label className="text-xs font-bold uppercase tracking-widest text-stone-400">Descrição Curta</label>
+                                <label className="text-xs font-bold uppercase tracking-widest text-stone-400">Descrição Longa</label>
                                 <textarea
                                     value={course.description || ''}
                                     onChange={e => setCourse({ ...course, description: e.target.value })}
-                                    rows={4}
+                                    rows={6}
                                     className="w-full p-4 bg-stone-50 rounded-xl border-transparent focus:bg-white focus:border-primary border transition-all outline-none resize-none"
-                                    placeholder="Resumo para o card..."
+                                    placeholder="Descrição detalhada para a página do curso..."
                                 />
                             </div>
                         </div>

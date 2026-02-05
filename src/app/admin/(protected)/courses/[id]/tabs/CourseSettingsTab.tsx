@@ -40,8 +40,29 @@ export default function CourseSettingsTab({ course }: { course: CourseDoc }) {
         }
     };
 
+    const handleDeleteCourse = async () => {
+        const confirm1 = confirm("Tem certeza que deseja EXCLUIR este curso permanentemente?");
+        if (!confirm1) return;
+
+        const confirm2 = prompt("Para confirmar, digite o nome do curso exatamente como está:");
+        if (confirm2 !== course.title) {
+            addToast("O nome digitado não coincide.", 'error');
+            return;
+        }
+
+        try {
+            setIsLoading(true);
+            await adminCourseService.deleteCourse(course.id);
+            addToast("Curso excluído com sucesso", 'success');
+            router.push('/admin/courses');
+        } catch (error) {
+            addToast("Erro ao excluir", 'error');
+            setIsLoading(false);
+        }
+    };
+
     return (
-        <div className="space-y-8 animate-in fade-in max-w-3xl">
+        <div className="space-y-8 animate-in fade-in max-w-3xl pb-20">
 
             {/* Visibility Card */}
             <section className="bg-white p-6 rounded-xl border border-stone-100 shadow-sm">
@@ -161,8 +182,9 @@ export default function CourseSettingsTab({ course }: { course: CourseDoc }) {
                     <Button
                         variant="ghost"
                         className="text-red-600 hover:bg-red-100 hover:text-red-700 border-red-200 hover:border-red-300 bg-white"
-                        onClick={() => alert("Funcionalidade de exclusão completa requer confirmação dupla. (Simulado)")}
+                        onClick={handleDeleteCourse}
                         leftIcon={<Trash2 size={16} />}
+                        isLoading={isLoading}
                     >
                         Excluir Curso
                     </Button>
