@@ -6,7 +6,7 @@ export const adminCourseService = {
     // --- COURSES ---
 
     async getAllCourses(): Promise<CourseDoc[]> {
-        const q = query(collection(db, 'courses'), orderBy('updatedAt', 'desc'));
+        const q = query(collection(db, 'courses'));
         const snapshot = await getDocs(q);
         return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as CourseDoc));
     },
@@ -29,8 +29,9 @@ export const adminCourseService = {
 
     async updateCourse(courseId: string, data: Partial<CourseDoc>): Promise<void> {
         const docRef = doc(db, 'courses', courseId);
+        const { id, ...updateData } = data as any;
         await updateDoc(docRef, {
-            ...data,
+            ...updateData,
             updatedAt: serverTimestamp()
         });
     },
@@ -42,7 +43,7 @@ export const adminCourseService = {
     // --- MODULES ---
 
     async getModules(courseId: string): Promise<ModuleDoc[]> {
-        const q = query(collection(db, 'courses', courseId, 'modules'), orderBy('order', 'asc'));
+        const q = query(collection(db, 'courses', courseId, 'modules'));
         const snapshot = await getDocs(q);
         // Helper to fetch lessons for each module could go here, or separate calls
         // For simplicity, we might just return modules and fetch lessons lazily or in parallel
@@ -75,8 +76,7 @@ export const adminCourseService = {
 
     async getLessons(courseId: string, moduleId: string): Promise<LessonDoc[]> {
         const q = query(
-            collection(db, 'courses', courseId, 'modules', moduleId, 'lessons'),
-            orderBy('order', 'asc')
+            collection(db, 'courses', courseId, 'modules', moduleId, 'lessons')
         );
         const snapshot = await getDocs(q);
         return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as LessonDoc));
@@ -107,7 +107,7 @@ export const adminCourseService = {
     // --- ENROLLMENTS ---
 
     async getCourseEnrollments(courseId: string): Promise<any[]> {
-        const q = query(collection(db, 'enrollments'), where('courseId', '==', courseId), orderBy('enrolledAt', 'desc'));
+        const q = query(collection(db, 'enrollments'), where('courseId', '==', courseId));
         const snapshot = await getDocs(q);
         return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     },
@@ -136,7 +136,7 @@ export const adminCourseService = {
     // --- MATERIALS ---
 
     async getMaterials(courseId: string): Promise<any[]> {
-        const q = query(collection(db, 'courses', courseId, 'materials'), orderBy('createdAt', 'desc'));
+        const q = query(collection(db, 'courses', courseId, 'materials'));
         const snapshot = await getDocs(q);
         return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     },

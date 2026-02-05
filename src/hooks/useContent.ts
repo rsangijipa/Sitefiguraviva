@@ -67,7 +67,7 @@ export const useGallery = (options?: { initialData?: any[] }) => {
     return useQuery({
         queryKey: ['gallery'],
         queryFn: async () => {
-            const q = query(collection(db, 'gallery'), orderBy('created_at', 'desc'));
+            const q = query(collection(db, 'gallery'));
             const snapshot = await getDocs(q);
             return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         },

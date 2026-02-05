@@ -16,7 +16,7 @@ export default function ApplicationsPage() {
     const { addToast } = useToast();
 
     useEffect(() => {
-        const q = query(collection(db, 'applications'), orderBy('createdAt', 'desc'));
+        const q = query(collection(db, 'applications'));
 
         const unsubscribe = onSnapshot(q, async (snapshot) => {
             const apps = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -98,8 +98,8 @@ export default function ApplicationsPage() {
                             <div className="flex flex-col md:flex-row">
                                 {/* Status Indicator Strip */}
                                 <div className={`w-full md:w-2 h-2 md:h-auto ${app.status === 'just_registered' ? 'bg-blue-400' :
-                                        app.status === 'submitted' ? 'bg-gold' :
-                                            app.status === 'approved' ? 'bg-green-500' : 'bg-stone-300'
+                                    app.status === 'submitted' ? 'bg-gold' :
+                                        app.status === 'approved' ? 'bg-green-500' : 'bg-stone-300'
                                     }`} />
 
                                 <div className="p-6 flex-1 grid md:grid-cols-12 gap-6 items-center">
@@ -134,8 +134,8 @@ export default function ApplicationsPage() {
                                     {/* Status & Date */}
                                     <div className="md:col-span-2">
                                         <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${app.status === 'just_registered' ? 'bg-blue-50 text-blue-600 border border-blue-100' :
-                                                app.status === 'submitted' ? 'bg-gold/10 text-gold border border-gold/20' :
-                                                    'bg-stone-100 text-stone-500'
+                                            app.status === 'submitted' ? 'bg-gold/10 text-gold border border-gold/20' :
+                                                'bg-stone-100 text-stone-500'
                                             }`}>
                                             {app.status === 'just_registered' ? 'Apenas Cadastro' :
                                                 app.status === 'submitted' ? 'Formulário Enviado' : app.status}

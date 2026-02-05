@@ -27,17 +27,18 @@ export default function CourseCurriculumTab({ courseId }: { courseId: string }) 
         setLoading(true);
         try {
             const mods = await adminCourseService.getModules(courseId);
-            setModules(mods);
+            const sortedMods = mods.sort((a, b) => (a.order || 0) - (b.order || 0));
+            setModules(sortedMods);
             // Auto expand all
             const expanded: Record<string, boolean> = {};
-            mods.forEach(m => expanded[m.id] = true);
+            sortedMods.forEach(m => expanded[m.id] = true);
             setExpandedModules(expanded);
 
             // Fetch lessons for each module
             const lMap: Record<string, LessonDoc[]> = {};
-            await Promise.all(mods.map(async m => {
+            await Promise.all(sortedMods.map(async m => {
                 const lessons = await adminCourseService.getLessons(courseId, m.id);
-                lMap[m.id] = lessons;
+                lMap[m.id] = lessons.sort((a, b) => (a.order || 0) - (b.order || 0));
             }));
             setLessonsMap(lMap);
 

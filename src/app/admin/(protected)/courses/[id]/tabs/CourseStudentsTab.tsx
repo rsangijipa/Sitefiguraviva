@@ -20,7 +20,12 @@ export default function CourseStudentsTab({ courseId }: { courseId: string }) {
         setLoading(true);
         try {
             const data = await adminCourseService.getCourseEnrollments(courseId);
-            setEnrollments(data);
+            const sorted = data.sort((a: any, b: any) => {
+                const dateA = a.enrolledAt?.seconds || 0;
+                const dateB = b.enrolledAt?.seconds || 0;
+                return dateB - dateA;
+            });
+            setEnrollments(sorted);
         } catch (error) {
             console.error(error);
             addToast("Erro ao carregar alunos", 'error');
