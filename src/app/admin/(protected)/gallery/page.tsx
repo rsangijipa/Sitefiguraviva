@@ -102,12 +102,18 @@ export default function GalleryManager() {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('Todos');
 
-    const filteredGallery = gallery.filter(item => {
-        const matchesSearch = item.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            item.caption?.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesCategory = selectedCategory === 'Todos' || item.category === selectedCategory;
-        return matchesSearch && matchesCategory;
-    });
+    const filteredGallery = gallery
+        .filter(item => {
+            const matchesSearch = item.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                item.caption?.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesCategory = selectedCategory === 'Todos' || item.category === selectedCategory;
+            return matchesSearch && matchesCategory;
+        })
+        .sort((a: any, b: any) => {
+            const dateA = a.created_at?.seconds || 0;
+            const dateB = b.created_at?.seconds || 0;
+            return dateB - dateA; // Descending
+        });
 
     return (
         <div className="space-y-12 pb-20">

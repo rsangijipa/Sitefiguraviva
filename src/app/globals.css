@@ -156,11 +156,15 @@
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-gold/20 rounded-full transition-colors;
+    background-color: #B08D5533;
+    /* gold with opacity */
+    border-radius: 9999px;
+    transition: background-color 0.3s;
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    @apply bg-gold/40;
+    background-color: #B08D5566;
+    /* gold with more opacity */
   }
 }
 

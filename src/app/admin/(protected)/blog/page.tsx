@@ -139,6 +139,12 @@ export default function BlogManager() {
         }
     };
 
+    const sortedPosts = [...blogPosts].sort((a: any, b: any) => {
+        const dateA = a.created_at?.seconds || 0;
+        const dateB = b.created_at?.seconds || 0;
+        return dateB - dateA;
+    });
+
     return (
         <div className="space-y-12 pb-20">
             <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
@@ -267,7 +273,7 @@ export default function BlogManager() {
             </AnimatePresence>
 
             <div className="grid gap-6">
-                {blogPosts.map((post: any, idx: number) => (
+                {sortedPosts.map((post: any, idx: number) => (
                     <motion.div
                         key={post.id}
                         layout
