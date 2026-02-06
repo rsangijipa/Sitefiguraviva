@@ -1,34 +1,47 @@
 "use client";
 
 import { useState } from 'react';
-import { CourseDoc, ModuleDoc, LessonDoc, Lesson, Block } from '@/types/lms';
+import { CourseDoc, ModuleDoc, Lesson, Block } from '@/types/lms';
 import BlockEditor from '@/components/admin/BlockEditor';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import { adminCourseService } from '@/services/adminCourseService';
+import { updateLessonBlocksAction } from '@/app/actions/lms';
 import { useToast } from '@/context/ToastContext';
 
-interface LessonEditorClientProps {
+export default function LessonEditorClient({
+    course,
+    module,
+    initialLesson
+}: {
     course: CourseDoc;
     module: ModuleDoc;
     initialLesson: Lesson;
-}
-
-export default function LessonEditorClient({ course, module, initialLesson }: LessonEditorClientProps) {
-    const { addToast } = useToast();
-    const [lesson, setLesson] = useState<Lesson>(initialLesson);
+}) {
+    const { addToast: showToast } = useToast();
+    const [lesson, setLesson] = useState(initialLesson);
     const [isSaving, setIsSaving] = useState(false);
 
     const handleSave = async (blocks: Block[]) => {
         setIsSaving(true);
         try {
-            await adminCourseService.updateLesson(course.id, lesson.moduleId, lesson.id, {
-                blocks: blocks
-            });
-            addToast("Conteúdo salvo com sucesso!", 'success');
+            // Normalize blocks: ensure order + default publish state
+            const normalized = (blocks || []).map((b: any, idx: number) => ({
+                ...b,
+                order: typeof b?.order === 'number' ? b.order : idx + 1,
+                isPublished: b?.isPublished !== false,
+            })) as Block[];
+
+            const res = await updateLessonBlocksAction(course.id, module.id, lesson.id, normalized);
+
+            if (!res?.success) {
+                throw new Error(res?.error || 'Falha ao salvar blocos');
+            }
+
+            setLesson(prev => ({ ...prev, blocks: normalized }));
+            showToast('Conteúdo salvo e publicado para alunos!', 'success');
         } catch (error) {
             console.error(error);
-            addToast("Erro ao salvar.", 'error');
+            showToast('Erro ao salvar o conteúdo.', 'error');
         } finally {
             setIsSaving(false);
         }

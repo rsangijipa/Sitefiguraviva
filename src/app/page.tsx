@@ -9,7 +9,7 @@ async function getHomeData() {
     try {
         // Parallel fetching
         const [coursesSnap, postsSnap, gallerySnap] = await Promise.all([
-            db.collection('courses').where('isPublished', '==', true).get(),
+            db.collection('courses').get(),
             db.collection('posts').where('isPublished', '==', true).get(), // Get posts without order to avoid index
             db.collection('gallery').get() // Get gallery without order to avoid index
         ]);
@@ -24,7 +24,7 @@ async function getHomeData() {
 
         const sanitize = (obj: any) => JSON.parse(JSON.stringify(obj));
 
-        const courses = coursesSnap.docs.map(doc => {
+        const rawCourses = coursesSnap.docs.map(doc => {
             const data = doc.data();
             return sanitize({
                 id: doc.id,
@@ -35,10 +35,14 @@ async function getHomeData() {
                 coverImage: data.coverImage || '',
                 status: data.status || '',
                 details: data.details || {},
+                isPublished: data.isPublished === true,
                 created_at: toISO(data.created_at),
                 updated_at: toISO(data.updated_at)
             });
         });
+
+        // Public availability: status=open OR legacy isPublished=true
+        const courses = rawCourses.filter((c: any) => c?.status === 'open' || c?.isPublished === true);
 
         const posts = postsSnap.docs.map(doc => {
             const data = doc.data();
