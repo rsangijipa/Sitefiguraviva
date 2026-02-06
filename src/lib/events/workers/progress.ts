@@ -9,22 +9,21 @@ export async function handleProgressUpdate(event: DomainEvent) {
 
     if (!courseId) return;
 
-    console.log(`[Worker] Recalculating progress for User:${actorUserId} Course:${courseId}`);
-
-    // 1. Fetch Course Structure (Total Lessons)
-    // NOTE: In high-scale, cache this "Total Lesson Count" in the course document root.
-    // For now, calculating dynamically or assuming field exists.
     const courseDoc = await db.collection('courses').doc(courseId).get();
     const courseData = courseDoc.data();
 
-    // Fallback: Count lessons manually if not in metadata (expensive but reliable for MVP)
-    let totalLessons = courseData?.totalLessons || 0;
+    // PRG-05: Use the centralized lessonsCount field
+    let totalLessons = courseData?.stats?.lessonsCount || courseData?.totalLessons || 0;
+
+    // Fallback: Count lessons manually if not in metadata
     if (!totalLessons) {
         const modulesSnap = await db.collection('courses').doc(courseId).collection('modules').get();
         for (const mod of modulesSnap.docs) {
-            const lessonsSnap = await mod.ref.collection('lessons').get(); // Costly! Optimization needed later.
+            const lessonsSnap = await mod.ref.collection('lessons').get();
             totalLessons += lessonsSnap.size;
         }
+        // Cache it for next time
+        await courseDoc.ref.update({ 'stats.lessonsCount': totalLessons });
     }
 
     if (totalLessons === 0) return; // Divide by zero safety
@@ -61,10 +60,11 @@ export async function handleProgressUpdate(event: DomainEvent) {
 
         // 3. Update Enrollment
         t.update(enrollmentRef, {
-            'progressSummary.completedLessons': Array.from(completedSet),
+            'progressSummary.completedLessons': Array.from(completedSet), // Keep array for historical context if needed
+            'progressSummary.completedLessonsCount': completedCount, // New numeric field
+            'progressSummary.totalLessons': totalLessons,
             'progressSummary.percent': percent,
             'progressSummary.lastUpdated': FieldValue.serverTimestamp(),
-            // 'status': percent === 100 ? 'completed' : currentData?.status // Be careful overriding status
         });
 
         // 4. Check Completion

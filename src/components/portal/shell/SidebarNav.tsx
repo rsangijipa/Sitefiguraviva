@@ -41,7 +41,7 @@ const NavItem = ({ href, icon: Icon, label, isActive }: NavItemProps) => (
 
 export const SidebarNav = ({ className }: { className?: string }) => {
     const pathname = usePathname();
-    const { signOut } = useAuth(); // Assuming logout method
+    const { user, signOut } = useAuth();
 
 
 
@@ -84,12 +84,29 @@ export const SidebarNav = ({ className }: { className?: string }) => {
 
             {/* Footer / User */}
             <div className="p-4 border-t border-stone-50 space-y-2">
-                <NavItem
+                <Link
                     href={ROUTES.settings}
-                    icon={User}
-                    label="Minha Conta"
-                    isActive={pathname.startsWith(ROUTES.settings)}
-                />
+                    className={cn(
+                        "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group",
+                        pathname.startsWith(ROUTES.settings)
+                            ? "bg-stone-100 text-stone-900 font-medium"
+                            : "text-stone-500 hover:bg-stone-50 hover:text-stone-900"
+                    )}
+                >
+                    {user?.photoURL ? (
+                        <div className="w-[18px] h-[18px] rounded-full overflow-hidden relative">
+                            <img
+                                src={user.photoURL}
+                                alt="Avatar"
+                                className="w-full h-full object-cover"
+                            />
+                        </div>
+                    ) : (
+                        <User size={18} className={cn("transition-colors", pathname.startsWith(ROUTES.settings) ? "text-primary" : "text-stone-400 group-hover:text-stone-600")} />
+                    )}
+                    <span className="text-sm">Minha Conta</span>
+                </Link>
+
                 <button
                     onClick={signOut}
                     className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-stone-500 hover:bg-red-50 hover:text-red-600 transition-colors"

@@ -1,0 +1,83 @@
+﻿[dotenv@17.2.3] injecting env (14) from .env.local -- tip: ­ƒôí add observability to secrets: https://dotenvx.com/ops
+[2m[WebServer] [22m
+[2m[WebServer] [22m> next-platform@0.1.0 dev
+[2m[WebServer] [22m> next dev
+[2m[WebServer] [22m
+node.exe : [2m[WebServer] 
+[22m[@sentry/nextjs] DEPRECATION WARNING: 
+disableLogger is deprecated and will be removed 
+in a future version. Use 
+webpack.treeshake.removeDebugLogging instead.
+No linha:1 caractere:1
++ & "C:\Program Files\nodejs/node.exe" 
+"C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([ 
+   2m[WebServer]...ogging instead.:String) [],  
+   RemoteException
+    + FullyQualifiedErrorId : NativeCommandErro 
+   r
+ 
+[2m[WebServer] [22m[@sentry/nextjs] 
+DEPRECATION WARNING: disableLogger is 
+deprecated and will be removed in a future 
+version. Use 
+webpack.treeshake.removeDebugLogging instead.
+[2m[WebServer] [22m   [1m[38;2;173;127;168mÔû▓ Next.js 15.1.9[39m[22m
+[2m[WebServer] [22m   - Local:        http://localhost:3000
+[2m[WebServer] [22m   - Network:      http://192.168.0.192:3000
+[2m[WebServer] [22m   - Environments: .env.local, .env
+[2m[WebServer] [22m   - Experiments (use with caution):
+[2m[WebServer] [22m     ┬À clientTraceMetadata
+[2m[WebServer] [22m
+[2m[WebServer] [22m [32m[1mÔ£ô[22m[39m Starting...
+[2m[WebServer] [22m[@sentry/nextjs] It 
+appears you've configured a 
+`sentry.server.config.ts` file. Please ensure 
+to put this file's content into the 
+`register()` function of a Next.js 
+instrumentation file instead. To ensure correct 
+functionality of the SDK, `Sentry.init` must be 
+called inside of an instrumentation file. Learn 
+more about setting up an instrumentation file 
+in Next.js: https://nextjs.org/docs/app/building
+-your-application/optimizing/instrumentation. 
+You can safely delete the 
+`sentry.server.config.ts` file afterward.
+[2m[WebServer] [22m[@sentry/nextjs] Could not 
+find a Next.js instrumentation file. This 
+indicates an incomplete configuration of the 
+Sentry SDK. An instrumentation file is required 
+for the Sentry SDK to be initialized on the 
+server: https://docs.sentry.io/platforms/javascr
+ipt/guides/nextjs/manual-setup/#create-initializ
+ation-config-files (you can suppress this 
+warning by setting 
+SENTRY_SUPPRESS_INSTRUMENTATION_FILE_WARNING=1 
+as environment variable)
+[2m[WebServer] [22m[@sentry/nextjs] It 
+appears you've configured a 
+`sentry.edge.config.ts` file. Please ensure to 
+put this file's content into the `register()` 
+function of a Next.js instrumentation file 
+instead. To ensure correct functionality of the 
+SDK, `Sentry.init` must be called inside of an 
+instrumentation file. Learn more about setting 
+up an instrumentation file in Next.js: https://n
+extjs.org/docs/app/building-your-application/opt
+imizing/instrumentation. You can safely delete 
+the `sentry.edge.config.ts` file afterward.
+[2m[WebServer] [22m[@sentry/nextjs] 
+DEPRECATION WARNING: It is recommended renaming 
+your `sentry.client.config.ts` file, or moving 
+its content to `instrumentation-client.ts`. 
+When using Turbopack `sentry.client.config.ts` 
+will no longer work. Read more about the 
+`instrumentation-client.ts` file: https://nextjs
+.org/docs/app/api-reference/file-conventions/ins
+trumentation-client
+[2m[WebServer] [22m [32m[1mÔ£ô[22m[39m Ready in 5.1s
+[2m[WebServer] [22m [37m[1mÔùï[22m[39m Compiling /src/middleware ...
+[2m[WebServer] [22m [32m[1mÔ£ô[22m[39m Compiled /src/middleware in 1216ms (430 modules)
+[2m[WebServer] [22m [37m[1mÔùï[22m[39m Compiling / ...

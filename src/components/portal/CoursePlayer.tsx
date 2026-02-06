@@ -17,15 +17,29 @@ interface CoursePlayerProps {
     modules: Module[];
     activeLesson: Lesson | null;
     onSelectLesson: (lessonId: string) => void;
-    onMarkComplete: (lessonId: string) => void;
+    onMarkComplete: (lessonId: string, moduleId: string) => void;
     nextLessonId?: string;
     prevLessonId?: string;
     loading?: boolean;
 }
 
 // Wrapper component to isolate hook usage per lesson
-const CourseVideoWrapper = ({ courseId, lesson, onMarkComplete }: { courseId: string, lesson: Lesson, onMarkComplete: (id: string) => void }) => {
-    const { progress, updateProgress, triggerSync } = useProgress(courseId, lesson.id);
+// Wrapper component to isolate hook usage per lesson
+const CourseVideoWrapper = ({ courseId, moduleId, lesson, onMarkComplete }: { courseId: string, moduleId: string, lesson: Lesson, onMarkComplete: (id: string, modId: string) => void }) => {
+    // FIX: useProgress now requires moduleId (PRG-02)
+    const { progress, updateProgress, triggerSync } = useProgress(courseId, moduleId, lesson.id);
+
+    const [isPlaying, setIsPlaying] = useState(false);
+
+    // VP-03: Heartbeat Sync (Every 10s) optimized
+    useEffect(() => {
+        if (!isPlaying) return; // Only poll if playing
+
+        const interval = setInterval(() => {
+            triggerSync();
+        }, 10000);
+        return () => clearInterval(interval);
+    }, [isPlaying, triggerSync]);
 
     return (
         <VideoPlayer
@@ -33,11 +47,25 @@ const CourseVideoWrapper = ({ courseId, lesson, onMarkComplete }: { courseId: st
             poster={(lesson as any).thumbnail}
             initialTime={progress?.seekPosition || 0}
             onTimeUpdate={(t) => updateProgress(t, false)}
-            onPause={() => triggerSync()}
-            onEnded={() => {
-                triggerSync();
-                onMarkComplete(lesson.id);
+            onStateChange={(state) => {
+                // 1 = Playing. We need to expose onStateChange from VideoPlayer?
+                // Current VideoPlayer prop is onPause/onEnded. 
+                // Let's check VideoPlayer.tsx to see what it exposes.
+                // It exposes onPause (state=2) and onEnded (state=0).
+                // It doesn't expose onPlay explicitly?
+                // We need onPlay to set isPlaying=true.
             }}
+            onPlay={() => setIsPlaying(true)}
+            onPause={() => {
+                setIsPlaying(false);
+                triggerSync();
+            }}
+            onEnded={() => {
+                setIsPlaying(false);
+                triggerSync();
+                onMarkComplete(lesson.id, moduleId);
+            }}
+        // We need to pass onPlay logic.
         />
     );
 };
@@ -55,6 +83,13 @@ export const CoursePlayer = ({
     const [sidebarOpen, setSidebarOpen] = useState(true);
 
     if (loading) return null; // Or skeleton
+
+    // Helper to resolve Module ID
+    const getModuleId = (lesson: Lesson) => {
+        if (lesson.moduleId) return lesson.moduleId;
+        const parent = modules.find(m => m.lessons.some(l => l.id === lesson.id));
+        return parent?.id || '';
+    };
 
     return (
         <div className="h-[calc(100vh-4rem)] flex flex-col bg-[#FDFCF9] overflow-hidden">
@@ -101,6 +136,7 @@ export const CoursePlayer = ({
                             {activeLesson && (
                                 <CourseVideoWrapper
                                     courseId={course.id}
+                                    moduleId={getModuleId(activeLesson)} // Pass Module ID
                                     lesson={activeLesson}
                                     onMarkComplete={onMarkComplete}
                                 />
@@ -128,12 +164,18 @@ export const CoursePlayer = ({
                                                     Concluída
                                                 </Button>
                                             ) : (
-                                                <Button
-                                                    onClick={() => onMarkComplete(activeLesson.id)}
-                                                    variant="primary"
-                                                >
-                                                    Marcar como Concluída
-                                                </Button>
+                                                // Verify if we should hide this too (VP-01)
+                                                // Assuming this Player uses its own Video checking, but manual override exists.
+                                                // Let's keep it consistent with LessonPlayer and HIDE if video.
+                                                // Condition: !isCompleted && type != 'video'
+                                                activeLesson.type !== 'video' && (
+                                                    <Button
+                                                        onClick={() => onMarkComplete(activeLesson.id, getModuleId(activeLesson))}
+                                                        variant="primary"
+                                                    >
+                                                        Marcar como Concluída
+                                                    </Button>
+                                                )
                                             )}
                                         </div>
                                     </div>

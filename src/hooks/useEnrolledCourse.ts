@@ -162,23 +162,15 @@ export function useEnrolledCourse(courseId: string, userId: string | undefined, 
     });
 
     const markCompleteMutation = useMutation({
-        mutationFn: async (lessonId: string) => {
+        mutationFn: async ({ lessonId, moduleId }: { lessonId: string, moduleId: string }) => {
             if (!userId) return;
-            const progressRef = doc(db, 'progress', `${userId}_${courseId}`);
 
-            const progressUpdate = {
-                userId, // Ensure ownership field for rules
-                courseId,
-                [`lessonProgress.${lessonId}`]: {
-                    completed: true,
-                    completedAt: Timestamp.now()
-                },
-                lastLessonId: lessonId,
-                lastAccessedAt: Timestamp.now()
-            };
-            await setDoc(progressRef, progressUpdate, { merge: true });
+            // Use Server Action (Fixes LOG-02 & PRG-02)
+            await import('@/actions/progress').then(({ updateLessonProgress }) =>
+                updateLessonProgress(courseId, moduleId, lessonId, { status: 'completed' })
+            );
         },
-        onSuccess: (_, lessonId) => {
+        onSuccess: (_, { lessonId }) => {
             queryClient.setQueryData(['enrolled-course', courseId, userId], (old: EnrolledCourseData | undefined) => {
                 if (!old) return old;
                 // Optimistic update of modules structure
@@ -197,6 +189,6 @@ export function useEnrolledCourse(courseId: string, userId: string | undefined, 
         error,
         isAccessDenied: error && (error as any).code === 'permission-denied',
         updateLastAccess: updateLastAccessMutation.mutate,
-        markComplete: markCompleteMutation.mutate
+        markComplete: (lessonId: string, moduleId: string) => markCompleteMutation.mutate({ lessonId, moduleId })
     };
 }

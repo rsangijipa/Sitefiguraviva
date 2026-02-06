@@ -123,7 +123,7 @@ export default function CourseStudentsTab({ courseId }: { courseId: string }) {
                                     <span className="text-[10px] text-stone-400 mt-1 block font-mono">{enrollment.progressSummary?.percent || 0}%</span>
                                 </td>
                                 <td className="px-6 py-4 text-xs text-stone-500">
-                                    {enrollment.progressSummary?.completedLessonsCount || 0} / {enrollment.progressSummary?.totalLessonsCount || 0}
+                                    {enrollment.progressSummary?.completedLessonsCount || 0} / {enrollment.progressSummary?.totalLessons || 0}
                                 </td>
                                 <td className="px-6 py-4 text-xs text-stone-500">
                                     {enrollment.lastAccessedAt?.toDate?.()?.toLocaleString() || '-'}

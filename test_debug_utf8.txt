@@ -1,0 +1,314 @@
+﻿[dotenv@17.2.3] injecting env (14) from .env.local -- tip: ­ƒæÑ sync secrets across teammates & machines: https://dotenvx.com/ops
+
+Running 2 tests using 1 worker
+
+[dotenv@17.2.3] injecting env (0) from .env.local -- tip: ÔÜÖ´©Å  specify custom .env file path with { path: '/custom/path/.env' }
+node.exe :   [38;5;45;1mpw:api [0m=> 
+browserType.launch started [38;5;45m+0ms[0m
+No linha:1 caractere:1
++ & "C:\Program Files\nodejs/node.exe" 
+"C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (   
+   [38;5;45;1mp...8;5;45m+0ms[0m:String) [],  
+   RemoteException
+    + FullyQualifiedErrorId : NativeCommandErro 
+   r
+ 
+  [38;5;45;1mpw:api [0m<= browserType.launch 
+succeeded [38;5;45m+119ms[0m
+  [38;5;45;1mpw:api [0m=> browser.newContext 
+started [38;5;45m+6ms[0m
+  [38;5;45;1mpw:api [0m<= browser.newContext 
+succeeded [38;5;45m+8ms[0m
+  [38;5;45;1mpw:api [0m=> 
+browserContext.newPage started 
+[38;5;45m+8ms[0m
+  [38;5;45;1mpw:api [0m<= 
+browserContext.newPage succeeded 
+[38;5;45m+124ms[0m
+[DEBUG] authenticate student started
+[DEBUG] STUDENT_EMAIL is SET
+[DEBUG] GOTO /login
+  [38;5;45;1mpw:api [0m=> page.goto started 
+[38;5;45m+3ms[0m
+  [38;5;45;1mpw:api [0mnavigating to 
+"http://localhost:3000/login", waiting until 
+"load" [38;5;45m+12ms[0m
+  [38;5;45;1mpw:api [0m<= page.goto failed 
+[38;5;45m+2s[0m
+[ERROR] authenticate student FAILED
+page.goto: net::ERR_CONNECTION_REFUSED at 
+http://localhost:3000/login
+Call log:
+[2m  - navigating to 
+"http://localhost:3000/login", waiting until 
+"load"[22m
+
+    at [90mD:\_ARQUIVOS DISCO C\Desktop\SiteFig
+uraViva\[39me2e\auth.setup.ts:20:20 {
+  name: [32m'Error'[39m,
+  [32mSymbol(step)[39m: {
+    location: {
+      file: [32m'D:\\_ARQUIVOS DISCO C\\Desktop
+\\SiteFiguraViva\\e2e\\auth.setup.ts'[39m,
+      line: [33m20[39m,
+      column: [33m20[39m
+    },
+    category: [32m'pw:api'[39m,
+    title: [32m'Navigate to "/login"'[39m,
+    apiName: [32m'page.goto'[39m,
+    params: { url: [32m'/login'[39m, 
+waitUntil: [32m'load'[39m, timeout: 
+[33m0[39m },
+    group: [90mundefined[39m,
+    stepId: [32m'pw:api@40'[39m,
+    boxedStack: [90mundefined[39m,
+    steps: [],
+    attachmentIndices: [],
+    info: TestStepInfoImpl {
+      annotations: [],
+      _testInfo: [36m[TestInfoImpl][39m,
+      _stepId: [32m'pw:api@40'[39m,
+      _title: [32m'Navigate to "/login"'[39m,
+      _parentStep: [90mundefined[39m,
+      skip: [36m[Function (anonymous)][39m
+    },
+    complete: [36m[Function: complete][39m,
+    endWallTime: [33m1770345546967[39m,
+    error: {
+      message: [32m'Error: page.goto: 
+net::ERR_CONNECTION_REFUSED at 
+http://localhost:3000/login\n'[39m +
+        [32m'Call log:\n'[39m +
+        [32m'\x1B[2m  - navigating to 
+"http://localhost:3000/login", waiting until 
+"load"\x1B[22m\n'[39m,
+      stack: [32m'Error: page.goto: 
+net::ERR_CONNECTION_REFUSED at 
+http://localhost:3000/login\n'[39m +
+        [32m'Call log:\n'[39m +
+        [32m'\x1B[2m  - navigating to 
+"http://localhost:3000/login", waiting until 
+"load"\x1B[22m\n'[39m +
+        [32m'\n'[39m +
+        [32m'    at D:\\_ARQUIVOS DISCO C\\Desk
+top\\SiteFiguraViva\\e2e\\auth.setup.ts:20:20'[
+39m,
+      cause: [90mundefined[39m
+    }
+  }
+}
+  [38;5;45;1mpw:api [0mtaking page screenshot 
+[38;5;45m+7ms[0m
+  [38;5;45;1mpw:api [0mwaiting for fonts to 
+load... [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0mfonts loaded 
+[38;5;45m+1ms[0m
+  [38;5;45;1mpw:api [0m  "commit" event fired 
+[38;5;45m+20ms[0m
+  [38;5;45;1mpw:api [0m  navigated to 
+"chrome-error://chromewebdata/" 
+[38;5;45m+1ms[0m
+  [38;5;45;1mpw:api [0m  "domcontentloaded" 
+event fired [38;5;45m+5ms[0m
+  [38;5;45;1mpw:api [0m  "load" event fired 
+[38;5;45m+1ms[0m
+  [38;5;45;1mpw:api [0m=> 
+browserContext.close started 
+[38;5;45m+198ms[0m
+  [38;5;45;1mpw:api [0m<= 
+browserContext.close succeeded 
+[38;5;45m+402ms[0m
+  [38;5;45;1mpw:api [0m=> browser.close 
+started [38;5;45m+17ms[0m
+  [38;5;45;1mpw:api [0m<= browser.close 
+succeeded [38;5;45m+255ms[0m
+  Ô£ÿ  1 [setup] ÔÇ║ e2e\auth.setup.ts:7:6 ÔÇ║ authenticate student (3.2s)
+[dotenv@17.2.3] injecting env (0) from .env.local -- tip: ÔÜÖ´©Å  load multiple .env files with { path: ['.env.local', '.env'] }
+  [38;5;45;1mpw:api [0m=> browserType.launch 
+started [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m<= browserType.launch 
+succeeded [38;5;45m+269ms[0m
+  [38;5;45;1mpw:api [0m=> browser.newContext 
+started [38;5;45m+5ms[0m
+  [38;5;45;1mpw:api [0m<= browser.newContext 
+succeeded [38;5;45m+8ms[0m
+  [38;5;45;1mpw:api [0m=> 
+browserContext.newPage started 
+[38;5;45m+7ms[0m
+  [38;5;45;1mpw:api [0m<= 
+browserContext.newPage succeeded 
+[38;5;45m+142ms[0m
+[DEBUG] authenticate admin started
+[DEBUG] ADMIN_EMAIL is SET
+[DEBUG] GOTO /admin/login
+  [38;5;45;1mpw:api [0m=> page.goto started 
+[38;5;45m+3ms[0m
+  [38;5;45;1mpw:api [0mnavigating to 
+"http://localhost:3000/admin/login", waiting 
+until "load" [38;5;45m+28ms[0m
+  [38;5;45;1mpw:api [0m<= page.goto failed 
+[38;5;45m+2s[0m
+[ERROR] authenticate admin FAILED
+page.goto: net::ERR_CONNECTION_REFUSED at 
+http://localhost:3000/admin/login
+Call log:
+[2m  - navigating to 
+"http://localhost:3000/admin/login", waiting 
+until "load"[22m
+
+    at [90mD:\_ARQUIVOS DISCO C\Desktop\SiteFig
+uraViva\[39me2e\auth.setup.ts:57:20 {
+  name: [32m'Error'[39m,
+  [32mSymbol(step)[39m: {
+    location: {
+      file: [32m'D:\\_ARQUIVOS DISCO C\\Desktop
+\\SiteFiguraViva\\e2e\\auth.setup.ts'[39m,
+      line: [33m57[39m,
+      column: [33m20[39m
+    },
+    category: [32m'pw:api'[39m,
+    title: [32m'Navigate to 
+"/admin/login"'[39m,
+    apiName: [32m'page.goto'[39m,
+    params: { url: [32m'/admin/login'[39m, 
+waitUntil: [32m'load'[39m, timeout: 
+[33m0[39m },
+    group: [90mundefined[39m,
+    stepId: [32m'pw:api@40'[39m,
+    boxedStack: [90mundefined[39m,
+    steps: [],
+    attachmentIndices: [],
+    info: TestStepInfoImpl {
+      annotations: [],
+      _testInfo: [36m[TestInfoImpl][39m,
+      _stepId: [32m'pw:api@40'[39m,
+      _title: [32m'Navigate to 
+"/admin/login"'[39m,
+      _parentStep: [90mundefined[39m,
+      skip: [36m[Function (anonymous)][39m
+    },
+    complete: [36m[Function: complete][39m,
+    endWallTime: [33m1770345553743[39m,
+    error: {
+      message: [32m'Error: page.goto: 
+net::ERR_CONNECTION_REFUSED at 
+http://localhost:3000/admin/login\n'[39m +
+        [32m'Call log:\n'[39m +
+        [32m'\x1B[2m  - navigating to 
+"http://localhost:3000/admin/login", waiting 
+until "load"\x1B[22m\n'[39m,
+      stack: [32m'Error: page.goto: 
+net::ERR_CONNECTION_REFUSED at 
+http://localhost:3000/admin/login\n'[39m +
+        [32m'Call log:\n'[39m +
+        [32m'\x1B[2m  - navigating to 
+"http://localhost:3000/admin/login", waiting 
+until "load"\x1B[22m\n'[39m +
+        [32m'\n'[39m +
+        [32m'    at D:\\_ARQUIVOS DISCO C\\Desk
+top\\SiteFiguraViva\\e2e\\auth.setup.ts:57:20'[
+39m,
+      cause: [90mundefined[39m
+    }
+  }
+}
+  [38;5;45;1mpw:api [0m  "commit" event fired 
+[38;5;45m+6ms[0m
+  [38;5;45;1mpw:api [0m  navigated to 
+"chrome-error://chromewebdata/" 
+[38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0mtaking page screenshot 
+[38;5;45m+1ms[0m
+  [38;5;45;1mpw:api [0mwaiting for fonts to 
+load... [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0mfonts loaded 
+[38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m  "domcontentloaded" 
+event fired [38;5;45m+3ms[0m
+  [38;5;45;1mpw:api [0m  "load" event fired 
+[38;5;45m+2ms[0m
+  [38;5;45;1mpw:api [0m=> 
+browserContext.close started 
+[38;5;45m+126ms[0m
+  [38;5;45;1mpw:api [0m<= 
+browserContext.close succeeded 
+[38;5;45m+230ms[0m
+  [38;5;45;1mpw:api [0m=> browser.close 
+started [38;5;45m+12ms[0m
+  [38;5;45;1mpw:api [0m<= browser.close 
+succeeded [38;5;45m+60ms[0m
+  Ô£ÿ  2 [setup] ÔÇ║ e2e\auth.setup.ts:44:6 ÔÇ║ authenticate admin (3.0s)
+
+
+  1) [setup] ÔÇ║ e2e\auth.setup.ts:7:6 ÔÇ║ authenticate student ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/login
+    Call log:
+    [2m  - navigating to "http://localhost:3000/login", waiting until "load"[22m
+
+
+      18 |
+      19 |         console.log('[DEBUG] GOTO /login');
+    > 20 |         await page.goto('/login');
+         |                    ^
+      21 |         console.log(`[DEBUG] Current URL: ${page.url()}`);
+      22 |
+      23 |         console.log('[DEBUG] Waiting for email input');
+        at D:\_ARQUIVOS DISCO C\Desktop\SiteFiguraViva\e2e\auth.setup.ts:20:20
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\auth.setup.ts-authenticate-student-setup\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    attachment #2: video (video/webm) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\auth.setup.ts-authenticate-student-setup\video.webm
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    attachment #3: trace (application/zip) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\auth.setup.ts-authenticate-student-setup\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\auth.setup.ts-authenticate-student-setup\trace.zip
+
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+  2) [setup] ÔÇ║ e2e\auth.setup.ts:44:6 ÔÇ║ authenticate admin ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/admin/login
+    Call log:
+    [2m  - navigating to "http://localhost:3000/admin/login", waiting until "load"[22m
+
+
+      55 |
+      56 |         console.log('[DEBUG] GOTO /admin/login');
+    > 57 |         await page.goto('/admin/login');
+         |                    ^
+      58 |         console.log(`[DEBUG] Current URL: ${page.url()}`);
+      59 |
+      60 |         console.log('[DEBUG] Waiting for email input');
+        at D:\_ARQUIVOS DISCO C\Desktop\SiteFiguraViva\e2e\auth.setup.ts:57:20
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\auth.setup.ts-authenticate-admin-setup\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    attachment #2: video (video/webm) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\auth.setup.ts-authenticate-admin-setup\video.webm
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    attachment #3: trace (application/zip) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\auth.setup.ts-authenticate-admin-setup\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\auth.setup.ts-authenticate-admin-setup\trace.zip
+
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+  2 failed
+    [setup] ÔÇ║ e2e\auth.setup.ts:7:6 ÔÇ║ authenticate student ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    [setup] ÔÇ║ e2e\auth.setup.ts:44:6 ÔÇ║ authenticate admin ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+[36m  Serving HTML report at http://localhost:51278. Press Ctrl+C to quit.[39m

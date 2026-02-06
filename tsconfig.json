@@ -24,6 +24,9 @@
       }
     ],
     "baseUrl": ".",
+    "types": [
+      "jest"
+    ],
     "paths": {
       "@/*": [
         "./src/*"

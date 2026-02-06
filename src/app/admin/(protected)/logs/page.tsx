@@ -1,106 +1,100 @@
-"use client";
+'use client';
 
 import { useState, useEffect } from 'react';
-import { db } from '@/lib/firebase/client';
-import { collection, query, orderBy, limit, onSnapshot, where } from 'firebase/firestore';
+import { getAuditLogs } from '@/actions/audit';
+import { Loader2, RefreshCw, Smartphone, Globe, ShieldAlert } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
-import { Clock, AlertTriangle, AlertCircle, Info, ExternalLink } from 'lucide-react';
+import Button from '@/components/ui/Button';
 
-export default function SystemLogsPage() {
+export default function AdminLogsPage() {
     const [logs, setLogs] = useState<any[]>([]);
-    const [filter, setFilter] = useState<'all' | 'error' | 'critical'>('all');
+    const [loading, setLoading] = useState(true);
+
+    const fetchLogs = async () => {
+        setLoading(true);
+        const res = await getAuditLogs(50);
+        if (res.success) {
+            setLogs(res.logs);
+        } else {
+            alert('Failed to fetch logs: ' + res.error);
+        }
+        setLoading(false);
+    };
 
     useEffect(() => {
-        let q = query(
-            collection(db, 'system_logs'),
-            orderBy('createdAt', 'desc'),
-            limit(50)
-        );
-
-        if (filter !== 'all') {
-            q = query(
-                collection(db, 'system_logs'),
-                where('severity', '==', filter),
-                orderBy('createdAt', 'desc'),
-                limit(50)
-            );
-        }
-
-        const unsub = onSnapshot(q, (snapshot) => {
-            setLogs(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-        });
-
-        return () => unsub();
-    }, [filter]);
+        fetchLogs();
+    }, []);
 
     return (
-        <div className="space-y-6">
-            <header className="flex justify-between items-center mb-8">
+        <div className="p-6 md:p-10 space-y-6">
+            <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="font-serif text-3xl text-primary">Logs do Sistema</h1>
-                    <p className="text-stone-500 font-light text-sm">Monitoramento de erros de webhook e infraestrutura.</p>
+                    <h1 className="text-2xl font-serif font-bold text-stone-800">Logs de Auditoria</h1>
+                    <p className="text-stone-500">Rastreamento imutável de ações críticas do sistema.</p>
                 </div>
-                <div className="flex gap-2">
-                    {['all', 'error', 'critical'].map((sev) => (
-                        <button
-                            key={sev}
-                            onClick={() => setFilter(sev as any)}
-                            className={`px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-lg transition-colors ${filter === sev
-                                    ? 'bg-primary text-white'
-                                    : 'bg-stone-100 text-stone-500 hover:bg-stone-200'
-                                }`}
-                        >
-                            {sev}
-                        </button>
-                    ))}
-                </div>
-            </header>
-
-            <div className="space-y-4">
-                {logs.length === 0 ? (
-                    <div className="p-12 text-center bg-stone-50 rounded-2xl border border-dashed border-stone-200">
-                        <p className="text-stone-400">Nenhum log encontrado para este filtro.</p>
-                    </div>
-                ) : (
-                    logs.map((log) => (
-                        <Card key={log.id} className={`p-4 border-l-4 ${log.severity === 'critical' ? 'border-l-red-600 bg-red-50/50' :
-                                log.severity === 'error' ? 'border-l-red-400' :
-                                    log.severity === 'warning' ? 'border-l-amber-400' :
-                                        'border-l-blue-400'
-                            }`}>
-                            <div className="flex justify-between items-start gap-4">
-                                <div>
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest ${log.severity === 'critical' ? 'bg-red-100 text-red-700' :
-                                                log.severity === 'error' ? 'bg-red-50 text-red-600' :
-                                                    log.severity === 'warning' ? 'bg-amber-50 text-amber-600' :
-                                                        'bg-blue-50 text-blue-600'
-                                            }`}>
-                                            {log.severity}
-                                        </span>
-                                        <span className="text-xs font-mono text-stone-400 uppercase">{log.source}</span>
-                                    </div>
-                                    <p className="font-bold text-stone-800 text-sm">{log.message || 'Sem mensagem'}</p>
-
-                                    {log.context && (
-                                        <div className="mt-2 text-xs font-mono bg-white/50 p-2 rounded border border-black/5 overflow-x-auto max-w-2xl">
-                                            <pre>{JSON.stringify(log.context, null, 2)}</pre>
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className="text-[10px] text-stone-400 font-mono shrink-0 flex flex-col items-end">
-                                    <div className="flex items-center gap-1">
-                                        <Clock size={10} />
-                                        {log.createdAt?.toDate?.()?.toLocaleString() || '...'}
-                                    </div>
-                                    <div className="mt-1 text-primary/30">ID: {log.id}</div>
-                                </div>
-                            </div>
-                        </Card>
-                    ))
-                )}
+                <Button onClick={fetchLogs} disabled={loading} leftIcon={<RefreshCw className={loading ? 'animate-spin' : ''} size={16} />}>
+                    Atualizar
+                </Button>
             </div>
+
+            <Card className="overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left">
+                        <thead className="bg-stone-50 text-stone-500 font-medium border-b border-stone-100">
+                            <tr>
+                                <th className="px-6 py-4">Data/Hora</th>
+                                <th className="px-6 py-4">Ação</th>
+                                <th className="px-6 py-4">Ator (UID)</th>
+                                <th className="px-6 py-4">Alvo</th>
+                                <th className="px-6 py-4">Detalhes</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-stone-50">
+                            {logs.map((log) => (
+                                <tr key={log.id} className="hover:bg-stone-50/50 transition-colors">
+                                    <td className="px-6 py-4 font-mono text-xs text-stone-500 whitespace-nowrap">
+                                        {new Date(log.timestamp).toLocaleString()}
+                                    </td>
+                                    <td className="px-6 py-4 font-medium text-stone-700">
+                                        <span className="bg-stone-100 px-2 py-1 rounded border border-stone-200">
+                                            {log.action}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 text-stone-600 font-mono text-xs">
+                                        <div className="flex flex-col">
+                                            <span>{log.actor?.email || 'N/A'}</span>
+                                            <span className="text-stone-400">{log.actor?.uid}</span>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 text-stone-600">
+                                        <div className="flex flex-col">
+                                            <span className="font-bold">{log.target?.collection}</span>
+                                            <span className="font-mono text-xs text-stone-400">{log.target?.id}</span>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        {log.diff && (
+                                            <details className="cursor-pointer">
+                                                <summary className="text-xs text-blue-600 font-medium select-none hover:underline">Ver Diff</summary>
+                                                <div className="mt-2 p-2 bg-stone-900 text-green-400 rounded text-[10px] font-mono whitespace-pre-wrap max-w-xs overflow-auto max-h-40">
+                                                    {JSON.stringify(log.diff, null, 2)}
+                                                </div>
+                                            </details>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                            {!loading && logs.length === 0 && (
+                                <tr>
+                                    <td colSpan={5} className="px-6 py-12 text-center text-stone-400">
+                                        Nenhum log encontrado.
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </Card>
         </div>
     );
 }

@@ -29,7 +29,7 @@ export const CertificateCard = ({ certificate, onView }: CertificateCardProps) =
                 <div className="flex items-start justify-between mb-2">
                     <div>
                         <h3 className="text-lg font-serif font-bold text-stone-800">{certificate.courseTitle}</h3>
-                        <p className="text-sm text-stone-500">Concluído por {certificate.studentName}</p>
+                        <p className="text-sm text-stone-500">Concluído por {certificate.userName}</p>
                     </div>
                 </div>
 
@@ -38,9 +38,9 @@ export const CertificateCard = ({ certificate, onView }: CertificateCardProps) =
                         <Calendar size={12} /> {date.toLocaleDateString()}
                     </span>
                     <span className="bg-stone-100 px-2 py-0.5 rounded text-stone-500">
-                        {certificate.workloadHours}h
+                        {certificate.metadata?.hours || 10}h
                     </span>
-                    <span>COD: {certificate.validationCode}</span>
+                    <span>COD: {certificate.code}</span>
                 </div>
             </div>
 

@@ -4,12 +4,17 @@ import { Block } from '@/types/lms';
 import ReactMarkdown from 'react-markdown';
 import { cn } from '@/lib/utils';
 import { Video, FileText, AlertCircle, CheckCircle, Info, ExternalLink, Image as ImageIcon } from 'lucide-react';
+import { VideoPlayer } from './VideoPlayer';
 
 interface BlockRendererProps {
     block: Block;
+    courseId?: string;
+    moduleId?: string; // Added
+    lessonId?: string;
+    isLessonCompleted?: boolean;
 }
 
-export function BlockRenderer({ block }: BlockRendererProps) {
+export function BlockRenderer({ block, courseId, moduleId, lessonId, isLessonCompleted }: BlockRendererProps) {
     if (!block.isPublished) return null;
 
     switch (block.type) {
@@ -21,16 +26,32 @@ export function BlockRenderer({ block }: BlockRendererProps) {
             );
 
         case 'video':
-            // Simple YouTube embed
+            // Smart Video Player
             const videoId = block.content.videoId || (block.content.url ? block.content.url.split('v=')[1] : null);
             if (!videoId && block.content.url) {
-                // Fallback for non-youtube?
                 return (
                     <div className="bg-stone-100 p-4 rounded text-center">Video URL not supported yet: {block.content.url}</div>
                 )
             }
             if (!videoId) return null;
 
+            if (courseId && moduleId && lessonId) {
+                // Return tracked player
+                return (
+                    <VideoPlayer
+                        videoId={videoId}
+                        courseId={courseId}
+                        moduleId={moduleId}
+                        lessonId={lessonId}
+                        initialCompleted={isLessonCompleted}
+                    // initialCompleted could be passed if we had lesson status in BlockRenderer, but we might not.
+                    // Ideally BlockRenderer should receive 'isCompleted' for the whole lesson? 
+                    // No, video completion triggers lesson completion.
+                    />
+                );
+            }
+
+            // Fallback for when context is missing (admin preview?)
             return (
                 <div className="rounded-xl overflow-hidden shadow-lg border border-stone-100 aspect-video bg-black relative">
                     <iframe

@@ -1,5 +1,5 @@
 import { db } from '@/lib/firebase/client';
-import { collection, doc, getDocs, getDoc, addDoc, updateDoc, deleteDoc, serverTimestamp, query, orderBy, where } from 'firebase/firestore';
+import { collection, doc, getDocs, getDoc, addDoc, updateDoc, deleteDoc, serverTimestamp, query, orderBy, where, increment, writeBatch } from 'firebase/firestore';
 import { CourseDoc, ModuleDoc, LessonDoc } from '@/types/lms';
 
 export const adminCourseService = {
@@ -83,16 +83,29 @@ export const adminCourseService = {
     },
 
     async createLesson(courseId: string, moduleId: string, title: string, order: number): Promise<string> {
-        const docRef = await addDoc(collection(db, 'courses', courseId, 'modules', moduleId, 'lessons'), {
+        const batch = writeBatch(db);
+        const lessonsCol = collection(db, 'courses', courseId, 'modules', moduleId, 'lessons');
+        const newLessonRef = doc(lessonsCol);
+
+        batch.set(newLessonRef, {
             title,
             order,
             moduleId,
-            type: 'text', // default
+            type: 'text',
             status: 'draft',
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp()
         });
-        return docRef.id;
+
+        // PRG-05: Increment lesson count
+        const courseRef = doc(db, 'courses', courseId);
+        batch.update(courseRef, {
+            'stats.lessonsCount': increment(1),
+            updatedAt: serverTimestamp()
+        });
+
+        await batch.commit();
+        return newLessonRef.id;
     },
 
     async updateLesson(courseId: string, moduleId: string, lessonId: string, data: Partial<LessonDoc>): Promise<void> {
@@ -101,7 +114,18 @@ export const adminCourseService = {
     },
 
     async deleteLesson(courseId: string, moduleId: string, lessonId: string): Promise<void> {
-        await deleteDoc(doc(db, 'courses', courseId, 'modules', moduleId, 'lessons', lessonId));
+        const batch = writeBatch(db);
+        const lessonRef = doc(db, 'courses', courseId, 'modules', moduleId, 'lessons', lessonId);
+        batch.delete(lessonRef);
+
+        // PRG-05: Decrement lesson count
+        const courseRef = doc(db, 'courses', courseId);
+        batch.update(courseRef, {
+            'stats.lessonsCount': increment(-1),
+            updatedAt: serverTimestamp()
+        });
+
+        await batch.commit();
     },
 
     // --- ENROLLMENTS ---
@@ -156,5 +180,24 @@ export const adminCourseService = {
 
     async deleteMaterial(courseId: string, materialId: string): Promise<void> {
         await deleteDoc(doc(db, 'courses', courseId, 'materials', materialId));
+    },
+
+    // --- UTILS ---
+
+    async syncLessonsCount(courseId: string): Promise<number> {
+        const modulesSnap = await getDocs(collection(db, 'courses', courseId, 'modules'));
+        let total = 0;
+
+        for (const modDoc of modulesSnap.docs) {
+            const lessonsSnap = await getDocs(collection(db, 'courses', courseId, 'modules', modDoc.id, 'lessons'));
+            total += lessonsSnap.size;
+        }
+
+        await updateDoc(doc(db, 'courses', courseId), {
+            'stats.lessonsCount': total,
+            updatedAt: serverTimestamp()
+        });
+
+        return total;
     }
 };

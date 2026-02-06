@@ -19,7 +19,7 @@ interface LessonPlayerProps {
     modules: Module[];
     activeLesson: Lesson | null;
     onSelectLesson: (lessonId: string) => void;
-    onMarkComplete: (lessonId: string) => void;
+    onMarkComplete: (lessonId: string, moduleId: string) => void;
     nextLessonId?: string;
     prevLessonId?: string;
 }
@@ -37,36 +37,12 @@ export function LessonPlayer({
     const [blocks, setBlocks] = useState<Block[]>([]);
     const [isLoadingContent, setIsLoadingContent] = useState(false);
 
-    // Fetch blocks when activeLesson changes
-    useEffect(() => {
-        if (!activeLesson) return;
-
-        let isMounted = true;
-
-        async function loadContent() {
-            setIsLoadingContent(true);
-            // We need moduleId. In this data structure, activeLesson doesn't always have moduleId populated 
-            // if it comes from a flattened list, but in our type it does.
-            // If missing, find it in modules.
-            let moduleId = activeLesson!.moduleId;
-            if (!moduleId) {
-                const parentModule = modules.find(m => m.lessons.some(l => l.id === activeLesson!.id));
-                if (parentModule) moduleId = parentModule.id;
-            }
-
-            if (moduleId) {
-                const res = await getLessonContentAction(course.id, moduleId, activeLesson!.id);
-                if (isMounted && res.success && res.data) {
-                    setBlocks(res.data.blocks);
-                }
-            }
-            if (isMounted) setIsLoadingContent(false);
-        }
-
-        loadContent();
-
-        return () => { isMounted = false; };
-    }, [activeLesson, course.id, modules]);
+    // Helper to find moduleId if not directly on lesson
+    const getModuleId = (lesson: Lesson) => {
+        if (lesson.moduleId) return lesson.moduleId;
+        const parent = modules.find(m => m.lessons.some(l => l.id === lesson.id));
+        return parent?.id;
+    };
 
     return (
         <div className="h-[calc(100vh-4rem)] flex flex-col bg-[#FDFCF9] overflow-hidden">
@@ -84,11 +60,19 @@ export function LessonPlayer({
 
                 <div className="flex items-center gap-2">
                     <Button
-                        onClick={() => onMarkComplete(activeLesson?.id || '')}
+                        onClick={() => {
+                            const modId = activeLesson ? getModuleId(activeLesson) : undefined;
+                            if (activeLesson && modId) onMarkComplete(activeLesson.id, modId);
+                        }}
                         disabled={!activeLesson || activeLesson.isCompleted}
                         size="sm"
                         variant={activeLesson?.isCompleted ? "outline" : "primary"}
-                        className={cn("hidden md:flex", activeLesson?.isCompleted && "text-green-600 border-green-200 bg-green-50")}
+                        className={cn(
+                            "hidden md:flex",
+                            activeLesson?.isCompleted && "text-green-600 border-green-200 bg-green-50",
+                            // VP-01: Hide manual completion for video lessons to enforce watch threshold
+                            activeLesson?.type === 'video' && !activeLesson.isCompleted && "hidden"
+                        )}
                         leftIcon={activeLesson?.isCompleted ? <CheckCircle size={14} /> : undefined}
                     >
                         {activeLesson?.isCompleted ? "Concluída" : "Concluir Aula"}
@@ -125,7 +109,14 @@ export function LessonPlayer({
                             {/* Blocks Render */}
                             <div className="space-y-8 animate-in fade-in duration-500">
                                 {blocks.map((block) => (
-                                    <BlockRenderer key={block.id} block={block} />
+                                    <BlockRenderer
+                                        key={block.id}
+                                        block={block}
+                                        courseId={course.id}
+                                        moduleId={getModuleId(activeLesson)} // Pass Resolved Module ID
+                                        lessonId={activeLesson.id}
+                                        isLessonCompleted={activeLesson.isCompleted}
+                                    />
                                 ))}
                                 {!isLoadingContent && blocks.length === 0 && (
                                     <div className="bg-stone-50 rounded-xl p-8 text-center text-stone-400 italic">
@@ -147,8 +138,11 @@ export function LessonPlayer({
                                 </Button>
 
                                 <div className="hidden md:flex gap-2">
-                                    {!activeLesson.isCompleted && (
-                                        <Button onClick={() => onMarkComplete(activeLesson.id)}>
+                                    {!activeLesson.isCompleted && activeLesson.type !== 'video' && (
+                                        <Button onClick={() => {
+                                            const modId = getModuleId(activeLesson);
+                                            if (modId) onMarkComplete(activeLesson.id, modId);
+                                        }}>
                                             Marcar como Concluída
                                         </Button>
                                     )}

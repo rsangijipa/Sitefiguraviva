@@ -9,7 +9,8 @@ export interface Enrollment {
     status: 'active' | 'expired' | 'completed' | 'pending';
     progressSummary?: {
         percent: number;
-        completedLessons: string[];
+        completedLessonsCount: number;
+        totalLessons: number;
         lastUpdated: any;
     };
     lastAccessedAt?: any;

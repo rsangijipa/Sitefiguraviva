@@ -101,6 +101,10 @@ export async function POST(req: NextRequest) {
                             // BUT 'invoice.paid' is the real source of truth for "Paid".
                             // Status here: Payment=Pending (safe bet), Approval=PendingReview.
 
+                            // PRG-05: Fetch course info to pre-populate totalLessons
+                            const courseSnap = await adminDb.collection('courses').doc(courseId).get();
+                            const totalLessons = courseSnap.data()?.stats?.lessonsCount || 0;
+
                             const updateData = {
                                 uid,
                                 courseId,
@@ -111,6 +115,12 @@ export async function POST(req: NextRequest) {
                                 'stripe.customerId': customerId,
                                 'stripe.subscriptionId': subscriptionId,
                                 'stripe.subscriptionStatus': 'active', // Assumed from session
+
+                                progressSummary: {
+                                    completedLessonsCount: 0,
+                                    totalLessons: totalLessons,
+                                    percent: 0,
+                                },
 
                                 applicationId: applicationId || null,
                                 updatedAt: FieldValue.serverTimestamp(),

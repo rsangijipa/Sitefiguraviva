@@ -80,12 +80,12 @@ export default async function CertificateView({ params }: { params: Promise<{ id
                         <p className="text-lg text-stone-600 mb-8">Certificamos que</p>
 
                         <h1 className="text-5xl font-serif font-bold text-amber-600 mb-6 border-b-2 border-amber-100 pb-8 inline-block mx-auto min-w-[50%]">
-                            {cert.studentName}
+                            {cert.userName}
                         </h1>
 
                         <p className="text-xl text-stone-600 leading-relaxed max-w-2xl mx-auto mb-12">
                             concluiu com êxito o curso <strong className="text-stone-900">{cert.courseTitle}</strong>,
-                            com carga horária de <strong>{cert.workloadHours} horas</strong>, demonstrando domínio nas competências propostas.
+                            com carga horária de <strong>{cert.metadata?.hours || 10} horas</strong>, demonstrando domínio nas competências propostas.
                         </p>
                     </div>
 
@@ -101,8 +101,11 @@ export default async function CertificateView({ params }: { params: Promise<{ id
                             <div className="w-16 h-16 bg-stone-100 mb-2 flex items-center justify-center">
                                 <ShieldCheck size={32} className="text-stone-300" />
                             </div>
-                            <span className="text-[10px] font-mono text-stone-400">COD: {cert.validationCode}</span>
-                            <span className="text-[10px] text-stone-400 mt-1">Valide em figuraviva.com/verify</span>
+                            <div className="w-16 h-16 bg-stone-100 mb-2 flex items-center justify-center">
+                                <ShieldCheck size={32} className="text-stone-300" />
+                            </div>
+                            <span className="text-[10px] font-mono text-stone-400">COD: {cert.code}</span>
+                            <span className="text-[10px] text-stone-400 mt-1">Valide em figuraviva.com/certificado/{cert.code}</span>
                         </div>
 
                         <div className="flex flex-col items-center">
