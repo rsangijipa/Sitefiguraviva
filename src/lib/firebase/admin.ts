@@ -1,71 +1,45 @@
 import admin from 'firebase-admin';
 
-// Check for required environment variables
-const requiredEnvVars = [
-    'NEXT_PUBLIC_FIREBASE_PROJECT_ID',
-    'FIREBASE_CLIENT_EMAIL',
-    'FIREBASE_PRIVATE_KEY'
-];
+// --- Env Resolution (Server-side) ---
+// We accept either FIREBASE_* or NEXT_PUBLIC_FIREBASE_* for convenience.
+const projectId = process.env.FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+const storageBucket = process.env.FIREBASE_STORAGE_BUCKET || process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
+const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
 
-const missingEnvVars = requiredEnvVars.filter(key => !process.env[key]);
+const missingRequired: string[] = [];
+if (!projectId) missingRequired.push('FIREBASE_PROJECT_ID (or NEXT_PUBLIC_FIREBASE_PROJECT_ID)');
+if (!clientEmail) missingRequired.push('FIREBASE_CLIENT_EMAIL');
+if (!process.env.FIREBASE_PRIVATE_KEY) missingRequired.push('FIREBASE_PRIVATE_KEY');
 
-if (missingEnvVars.length > 0) {
-    console.error(`Missing required environment variables for Firebase Admin: ${missingEnvVars.join(', ')}`);
+if (missingRequired.length > 0) {
+    console.error(`Missing required environment variables for Firebase Admin: ${missingRequired.join(', ')}`);
 }
 
 // Ensure initialization happens only once
 if (!admin.apps.length) {
     try {
-        if (process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
+        if (projectId && clientEmail && privateKey) {
             admin.initializeApp({
                 credential: admin.credential.cert({
-                    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-                    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-                    privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+                    projectId,
+                    clientEmail,
+                    privateKey,
                 }),
-                storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+                ...(storageBucket ? { storageBucket } : {}),
             });
-            console.log("Firebase Admin Initialized successfully.");
+            console.log('Firebase Admin Initialized successfully.');
         } else {
-            console.error("Firebase Admin skipped - missing credentials.");
+            console.error('Firebase Admin skipped - missing credentials/projectId.');
         }
     } catch (error) {
         console.error('Firebase admin initialization error', error);
     }
 }
 
-// Export safe accessors that throw specific errors on usage if not initialized
-// This prevents top-level crashes during module evaluation
-const createProxy = (name: string) => {
-    return new Proxy({}, {
-        get: (_target, prop) => {
-            if (admin.apps.length > 0) {
-                // If initialized later, return the real thing? 
-                // No, the proxy is bound to the export. 
-                // We should return the actual service instance property.
-                const service = name === 'firestore' ? admin.firestore() :
-                    name === 'auth' ? admin.auth() :
-                        admin.storage();
-                const value = service[prop as keyof typeof service];
-                // If it's a function, bind it to the service
-                if (typeof value === 'function') {
-                    return (value as Function).bind(service);
-                }
-                return value;
-            }
-            throw new Error(`Firebase Admin SDK not initialized. Missing environment variables: ${missingEnvVars.join(', ')}. Cannot access '${name}.${String(prop)}'`);
-        }
-    });
-};
-
-let db: FirebaseFirestore.Firestore;
-let auth: admin.auth.Auth;
-let storage: admin.storage.Storage;
-
-// We assign the real instances if ready, otherwise proxies.
-// BUT, since ES modules caches exports, if we export proxies, they stay proxies.
-// So we ALWAYS export proxies that delegate to the real instance if available, 
-// or throw if not. This is safer for Next.js hot reloading too.
+// --- Safe Proxies ---
+// We export proxies that delegate to the real service instance when initialized,
+// and throw a clear error otherwise. This avoids module-evaluation crashes.
 
 const dbProxy = new Proxy({}, {
     get: (_target, prop) => {
@@ -74,7 +48,7 @@ const dbProxy = new Proxy({}, {
             const val = instance[prop as keyof typeof instance];
             return typeof val === 'function' ? (val as Function).bind(instance) : val;
         }
-        throw new Error(`Firebase Admin SDK not initialized (Firestore). Missing: ${missingEnvVars.join(', ')}`);
+        throw new Error(`Firebase Admin SDK not initialized (Firestore). Missing: ${missingRequired.join(', ')}`);
     }
 }) as FirebaseFirestore.Firestore;
 
@@ -85,7 +59,7 @@ const authProxy = new Proxy({}, {
             const val = instance[prop as keyof typeof instance];
             return typeof val === 'function' ? (val as Function).bind(instance) : val;
         }
-        throw new Error(`Firebase Admin SDK not initialized (Auth). Missing: ${missingEnvVars.join(', ')}`);
+        throw new Error(`Firebase Admin SDK not initialized (Auth). Missing: ${missingRequired.join(', ')}`);
     }
 }) as admin.auth.Auth;
 
@@ -96,7 +70,7 @@ const storageProxy = new Proxy({}, {
             const val = instance[prop as keyof typeof instance];
             return typeof val === 'function' ? (val as Function).bind(instance) : val;
         }
-        throw new Error(`Firebase Admin SDK not initialized (Storage). Missing: ${missingEnvVars.join(', ')}`);
+        throw new Error(`Firebase Admin SDK not initialized (Storage). Missing: ${missingRequired.join(', ')}`);
     }
 }) as admin.storage.Storage;
 

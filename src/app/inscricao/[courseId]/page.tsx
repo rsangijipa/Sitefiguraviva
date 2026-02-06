@@ -26,8 +26,9 @@ export default async function EnrollmentPage({ params }: { params: Promise<{ cou
     }
     const courseData = { id: courseDoc.id, ...courseDoc.data() } as any;
 
-    // Check Published
-    if (!courseData.isPublished) {
+    // Check availability (new: status==open; legacy: isPublished==true)
+    const isAvailable = courseData.status === 'open' || courseData.isPublished === true;
+    if (!isAvailable) {
         return <div className="p-10 text-center text-stone-500">Inscrições encerradas ou curso não disponível.</div>;
     }
 

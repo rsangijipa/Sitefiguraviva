@@ -7,14 +7,28 @@ async function findLessonParent(courseId: string, lessonId: string) {
 
     // 2. Search for the lesson in each module's subcollection
     for (const mDoc of modulesSnap.docs) {
-        const lessonsSnap = await mDoc.ref.collection('lessons').doc(lessonId).get();
-        if (lessonsSnap.exists) {
+        const lessonRef = mDoc.ref.collection('lessons').doc(lessonId);
+        const lessonSnap = await lessonRef.get();
+
+        if (lessonSnap.exists) {
+            // Fetch blocks (admin editor must reflect what students will actually see)
+            let blocks: any[] = [];
+            try {
+                const blocksSnap = await lessonRef.collection('blocks').orderBy('order', 'asc').get();
+                blocks = blocksSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+            } catch (error) {
+                // Legacy blocks might not have 'order'
+                const blocksSnap = await lessonRef.collection('blocks').get();
+                blocks = blocksSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+            }
+
             return {
                 module: { id: mDoc.id, ...mDoc.data() },
-                lesson: { id: lessonsSnap.id, ...lessonsSnap.data() }
+                lesson: { id: lessonSnap.id, ...lessonSnap.data(), blocks }
             };
         }
     }
+
     return null;
 }
 

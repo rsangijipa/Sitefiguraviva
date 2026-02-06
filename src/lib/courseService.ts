@@ -96,24 +96,30 @@ export async function getLessonContent(courseId: string, moduleId: string, lesso
     // Fetch specific lesson and its blocks
     const lessonRef = db.collection('courses').doc(courseId).collection('modules').doc(moduleId).collection('lessons').doc(lessonId);
 
-    const [lessonDoc, blocksSnap] = await Promise.all([
-        lessonRef.get(),
-        lessonRef.collection('blocks').orderBy('order', 'asc').get()
-    ]);
-
+    const lessonDoc = await lessonRef.get();
     if (!lessonDoc.exists) return null;
+
+    let blocksSnap;
+    try {
+        blocksSnap = await lessonRef.collection('blocks').orderBy('order', 'asc').get();
+    } catch (error) {
+        // Legacy blocks might not have an 'order' field; fallback without ordering
+        blocksSnap = await lessonRef.collection('blocks').get();
+    }
 
     const lesson = { id: lessonDoc.id, ...lessonDoc.data() } as Lesson;
 
-    const blocks = blocksSnap.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-    })) as Block[];
+    const blocks = blocksSnap.docs.map(doc => {
+        const data: any = doc.data();
+        return {
+            id: doc.id,
+            ...data,
+            // Default: visible unless explicitly disabled
+            isPublished: data?.isPublished !== false
+        };
+    }) as Block[];
 
-    return {
-        lesson,
-        blocks
-    };
+    return { lesson, blocks };
 }
 
 export async function saveLessonContent(courseId: string, moduleId: string, lessonId: string, blocks: Block[]) {
@@ -130,18 +136,32 @@ export async function saveLessonContent(courseId: string, moduleId: string, less
         batch.delete(doc.ref);
     });
 
-    // 2. Add new blocks
-    blocks.forEach((block) => {
+    // 2. Normalize and add new blocks
+    const safeBlocks = (blocks || []).map((b: any, idx: number) => ({
+        ...b,
+        // Default ordering and publish state (legacy data may omit these fields)
+        order: typeof b?.order === 'number' ? b.order : idx + 1,
+        isPublished: b?.isPublished !== false,
+    })) as Block[];
+
+    safeBlocks.forEach((block: any) => {
         const docRef = blocksRef.doc(block.id);
-        const { id, ...blockData } = block; // Ensure ID is not in data if using doc(id)
-        batch.set(docRef, blockData);
+        const { id, ...raw } = block;
+
+        batch.set(docRef, {
+            ...raw,
+            order: typeof raw?.order === 'number' ? raw.order : 0,
+            isPublished: raw?.isPublished !== false,
+            updatedAt: new Date(),
+            createdAt: raw?.createdAt || new Date(),
+        });
     });
 
-    // 3. Update lesson timestamp/count
-    batch.update(lessonRef, {
+    // 3. Update lesson timestamp/count (use set+merge for safety)
+    batch.set(lessonRef, {
         updatedAt: new Date(),
-        publishedBlocksCount: blocks.filter(b => b.isPublished).length
-    });
+        publishedBlocksCount: safeBlocks.filter((b: any) => b?.isPublished !== false).length
+    }, { merge: true });
 
     return batch.commit();
 }

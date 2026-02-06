@@ -44,6 +44,92 @@ export function LessonPlayer({
         return parent?.id;
     };
 
+    // Resolved moduleId for the active lesson (needed to load blocks)
+    const resolvedModuleId = activeLesson ? getModuleId(activeLesson) : undefined;
+
+    // Load lesson content blocks whenever the active lesson changes
+    useEffect(() => {
+        let cancelled = false;
+
+        const load = async () => {
+            if (!activeLesson || !resolvedModuleId) {
+                setBlocks([]);
+                return;
+            }
+
+            setIsLoadingContent(true);
+            try {
+                const res = await getLessonContentAction(course.id, resolvedModuleId, activeLesson.id);
+
+                if (cancelled) return;
+
+                if (res?.success) {
+                    const serverBlocks = (res.data?.blocks || []) as Block[];
+                    // Default visible; only hide if explicitly disabled
+                    setBlocks(serverBlocks.filter(b => b.isPublished !== false));
+                } else {
+                    console.error('Failed to load lesson content:', res?.error);
+                    setBlocks([]);
+                }
+            } catch (err) {
+                if (!cancelled) {
+                    console.error('Failed to load lesson content:', err);
+                    setBlocks([]);
+                }
+            } finally {
+                if (!cancelled) setIsLoadingContent(false);
+            }
+        };
+
+        load();
+        return () => {
+            cancelled = true;
+        };
+    }, [activeLesson?.id, resolvedModuleId, course.id]);
+
+    // Resolved moduleId for the active lesson (needed to load blocks)
+    const resolvedModuleId = activeLesson ? getModuleId(activeLesson) : undefined;
+
+    // Load lesson content blocks whenever the active lesson changes
+    useEffect(() => {
+        let cancelled = false;
+
+        const load = async () => {
+            if (!activeLesson || !resolvedModuleId) {
+                setBlocks([]);
+                return;
+            }
+
+            setIsLoadingContent(true);
+            try {
+                const res = await getLessonContentAction(course.id, resolvedModuleId, activeLesson.id);
+
+                if (cancelled) return;
+
+                if (res?.success) {
+                    const serverBlocks = (res.data?.blocks || []) as Block[];
+                    // Default visible; only hide if explicitly disabled
+                    setBlocks(serverBlocks.filter(b => b.isPublished !== false));
+                } else {
+                    console.error('Failed to load lesson content:', res?.error);
+                    setBlocks([]);
+                }
+            } catch (err) {
+                if (!cancelled) {
+                    console.error('Failed to load lesson content:', err);
+                    setBlocks([]);
+                }
+            } finally {
+                if (!cancelled) setIsLoadingContent(false);
+            }
+        };
+
+        load();
+        return () => {
+            cancelled = true;
+        };
+    }, [activeLesson?.id, resolvedModuleId, course.id]);
+
     return (
         <div className="h-[calc(100vh-4rem)] flex flex-col bg-[#FDFCF9] overflow-hidden">
             {/* Top Bar (Simplified for focus) */}

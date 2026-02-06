@@ -15,7 +15,9 @@ interface BlockRendererProps {
 }
 
 export function BlockRenderer({ block, courseId, moduleId, lessonId, isLessonCompleted }: BlockRendererProps) {
-    if (!block.isPublished) return null;
+    // Don't render unpublished blocks
+    // Default: visible. Only hide if explicitly disabled.
+    if (block.isPublished === false) return null;
 
     switch (block.type) {
         case 'text':
