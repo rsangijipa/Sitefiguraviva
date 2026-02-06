@@ -62,6 +62,7 @@ export interface CourseDoc {
 
     stats?: {
         studentsCount: number;
+        lessonsCount?: number; // Added for PRG-05
         rating?: number;
     };
 
@@ -230,13 +231,16 @@ export interface EnrollmentDoc {
 
     // Synced Stats (for fast UI)
     progressSummary?: {
-        completedLessonsCount: number;
-        totalLessonsCount: number;
+        completedLessonsCount: number; // Renamed for consistency
+        totalLessons: number;
         percent: number;
         lastLessonId?: string;
+        lastAccess?: any;
     };
 }
 
+// ... (removed old interface if it existed there, or just keep the export line and remove the manual interface)
+export type { CertificateDoc } from './certificate';
 export interface ProgressDoc {
     userId: string;
     courseId: string;
@@ -249,19 +253,7 @@ export interface ProgressDoc {
     updatedAt: Timestamp; // Last touched
 }
 
-export interface CertificateDoc {
-    id: string;
-    userId: string;
-    userName: string; // Denormalized
-    courseId: string;
-    courseTitle: string; // Denormalized
-    code: string; // Unique verification code
-    pdfUrl?: string; // Storage URL
-    issuedAt: Timestamp;
-    metadata?: {
-        hours?: number;
-    };
-}
+// CertificateDoc is imported from ./certificate
 
 // --- LEGACY COMPATIBILITY & UI HELPERS ---
 // Aliases to prevent breaking existing code while we refactor

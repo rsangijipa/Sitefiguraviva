@@ -44,16 +44,23 @@ export const metadata: Metadata = {
     },
 };
 
-export default function RootLayout({
+import { cookies } from 'next/headers';
+import ImpersonationBanner from '@/components/admin/ImpersonationBanner';
+
+export default async function RootLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
+    const cookieStore = await cookies();
+    const isImpersonating = cookieStore.has('admin_session_backup');
+
     return (
         <html lang="pt-BR" className={`${cormorant.variable} ${lato.variable}`}>
             <body className="antialiased bg-paper text-text overflow-x-hidden">
                 <Providers>
                     {children}
+                    {isImpersonating && <ImpersonationBanner />}
                 </Providers>
             </body>
         </html>

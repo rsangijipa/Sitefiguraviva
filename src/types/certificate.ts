@@ -1,21 +1,27 @@
 
 
+// Firestore Document Type
 export interface Certificate {
-    id: string; // Unique ID (often used as validation code)
+    id: string;
     userId: string;
     courseId: string;
 
-    // Metadata snapshot (SoT at moment of issue)
-    studentName: string;
+    // Snapshot Data
+    userName: string; // Was studentName
     courseTitle: string;
-    instructorName: string;
-    workloadHours: number;
 
     // Validation
-    validationCode: string; // Short alphanumeric code
-    issuedAt: any;
+    code: string; // Was validationCode
+    issuedAt: any; // Firestore Timestamp
 
-    // Assets
-    pdfUrl?: string; // If generated and stored
-    templateId?: string; // For dynamic rendering
+    // Optional
+    metadata?: {
+        version?: string;
+        hours?: number;
+    };
+
+    // Legacy / Future
+    pdfUrl?: string;
 }
+
+export type CertificateDoc = Certificate;

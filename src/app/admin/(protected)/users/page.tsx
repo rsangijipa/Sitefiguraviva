@@ -6,11 +6,15 @@ import { Loader2, Search, User as UserIcon, Shield, Ban, CheckCircle, Filter } f
 import { useState, useTransition } from 'react';
 import { useToast } from '@/context/ToastContext';
 import { toggleUserStatus, updateUserRole } from '@/app/actions/user-management';
+import { impersonateUser } from '@/actions/authAdmin';
+import { Eye } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export default function UsersPage() {
     const { data: users, isLoading, refetch } = useAllUsers();
     const { addToast } = useToast();
     const [isPending, startTransition] = useTransition();
+    const router = useRouter();
 
     // Filters
     const [searchTerm, setSearchTerm] = useState('');
@@ -47,6 +51,20 @@ export default function UsersPage() {
                 refetch();
             } else {
                 addToast(result.error || 'Erro ao alterar status.', 'error');
+            }
+        });
+    };
+
+    const handleImpersonate = (uid: string) => {
+        if (!confirm('Deseja acessar o sistema como este usuário? A ação será registrada no log de auditoria.')) return;
+
+        startTransition(async () => {
+            const result = await impersonateUser(uid);
+            if (result.success) {
+                // Force full reload to apply new cookie
+                window.location.href = '/portal';
+            } else {
+                addToast(result.error || 'Erro ao iniciar impersonation.', 'error');
             }
         });
     };
@@ -202,6 +220,17 @@ export default function UsersPage() {
                                             >
                                                 {user.status === 'disabled' ? <CheckCircle size={18} /> : <Ban size={18} />}
                                             </button>
+
+                                            {user.role !== 'admin' && (
+                                                <button
+                                                    onClick={() => handleImpersonate(user.uid)}
+                                                    disabled={isPending || user.status === 'disabled'}
+                                                    className="p-2 text-stone-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                                                    title="Ver como este usuário"
+                                                >
+                                                    <Eye size={18} />
+                                                </button>
+                                            )}
                                         </td>
                                     </tr>
                                 ))}

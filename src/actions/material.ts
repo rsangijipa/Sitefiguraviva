@@ -32,7 +32,8 @@ export async function addMaterial(courseId: string, data: AddMaterialData) {
         });
 
         revalidatePath(`/admin/courses/${courseId}/materials`);
-        revalidatePath(`/portal/materials`); // Update student view too
+        revalidatePath(`/portal/materials`);
+        revalidatePath(`/portal/course/${courseId}`); // Fix: Update course page content
         return { success: true };
 
     } catch (error) {
@@ -54,6 +55,7 @@ export async function deleteMaterial(courseId: string, materialId: string) {
 
         revalidatePath(`/admin/courses/${courseId}/materials`);
         revalidatePath(`/portal/materials`);
+        revalidatePath(`/portal/course/${courseId}`); // Fix: Update course page content
         return { success: true };
     } catch (error) {
         return { error: 'Failed to delete' };

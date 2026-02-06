@@ -122,9 +122,9 @@ service cloud.firestore {
         isTeam(resource.data.courseId)
       );
       
-      // Student can update their own progress
-      allow create: if isSignedIn() && request.resource.data.userId == uid();
-      allow update: if isSignedIn() && resource.data.userId == uid() && request.resource.data.userId == uid();
+      // WRITE SECURITY: All progress updates MUST go through Server Actions
+      // to ensure enrollment validation and business logic.
+      allow write: if false; 
     }
 
     // GLOBAL CERTIFICATES

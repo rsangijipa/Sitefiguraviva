@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Loader2, Lock, ArrowRight, CreditCard, User, Clock } from 'lucide-react';
@@ -8,37 +8,111 @@ import Link from 'next/link';
 import { Input } from '@/components/ui/Input';
 import { useToast } from '@/context/ToastContext';
 
+// --- AUTH HELPER (Robust P0 Fix) ---
+const getIdToken = async (): Promise<string> => {
+    const { auth } = await import('@/lib/firebase/client');
+    if (auth.currentUser) return auth.currentUser.getIdToken();
+
+    return new Promise((resolve, reject) => {
+        let settled = false;
+
+        const cleanup = () => {
+            settled = true;
+            clearTimeout(timeoutId);
+            unsubscribe();
+        };
+
+        const timeoutId = setTimeout(() => {
+            if (settled) return;
+            cleanup();
+            reject(new Error("Timeout de autenticação"));
+        }, 5000);
+
+        const unsubscribe = auth.onAuthStateChanged(async (user) => {
+            if (settled) return;
+
+            if (user) {
+                // Ensure we clean up immediately to prevent race conditions
+                cleanup();
+                try {
+                    const token = await user.getIdToken();
+                    resolve(token);
+                } catch (e) {
+                    reject(e);
+                }
+            } else {
+                // Determine if we should wait or reject immediately. 
+                // Standard: wait for initial load. If null comes after load, then reject.
+                // But onAuthStateChanged fires immediately. If null, we might want to wait.
+                // However, without logic to know "auth initialized", we rely on timeout for "not logged in" case.
+            }
+        });
+    });
+};
+
 export default function EnrollmentStepper({ courseId, initialData }: { courseId: string, initialData: any }) {
     const router = useRouter();
     const { addToast } = useToast();
+
+    // Derived Data
     const { course, enrollment, application, uid } = initialData;
+    const enrollmentStatus = enrollment?.status;
+    const appStatus = application?.status;
 
-    // Determine initial step
-    const getInitialStep = () => {
+    // --- STEP DERIVATION (P0 Fix) ---
+    const derivedStep = useMemo(() => {
         if (!uid) return 1;
-        if (enrollment?.status === 'active') return 4;
-        if (application?.status === 'submitted' || enrollment?.status === 'pending') return 3;
-        return 2;
-    };
 
-    const [currentStep, setCurrentStep] = useState(getInitialStep());
+        // Step 4: Any established enrollment status
+        if (['active', 'pending', 'pending_approval', 'past_due'].includes(enrollmentStatus)) {
+            return 4;
+        }
+
+        // Step 3: Application submitted BUT no enrollment status yet (implies need to pay/finalize)
+        // If enrollmentStatus exists, logic above overrides.
+        if (appStatus === 'submitted') {
+            return 3;
+        }
+
+        // Step 2: Default for authenticated user (Fill Form)
+        return 2;
+    }, [uid, enrollmentStatus, appStatus]);
+
+    const [currentStep, setCurrentStep] = useState(derivedStep);
     const [loading, setLoading] = useState(false);
+
+    // Sync state with prop changes (e.g. after router.refresh)
+    useEffect(() => {
+        // Only auto-advance/sync if the derived step implies progress (or regression in auth)
+        // But mainly to catch up with backend state.
+        setCurrentStep(derivedStep);
+    }, [derivedStep]);
 
     // Form State
     const [formData, setFormData] = useState({
-        fullName: application?.answers?.fullName || '',
-        phone: application?.answers?.phone || '',
-        profession: application?.answers?.profession || '',
+        fullName: '',
+        phone: '',
+        profession: '',
     });
 
-    const isAuthorized = !!uid;
-    const isEnrolled = enrollment?.status === 'active';
-    const isPending = enrollment?.status === 'pending';
-
-    // Step 1: Login Check (Auto-redirect logic or UI CTA)
-    if (currentStep === 1 && !isAuthorized) {
-        // We show the UI below
-    }
+    // --- FORM DATA SYNC (P1 Fix) ---
+    // Populate form if server data arrives and form is pristine
+    useEffect(() => {
+        if (currentStep === 2 && application?.answers) {
+            setFormData(prev => {
+                // "Pristine" check: if fields are empty, safe to fill.
+                const isPristine = !prev.fullName && !prev.phone && !prev.profession;
+                if (isPristine) {
+                    return {
+                        fullName: application.answers.fullName || '',
+                        phone: application.answers.phone || '',
+                        profession: application.answers.profession || '',
+                    };
+                }
+                return prev;
+            });
+        }
+    }, [currentStep, application?.answers]);
 
     // Handlers
     const handleLogin = () => {
@@ -53,12 +127,13 @@ export default function EnrollmentStepper({ courseId, initialData }: { courseId:
         e.preventDefault();
         setLoading(true);
         try {
+            const token = await getIdToken();
             const res = await fetch('/api/applications/submit', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${await getIdToken()}` }, // Helper needed or cookie auth?
-                // Note: Our API expects Bearer token. We need AuthContext or simple cookie usage.
-                // Since this is client side, let's assume we are logged in.
-                // Actually the API reads 'Authorization' header. We need to get the token from Firebase Client SDK.
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify({
                     courseId,
                     answers: formData,
@@ -66,22 +141,30 @@ export default function EnrollmentStepper({ courseId, initialData }: { courseId:
                 })
             });
 
-            if (!res.ok) throw new Error('Falha ao salvar');
+            // P0: 401 Handling
+            if (res.status === 401) {
+                setLoading(false);
+                router.push(`/login?next=/inscricao/${courseId}`);
+                return;
+            }
 
+            if (!res.ok) throw new Error('Falha ao salvar formulário');
+
+            // P1: Optimistic Update
             setCurrentStep(3);
             router.refresh();
+
         } catch (err) {
             console.error(err);
-            addToast('Ocorreu um erro ao salvar sua inscrição. Tente novamente.', 'error');
-        } finally {
-            setLoading(false);
+            addToast('Ocorreu um erro ao salvar sua inscrição.', 'error');
+            setLoading(false); // Only stop loading on error (success moves step or refreshes)
         }
     };
 
     const handleSubscribe = async () => {
         setLoading(true);
         try {
-            const token = await getIdToken(); // Need to implement this helper inline or import
+            const token = await getIdToken();
             const res = await fetch('/api/billing/checkout-subscription', {
                 method: 'POST',
                 headers: {
@@ -91,6 +174,13 @@ export default function EnrollmentStepper({ courseId, initialData }: { courseId:
                 body: JSON.stringify({ courseId })
             });
 
+            // P0: 401 Handling
+            if (res.status === 401) {
+                setLoading(false);
+                router.push(`/login?next=/inscricao/${courseId}`);
+                return;
+            }
+
             const data = await res.json();
             if (data.url) {
                 window.location.href = data.url;
@@ -99,37 +189,24 @@ export default function EnrollmentStepper({ courseId, initialData }: { courseId:
             }
         } catch (err) {
             console.error(err);
-            addToast('Não foi possível iniciar o pagamento. Verifique sua conexão.', 'error');
+            addToast('Não foi possível iniciar o pagamento.', 'error');
             setLoading(false);
         }
     };
 
-    // Firebase Token Helper (Robust)
-    const getIdToken = async () => {
-        const { auth } = await import('@/lib/firebase/client');
-        if (auth.currentUser) return auth.currentUser.getIdToken();
-
-        return new Promise<string>((resolve, reject) => {
-            const unsubscribe = auth.onAuthStateChanged(async (user) => {
-                unsubscribe();
-                if (user) {
-                    resolve(await user.getIdToken());
-                } else {
-                    reject(new Error("User not valid"));
-                }
-            });
-        });
-    };
-
+    // Derived Status Flags for Render
+    const isPending = enrollment?.status === 'pending';
+    const isPendingApproval = enrollment?.status === 'pending_approval';
+    const isPastDue = enrollment?.status === 'past_due';
 
     return (
         <div className="max-w-3xl mx-auto">
             {/* Header */}
             <div className="mb-12 text-center">
-                <Link href="/" className="text-primary/80 text-xs font-bold uppercase tracking-widest hover:text-primary mb-4 block transition-colors" aria-label="Voltar para a página inicial">
+                <Link href="/" className="text-primary/80 text-xs font-bold uppercase tracking-widest hover:text-primary mb-4 block transition-colors" aria-label="Voltar">
                     &larr; Voltar para Home
                 </Link>
-                <h1 className="font-serif text-3xl md:text-4xl text-primary mb-4">{course.title}</h1>
+                <h1 className="font-serif text-3xl md:text-4xl text-primary mb-4">{course.courseTitle || course.title}</h1>
                 <p className="text-stone-500">Complete sua inscrição para garantir sua vaga.</p>
             </div>
 
@@ -160,14 +237,14 @@ export default function EnrollmentStepper({ courseId, initialData }: { courseId:
                                 </div>
                                 <h2 className="font-serif text-3xl text-primary mb-4">Primeiro, identifique-se</h2>
                                 <p className="text-stone-500 mb-10 max-w-md mx-auto leading-relaxed">
-                                    Para se inscrever, você precisa entrar com sua conta ou criar uma nova. É rápido e seguro.
+                                    Para se inscrever, você precisa entrar com sua conta ou criar uma nova.
                                 </p>
                                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                                     <button
                                         onClick={handleLogin}
                                         className="px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg hover:bg-primary/90 transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-xs"
                                     >
-                                        Já possuo uma conta <ArrowRight size={16} />
+                                        Já possuo conta <ArrowRight size={16} />
                                     </button>
                                     <button
                                         onClick={handleSignup}
@@ -212,7 +289,7 @@ export default function EnrollmentStepper({ courseId, initialData }: { courseId:
 
                                 <div className="pt-8 border-t border-stone-200/50 flex justify-end">
                                     <button type="submit" disabled={loading} className="px-8 py-4 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-all flex items-center gap-2 shadow-lg shadow-primary/20 uppercase tracking-widest text-xs">
-                                        {loading ? <Loader2 className="animate-spin" size={18} /> : <>Continuar para Pagamento <ArrowRight size={16} /></>}
+                                        {loading ? <Loader2 className="animate-spin" size={18} /> : <>Ir para Pagamento <ArrowRight size={16} /></>}
                                     </button>
                                 </div>
                             </form>
@@ -227,13 +304,13 @@ export default function EnrollmentStepper({ courseId, initialData }: { courseId:
                                     <CreditCard size={32} />
                                 </div>
                                 <h2 className="font-serif text-2xl text-primary mb-2">Assinatura Mensal</h2>
-                                <p className="text-stone-500">Acesso completo ao curso com renovação automática. Cancele quando quiser.</p>
+                                <p className="text-stone-500">Acesso completo com renovação automática. Cancele quando quiser.</p>
                             </div>
 
                             <div className="bg-stone-50 rounded-2xl p-6 border border-stone-200 mb-8 flex items-center justify-between">
                                 <div>
-                                    <p className="font-bold text-primary">{course.title}</p>
-                                    <p className="text-xs text-stone-500">Cobrança mensal recorrente</p>
+                                    <p className="font-bold text-primary">{course.courseTitle || course.title}</p>
+                                    <p className="text-xs text-stone-500">Valor Recorrente</p>
                                 </div>
                                 <div className="text-right">
                                     <p className="font-serif text-2xl text-primary">R$ 97,00</p>
@@ -242,13 +319,12 @@ export default function EnrollmentStepper({ courseId, initialData }: { courseId:
                             </div>
 
                             <button onClick={handleSubscribe} disabled={loading} className="w-full py-4 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-600/20">
-                                {loading ? <Loader2 className="animate-spin" /> : <>Assinar Agora com Stripe <Lock size={16} /></>}
+                                {loading ? <Loader2 className="animate-spin" /> : <>Assinar com Stripe <Lock size={16} /></>}
                             </button>
-                            <p className="text-center text-xs text-stone-400 mt-4">Pagamento seguro processado pelo Stripe. Ambiente criptografado.</p>
                         </motion.div>
                     )}
 
-                    {/* STEP 4: SUCCESS / STATUS */}
+                    {/* STEP 4: STATUS */}
                     {currentStep === 4 && (
                         <motion.div key="step4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                             <div className="text-center">
@@ -258,55 +334,44 @@ export default function EnrollmentStepper({ courseId, initialData }: { courseId:
                                             <Loader2 size={32} className="animate-spin" />
                                         </div>
                                         <h2 className="font-serif text-2xl text-primary mb-4">Pagamento em Processamento</h2>
-                                        <p className="text-stone-500 mb-8">Estamos aguardando a confirmação do seu banco. O acesso será liberado automaticamente em instantes.</p>
+                                        <p className="text-stone-500 mb-8">Aguardando confirmação bancária. O acesso será liberado em instantes.</p>
                                         <button onClick={() => router.refresh()} className="px-6 py-2 border border-stone-200 rounded-lg text-sm text-stone-600 hover:bg-stone-50">
-                                            Verificar novamente
+                                            Atualizar Status
                                         </button>
                                     </>
-                                ) : enrollment?.status === 'pending_approval' ? (
+                                ) : isPendingApproval ? (
                                     <>
                                         <div className="w-16 h-16 bg-gold/10 rounded-full flex items-center justify-center mx-auto mb-6 text-gold">
                                             <Clock size={32} />
                                         </div>
                                         <h2 className="font-serif text-2xl text-primary mb-4">Inscrição em Análise</h2>
                                         <p className="text-stone-500 mb-8">
-                                            Confirmamos seu pagamento! Agora, nossa equipe revisará sua inscrição.
-                                            Assim que for aprovada, você receberá um e-mail e o acesso será liberado no Portal.
+                                            Pagamento confirmado! Nossa equipe está revisando sua inscrição.
                                         </p>
                                         <Link href="/portal" className="px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg hover:bg-primary/90 transition-all inline-flex items-center gap-2">
-                                            Ir para o Portal do Aluno <ArrowRight size={18} />
+                                            Ir para o Portal <ArrowRight size={18} />
                                         </Link>
                                     </>
-                                ) : enrollment?.status === 'past_due' ? (
+                                ) : isPastDue ? (
                                     <>
                                         <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6 text-red-600">
                                             <CreditCard size={32} />
                                         </div>
                                         <h2 className="font-serif text-2xl text-primary mb-4">Pagamento Pendente</h2>
-                                        <p className="text-stone-500 mb-8">Houve um problema com a renovação da sua assinatura. Atualize seu cartão para continuar.</p>
-                                        <button
-                                            onClick={async () => {
-                                                const res = await fetch('/api/billing/customer-portal', {
-                                                    method: 'POST',
-                                                    headers: { 'Authorization': `Bearer ${await getIdToken()}` }
-                                                });
-                                                const data = await res.json();
-                                                if (data.url) window.location.href = data.url;
-                                            }}
-                                            className="px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg hover:bg-primary/90 transition-all inline-flex items-center gap-2"
-                                        >
-                                            Regularizar Assinatura <ArrowRight size={18} />
-                                        </button>
+                                        <p className="text-stone-500 mb-8">Falha na renovação da assinatura. Atualize seu meio de pagamento.</p>
+                                        <Link href="/portal/settings" className="px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg hover:bg-primary/90 transition-all inline-flex items-center gap-2">
+                                            Gerenciar Assinatura <ArrowRight size={18} />
+                                        </Link>
                                     </>
                                 ) : (
                                     <>
                                         <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600">
                                             <Check size={32} />
                                         </div>
-                                        <h2 className="font-serif text-2xl text-primary mb-4">Você está inscrito!</h2>
-                                        <p className="text-stone-500 mb-8">Sua assinatura está ativa e seu acesso liberado. Bons estudos!</p>
-                                        <Link href={`/portal/course/${course.id}`} className="px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg hover:bg-primary/90 transition-all inline-flex items-center gap-2">
-                                            Acessar o Portal do Aluno <ArrowRight size={18} />
+                                        <h2 className="font-serif text-2xl text-primary mb-4">Inscrição Confirmada!</h2>
+                                        <p className="text-stone-500 mb-8">Sua assinatura está ativa e o acesso liberado.</p>
+                                        <Link href={`/portal/course/${courseId}`} className="px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg hover:bg-primary/90 transition-all inline-flex items-center gap-2">
+                                            Acessar Curso <ArrowRight size={18} />
                                         </Link>
                                     </>
                                 )}

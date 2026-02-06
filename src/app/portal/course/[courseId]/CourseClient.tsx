@@ -16,6 +16,7 @@ import CourseCommunity from '@/components/community/CourseCommunity';
 import AnnouncementList from '@/components/community/AnnouncementList';
 import { certificateService } from '@/services/certificateService';
 import { CertificateDoc } from '@/types/lms';
+import { CertificateIssueCard } from '@/components/portal/CertificateIssueCard';
 
 // Separate component to handle search params usage inside Suspense
 function CourseContent({ initialData }: { initialData?: any }) {
@@ -54,19 +55,9 @@ function CourseContent({ initialData }: { initialData?: any }) {
     // Check for Certificate
     useEffect(() => {
         if (enrollment?.progressSummary?.percent === 100 && user?.uid) {
-            certificateService.getCertificate(user.uid, courseId).then(async (cert) => {
+            certificateService.getCertificate(user.uid, courseId).then((cert) => {
                 if (cert) {
                     setCertificate(cert);
-                } else {
-                    // Auto-issue if 100% but missing
-                    try {
-                        const newCertId = await certificateService.issueCertificate(user.uid, courseId);
-                        // Refresh to get full doc
-                        const newCert = await certificateService.getCertificate(user.uid, courseId);
-                        setCertificate(newCert);
-                    } catch (err) {
-                        console.error("Failed to auto-issue certificate", err);
-                    }
                 }
             });
         }
@@ -98,8 +89,20 @@ function CourseContent({ initialData }: { initialData?: any }) {
         updateLastAccess(lessonId);
     };
 
-    const handleMarkComplete = (lessonId: string) => {
-        markComplete(lessonId);
+    const handleMarkComplete = (lessonId: string, moduleId?: string) => {
+        // If moduleId provided (by LessonPlayer), use it
+        if (moduleId) {
+            markComplete(lessonId, moduleId);
+            return;
+        }
+
+        // Fallback: Find it in modules
+        const module = modules.find(m => m.lessons.some(l => l.id === lessonId));
+        if (module) {
+            markComplete(lessonId, module.id);
+        } else {
+            console.error("Could not find module for lesson", lessonId);
+        }
     };
 
     const handleTabChange = (tab: string) => {
@@ -271,24 +274,15 @@ function CourseContent({ initialData }: { initialData?: any }) {
                             </Card>
 
                             {/* Certificate Status */}
-                            <div className={cn("p-6 rounded-2xl border transition-all", certificate ? "bg-green-50 border-green-200" : "bg-white border-stone-100 opacity-60")}>
-                                <div className="flex items-center gap-3 mb-2 text-stone-700">
-                                    <Download size={18} className={certificate ? "text-green-600" : "text-stone-400"} />
-                                    <h3 className={cn("font-bold text-sm", certificate ? "text-green-800" : "text-stone-700")}>Certificado</h3>
-                                </div>
-                                {certificate ? (
-                                    <>
-                                        <p className="text-xs text-green-700 mb-3">Parabéns! Seu certificado está disponível.</p>
-                                        <Link href={`/portal/certificate/${certificate.id}`} target="_blank">
-                                            <Button size="sm" className="w-full bg-green-600 hover:bg-green-700 text-white border-transparent">
-                                                Baixar PDF
-                                            </Button>
-                                        </Link>
-                                    </>
-                                ) : (
-                                    <p className="text-xs text-stone-400">Complete 100% para desbloquear.</p>
-                                )}
-                            </div>
+                            <CertificateIssueCard
+                                courseId={courseId}
+                                courseTitle={course.title}
+                                progressPercent={enrollment?.progressSummary?.percent || 0}
+                                isCompleted={enrollment?.status === 'completed'} // or calculate from progress
+                                // Wait, the type of `certificate` state is CertificateDoc.
+                                // CertificateIssueCard expects { id: string, code: string }
+                                existingCertificate={certificate ? { id: certificate.id, code: certificate.code } : null}
+                            />
                         </div>
                     </div>
                 )}
