@@ -124,6 +124,7 @@ export default function CoursesSection({ courses = [], onOpenCalendar, onSelectC
                                                         src={(course.image && course.image.trim() !== "") ? course.image : (course.images?.[0] && course.images[0].trim() !== "") ? course.images[0] : 'https://via.placeholder.com/400x300'}
                                                         alt={course.title || "Course Image"}
                                                         fill
+                                                        priority={index === 0}
                                                         sizes="(max-width: 768px) 100vw, 33vw"
                                                         className={`object-cover transition-transform duration-700 ease-out group-hover:scale-105 ${isClosed ? 'grayscale opacity-70' : ''}`}
                                                     />

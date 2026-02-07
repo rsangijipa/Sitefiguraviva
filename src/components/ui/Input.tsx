@@ -1,71 +1,75 @@
-import React from 'react';
-import { cn } from '@/lib/utils';
-import { LucideIcon } from 'lucide-react';
+import * as React from "react"
+import { cva, type VariantProps } from "class-variance-authority"
+import { cn } from "@/lib/utils"
+import { LucideIcon } from "lucide-react"
 
-export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+const inputVariants = cva(
+    "flex h-12 w-full rounded-xl border-2 px-4 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300",
+    {
+        variants: {
+            variant: {
+                default: "border-primary/10 bg-white/50 focus-visible:ring-primary/20 focus-visible:border-primary hover:border-primary/30 hover:bg-white",
+                glass: "bg-white/10 border-white/20 text-white placeholder:text-white/60 focus-visible:ring-white/30 focus-visible:border-white/50 hover:bg-white/20",
+                error: "border-error/50 bg-error/5 focus-visible:border-error focus-visible:ring-error/20 text-error placeholder:text-error/50",
+            },
+        },
+        defaultVariants: {
+            variant: "default",
+        },
+    }
+)
+
+export interface InputProps
+    extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>,
+    VariantProps<typeof inputVariants> {
     label?: string;
     error?: string;
     leftIcon?: LucideIcon;
     rightIcon?: LucideIcon;
     onRightIconClick?: () => void;
-    variant?: 'default' | 'glass';
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-    ({ className, type, label, error, leftIcon: LeftIcon, rightIcon: RightIcon, onRightIconClick, variant = 'default', ...props }, ref) => {
-
-        const baseInputStyles = cn(
-            "flex h-12 w-full rounded-xl border px-4 py-2 text-sm md:text-base font-medium transition-all duration-300 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-stone-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50",
-            variant === 'default'
-                ? "bg-white border-stone-200 text-stone-900 shadow-sm focus:border-stone-300"
-                : "bg-white/60 backdrop-blur-md border-white/50 text-stone-800 shadow-soft-sm hover:bg-white/80 focus:bg-white/90"
-        );
+    ({ className, type, label, error, variant, leftIcon: LeftIcon, rightIcon: RightIcon, onRightIconClick, ...props }, ref) => {
+        const isGlass = variant === 'glass';
 
         return (
             <div className="w-full space-y-2">
                 {label && (
-                    <label className="text-[10px] uppercase tracking-widest font-bold text-stone-500 ml-1">
+                    <label className={cn("text-sm font-bold ml-1", isGlass ? "text-white/90" : "text-primary/80")}>
                         {label}
                     </label>
                 )}
-
                 <div className="relative">
                     {LeftIcon && (
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
                             <LeftIcon size={18} />
                         </div>
                     )}
-
                     <input
                         type={type}
                         className={cn(
-                            baseInputStyles,
+                            inputVariants({ variant: error ? 'error' : variant, className }),
                             LeftIcon && "pl-11",
-                            RightIcon && "pr-11",
-                            error && "border-red-300 focus-visible:ring-red-200 bg-red-50/50",
-                            className
+                            RightIcon && "pr-11"
                         )}
                         ref={ref}
                         {...props}
                     />
-
                     {RightIcon && (
-                        <button
-                            type="button"
-                            onClick={onRightIconClick}
+                        <div
                             className={cn(
-                                "absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 transition-colors",
-                                onRightIconClick ? "hover:text-primary cursor-pointer" : "pointer-events-none"
+                                "absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground",
+                                onRightIconClick && "cursor-pointer hover:text-primary transition-colors"
                             )}
-                            tabIndex={onRightIconClick ? 0 : -1}
+                            onClick={onRightIconClick}
                         >
                             <RightIcon size={18} />
-                        </button>
+                        </div>
                     )}
                 </div>
-
                 {error && (
-                    <p className="text-xs text-red-500 font-medium ml-1 animate-fade-in-up">
+                    <p className="text-xs text-error font-medium ml-1 animate-in slide-in-from-top-1 fade-in">
                         {error}
                     </p>
                 )}

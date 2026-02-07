@@ -37,7 +37,7 @@ export default function InstituteSection({ gallery = [] }: { gallery?: any[] }) 
         manifesto_title: "Habitar a Fronteira",
         manifesto_text: "Na Gestalt, a vida acontece no contato: na fronteira entre organismo e ambiente, entre o que sinto e o que digo, entre o que foi e o que pode nascer agora. No Figura Viva, a gente leva isso a sério — com rigor, com ética e com humanidade.",
         quote: "O encontro é a fronteira onde a vida se renova.",
-        address: "Rua Pinheiro Machado, 2033 – Central, Porto Velho – RO • CEP 76801-057",
+        address: "Rua Santos Dumont, 156 - Uniao, Ouro Preto D'Oeste - RO - CEP 76920-000",
         phone: "(69) 99248-1585"
     };
 
@@ -222,14 +222,14 @@ export default function InstituteSection({ gallery = [] }: { gallery?: any[] }) 
                 <div className="bg-paper rounded-[3rem] p-8 md:p-16 text-center border border-transparent">
                     <h3 className="font-serif text-3xl text-primary mb-6">Presença local, campo aberto</h3>
                     <p className="text-primary/70 max-w-2xl mx-auto mb-10 leading-relaxed">
-                        Estamos em Porto Velho (RO), com o compromisso de construir um campo vivo de cuidado e formação.
+                        Estamos em Ouro Preto D'Oeste (RO), com o compromisso de construir um campo vivo de cuidado e formação.
                         Um lugar para chegar com perguntas, ficar com presença e sair com mais mundo por dentro.
                     </p>
 
                     <div className="flex flex-col md:flex-row justify-center gap-8 md:gap-16 text-sm text-primary/60 mb-10">
                         <div className="flex items-center justify-center gap-3">
                             <MapPin className="text-gold" size={20} />
-                            <span>{data.address || "Porto Velho - RO"}</span>
+                            <span>{data.address || "Ouro Preto D'Oeste - RO"}</span>
                         </div>
                         <div className="flex items-center justify-center gap-3">
                             <Phone className="text-gold" size={20} />

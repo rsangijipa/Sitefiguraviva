@@ -58,9 +58,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
             if (currentUser) {
                 try {
+                    console.log('[AuthContext] User logged in:', currentUser.email);
                     // 1. Check Custom Claims (Fastest, good for initial check)
                     const token = await currentUser.getIdTokenResult(true);
                     const claimAdmin = !!token.claims.admin;
+                    console.log('[AuthContext] Custom Claims:', { admin: token.claims.admin, role: token.claims.role });
 
                     // 2. Fetch Role/Status from Firestore (Source of Truth)
                     const userDocRef = doc(db, "users", currentUser.uid);
@@ -71,6 +73,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
                     if (userSnapshot.exists()) {
                         const data = userSnapshot.data();
+                        console.log('[AuthContext] Firestore user data:', { role: data.role, status: data.status });
 
                         // Role Mapping
                         if (data.role) {
@@ -82,6 +85,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                         // Status Mapping
                         if (data.status) {
                             userStatus = data.status as UserStatus;
+                        }
+                    } else {
+                        console.warn('[AuthContext] No Firestore document found for user');
+                        // Fallback: Use Custom Claims if no Firestore document
+                        if (claimAdmin || token.claims.role === 'admin') {
+                            userRole = 'admin';
                         }
                     }
 
@@ -102,6 +111,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     setRole(userRole);
                     setStatus(userStatus);
                     setIsAdmin(userRole === 'admin' || claimAdmin);
+                    console.log('[AuthContext] Final state:', { role: userRole, status: userStatus, isAdmin: userRole === 'admin' || claimAdmin });
 
                 } catch (error) {
                     console.error("Error fetching user data:", error);

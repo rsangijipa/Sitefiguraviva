@@ -4,6 +4,8 @@ import { auth, db } from '@/lib/firebase/admin';
 import { FieldValue } from 'firebase-admin/firestore';
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
+import { publishEvent } from '@/lib/events/bus';
+import { assertCanAccessCourse } from '@/lib/auth/access-gate';
 
 /**
  * Updates the progress of a specific lesson for the current user.
@@ -48,10 +50,8 @@ export async function updateLessonProgress(
             const progressDoc = await t.get(progressRef);
             const enrollmentDoc = await t.get(enrollmentRef);
 
-            // PRG-01: Strict Enrollment Check
-            if (!enrollmentDoc.exists || enrollmentDoc.data()?.status !== 'active') {
-                throw new Error('Enrollment inactive or not found.');
-            }
+            // ORBITAL 01 & 05: Single Source of Truth Access Gate
+            await assertCanAccessCourse(uid, courseId);
 
             const now = FieldValue.serverTimestamp();
             const existingData = progressDoc.exists ? progressDoc.data() : null;
@@ -115,7 +115,32 @@ export async function updateLessonProgress(
                     updatedAt: now
                 });
             }
+
+            // 3. Publish Event (Audit) - Fixed P1.3 requirement
+            if (isCompleting && !wasCompleted) {
+                // We use a helper or call it outside if transaction is strictly for DB
+                // but since publishEvent is likely an async side-effect, we should handle it carefully.
+                // In this codebase's pattern (ref: src/app/actions/progress.ts), it was called after set.
+            }
         });
+
+        // 3. Publish Event (Audit)
+        if (data.status === 'completed') {
+            await publishEvent({
+                type: 'LESSON_COMPLETED',
+                actorUserId: uid,
+                targetId: lessonId,
+                context: {
+                    courseId,
+                    lessonId,
+                    moduleId
+                },
+                payload: {
+                    method: 'manual_completion',
+                    percent: data.percent || 100
+                }
+            });
+        }
 
         revalidatePath(`/portal/curso/${courseId}`);
         return { success: true };

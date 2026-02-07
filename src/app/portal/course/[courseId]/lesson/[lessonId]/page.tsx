@@ -4,6 +4,8 @@ import { redirect } from 'next/navigation';
 import { auth, db } from '@/lib/firebase/admin';
 import { LessonPlayerWrapper } from '@/components/portal/LessonPlayerWrapper';
 import { Lesson, Module } from '@/types/lms';
+import { deepSafeSerialize } from '@/lib/utils';
+import { assertCanAccessCourse } from '@/lib/auth/access-gate';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,7 +21,7 @@ async function getCourseData(courseId: string) {
         return { id: doc.id, ...doc.data(), lessons };
     }));
 
-    return { id: courseDoc.id, ...courseDoc.data(), modules } as any;
+    return deepSafeSerialize({ id: courseDoc.id, ...courseDoc.data(), modules } as any);
 }
 
 export default async function LessonPage({ params }: { params: Promise<{ courseId: string, lessonId: string }> }) {
@@ -35,10 +37,8 @@ export default async function LessonPage({ params }: { params: Promise<{ courseI
         uid = decodedClaims.uid;
     } catch { redirect('/login'); }
 
-    const enrollmentDoc = await db.collection('enrollments').doc(`${uid}_${courseId}`).get();
-    if (!enrollmentDoc.exists || enrollmentDoc.data()?.status !== 'active') {
-        redirect('/portal/courses');
-    }
+    // ORBITAL 01 & 05: Single Source of Truth Access Gate
+    await assertCanAccessCourse(uid, courseId);
 
     const courseData = await getCourseData(courseId);
     if (!courseData) redirect('/portal');
@@ -82,11 +82,11 @@ export default async function LessonPage({ params }: { params: Promise<{ courseI
 
     return (
         <LessonPlayerWrapper
-            course={{
+            course={deepSafeSerialize({
                 id: courseData.id,
                 title: courseData.title,
                 backLink: `/portal/course/${courseId}`
-            }}
+            })}
             modules={courseData.modules as Module[]}
             activeLesson={activeLesson}
             prevLessonId={prevLessonId}

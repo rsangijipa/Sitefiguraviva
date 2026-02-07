@@ -27,12 +27,17 @@ function createChainableMock(serviceName: string, propPath: string = ''): any {
         forEach: (cb: any) => { },
     });
 
-    if (propPath === 'verifySessionCookie') {
+    if (propPath === 'verifySessionCookie' || propPath === 'verifyIdToken') {
         mockCallable.then = (resolve: any) => resolve({
             uid: 'mock-admin-uid',
             email: 'admin@mock.com',
             admin: true,
-            role: 'admin'
+            role: 'admin',
+            email_verified: true,
+            firebase: {
+                identities: { email: ['admin@mock.com'] },
+                sign_in_provider: 'password'
+            }
         });
     }
 
@@ -40,8 +45,14 @@ function createChainableMock(serviceName: string, propPath: string = ''): any {
     mock.update = async () => ({});
     mock.add = async () => ({ id: 'mock-id' });
     mock.delete = async () => ({});
+    mock.save = async () => ({});
+    mock.makePublic = async () => ({});
+    mock.publicUrl = () => 'https://mock-storage.com/avatar.webp';
 
-    const chainableMethods = ['collection', 'doc', 'where', 'orderBy', 'limit', 'startAt', 'endAt', 'parent', 'ref'];
+    const chainableMethods = [
+        'collection', 'doc', 'where', 'orderBy', 'limit', 'startAt', 'endAt', 'parent', 'ref',
+        'bucket', 'file'
+    ];
     chainableMethods.forEach(method => {
         mock[method] = () => createChainableMock(serviceName, `${propPath}.${method}`);
     });
@@ -76,6 +87,7 @@ function getAdminApp() {
             // Remove any surrounding quotes (e.g. 'path' or "path")
             serviceAccountPath = serviceAccountPath.replace(/^["']|["']$/g, '');
 
+            if (typeof window !== 'undefined') return;
             const fs = require('fs');
             console.log(`[FIREBASE INIT] Checking local path: ${serviceAccountPath}`);
 
@@ -141,7 +153,7 @@ function getAdminApp() {
         const storageBucket = (process.env.FIREBASE_STORAGE_BUCKET || process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || '').replace(/^["']|["']$/g, '');
         const finalProjectId = (credential as any)?.projectId || (credential as any)?.project_id || process.env.FIREBASE_PROJECT_ID;
 
-        console.log(`[FIREBASE ADMIN] App initialization for project: ${finalProjectId}`);
+        console.log(`[FIREBASE ADMIN] App initialization for project: ${finalProjectId} with bucket: ${storageBucket}`);
 
         return admin.initializeApp({
             credential,

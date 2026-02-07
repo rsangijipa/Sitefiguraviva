@@ -65,23 +65,32 @@ export function ProfileForm() {
             // 1. Upload Avatar if changed
             let newPhotoURL = user?.photoURL;
             if (avatarFile) {
+                console.log("[DEBUG] Starting avatar upload...", avatarFile.name);
                 const formData = new FormData();
                 formData.append('file', avatarFile);
 
                 const uploadRes = await uploadAvatar(formData);
+                console.log("[DEBUG] Upload result:", uploadRes);
                 if (uploadRes.error) throw new Error(uploadRes.error);
                 if (uploadRes.url) newPhotoURL = uploadRes.url;
             }
 
+            console.log("[DEBUG] Updating profile info...");
             // 2. Update Info
             const updateRes = await updateProfileAction({ displayName, bio });
+            console.log("[DEBUG] Update result:", updateRes);
             if (updateRes.error) throw new Error(updateRes.error);
 
             // 3. Update Client Context (Sync Sidebar)
             if (user) {
-                // Best: Manually update context state if exposed, OR call Client SDK updateProfile.
-                // AuthContext exposes 'updateProfile'.
-                await updateProfile({ displayName, photoURL: newPhotoURL });
+                console.log("[DEBUG] Syncing client context...");
+                try {
+                    // We don't want this to block if there's a connection issue with Firebase Client SDK,
+                    // since the source of truth (Firestore/Action) already succeeded.
+                    await updateProfile({ displayName, photoURL: newPhotoURL });
+                } catch (e) {
+                    console.error("[DEBUG] Client-side updateProfile failed, but data is saved in Firestore:", e);
+                }
             }
 
             setMessage({ type: 'success', text: 'Perfil atualizado com sucesso!' });

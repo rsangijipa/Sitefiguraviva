@@ -78,6 +78,7 @@ export async function updateProfile(data: { displayName: string; bio?: string })
  * Uploads avatar image to Firebase Storage (Admin SDK) with strict sanitization (P1).
  */
 export async function uploadAvatar(formData: FormData) {
+    console.log("[SERVER DEBUG] uploadAvatar called");
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get('session')?.value;
     if (!sessionCookie) return { error: 'Unauthorized', status: 401 };
@@ -99,16 +100,33 @@ export async function uploadAvatar(formData: FormData) {
 
         // 2. Multi-step Sanitization (P1)
         const rawBuffer = Buffer.from(await file.arrayBuffer());
+        console.log("[SERVER DEBUG] Initialized buffer. Buffer size:", rawBuffer.length);
 
-        // Remove EXIF, resize to 512px, convert to WebP for optimization
-        const sanitizedBuffer = await sharp(rawBuffer)
-            .resize(512, 512, {
-                fit: 'cover',
-                position: 'center'
-            })
-            .webp({ quality: 85 })
-            .toBuffer();
+        const BYPASS_SHARP = process.env.DEBUG_BYPASS_SHARP === 'true';
+        let sanitizedBuffer: Buffer;
 
+        if (BYPASS_SHARP) {
+            console.log("[SERVER DEBUG] BYPASSING SHARP SANITIZATION");
+            sanitizedBuffer = rawBuffer;
+        } else {
+            console.log("[SERVER DEBUG] starting sharp sanitization...");
+            // Remove EXIF, resize to 512px, convert to WebP for optimization
+            try {
+                sanitizedBuffer = await sharp(rawBuffer)
+                    .resize(512, 512, {
+                        fit: 'cover',
+                        position: 'center'
+                    })
+                    .webp({ quality: 85 })
+                    .toBuffer();
+                console.log("[SERVER DEBUG] Sharp done. Sanitized size:", sanitizedBuffer.length);
+            } catch (sharpError: any) {
+                console.error("[SERVER DEBUG] Sharp FAILED:", sharpError.message);
+                return { error: 'Falha no processamento da imagem.' };
+            }
+        }
+
+        console.log("[SERVER DEBUG] Saving to bucket...");
         const fileName = `avatars/${uid}/avatar.webp`;
         const bucket = storage.bucket();
         const fileRef = bucket.file(fileName);
@@ -124,8 +142,14 @@ export async function uploadAvatar(formData: FormData) {
             }
         });
 
-        await fileRef.makePublic();
+        console.log("[SERVER DEBUG] Saved to bucket, making public...");
+        try {
+            await fileRef.makePublic();
+        } catch (e) {
+            console.warn("[SERVER DEBUG] makePublic failed (likely Uniform Bucket Access), continuing...");
+        }
         const publicUrl = fileRef.publicUrl();
+        console.log("[SERVER DEBUG] Public URL:", publicUrl);
 
         // 3. Update User Record & Auth
         await db.collection('users').doc(uid).set({

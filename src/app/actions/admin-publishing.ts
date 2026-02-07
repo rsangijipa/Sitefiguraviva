@@ -2,36 +2,38 @@
 
 import { revalidatePath } from 'next/cache';
 import { adminDb, adminAuth } from '@/lib/firebase/admin';
-import { verifySession } from '@/lib/auth/server';
 import { FieldValue } from 'firebase-admin/firestore';
+import { assertIsTutorOrAdmin } from '@/lib/auth/authoring-gate';
 
-// Helper to check admin permission without redirecting
-async function isAuthorizedAdmin() {
-    const session = await verifySession();
-    if (!session) return false;
 
-    // 1. Custom Claims
-    if (session.admin === true || session.role === 'admin') return true;
 
-    // 2. Firestore Profile
-    try {
-        const doc = await adminDb.collection('users').doc(session.uid).get();
-        const role = doc.data()?.role;
-        return role === 'admin' || role === 'administrador';
-    } catch (e) {
-        console.error('Auth check failed:', e);
-        return false;
-    }
+async function hasContent(courseId: string) {
+    const modulesSnap = await adminDb.collection('courses').doc(courseId).collection('modules').limit(1).get();
+    if (modulesSnap.empty) return false;
+
+    // Check if at least one module has lessons
+    const firstModule = modulesSnap.docs[0];
+    const lessonsSnap = await firstModule.ref.collection('lessons').limit(1).get();
+    return !lessonsSnap.empty;
 }
 
 export async function toggleCourseStatus(courseId: string, currentStatus: string) {
-    if (!await isAuthorizedAdmin()) {
+    try {
+        await assertIsTutorOrAdmin();
+    } catch (e) {
         return { success: false, error: 'Unauthorized' };
     }
 
     try {
         const newStatus = currentStatus === 'open' ? 'draft' : 'open';
         const isPublished = newStatus === 'open';
+
+        if (isPublished) {
+            const valid = await hasContent(courseId);
+            if (!valid) {
+                return { success: false, error: 'Cannot publish empty course. Add modules and lessons first.' };
+            }
+        }
 
         const updates: any = {
             status: newStatus,

@@ -3,7 +3,19 @@ import { loginAsAdmin } from './helpers';
 
 test.describe('Admin Content Management', () => {
 
-    test('should create and publish a new course @smoke', async ({ page }) => {
+    test('should load admin dashboard with stats @smoke', async ({ page }) => {
+        await loginAsAdmin(page);
+        await page.goto('/admin');
+
+        // Check for welcome message
+        await expect(page.locator('h1')).toContainText(/Bem-vinda/i);
+
+        // Check for key stats cards
+        await expect(page.locator('text=Total de Cursos')).toBeVisible();
+        await expect(page.locator('text=Artigos Publicados')).toBeVisible();
+    });
+
+    test('should create and publish a new course', async ({ page }) => {
         // 1. Login
         await loginAsAdmin(page);
 

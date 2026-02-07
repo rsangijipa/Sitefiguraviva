@@ -91,7 +91,7 @@ export const AssessmentNavigation = ({
                     {isLast ? (
                         <Button
                             variant="primary"
-                            size="md"
+                            size="default"
                             onClick={onFinish}
                             className="px-8 shadow-lg shadow-primary/20 hover:shadow-primary/30"
                         >
@@ -100,7 +100,7 @@ export const AssessmentNavigation = ({
                     ) : (
                         <Button
                             variant="primary"
-                            size="md"
+                            size="default"
                             onClick={onNext}
                             disabled={!canNext}
                             rightIcon={<ChevronRight size={16} />}

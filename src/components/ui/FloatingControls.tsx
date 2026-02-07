@@ -11,7 +11,8 @@ export default function FloatingControls() {
     const [isPlaying, setIsPlaying] = useState(false);
     const [expanded, setExpanded] = useState(false);
     const audioRef = useRef<HTMLAudioElement>(null);
-    const meditationMusic = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"; // Reliable placeholder
+    // Música meditativa local - coloque o arquivo MP3 em public/assets/audio/
+    const meditationMusic = "/assets/audio/meditation.mp3";
 
     // Theme Logic
     useEffect(() => {

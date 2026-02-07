@@ -23,7 +23,7 @@ export const metadata: Metadata = {
         template: "%s | Instituto Figura Viva"
     },
     description: "Um espaço vivo de acolhimento clínico e formação profissional em Gestalt-Terapia. Encontros que transformam e florescem.",
-    keywords: ["Gestalt-Terapia", "Psicologia", "Formação Clínica", "Instituto Figura Viva", "Porto Velho", "Richard Sangi"],
+    keywords: ["Gestalt-Terapia", "Psicologia", "Formação Clínica", "Instituto Figura Viva", "Ouro Preto D'Oeste", "Richard Sangi"],
     authors: [{ name: "Instituto Figura Viva" }],
     creator: "Richard Sangi",
     openGraph: {
@@ -46,6 +46,7 @@ export const metadata: Metadata = {
 
 import { cookies } from 'next/headers';
 import ImpersonationBanner from '@/components/admin/ImpersonationBanner';
+import { WebVitalsReporter } from "@/components/system/WebVitalsReporter";
 
 export default async function RootLayout({
     children,
@@ -59,6 +60,7 @@ export default async function RootLayout({
         <html lang="pt-BR" className={`${cormorant.variable} ${lato.variable}`}>
             <body className="antialiased bg-paper text-text overflow-x-hidden">
                 <Providers>
+                    <WebVitalsReporter />
                     {children}
                     {isImpersonating && <ImpersonationBanner />}
                 </Providers>
