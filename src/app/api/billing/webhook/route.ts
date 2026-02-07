@@ -107,6 +107,7 @@ export async function POST(req: NextRequest) {
 
                             const updateData = {
                                 uid,
+                                userId: uid, // P2: Canonical field
                                 courseId,
                                 status: 'awaiting_payment', // Default start
                                 paymentStatus: 'pending',

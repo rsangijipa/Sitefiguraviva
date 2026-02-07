@@ -203,7 +203,7 @@ export function ProfileForm() {
                 </div>
 
                 <div className="flex justify-end">
-                    <Button type="submit" variant="primary" loading={loading} leftIcon={<Save size={18} />}>
+                    <Button type="submit" variant="primary" isLoading={loading} leftIcon={<Save size={18} />}>
                         Salvar Alterações
                     </Button>
                 </div>
@@ -281,7 +281,7 @@ export function ProfileForm() {
                             >
                                 Cancelar
                             </Button>
-                            <Button type="submit" variant="outline" loading={loading} className="border-red-200 text-red-600 hover:bg-red-50">
+                            <Button type="submit" variant="outline" isLoading={loading} className="border-red-200 text-red-600 hover:bg-red-50">
                                 Atualizar Senha
                             </Button>
                         </div>

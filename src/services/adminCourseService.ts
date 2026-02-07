@@ -20,6 +20,9 @@ export const adminCourseService = {
     async createCourse(data: Partial<CourseDoc>): Promise<string> {
         const docRef = await addDoc(collection(db, 'courses'), {
             ...data,
+            // Dual-write for schema consistency
+            image: (data as any).coverImage || (data as any).image || '',
+            coverImage: data.coverImage || (data as any).image || '',
             status: 'draft',
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp()
@@ -30,10 +33,16 @@ export const adminCourseService = {
     async updateCourse(courseId: string, data: Partial<CourseDoc>): Promise<void> {
         const docRef = doc(db, 'courses', courseId);
         const { id, ...updateData } = data as any;
-        await updateDoc(docRef, {
+        const updatePayload: any = {
             ...updateData,
             updatedAt: serverTimestamp()
-        });
+        };
+
+        // Dual-write check
+        if (updateData.coverImage) updatePayload.image = updateData.coverImage;
+        if (updateData.image) updatePayload.coverImage = updateData.image;
+
+        await updateDoc(docRef, updatePayload);
     },
 
     async deleteCourse(courseId: string): Promise<void> {

@@ -5,6 +5,8 @@ import { auth, db } from '@/lib/firebase/admin';
 import { LessonPlayerWrapper } from '@/components/portal/LessonPlayerWrapper';
 import { Lesson, Module } from '@/types/lms';
 
+export const dynamic = 'force-dynamic';
+
 // Helper to fetch full course structure
 async function getCourseData(courseId: string) {
     const courseDoc = await db.collection('courses').doc(courseId).get();
@@ -13,7 +15,7 @@ async function getCourseData(courseId: string) {
     const modulesSnap = await db.collection('courses').doc(courseId).collection('modules').orderBy('order', 'asc').get();
     const modules = await Promise.all(modulesSnap.docs.map(async doc => {
         const lessonsSnap = await doc.ref.collection('lessons').orderBy('order', 'asc').get();
-        const lessons = lessonsSnap.docs.map(l => ({ id: l.id, ...l.data() }));
+        const lessons = lessonsSnap.docs.map(l => ({ id: l.id, moduleId: doc.id, ...l.data() }));
         return { id: doc.id, ...doc.data(), lessons };
     }));
 
@@ -47,6 +49,34 @@ export default async function LessonPage({ params }: { params: Promise<{ courseI
     if (currentIndex === -1) redirect(`/portal/course/${courseId}`);
 
     const activeLesson = allLessons[currentIndex];
+
+    // FETCH CONTENT (Blocks)
+    // We must fetch the subcollection 'blocks' for this lesson to show content
+    if (activeLesson) {
+        try {
+            const blocksSnap = await db.collection('courses')
+                .doc(courseId)
+                .collection('modules')
+                .doc(activeLesson.moduleId)
+                .collection('lessons')
+                .doc(activeLesson.id)
+                .collection('blocks')
+                .orderBy('order', 'asc')
+                .get();
+
+            const blocks = blocksSnap.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data(),
+                isPublished: doc.data().isPublished !== false
+            }));
+
+            // @ts-ignore - injecting blocks into the lesson object for the player
+            activeLesson.blocks = blocks;
+        } catch (e) {
+            console.error("Error fetching lesson blocks:", e);
+        }
+    }
+
     const prevLessonId = currentIndex > 0 ? allLessons[currentIndex - 1].id : undefined;
     const nextLessonId = currentIndex < allLessons.length - 1 ? allLessons[currentIndex + 1].id : undefined;
 

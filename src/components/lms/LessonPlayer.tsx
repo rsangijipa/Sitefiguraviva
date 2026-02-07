@@ -36,56 +36,12 @@ export function LessonPlayer({
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [blocks, setBlocks] = useState<Block[]>([]);
     const [isLoadingContent, setIsLoadingContent] = useState(false);
-
     // Helper to find moduleId if not directly on lesson
     const getModuleId = (lesson: Lesson) => {
         if (lesson.moduleId) return lesson.moduleId;
         const parent = modules.find(m => m.lessons.some(l => l.id === lesson.id));
         return parent?.id;
     };
-
-    // Resolved moduleId for the active lesson (needed to load blocks)
-    const resolvedModuleId = activeLesson ? getModuleId(activeLesson) : undefined;
-
-    // Load lesson content blocks whenever the active lesson changes
-    useEffect(() => {
-        let cancelled = false;
-
-        const load = async () => {
-            if (!activeLesson || !resolvedModuleId) {
-                setBlocks([]);
-                return;
-            }
-
-            setIsLoadingContent(true);
-            try {
-                const res = await getLessonContentAction(course.id, resolvedModuleId, activeLesson.id);
-
-                if (cancelled) return;
-
-                if (res?.success) {
-                    const serverBlocks = (res.data?.blocks || []) as Block[];
-                    // Default visible; only hide if explicitly disabled
-                    setBlocks(serverBlocks.filter(b => b.isPublished !== false));
-                } else {
-                    console.error('Failed to load lesson content:', res?.error);
-                    setBlocks([]);
-                }
-            } catch (err) {
-                if (!cancelled) {
-                    console.error('Failed to load lesson content:', err);
-                    setBlocks([]);
-                }
-            } finally {
-                if (!cancelled) setIsLoadingContent(false);
-            }
-        };
-
-        load();
-        return () => {
-            cancelled = true;
-        };
-    }, [activeLesson?.id, resolvedModuleId, course.id]);
 
     // Resolved moduleId for the active lesson (needed to load blocks)
     const resolvedModuleId = activeLesson ? getModuleId(activeLesson) : undefined;
