@@ -41,6 +41,33 @@ yarn-error.log*
 # vercel
 .vercel
 
+# firebase
+.firebase
+.firebaserc
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# logs and debug files
+*.log
+*.txt
+debug_cert*
+test_*
+tsc_errors.txt
+results.json
+admin_error.txt
+build_*
+test_failure*
+test_smoke*
+
+# scripts and temporary files
+/scripts/
+/*.js
+!/next.config.mjs
+!/eslint.config.mjs
+!/jest.config.js
+!/jest.setup.js
+!/postcss.config.js
+!/tailwind.config.js
+/system_map.md

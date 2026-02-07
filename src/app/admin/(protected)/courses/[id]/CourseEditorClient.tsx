@@ -23,6 +23,7 @@ import CourseSettingsTab from './tabs/CourseSettingsTab';
 // import CourseContentTab from './tabs/Course/CourseContentTab';
 // import CourseStudentsTab from './tabs/CourseStudentsTab';
 // import CourseCommunityTab from './tabs/CourseCommunityTab'; 
+import { toggleCourseStatus } from '@/app/actions/admin-publishing';
 
 export default function CourseEditorClient({ initialCourse }: { initialCourse: CourseDoc }) {
     const searchParams = useSearchParams();
@@ -78,6 +79,28 @@ export default function CourseEditorClient({ initialCourse }: { initialCourse: C
                 <div className="flex gap-2">
                     <Button variant="outline" onClick={() => window.open(`/portal/course/${course.id}`, '_blank')}>
                         Ver no Portal
+                    </Button>
+                    <Button
+                        onClick={async () => {
+                            setIsSaving(true);
+                            try {
+                                const result: any = await toggleCourseStatus(course.id, course.status);
+                                if (result.success) {
+                                    setCourse({ ...course, status: result.newStatus, isPublished: result.isPublished });
+                                    addToast(result.newStatus === 'open' ? "Curso Publicado!" : "Curso despublicado", 'success');
+                                } else {
+                                    addToast("Erro ao alterar status: " + result.error, 'error');
+                                }
+                            } catch (e) {
+                                addToast("Erro de conexão", 'error');
+                            } finally {
+                                setIsSaving(false);
+                            }
+                        }}
+                        variant={course.status === 'open' ? 'ghost' : 'secondary'}
+                        className={course.status === 'open' ? 'text-red-500 hover:text-red-600 hover:bg-red-50' : 'text-green-600 bg-green-50 hover:bg-green-100'}
+                    >
+                        {course.status === 'open' ? 'Despublicar' : 'Publicar Curso'}
                     </Button>
                     <Button onClick={handleSaveCourse} isLoading={isSaving} leftIcon={<Save size={16} />}>
                         Salvar Alterações

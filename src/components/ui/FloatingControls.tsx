@@ -11,9 +11,7 @@ export default function FloatingControls() {
     const [isPlaying, setIsPlaying] = useState(false);
     const [expanded, setExpanded] = useState(false);
     const audioRef = useRef<HTMLAudioElement>(null);
-    const audioUrl = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3"; // Temporário: Trocarei por um link de sons de natureza meditativos realistas se disponível, ou usarei um CDN confiável.
-    // Usando um link de som de natureza (chuva/floresta) mais adequado para meditação.
-    const meditationMusic = "https://cdn.pixabay.com/audio/2022/02/10/audio_f30064375b.mp3"; // Forest/Nature loops
+    const meditationMusic = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"; // Reliable placeholder
 
     // Theme Logic
     useEffect(() => {

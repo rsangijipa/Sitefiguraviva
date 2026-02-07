@@ -1,6 +1,6 @@
 import { ArrowLeft, CheckCircle, ChevronLeft, ChevronRight, Menu, X } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { VideoPlayer } from "./VideoPlayer";
 import { LessonSidebar } from "./LessonSidebar";
 import { Lesson, Module } from "@/types/lms";
@@ -46,15 +46,7 @@ const CourseVideoWrapper = ({ courseId, moduleId, lesson, onMarkComplete }: { co
             url={lesson.type === 'video' ? (lesson as any).videoUrl : ''}
             poster={(lesson as any).thumbnail}
             initialTime={progress?.seekPosition || 0}
-            onTimeUpdate={(t) => updateProgress(t, false)}
-            onStateChange={(state) => {
-                // 1 = Playing. We need to expose onStateChange from VideoPlayer?
-                // Current VideoPlayer prop is onPause/onEnded. 
-                // Let's check VideoPlayer.tsx to see what it exposes.
-                // It exposes onPause (state=2) and onEnded (state=0).
-                // It doesn't expose onPlay explicitly?
-                // We need onPlay to set isPlaying=true.
-            }}
+            onTimeUpdate={(t) => { updateProgress(t, false); }}
             onPlay={() => setIsPlaying(true)}
             onPause={() => {
                 setIsPlaying(false);

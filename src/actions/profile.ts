@@ -1,3 +1,5 @@
+"use server";
+
 import { auth, db, storage } from '@/lib/firebase/admin';
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
@@ -29,7 +31,7 @@ export async function updateProfile(data: { displayName: string; bio?: string })
         // 1. Validate Input (Zod)
         const parseResult = updateProfileSchema.safeParse(data);
         if (!parseResult.success) {
-            return { error: parseResult.error.errors[0].message, status: 400 };
+            return { error: parseResult.error.issues[0]?.message || 'Dados inválidos', status: 400 };
         }
         const { displayName, bio } = parseResult.data;
 

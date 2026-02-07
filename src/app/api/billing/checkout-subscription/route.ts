@@ -72,53 +72,6 @@ export async function POST(req: NextRequest) {
         const enrollmentData = {
             uid,
             courseId,
-            status: 'pending',
-            source: 'payment', // The original had status: 'awaiting_payment' in diff? Wait.
-            // My view_file for this file showed different content than the diff expectation?
-            // view_file content:
-            // 74:             status: 'pending',
-            // 75:             source: 'payment',
-            // ...
-            // Diff content says:
-            // -            status: 'awaiting_payment',
-            // -            paymentStatus: 'pending',
-            // -            approvalStatus: 'pending',
-            // +            approvalStatus: 'pending_review',
-
-            // My file content in Step 9 lines 70-81:
-            // 70:         const enrollmentId = `${uid}_${courseId}`;
-            // 71:         const enrollmentData = {
-            // 72:             uid,
-            // 73:             courseId,
-            // 74:             status: 'pending',
-            // 75:             source: 'payment',
-            // 76:             createdAt: FieldValue.serverTimestamp(),
-            // ...
-
-            // The user's diff seems to match a DIFFERENT version of the file?
-            // "status: 'awaiting_payment'" vs "status: 'pending'".
-            // "approvalStatus" is MISSING in my Step 9 content!
-            // So if I blindly apply the patch, I might be adding fields that weren't there or changing logic on a file that is not what the user thought.
-            // But the instruction is "Apply exactly the patch below".
-            // The patch has:
-            // -            approvalStatus: 'pending',
-            // +            approvalStatus: 'pending_review',
-            // But my file DOES NOT HAVE approvalStatus!
-
-            // If I look at the diff again on `checkout-subscription/route.ts`:
-            // @@ -76,9 +77,9 @@
-            //
-            // -            status: 'awaiting_payment',
-            // -            paymentStatus: 'pending',
-            // -            approvalStatus: 'pending',
-            // +            status: 'awaiting_payment',  (Wait, diff keeps it awaiting_payment?)
-            // +            approvalStatus: 'pending_review',
-
-            // My file has `status: 'pending'`.
-            // I should UPGRADE my file to match the DESIRED state of the diff.
-            // The desired state is `approvalStatus: 'pending_review'`.
-            // So I will insert it.
-
             status: 'awaiting_payment',
             paymentStatus: 'pending',
             approvalStatus: 'pending_review',
