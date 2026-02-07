@@ -1,0 +1,15 @@
+# Global Fallback
+* @rsangijipa
+
+# DevOps & CI/CD
+/.github/ @rsangijipa
+/.husky/ @rsangijipa
+/package.json @rsangijipa
+/scripts/ @rsangijipa
+
+# Product & Documentation
+/docs/ @rsangijipa
+/*.md @rsangijipa
+
+# Source Code
+/src/ @rsangijipa

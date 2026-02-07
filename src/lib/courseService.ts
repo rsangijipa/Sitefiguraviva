@@ -1,5 +1,7 @@
+import { FieldValue } from 'firebase-admin/firestore';
 import { db } from '@/lib/firebase/admin';
 import { Course, Module, Lesson, Block } from '@/types/lms';
+import { deepSafeSerialize } from './utils';
 
 export async function getCourseData(courseId: string, userId: string) {
     if (!courseId || !userId) return null;
@@ -83,13 +85,13 @@ export async function getCourseData(courseId: string, userId: string) {
         } as Module;
     }));
 
-    return {
+    return deepSafeSerialize({
         course: courseData,
         modules,
         enrollment: enrollmentData,
         status,
         isAccessDenied: false
-    };
+    });
 }
 
 export async function getLessonContent(courseId: string, moduleId: string, lessonId: string) {
@@ -119,7 +121,7 @@ export async function getLessonContent(courseId: string, moduleId: string, lesso
         };
     }) as Block[];
 
-    return { lesson, blocks };
+    return deepSafeSerialize({ lesson, blocks });
 }
 
 export async function saveLessonContent(courseId: string, moduleId: string, lessonId: string, blocks: Block[]) {
@@ -159,9 +161,15 @@ export async function saveLessonContent(courseId: string, moduleId: string, less
 
     // 3. Update lesson timestamp/count (use set+merge for safety)
     batch.set(lessonRef, {
-        updatedAt: new Date(),
+        updatedAt: FieldValue.serverTimestamp(),
         publishedBlocksCount: safeBlocks.filter((b: any) => b?.isPublished !== false).length
     }, { merge: true });
+
+    // 4. Increment course content revision (Structural Integrity)
+    batch.update(db.collection('courses').doc(courseId), {
+        contentRevision: FieldValue.increment(1),
+        updatedAt: FieldValue.serverTimestamp()
+    });
 
     return batch.commit();
 }

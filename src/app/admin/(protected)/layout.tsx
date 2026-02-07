@@ -1,6 +1,7 @@
 import { requireAdmin } from '@/lib/auth/server';
 import AdminShell from './AdminShell';
 import { headers } from 'next/headers'; // Used to force dynamic if needed, but cookies() implies dynamic.
+import { RequireRole } from '@/components/system/RequireRole';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
 
@@ -10,7 +11,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
     return (
         <AdminShell>
-            {children}
+            <RequireRole roles={['admin']}>
+                {children}
+            </RequireRole>
         </AdminShell>
     );
 }

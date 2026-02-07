@@ -18,6 +18,8 @@ export function VideoPlayer({ videoId, courseId, moduleId, lessonId, initialComp
     const [isCompleted, setIsCompleted] = useState(initialCompleted);
     const [loading, setLoading] = useState(false);
     const playerRef = useRef<any>(null);
+    const lastPushedTime = useRef<number>(0);
+    const lastUpdateTs = useRef<number>(Date.now());
 
     const onEnd = async (event: YouTubeEvent) => {
         if (isCompleted) return;
@@ -54,8 +56,49 @@ export function VideoPlayer({ videoId, courseId, moduleId, lessonId, initialComp
 
     const onStateChange = (event: YouTubeEvent) => {
         // 1 = Playing, 2 = Paused, 0 = Ended
-        // We could track % here if needed
+        if (event.data === 2) {
+            // Force a sync on pause
+            const currentTime = event.target.getCurrentTime();
+            pushProgress(currentTime);
+        }
     };
+
+    const pushProgress = async (currentTime: number) => {
+        // Debounce: Don't push if < 10s passed since last push
+        const now = Date.now();
+        if (now - lastUpdateTs.current < 10000) return;
+
+        // Optimization: Don't push if we haven't advanced much (e.g. seeking back)
+        if (currentTime <= lastPushedTime.current) return;
+
+        try {
+            await updateLessonProgress(
+                courseId,
+                moduleId,
+                lessonId,
+                {
+                    status: 'in_progress',
+                    maxWatchedSecond: Math.floor(currentTime)
+                }
+            );
+            lastPushedTime.current = currentTime;
+            lastUpdateTs.current = now;
+        } catch (e) {
+            console.error("Failed to push metrics", e);
+        }
+    };
+
+    // Use interval for polling while playing since onStateChange doesn't fire continuously
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (playerRef.current && playerRef.current.getPlayerState() === 1) { // Playing
+                const currentTime = playerRef.current.getCurrentTime();
+                pushProgress(currentTime);
+            }
+        }, 5000); // Check every 5s, but pushProgress debounces to 10s
+
+        return () => clearInterval(interval);
+    }, [courseId, moduleId, lessonId]);
 
     return (
         <div className="space-y-4">

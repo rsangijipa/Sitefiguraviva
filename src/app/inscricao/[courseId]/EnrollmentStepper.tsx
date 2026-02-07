@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Loader2, Lock, ArrowRight, CreditCard, User, Clock } from 'lucide-react';
+import { Check, Loader2, ArrowRight, User, Clock } from 'lucide-react';
 import Link from 'next/link';
 import { Input } from '@/components/ui/Input';
 import { useToast } from '@/context/ToastContext';
@@ -289,38 +289,62 @@ export default function EnrollmentStepper({ courseId, initialData }: { courseId:
 
                                 <div className="pt-8 border-t border-stone-200/50 flex justify-end">
                                     <button type="submit" disabled={loading} className="px-8 py-4 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-all flex items-center gap-2 shadow-lg shadow-primary/20 uppercase tracking-widest text-xs">
-                                        {loading ? <Loader2 className="animate-spin" size={18} /> : <>Ir para Pagamento <ArrowRight size={16} /></>}
+                                        {loading ? <Loader2 className="animate-spin" size={18} /> : <>Confirmar Interesse <ArrowRight size={16} /></>}
                                     </button>
                                 </div>
                             </form>
                         </motion.div>
                     )}
 
-                    {/* STEP 3: PAYMENT */}
+                    {/* STEP 3: INTERESSE REGISTRADO */}
                     {currentStep === 3 && (
                         <motion.div key="step3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                            <div className="text-center mb-8">
-                                <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600">
-                                    <CreditCard size={32} />
+                            <div className="text-center">
+                                <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600">
+                                    <Check size={40} />
                                 </div>
-                                <h2 className="font-serif text-2xl text-primary mb-2">Assinatura Mensal</h2>
-                                <p className="text-stone-500">Acesso completo com renovação automática. Cancele quando quiser.</p>
-                            </div>
+                                <h2 className="font-serif text-3xl text-primary mb-4">Interesse Registrado!</h2>
+                                <p className="text-stone-500 mb-8 max-w-md mx-auto leading-relaxed">
+                                    Sua demonstração de interesse foi enviada com sucesso.
+                                    Nossa equipe entrará em contato em breve com mais informações sobre o curso e formas de pagamento.
+                                </p>
 
-                            <div className="bg-stone-50 rounded-2xl p-6 border border-stone-200 mb-8 flex items-center justify-between">
-                                <div>
-                                    <p className="font-bold text-primary">{course.courseTitle || course.title}</p>
-                                    <p className="text-xs text-stone-500">Valor Recorrente</p>
+                                <div className="bg-stone-50 rounded-2xl p-6 border border-stone-200 mb-8 text-left max-w-md mx-auto">
+                                    <h3 className="font-bold text-primary mb-4 text-sm uppercase tracking-widest">Resumo da Inscrição</h3>
+                                    <div className="space-y-3 text-sm">
+                                        <div className="flex justify-between">
+                                            <span className="text-stone-500">Curso:</span>
+                                            <span className="font-medium text-primary">{course.courseTitle || course.title}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-stone-500">Nome:</span>
+                                            <span className="font-medium text-primary">{formData.fullName || application?.answers?.fullName}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-stone-500">Telefone:</span>
+                                            <span className="font-medium text-primary">{formData.phone || application?.answers?.phone}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-stone-500">Status:</span>
+                                            <span className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-bold">
+                                                Aguardando Contato
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="text-right">
-                                    <p className="font-serif text-2xl text-primary">R$ 97,00</p>
-                                    <p className="text-[10px] text-stone-400">/mês</p>
+
+                                <div className="space-y-4">
+                                    <p className="text-xs text-stone-400">
+                                        Você receberá um e-mail com mais detalhes. Fique atento ao seu WhatsApp!
+                                    </p>
+                                    <Link
+                                        href="/"
+                                        className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg hover:bg-primary/90 transition-all uppercase tracking-widest text-xs"
+                                    >
+                                        Voltar para Home <ArrowRight size={16} />
+                                    </Link>
                                 </div>
                             </div>
-
-                            <button onClick={handleSubscribe} disabled={loading} className="w-full py-4 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-600/20">
-                                {loading ? <Loader2 className="animate-spin" /> : <>Assinar com Stripe <Lock size={16} /></>}
-                            </button>
                         </motion.div>
                     )}
 
@@ -355,7 +379,7 @@ export default function EnrollmentStepper({ courseId, initialData }: { courseId:
                                 ) : isPastDue ? (
                                     <>
                                         <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6 text-red-600">
-                                            <CreditCard size={32} />
+                                            <Clock size={32} />
                                         </div>
                                         <h2 className="font-serif text-2xl text-primary mb-4">Pagamento Pendente</h2>
                                         <p className="text-stone-500 mb-8">Falha na renovação da assinatura. Atualize seu meio de pagamento.</p>

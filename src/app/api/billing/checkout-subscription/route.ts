@@ -75,6 +75,7 @@ export async function POST(req: NextRequest) {
             status: 'awaiting_payment',
             paymentStatus: 'pending',
             approvalStatus: 'pending_review',
+            courseVersionAtEnrollment: courseData.contentRevision || 1, // Capture starting version
             createdAt: FieldValue.serverTimestamp(),
             updatedAt: FieldValue.serverTimestamp(),
             stripe: {

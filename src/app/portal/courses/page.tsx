@@ -4,14 +4,15 @@ import { redirect } from 'next/navigation';
 import { auth, db } from '@/lib/firebase/admin';
 import Link from 'next/link';
 import { FieldPath } from 'firebase-admin/firestore';
-import { BookOpen, Calendar, ArrowRight, Clock, AlertCircle, Ban, Play } from 'lucide-react';
+import { BookOpen, Library } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Timestamp } from 'firebase-admin/firestore';
 
 // --- Reusable Course Card (Inline for now, extract later) ---
-const CourseCard = ({ course, enrollment }: { course: any, enrollment: any }) => {
-    const status = enrollment?.status || 'pending';
+const CourseCard = ({ course, enrollment, isCatalog = false }: { course: any, enrollment?: any, isCatalog?: boolean }) => {
+    const status = enrollment?.status || (isCatalog ? 'catalog' : 'pending');
     const isActive = status === 'active';
-    const progress = enrollment?.progressSummary?.percent || 0; // Assuming sync worked
+    const progress = enrollment?.progressSummary?.percent || 0;
     const lastAccess = enrollment?.lastAccessedAt?.toDate?.().toLocaleDateString();
 
     const getStatusChip = () => {
@@ -19,6 +20,7 @@ const CourseCard = ({ course, enrollment }: { course: any, enrollment: any }) =>
             case 'active': return <span className="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold uppercase rounded-full">Ativo</span>;
             case 'completed': return <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-bold uppercase rounded-full">Concluído</span>;
             case 'expired': return <span className="px-2 py-0.5 bg-red-100 text-red-700 text-[10px] font-bold uppercase rounded-full">Expirado</span>;
+            case 'catalog': return <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-[10px] font-bold uppercase rounded-full">Disponível</span>;
             default: return <span className="px-2 py-0.5 bg-stone-100 text-stone-500 text-[10px] font-bold uppercase rounded-full">Pendente</span>;
         }
     };
@@ -66,12 +68,22 @@ const CourseCard = ({ course, enrollment }: { course: any, enrollment: any }) =>
                     </div>
                 ) : (
                     <div className="mt-auto pt-4">
-                        <p className="text-xs text-stone-500 italic">Acesso restrito ou pendente.</p>
+                        {isCatalog ? (
+                            <p className="text-xs text-stone-500 line-clamp-2 mb-3">{course.description || 'Domine novas habilidades.'}</p>
+                        ) : (
+                            <p className="text-xs text-stone-500 italic">Acesso restrito ou pendente.</p>
+                        )}
+
                         <Link
-                            href={`/portal/course/${course.id}`}
-                            className="block w-full py-2 border border-stone-200 text-stone-500 text-center text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-stone-50 transition-colors mt-3"
+                            href={isCatalog ? `/curso/${course.slug || course.id}` : `/portal/course/${course.id}`}
+                            className={cn(
+                                "block w-full py-2 border text-center text-xs font-bold uppercase tracking-widest rounded-lg transition-colors mt-3",
+                                isCatalog
+                                    ? "border-primary text-primary hover:bg-primary hover:text-white"
+                                    : "border-stone-200 text-stone-500 hover:bg-stone-50"
+                            )}
                         >
-                            Ver Detalhes
+                            {isCatalog ? 'Saiba Mais' : 'Ver Detalhes'}
                         </Link>
                     </div>
                 )}
@@ -91,56 +103,98 @@ export default async function MyCoursesPage() {
         uid = decodedClaims.uid;
     } catch (error) { redirect('/login'); }
 
-    // Fetch Enrollments
+    // 1. Fetch User Enrollments
     const enrollmentsSnap = await db.collection('enrollments').where('userId', '==', uid).get();
     const enrollments = enrollmentsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-    let courses = [];
+    // 2. Resolve Enrolled Courses
+    let enrolledCourses: any[] = [];
+    let enrolledCourseIds = new Set<string>();
+
     if (enrollments.length > 0) {
         const courseIds = enrollments.map((e: any) => e.courseId);
-        // Simplified fetch for demo (chunking omitted for brevity, assume < 10 for now in this MVP step)
-        // In prod, use the chunking logic from dashboard
-        if (courseIds.length > 0) {
-            const courseSnap = await db.collection('courses').where(FieldPath.documentId(), 'in', courseIds.slice(0, 10)).get();
-            courses = courseSnap.docs.map(doc => {
-                const enrollment = enrollments.find((e: any) => e.courseId === doc.id);
-                return { id: doc.id, ...doc.data(), enrollment };
-            });
+        enrolledCourseIds = new Set(courseIds);
+
+        // Batch fetch (simplified for MVP)
+        // Split into chunks of 10
+        const chunks = [];
+        for (let i = 0; i < courseIds.length; i += 10) {
+            chunks.push(courseIds.slice(i, i + 10));
+        }
+
+        for (const chunk of chunks) {
+            if (chunk.length > 0) {
+                const snap = await db.collection('courses').where(FieldPath.documentId(), 'in', chunk).get();
+                const chunkCourses = snap.docs.map(doc => {
+                    const enrollment = enrollments.find((e: any) => e.courseId === doc.id);
+                    return { id: doc.id, ...doc.data(), enrollment };
+                });
+                enrolledCourses.push(...chunkCourses);
+            }
         }
     }
 
-    return (
-        <div className="space-y-8">
-            <header className="flex items-center justify-between">
-                <div>
-                    <h1 className="font-serif text-3xl text-stone-800">Meus Cursos</h1>
-                    <p className="text-stone-500 mt-1">Biblioteca de aprendizado</p>
-                </div>
-                {/* Search/Filter Placeholder */}
-                <div className="hidden md:flex gap-3">
-                    <input type="text" placeholder="Buscar curso..." className="px-4 py-2 bg-white border border-stone-200 rounded-lg text-sm outline-none focus:border-stone-400" />
-                    <select className="px-4 py-2 bg-white border border-stone-200 rounded-lg text-sm outline-none text-stone-600">
-                        <option>Todos</option>
-                        <option>Ativos</option>
-                        <option>Concluídos</option>
-                    </select>
-                </div>
-            </header>
+    // 3. Fetch Catalog (Published & Open, limit 10 for MVP)
+    // Exclude enrolled? Ideally yes, but Firestore "not-in" has limits.
+    // We will fetch widely and filter in memory for this page since catalog size is likely small (<100) for now.
+    const catalogSnap = await db.collection('courses')
+        .where('isPublished', '==', true)
+        .where('status', '==', 'open')
+        .limit(20)
+        .get();
 
-            {courses.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {courses.map(course => (
-                        <CourseCard key={course.id} course={course} enrollment={course.enrollment} />
-                    ))}
-                </div>
-            ) : (
-                <div className="bg-white border border-stone-100 rounded-2xl p-12 text-center">
-                    <div className="w-16 h-16 bg-stone-50 rounded-full flex items-center justify-center mx-auto mb-4 text-stone-400">
-                        <BookOpen size={32} />
+    const catalogCourses = catalogSnap.docs
+        .map(doc => ({ id: doc.id, ...doc.data() }))
+        .filter(c => !enrolledCourseIds.has(c.id));
+
+
+    return (
+        <div className="space-y-12 pb-12">
+
+            {/* Section: My Enrollments */}
+            <section className="space-y-6">
+                <header className="flex items-center justify-between border-b border-stone-100 pb-4">
+                    <div>
+                        <h1 className="font-serif text-3xl text-stone-800 flex items-center gap-3">
+                            <BookOpen className="text-primary" />
+                            Meus Cursos
+                        </h1>
+                        <p className="text-stone-500 mt-1">Continue de onde parou.</p>
                     </div>
-                    <h3 className="text-lg font-bold text-stone-800">Nenhum curso encontrado</h3>
-                    <p className="text-stone-500 mt-2 max-w-md mx-auto">Você ainda não se inscreveu em nenhum curso. Explore nossa biblioteca para começar.</p>
-                </div>
+                </header>
+
+                {enrolledCourses.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {enrolledCourses.map(course => (
+                            <CourseCard key={course.id} course={course} enrollment={course.enrollment} />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="bg-stone-50 border border-dashed border-stone-200 rounded-2xl p-8 text-center pt-16 pb-16">
+                        <BookOpen size={48} className="mx-auto text-stone-300 mb-4" />
+                        <h3 className="text-lg font-bold text-stone-700">Comece sua jornada</h3>
+                        <p className="text-stone-500 mt-2">Você ainda não está matriculado em nenhum curso.</p>
+                    </div>
+                )}
+            </section>
+
+            {/* Section: Catalog */}
+            {catalogCourses.length > 0 && (
+                <section className="space-y-6">
+                    <header className="flex items-center gap-3 border-b border-stone-100 pb-4">
+                        <Library className="text-stone-400" />
+                        <div>
+                            <h2 className="font-serif text-2xl text-stone-800">Catálogo Disponível</h2>
+                            <p className="text-stone-500 text-sm">Novos conhecimentos esperando por você.</p>
+                        </div>
+                    </header>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {catalogCourses.map(course => (
+                            <CourseCard key={course.id} course={course} isCatalog={true} />
+                        ))}
+                    </div>
+                </section>
             )}
         </div>
     );

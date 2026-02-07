@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { adminCourseService } from '@/services/adminCourseService';
 import { ModuleDoc, LessonDoc } from '@/types/lms';
 import { Plus, GripVertical, Trash2, Edit, ChevronDown, ChevronRight, FileText, Video } from 'lucide-react';
@@ -12,6 +13,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 // We will need a LessonEditor Modal/Drawer later. For now, skeleton.
 
 export default function CourseCurriculumTab({ courseId }: { courseId: string }) {
+    const router = useRouter();
     const { addToast } = useToast();
     const [modules, setModules] = useState<ModuleDoc[]>([]);
     const [lessonsMap, setLessonsMap] = useState<Record<string, LessonDoc[]>>({});
@@ -89,10 +91,7 @@ export default function CourseCurriculumTab({ courseId }: { courseId: string }) 
 
     // Navigate to the Block Editor
     const handleEditLesson = (moduleId: string, lessonId: string) => {
-        // Use window.location or Link component from wrapping. 
-        // Since we are inside a client component in a tab, we can use window.location.href or just standard Next.js Link logic
-        // But here we are in a function.
-        window.location.href = `/admin/courses/${courseId}/lessons/${lessonId}`;
+        router.push(`/admin/courses/${courseId}/lessons/${lessonId}`);
     };
 
     if (loading) return <div className="p-8 text-center text-stone-400">Carregando estrutura...</div>;

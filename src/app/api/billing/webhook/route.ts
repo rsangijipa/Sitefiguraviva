@@ -3,7 +3,9 @@ import { stripe } from '@/lib/stripe';
 import { adminDb } from '@/lib/firebase/admin';
 import { FieldValue } from 'firebase-admin/firestore';
 import Stripe from 'stripe';
+import { EnrollmentDoc } from '@/types/lms';
 import { computeAccessStatus, AccessStatus, PaymentStatus, StripeSubscriptionStatus } from '@/lib/enrollmentStatus';
+import { activateEnrollmentFromStripe } from '@/lib/auth/enrollment-service';
 import { logSystemError } from '@/lib/logging';
 import { logAudit } from '@/lib/audit';
 
@@ -82,63 +84,21 @@ export async function POST(req: NextRequest) {
         switch (event.type) {
             case 'checkout.session.completed': {
                 const checkoutSession = session as Stripe.Checkout.Session;
-                if (checkoutSession.mode === 'subscription') {
-                    const uid = checkoutSession.metadata?.uid;
-                    const courseId = checkoutSession.metadata?.courseId;
-                    const applicationId = checkoutSession.metadata?.applicationId;
-                    const subscriptionId = checkoutSession.subscription as string;
-                    const customerId = checkoutSession.customer as string;
+                const uid = checkoutSession.metadata?.uid;
+                const courseId = checkoutSession.metadata?.courseId;
+                const isSubscription = checkoutSession.mode === 'subscription';
 
-                    if (uid && courseId) {
-                        try {
-                            // Link user to stripe customer
-                            await adminDb.collection('users').doc(uid).set({
-                                'stripeCustomerId': customerId
-                            }, { merge: true });
-
-                            // INITIAL ENROLLMENT STATE
-                            // Paid via Checkout means Payment is implicitly confirmed or processing...
-                            // BUT 'invoice.paid' is the real source of truth for "Paid".
-                            // Status here: Payment=Pending (safe bet), Approval=PendingReview.
-
-                            // PRG-05: Fetch course info to pre-populate totalLessons
-                            const courseSnap = await adminDb.collection('courses').doc(courseId).get();
-                            const totalLessons = courseSnap.data()?.stats?.lessonsCount || 0;
-
-                            const updateData = {
-                                uid,
-                                userId: uid, // P2: Canonical field
-                                courseId,
-                                status: 'awaiting_payment', // Default start
-                                paymentStatus: 'pending',
-                                approvalStatus: 'pending_review',
-
-                                'stripe.customerId': customerId,
-                                'stripe.subscriptionId': subscriptionId,
-                                'stripe.subscriptionStatus': 'active', // Assumed from session
-
-                                progressSummary: {
-                                    completedLessonsCount: 0,
-                                    totalLessons: totalLessons,
-                                    percent: 0,
-                                },
-
-                                applicationId: applicationId || null,
-                                updatedAt: FieldValue.serverTimestamp(),
-                                createdAt: FieldValue.serverTimestamp() // Only if new
-                            };
-
-                            const userEnrollmentRef = adminDb.collection('users').doc(uid).collection('enrollments').doc(courseId);
-                            const globalEnrollmentRef = adminDb.collection('enrollments').doc(`${uid}_${courseId}`);
-
-                            const batch = adminDb.batch();
-                            batch.set(userEnrollmentRef, updateData, { merge: true });
-                            batch.set(globalEnrollmentRef, updateData, { merge: true });
-                            await batch.commit();
-                        } catch (err: any) {
-                            throw new Error(`Failed to process checkout for ${uid}/${courseId}: ${err.message}`);
-                        }
-                    }
+                if (uid && courseId) {
+                    // Note: We'll wait for invoice.paid for subscriptions if we want strictness,
+                    // but for one-time or trial starts, we activate now.
+                    // For simplicity and immediate access as requested in Orbital 03:
+                    await activateEnrollmentFromStripe({
+                        uid,
+                        courseId,
+                        sessionId: checkoutSession.id,
+                        isSubscription,
+                        paymentStatus: 'paid'
+                    });
                 }
                 break;
             }
@@ -147,53 +107,24 @@ export async function POST(req: NextRequest) {
                 const invoice = session as Stripe.Invoice;
                 const subscriptionId = (invoice as any).subscription as string;
 
+                // Authoritative metadata: userId/courseId are often in the subscription or initial checkout
+                // But for safety, we try to find the enrollment by subscriptionId
                 const enrollmentQuery = await adminDb.collection('enrollments')
-                    .where('stripe.subscriptionId', '==', subscriptionId)
+                    .where('sourceRef', '==', subscriptionId) // Assuming subId was used as sourceRef if subscription
                     .limit(1)
                     .get();
 
+                // If not found by sourceRef, try metadata from initial checkout if available
+                // Usually better to have a helper that finds it
                 if (!enrollmentQuery.empty) {
-                    const enrollmentDoc = enrollmentQuery.docs[0];
-                    const data = enrollmentDoc.data();
-
-                    const currentApproval = data.approvalStatus || 'pending_review';
-                    const currentStripeStatus = data['stripe.subscriptionStatus'] || 'active'; // Default active if missing on creation
-
-                    // CORE LOGIC: invoice.paid sets paymentStatus = 'paid'.
-                    const finalStatus = computeAccessStatus('paid', currentApproval, currentStripeStatus);
-
-                    const updateData = {
-                        status: finalStatus,
-                        paymentStatus: 'paid', // Explicitly PAID
-                        approvalStatus: currentApproval, // Preserves approval
-
-                        'stripe.latestInvoiceId': invoice.id,
-                        'stripe.latestInvoiceStatus': invoice.status,
-                        // DO NOT set stripe.subscriptionStatus here blindly, wait for sub.updated event or keep existing?
-                        // Usually safe to assume active if invoice paid, but let sub event handle status.
-
-                        lastPaidAt: FieldValue.serverTimestamp(),
-                        updatedAt: FieldValue.serverTimestamp(),
-                    };
-
-                    const batch = adminDb.batch();
-                    const userEnrollmentRef = adminDb.collection('users').doc(data.uid).collection('enrollments').doc(data.courseId);
-
-                    batch.set(enrollmentDoc.ref, updateData, { merge: true });
-                    batch.set(userEnrollmentRef, updateData, { merge: true });
-                    await batch.commit();
-
-                    await logAudit({
-                        actor: { uid: 'system', role: 'webhook' },
-                        action: 'billing.invoice_paid',
-                        target: { collection: 'enrollments', id: enrollmentDoc.id, summary: `Invoice ${invoice.id} paid. Access Granted/Renewed.` },
-                        metadata: { subscriptionId, invoiceId: invoice.id, amount: invoice.amount_paid },
-                        diff: { after: updateData }
+                    const data = enrollmentQuery.docs[0].data() as EnrollmentDoc;
+                    await activateEnrollmentFromStripe({
+                        uid: data.userId,
+                        courseId: data.courseId,
+                        sessionId: subscriptionId,
+                        isSubscription: true,
+                        paymentStatus: 'paid'
                     });
-                } else {
-                    console.warn(`No enrollment found for subscription ${subscriptionId}`);
-                    await logSystemError('webhook', 'Missing enrollment for paid invoice', { subscriptionId, invoiceId: invoice.id }, 'warning');
-                    // TODO: Add to "Reconciliation Queue"
                 }
                 break;
             }

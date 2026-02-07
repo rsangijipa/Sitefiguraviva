@@ -25,6 +25,10 @@ module.exports = {
                 'gold-light': 'var(--color-gold-light)',
                 'gold-dark': 'var(--color-gold-dark)',
                 beige: 'var(--color-beige)',
+                success: 'var(--color-success)',
+                warning: 'var(--color-warning)',
+                error: 'var(--color-error)',
+                info: colors.sky[500],
             },
             fontFamily: {
                 serif: ['var(--font-serif)', 'serif'],

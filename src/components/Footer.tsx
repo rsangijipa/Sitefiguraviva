@@ -1,6 +1,7 @@
 "use client";
 
 import { Facebook, Instagram, Mail, MapPin } from 'lucide-react';
+import { Button } from './ui/Button';
 
 export default function Footer() {
     return (
@@ -26,12 +27,14 @@ export default function Footer() {
                             >
                                 <Instagram size={20} className="group-hover:scale-110 transition-transform" />
                             </a>
-                            <a
-                                href="mailto:contato@figuraviva.com"
-                                className="w-12 h-12 rounded-full border border-paper/10 flex items-center justify-center hover:bg-paper hover:text-primary transition-soft group"
+                            <Button
+                                variant="outline"
+                                className="w-full justify-start gap-3 border-white/20 text-white hover:bg-white/10 hover:text-white group"
+                                onClick={() => window.location.href = 'mailto:contato@figuraviva.com.br'}
                             >
-                                <Mail size={20} className="group-hover:scale-110 transition-transform" />
-                            </a>
+                                <Mail size={18} className="text-gold group-hover:scale-110 transition-transform" />
+                                <span className="text-sm tracking-wide">contato@figuraviva.com.br</span>
+                            </Button>
                         </div>
                     </div>
 

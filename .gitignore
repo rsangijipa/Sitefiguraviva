@@ -1,6 +1,4 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
+# Dependencies
 /node_modules
 /.pnp
 .pnp.*
@@ -10,46 +8,71 @@
 !.yarn/releases
 !.yarn/versions
 
-# testing
+# Testing
 /coverage
 /test-results/
 /playwright-report/
 /blob-report/
 /playwright/.auth/
 
-# next.js
+# Next.js
 /.next/
 /out/
 
-# production
+# Production
 /build
 
-# misc
+# Misc
 .DS_Store
 *.pem
+*.p12
+*.key
+*.pfx
+creds.json
+serviceAccountKey.json
+auth_key.json
 
-# debug
+# Debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
-!.env.example
+# Env Files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
 
-# vercel
+# Vercel
 .vercel
 
-# firebase
+# Firebase
 .firebase
 .firebaserc
+firebase-debug.log
+ui-debug.log
 
-# typescript
+# TypeScript
 *.tsbuildinfo
 next-env.d.ts
 
-# logs and debug files
+# Editors
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/settings.json
+.idea
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+Desktop.ini
+
+# Logs and Debug Files
 *.log
 *.txt
 debug_cert*
@@ -61,7 +84,7 @@ build_*
 test_failure*
 test_smoke*
 
-# scripts and temporary files
+# Scripts
 /scripts/
 /*.js
 !/next.config.mjs
@@ -70,4 +93,9 @@ test_smoke*
 !/jest.setup.js
 !/postcss.config.js
 !/tailwind.config.js
+!/debug-courses.js
+!/fix-env.js
+!/test-admin.js
+
+# System Map
 /system_map.md

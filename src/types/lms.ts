@@ -3,7 +3,7 @@ import { Timestamp } from 'firebase/firestore';
 // --- PRIMITIVES ---
 
 export type Role = 'admin' | 'tutor' | 'student';
-export type EnrollmentStatus = 'active' | 'completed' | 'cancelled' | 'expired' | 'pending';
+export type EnrollmentStatus = 'pending' | 'active' | 'expired' | 'refunded' | 'canceled' | 'completed';
 export type BlockType = 'text' | 'video' | 'image' | 'file' | 'pdf' | 'quiz' | 'link' | 'callout' | 'divider';
 export type LessonType = 'video' | 'text' | 'quiz' | 'library' | 'live';
 
@@ -28,6 +28,7 @@ export interface CourseDoc {
     description?: string;
     slug?: string; // friendly url
     coverImage?: string; // URL
+    image?: string; // Legacy/Compatibility URL
     thumbnail?: string; // URL
 
     // Quick Details
@@ -39,6 +40,7 @@ export interface CourseDoc {
     // Status & Visibility
     isPublished: boolean;
     status: 'draft' | 'open' | 'closed' | 'archived';
+    contentRevision: number; // For certificate snapshotting and structural tracking
 
     // Sales & Access
     billing?: {
@@ -226,8 +228,24 @@ export interface EnrollmentDoc {
     subscriptionId?: string; // Stripe
 
     enrolledAt: Timestamp;
+    paidAt?: Timestamp;
+    paymentMethod?: 'pix' | 'stripe' | 'subscription' | 'free';
+    sourceRef?: string; // Idempotency key (sessionId, chargeId, etc.)
+    accessUntil?: Timestamp; // For subscriptions
+
+    approvedBy?: string; // Admin UID for manual approvals
+    approvedAt?: Timestamp;
+    rejectionReason?: string;
+
+    courseVersionAtEnrollment?: number;
+    courseSnapshotAtEnrollment?: {
+        publishedLessonIds: string[];
+    };
     completedAt?: Timestamp;
     lastAccessedAt?: Timestamp;
+
+    createdAt: Timestamp;
+    updatedAt: Timestamp;
 
     // Synced Stats (for fast UI)
     progressSummary?: {

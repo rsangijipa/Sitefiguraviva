@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { generateCertificate } from '@/actions/certificate';
+import { issueCertificate } from '@/app/actions/certificate';
 import { Loader2, Award, CheckCircle } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { useRouter } from 'next/navigation';
@@ -27,7 +27,7 @@ export function CertificateIssueCard({ courseId, courseTitle, progressPercent, i
     const handleIssue = async () => {
         setLoading(true);
         try {
-            const res = await generateCertificate(courseId);
+            const res = await issueCertificate(courseId);
             if (res.success) {
                 setIssued(true);
                 setCertId(res.certificateId);

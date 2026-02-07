@@ -11,7 +11,7 @@ import {
 import PageShell from '@/components/ui/PageShell';
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {
-    const { signOut } = useAuth(); // Still needed for Logout button
+    const { signOut, user, role } = useAuth(); // Get current user and role
     const router = useRouter();
     const pathname = usePathname();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -137,8 +137,8 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
                         <div className="flex items-center gap-4 bg-white/60 backdrop-blur-md p-2 rounded-full border border-white/50 shadow-sm">
                             <div className="flex flex-col items-end px-4 hidden md:flex">
-                                <span className="text-xs font-bold text-primary">Richards A.</span>
-                                <span className="text-[10px] text-stone-400 uppercase tracking-wider">Administrador</span>
+                                <span className="text-xs font-bold text-primary">{user?.displayName || user?.email || 'Admin'}</span>
+                                <span className="text-[10px] text-stone-400 uppercase tracking-wider">{role === 'admin' ? 'Administrador' : role || 'Usuário'}</span>
                             </div>
                             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gold/20 to-primary/10 border border-white flex items-center justify-center text-primary shadow-inner">
                                 <Settings size={18} />

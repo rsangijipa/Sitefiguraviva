@@ -46,7 +46,33 @@ export const adminCourseService = {
     },
 
     async deleteCourse(courseId: string): Promise<void> {
-        await deleteDoc(doc(db, 'courses', courseId));
+        // Fix: Deep delete modules and lessons to avoid massive data leaks
+        const modulesRef = collection(db, 'courses', courseId, 'modules');
+        const modulesSnap = await getDocs(modulesRef);
+
+        const batch = writeBatch(db);
+
+        // Delete all modules and their sub-lessons
+        for (const modDoc of modulesSnap.docs) {
+            const lessonsRef = collection(db, 'courses', courseId, 'modules', modDoc.id, 'lessons');
+            const lessonsSnap = await getDocs(lessonsRef);
+            lessonsSnap.docs.forEach(l => batch.delete(l.ref));
+            batch.delete(modDoc.ref);
+        }
+
+        // Delete other course subcollections if needed (e.g. materials, community)
+        const materialsRef = collection(db, 'courses', courseId, 'materials');
+        const materialsSnap = await getDocs(materialsRef);
+        materialsSnap.docs.forEach(m => batch.delete(m.ref));
+
+        const threadsRef = collection(db, 'courses', courseId, 'communityThreads');
+        const threadsSnap = await getDocs(threadsRef);
+        threadsSnap.docs.forEach(t => batch.delete(t.ref));
+
+        // Delete the course itself
+        batch.delete(doc(db, 'courses', courseId));
+
+        await batch.commit();
     },
 
     // --- MODULES ---
@@ -76,9 +102,30 @@ export const adminCourseService = {
     },
 
     async deleteModule(courseId: string, moduleId: string): Promise<void> {
-        // Warning: This doesn't delete sub-lessons automatically in Client SDK. 
-        // Admin SDK or Functions would be better for recursive delete.
-        await deleteDoc(doc(db, 'courses', courseId, 'modules', moduleId));
+        // Fix: Delete sub-lessons automatically to avoid orphaned data
+        const lessonsRef = collection(db, 'courses', courseId, 'modules', moduleId, 'lessons');
+        const lessonsSnap = await getDocs(lessonsRef);
+
+        const batch = writeBatch(db);
+
+        // Delete all lessons
+        lessonsSnap.docs.forEach(lessonDoc => {
+            batch.delete(lessonDoc.ref);
+        });
+
+        // Delete the module
+        batch.delete(doc(db, 'courses', courseId, 'modules', moduleId));
+
+        // Update lesson count if needed (optional, but good for consistency)
+        if (lessonsSnap.size > 0) {
+            const courseRef = doc(db, 'courses', courseId);
+            batch.update(courseRef, {
+                'stats.lessonsCount': increment(-lessonsSnap.size),
+                updatedAt: serverTimestamp()
+            });
+        }
+
+        await batch.commit();
     },
 
     // --- LESSONS ---

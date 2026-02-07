@@ -1,7 +1,7 @@
 
 import { updateProfile, uploadAvatar } from '@/actions/profile';
 import { updateLessonProgress } from '@/actions/progress';
-import { generateCertificate } from '@/actions/certificate';
+import { issueCertificate } from '@/app/actions/certificate';
 import { db, auth, storage } from '@/lib/firebase/admin';
 
 // --- MOCK SETUP ---
@@ -52,7 +52,9 @@ jest.mock('@/lib/firebase/admin', () => {
                     data: () => ({ status: 'active', userId: 'student1', courseId: 'course1' })
                 });
             }
-            // Certificate check (initially empty)
+            if (path.includes('courses/course1/modules')) {
+                return Promise.resolve({ empty: true, docs: [] }); // Stub for modules
+            }
             return Promise.resolve({ exists: false, data: () => ({}) });
         }),
         set: jest.fn(),
@@ -197,7 +199,7 @@ describe('E2E Student Flow Integration', () => {
 
     it('Scenario 3: Issue Certificate', async () => {
         // 1. Attempt generation
-        const certRes = await generateCertificate('course1');
+        const certRes = await issueCertificate('course1');
 
         // Expect success
         expect(certRes).toEqual(expect.objectContaining({

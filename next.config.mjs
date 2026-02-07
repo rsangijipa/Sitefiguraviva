@@ -16,6 +16,11 @@ const nextConfig = {
             },
         ];
     },
+    experimental: {
+        serverActions: {
+            bodySizeLimit: '5mb',
+        },
+    },
 };
 
 import { withSentryConfig } from '@sentry/nextjs';

@@ -3,6 +3,7 @@
 import { saveLessonContent, getLessonContent } from '@/lib/courseService';
 import { Block } from '@/types/lms';
 import { revalidatePath } from 'next/cache';
+import { assertIsTutorOrAdmin } from '@/lib/auth/authoring-gate';
 
 export async function getLessonContentAction(courseId: string, moduleId: string, lessonId: string) {
     try {
@@ -21,6 +22,7 @@ export async function updateLessonBlocksAction(
     blocks: Block[]
 ) {
     try {
+        await assertIsTutorOrAdmin();
         await saveLessonContent(courseId, moduleId, lessonId, blocks);
         // Revalidate the builder page and the student course page
         revalidatePath(`/admin/courses/${courseId}/builder`);

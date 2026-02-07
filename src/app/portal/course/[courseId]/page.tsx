@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/lib/firebase/admin';
 import { getCourseData } from '@/lib/courseService';
 import CourseClient from './CourseClient';
+import { assertCanAccessCourse, AccessError } from '@/lib/auth/access-gate';
 
 export default async function CoursePage({ params }: { params: Promise<{ courseId: string }> }) {
     const { courseId } = await params;
@@ -14,12 +15,19 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
         redirect('/login');
     }
 
-    let uid;
+    const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
+    const uid = decodedClaims.uid;
+
+    // ORBITAL 01 & 05: Single Source of Truth Access Gate
     try {
-        const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
-        uid = decodedClaims.uid;
+        await assertCanAccessCourse(uid, courseId);
     } catch (error) {
-        redirect('/login');
+        if (error instanceof AccessError) {
+            // Depending on the error, we might redirect or show a specific UI
+            // For now, continue to fetch data which contains isAccessDenied flag
+        } else {
+            throw error;
+        }
     }
 
     // Server-Side Data Fetch

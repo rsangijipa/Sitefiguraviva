@@ -17,14 +17,41 @@ export default function DocumentManager() {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('Todos');
 
-    // Fetch documents manually since we might not have a hook yet
+    // Fetch documents with error handling for Firestore listener
     useEffect(() => {
-        const q = query(collection(db, 'publicDocs'), orderBy('created_at', 'desc'));
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            setDocuments(docs);
-        });
-        return () => unsubscribe();
+        let unsubscribe: (() => void) | null = null;
+        let isMounted = true;
+
+        try {
+            const q = query(collection(db, 'publicDocs'), orderBy('created_at', 'desc'));
+            unsubscribe = onSnapshot(
+                q,
+                (snapshot) => {
+                    if (isMounted) {
+                        const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                        setDocuments(docs);
+                    }
+                },
+                (error) => {
+                    // Handle Firestore listener errors gracefully
+                    console.warn('[DocumentManager] Firestore listener error:', error.message);
+                    // Don't crash the UI, just log the error
+                }
+            );
+        } catch (error) {
+            console.warn('[DocumentManager] Failed to setup listener:', error);
+        }
+
+        return () => {
+            isMounted = false;
+            if (unsubscribe) {
+                try {
+                    unsubscribe();
+                } catch (e) {
+                    // Ignore cleanup errors
+                }
+            }
+        };
     }, []);
 
     // Form State
