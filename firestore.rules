@@ -23,7 +23,15 @@ service cloud.firestore {
         request.auth.token.role == 'admin' ||
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
         request.auth.token.email.matches('.*@figuraviva.com') || 
-        request.auth.token.email == 'liliangusmao@institutofiguraviva.com.br'
+        request.auth.token.email == 'liliangusmao@institutofiguraviva.com.br' ||
+        request.auth.token.email == 'erlanesangi@gmail.com'
+      );
+    }
+
+    function isDocOwner() {
+      return isAuthenticated() && (
+        resource.data.uid == request.auth.uid || 
+        resource.data.userId == request.auth.uid
       );
     }
 
@@ -64,6 +72,11 @@ service cloud.firestore {
 
       // Admin has full write access
       allow write: if isAdmin();
+
+      // Notifications Subcollection
+      match /notifications/{notifId} {
+        allow read, write: if isOwner(uid);
+      }
     }
 
     // =========================================================================
@@ -73,7 +86,7 @@ service cloud.firestore {
       // ID Format: {uid}_{courseId}
       
       // Read: Owner or Admin
-      allow read: if isAdmin() || (isAuthenticated() && resource.data.uid == request.auth.uid);
+      allow read: if isAdmin() || (isAuthenticated() && (resource.data.uid == request.auth.uid || resource.data.userId == request.auth.uid));
 
       // Write: STRICTLY ADMIN (Backend/Server Actions only)
       // Clients never write purely to enrollment
@@ -85,7 +98,8 @@ service cloud.firestore {
     // =========================================================================
     match /courses/{courseId} {
       // Public Read (Catalog): Must be Published AND Open
-      allow read: if (isPublished() && isCourseOpen()) || isAdmin();
+      // OR if user has an active enrollment
+      allow read: if (isPublished() && isCourseOpen()) || isAdmin() || hasActiveEnrollment(courseId);
       
       // Write: Admin only
       allow write: if isAdmin();
@@ -101,22 +115,35 @@ service cloud.firestore {
          allow read: if (isAdmin() || (hasActiveEnrollment(courseId) && isPublished()));
          allow write: if isAdmin();
       }
+
+      match /materials/{materialId} {
+         // Materials Visibility: Enrolled
+         allow read: if (isAdmin() || hasActiveEnrollment(courseId));
+         allow write: if isAdmin();
+      }
+
+      match /announcements/{announcementId} {
+         // Announcements Visibility: Enrolled
+         allow read: if (isAdmin() || hasActiveEnrollment(courseId));
+         allow write: if isAdmin();
+      }
     }
 
     // =========================================================================
     // 5. PROGRESS & COMPLETION
     // =========================================================================
-    match /lesson_progress/{docId} {
+    match /progress/{docId} {
       // ID: {uid}_{courseId}_{lessonId}
       
       // Read: Owner or Admin
-      allow read: if isAdmin() || (isAuthenticated() && resource.data.uid == request.auth.uid);
+      // Read: Owner or Admin
+      allow read: if isAdmin() || isDocOwner();
 
       // Write: Owner (Mark as complete)
       // Constraint: Must have active enrollment
       allow write: if isAdmin() || (
         isAuthenticated() && 
-        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.userId == request.auth.uid &&
         hasActiveEnrollment(request.resource.data.courseId)
       );
     }
@@ -126,7 +153,7 @@ service cloud.firestore {
     // =========================================================================
     match /certificates/{certId} {
       // Private Certificate Data
-      allow read: if isAdmin() || (isAuthenticated() && resource.data.uid == request.auth.uid);
+      allow read: if isAdmin() || isDocOwner();
       allow write: if isAdmin(); // Only backend issues certificates
     }
 
@@ -144,6 +171,38 @@ service cloud.firestore {
       allow read: if true;
       // Admin write only
       allow write: if isAdmin();
+    }
+    // =========================================================================
+    // 8. EVENTS & AGENDA
+    // =========================================================================
+    match /events/{eventId} {
+      // Public events are readable by all
+      // Course-linked events require enrollment or public status
+      allow read: if resource.data.isPublic == true || 
+                    isAdmin() || 
+                    (isAuthenticated() && (resource.data.courseId == null || hasActiveEnrollment(resource.data.courseId)));
+      allow write: if isAdmin();
+    }
+
+    // =========================================================================
+    // 9. COMMUNITY & FORUM
+    // =========================================================================
+    match /community/{threadId} {
+      // Read: Admin or Enrolled in the course linked to thread
+      allow read: if isAdmin() || (isAuthenticated() && hasActiveEnrollment(resource.data.courseId));
+      
+      // Create: Enrolled
+      allow create: if isAuthenticated() && hasActiveEnrollment(request.resource.data.courseId);
+      
+      // Update/Delete: Owner or Admin
+      allow update, delete: if isAdmin() || (isAuthenticated() && resource.data.authorId == request.auth.uid);
+
+      match /replies/{replyId} {
+         // Inherit context from thread is hard without get(), so we check thread
+         allow read: if isAdmin() || (isAuthenticated() && hasActiveEnrollment(get(/databases/$(database)/documents/community/$(threadId)).data.courseId));
+         allow create: if isAuthenticated() && hasActiveEnrollment(get(/databases/$(database)/documents/community/$(threadId)).data.courseId);
+         allow update, delete: if isAdmin() || (isAuthenticated() && resource.data.authorId == request.auth.uid);
+      }
     }
   }
 }
