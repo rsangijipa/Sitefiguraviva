@@ -277,6 +277,20 @@ service cloud.firestore {
     }
 
     // =========================================================================
+    // 12.5 GAMIFICATION PROFILES
+    // =========================================================================
+    match /gamification_profiles/{userId} {
+      // Read: Owner or Admin
+      allow read: if isAdmin() || isOwner(userId);
+      
+      // Create/Update: Owner (auto-initialization) or Admin
+      allow create, update: if isAdmin() || isOwner(userId);
+      
+      // Delete: Admin only
+      allow delete: if isAdmin();
+    }
+
+    // =========================================================================
     // 13. PROGRESS TRACKING (Alternative path if using top-level progress)
     // =========================================================================
     match /progress/{progressId} {
