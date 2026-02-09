@@ -9,30 +9,30 @@ import {
   SEOSettings,
 } from "@/lib/siteSettings";
 
-export const useFounderSettings = () => {
+export const useFounderSettings = (initialData?: FounderSettings) => {
   return useQuery({
     queryKey: ["siteSettings", "founder"],
     queryFn: () => getSiteSettings<FounderSettings>("founder", DEFAULT_FOUNDER),
-    initialData: DEFAULT_FOUNDER,
+    initialData: initialData || DEFAULT_FOUNDER,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 };
 
-export const useInstituteSettings = () => {
+export const useInstituteSettings = (initialData?: InstituteSettings) => {
   return useQuery({
     queryKey: ["siteSettings", "institute"],
     queryFn: () =>
       getSiteSettings<InstituteSettings>("institute", DEFAULT_INSTITUTE),
-    initialData: DEFAULT_INSTITUTE,
+    initialData: initialData || DEFAULT_INSTITUTE,
     staleTime: 1000 * 60 * 5,
   });
 };
 
-export const useSEOSettings = () => {
+export const useSEOSettings = (initialData?: SEOSettings) => {
   return useQuery({
     queryKey: ["siteSettings", "seo"],
     queryFn: () => getSiteSettings<SEOSettings>("seo", DEFAULT_SEO),
-    initialData: DEFAULT_SEO,
+    initialData: initialData || DEFAULT_SEO,
     staleTime: 1000 * 60 * 60, // 1 hour
   });
 };
