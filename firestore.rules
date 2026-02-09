@@ -290,6 +290,17 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // XP Transactions (Read-only logs for users, write via system)
+    match /xp_transactions/{transactionId} {
+      // Read: Owner (if transaction belongs to them) or Admin
+      allow read: if isAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
+      
+      // Write: Owner can create their own transactions, Admin can do anything
+      // This allows the gamification service to log XP awards
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
     // =========================================================================
     // 13. PROGRESS TRACKING (Alternative path if using top-level progress)
     // =========================================================================
