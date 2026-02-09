@@ -3,29 +3,35 @@
 @tailwind utilities;
 
 :root {
-  /* Brand Colors */
-  --color-primary: #412726;
-  --color-secondary: #7A5A54;
-  --color-accent: #5D7052;
-  --color-accent-light: #AABEAB;
+  /* Brand Colors - Figura Viva v1 */
+  --color-primary: #0E6330;
+  /* Verde Institucional */
+  --color-primary-dark: #0A4D25;
+  --color-primary-light: #158542;
+
+  --color-secondary: #F0D418;
+  /* Ouro Figura Viva */
+  --color-accent: #0E6330;
+  --color-accent-light: #D4E7D9;
 
   /* Surface & Background */
-  --color-paper: #F8F1E5;
-  --color-surface: #FBFAEC;
-  --color-text: #212328;
-  --color-muted: #8C8C8C;
-  --color-border: #E5DCCB;
+  --color-paper: #F7F6EE;
+  /* Fundo Papel Institucional */
+  --color-surface: #FFFFFF;
+  --color-text: #1A1C1E;
+  --color-muted: #6B7280;
+  --color-border: #E5E7EB;
 
   /* Highlights */
-  --color-gold: #B08D55;
-  --color-gold-dark: #8C6A30;
-  --color-gold-light: #EAE4A6;
-  --color-beige: #E4CDB4;
+  --color-gold: #F0D418;
+  --color-gold-dark: #C6AF14;
+  --color-gold-light: #F0E263;
+  --color-beige: #F3E5D8;
 
   /* Feedback & Status */
-  --color-success: #5D7052;
-  --color-warning: #D97706;
-  --color-error: #991B1B;
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
 
   /* Spacing Scale */
   --space-unit: 0.25rem;

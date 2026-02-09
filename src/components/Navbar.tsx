@@ -79,6 +79,7 @@ export default function Navbar() {
               className="rounded-full object-cover border border-primary/10"
               sizes="40px"
               priority
+              fetchPriority="high"
             />
           </div>
           <span className="text-xl font-serif text-primary tracking-tight font-bold">

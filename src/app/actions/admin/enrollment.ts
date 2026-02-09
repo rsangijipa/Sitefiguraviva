@@ -105,3 +105,39 @@ export async function revokeAccess(
     return { success: false, error: error.message };
   }
 }
+
+/**
+ * Batch enrolls multiple users by email.
+ */
+export async function batchEnrollUsers(emails: string[], courseId: string) {
+  try {
+    await assertAdmin();
+    const results = {
+      success: [] as string[],
+      failed: [] as { email: string; error: string }[],
+    };
+
+    // Process in sequence or small batches to avoid hitting rate limits if creating many users
+    // For simplicity and given expected small batch sizes (e.g. 50), we can do parallel with error isolation
+    await Promise.all(
+      emails.map(async (email) => {
+        try {
+          const res = await enrollUser(email, courseId);
+          if (res.success) {
+            results.success.push(email);
+          } else {
+            results.failed.push({ email, error: res.error || "Unknown error" });
+          }
+        } catch (err: any) {
+          results.failed.push({ email, error: err.message });
+        }
+      }),
+    );
+
+    revalidatePath(`/admin/enrollments`);
+    return { success: true, ...results };
+  } catch (error: any) {
+    console.error("Batch Enrollment Error:", error);
+    return { success: false, error: error.message };
+  }
+}

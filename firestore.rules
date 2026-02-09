@@ -149,35 +149,42 @@ service cloud.firestore {
     }
 
     // =========================================================================
-    // 6. CERTIFICATES
+    // 6. CERTIFICATES & AUDIT
     // =========================================================================
     match /certificates/{certId} {
-      // Private Certificate Data
       allow read: if isAdmin() || isDocOwner();
-      allow write: if isAdmin(); // Only backend issues certificates
+      allow write: if isAdmin();
     }
 
     match /certificatePublic/{code} {
-      // Public Verification
       allow read: if true;
       allow write: if isAdmin();
     }
 
+    match /audit_logs/{logId} {
+      // Audit logs are READ-ONLY for Admins
+      // WRITES only from Service Accounts (Admin SDK bypasses anyway)
+      allow read: if isAdmin();
+      allow write: if isAdmin(); 
+    }
+
     // =========================================================================
-    // 7. SITE SETTINGS (CMS-lite)
+    // 7. SITE SETTINGS & METADATA
     // =========================================================================
     match /siteSettings/{docId} {
-      // Public read for layout/footer
       allow read: if true;
-      // Admin write only
       allow write: if isAdmin();
     }
+
+    match /courseMetadata/{courseId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // =========================================================================
     // 8. EVENTS & AGENDA
     // =========================================================================
     match /events/{eventId} {
-      // Public events are readable by all
-      // Course-linked events require enrollment or public status
       allow read: if resource.data.isPublic == true || 
                     isAdmin() || 
                     (isAuthenticated() && (resource.data.courseId == null || hasActiveEnrollment(resource.data.courseId)));
@@ -188,17 +195,11 @@ service cloud.firestore {
     // 9. COMMUNITY & FORUM
     // =========================================================================
     match /community/{threadId} {
-      // Read: Admin or Enrolled in the course linked to thread
       allow read: if isAdmin() || (isAuthenticated() && hasActiveEnrollment(resource.data.courseId));
-      
-      // Create: Enrolled
       allow create: if isAuthenticated() && hasActiveEnrollment(request.resource.data.courseId);
-      
-      // Update/Delete: Owner or Admin
       allow update, delete: if isAdmin() || (isAuthenticated() && resource.data.authorId == request.auth.uid);
 
       match /replies/{replyId} {
-         // Inherit context from thread is hard without get(), so we check thread
          allow read: if isAdmin() || (isAuthenticated() && hasActiveEnrollment(get(/databases/$(database)/documents/community/$(threadId)).data.courseId));
          allow create: if isAuthenticated() && hasActiveEnrollment(get(/databases/$(database)/documents/community/$(threadId)).data.courseId);
          allow update, delete: if isAdmin() || (isAuthenticated() && resource.data.authorId == request.auth.uid);

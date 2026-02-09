@@ -82,10 +82,6 @@ function CourseContent({ initialData }: { initialData?: any }) {
       const total = enrollment.progressSummary?.totalLessons || 0;
       const percent = enrollment.progressSummary?.percent || 0;
 
-      // Calculate logical progress in client to compare
-      const allLessons = modules.flatMap((m) => m.lessons);
-      const clientCompleted = allLessons.filter((l) => l.isCompleted).length;
-
       console.log("COURSE_VIEW_DIAGNOSTIC", {
         courseId: course.id,
         uid: user?.uid,
@@ -94,14 +90,11 @@ function CourseContent({ initialData }: { initialData?: any }) {
           total,
           percent,
           status: enrollment.status,
-        },
-        clientCalc: {
-          totalVisible: allLessons.length,
-          completed: clientCompleted,
+          lastLessonId: enrollment.progressSummary?.lastLessonId,
         },
         integrity: {
-          matchCount: completedCount === clientCompleted,
-          matchTotal: total === allLessons.length,
+          hasProgress: !!enrollment.progressSummary,
+          isActive: enrollment.status === "active",
         },
       });
     }

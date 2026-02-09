@@ -34,7 +34,7 @@ async function getHomeData() {
 
     const sanitize = (obj: any) => JSON.parse(JSON.stringify(obj));
 
-    // Course Merge & Deduplication Strategy
+    // Course Merge & Deduplication Strategy - Visibility Guard: Published AND Open only
     const courses = coursesSnap.docs
       .map((doc) => {
         const data = doc.data();
@@ -47,12 +47,12 @@ async function getHomeData() {
           coverImage: data.coverImage || "",
           status: data.status || "",
           details: data.details || {},
-          isPublished: data.isPublished !== false,
+          isPublished: data.isPublished === true, // Strict boolean
           created_at: toISO(data.created_at || data.createdAt),
           updated_at: toISO(data.updated_at || data.updatedAt),
         });
       })
-      .filter((c: any) => c.isPublished !== false || c.status === "open")
+      .filter((c: any) => c.isPublished === true && c.status === "open")
       .sort((a: any, b: any) => {
         const dateA = new Date(a.created_at || 0).getTime();
         const dateB = new Date(b.created_at || 0).getTime();

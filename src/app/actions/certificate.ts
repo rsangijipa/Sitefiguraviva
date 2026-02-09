@@ -29,7 +29,7 @@ async function generateVerificationCode(): Promise<string> {
  * Performs a full server-side re-check of eligibility and structural integrity.
  * Hardened for SSoT & Idempotency.
  */
-export async function issueCertificate(courseId: string) {
+export async function issueCertificate(courseId: string, targetUid?: string) {
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get("session")?.value;
 
@@ -39,7 +39,19 @@ export async function issueCertificate(courseId: string) {
 
   try {
     const claims = await adminAuth.verifySessionCookie(sessionCookie, true);
-    const uid = claims.uid;
+    const actorUid = claims.uid;
+    const isAdminToken = !!claims.admin || claims.role === "admin";
+
+    // If targetUid is provided, actor must be admin
+    const uid = targetUid && isAdminToken ? targetUid : actorUid;
+
+    // Security Guard: Non-admins cannot issue certificates for other users
+    if (targetUid && targetUid !== actorUid && !isAdminToken) {
+      throw new Error(
+        "Unauthorized: Cannot issue certificate for another user",
+      );
+    }
+
     const now = FieldValue.serverTimestamp();
     const enrollmentId = `${uid}_${courseId}`;
 
@@ -54,6 +66,9 @@ export async function issueCertificate(courseId: string) {
       courseRef.get(),
       enrollmentRef.get(),
     ]);
+
+    if (!courseSnap.exists) throw new Error("Course not found");
+    if (!enrollmentSnap.exists) throw new Error("Enrollment not found");
 
     const course = courseSnap.data() as CourseDoc;
     const enrollment = enrollmentSnap.data() as EnrollmentDoc;
@@ -135,11 +150,8 @@ export async function issueCertificate(courseId: string) {
       console.warn(
         `[Certificate] Missing lessons for ${uid}. Req: ${requiredCount}, Has: ${completedRequiredCount}`,
       );
-      // If we are here, it means progressService thought we were 100%, but re-check failed.
-      // This might happen if a lesson was just published.
-      // We block issuance.
       return {
-        error: "PROGRESS_INCOMPLETE", // Frontend will show "Wait, you have 99%?"
+        error: "PROGRESS_INCOMPLETE",
         status: 400,
         details: { required: requiredCount, completed: completedRequiredCount },
       };
@@ -167,15 +179,6 @@ export async function issueCertificate(courseId: string) {
 
     // 8. Transactional Commit
     await adminDb.runTransaction(async (tx) => {
-      // Re-verify idempotency inside transaction
-      const certInTx = await tx.get(certRef);
-      if (certInTx.exists) return;
-
-      // Public Verification Doc Ref
-      const publicRef = adminDb
-        .collection("certificatePublic")
-        .doc(verificationCode);
-
       // Create Private Certificate
       tx.set(certRef, {
         userId: uid,
@@ -197,7 +200,7 @@ export async function issueCertificate(courseId: string) {
       });
 
       // Create Public Verification Record
-      tx.set(publicRef, {
+      tx.set(adminDb.collection("certificatePublic").doc(verificationCode), {
         code: verificationCode,
         userName,
         courseTitle: course.title,
@@ -209,33 +212,34 @@ export async function issueCertificate(courseId: string) {
       tx.update(enrollmentRef, {
         status: "completed",
         completedAt: now,
-        certificateId: certNaturalKey, // Link back
+        certificateId: certNaturalKey,
         "progressSummary.percent": 100,
         "progressSummary.completedLessonsCount": requiredCount,
         updatedAt: now,
       });
 
-      // Append Audit Log
-      const auditRef = adminDb.collection("audit_logs").doc();
-      tx.set(auditRef, {
-        eventType: "CERTIFICATE_ISSUED",
-        userId: uid,
-        courseId,
-        enrollmentId,
-        certificateId: certNaturalKey,
-        courseVersion: courseVersionAtCompletion,
-        timestamp: now,
-        actor: { type: "system" },
-      });
+      // Append Audit Log (Standardized)
+      await import("@/services/auditService").then((m) =>
+        m.auditService.logEventInTransaction(tx, {
+          eventType: "CERTIFICATE_ISSUED",
+          actor: { uid: actorUid },
+          target: { id: certNaturalKey, collection: "certificates" },
+          payload: {
+            enrollmentId,
+            verificationCode,
+            courseId,
+          },
+        }),
+      );
     });
 
-    // 9. Publish Event (Asynchronous secondary flow)
+    // 9. Publish Event
     await publishEvent({
       type: "CERTIFICATE_ISSUED",
       actorUserId: uid,
       targetId: certNaturalKey,
       context: { courseId },
-      payload: { verificationCode, courseVersion: courseVersionAtCompletion },
+      payload: { verificationCode },
     });
 
     return {

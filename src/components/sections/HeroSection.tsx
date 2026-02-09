@@ -40,6 +40,7 @@ export default function HeroSection({ initialData }: { initialData?: any }) {
           className="object-contain transition-all duration-700"
           priority
           sizes="(max-width: 768px) 100vw, 80vw"
+          fetchPriority="high"
         />
       </div>
       {/* Soft colored waves overlay */}
