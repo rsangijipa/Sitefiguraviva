@@ -779,9 +779,41 @@ export default function AdminContentPage() {
                         }}
                         placeholder="Texto da Seção"
                       />
+                      <button
+                        onClick={() => {
+                          const newContent = legalForm.privacy.content.filter(
+                            (_: any, i: number) => i !== idx,
+                          );
+                          setLegalForm({
+                            ...legalForm,
+                            privacy: {
+                              ...legalForm.privacy,
+                              content: newContent,
+                            },
+                          });
+                        }}
+                        className="absolute -top-2 -right-2 p-1.5 bg-white border border-red-100 text-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-all shadow-sm hover:bg-red-50"
+                      >
+                        <Trash2 size={12} />
+                      </button>
                     </div>
                   ),
                 )}
+                <button
+                  onClick={() => {
+                    const newContent = [
+                      ...(legalForm?.privacy?.content || []),
+                      { heading: "Nova Seção", text: "" },
+                    ];
+                    setLegalForm({
+                      ...legalForm,
+                      privacy: { ...legalForm.privacy, content: newContent },
+                    });
+                  }}
+                  className="w-full py-3 border-2 border-dashed border-stone-200 rounded-xl text-stone-400 text-xs font-bold uppercase tracking-widest hover:border-gold hover:text-gold transition-colors flex items-center justify-center gap-2"
+                >
+                  <Plus size={14} /> Adicionar Seção
+                </button>
               </div>
             </div>
 
@@ -867,9 +899,38 @@ export default function AdminContentPage() {
                         }}
                         placeholder="Texto da Seção"
                       />
+                      <button
+                        onClick={() => {
+                          const newContent = legalForm.terms.content.filter(
+                            (_: any, i: number) => i !== idx,
+                          );
+                          setLegalForm({
+                            ...legalForm,
+                            terms: { ...legalForm.terms, content: newContent },
+                          });
+                        }}
+                        className="absolute -top-2 -right-2 p-1.5 bg-white border border-red-100 text-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-all shadow-sm hover:bg-red-50"
+                      >
+                        <Trash2 size={12} />
+                      </button>
                     </div>
                   ),
                 )}
+                <button
+                  onClick={() => {
+                    const newContent = [
+                      ...(legalForm?.terms?.content || []),
+                      { heading: "Nova Seção", text: "" },
+                    ];
+                    setLegalForm({
+                      ...legalForm,
+                      terms: { ...legalForm.terms, content: newContent },
+                    });
+                  }}
+                  className="w-full py-3 border-2 border-dashed border-stone-200 rounded-xl text-stone-400 text-xs font-bold uppercase tracking-widest hover:border-gold hover:text-gold transition-colors flex items-center justify-center gap-2"
+                >
+                  <Plus size={14} /> Adicionar Seção
+                </button>
               </div>
             </div>
           </div>

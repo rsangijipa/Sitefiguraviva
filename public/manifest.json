@@ -1,16 +1,68 @@
 {
-    "name": "Figura Viva",
+    "name": "Instituto Figura Viva - Plataforma de Ensino",
     "short_name": "Figura Viva",
-    "description": "Instituto Figura Viva - Plataforma de Saúde Mental",
-    "start_url": "/portal",
+    "description": "Plataforma de cursos profissionalizantes do Instituto Figura Viva",
+    "start_url": "/",
     "display": "standalone",
     "background_color": "#ffffff",
-    "theme_color": "#ffffff",
+    "theme_color": "#3B7F6D",
+    "orientation": "portrait-primary",
     "icons": [
         {
-            "src": "/favicon.ico",
-            "sizes": "64x64 32x32 24x24 16x16",
-            "type": "image/x-icon"
+            "src": "/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "categories": [
+        "education",
+        "lifestyle"
+    ],
+    "screenshots": [
+        {
+            "src": "/screenshot-wide.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "form_factor": "wide"
+        },
+        {
+            "src": "/screenshot-mobile.png",
+            "sizes": "750x1334",
+            "type": "image/png",
+            "form_factor": "narrow"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Meus Cursos",
+            "short_name": "Cursos",
+            "description": "Ver meus cursos matriculados",
+            "url": "/portal",
+            "icons": [
+                {
+                    "src": "/icon-192x192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "Certificados",
+            "short_name": "Certificados",
+            "description": "Visualizar meus certificados",
+            "url": "/portal/certificates",
+            "icons": [
+                {
+                    "src": "/icon-192x192.png",
+                    "sizes": "192x192"
+                }
+            ]
         }
     ]
 }

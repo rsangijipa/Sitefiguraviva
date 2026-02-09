@@ -24,8 +24,22 @@ const nextConfig = {
 };
 
 import { withSentryConfig } from '@sentry/nextjs';
+import withPWA from 'next-pwa';
 
-export default withSentryConfig(nextConfig, {
+// PWA Configuration
+const pwaConfig = withPWA({
+    dest: 'public',
+    register: true,
+    skipWaiting: true,
+    disable: process.env.NODE_ENV === 'development',
+    runtimeCaching: [],
+    buildExcludes: [/middleware-manifest.json$/],
+});
+
+// Apply PWA first, then Sentry
+const configWithPWA = pwaConfig(nextConfig);
+
+export default withSentryConfig(configWithPWA, {
     // For all available options, see:
     // https://github.com/getsentry/sentry-webpack-plugin#options
 

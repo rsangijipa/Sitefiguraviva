@@ -14,11 +14,16 @@ type FlexibleTimestamp =
 export interface Enrollment {
   uid: string;
   courseId: string;
-  status: "active" | "locked" | "expired";
+  status: "active" | "locked" | "expired" | "completed";
   createdAt: FlexibleTimestamp | Date;
   updatedAt?: FlexibleTimestamp | Date;
 
   // Metadata for audit
   enrolledBy?: string; // 'admin' | 'system' | 'stripe'
   reason?: string;
+
+  // SSoT Snapshots (SEN-01)
+  courseVersionAtEnrollment?: number;
+  courseTitle?: string;
+  userName?: string;
 }

@@ -21,10 +21,12 @@ service cloud.firestore {
       return isAuthenticated() && (
         request.auth.token.admin == true || 
         request.auth.token.role == 'admin' ||
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
-        request.auth.token.email.matches('.*@figuraviva.com') || 
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin') ||
+        request.auth.token.email.matches('.*@figuraviva\\.com.*') || 
         request.auth.token.email == 'liliangusmao@institutofiguraviva.com.br' ||
-        request.auth.token.email == 'erlanesangi@gmail.com'
+        request.auth.token.email == 'erlanesangi@gmail.com' ||
+        request.auth.token.email == 'rsangijipa@gmail.com'
       );
     }
 
@@ -104,28 +106,38 @@ service cloud.firestore {
       // Write: Admin only
       allow write: if isAdmin();
 
-      // Subcollections
+      // Modules Subcollection
       match /modules/{moduleId} {
          allow read: if (isAdmin() || hasActiveEnrollment(courseId));
          allow write: if isAdmin();
+
+         // Lessons nested within Modules (DEEP NESTING)
+         match /lessons/{lessonId} {
+            // Lesson Visibility: Enrolled & Lesson is Published
+            allow read: if (isAdmin() || (hasActiveEnrollment(courseId) && isPublished()));
+            allow write: if isAdmin();
+         }
       }
 
-      match /lessons/{lessonId} {
-         // Lesson Visibility: Enrolled & Lesson is Published
-         allow read: if (isAdmin() || (hasActiveEnrollment(courseId) && isPublished()));
-         allow write: if isAdmin();
-      }
-
+      // Materials Subcollection
       match /materials/{materialId} {
          // Materials Visibility: Enrolled
          allow read: if (isAdmin() || hasActiveEnrollment(courseId));
          allow write: if isAdmin();
       }
 
+      // Announcements Subcollection
       match /announcements/{announcementId} {
          // Announcements Visibility: Enrolled
          allow read: if (isAdmin() || hasActiveEnrollment(courseId));
          allow write: if isAdmin();
+      }
+
+      // Community Threads Subcollection
+      match /communityThreads/{threadId} {
+         allow read: if isAdmin() || hasActiveEnrollment(courseId);
+         allow create: if isAuthenticated() && hasActiveEnrollment(courseId);
+         allow update, delete: if isAdmin() || (isAuthenticated() && resource.data.authorId == request.auth.uid);
       }
     }
 
@@ -204,6 +216,35 @@ service cloud.firestore {
          allow create: if isAuthenticated() && hasActiveEnrollment(get(/databases/$(database)/documents/community/$(threadId)).data.courseId);
          allow update, delete: if isAdmin() || (isAuthenticated() && resource.data.authorId == request.auth.uid);
       }
+    }
+
+    // =========================================================================
+    // 10. ASSESSMENTS & QUIZZES
+    // =========================================================================
+    match /assessments/{assessmentId} {
+      // Read: Published assessments visible to enrolled students, all visible to admins
+      allow read: if isAdmin() || 
+        (isAuthenticated() && resource.data.status == 'published' && hasActiveEnrollment(resource.data.courseId));
+      
+      // Write: Admin only
+      allow write: if isAdmin();
+    }
+
+    match /assessmentSubmissions/{submissionId} {
+      // Read: Owner or Admin
+      allow read: if isAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
+      
+      // Create: Students can create their own submissions
+      allow create: if isAuthenticated() && 
+        request.resource.data.userId == request.auth.uid &&
+        hasActiveEnrollment(request.resource.data.courseId);
+      
+      // Update: Owner can update (for submitting answers), Admin can update (for grading)
+      allow update: if isAdmin() || 
+        (isAuthenticated() && resource.data.userId == request.auth.uid && resource.data.status == 'pending');
+      
+      // Delete: Admin only
+      allow delete: if isAdmin();
     }
   }
 }

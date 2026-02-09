@@ -172,6 +172,22 @@
     background-color: #B08D5566;
     /* gold with more opacity */
   }
+
+  @keyframes float-slow {
+
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(-20px);
+    }
+  }
+
+  .animate-float-slow {
+    animation: float-slow 8s ease-in-out infinite;
+  }
 }
 
 /* Base scrollbar for better overall feel */

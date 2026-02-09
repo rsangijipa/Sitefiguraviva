@@ -32,14 +32,14 @@ export default function HeroSection({ initialData }: { initialData?: any }) {
   return (
     <header className="pt-32 pb-24 md:pt-48 md:pb-32 px-6 bg-paper relative overflow-hidden">
       <OrganicBackground />
-      <div className="absolute left-1/2 -translate-x-1/2 top-[60%] md:top-[55%] -translate-y-1/2 h-[60%] md:h-[80%] aspect-square pointer-events-none opacity-30 mix-blend-multiply">
+      <div className="absolute right-[2%] top-[50%] -translate-y-1/2 h-[85%] md:h-[95%] aspect-square pointer-events-none opacity-60 mix-blend-multiply z-0">
         <Image
           src="/assets/hero-bg-custom.jpg"
           alt=""
           fill
-          className="object-contain transition-all duration-700"
+          className="object-contain transition-all duration-1000 animate-float-slow"
           priority
-          sizes="(max-width: 768px) 100vw, 80vw"
+          sizes="(max-width: 768px) 100vw, 50vw"
           fetchPriority="high"
         />
       </div>

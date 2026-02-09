@@ -19,6 +19,7 @@ import { useCourses } from "@/hooks/useContent";
 import Button from "@/components/ui/Button";
 import { EnrollmentCard } from "./EnrollmentCard";
 import BatchEnrollModal from "./BatchEnrollModal";
+import { enrollUser } from "@/app/actions/admin/enrollment";
 
 export default function EnrollmentsManager() {
   const [users, setUsers] = useState<any[]>([]);
@@ -63,7 +64,7 @@ export default function EnrollmentsManager() {
     const q = query(
       collection(db, "enrollments"),
       where("uid", "==", selectedUser.id),
-      orderBy("enrolledAt", "desc"),
+      orderBy("createdAt", "desc"),
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -76,21 +77,14 @@ export default function EnrollmentsManager() {
   const handleEnroll = async () => {
     if (!selectedCourse || !selectedUser) return;
     try {
-      const enrollmentId = `${selectedUser.id}_${selectedCourse}`;
-
-      // Write to Root Collection
-      await setDoc(doc(db, "enrollments", enrollmentId), {
-        uid: selectedUser.id,
-        courseId: selectedCourse,
-        enrolledAt: serverTimestamp(),
-        status: "active",
-        createdBy: "admin",
-        source: "manual_admin",
-      });
-
-      addToast("Aluno matriculado com sucesso!", "success");
-      setIsEnrolling(false);
-      setSelectedCourse("");
+      const res = await enrollUser(selectedUser.email, selectedCourse);
+      if (res.success) {
+        addToast("Aluno matriculado com sucesso!", "success");
+        setIsEnrolling(false);
+        setSelectedCourse("");
+      } else {
+        addToast("Erro: " + res.error, "error");
+      }
     } catch (error) {
       console.error(error);
       addToast("Erro ao matricular.", "error");

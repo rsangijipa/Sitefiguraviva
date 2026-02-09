@@ -1,123 +1,180 @@
+"use client";
 
-import { auth, db } from '@/lib/firebase/admin';
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
-import { LiveEvent } from '@/types/event';
-import { LiveEventCard } from '@/components/portal/events/LiveEventCard';
-import { Calendar } from 'lucide-react';
-import { Timestamp } from 'firebase-admin/firestore';
+import { useAuth } from "@/context/AuthContext";
+import { eventService, EventDoc } from "@/services/eventService";
+import { useEffect, useState } from "react";
+import {
+  Calendar,
+  Clock,
+  Video,
+  MapPin,
+  ArrowLeft,
+  ExternalLink,
+} from "lucide-react";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
+import Button from "@/components/ui/Button";
 
-export default async function EventsPage() {
-    const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get('session')?.value;
-    if (!sessionCookie) redirect('/login');
+export default function PortalEventsPage() {
+  const { user } = useAuth();
+  const [events, setEvents] = useState<EventDoc[]>([]);
+  const [loading, setLoading] = useState(true);
 
-    // Auth Check
-    let uid;
-    try {
-        await auth.verifySessionCookie(sessionCookie, true);
-    } catch { redirect('/login'); }
-
-    // Fetch Events (Ordered by start date)
-    // Removed orderBy to avoid index requirement - sorting after fetch
-    const eventsSnap = await db.collection('events')
-        .where('status', '!=', 'cancelled')
-        .get();
-
-    let events: LiveEvent[] = eventsSnap.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        startsAt: doc.data().startsAt,
-        endsAt: doc.data().endsAt
-    } as LiveEvent));
-
-    // Sort in memory (Status logical group then date)
-    events.sort((a, b) => {
-        // First priority: Not ended events
-        const aEnded = a.status === 'ended';
-        const bEnded = b.status === 'ended';
-        if (aEnded !== bEnded) return aEnded ? 1 : -1;
-
-        // Second priority: Chronological startsAt
-        const tA = (a.startsAt as any)?._seconds || 0;
-        const tB = (b.startsAt as any)?._seconds || 0;
-        return tA - tB;
+  useEffect(() => {
+    if (!user?.uid) return;
+    eventService.getUpcomingEvents(20).then((data) => {
+      setEvents(data);
+      setLoading(false);
     });
+  }, [user?.uid]);
 
-    // If empty, mock data for demonstration if allowMock=true or just empty state
-    // For Development, let's inject a mock event if database is empty so review is possible
-    if (events.length === 0) {
-        const now = new Date();
-        const tomorrow = new Date(now); tomorrow.setDate(tomorrow.getDate() + 1);
+  const formatDate = (ts: any) => {
+    const date = ts?.toDate ? ts.toDate() : new Date(ts);
+    return {
+      day: date.toLocaleDateString("pt-BR", { day: "2-digit" }),
+      month: date
+        .toLocaleDateString("pt-BR", { month: "short" })
+        .replace(".", ""),
+      full: date.toLocaleDateString("pt-BR", {
+        weekday: "long",
+        day: "2-digit",
+        month: "long",
+      }),
+      time: date.toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    };
+  };
 
-        events = [
-            {
-                id: 'mock-1',
-                title: 'Aula Inaugural: O Poder da Figura',
-                description: 'Encontro ao vivo para discutir os fundamentos da metodologia e tirar dúvidas iniciais.',
-                startsAt: Timestamp.fromDate(tomorrow),
-                endsAt: Timestamp.fromDate(new Date(tomorrow.getTime() + 3600000)),
-                timezone: 'America/Sao_Paulo',
-                type: 'webinar',
-                provider: 'zoom',
-                joinUrl: 'https://zoom.us/j/123456789',
-                status: 'scheduled',
-                createdAt: Timestamp.now(),
-                updatedAt: Timestamp.now()
-            },
-            {
-                id: 'mock-2',
-                title: 'Mentoria em Grupo #04',
-                description: 'Sessão de feedback sobre os projetos do Módulo 2.',
-                startsAt: Timestamp.fromDate(new Date(now.getTime() - 86400000)), // Yesterday
-                endsAt: Timestamp.fromDate(new Date(now.getTime() - 82800000)),
-                timezone: 'America/Sao_Paulo',
-                type: 'webinar',
-                provider: 'google_meet',
-                status: 'ended',
-                recordingUrl: '#',
-                createdAt: Timestamp.now(),
-                updatedAt: Timestamp.now()
-            }
-        ];
-    }
-
+  if (loading) {
     return (
-        <div className="max-w-5xl mx-auto p-8 animate-fade-in-up">
-            <header className="mb-10 flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-serif font-bold text-stone-800 mb-2">Agenda Ao Vivo</h1>
-                    <p className="text-stone-500">Próximas aulas, mentorias e eventos da comunidade.</p>
-                </div>
-                <div className="hidden md:block p-3 bg-stone-100 rounded-full text-stone-400">
-                    <Calendar size={24} />
-                </div>
-            </header>
-
-            <div className="space-y-6">
-                {/* Upcoming */}
-                <section>
-                    <h2 className="text-sm font-bold text-stone-400 uppercase tracking-widest mb-4">Próximos Eventos</h2>
-                    <div className="grid gap-4">
-                        {events.filter(e => e.status !== 'ended').map(event => (
-                            <LiveEventCard key={event.id} event={event} />
-                        ))}
-                    </div>
-                    {events.filter(e => e.status !== 'ended').length === 0 && (
-                        <p className="text-stone-400 italic">Nenhum evento futuro agendado.</p>
-                    )}
-                </section>
-
-                {/* Past */}
-                <section className="mt-12">
-                    <h2 className="text-sm font-bold text-stone-400 uppercase tracking-widest mb-4">Eventos Anteriores</h2>
-                    <div className="grid gap-4 opacity-75">
-                        {events.filter(e => e.status === 'ended').map(event => (
-                            <LiveEventCard key={event.id} event={event} />
-                        ))}
-                    </div>
-                </section>
-            </div>
-        </div>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="w-8 h-8 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
+      </div>
     );
+  }
+
+  return (
+    <div className="space-y-8 animate-fade-in">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-serif text-stone-800">Agenda Viva</h1>
+          <p className="text-stone-500 mt-1">
+            Acompanhe nossos encontros ao vivo, mentorias e eventos especiais.
+          </p>
+        </div>
+        <Link href="/portal">
+          <Button
+            variant="outline"
+            size="sm"
+            leftIcon={<ArrowLeft size={16} />}
+          >
+            Voltar
+          </Button>
+        </Link>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6">
+        {events.length > 0 ? (
+          events.map((event) => {
+            const date = formatDate(event.startsAt);
+            const isLive = event.status === "live";
+
+            return (
+              <div
+                key={event.id}
+                className={cn(
+                  "bg-white rounded-2xl border transition-all overflow-hidden flex flex-col md:flex-row",
+                  isLive
+                    ? "border-amber-200 shadow-amber-100/50 shadow-xl"
+                    : "border-stone-100 hover:border-gold/30 hover:shadow-md",
+                )}
+              >
+                {/* Date Badge */}
+                <div
+                  className={cn(
+                    "w-full md:w-32 flex flex-col items-center justify-center p-6 shrink-0",
+                    isLive
+                      ? "bg-amber-500 text-white"
+                      : "bg-stone-50 text-stone-600",
+                  )}
+                >
+                  <span className="text-xs font-bold uppercase tracking-widest opacity-80">
+                    {date.month}
+                  </span>
+                  <span className="text-4xl font-serif font-bold leading-none my-1">
+                    {date.day}
+                  </span>
+                  {isLive && (
+                    <span className="mt-2 px-2 py-0.5 bg-white text-amber-600 text-[10px] font-bold uppercase rounded-full animate-pulse">
+                      AO VIVO
+                    </span>
+                  )}
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 p-6 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className="text-[10px] font-bold text-primary bg-primary/5 px-2 py-1 rounded-md uppercase tracking-wider">
+                        {event.courseId
+                          ? "Mentoria Exclusiva"
+                          : "Evento Especial"}
+                      </span>
+                      <div className="flex items-center gap-1.5 text-stone-400 text-xs font-medium">
+                        <Clock size={14} />
+                        <span>{date.time}</span>
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-bold text-stone-800 mb-2">
+                      {event.title}
+                    </h3>
+                    <p className="text-sm text-stone-500 line-clamp-2 mb-4 leading-relaxed">
+                      {event.description ||
+                        "Participe deste encontro transformador com a equipe do Instituto Figura Viva."}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-between mt-auto pt-4 border-t border-stone-50">
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-1.5 text-xs text-stone-400">
+                        <Video size={14} />
+                        <span>Google Meet / Zoom</span>
+                      </div>
+                    </div>
+
+                    {event.meetingUrl ? (
+                      <a
+                        href={event.meetingUrl}
+                        target="_blank"
+                        className="btn-primary px-6 py-2 rounded-xl text-sm flex items-center gap-2"
+                      >
+                        Acessar Sala <ExternalLink size={14} />
+                      </a>
+                    ) : (
+                      <Button disabled size="sm" variant="outline">
+                        Link em breve
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        ) : (
+          <div className="flex flex-col items-center justify-center py-20 bg-stone-50 rounded-3xl border border-dashed border-stone-200">
+            <Calendar size={48} className="text-stone-300 mb-4" />
+            <h3 className="text-lg font-bold text-stone-700">
+              Agenda Tranquila
+            </h3>
+            <p className="text-stone-500 text-sm max-w-xs text-center mt-2">
+              No momento não há eventos agendados. Fique atento às nossas
+              notificações!
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
