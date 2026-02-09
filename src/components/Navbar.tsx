@@ -63,6 +63,7 @@ export default function Navbar() {
 
   return (
     <nav
+      aria-label="Navegação principal"
       className={`fixed w-full z-50 top-0 left-0 bg-white transition-all duration-300 ${scrolled ? "shadow-md py-4" : "shadow-sm py-5"}`}
     >
       <div className="container mx-auto px-6 max-w-7xl flex items-center justify-between">

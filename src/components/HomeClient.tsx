@@ -115,7 +115,12 @@ export default function HomeClient({ initialData }: HomeClientProps = {}) {
       <AlertBar />
       <Navbar />
 
-      <main>
+      <main
+        id="main-content"
+        role="main"
+        tabIndex={-1}
+        className="outline-none"
+      >
         <HeroSection initialData={initialData?.institute} />
         <FounderSection initialData={initialData?.founder} />
 
