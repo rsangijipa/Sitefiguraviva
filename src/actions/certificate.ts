@@ -65,18 +65,40 @@ export async function issueCertificate(userId: string, courseId: string) {
     }
 
     // Verify course completion - CHECK BOTH POSSIBLE FIELD NAMES
-    const progressDoc = await adminDb
-      .collection("users")
-      .doc(userId)
-      .collection("courseProgress")
-      .doc(courseId)
+    // Verify course completion - CHECK BOTH LOCATIONS (progress collection AND user subcollection)
+    let progress: any = null;
+
+    // 1. Check 'progress' top-level collection (New Schema)
+    const progressDocRoot = await adminDb
+      .collection("progress")
+      .doc(`${userId}_${courseId}`)
       .get();
 
-    if (!progressDoc.exists) {
-      return { error: "Progresso do curso não encontrado" };
+    if (progressDocRoot.exists) {
+      progress = progressDocRoot.data();
+      console.log(
+        `[issueCertificate] Found progress in root collection 'progress/${userId}_${courseId}'`,
+      );
+    } else {
+      // 2. Check 'users/{userId}/courseProgress/{courseId}' (Old Schema)
+      const progressDocSub = await adminDb
+        .collection("users")
+        .doc(userId)
+        .collection("courseProgress")
+        .doc(courseId)
+        .get();
+
+      if (progressDocSub.exists) {
+        progress = progressDocSub.data();
+        console.log(
+          `[issueCertificate] Found progress in subcollection 'users/${userId}/courseProgress/${courseId}'`,
+        );
+      }
     }
 
-    const progress = progressDoc.data();
+    if (!progress) {
+      return { error: "Progresso do curso não encontrado" };
+    }
 
     // DEBUG: Log progress data
     console.log("Progress data:", JSON.stringify(progress, null, 2));
@@ -300,19 +322,34 @@ export async function getCertificate(certificateId: string) {
 
     if (!data) return { error: "Dados do certificado corrompidos" };
 
-    // Normalize certificate data to match expected Certificate type from analytics.ts
-    const certificate: Certificate = {
+    // Helper to serialize Timestamp/Date to ISO String
+    const serializeDate = (date: any): string => {
+      if (!date) return new Date().toISOString();
+      if (date.toDate && typeof date.toDate === "function")
+        return date.toDate().toISOString(); // Firestore Timestamp
+      if (date instanceof Date) return date.toISOString();
+      if (typeof date === "string") return date;
+      if (date._seconds) return new Date(date._seconds * 1000).toISOString(); // Raw Firestore object
+      return new Date().toISOString();
+    };
+
+    // Serialize certificate data for Client Component
+    // NOTE: The return type here doesn't strictly match 'Certificate' from analytics.ts anymore
+    // because dates are strings. The Client Component should handle string dates.
+    const certificate = {
       id: certDoc.id,
       userId: data?.userId || "",
       courseId: data?.courseId || "",
       studentName: data?.studentName || data?.userName || "Aluno",
       courseName: data?.courseName || data?.courseTitle || "Curso",
-      completedAt: data?.completedAt || data?.issuedAt || Timestamp.now(),
-      issuedAt: data?.issuedAt || Timestamp.now(),
+      completedAt: serializeDate(data?.completedAt || data?.issuedAt),
+      issuedAt: serializeDate(data?.issuedAt),
       certificateNumber: data?.certificateNumber || data?.code || "N/A",
       instructorName: data?.instructorName || "Lilian Gusmão",
       instructorTitle: data?.instructorTitle || "Diretora Pedagógica",
-      courseWorkload: data?.courseWorkload || data?.metadata?.hours || 40,
+      courseWorkload: Number(
+        data?.courseWorkload || data?.metadata?.hours || 40,
+      ),
       validationUrl:
         data?.validationUrl ||
         `${process.env.NEXT_PUBLIC_BASE_URL || "https://figuraviva.com"}/verify/${certDoc.id}`,
