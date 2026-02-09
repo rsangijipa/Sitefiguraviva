@@ -84,7 +84,7 @@ export default function ResetPasswordPage() {
                                 value={email}
                                 onChange={e => setEmail(e.target.value)}
                                 required
-                                icon={<Mail size={18} />}
+                                leftIcon={Mail}
                             />
 
                             {error && (
