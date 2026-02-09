@@ -2,61 +2,35 @@
 
 import { adminDb } from '@/lib/firebase/admin';
 import { EnrollmentDoc, CourseDoc } from '@/types/lms';
-
-export enum AccessErrorCode {
-    AUTH_REQUIRED = 'AUTH_REQUIRED',
-    ENROLLMENT_NOT_FOUND = 'ENROLLMENT_NOT_FOUND',
-    ENROLLMENT_PENDING = 'ENROLLMENT_PENDING',
-    ENROLLMENT_EXPIRED = 'ENROLLMENT_EXPIRED',
-    ACCESS_DENIED = 'ACCESS_DENIED',
-    COURSE_NOT_AVAILABLE = 'COURSE_NOT_AVAILABLE',
-    LESSON_NOT_AVAILABLE = 'LESSON_NOT_AVAILABLE',
-    CONFIG_ERROR = 'CONFIG_ERROR'
-}
-
-export class AccessError extends Error {
-    constructor(public code: AccessErrorCode, message?: string) {
-        super(message || code);
-        this.name = 'AccessError';
-    }
-}
-
-export interface AccessContext {
-    uid: string;
-    courseId: string;
-    enrollmentId: string;
-    paymentMethod: string;
-    courseVersion?: number;
-    accessUntil?: string;
-}
+import { AccessErrorCode, AccessError, AccessContext, AuthError, ForbiddenError, NotFoundError, ContentUnavailableError } from './access-types';
 
 /**
  * Canonical Server-Side Access Guard.
  * Validates enrollment status, course publication state, and subscription expiry.
  */
 export async function assertCanAccessCourse(uid: string | undefined, courseId: string): Promise<AccessContext> {
-    if (!uid) throw new AccessError(AccessErrorCode.AUTH_REQUIRED);
+    if (!uid) throw new AuthError();
 
     const enrollmentId = `${uid}_${courseId}`;
     const enrollmentSnap = await adminDb.collection('enrollments').doc(enrollmentId).get();
 
     if (!enrollmentSnap.exists) {
-        throw new AccessError(AccessErrorCode.ENROLLMENT_NOT_FOUND);
+        throw new NotFoundError('Enrollment');
     }
 
     const enrollment = enrollmentSnap.data() as EnrollmentDoc;
 
     // 1. Enrollment Level Status Check
     if (enrollment.status === 'pending') {
-        throw new AccessError(AccessErrorCode.ENROLLMENT_PENDING);
+        throw new ForbiddenError('Enrollment is pending approval');
     }
 
     if (enrollment.status === 'expired') {
-        throw new AccessError(AccessErrorCode.ENROLLMENT_EXPIRED);
+        throw new ForbiddenError('Enrollment has expired');
     }
 
     if (enrollment.status !== 'active' && enrollment.status !== 'completed') {
-        throw new AccessError(AccessErrorCode.ACCESS_DENIED);
+        throw new ForbiddenError('Enrollment is not active');
     }
 
     // 2. Subscription Expiry Check
@@ -69,14 +43,14 @@ export async function assertCanAccessCourse(uid: string | undefined, courseId: s
         const expiry = enrollment.accessUntil.toMillis();
 
         if (now >= expiry) {
-            throw new AccessError(AccessErrorCode.ENROLLMENT_EXPIRED);
+            throw new ForbiddenError('Subscription period has ended');
         }
     }
 
     // 3. Course Level Visibility Check
     const courseSnap = await adminDb.collection('courses').doc(courseId).get();
     if (!courseSnap.exists) {
-        throw new AccessError(AccessErrorCode.COURSE_NOT_AVAILABLE);
+        throw new NotFoundError('Course');
     }
 
     const course = courseSnap.data() as CourseDoc;
@@ -84,7 +58,7 @@ export async function assertCanAccessCourse(uid: string | undefined, courseId: s
     // Admin Override: If user is admin, they might be able to see draft?
     // But for "Student View" gate, we follow strict rules.
     if (!course.isPublished || course.status !== 'open') {
-        throw new AccessError(AccessErrorCode.COURSE_NOT_AVAILABLE);
+        throw new ContentUnavailableError('Course is not available for students');
     }
 
     return {

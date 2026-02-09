@@ -1,7 +1,7 @@
 import { ArrowLeft, CheckCircle, ChevronLeft, ChevronRight, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { VideoPlayer } from "./VideoPlayer";
+import { VideoPlayer } from "../lms/VideoPlayer";
 import { LessonSidebar } from "./LessonSidebar";
 import { Lesson, Module } from "@/types/lms";
 import Button from "../ui/Button";
@@ -21,43 +21,53 @@ interface CoursePlayerProps {
     nextLessonId?: string;
     prevLessonId?: string;
     loading?: boolean;
+    // New props for Video-First features
+    initialMaxWatchedSecond?: number;
+    onVideoCompleted?: () => void;
 }
 
 // Wrapper component to isolate hook usage per lesson
-// Wrapper component to isolate hook usage per lesson
-const CourseVideoWrapper = ({ courseId, moduleId, lesson, onMarkComplete }: { courseId: string, moduleId: string, lesson: Lesson, onMarkComplete: (id: string, modId: string) => void }) => {
+const CourseVideoWrapper = ({
+    courseId,
+    moduleId,
+    lesson,
+    onMarkComplete,
+    initialMaxWatchedSecond,
+    onVideoCompleted
+}: {
+    courseId: string,
+    moduleId: string,
+    lesson: Lesson,
+    onMarkComplete: (id: string, modId: string) => void,
+    initialMaxWatchedSecond?: number,
+    onVideoCompleted?: () => void
+}) => {
     // FIX: useProgress now requires moduleId (PRG-02)
-    const { progress, updateProgress, triggerSync } = useProgress(courseId, moduleId, lesson.id);
+    // We are deprecating useProgress hook in favor of direct VideoPlayer logic for SSoT
+    // But keeping it for now if it does other things, but VideoPlayer is self-contained.
 
-    const [isPlaying, setIsPlaying] = useState(false);
+    // We are replacing the old VideoPlayer usage with the Refactored VideoPlayer
+    // The Refactored VideoPlayer takes: videoId, courseId, moduleId, lessonId, initialCompleted, initialMaxWatchedSecond, onCompleted
 
-    // VP-03: Heartbeat Sync (Every 10s) optimized
-    useEffect(() => {
-        if (!isPlaying) return; // Only poll if playing
+    // Check if lesson.type is strictly video to avoid errors
+    const videoUrl = (lesson as any).videoUrl || '';
+    // Extract video ID from URL (basic regex for youtube)
+    const videoId = videoUrl.match(/(?:youtu\.be\/|youtube\.com\/watch\?v=|youtube\.com\/embed\/)([^#&?]*)/)?.[1] || '';
 
-        const interval = setInterval(() => {
-            triggerSync();
-        }, 10000);
-        return () => clearInterval(interval);
-    }, [isPlaying, triggerSync]);
+    if (!videoId) return <div className="aspect-video bg-black flex items-center justify-center text-white">Vídeo indisponível</div>;
 
     return (
         <VideoPlayer
-            url={lesson.type === 'video' ? (lesson as any).videoUrl : ''}
-            poster={(lesson as any).thumbnail}
-            initialTime={progress?.seekPosition || 0}
-            onTimeUpdate={(t) => { updateProgress(t, false); }}
-            onPlay={() => setIsPlaying(true)}
-            onPause={() => {
-                setIsPlaying(false);
-                triggerSync();
-            }}
-            onEnded={() => {
-                setIsPlaying(false);
-                triggerSync();
+            videoId={videoId}
+            courseId={courseId}
+            moduleId={moduleId}
+            lessonId={lesson.id}
+            initialCompleted={lesson.isCompleted}
+            initialMaxWatchedSecond={initialMaxWatchedSecond}
+            onCompleted={() => {
                 onMarkComplete(lesson.id, moduleId);
+                if (onVideoCompleted) onVideoCompleted();
             }}
-        // We need to pass onPlay logic.
         />
     );
 };
@@ -70,8 +80,10 @@ export const CoursePlayer = ({
     onMarkComplete,
     nextLessonId,
     prevLessonId,
-    loading = false
-}: CoursePlayerProps) => {
+    loading = false,
+    initialMaxWatchedSecond,
+    onVideoCompleted
+}: CoursePlayerProps) => { // ...
     const [sidebarOpen, setSidebarOpen] = useState(true);
 
     if (loading) return null; // Or skeleton
@@ -131,6 +143,8 @@ export const CoursePlayer = ({
                                     moduleId={getModuleId(activeLesson)} // Pass Module ID
                                     lesson={activeLesson}
                                     onMarkComplete={onMarkComplete}
+                                    initialMaxWatchedSecond={initialMaxWatchedSecond}
+                                    onVideoCompleted={onVideoCompleted}
                                 />
                             )}
                         </div>

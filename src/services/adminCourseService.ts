@@ -1,5 +1,5 @@
 import { db } from '@/lib/firebase/client';
-import { collection, doc, getDocs, getDoc, addDoc, updateDoc, deleteDoc, serverTimestamp, query, orderBy, where, increment, writeBatch } from 'firebase/firestore';
+import { collection, doc, getDocs, getDoc, addDoc, setDoc, updateDoc, deleteDoc, serverTimestamp, query, orderBy, where, increment, writeBatch } from 'firebase/firestore';
 import { CourseDoc, ModuleDoc, LessonDoc } from '@/types/lms';
 
 export const adminCourseService = {
@@ -99,6 +99,10 @@ export const adminCourseService = {
     async updateModule(courseId: string, moduleId: string, data: Partial<ModuleDoc>): Promise<void> {
         const docRef = doc(db, 'courses', courseId, 'modules', moduleId);
         await updateDoc(docRef, { ...data, updatedAt: serverTimestamp() });
+
+        if (data.isPublished !== undefined) {
+            await this.syncLessonsCount(courseId);
+        }
     },
 
     async deleteModule(courseId: string, moduleId: string): Promise<void> {
@@ -139,49 +143,45 @@ export const adminCourseService = {
     },
 
     async createLesson(courseId: string, moduleId: string, title: string, order: number): Promise<string> {
-        const batch = writeBatch(db);
         const lessonsCol = collection(db, 'courses', courseId, 'modules', moduleId, 'lessons');
         const newLessonRef = doc(lessonsCol);
 
-        batch.set(newLessonRef, {
+        await setDoc(newLessonRef, {
             title,
             order,
             moduleId,
+            courseId,
             type: 'text',
+            isPublished: false, // Default to draft
             status: 'draft',
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp()
         });
 
-        // PRG-05: Increment lesson count
-        const courseRef = doc(db, 'courses', courseId);
-        batch.update(courseRef, {
-            'stats.lessonsCount': increment(1),
-            updatedAt: serverTimestamp()
-        });
-
-        await batch.commit();
+        // We don't increment published count yet because default is draft
         return newLessonRef.id;
     },
 
     async updateLesson(courseId: string, moduleId: string, lessonId: string, data: Partial<LessonDoc>): Promise<void> {
         const docRef = doc(db, 'courses', courseId, 'modules', moduleId, 'lessons', lessonId);
         await updateDoc(docRef, { ...data, updatedAt: serverTimestamp() });
+
+        // If sub-published state might have changed, sync count
+        if (data.isPublished !== undefined) {
+            await this.syncLessonsCount(courseId);
+        }
     },
 
     async deleteLesson(courseId: string, moduleId: string, lessonId: string): Promise<void> {
-        const batch = writeBatch(db);
         const lessonRef = doc(db, 'courses', courseId, 'modules', moduleId, 'lessons', lessonId);
-        batch.delete(lessonRef);
+        const snap = await getDoc(lessonRef);
+        const wasPublished = snap.exists() && snap.data()?.isPublished === true;
 
-        // PRG-05: Decrement lesson count
-        const courseRef = doc(db, 'courses', courseId);
-        batch.update(courseRef, {
-            'stats.lessonsCount': increment(-1),
-            updatedAt: serverTimestamp()
-        });
+        await deleteDoc(lessonRef);
 
-        await batch.commit();
+        if (wasPublished) {
+            await this.syncLessonsCount(courseId);
+        }
     },
 
     // --- ENROLLMENTS ---
@@ -242,18 +242,26 @@ export const adminCourseService = {
 
     async syncLessonsCount(courseId: string): Promise<number> {
         const modulesSnap = await getDocs(collection(db, 'courses', courseId, 'modules'));
-        let total = 0;
+        let totalPublished = 0;
 
         for (const modDoc of modulesSnap.docs) {
-            const lessonsSnap = await getDocs(collection(db, 'courses', courseId, 'modules', modDoc.id, 'lessons'));
-            total += lessonsSnap.size;
+            const mData = modDoc.data();
+            // Optional: If module is not published, maybe its lessons shouldn't count?
+            // Usually, yes. Let's be strict: published module + published lesson.
+            if (mData.isPublished === true) {
+                const lessonsSnap = await getDocs(
+                    query(collection(db, 'courses', courseId, 'modules', modDoc.id, 'lessons'),
+                        where('isPublished', '==', true))
+                );
+                totalPublished += lessonsSnap.size;
+            }
         }
 
         await updateDoc(doc(db, 'courses', courseId), {
-            'stats.lessonsCount': total,
+            'stats.lessonsCount': totalPublished,
             updatedAt: serverTimestamp()
         });
 
-        return total;
+        return totalPublished;
     }
 };

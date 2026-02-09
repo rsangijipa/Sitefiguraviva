@@ -38,8 +38,8 @@ export async function requireAdmin() {
         redirect('/admin/login');
     }
 
-    // 1) Fast path: Custom Claims
-    if (claims.admin === true || isAdminRole(claims.role)) {
+    // 1) Fast path: Custom Claims OR Hardcoded Super Admin
+    if (claims.admin === true || isAdminRole(claims.role) || claims.email === 'liliangusmao@figuraviva.com') {
         return claims;
     }
 

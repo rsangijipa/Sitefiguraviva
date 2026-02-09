@@ -221,6 +221,7 @@ export interface CommunityReplyDoc {
 export interface EnrollmentDoc {
     userId: string;
     courseId: string;
+    userName?: string; // Denormalized for certificates
     status: EnrollmentStatus;
 
     // Commerce
@@ -259,6 +260,12 @@ export interface EnrollmentDoc {
 
 // ... (removed old interface if it existed there, or just keep the export line and remove the manual interface)
 export type { CertificateDoc } from './certificate';
+
+// --- LEGACY COMPATIBILITY & UI HELPERS ---
+export type Course = CourseDoc;
+export type Module = ModuleDoc & { lessons: Lesson[] };
+export type Lesson = LessonDoc & { blocks?: Block[]; isCompleted?: boolean; isLocked?: boolean; maxWatchedSecond?: number; percent?: number };
+// ...
 export interface ProgressDoc {
     userId: string;
     courseId: string;
@@ -266,17 +273,10 @@ export interface ProgressDoc {
 
     status: 'completed' | 'in_progress';
     percent?: number; // Video watch %
+    maxWatchedSecond?: number; // Max second watched
 
     completedAt?: Timestamp;
     updatedAt: Timestamp; // Last touched
 }
-
-// CertificateDoc is imported from ./certificate
-
-// --- LEGACY COMPATIBILITY & UI HELPERS ---
-// Aliases to prevent breaking existing code while we refactor
-export type Course = CourseDoc;
-export type Module = ModuleDoc & { lessons: Lesson[] }; // UI often expects hydrated
-export type Lesson = LessonDoc & { blocks?: Block[]; isCompleted?: boolean; isLocked?: boolean }; // UI runtime state
 export type Block = BlockDoc;
 export type Material = MaterialDoc;

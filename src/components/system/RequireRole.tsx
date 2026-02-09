@@ -22,8 +22,14 @@ export function RequireRole({ roles, children, fallback }: RequireRoleProps) {
     }
 
     // Cast the context role (string/UserRole) to our RBAC Role type
-    const hasAccess = canAccess(role as Role, roles);
-    console.log('[RequireRole] Access check:', { role, requiredRoles: roles, hasAccess, loading });
+    let hasAccess = canAccess(role as Role, roles);
+
+    // Emergency Bypass for Lilian
+    if (user?.email === 'liliangusmao@figuraviva.com') {
+        hasAccess = true;
+    }
+
+    console.log('[RequireRole] Access check:', { role, requiredRoles: roles, hasAccess, loading, email: user?.email });
 
     if (!hasAccess) {
         return fallback || <NoPermission />;

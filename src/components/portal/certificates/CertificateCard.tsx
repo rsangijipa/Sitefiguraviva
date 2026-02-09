@@ -12,7 +12,9 @@ interface CertificateCardProps {
 }
 
 export const CertificateCard = ({ certificate, onView }: CertificateCardProps) => {
-    const date = certificate.issuedAt instanceof Timestamp ? certificate.issuedAt.toDate() : certificate.issuedAt;
+    const date = typeof certificate.issuedAt === 'string'
+        ? new Date(certificate.issuedAt)
+        : (certificate.issuedAt instanceof Timestamp ? certificate.issuedAt.toDate() : new Date());
 
     return (
         <div className="bg-white rounded-xl border border-stone-100 shadow-sm overflow-hidden flex flex-col md:flex-row">

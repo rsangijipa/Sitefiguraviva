@@ -4,7 +4,8 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/lib/firebase/admin';
 import { getCourseData } from '@/lib/courseService';
 import CourseClient from './CourseClient';
-import { assertCanAccessCourse, AccessError } from '@/lib/auth/access-gate';
+import { assertCanAccessCourse } from '@/lib/auth/access-gate';
+import { AccessError } from '@/lib/auth/access-types';
 
 export default async function CoursePage({ params }: { params: Promise<{ courseId: string }> }) {
     const { courseId } = await params;

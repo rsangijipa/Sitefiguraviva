@@ -63,6 +63,30 @@ function CourseContent({ initialData }: { initialData?: any }) {
         }
     }, [enrollment?.progressSummary?.percent, user?.uid, courseId]);
 
+    // DIAGNOSTIC LOGGING
+    useEffect(() => {
+        if (course && enrollment) {
+            const completedCount = enrollment.progressSummary?.completedLessonsCount || 0;
+            const total = enrollment.progressSummary?.totalLessons || 0;
+            const percent = enrollment.progressSummary?.percent || 0;
+
+            // Calculate logical progress in client to compare
+            const allLessons = modules.flatMap(m => m.lessons);
+            const clientCompleted = allLessons.filter(l => l.isCompleted).length;
+
+            console.log("COURSE_VIEW_DIAGNOSTIC", {
+                courseId: course.id,
+                uid: user?.uid,
+                enrollment: { completedCount, total, percent },
+                clientCalc: { totalVisible: allLessons.length, completed: clientCompleted },
+                integrity: {
+                    matchCount: completedCount === clientCompleted,
+                    matchTotal: total === allLessons.length
+                }
+            });
+        }
+    }, [course, enrollment, modules, user?.uid]);
+
     // Fetch Threads when tab becomes active
     useEffect(() => {
         if (activeTab === 'community' && threads.length === 0) {

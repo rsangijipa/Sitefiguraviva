@@ -138,13 +138,13 @@ export default async function MyCoursesPage() {
     // Exclude enrolled? Ideally yes, but Firestore "not-in" has limits.
     // We will fetch widely and filter in memory for this page since catalog size is likely small (<100) for now.
     const catalogSnap = await db.collection('courses')
-        .where('isPublished', '==', true)
         .where('status', '==', 'open')
         .limit(20)
         .get();
 
-    const catalogCourses = catalogSnap.docs
-        .map(doc => ({ id: doc.id, ...doc.data() }))
+    const catalogCourses = (catalogSnap.docs
+        .map(doc => ({ id: doc.id, ...doc.data() })) as any[])
+        .filter(c => c.isPublished !== false) // Filter in memory for isPublished !== false
         .filter(c => !enrolledCourseIds.has(c.id));
 
 

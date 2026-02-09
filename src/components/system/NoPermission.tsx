@@ -1,7 +1,21 @@
-import { Lock } from 'lucide-react';
+"use client";
+
+import { Lock, LogOut } from 'lucide-react';
 import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext';
+import { useRouter, usePathname } from 'next/navigation';
 
 export function NoPermission() {
+    const { signOut } = useAuth();
+    const router = useRouter();
+    const pathname = usePathname();
+
+    const handleSwitchAccount = async () => {
+        await signOut();
+        // Redirect to auth preserving the current intent (admin page)
+        router.push(`/auth?next=${encodeURIComponent(pathname)}`);
+    };
+
     return (
         <div className="flex flex-col items-center justify-center min-h-[60vh] p-8 text-center">
             <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6 text-gray-500">
@@ -20,6 +34,14 @@ export function NoPermission() {
                 >
                     Voltar para o Início
                 </Link>
+
+                <button
+                    onClick={handleSwitchAccount}
+                    className="inline-flex items-center justify-center bg-white border-2 border-primary/10 text-primary px-8 py-3 rounded-xl font-bold hover:bg-stone-50 transition-all gap-2"
+                >
+                    <LogOut size={18} />
+                    Entrar com outra conta
+                </button>
             </div>
         </div>
     );
