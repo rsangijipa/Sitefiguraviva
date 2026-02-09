@@ -25,7 +25,7 @@ export function RequireRole({ roles, children, fallback }: RequireRoleProps) {
     let hasAccess = canAccess(role as Role, roles);
 
     // Emergency Bypass for Lilian
-    if (user?.email === 'liliangusmao@figuraviva.com') {
+    if (user?.email === 'liliangusmao@figuraviva.com' || user?.email === 'liliangusmao@institutofiguraviva.com.br') {
         hasAccess = true;
     }
 

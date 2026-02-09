@@ -1,21 +1,12 @@
 "use client";
 
 import { motion } from 'framer-motion';
-import { usePageContent } from '@/hooks/useContent';
+import { useFounderSettings } from '@/hooks/useSiteSettings';
 import { ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 
 export default function FounderSection() {
-    const { data: founderData } = usePageContent('founder');
-
-    // Fallback data
-    const data = founderData || {
-        name: "Lilian Vanessa Nicacio Gusmão Vianei",
-        role: "Psicóloga e Gestalt-terapeuta",
-        bio: "Psicóloga, gestalt-terapeuta e pesquisadora, com trajetória que integra clínica, docência e estudos em trauma, psicoterapia corporal e neurodiversidades, além de perspectivas feministas e decoloniais.",
-        image: "/assets/lilian-vanessa.jpeg",
-        link: "http://lattes.cnpq.br/"
-    };
+    const { data } = useFounderSettings();
 
     return (
         <section id="fundadora" className="py-16 bg-stone-50 border-t border-stone-200">

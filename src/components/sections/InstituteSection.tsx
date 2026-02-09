@@ -2,15 +2,16 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { usePageContent, useTeamMembers } from '@/hooks/useContent';
+import { useInstituteSettings, useFounderSettings, useTeamSettings } from '@/hooks/useSiteSettings';
 import { ArrowRight, MapPin, Phone, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
 export default function InstituteSection({ gallery = [] }: { gallery?: any[] }) {
-    const { data: instituteData } = usePageContent('institute');
-    const { data: founderData } = usePageContent('founder');
-    const { data: teamMembers = [] } = useTeamMembers();
+    const { data: data } = useInstituteSettings();
+    const { data: founderData } = useFounderSettings();
+    const { data: teamSettings } = useTeamSettings();
+    const teamMembers = teamSettings.members || [];
     const [currentIndex, setCurrentIndex] = useState(0);
 
     // Filter images for the slideshow (prefer 'Espaço' or 'Instituto')
@@ -29,17 +30,6 @@ export default function InstituteSection({ gallery = [] }: { gallery?: any[] }) 
         }, 6000); // 6s per slide
         return () => clearInterval(interval);
     }, [slides.length]);
-
-    // Fallback data if DB is empty
-    const data = instituteData || {
-        title: "O Instituto Figura Viva",
-        subtitle: "Um espaço vivo de acolhimento clínico e formação profissional — onde o encontro transforma.",
-        manifesto_title: "Habitar a Fronteira",
-        manifesto_text: "Na Gestalt, a vida acontece no contato: na fronteira entre organismo e ambiente, entre o que sinto e o que digo, entre o que foi e o que pode nascer agora. No Figura Viva, a gente leva isso a sério — com rigor, com ética e com humanidade.",
-        quote: "O encontro é a fronteira onde a vida se renova.",
-        address: "Rua Santos Dumont, 156 - Uniao, Ouro Preto D'Oeste - RO - CEP 76920-000",
-        phone: "(69) 99248-1585"
-    };
 
     return (
         <section id="instituto-sobre" className="py-16 md:py-24 bg-white relative overflow-hidden transition-colors duration-500">

@@ -15,7 +15,7 @@ export default function EnrollmentsManager() {
     const [searchTerm, setSearchTerm] = useState('');
     const [enrollments, setEnrollments] = useState<any[]>([]);
     const { addToast } = useToast();
-    const { data: courses } = useCourses();
+    const { data: courses } = useCourses(true);
     const [isEnrolling, setIsEnrolling] = useState(false);
     const [selectedCourse, setSelectedCourse] = useState('');
 

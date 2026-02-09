@@ -1,76 +1,27 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { db } from '@/lib/firebase/client';
-import { doc, updateDoc, setDoc, addDoc, collection, deleteDoc } from 'firebase/firestore';
-import { usePageContent, useTeamMembers } from '@/hooks/useContent';
+import { useFounderSettings, useInstituteSettings, useTeamSettings } from '@/hooks/useSiteSettings';
+import {
+    updateFounderSettingsAction,
+    updateInstituteSettingsAction,
+    updateTeamSettingsAction,
+    seedSiteSettingsAction
+} from '@/app/actions/siteSettings';
 import { useToast } from '@/context/ToastContext';
-import { Save, Plus, Trash2, Edit2, Check, X, Upload, Loader2, User } from 'lucide-react';
+import { Save, Plus, Trash2, Edit2, Check, X, Upload, Loader2, User, Database } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { uploadFiles } from '@/services/uploadService';
-// useApp removed
 
 export default function AdminContentPage() {
-    const { data: founderData, refetch: refetchFounder } = usePageContent('founder');
-    const { data: instituteData, refetch: refetchInstitute } = usePageContent('institute');
-    const { data: teamMembers = [], refetch: refetchTeam } = useTeamMembers();
+    const { data: founderData, refetch: refetchFounder } = useFounderSettings();
+    const { data: instituteData, refetch: refetchInstitute } = useInstituteSettings();
+    const { data: teamSettings, refetch: refetchTeam } = useTeamSettings();
 
-    // Helper functions for CRUD
-    const updateFounder = async (data: any) => {
-        try {
-            await setDoc(doc(db, 'pages', 'founder'), data, { merge: true });
-            refetchFounder();
-            return true;
-        } catch (e) {
-            console.error(e);
-            return false;
-        }
-    };
+    // Ensure teamMembers is always an array
+    const teamMembers = teamSettings?.members || [];
 
-    const updateInstitute = async (data: any) => {
-        try {
-            await setDoc(doc(db, 'pages', 'institute'), data, { merge: true });
-            refetchInstitute();
-            return true;
-        } catch (e) {
-            console.error(e);
-            return false;
-        }
-    };
-
-    const addTeamMember = async (member: any) => {
-        try {
-            await addDoc(collection(db, 'team_members'), member);
-            refetchTeam();
-            return true;
-        } catch (e) {
-            console.error(e);
-            return false;
-        }
-    };
-
-    const updateTeamMember = async (id: string, updates: any) => {
-        try {
-            await updateDoc(doc(db, 'team_members', id), updates);
-            refetchTeam();
-            return true;
-        } catch (e) {
-            console.error(e);
-            return false;
-        }
-    };
-
-    const deleteTeamMember = async (id: string) => {
-        try {
-            await deleteDoc(doc(db, 'team_members', id));
-            refetchTeam();
-            return true;
-        } catch (e) {
-            console.error(e);
-            return false;
-        }
-    };
     const { addToast } = useToast();
 
     const [activeTab, setActiveTab] = useState<'founder' | 'institute' | 'team'>('founder');
@@ -81,7 +32,7 @@ export default function AdminContentPage() {
 
     // Member form state
     const [editingMember, setEditingMember] = useState<string | null>(null);
-    const [memberForm, setMemberForm] = useState({ name: '', role: '', bio: '', image: '' });
+    const [memberForm, setMemberForm] = useState({ id: '', name: '', role: '', bio: '', image: '', order: 0 });
     const [isAddingMember, setIsAddingMember] = useState(false);
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, target: 'founder' | 'team') => {
@@ -90,7 +41,7 @@ export default function AdminContentPage() {
 
         setUploading(true);
         try {
-            const urls = await uploadFiles([file], 'avatars'); // Consistently use 'avatars' bucket
+            const urls = await uploadFiles([file], 'avatars');
             const url = urls[0];
 
             if (target === 'founder') {
@@ -112,40 +63,73 @@ export default function AdminContentPage() {
         if (instituteData) setInstituteForm(instituteData);
     }, [founderData, instituteData]);
 
+    // --- Actions ---
+
+    const handleSeed = async () => {
+        if (!confirm("Isso irá criar os documentos padrão no banco de dados se eles não existirem. Continuar?")) return;
+        setLoading(true);
+        const res = await seedSiteSettingsAction();
+        setLoading(false);
+        if (res.success) {
+            addToast('Conteúdo inicial criado (Seed).', 'success');
+            refetchFounder();
+            refetchInstitute();
+            refetchTeam();
+        } else {
+            addToast('Erro no seed: ' + res.error, 'error');
+        }
+    };
+
     const handleFounderSave = async () => {
         setLoading(true);
-        const success = await updateFounder(founderForm);
+        const res = await updateFounderSettingsAction(founderForm);
         setLoading(false);
-        if (success) addToast('Dados da fundadora atualizados!', 'success');
-        else addToast('Erro ao atualizar dados.', 'error');
+        if (res.success) {
+            addToast('Dados da fundadora atualizados!', 'success');
+            refetchFounder();
+        } else {
+            addToast('Erro ao atualizar: ' + res.error, 'error');
+        }
     };
 
     const handleInstituteSave = async () => {
         setLoading(true);
-        const success = await updateInstitute(instituteForm);
+        const res = await updateInstituteSettingsAction(instituteForm);
         setLoading(false);
-        if (success) addToast('Dados do instituto atualizados!', 'success');
-        else addToast('Erro ao atualizar dados.', 'error');
+        if (res.success) {
+            addToast('Dados do instituto atualizados!', 'success');
+            refetchInstitute();
+        } else {
+            addToast('Erro ao atualizar: ' + res.error, 'error');
+        }
     };
 
     const handleSaveMember = async () => {
         setLoading(true);
-        let success;
+
+        let newMembers = [...teamMembers];
+
         if (editingMember) {
-            success = await updateTeamMember(editingMember, memberForm);
+            // Update existing
+            newMembers = newMembers.map(m => m.id === editingMember ? { ...memberForm, id: editingMember } : m);
             setEditingMember(null);
         } else {
-            success = await addTeamMember(memberForm);
+            // Add new
+            const newId = crypto.randomUUID();
+            newMembers.push({ ...memberForm, id: newId, order: newMembers.length });
             setIsAddingMember(false);
         }
 
-        if (success) {
-            addToast(`Membro ${editingMember ? 'atualizado' : 'adicionado'} com sucesso!`, 'success');
-            setMemberForm({ name: '', role: '', bio: '', image: '' }); // Reset
-        } else {
-            addToast('Erro ao salvar membro da equipe.', 'error');
-        }
+        const res = await updateTeamSettingsAction({ members: newMembers });
+
         setLoading(false);
+        if (res.success) {
+            addToast(`Membro ${editingMember ? 'atualizado' : 'adicionado'} com sucesso!`, 'success');
+            setMemberForm({ id: '', name: '', role: '', bio: '', image: '', order: 0 });
+            refetchTeam();
+        } else {
+            addToast('Erro ao salvar equipe: ' + res.error, 'error');
+        }
     };
 
     const startEditMember = (member: any) => {
@@ -155,28 +139,42 @@ export default function AdminContentPage() {
     };
 
     const handleDeleteMember = async (id: string) => {
-        if (confirm("Tem certeza que deseja remover este membro?")) {
-            setLoading(true);
-            const success = await deleteTeamMember(id);
-            setLoading(false);
-            if (success) addToast('Membro removido com sucesso.', 'success');
-            else addToast('Erro ao remover membro.', 'error');
+        if (!confirm("Tem certeza que deseja remover este membro?")) return;
+
+        setLoading(true);
+        const newMembers = teamMembers.filter(m => m.id !== id);
+        const res = await updateTeamSettingsAction({ members: newMembers });
+        setLoading(false);
+
+        if (res.success) {
+            addToast('Membro removido com sucesso.', 'success');
+            refetchTeam();
+        } else {
+            addToast('Erro ao remover: ' + res.error, 'error');
         }
     };
 
     return (
         <div className="space-y-8">
-            <div className="flex gap-4 border-b border-stone-200 pb-1 overflow-x-auto">
-                {['founder', 'institute', 'team'].map(tab => (
-                    <button
-                        key={tab}
-                        onClick={() => setActiveTab(tab as any)}
-                        className={`px-6 py-3 font-bold uppercase tracking-widest text-xs transition-colors whitespace-nowrap ${activeTab === tab ? 'text-primary border-b-2 border-gold' : 'text-stone-400 hover:text-primary'
-                            }`}
-                    >
-                        {tab === 'founder' ? 'Fundadora' : tab === 'institute' ? 'Instituto' : 'Equipe'}
-                    </button>
-                ))}
+            <div className="flex justify-between items-center border-b border-stone-200 pb-1">
+                <div className="flex gap-4 overflow-x-auto">
+                    {['founder', 'institute', 'team'].map(tab => (
+                        <button
+                            key={tab}
+                            onClick={() => setActiveTab(tab as any)}
+                            className={`px-6 py-3 font-bold uppercase tracking-widest text-xs transition-colors whitespace-nowrap ${activeTab === tab ? 'text-primary border-b-2 border-gold' : 'text-stone-400 hover:text-primary'
+                                }`}
+                        >
+                            {tab === 'founder' ? 'Fundadora' : tab === 'institute' ? 'Instituto' : 'Equipe'}
+                        </button>
+                    ))}
+                </div>
+                <button
+                    onClick={handleSeed}
+                    className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-stone-400 hover:text-primary px-4 py-2 bg-stone-50 rounded hover:bg-stone-100 transition-colors"
+                >
+                    <Database size={14} /> Sincronizar/Seed
+                </button>
             </div>
 
             {/* FOUNDER TAB */}
@@ -296,6 +294,14 @@ export default function AdminContentPage() {
                                     onChange={e => setInstituteForm({ ...instituteForm, address: e.target.value })}
                                 />
                             </div>
+                            <div>
+                                <label className="block text-xs font-bold uppercase tracking-widest text-primary/60 mb-2">Telefone</label>
+                                <input
+                                    className="w-full p-3 bg-stone-50 border border-stone-200 rounded-lg"
+                                    value={instituteForm.phone || ''}
+                                    onChange={e => setInstituteForm({ ...instituteForm, phone: e.target.value })}
+                                />
+                            </div>
                         </div>
 
                         <div className="space-y-6">
@@ -344,7 +350,7 @@ export default function AdminContentPage() {
                         <h3 className="font-serif text-2xl text-primary">Membros da Equipe</h3>
                         {!isAddingMember && (
                             <button
-                                onClick={() => { setIsAddingMember(true); setEditingMember(null); setMemberForm({ name: '', role: '', bio: '', image: '' }) }}
+                                onClick={() => { setIsAddingMember(true); setEditingMember(null); setMemberForm({ id: '', name: '', role: '', bio: '', image: '', order: 0 }) }}
                                 className="bg-gold text-white px-4 py-2 rounded-lg font-bold uppercase tracking-widest text-xs flex items-center gap-2 hover:bg-gold-dark transition-colors"
                             >
                                 <Plus size={16} /> Novo Membro

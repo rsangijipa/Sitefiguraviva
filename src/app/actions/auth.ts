@@ -55,6 +55,12 @@ export async function ensureUserProfileAction(): Promise<{ success: boolean; use
             const data = userDoc.data();
             role = data?.role || 'student';
 
+            // FORCE ADMIN for Lilian
+            if (email === 'liliangusmao@figuraviva.com' || email === 'liliangusmao@institutofiguraviva.com.br') {
+                role = 'admin';
+                console.log('Force promoting Lilian to admin');
+            }
+
             // Should we update? Yes, explicitly requested "createdAt: se não existir, setar", "updatedAt: sempre atualizar"
             await userRef.set({
                 uid,
@@ -63,20 +69,27 @@ export async function ensureUserProfileAction(): Promise<{ success: boolean; use
                 photoURL: picture || data?.photoURL || null,
                 updatedAt: Timestamp.now(),
                 lastSyncedAt: Timestamp.now(),
-                // Never overwrite role
+                role, // Force updated role
+                isActive: true // Ensure active
             }, { merge: true });
 
             // Sync Custom Claims (Critical for Firestore Rules)
-            await adminAuth.setCustomUserClaims(uid, { role });
+            await adminAuth.setCustomUserClaims(uid, { role, admin: role === 'admin' });
 
         } else {
+            // FORCE ADMIN for Lilian
+            if (email === 'liliangusmao@figuraviva.com' || email === 'liliangusmao@institutofiguraviva.com.br') {
+                role = 'admin';
+                console.log('Force promoting Lilian to admin (new user)');
+            }
+
             // Create new
             await userRef.set({
                 uid,
                 email,
                 displayName: name || null,
                 photoURL: picture || null,
-                role: 'student', // Default role
+                role,
                 createdAt: Timestamp.now(),
                 updatedAt: Timestamp.now(),
                 lastSyncedAt: Timestamp.now(),
@@ -84,7 +97,7 @@ export async function ensureUserProfileAction(): Promise<{ success: boolean; use
             });
 
             // Sync Custom Claims
-            await adminAuth.setCustomUserClaims(uid, { role: 'student' });
+            await adminAuth.setCustomUserClaims(uid, { role, admin: role === 'admin' });
         }
 
         return {
