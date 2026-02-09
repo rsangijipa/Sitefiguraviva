@@ -1,27 +1,39 @@
-
-
 // Firestore Document Type
 export interface Certificate {
-    id: string;
-    userId: string;
+  id: string;
+  userId: string;
+  courseId: string;
+
+  // Snapshot Data
+  userName: string; // Was studentName
+  courseTitle: string;
+
+  // Validation
+  code: string; // Was validationCode
+  issuedAt: any; // Firestore Timestamp
+  integrityHash?: string;
+
+  // Snapshot Info
+  courseVersionAtCompletion?: number;
+  courseSnapshot?: {
     courseId: string;
+    courseVersionAtCompletion: number;
+    totalLessonsConsidered: number;
+    lessons: { id: string; title: string }[];
+  };
 
-    // Snapshot Data
-    userName: string; // Was studentName
-    courseTitle: string;
+  // Optional
+  metadata?: {
+    version?: string;
+    hours?: number;
+  };
 
-    // Validation
-    code: string; // Was validationCode
-    issuedAt: any; // Firestore Timestamp
+  // Meta
+  issuedBy?: string;
+  templateVersion?: string;
 
-    // Optional
-    metadata?: {
-        version?: string;
-        hours?: number;
-    };
-
-    // Legacy / Future
-    pdfUrl?: string;
+  // Legacy / Future
+  pdfUrl?: string;
 }
 
 export type CertificateDoc = Certificate;

@@ -5,6 +5,7 @@ import {
   useFounderSettings,
   useInstituteSettings,
   useTeamSettings,
+  useLegalSettings,
 } from "@/hooks/useSiteSettings";
 import {
   updateSiteSettings,
@@ -22,6 +23,7 @@ import {
   Loader2,
   User,
   Database,
+  FileText,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import Image from "next/image";
@@ -38,13 +40,15 @@ export default function AdminContentPage() {
 
   const { addToast } = useToast();
 
-  const [activeTab, setActiveTab] = useState<"founder" | "institute" | "team">(
-    "founder",
-  );
+  const [activeTab, setActiveTab] = useState<
+    "founder" | "institute" | "team" | "legal"
+  >("founder");
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [founderForm, setFounderForm] = useState<any>({});
   const [instituteForm, setInstituteForm] = useState<any>({});
+  const [legalForm, setLegalForm] = useState<any>({});
+  const { data: legalData, refetch: refetchLegal } = useLegalSettings();
 
   // Member form state
   const [editingMember, setEditingMember] = useState<string | null>(null);
@@ -87,7 +91,8 @@ export default function AdminContentPage() {
   useEffect(() => {
     if (founderData) setFounderForm(founderData);
     if (instituteData) setInstituteForm(instituteData);
-  }, [founderData, instituteData]);
+    if (legalData) setLegalForm(legalData);
+  }, [founderData, instituteData, legalData]);
 
   // --- Actions ---
 
@@ -106,8 +111,21 @@ export default function AdminContentPage() {
       refetchFounder();
       refetchInstitute();
       refetchTeam();
+      refetchLegal();
     } else {
       addToast("Erro no seed: " + res.error, "error");
+    }
+  };
+
+  const handleLegalSave = async () => {
+    setLoading(true);
+    const res = await updateSiteSettings("legal", legalForm);
+    setLoading(false);
+    if (res.success) {
+      addToast("Políticas legais atualizadas!", "success");
+      refetchLegal();
+    } else {
+      addToast("Erro ao atualizar: " + res.error, "error");
     }
   };
 
@@ -201,7 +219,7 @@ export default function AdminContentPage() {
     <div className="space-y-8">
       <div className="flex justify-between items-center border-b border-stone-200 pb-1">
         <div className="flex gap-4 overflow-x-auto">
-          {["founder", "institute", "team"].map((tab) => (
+          {["founder", "institute", "team", "legal"].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab as any)}
@@ -215,7 +233,9 @@ export default function AdminContentPage() {
                 ? "Fundadora"
                 : tab === "institute"
                   ? "Instituto"
-                  : "Equipe"}
+                  : tab === "team"
+                    ? "Equipe"
+                    : "Legal"}
             </button>
           ))}
         </div>
@@ -650,6 +670,208 @@ export default function AdminContentPage() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* LEGAL TAB */}
+      {activeTab === "legal" && (
+        <div className="space-y-8 animate-fade-in-up">
+          <div className="flex justify-between items-center">
+            <h3 className="font-serif text-2xl text-primary">
+              Políticas Legais (SSoT)
+            </h3>
+            <button
+              onClick={handleLegalSave}
+              disabled={loading}
+              className="bg-primary text-white px-6 py-3 rounded-lg font-bold uppercase tracking-widest text-xs flex items-center gap-2 hover:bg-gold transition-colors"
+            >
+              <Save size={16} /> Salvar Tudo
+            </button>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-8">
+            {/* PRIVACY */}
+            <div className="bg-white p-8 rounded-2xl shadow-sm border border-stone-100 space-y-6">
+              <div className="flex items-center gap-3 border-b border-stone-100 pb-4">
+                <div className="p-2 bg-stone-50 rounded-lg text-gold">
+                  <Save size={20} />
+                </div>
+                <h4 className="font-serif text-xl text-primary">
+                  Política de Privacidade
+                </h4>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-primary/40 mb-2">
+                  Título do Modal
+                </label>
+                <input
+                  className="w-full p-3 bg-stone-50 border rounded-lg"
+                  value={legalForm?.privacy?.title || ""}
+                  onChange={(e) =>
+                    setLegalForm({
+                      ...legalForm,
+                      privacy: { ...legalForm.privacy, title: e.target.value },
+                    })
+                  }
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-primary/40 mb-2">
+                  Última Atualização
+                </label>
+                <input
+                  className="w-full p-3 bg-stone-50 border rounded-lg"
+                  value={legalForm?.privacy?.lastUpdated || ""}
+                  onChange={(e) =>
+                    setLegalForm({
+                      ...legalForm,
+                      privacy: {
+                        ...legalForm.privacy,
+                        lastUpdated: e.target.value,
+                      },
+                    })
+                  }
+                />
+              </div>
+
+              <div className="space-y-4">
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-primary/40">
+                  Seções do Conteúdo
+                </label>
+                {(legalForm?.privacy?.content || []).map(
+                  (section: any, idx: number) => (
+                    <div
+                      key={idx}
+                      className="p-4 bg-stone-50 border rounded-xl space-y-2 relative group"
+                    >
+                      <input
+                        className="w-full bg-white border-none text-sm font-bold text-primary focus:ring-0 rounded-md"
+                        value={section.heading}
+                        onChange={(e) => {
+                          const newContent = [...legalForm.privacy.content];
+                          newContent[idx].heading = e.target.value;
+                          setLegalForm({
+                            ...legalForm,
+                            privacy: {
+                              ...legalForm.privacy,
+                              content: newContent,
+                            },
+                          });
+                        }}
+                        placeholder="Título da Seção"
+                      />
+                      <textarea
+                        className="w-full bg-white border-none text-xs text-primary/60 focus:ring-0 rounded-md min-h-[60px]"
+                        value={section.text}
+                        onChange={(e) => {
+                          const newContent = [...legalForm.privacy.content];
+                          newContent[idx].text = e.target.value;
+                          setLegalForm({
+                            ...legalForm,
+                            privacy: {
+                              ...legalForm.privacy,
+                              content: newContent,
+                            },
+                          });
+                        }}
+                        placeholder="Texto da Seção"
+                      />
+                    </div>
+                  ),
+                )}
+              </div>
+            </div>
+
+            {/* TERMS */}
+            <div className="bg-white p-8 rounded-2xl shadow-sm border border-stone-100 space-y-6">
+              <div className="flex items-center gap-3 border-b border-stone-100 pb-4">
+                <div className="p-2 bg-stone-50 rounded-lg text-gold">
+                  <FileText size={20} />
+                </div>
+                <h4 className="font-serif text-xl text-primary">
+                  Termos de Uso
+                </h4>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-primary/40 mb-2">
+                  Título do Modal
+                </label>
+                <input
+                  className="w-full p-3 bg-stone-50 border rounded-lg"
+                  value={legalForm?.terms?.title || ""}
+                  onChange={(e) =>
+                    setLegalForm({
+                      ...legalForm,
+                      terms: { ...legalForm.terms, title: e.target.value },
+                    })
+                  }
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-primary/40 mb-2">
+                  Última Atualização
+                </label>
+                <input
+                  className="w-full p-3 bg-stone-50 border rounded-lg"
+                  value={legalForm?.terms?.lastUpdated || ""}
+                  onChange={(e) =>
+                    setLegalForm({
+                      ...legalForm,
+                      terms: {
+                        ...legalForm.terms,
+                        lastUpdated: e.target.value,
+                      },
+                    })
+                  }
+                />
+              </div>
+
+              <div className="space-y-4">
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-primary/40">
+                  Seções do Conteúdo
+                </label>
+                {(legalForm?.terms?.content || []).map(
+                  (section: any, idx: number) => (
+                    <div
+                      key={idx}
+                      className="p-4 bg-stone-50 border rounded-xl space-y-2 relative group"
+                    >
+                      <input
+                        className="w-full bg-white border-none text-sm font-bold text-primary focus:ring-0 rounded-md"
+                        value={section.heading}
+                        onChange={(e) => {
+                          const newContent = [...legalForm.terms.content];
+                          newContent[idx].heading = e.target.value;
+                          setLegalForm({
+                            ...legalForm,
+                            terms: { ...legalForm.terms, content: newContent },
+                          });
+                        }}
+                        placeholder="Título da Seção"
+                      />
+                      <textarea
+                        className="w-full bg-white border-none text-xs text-primary/60 focus:ring-0 rounded-md min-h-[60px]"
+                        value={section.text}
+                        onChange={(e) => {
+                          const newContent = [...legalForm.terms.content];
+                          newContent[idx].text = e.target.value;
+                          setLegalForm({
+                            ...legalForm,
+                            terms: { ...legalForm.terms, content: newContent },
+                          });
+                        }}
+                        placeholder="Texto da Seção"
+                      />
+                    </div>
+                  ),
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}

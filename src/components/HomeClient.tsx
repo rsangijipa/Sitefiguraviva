@@ -13,6 +13,7 @@ import FounderSection from "./sections/FounderSection";
 import ResourcesSection from "./ResourcesSection";
 import InstagramSection from "./InstagramSection";
 import FloatingControls from "./ui/FloatingControls";
+import { useUI } from "@/context/UIContext";
 import GalleryModal from "./GalleryModal";
 import CalendarModal from "./CalendarModal";
 import PDFReader from "./PDFReader";
@@ -51,15 +52,11 @@ export default function HomeClient({ initialData }: HomeClientProps = {}) {
     initialData: initialData?.gallery,
   });
 
-  const [alertMessage, setAlertMessage] = useState(
-    "Bem-vindos ao Instituto Figura Viva",
-  );
+  const { showAlert } = useUI();
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("alertMessage");
-      if (saved) setAlertMessage(saved);
-    }
+    // Set initial alert if needed, or fetch from DB
+    showAlert("Bem-vindos ao Instituto Figura Viva");
   }, []);
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -115,7 +112,7 @@ export default function HomeClient({ initialData }: HomeClientProps = {}) {
 
   return (
     <div className="bg-paper min-h-screen flex flex-col font-sans text-primary overflow-hidden">
-      <AlertBar message={alertMessage} />
+      <AlertBar />
       <Navbar />
 
       <main>

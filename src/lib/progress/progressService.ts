@@ -213,7 +213,7 @@ export const progressService = {
         console.log(
           `[ProgressService] Triggering certificate for ${uid} in course ${courseId}`,
         );
-        await issueCertificate(courseId);
+        await issueCertificate(courseId, uid);
       } catch (e) {
         console.error("[ProgressService] Certificate issuance failed:", e);
       }

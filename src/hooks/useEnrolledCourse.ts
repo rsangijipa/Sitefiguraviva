@@ -43,32 +43,24 @@ export function useEnrolledCourse(
       if (!courseDoc.exists()) throw new Error("Course not found");
       const course = { id: courseDoc.id, ...courseDoc.data() };
 
-      // B. Check Enrollment (Root Collection source of truth)
-      const enrollmentQ = query(
-        collection(db, "enrollments"),
-        where("uid", "==", userId),
-        where("courseId", "==", courseId),
-      );
-      const enrollmentSnap = await getDocs(enrollmentQ);
+      // B. Check Enrollment (Canonical Source of Truth: enrollments/{uid}_{courseId})
+      const enrollmentRef = doc(db, "enrollments", `${userId}_${courseId}`);
+      const enrollmentSnap = await getDoc(enrollmentRef);
+
       let enrollmentData = null;
       let status = "none";
       let progressData: any = {};
 
-      if (!enrollmentSnap.empty) {
-        // Priority: active enrollment
-        const active = enrollmentSnap.docs.find(
-          (d) => d.data().status === "active",
-        );
-        const docToUse = active || enrollmentSnap.docs[0];
-        enrollmentData = { id: docToUse.id, ...docToUse.data() };
+      if (enrollmentSnap.exists()) {
+        enrollmentData = { id: enrollmentSnap.id, ...enrollmentSnap.data() };
         status = enrollmentData.status || "none";
         console.log(
-          `[useEnrolledCourse] Found enrollment info. Status: ${status}`,
+          `[useEnrolledCourse] Found canonical enrollment. Status: ${status}`,
           enrollmentData,
         );
       } else {
         console.warn(
-          `[useEnrolledCourse] No enrollment found for UID: ${userId} and Course: ${courseId}`,
+          `[useEnrolledCourse] No enrollment found for canonical ID: ${userId}_${courseId}`,
         );
       }
 
@@ -206,8 +198,11 @@ export function useEnrolledCourse(
       await setDoc(
         enrollmentRef,
         {
-          lastLessonId: lessonId,
           lastAccessedAt: Timestamp.now(),
+          progressSummary: {
+            lastLessonId: lessonId,
+            lastAccess: Timestamp.now(),
+          },
         },
         { merge: true },
       );

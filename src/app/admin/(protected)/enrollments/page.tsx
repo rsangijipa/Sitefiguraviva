@@ -13,11 +13,12 @@ import {
   doc,
   serverTimestamp,
 } from "firebase/firestore";
-import { Search, User, Plus, GraduationCap, X } from "lucide-react";
+import { Search, User, Plus, GraduationCap, X, Layers } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
 import { useCourses } from "@/hooks/useContent";
 import Button from "@/components/ui/Button";
 import { EnrollmentCard } from "./EnrollmentCard";
+import BatchEnrollModal from "./BatchEnrollModal";
 
 export default function EnrollmentsManager() {
   const [users, setUsers] = useState<any[]>([]);
@@ -27,6 +28,7 @@ export default function EnrollmentsManager() {
   const { addToast } = useToast();
   const { data: courses } = useCourses(true);
   const [isEnrolling, setIsEnrolling] = useState(false);
+  const [isBatchOpen, setIsBatchOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState("");
 
   // Fetch Users
@@ -185,13 +187,23 @@ export default function EnrollmentsManager() {
                   </p>
                 </div>
               </div>
-              <Button
-                onClick={() => setIsEnrolling(true)}
-                leftIcon={<Plus size={16} />}
-                size="sm"
-              >
-                Nova Matrícula
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => setIsBatchOpen(true)}
+                  leftIcon={<Layers size={16} />}
+                  variant="outline"
+                  size="sm"
+                >
+                  Lote
+                </Button>
+                <Button
+                  onClick={() => setIsEnrolling(true)}
+                  leftIcon={<Plus size={16} />}
+                  size="sm"
+                >
+                  Nova Matrícula
+                </Button>
+              </div>
             </header>
 
             {isEnrolling && (
@@ -254,12 +266,29 @@ export default function EnrollmentsManager() {
             </div>
           </div>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-stone-300 bg-stone-50/50 rounded-3xl border border-stone-100 border-dashed">
+          <div className="flex-1 flex flex-col items-center justify-center text-stone-300 bg-stone-50/50 rounded-3xl border border-stone-100 border-dashed p-10 text-center">
             <User size={48} className="mb-4 opacity-20" />
-            <p>Selecione um aluno para gerenciar matrículas.</p>
+            <p className="mb-6">
+              Selecione um aluno para gerenciar matrículas.
+            </p>
+            <div className="flex gap-4">
+              <Button
+                onClick={() => setIsBatchOpen(true)}
+                leftIcon={<Layers size={18} />}
+                variant="outline"
+              >
+                Matrícula em Lote
+              </Button>
+            </div>
           </div>
         )}
       </div>
+
+      <BatchEnrollModal
+        isOpen={isBatchOpen}
+        onClose={() => setIsBatchOpen(false)}
+        courses={courses || []}
+      />
     </div>
   );
 }

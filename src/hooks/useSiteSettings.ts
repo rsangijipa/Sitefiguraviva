@@ -37,7 +37,12 @@ export const useSEOSettings = (initialData?: SEOSettings) => {
   });
 };
 
-import { DEFAULT_TEAM, TeamSettings } from "@/lib/siteSettings";
+import {
+  DEFAULT_TEAM,
+  TeamSettings,
+  DEFAULT_LEGAL,
+  LegalSettings,
+} from "@/lib/siteSettings";
 
 export const useTeamSettings = () => {
   return useQuery({
@@ -45,5 +50,14 @@ export const useTeamSettings = () => {
     queryFn: () => getSiteSettings<TeamSettings>("team", DEFAULT_TEAM),
     initialData: DEFAULT_TEAM,
     staleTime: 1000 * 60 * 15,
+  });
+};
+
+export const useLegalSettings = () => {
+  return useQuery({
+    queryKey: ["siteSettings", "legal"],
+    queryFn: () => getSiteSettings<LegalSettings>("legal", DEFAULT_LEGAL),
+    initialData: DEFAULT_LEGAL,
+    staleTime: 1000 * 60 * 60, // 1 hour
   });
 };
