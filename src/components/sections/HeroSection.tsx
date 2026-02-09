@@ -25,8 +25,8 @@ const staggerContainer = {
   },
 };
 
-export default function HeroSection() {
-  const { data } = useInstituteSettings();
+export default function HeroSection({ initialData }: { initialData?: any }) {
+  const { data } = useInstituteSettings(initialData);
   const whatsappNumber = data.phone.replace(/\D/g, "");
 
   return (
