@@ -1,113 +1,125 @@
-'use server';
+"use server";
 
-import { adminDb } from '@/lib/firebase/admin';
-import { requireAdmin } from '@/lib/auth/server';
-import {
-    DEFAULT_FOUNDER,
-    DEFAULT_INSTITUTE,
-    DEFAULT_TEAM,
-    FounderSettings,
-    InstituteSettings,
-    TeamSettings
-} from '@/lib/siteSettings';
-import { Timestamp } from 'firebase-admin/firestore';
+import { adminDb, adminAuth } from "@/lib/firebase/admin";
+import { Timestamp } from "firebase-admin/firestore";
+import { cookies } from "next/headers";
+import { revalidatePath } from "next/cache";
 
-// --- Seed Action ---
+/**
+ * Helper to ensure the user is an admin.
+ * @throws Error if not authenticated or not an admin.
+ */
+async function assertIsAdmin() {
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get("session")?.value;
+
+  if (!sessionCookie) {
+    throw new Error("Unauthenticated");
+  }
+
+  const decodedToken = await adminAuth.verifySessionCookie(sessionCookie, true);
+
+  // Check role in token first (fastest)
+  if (decodedToken.role === "admin" || decodedToken.admin === true) {
+    return decodedToken;
+  }
+
+  // Double check database source of truth (safest)
+  const userDoc = await adminDb.collection("users").doc(decodedToken.uid).get();
+  const userData = userDoc.data();
+
+  if (userData?.role !== "admin") {
+    throw new Error("Access Denied: Admin role required.");
+  }
+
+  return decodedToken;
+}
+
+export async function updateSiteSettings(
+  key: "founder" | "institute" | "seo" | "team",
+  data: any,
+) {
+  try {
+    const user = await assertIsAdmin();
+
+    await adminDb
+      .collection("siteSettings")
+      .doc(key)
+      .set(
+        {
+          ...data,
+          updatedAt: Timestamp.now(),
+          updatedBy: user.email,
+        },
+        { merge: true },
+      );
+
+    revalidatePath("/", "layout"); // Revalidate everything as header/footer might change
+    return { success: true };
+  } catch (error: any) {
+    console.error(`Error updating settings/${key}:`, error);
+    return { success: false, error: error.message };
+  }
+}
 
 export async function seedSiteSettingsAction() {
-    try {
-        await requireAdmin(); // Gate: Admin only
+  try {
+    await assertIsAdmin();
+    const batch = adminDb.batch();
 
-        const batch = adminDb.batch();
+    const defaults = {
+      founder: {
+        name: "Lilian Gusmão",
+        role: "Fundadora e Responsável Técnica",
+        bio: "Psicóloga com mais de 20 anos de experiência...",
+        image: "/uploads/lilian.jpg", // Placeholder
+        link: "http://lattes.cnpq.br/...",
+      },
+      institute: {
+        title: "Instituto Figura Viva",
+        subtitle:
+          "Um espaço vivo de acolhimento clínico e formação profissional.",
+        address: "Rua Exemplo, 123 - Ouro Preto D'Oeste/RO",
+        phone: "(69) 99999-9999",
+        manifesto_title: "Nossa Essência",
+        manifesto_text: "Acreditamos na potência do encontro...",
+        quote: "Onde a vida acontece.",
+      },
+      seo: {
+        title: "Instituto Figura Viva",
+        description: "Página oficial do Instituto Figura Viva.",
+        keywords: ["psicologia", "gestalt", "formação"],
+      },
+    };
 
-        // 1. Founder
-        const founderRef = adminDb.collection('siteSettings').doc('founder');
-        const founderSnap = await founderRef.get();
-        if (!founderSnap.exists) {
-            batch.set(founderRef, {
-                ...DEFAULT_FOUNDER,
-                updatedAt: Timestamp.now(),
-                updatedBy: 'seed-script'
-            });
-        }
+    const founderRef = adminDb.collection("siteSettings").doc("founder");
+    const instituteRef = adminDb.collection("siteSettings").doc("institute");
+    const seoRef = adminDb.collection("siteSettings").doc("seo");
 
-        // 2. Institute
-        const instituteRef = adminDb.collection('siteSettings').doc('institute');
-        const instituteSnap = await instituteRef.get();
-        if (!instituteSnap.exists) {
-            batch.set(instituteRef, {
-                ...DEFAULT_INSTITUTE,
-                updatedAt: Timestamp.now(),
-                updatedBy: 'seed-script'
-            });
-        }
+    const [fSnap, iSnap, sSnap] = await Promise.all([
+      founderRef.get(),
+      instituteRef.get(),
+      seoRef.get(),
+    ]);
 
-        // 3. Team
-        const teamRef = adminDb.collection('siteSettings').doc('team');
-        const teamSnap = await teamRef.get();
-        if (!teamSnap.exists) {
-            batch.set(teamRef, {
-                ...DEFAULT_TEAM,
-                updatedAt: Timestamp.now(),
-                updatedBy: 'seed-script'
-            });
-        }
+    if (!fSnap.exists)
+      batch.set(founderRef, {
+        ...defaults.founder,
+        updatedAt: Timestamp.now(),
+      });
+    if (!iSnap.exists)
+      batch.set(instituteRef, {
+        ...defaults.institute,
+        updatedAt: Timestamp.now(),
+      });
+    if (!sSnap.exists)
+      batch.set(seoRef, { ...defaults.seo, updatedAt: Timestamp.now() });
 
-        await batch.commit();
-
-        return { success: true, message: 'Site settings seeded successfully (idempotent).' };
-    } catch (error: any) {
-        console.error('Seed Error:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-// --- Update Actions ---
-
-export async function updateFounderSettingsAction(data: Partial<FounderSettings>) {
-    try {
-        const claims = await requireAdmin();
-
-        await adminDb.collection('siteSettings').doc('founder').set({
-            ...data,
-            updatedAt: Timestamp.now(),
-            updatedBy: claims.uid
-        }, { merge: true });
-
-        return { success: true };
-    } catch (error: any) {
-        return { success: false, error: error.message };
-    }
-}
-
-export async function updateInstituteSettingsAction(data: Partial<InstituteSettings>) {
-    try {
-        const claims = await requireAdmin();
-
-        await adminDb.collection('siteSettings').doc('institute').set({
-            ...data,
-            updatedAt: Timestamp.now(),
-            updatedBy: claims.uid
-        }, { merge: true });
-
-        return { success: true };
-    } catch (error: any) {
-        return { success: false, error: error.message };
-    }
-}
-
-export async function updateTeamSettingsAction(data: TeamSettings) {
-    try {
-        const claims = await requireAdmin();
-
-        await adminDb.collection('siteSettings').doc('team').set({
-            members: data.members,
-            updatedAt: Timestamp.now(),
-            updatedBy: claims.uid
-        }, { merge: true }); // Merge true preserves other fields if any, but members array is replaced
-
-        return { success: true };
-    } catch (error: any) {
-        return { success: false, error: error.message };
-    }
+    await batch.commit();
+    revalidatePath("/", "layout");
+    return { success: true };
+  } catch (error: any) {
+    console.error("Seed Error:", error);
+    return { success: false, error: error.message };
+  }
 }
