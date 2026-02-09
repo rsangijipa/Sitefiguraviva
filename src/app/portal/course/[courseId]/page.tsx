@@ -1,55 +1,63 @@
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { auth } from "@/lib/firebase/admin";
+import { getCourseData } from "@/lib/courseService";
+import CourseClient from "./CourseClient";
+import { assertCanAccessCourse } from "@/lib/auth/access-gate";
+import { AccessError } from "@/lib/auth/access-types";
 
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
-import { auth } from '@/lib/firebase/admin';
-import { getCourseData } from '@/lib/courseService';
-import CourseClient from './CourseClient';
-import { assertCanAccessCourse } from '@/lib/auth/access-gate';
-import { AccessError } from '@/lib/auth/access-types';
+export default async function CoursePage({
+  params,
+}: {
+  params: Promise<{ courseId: string }>;
+}) {
+  const { courseId } = await params;
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get("session")?.value;
 
-export default async function CoursePage({ params }: { params: Promise<{ courseId: string }> }) {
-    const { courseId } = await params;
-    const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get('session')?.value;
+  if (!sessionCookie) {
+    redirect("/login");
+  }
 
-    if (!sessionCookie) {
-        redirect('/login');
+  const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
+  const uid = decodedClaims.uid;
+
+  // ORBITAL 01 & 05: Single Source of Truth Access Gate
+  try {
+    await assertCanAccessCourse(uid, courseId);
+  } catch (error) {
+    if (error instanceof AccessError) {
+      // If the course is not available/published, restrict access completely
+      if (error.code === "COURSE_NOT_AVAILABLE") {
+        redirect("/portal?error=course_unavailable");
+      }
+      // Other access errors (expired, pending) might still allow partial view or specific error page
+      // For now, continue to fetch data which contains isAccessDenied flag
+    } else {
+      throw error;
     }
+  }
 
-    const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
-    const uid = decodedClaims.uid;
+  // Server-Side Data Fetch
+  const data = await getCourseData(courseId, uid);
 
-    // ORBITAL 01 & 05: Single Source of Truth Access Gate
-    try {
-        await assertCanAccessCourse(uid, courseId);
-    } catch (error) {
-        if (error instanceof AccessError) {
-            // Depending on the error, we might redirect or show a specific UI
-            // For now, continue to fetch data which contains isAccessDenied flag
-        } else {
-            throw error;
-        }
-    }
+  if (!data) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <h1 className="text-2xl font-serif text-primary">
+          Curso não encontrado.
+        </h1>
+      </div>
+    );
+  }
 
-    // Server-Side Data Fetch
-    const data = await getCourseData(courseId, uid);
+  // Access Control handled in Client or via middleware, but strictly we could redirect here if we want no-render
+  if (data.isAccessDenied) {
+    // We pass data to Client to show "Paywall" UI properly
+  }
 
-    if (!data) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <h1 className="text-2xl font-serif text-primary">Curso não encontrado.</h1>
-            </div>
-        );
-    }
+  // Serialize
+  const serializedData = JSON.parse(JSON.stringify(data));
 
-    // Access Control handled in Client or via middleware, but strictly we could redirect here if we want no-render
-    if (data.isAccessDenied) {
-        // We pass data to Client to show "Paywall" UI properly
-    }
-
-    // Serialize
-    const serializedData = JSON.parse(JSON.stringify(data));
-
-    return <CourseClient initialData={serializedData} />;
+  return <CourseClient initialData={serializedData} />;
 }
-

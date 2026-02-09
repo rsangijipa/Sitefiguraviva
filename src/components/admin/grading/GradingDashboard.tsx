@@ -247,7 +247,7 @@ export default function GradingDashboard({ courseId }: { courseId?: string }) {
 
       {/* Grading Modal */}
       {selectedSubmission && assessment && (
-        <Modal onClose={() => setSelectedSubmission(null)}>
+        <Modal isOpen={true} onClose={() => setSelectedSubmission(null)}>
           <div className="space-y-6 max-h-[80vh] overflow-y-auto pr-2">
             {/* Header */}
             <div>

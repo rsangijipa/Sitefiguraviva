@@ -333,3 +333,44 @@ export async function getPlatformAnalytics() {
     return { error: "Erro ao buscar analytics da plataforma" };
   }
 }
+
+/**
+ * Track granular student interaction events
+ */
+export type EventType =
+  | "video_play"
+  | "video_pause"
+  | "video_complete"
+  | "quiz_start"
+  | "quiz_complete"
+  | "document_open"
+  | "page_view";
+
+export async function trackEvent(
+  type: EventType,
+  resourceId: string,
+  metadata: Record<string, any> = {},
+) {
+  try {
+    const sessionCookie = (await cookies()).get("session")?.value;
+    if (!sessionCookie) return { success: false, error: "Unauthenticated" };
+
+    const decodedToken = await auth.verifySessionCookie(sessionCookie, true);
+    const uid = decodedToken.uid;
+
+    const eventId = `${uid}_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+
+    await adminDb.collection("analytics_events").doc(eventId).set({
+      userId: uid,
+      type,
+      resourceId,
+      metadata,
+      timestamp: new Date(), // using Date for standard Firestore timestamp consistency in this file
+    });
+
+    return { success: true };
+  } catch (error: any) {
+    console.error("[TrackEvent Error]:", error);
+    return { success: false, error: error.message };
+  }
+}

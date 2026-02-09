@@ -5,6 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 import { assessmentService } from "@/services/assessmentService";
 import { gradeAssessment } from "@/actions/assessment";
+import { trackEvent } from "@/actions/analytics";
 import type {
   AssessmentDoc,
   StudentAnswer,
@@ -88,6 +89,8 @@ export default function QuizTaker({
       setCurrentSubmissionId(submissionId);
       setStartTime(Date.now());
 
+      trackEvent("quiz_start", assessmentId, { courseId: data.courseId });
+
       // Shuffle questions if configured
       if (data.shuffleQuestions) {
         data.questions = [...data.questions].sort(() => Math.random() - 0.5);
@@ -141,6 +144,11 @@ export default function QuizTaker({
         currentSubmissionId,
         answersArray,
       );
+
+      trackEvent("quiz_complete", assessmentId, {
+        courseId: assessment.courseId,
+        submissionId: currentSubmissionId,
+      });
 
       // Grade assessment (server-side)
       const result = await gradeAssessment(currentSubmissionId);

@@ -233,7 +233,7 @@ export function useEnrolledCourse(
       if (!userId) return;
 
       // Use Server Action (Fixes LOG-02 & PRG-02)
-      await import("@/actions/progress").then(({ updateLessonProgress }) =>
+      await import("@/app/actions/progress").then(({ updateLessonProgress }) =>
         updateLessonProgress(courseId, moduleId, lessonId, {
           status: "completed",
         }),
