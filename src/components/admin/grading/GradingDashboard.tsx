@@ -9,7 +9,13 @@ import {
 import { assessmentService } from "@/services/assessmentService";
 import type { AssessmentDoc, StudentAnswer } from "@/types/assessment";
 import Button from "@/components/ui/Button";
-import { Modal } from "@/components/ui/Modal";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from "@/components/ui/Modal";
 import {
   AlertCircle,
   CheckCircle,
@@ -59,7 +65,7 @@ export default function GradingDashboard({ courseId }: { courseId?: string }) {
         return;
       }
 
-      setSubmissions(result.submissions || []);
+      setSubmissions((result.submissions as any) || []);
     } catch (error) {
       console.error("Load Submissions Error:", error);
       addToast("Erro ao carregar submissões", "error");
@@ -248,13 +254,12 @@ export default function GradingDashboard({ courseId }: { courseId?: string }) {
       {/* Grading Modal */}
       {selectedSubmission && assessment && (
         <Modal isOpen={true} onClose={() => setSelectedSubmission(null)}>
-          <div className="space-y-6 max-h-[80vh] overflow-y-auto pr-2">
-            {/* Header */}
-            <div>
-              <h2 className="text-2xl font-bold font-serif text-stone-800 mb-2">
+          <ModalContent size="lg">
+            <ModalHeader>
+              <h2 className="text-2xl font-bold font-serif text-stone-800">
                 {assessment.title}
               </h2>
-              <div className="flex items-center gap-3 text-sm text-stone-600">
+              <div className="flex items-center gap-3 text-sm text-stone-600 mt-1">
                 <div className="flex items-center gap-1">
                   <User size={14} />
                   <span>{selectedSubmission.studentName}</span>
@@ -262,181 +267,191 @@ export default function GradingDashboard({ courseId }: { courseId?: string }) {
                 <div>•</div>
                 <div>{selectedSubmission.studentEmail}</div>
               </div>
-            </div>
+            </ModalHeader>
+            <ModalBody>
+              <div className="space-y-6">
+                {/* Questions & Grading */}
+                <div className="space-y-4">
+                  {assessment.questions.map((question, idx) => {
+                    const answer = selectedSubmission.answers.find(
+                      (a) => a.questionId === question.id,
+                    );
+                    const isManualGrade =
+                      question.type === "essay" ||
+                      question.type === "practical";
 
-            {/* Questions & Grading */}
-            <div className="space-y-4">
-              {assessment.questions.map((question, idx) => {
-                const answer = selectedSubmission.answers.find(
-                  (a) => a.questionId === question.id,
-                );
-                const isManualGrade =
-                  question.type === "essay" || question.type === "practical";
+                    return (
+                      <div
+                        key={question.id}
+                        className="bg-stone-50 rounded-xl p-4 space-y-3"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold shrink-0 text-sm">
+                            {idx + 1}
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-bold text-stone-800 mb-1">
+                              {question.title}
+                            </h3>
+                            <div className="text-xs text-stone-500 mb-2">
+                              {question.points} pontos • {question.type}
+                            </div>
 
-                return (
-                  <div
-                    key={question.id}
-                    className="bg-stone-50 rounded-xl p-4 space-y-3"
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold shrink-0 text-sm">
-                        {idx + 1}
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-bold text-stone-800 mb-1">
-                          {question.title}
-                        </h3>
-                        <div className="text-xs text-stone-500 mb-2">
-                          {question.points} pontos • {question.type}
+                            {/* Student Answer */}
+                            {question.type === "essay" &&
+                              answer?.textAnswer && (
+                                <div className="bg-white rounded-lg p-4 border border-stone-200 mb-3">
+                                  <div className="text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">
+                                    Resposta do Aluno:
+                                  </div>
+                                  <p className="text-stone-800 whitespace-pre-wrap">
+                                    {answer.textAnswer}
+                                  </p>
+                                </div>
+                              )}
+
+                            {question.type === "practical" &&
+                              answer?.fileUrl && (
+                                <div className="bg-white rounded-lg p-4 border border-stone-200 mb-3">
+                                  <div className="text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">
+                                    Arquivo Enviado:
+                                  </div>
+                                  <a
+                                    href={answer.fileUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-primary hover:underline flex items-center gap-2"
+                                  >
+                                    <FileText size={16} />
+                                    Visualizar arquivo
+                                  </a>
+                                </div>
+                              )}
+
+                            {/* Auto-graded display */}
+                            {!isManualGrade && answer && (
+                              <div
+                                className={cn(
+                                  "inline-flex items-center gap-2 px-3 py-1 rounded-lg text-sm font-bold",
+                                  answer.isCorrect
+                                    ? "bg-green-100 text-green-700"
+                                    : "bg-red-100 text-red-700",
+                                )}
+                              >
+                                {answer.isCorrect ? (
+                                  <CheckCircle size={14} />
+                                ) : (
+                                  <AlertCircle size={14} />
+                                )}
+                                {answer.isCorrect ? "Correta" : "Incorreta"} •{" "}
+                                {answer.pointsEarned || 0}/{question.points} pts
+                              </div>
+                            )}
+
+                            {/* Manual Grading Input */}
+                            {isManualGrade && (
+                              <div>
+                                <label className="block text-sm font-bold text-stone-700 mb-2">
+                                  Nota (0 a {question.points})
+                                </label>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  max={question.points}
+                                  step="0.5"
+                                  value={grades[question.id] || 0}
+                                  onChange={(e) =>
+                                    setGrades({
+                                      ...grades,
+                                      [question.id]:
+                                        parseFloat(e.target.value) || 0,
+                                    })
+                                  }
+                                  className="w-32 px-4 py-2 rounded-lg border-2 border-stone-200 focus:border-primary outline-none"
+                                />
+                              </div>
+                            )}
+                          </div>
                         </div>
-
-                        {/* Student Answer */}
-                        {question.type === "essay" && answer?.textAnswer && (
-                          <div className="bg-white rounded-lg p-4 border border-stone-200 mb-3">
-                            <div className="text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">
-                              Resposta do Aluno:
-                            </div>
-                            <p className="text-stone-800 whitespace-pre-wrap">
-                              {answer.textAnswer}
-                            </p>
-                          </div>
-                        )}
-
-                        {question.type === "practical" && answer?.fileUrl && (
-                          <div className="bg-white rounded-lg p-4 border border-stone-200 mb-3">
-                            <div className="text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">
-                              Arquivo Enviado:
-                            </div>
-                            <a
-                              href={answer.fileUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-primary hover:underline flex items-center gap-2"
-                            >
-                              <FileText size={16} />
-                              Visualizar arquivo
-                            </a>
-                          </div>
-                        )}
-
-                        {/* Auto-graded display */}
-                        {!isManualGrade && answer && (
-                          <div
-                            className={cn(
-                              "inline-flex items-center gap-2 px-3 py-1 rounded-lg text-sm font-bold",
-                              answer.isCorrect
-                                ? "bg-green-100 text-green-700"
-                                : "bg-red-100 text-red-700",
-                            )}
-                          >
-                            {answer.isCorrect ? (
-                              <CheckCircle size={14} />
-                            ) : (
-                              <AlertCircle size={14} />
-                            )}
-                            {answer.isCorrect ? "Correta" : "Incorreta"} •{" "}
-                            {answer.pointsEarned || 0}/{question.points} pts
-                          </div>
-                        )}
-
-                        {/* Manual Grading Input */}
-                        {isManualGrade && (
-                          <div>
-                            <label className="block text-sm font-bold text-stone-700 mb-2">
-                              Nota (0 a {question.points})
-                            </label>
-                            <input
-                              type="number"
-                              min="0"
-                              max={question.points}
-                              step="0.5"
-                              value={grades[question.id] || 0}
-                              onChange={(e) =>
-                                setGrades({
-                                  ...grades,
-                                  [question.id]:
-                                    parseFloat(e.target.value) || 0,
-                                })
-                              }
-                              className="w-32 px-4 py-2 rounded-lg border-2 border-stone-200 focus:border-primary outline-none"
-                            />
-                          </div>
-                        )}
                       </div>
-                    </div>
+                    );
+                  })}
+                </div>
+
+                {/* Feedback */}
+                <div>
+                  <label className="block text-sm font-bold text-stone-700 mb-2">
+                    Feedback Geral (Opcional)
+                  </label>
+                  <textarea
+                    value={feedback}
+                    onChange={(e) => setFeedback(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border-2 border-stone-200 focus:border-primary outline-none min-h-[100px] resize-y"
+                    placeholder="Comentários sobre o desempenho do aluno..."
+                  />
+                </div>
+
+                {/* Summary */}
+                <div className="bg-primary/5 rounded-xl p-4 border-2 border-primary/20">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-bold text-stone-700">
+                      Nota Final:
+                    </span>
+                    <span className="text-2xl font-bold text-stone-800">
+                      {getTotalScore()} / {assessment.totalPoints}
+                    </span>
                   </div>
-                );
-              })}
-            </div>
-
-            {/* Feedback */}
-            <div>
-              <label className="block text-sm font-bold text-stone-700 mb-2">
-                Feedback Geral (Opcional)
-              </label>
-              <textarea
-                value={feedback}
-                onChange={(e) => setFeedback(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border-2 border-stone-200 focus:border-primary outline-none min-h-[100px] resize-y"
-                placeholder="Comentários sobre o desempenho do aluno..."
-              />
-            </div>
-
-            {/* Summary */}
-            <div className="bg-primary/5 rounded-xl p-4 border-2 border-primary/20">
-              <div className="flex items-center justify-between mb-2">
-                <span className="font-bold text-stone-700">Nota Final:</span>
-                <span className="text-2xl font-bold text-stone-800">
-                  {getTotalScore()} / {assessment.totalPoints}
-                </span>
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-stone-700">
+                      Percentual:
+                    </span>
+                    <span
+                      className={cn(
+                        "text-xl font-bold",
+                        getPercentage() >= assessment.passingScore
+                          ? "text-green-600"
+                          : "text-red-600",
+                      )}
+                    >
+                      {getPercentage().toFixed(1)}%
+                    </span>
+                  </div>
+                  <div className="text-xs text-stone-500 mt-2">
+                    Nota mínima: {assessment.passingScore}%
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-stone-700">Percentual:</span>
-                <span
-                  className={cn(
-                    "text-xl font-bold",
-                    getPercentage() >= assessment.passingScore
-                      ? "text-green-600"
-                      : "text-red-600",
-                  )}
+            </ModalBody>
+            <ModalFooter>
+              <div className="flex gap-3">
+                <Button
+                  onClick={() => setSelectedSubmission(null)}
+                  variant="outline"
+                  className="flex-1"
+                  disabled={isGrading}
                 >
-                  {getPercentage().toFixed(1)}%
-                </span>
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={handleGrade}
+                  disabled={isGrading}
+                  className="flex-1 gap-2"
+                >
+                  {isGrading ? (
+                    <>
+                      <Loader2 className="animate-spin" size={16} />
+                      Salvando...
+                    </>
+                  ) : (
+                    <>
+                      <Save size={16} />
+                      Salvar Correção
+                    </>
+                  )}
+                </Button>
               </div>
-              <div className="text-xs text-stone-500 mt-2">
-                Nota mínima: {assessment.passingScore}%
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div className="flex gap-3">
-              <Button
-                onClick={() => setSelectedSubmission(null)}
-                variant="outline"
-                className="flex-1"
-                disabled={isGrading}
-              >
-                Cancelar
-              </Button>
-              <Button
-                onClick={handleGrade}
-                disabled={isGrading}
-                className="flex-1 gap-2"
-              >
-                {isGrading ? (
-                  <>
-                    <Loader2 className="animate-spin" size={16} />
-                    Salvando...
-                  </>
-                ) : (
-                  <>
-                    <Save size={16} />
-                    Salvar Correção
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
+            </ModalFooter>
+          </ModalContent>
         </Modal>
       )}
     </div>

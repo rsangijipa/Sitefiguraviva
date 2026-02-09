@@ -9,8 +9,13 @@ import type {
   MultipleChoiceQuestion,
 } from "@/types/assessment";
 import Button from "@/components/ui/Button";
-import { Modal } from "@/components/ui/Modal";
-import { Plus, Trash2, Save, Loader2, GripVertical } from "@/components/icons";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+} from "@/components/ui/Modal";
+import { Plus, Trash2, Save, Loader2 } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
 interface QuizBuilderProps {
@@ -67,8 +72,8 @@ export default function QuizBuilder({ courseId, onSuccess }: QuizBuilderProps) {
     setFormData((prev) => ({
       ...prev,
       questions:
-        prev.questions?.map((q, i) =>
-          i === index ? { ...q, ...updates } : q,
+        (prev.questions as Question[])?.map((q, i) =>
+          i === index ? ({ ...q, ...updates } as Question) : q,
         ) || [],
     }));
   };
@@ -427,46 +432,63 @@ export default function QuizBuilder({ courseId, onSuccess }: QuizBuilderProps) {
       {/* Question Type Modal */}
       {isAddingQuestion && (
         <Modal
+          isOpen={isAddingQuestion}
           onClose={() => setIsAddingQuestion(false)}
-          title="Tipo de Questão"
         >
-          <div className="grid grid-cols-2 gap-4">
-            <button
-              onClick={() => addQuestion("multiple_choice")}
-              className="p-6 rounded-xl border-2 border-stone-200 hover:border-primary hover:bg-primary/5 transition-all"
-            >
-              <div className="font-bold text-stone-800 mb-2">
-                Múltipla Escolha
+          <ModalContent>
+            <ModalHeader>
+              <h2 className="text-xl font-bold font-serif text-stone-800">
+                Tipo de Questão
+              </h2>
+            </ModalHeader>
+            <ModalBody>
+              <div className="grid grid-cols-2 gap-4">
+                <button
+                  onClick={() => addQuestion("multiple_choice")}
+                  className="p-6 rounded-xl border-2 border-stone-200 hover:border-primary hover:bg-primary/5 transition-all text-left"
+                >
+                  <div className="font-bold text-stone-800 mb-2">
+                    Múltipla Escolha
+                  </div>
+                  <div className="text-sm text-stone-600">
+                    Correção automática
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => addQuestion("true_false")}
+                  className="p-6 rounded-xl border-2 border-stone-200 hover:border-primary hover:bg-primary/5 transition-all text-left"
+                >
+                  <div className="font-bold text-stone-800 mb-2">
+                    Verdadeiro/Falso
+                  </div>
+                  <div className="text-sm text-stone-600">
+                    Correção automática
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => addQuestion("essay")}
+                  className="p-6 rounded-xl border-2 border-stone-200 hover:border-primary hover:bg-primary/5 transition-all text-left"
+                >
+                  <div className="font-bold text-stone-800 mb-2">
+                    Dissertativa
+                  </div>
+                  <div className="text-sm text-stone-600">Correção manual</div>
+                </button>
+
+                <button
+                  onClick={() => addQuestion("practical")}
+                  className="p-6 rounded-xl border-2 border-stone-200 hover:border-primary hover:bg-primary/5 transition-all text-left"
+                >
+                  <div className="font-bold text-stone-800 mb-2">Prática</div>
+                  <div className="text-sm text-stone-600">
+                    Upload de arquivo
+                  </div>
+                </button>
               </div>
-              <div className="text-sm text-stone-600">Correção automática</div>
-            </button>
-
-            <button
-              onClick={() => addQuestion("true_false")}
-              className="p-6 rounded-xl border-2 border-stone-200 hover:border-primary hover:bg-primary/5 transition-all"
-            >
-              <div className="font-bold text-stone-800 mb-2">
-                Verdadeiro/Falso
-              </div>
-              <div className="text-sm text-stone-600">Correção automática</div>
-            </button>
-
-            <button
-              onClick={() => addQuestion("essay")}
-              className="p-6 rounded-xl border-2 border-stone-200 hover:border-primary hover:bg-primary/5 transition-all"
-            >
-              <div className="font-bold text-stone-800 mb-2">Dissertativa</div>
-              <div className="text-sm text-stone-600">Correção manual</div>
-            </button>
-
-            <button
-              onClick={() => addQuestion("practical")}
-              className="p-6 rounded-xl border-2 border-stone-200 hover:border-primary hover:bg-primary/5 transition-all"
-            >
-              <div className="font-bold text-stone-800 mb-2">Prática</div>
-              <div className="text-sm text-stone-600">Upload de arquivo</div>
-            </button>
-          </div>
+            </ModalBody>
+          </ModalContent>
         </Modal>
       )}
     </div>

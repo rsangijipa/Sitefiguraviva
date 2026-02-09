@@ -21,6 +21,17 @@ const nextConfig = {
             bodySizeLimit: '5mb',
         },
     },
+    // Sentry Configuration (Corrected for modern SDK)
+    sentry: {
+        widenClientFileUpload: true,
+        transpileClientSDK: true,
+        tunnelRoute: "/monitoring",
+        hideSourceMaps: true,
+        // Modern tree-shaking options to replace deprecated disableLogger
+        treeshake: {
+            removeDebugLogging: true,
+        },
+    },
 };
 
 import { withSentryConfig } from '@sentry/nextjs';
@@ -46,18 +57,6 @@ export default withSentryConfig(configWithPWA, {
     // Suppresses source map uploading logs during build
     silent: true,
 
-    // Upload a larger set of source maps for prettier stack traces (increases build time)
-    widenClientFileUpload: true,
-
-    // Transpiles SDK to be compatible with IE11 (increases bundle size)
-    transpileClientSDK: true,
-
-    // Routes browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers
-    tunnelRoute: "/monitoring",
-
-    // Hides source maps from generated client bundles
-    hideSourceMaps: true,
-
-    // Automatically tree-shake Sentry logger statements to reduce bundle size
-    disableLogger: true,
+    // Note: widenClientFileUpload, transpileClientSDK, tunnelRoute, and hideSourceMaps 
+    // have been moved to nextConfig.sentry to resolve deprecation warnings.
 });
