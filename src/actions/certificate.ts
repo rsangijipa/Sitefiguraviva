@@ -203,18 +203,102 @@ export async function issueCertificate(userId: string, courseId: string) {
  * Get certificate by ID (NO AUTH REQUIRED for student viewing their own)
  * Handles both legacy and current certificate schemas
  */
+/**
+ * Get certificate by ID (NO AUTH REQUIRED for student viewing their own)
+ * Handles both legacy and current certificate schemas
+ * ALSO HANDLES: Composite IDs (userId_courseId) for auto-recovery
+ */
 export async function getCertificate(certificateId: string) {
   try {
-    const certDoc = await adminDb
-      .collection("certificates")
-      .doc(certificateId)
-      .get();
+    let certDoc;
+    let actualCertificateId = certificateId;
 
-    if (!certDoc.exists) {
+    // 1. Check if ID is composite (UserId_CourseId)
+    // The image showed an ID like "d7..._Ti..." which is 28 chars + _ + 20 chars
+    if (certificateId.includes("_")) {
+      const [userId, courseId] = certificateId.split("_");
+
+      if (userId && courseId) {
+        console.log(
+          `[getCertificate] Detected composite ID: ${userId}_${courseId}`,
+        );
+
+        // Try to find existing certificate by query
+        const existingQuery = await adminDb
+          .collection("certificates")
+          .where("userId", "==", userId)
+          .where("courseId", "==", courseId)
+          .where("status", "==", "issued")
+          .limit(1)
+          .get();
+
+        if (!existingQuery.empty) {
+          console.log(
+            `[getCertificate] Found existing certificate via composite ID`,
+          );
+          certDoc = existingQuery.docs[0];
+          actualCertificateId = certDoc.id;
+        } else {
+          console.log(
+            `[getCertificate] No certificate found for composite ID. Attempting auto-issue...`,
+          );
+          // AUTO-RECOVERY: If no certificate exists, try to issue one!
+          // We need to bypass the session check in issueCertificate if we want this to work strictly server-side
+          // BUT, issueCertificate relies on cookies.
+          // Let's copy the logic or call it if we can.
+
+          // For safety, let's call issueCertificate. logic inside validates everything.
+          // Note: issueCertificate expects a session. If this call comes from a public context without session, it might fail.
+          // But this is the /portal/ route, so user should be logged in.
+
+          // We'll wrap this in a try/catch specifically for issuance
+          try {
+            // Since we are already in a Server Action context, we can try to call the logic directly
+            // OR just call issueCertificate if we trust the session is there.
+            // The safer bet properly "fixing" the stuck student problem is to just run the issuance logic
+            // directly here but adapted (or call existing export).
+
+            const result = await issueCertificate(userId, courseId);
+            if (result.success && result.certificateId) {
+              console.log(
+                `[getCertificate] Auto-issued certificate: ${result.certificateId}`,
+              );
+              // Now fetch the newly created cert
+              certDoc = await adminDb
+                .collection("certificates")
+                .doc(result.certificateId)
+                .get();
+              actualCertificateId = result.certificateId;
+            } else {
+              console.error(`[getCertificate] Auto-issue failed:`, result);
+              return {
+                error:
+                  result.error ||
+                  "Certificado não encontrado e não pôde ser gerado.",
+              };
+            }
+          } catch (err) {
+            console.error("Auto-issue error", err);
+          }
+        }
+      }
+    }
+
+    // 2. If certDoc is still undefined (was not composite or auto-issue failed/logic skipped), try direct lookup
+    if (!certDoc) {
+      certDoc = await adminDb
+        .collection("certificates")
+        .doc(actualCertificateId)
+        .get();
+    }
+
+    if (!certDoc || !certDoc.exists) {
       return { error: "Certificado não encontrado" };
     }
 
     const data = certDoc.data();
+
+    if (!data) return { error: "Dados do certificado corrompidos" };
 
     // Normalize certificate data to match expected Certificate type from analytics.ts
     const certificate: Certificate = {
@@ -236,9 +320,9 @@ export async function getCertificate(certificateId: string) {
     };
 
     return { certificate };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Get Certificate Error:", error);
-    return { error: "Erro ao buscar certificado" };
+    return { error: `Erro ao buscar certificado: ${error.message}` };
   }
 }
 
