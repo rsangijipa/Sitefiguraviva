@@ -246,5 +246,55 @@ service cloud.firestore {
       // Delete: Admin only
       allow delete: if isAdmin();
     }
+
+    // =========================================================================
+    // 11. PUBLIC DOCS & MEDIA
+    // =========================================================================
+    match /publicDocs/{docId} {
+      allow read: if true; // Public read
+      allow write: if isAdmin();
+    }
+
+    match /gallery/{imageId} {
+      allow read: if true; // Public read
+      allow write: if isAdmin();
+    }
+
+    match /posts/{postId} {
+      // Blog posts
+      allow read: if true; // Public read
+      allow write: if isAdmin();
+    }
+
+    // =========================================================================
+    // 12. APPLICATIONS & APPROVALS
+    // =========================================================================
+    match /applications/{applicationId} {
+      // Applications for courses/programs
+      allow read: if isAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // =========================================================================
+    // 13. PROGRESS TRACKING (Alternative path if using top-level progress)
+    // =========================================================================
+    match /progress/{progressId} {
+      // Already defined above, but ensuring it's accessible
+      allow read: if isAdmin() || isDocOwner();
+      allow write: if isAdmin() || (
+        isAuthenticated() && 
+        request.resource.data.userId == request.auth.uid &&
+        hasActiveEnrollment(request.resource.data.courseId)
+      );
+    }
+
+    // =========================================================================
+    // 14. CATCH-ALL (DENY)
+    // =========================================================================
+    // Explicitly deny access to any collection not mentioned above
+    match /{document=**} {
+      allow read, write: if false;
+    }
   }
 }
