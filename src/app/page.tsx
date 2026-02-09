@@ -8,9 +8,8 @@ export const revalidate = 3600;
 async function getHomeData() {
     try {
         // Parallel fetching of all collections
-        const [openCoursesSnap, publishedCoursesSnap, postsSnap, gallerySnap] = await Promise.all([
-            db.collection('courses').where('status', '==', 'open').get(),
-            db.collection('courses').where('isPublished', '==', true).get(),
+        const [coursesSnap, postsSnap, gallerySnap] = await Promise.all([
+            db.collection('courses').get(),
             db.collection('posts').where('isPublished', '==', true).get(),
             db.collection('gallery').get()
         ]);
@@ -26,11 +25,10 @@ async function getHomeData() {
         const sanitize = (obj: any) => JSON.parse(JSON.stringify(obj));
 
         // Course Merge & Deduplication Strategy
-        const coursesMap = new Map();
-        [...openCoursesSnap.docs, ...publishedCoursesSnap.docs].forEach(doc => {
-            if (!coursesMap.has(doc.id)) {
+        const courses = coursesSnap.docs
+            .map(doc => {
                 const data = doc.data();
-                coursesMap.set(doc.id, sanitize({
+                return sanitize({
                     id: doc.id,
                     title: data.title || '',
                     subtitle: data.subtitle || '',
@@ -39,18 +37,17 @@ async function getHomeData() {
                     coverImage: data.coverImage || '',
                     status: data.status || '',
                     details: data.details || {},
-                    isPublished: true,
+                    isPublished: data.isPublished !== false,
                     created_at: toISO(data.created_at || data.createdAt),
                     updated_at: toISO(data.updated_at || data.updatedAt)
-                }));
-            }
-        });
-
-        const courses = Array.from(coursesMap.values()).sort((a: any, b: any) => {
-            const dateA = new Date(a.created_at || 0).getTime();
-            const dateB = new Date(b.created_at || 0).getTime();
-            return dateB - dateA;
-        });
+                });
+            })
+            .filter((c: any) => c.isPublished !== false || c.status === 'open')
+            .sort((a: any, b: any) => {
+                const dateA = new Date(a.created_at || 0).getTime();
+                const dateB = new Date(b.created_at || 0).getTime();
+                return dateB - dateA;
+            });
 
         const posts = postsSnap.docs.map(doc => {
             const data = doc.data();

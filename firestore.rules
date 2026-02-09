@@ -2,182 +2,300 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // --- Helper Functions ---
-
-    function isSignedIn() { 
-      return request.auth != null; 
+    // =========================
+    // Helpers (expression-only)
+    // =========================
+    function isAuthenticated() {
+      return request.auth != null;
     }
-    
-    function uid() { 
-      return request.auth.uid; 
+
+    function uid() {
+      return request.auth.uid;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && uid() == userId;
+    }
+
+    function isSuperAdminEmail() {
+      return isAuthenticated()
+        && request.auth.token.email == 'liliangusmao@figuraviva.com'
+        && request.auth.token.email_verified == true;
     }
 
     function isAdmin() {
-      // Robust admin check: check Custom Claims (fastest/safest) OR Firestore Doc (backup)
-      // We handle case-insensitive "admin" and "administrador"
-      return isSignedIn() && (
-        request.auth.token.admin == true ||
-        (request.auth.token.get('role', '').lower() in ['admin', 'administrador']) ||
-        (exists(/databases/$(database)/documents/users/$(uid())) && 
-         get(/databases/$(database)/documents/users/$(uid())).data.get('role', 'student').lower() in ['admin', 'administrador'])
+      // Prefer claims. Super admin email only if verified.
+      return isAuthenticated() && (
+        request.auth.token.admin == true
+        || request.auth.token.role == 'admin'
+        || isSuperAdminEmail()
       );
     }
 
-    function isEnrollmentActive(courseId) {
-      let path = /databases/$(database)/documents/enrollments/$(uid() + '_' + courseId);
-      if (!exists(path)) { return false; }
-      let enrollment = get(path).data;
-      
-      let statusValid = enrollment.status in ['active', 'completed'];
-      let timeValid = enrollment.get('paymentMethod', '') != 'subscription' 
-                    || enrollment.get('accessUntil', request.time) >= request.time;
-      
-      return statusValid && timeValid;
+    function courseRef(courseId) {
+      return /databases/$(database)/documents/courses/$(courseId);
     }
 
-    function isCoursePublished(courseId) {
-      let path = /databases/$(database)/documents/courses/$(courseId);
-      if (!exists(path)) { return false; }
-      let course = get(path).data;
-      return course.isPublished == true && course.status == 'open';
+    function isCourseOpenPublished(courseId) {
+      return exists(courseRef(courseId))
+        && get(courseRef(courseId)).data.isPublished == true
+        && get(courseRef(courseId)).data.status == 'open';
     }
 
-    function canAccessContent(courseId) {
-      return isAdmin() || isTeam(courseId) || (isEnrollmentActive(courseId) && isCoursePublished(courseId));
+    function enrollmentRef(courseId) {
+      // Canonical enrollment ID: {uid}_{courseId}
+      return /databases/$(database)/documents/enrollments/$(uid() + '_' + courseId);
     }
 
-    function isTeam(courseId) {
-      return exists(/databases/$(database)/documents/courses/$(courseId)/team/$(uid()));
+    function isEnrolledActive(courseId) {
+      return isAuthenticated()
+        && exists(enrollmentRef(courseId))
+        && get(enrollmentRef(courseId)).data.status == 'active';
     }
 
-    // --- Collections ---
-
-    // USERS (Strict Privacy)
-    match /users/{userId} {
-      allow read: if isAdmin() || (isSignedIn() && userId == uid());
-      allow create: if isSignedIn() && userId == uid();
-      // Allow users to update their own profile, but NOT their role
-      allow update: if isAdmin() || (isSignedIn() && userId == uid() && !("role" in request.resource.data));
+    function canReadCourseCatalog(courseId) {
+      // catalog can be public for published/open
+      return isCourseOpenPublished(courseId) || isAdmin();
     }
 
-    // APPLICATIONS (Interessados)
-    match /applications/{appId} {
-      allow read, write: if isAdmin();
-      allow create: if true; // Public lead capture
+    function canReadCourseContent(courseId) {
+      // content requires active enrollment + published/open course
+      return (isCourseOpenPublished(courseId) && isEnrolledActive(courseId)) || isAdmin();
     }
 
-    // COURSES (Catalog & Content)
+    function isPublishedOrAdmin() {
+      // STRICT: must be explicitly true
+      return (resource.data.isPublished == true) || isAdmin();
+    }
+
+    // =========================
+    // Courses (catalog) + Content (enrolled-only)
+    // =========================
     match /courses/{courseId} {
-      // Read: Public/Open OR Authorized OR Admin/Team
-      allow read: if canAccessContent(courseId) || resource.data.status == 'open'; 
-      allow write: if isAdmin() || isTeam(courseId);
+      // Course doc (catalog)
+      allow read: if (resource.data.isPublished == true && resource.data.status == 'open') || isAdmin();
+      allow write: if isAdmin();
 
-      // Subcollections inherit logic but specific rules apply
+      // Modules (enrolled-only + published-only)
       match /modules/{moduleId} {
-        allow read: if canAccessContent(courseId);
-        allow write: if isAdmin() || isTeam(courseId);
+        allow read: if canReadCourseContent(courseId) && isPublishedOrAdmin();
+        allow write: if isAdmin();
 
+        // Lessons (enrolled-only + published-only)
         match /lessons/{lessonId} {
-          allow read: if canAccessContent(courseId);
-          allow write: if isAdmin() || isTeam(courseId);
+          allow read: if canReadCourseContent(courseId) && isPublishedOrAdmin();
+          allow write: if isAdmin();
 
-          match /blocks/{blockId} {
-              allow read: if canAccessContent(courseId);
-              allow write: if isAdmin() || isTeam(courseId);
+          // Optional materials
+          match /materials/{materialId} {
+            allow read: if canReadCourseContent(courseId) && isPublishedOrAdmin();
+            allow write: if isAdmin();
           }
         }
       }
 
-      match /materials/{materialId} {
-        allow read: if isAdmin() || isTeam(courseId) || isEnrolled(courseId);
-        allow write: if isAdmin() || isTeam(courseId);
-      }
-
-      match /announcements/{announcementId} {
-        allow read: if isAdmin() || isTeam(courseId) || isEnrolled(courseId);
-        allow write: if isAdmin() || isTeam(courseId);
-      }
-
-      // Community Subcollection (Preferred approach)
+      // Community (enrolled-only)
       match /communityThreads/{threadId} {
-        allow read: if isAdmin() || isTeam(courseId) || isEnrolled(courseId);
-        allow create: if isEnrolled(courseId);
-        allow update: if (isAdmin() || isTeam(courseId)) || (isSignedIn() && request.resource.data.authorId == uid() && resource.data.authorId == uid() && !("isPinned" in request.resource.data) && !("isLocked" in request.resource.data));
-        allow delete: if isAdmin() || isTeam(courseId); // Soft delete preferred via update
+        allow read, create: if canReadCourseContent(courseId);
+
+        allow update: if canReadCourseContent(courseId)
+          && (isAdmin() || resource.data.authorId == uid())
+          && request.resource.data.authorId == resource.data.authorId;
+
+        allow delete: if isAdmin() || (canReadCourseContent(courseId) && resource.data.authorId == uid());
 
         match /replies/{replyId} {
-          allow read: if isAdmin() || isTeam(courseId) || isEnrolled(courseId);
-          allow create: if isEnrolled(courseId);
-          allow update: if (isAdmin() || isTeam(courseId)) || (isSignedIn() && request.resource.data.authorId == uid());
-          allow delete: if isAdmin() || isTeam(courseId);
+          allow read, create: if canReadCourseContent(courseId);
+
+          allow update: if canReadCourseContent(courseId)
+            && (isAdmin() || resource.data.authorId == uid())
+            && request.resource.data.authorId == resource.data.authorId;
+
+          allow delete: if isAdmin() || (canReadCourseContent(courseId) && resource.data.authorId == uid());
         }
       }
 
-      match /team/{memberId} {
-        allow read: if isAdmin() || isTeam(courseId);
-        allow write: if isAdmin() || isTeam(courseId);
+      // Announcements (enrolled-only)
+      match /announcements/{annId} {
+        allow read: if canReadCourseContent(courseId);
+        allow write: if isAdmin();
       }
     }
 
-    // GLOBAL ENROLLMENTS (The Ledger)
+    // =========================
+    // Enrollments (SSoT) - admin/server writes only
+    // =========================
     match /enrollments/{enrollmentId} {
-      // ID scheme: {uid}_{courseId}
-      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == uid());
-      allow write: if isAdmin(); // System/Admin managed
+      allow read: if isAuthenticated()
+        && (
+          isAdmin()
+          || resource.data.userId == uid()
+          || resource.data.uid == uid()
+        );
+
+      // client cannot write; admin/server only
+      allow create, update, delete: if isAdmin();
     }
 
-    // GLOBAL PROGRESS
+    // =========================
+    // Progress (legacy) - admin/server writes only
+    // =========================
     match /progress/{progressId} {
-      // ID scheme: {uid}_{courseId}
-      // Allow read if admin, or doc doesn't exist (to allow 404), or it belongs to user
-      allow read: if isSignedIn() && (
-        isAdmin() || 
-        resource == null || 
-        resource.data.userId == uid() || 
-        isTeam(resource.data.courseId)
-      );
-      
-      // WRITE SECURITY: All progress updates MUST go through Server Actions
-      // to ensure enrollment validation and business logic.
-      allow write: if false; 
+      allow read: if isAuthenticated()
+        && (
+          isAdmin()
+          || resource.data.userId == uid()
+          || resource.data.uid == uid()
+        );
+
+      allow create, update, delete: if isAdmin();
     }
 
-    // GLOBAL CERTIFICATES
-    match /certificates/{certificateId} {
-      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == uid());
-      allow write: if isAdmin(); // Server issued
-    }
-    
-    // EVENTS (Live Sessions)
-    match /events/{eventId} {
-         // Allow reading any event metadata for signed in users
-         // (Required for general agenda queries)
-         allow read: if isSignedIn(); 
-         allow write: if isAdmin();
-    }
-    
-    // SECURITY & AUDIT
-    match /audit_logs/{logId} {
-      allow read: if isAdmin();
-      allow write: if false; 
-    }
-    
-    match /system_logs/{logId} {
-      allow read: if isAdmin();
-      allow write: if false;
-    }
-    
-    // NOTIFICATIONS
-    match /users/{userId}/notifications/{notificationId} {
-      allow read: if isSignedIn() && userId == uid();
-      allow update: if isSignedIn() && userId == uid(); // Only for marking as read
-      allow create: if isAdmin(); // Or server action
+    // =========================
+    // Enrollment Requests (lead pipeline)
+    // =========================
+    match /enrollmentRequests/{requestId} {
+      allow read: if isAuthenticated()
+        && (
+          isAdmin()
+          || resource.data.uid == uid()
+          || resource.data.userId == uid()
+        );
+
+      // Student creates idempotent request: {uid}_{courseId} with status 'new'
+      allow create: if isAuthenticated()
+        && request.resource.data.uid == uid()
+        && requestId == uid() + '_' + request.resource.data.courseId
+        && request.resource.data.status == 'new'
+        && request.resource.data.createdAt <= request.time;
+
+      // Student can only update phone/consent/updatedAt and cannot change status; admin can update anything
+      allow update: if isAdmin()
+        || (
+          isAuthenticated()
+          && resource.data.uid == uid()
+          && request.resource.data.status == resource.data.status
+          && request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['phone', 'consentWhatsApp', 'updatedAt'])
+        );
+
+      allow delete: if isAdmin();
     }
 
-    // CMS PAGES & CONFIG
-    match /pages/{pageId} {
+    // =========================
+    // Lesson Completions (server-only writes)
+    // =========================
+    match /lessonCompletions/{completionId} {
+      allow read: if isAuthenticated() && (isAdmin() || resource.data.uid == uid());
+      allow create, update, delete: if isAdmin();
+    }
+
+    // =========================
+    // Lesson Watch (anti-skip telemetry) - monotonic updates
+    // =========================
+    match /lessonWatch/{watchId} {
+      allow read: if isAuthenticated() && (isAdmin() || resource.data.uid == uid());
+
+      allow create: if isAuthenticated()
+        && request.resource.data.uid == uid()
+        && request.resource.data.maxWatchedSeconds >= 0;
+
+      allow update: if isAdmin()
+        || (
+          isAuthenticated()
+          && resource.data.uid == uid()
+          && request.resource.data.uid == resource.data.uid
+          && request.resource.data.courseId == resource.data.courseId
+          && request.resource.data.lessonId == resource.data.lessonId
+          && request.resource.data.maxWatchedSeconds >= resource.data.maxWatchedSeconds
+          && request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['maxWatchedSeconds', 'durationSeconds', 'strictMode', 'updatedAt', 'uid', 'courseId', 'lessonId'])
+        );
+
+      allow delete: if isAdmin();
+    }
+
+    // =========================
+    // Certificates (private) - admin/server writes
+    // =========================
+    match /certificates/{certId} {
+      allow read: if isAuthenticated()
+        && (
+          isAdmin()
+          || resource.data.userId == uid()
+          || resource.data.uid == uid()
+        );
+
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Public verification (minimal public payload only)
+    match /certificatePublic/{certificateNumber} {
       allow read: if true;
       allow write: if isAdmin();
+    }
+
+    // =========================
+    // Users - protect role & isActive
+    // =========================
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+
+      // Owner can create own profile but cannot create tutor/admin
+      allow create: if isOwner(userId)
+        && (
+          !request.resource.data.keys().hasAny(['role'])
+          || request.resource.data.role == 'student'
+        )
+        && (
+          !request.resource.data.keys().hasAny(['isActive'])
+          || request.resource.data.isActive == true
+        );
+
+      // Owner can update only safe fields; cannot change role/isActive
+      allow update: if isAdmin()
+        || (
+          isOwner(userId)
+          && (
+            !resource.data.keys().hasAny(['role'])
+            || request.resource.data.role == resource.data.role
+          )
+          && (
+            !resource.data.keys().hasAny(['isActive'])
+            || request.resource.data.isActive == resource.data.isActive
+          )
+          && request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['displayName', 'phone', 'photoURL', 'updatedAt', 'consentWhatsApp'])
+        );
+
+      allow delete: if isAdmin();
+
+      match /notifications/{notifId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow update: if (isOwner(userId) || isAdmin())
+          && request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['readAt', 'isRead', 'updatedAt']);
+        allow create, delete: if isAdmin();
+      }
+    }
+
+    // =========================
+    // Events
+    // =========================
+    match /events/{eventId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // =========================
+    // Applications (public lead form) - constrained payload
+    // =========================
+    match /applications/{appId} {
+      allow create: if request.resource.data.keys()
+        .hasOnly(['name', 'phone', 'email', 'message', 'createdAt', 'source'])
+        && request.resource.data.createdAt <= request.time;
+
+      allow read, update, delete: if isAdmin();
     }
   }
 }

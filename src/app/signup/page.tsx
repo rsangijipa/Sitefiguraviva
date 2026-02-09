@@ -1,19 +1,12 @@
-"use client";
+import { redirect } from 'next/navigation';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { Eye, EyeOff, Loader2, UserPlus, ArrowLeft } from 'lucide-react';
-import { motion } from 'framer-motion';
+export default function SignupPage({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
+    const params = new URLSearchParams();
+    Object.entries(searchParams).forEach(([key, value]) => {
+        if (typeof value === 'string') params.set(key, value);
+    });
+    params.set('mode', 'signup');
 
-export default function SignupPage() {
-    const router = useRouter();
-
-    // Redirect to login as registration is only allowed during enrollment
-    useEffect(() => {
-        router.replace('/login?mode=signup');
-    }, [router]);
-
-    return null; // Don't render anything while redirecting
+    redirect(`/auth?${params.toString()}`);
 }
 

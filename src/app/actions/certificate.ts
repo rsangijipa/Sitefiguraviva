@@ -1,7 +1,7 @@
 'use server';
 
 import { auth, db } from '@/lib/firebase/admin';
-import { FieldValue, Timestamp } from 'firebase-admin/firestore';
+import { FieldValue } from 'firebase-admin/firestore';
 import { cookies } from 'next/headers';
 import { publishEvent } from '@/lib/events/bus';
 import { CourseDoc, EnrollmentDoc, ProgressDoc, LessonDoc } from '@/types/lms';
@@ -14,7 +14,11 @@ import { assertCanAccessCourse } from '@/lib/auth/access-gate';
 async function generateVerificationCode(): Promise<string> {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // No I, O, 0, 1 for clarity
     let code = 'FV-';
-    for (let i = 0; i < 5; i++) {
+    // Add Year to make it cleaner and scalable: FV-23-XXXXX
+    const year = new Date().getFullYear().toString().slice(-2);
+    code += `${year}-`;
+
+    for (let i = 0; i < 6; i++) {
         code += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     return code;
@@ -23,6 +27,7 @@ async function generateVerificationCode(): Promise<string> {
 /**
  * Server Action to issue a course certificate.
  * Performs a full server-side re-check of eligibility and structural integrity.
+ * Hardened for SSoT & Idempotency.
  */
 export async function issueCertificate(courseId: string) {
     const cookieStore = await cookies();
@@ -55,10 +60,12 @@ export async function issueCertificate(courseId: string) {
 
         // 2. Determine Academic Version (Policy A: By Enrollment Version)
         const courseVersionAtCompletion = enrollment.courseVersionAtEnrollment || course.contentRevision || 1;
-        const certNaturalKey = `${uid}_${courseId}_v${courseVersionAtCompletion}`;
+
+        // STRICT ID: Certificate ID must be predictable for idempotency
+        const certNaturalKey = `${uid}_${courseId}`;
         const certRef = db.collection('certificates').doc(certNaturalKey);
 
-        // 3. Idempotency Check
+        // 3. Idempotency Check (Fast Path)
         const existingCert = await certRef.get();
         if (existingCert.exists) {
             const data = existingCert.data();
@@ -74,29 +81,25 @@ export async function issueCertificate(courseId: string) {
         let consideredLessonIds: string[] = [];
         let lessonsSnapshot: { id: string; title: string }[] = [];
 
-        if (enrollment.courseSnapshotAtEnrollment?.publishedLessonIds) {
-            consideredLessonIds = enrollment.courseSnapshotAtEnrollment.publishedLessonIds;
-            // Note: If using enrollment snapshot, we might need a way to get titles for the certificate snapshot
-            // For now, if titles are missing, we'll fetch them from the current structure or just use IDs
-        } else {
-            // Live query of published structure
-            const modulesSnap = await db.collection(`courses/${courseId}/modules`)
-                .where('isPublished', '==', true)
+        // STRICT RULE: Only currently published content counts for issuance
+        const modulesSnap = await db.collection(`courses/${courseId}/modules`)
+            .orderBy('order')
+            .get();
+
+        const publishedModules = modulesSnap.docs.filter(m => m.data().isPublished !== false);
+
+        for (const modDoc of publishedModules) {
+            const lessonsSnap = await db.collection(`courses/${courseId}/modules/${modDoc.id}/lessons`)
                 .orderBy('order')
                 .get();
 
-            for (const modDoc of modulesSnap.docs) {
-                const lessonsSnap = await db.collection(`courses/${courseId}/modules/${modDoc.id}/lessons`)
-                    .where('isPublished', '==', true)
-                    .orderBy('order')
-                    .get();
-
-                lessonsSnap.docs.forEach(lDoc => {
-                    const lData = lDoc.data() as LessonDoc;
+            lessonsSnap.docs.forEach(lDoc => {
+                const lData = lDoc.data() as LessonDoc;
+                if (lData.isPublished !== false) {
                     consideredLessonIds.push(lDoc.id);
                     lessonsSnapshot.push({ id: lDoc.id, title: lData.title });
-                });
-            }
+                }
+            });
         }
 
         if (consideredLessonIds.length === 0) {
@@ -112,7 +115,7 @@ export async function issueCertificate(courseId: string) {
 
         const completedSet = new Set(progressSnap.docs.map(d => (d.data() as ProgressDoc).lessonId));
 
-        // 6. Apply Completion Rules (Default: All Lessons)
+        // 6. Apply Completion Rules (All Published Lessons)
         const requiredCount = consideredLessonIds.length;
         let completedRequiredCount = 0;
 
@@ -121,8 +124,12 @@ export async function issueCertificate(courseId: string) {
         });
 
         if (completedRequiredCount < requiredCount) {
+            console.warn(`[Certificate] Missing lessons for ${uid}. Req: ${requiredCount}, Has: ${completedRequiredCount}`);
+            // If we are here, it means progressService thought we were 100%, but re-check failed.
+            // This might happen if a lesson was just published.
+            // We block issuance.
             return {
-                error: 'PROGRESS_INCOMPLETE',
+                error: 'PROGRESS_INCOMPLETE', // Frontend will show "Wait, you have 99%?"
                 status: 400,
                 details: { required: requiredCount, completed: completedRequiredCount }
             };
@@ -130,14 +137,13 @@ export async function issueCertificate(courseId: string) {
 
         // 7. Generate Verification Code and Data
         const verificationCode = await generateVerificationCode();
-        const studentNameSnapshot = enrollment.userId; // Fallback to UID, ideally fetch user display name
 
         // Fetch User name for Snapshot
         const userSnap = await db.collection('users').doc(uid).get();
-        const userName = userSnap.data()?.displayName || uid;
+        const userName = userSnap.data()?.displayName || enrollment.userName || uid;
 
         const integrityHash = crypto.createHash('sha256').update(
-            JSON.stringify({ uid, courseId, courseVersionAtCompletion, consideredLessonIds })
+            JSON.stringify({ uid, courseId, courseVersionAtCompletion, consideredLessonIds, issuedAt: new Date().toISOString() })
         ).digest('hex');
 
         // 8. Transactional Commit
@@ -162,13 +168,15 @@ export async function issueCertificate(courseId: string) {
                     totalLessonsConsidered: requiredCount,
                     lessons: lessonsSnapshot
                 },
-                issuedBy: 'system'
+                issuedBy: 'system',
+                templateVersion: 'v1'
             });
 
             // Update Enrollment Status
             tx.update(enrollmentRef, {
                 status: 'completed',
                 completedAt: now,
+                certificateId: certNaturalKey, // Link back
                 'progressSummary.percent': 100,
                 'progressSummary.completedLessonsCount': requiredCount,
                 updatedAt: now

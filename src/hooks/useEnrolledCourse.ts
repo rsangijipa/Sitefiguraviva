@@ -53,12 +53,33 @@ export function useEnrolledCourse(courseId: string, userId: string | undefined, 
                 };
             }
 
-            // Fetch Progress (Separate Collection)
+            // Fetch Progress (Atomic Collection)
             try {
-                const progressDoc = await getDoc(doc(db, 'progress', `${userId}_${courseId}`));
-                if (progressDoc.exists()) {
-                    progressData = progressDoc.data();
-                }
+                // Query all progress docs for this user/course
+                const progressQ = query(
+                    collection(db, 'progress'),
+                    where('userId', '==', userId),
+                    where('courseId', '==', courseId)
+                );
+                const progressSnap = await getDocs(progressQ);
+
+                // Construct map: lessonId -> status
+                progressSnap.docs.forEach(doc => {
+                    const d = doc.data();
+                    if (d.lessonId) {
+                        progressData[d.lessonId] = {
+                            completed: d.status === 'completed',
+                            maxWatchedSecond: d.maxWatchedSecond,
+                            percent: d.percent
+                        };
+                        // Also check for last accessed timestamp to determine "lastLessonId" candidate?
+                        // Actually, let's keep it simple. The server doesn't track "lastLessonId" in progress docs explicitly easily queryable without sort.
+                        // We rely on enrollment.lastAccessedAt or similar, but for now let's just use what we have.
+                    }
+                    if (d.lastLessonId) {
+                        // Fallback if we decide to store it here, but actually we store it in enrollment or separate tracking doc
+                    }
+                });
             } catch (e) {
                 console.warn("Error fetching progress:", e);
             }
@@ -71,62 +92,62 @@ export function useEnrolledCourse(courseId: string, userId: string | undefined, 
                 .filter(m => !m.visibility || m.visibility === 'enrolled' || m.visibility === 'after_completion'); // Default to enrolled if missing
 
             // D. Fetch Modules & Lessons (Only if Active)
-            // Filter by isPublished: true
+            // Relaxed filter for legacy content support
             const modulesQ = query(
                 collection(db, 'courses', courseId, 'modules'),
-                where('isPublished', '==', true),
                 orderBy('order', 'asc')
             );
             const modulesSnap = await getDocs(modulesQ);
 
-            const modulesPromises = modulesSnap.docs.map(async (mDoc) => {
-                const lessonsQ = query(
-                    collection(db, 'courses', courseId, 'modules', mDoc.id, 'lessons'),
-                    where('isPublished', '==', true),
-                    orderBy('order', 'asc')
-                );
-                const lessonsSnap = await getDocs(lessonsQ);
+            const modulesPromises = modulesSnap.docs
+                .filter(mDoc => mDoc.data().isPublished !== false) // Handle missing/true as visible
+                .map(async (mDoc) => {
+                    const lessonsQ = query(
+                        collection(db, 'courses', courseId, 'modules', mDoc.id, 'lessons'),
+                        orderBy('order', 'asc')
+                    );
+                    const lessonsSnap = await getDocs(lessonsQ);
 
-                const lessons: Lesson[] = lessonsSnap.docs.map(lDoc => {
-                    const lData = lDoc.data();
-                    // Use separated progress data
-                    const progress = progressData.lessonProgress || {};
-                    const isCompleted = !!progress[lDoc.id]?.completed;
+                    const lessons: Lesson[] = lessonsSnap.docs
+                        .filter(lDoc => lDoc.data().isPublished !== false)
+                        .map(lDoc => {
+                            const lData = lDoc.data();
+                            // Use atomic progress data
+                            const p = progressData[lDoc.id];
+                            const isCompleted = !!p?.completed;
+
+                            return {
+                                id: lDoc.id,
+                                moduleId: mDoc.id,
+                                courseId: courseId,
+                                title: lData.title,
+                                duration: lData.duration,
+                                videoUrl: lData.videoUrl,
+                                description: lData.description,
+                                thumbnail: lData.thumbnail,
+                                isCompleted,
+                                isLocked: lData.isLocked || false,
+                                type: (lData.type || 'video') as 'video' | 'text' | 'quiz',
+                                order: lData.order || 0,
+                                isPublished: lData.isPublished !== false
+                            };
+                        });
 
                     return {
-                        id: lDoc.id,
-                        moduleId: mDoc.id,
-                        courseId: courseId,
-                        title: lData.title,
-                        duration: lData.duration,
-                        videoUrl: lData.videoUrl,
-                        description: lData.description,
-                        thumbnail: lData.thumbnail,
-                        isCompleted,
-                        isLocked: lData.isLocked || false,
-                        type: (lData.type || 'video') as 'video' | 'text' | 'quiz',
-                        order: lData.order || 0,
-                        isPublished: lData.isPublished !== false
-                    };
+                        id: mDoc.id,
+                        courseId,
+                        title: mDoc.data().title,
+                        order: mDoc.data().order,
+                        isPublished: true,
+                        lessons
+                    } as Module;
                 });
-
-                return {
-                    id: mDoc.id,
-                    courseId,
-                    title: mDoc.data().title,
-                    order: mDoc.data().order,
-                    isPublished: true,
-                    lessons
-                } as Module;
-            });
 
             const modules = await Promise.all(modulesPromises);
 
-            // Merge progress lastLessonId into enrollment for UI consumption if needed, or handle separately
-            // The UI uses enrollment.lastLessonId. Let's merge it back into the enrollment object we return
-            if (enrollmentData && progressData.lastLessonId) {
-                enrollmentData.lastLessonId = progressData.lastLessonId;
-            }
+            // E. Recalculate Progress Stats - DEPRECATED
+            // Server now strictly handles SSoT via progressService.
+            // We trust enrollment.progressSummary.
 
             return { course, modules, materials, enrollment: enrollmentData, status };
         },
@@ -139,12 +160,12 @@ export function useEnrolledCourse(courseId: string, userId: string | undefined, 
     const updateLastAccessMutation = useMutation({
         mutationFn: async (lessonId: string) => {
             if (!userId) return;
-            const progressRef = doc(db, 'progress', `${userId}_${courseId}`);
-
             // Ensure doc exists (upsert)
-            await setDoc(progressRef, {
-                userId,
-                courseId,
+            // Note: This was writing to a deprecated "aggregate" doc. 
+            // We should arguably move this to a user_preferences or just update enrollment.
+            // For now, let's update the Enrollment doc which is the SSoT for "lastLessonId"
+            const enrollmentRef = doc(db, 'enrollments', `${userId}_${courseId}`);
+            await setDoc(enrollmentRef, {
                 lastLessonId: lessonId,
                 lastAccessedAt: Timestamp.now()
             }, { merge: true });

@@ -35,12 +35,21 @@ export async function getCourseData(courseId: string, userId: string) {
         };
     }
 
-    // 2. Fetch Progress
-    let progressData: any = {};
-    const progressDoc = await db.collection('progress').doc(`${userId}_${courseId}`).get();
-    if (progressDoc.exists) {
-        progressData = progressDoc.data();
-    }
+    // 2. Fetch Progress (ATOMIC - New Pattern)
+    // We query the 'progress' collection for this user and course
+    const progressSnap = await db.collection('progress')
+        .where('userId', '==', userId)
+        .where('courseId', '==', courseId)
+        // Removed status filter to get all progress including in-progress for resume
+        .get();
+
+    const progressMap = new Map<string, any>();
+    progressSnap.docs.forEach(doc => {
+        const data = doc.data();
+        if (data.lessonId) {
+            progressMap.set(data.lessonId, data);
+        }
+    });
 
     // 3. Fetch Modules & Lessons
     // Fetch all modules
@@ -54,8 +63,8 @@ export async function getCourseData(courseId: string, userId: string) {
 
         const lessons: Lesson[] = lessonsSnap.docs.map(lDoc => {
             const lData = lDoc.data();
-            const lessonProgress = progressData.lessonProgress || {};
-            const isCompleted = !!lessonProgress[lDoc.id]?.completed;
+            const progress = progressMap.get(lDoc.id);
+            const isCompleted = progress?.status === 'completed';
 
             return {
                 id: lDoc.id,
@@ -67,9 +76,11 @@ export async function getCourseData(courseId: string, userId: string) {
                 isPublished: lData.isPublished,
                 duration: lData.duration, // Estimated minutes
                 thumbnail: lData.thumbnail,
-                // Add completion status to the runtime object (not in DB type, but useful for UI)
+                // Add completion status to the runtime object
                 // @ts-ignore
                 isCompleted: isCompleted,
+                maxWatchedSecond: progress?.maxWatchedSecond || 0,
+                percent: progress?.percent || 0,
                 isLocked: false // Implement lock logic if needed
             } as Lesson;
         });
@@ -81,9 +92,30 @@ export async function getCourseData(courseId: string, userId: string) {
             description: mDoc.data().description,
             order: mDoc.data().order,
             isPublished: mDoc.data().isPublished,
-            lessons
+            lessons: lessons.filter(l => l.isPublished !== false)
         } as Module;
-    }));
+    })).then(modules => modules.filter(m => m.isPublished !== false));
+
+    // 4. Recalculate Progress Stats (Live & Authoritative)
+    // We trust the filtered list of published lessons as the true denominator.
+    const allPublishedLessons = modules.flatMap(m => m.lessons);
+    const totalPublished = allPublishedLessons.length;
+    const completedCount = allPublishedLessons.filter(l => l.isCompleted).length;
+
+    // Percent logic:
+    // If totalPublished is 0, percent is 0.
+    // Else, (completed / total) * 100.
+    const percent = totalPublished > 0 ? Math.round((completedCount / totalPublished) * 100) : 0;
+
+    // Override enrollment summary with live calculation to ensure UI is correct
+    if (enrollmentData) {
+        enrollmentData.progressSummary = {
+            ...enrollmentData.progressSummary,
+            completedLessonsCount: completedCount,
+            totalLessons: totalPublished,
+            percent: percent
+        };
+    }
 
     return deepSafeSerialize({
         course: courseData,

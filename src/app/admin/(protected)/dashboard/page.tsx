@@ -1,6 +1,6 @@
 
 import { KpiService } from '@/lib/analytics/kpi-service';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Activity, Users, DollarSign, AlertTriangle, CheckCircle } from 'lucide-react';
 
 export default async function AdminDashboardPage() {

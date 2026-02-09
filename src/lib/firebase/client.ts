@@ -27,4 +27,28 @@ if (process.env.NODE_ENV === 'development') {
     // connectFirestoreEmulator(db, 'localhost', 8080);
 }
 
-export { app, auth, db, storage, functions };
+import { GoogleAuthProvider, signInWithPopup, signInWithRedirect } from "firebase/auth";
+
+// ... existing exports ...
+
+const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({ prompt: 'select_account' });
+
+export const signInWithGoogle = async () => {
+    try {
+        const result = await signInWithPopup(auth, googleProvider);
+        return { user: result.user, error: null };
+    } catch (error: any) {
+        if (error.code === 'auth/popup-blocked' || error.code === 'auth/popup-closed-by-user') {
+            try {
+                await signInWithRedirect(auth, googleProvider);
+                return { user: null, error: null }; // Redirecting...
+            } catch (redirectError: any) {
+                return { user: null, error: redirectError.message };
+            }
+        }
+        return { user: null, error: error.message };
+    }
+};
+
+export { app, auth, db, storage, functions, googleProvider };

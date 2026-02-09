@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase/client';
-import { collection, query, orderBy, onSnapshot, doc, updateDoc, serverTimestamp, getDoc, addDoc, deleteDoc } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, doc, updateDoc, serverTimestamp, getDoc, addDoc, deleteDoc, where, getDocs } from 'firebase/firestore';
 import { Search, User, Clock, Phone, Mail, GraduationCap, Check, Info, MessageCircle, UserPlus, Trash2, MoreVertical, Briefcase, Calendar } from 'lucide-react';
 import { useToast } from '@/context/ToastContext';
 import { Card } from '@/components/ui/Card';
@@ -76,9 +76,28 @@ export default function ApplicationsPage() {
     const handleEnroll = async (app: any) => {
         setEnrollingId(app.id);
         try {
+            let targetUserId = app.userId;
+
+            // Fix: If userId is missing, try to find user by email
+            if (!targetUserId && app.userEmail) {
+                const usersRef = collection(db, 'users');
+                const q = query(usersRef, where('email', '==', app.userEmail));
+                const querySnapshot = await getDocs(q);
+
+                if (!querySnapshot.empty) {
+                    targetUserId = querySnapshot.docs[0].id;
+                }
+            }
+
+            if (!targetUserId) {
+                addToast('Erro: Usuário não possui conta registrada no sistema.', 'error');
+                setEnrollingId(null);
+                return;
+            }
+
             // Create enrollment document
             await addDoc(collection(db, 'enrollments'), {
-                userId: app.userId,
+                userId: targetUserId,
                 userName: app.userName || app.answers?.fullName,
                 userEmail: app.userEmail,
                 userPhone: app.answers?.phone || app.userPhone,
@@ -232,8 +251,8 @@ export default function ApplicationsPage() {
                                     <div className="flex flex-col">
                                         {/* Status Indicator Strip */}
                                         <div className={`w-full h-1 ${app.status === 'enrolled' ? 'bg-green-500' :
-                                                app.status === 'contacted' ? 'bg-blue-500' :
-                                                    app.status === 'submitted' ? 'bg-yellow-500' : 'bg-stone-300'
+                                            app.status === 'contacted' ? 'bg-blue-500' :
+                                                app.status === 'submitted' ? 'bg-yellow-500' : 'bg-stone-300'
                                             }`} />
 
                                         <div className="p-5 md:p-6">

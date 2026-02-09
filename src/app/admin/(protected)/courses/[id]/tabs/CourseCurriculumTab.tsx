@@ -100,7 +100,27 @@ export default function CourseCurriculumTab({ courseId }: { courseId: string }) 
         <div className="space-y-8 animate-in fade-in">
             <div className="flex justify-between items-center">
                 <h3 className="font-bold text-stone-700">Estrutura do Curso</h3>
-                <Button onClick={handleCreateModule} leftIcon={<Plus size={16} />}>Adicionar Módulo</Button>
+                <div className="flex gap-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={async () => {
+                            setLoading(true);
+                            try {
+                                await adminCourseService.syncLessonsCount(courseId);
+                                addToast("Estatísticas sincronizadas", 'success');
+                                loadModules();
+                            } catch (e) {
+                                addToast("Erro ao sincronizar", 'error');
+                            } finally {
+                                setLoading(false);
+                            }
+                        }}
+                    >
+                        Sincronizar Contagem
+                    </Button>
+                    <Button onClick={handleCreateModule} leftIcon={<Plus size={16} />}>Adicionar Módulo</Button>
+                </div>
             </div>
 
             <div className="space-y-4">

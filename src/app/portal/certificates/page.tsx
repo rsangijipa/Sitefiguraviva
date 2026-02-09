@@ -22,17 +22,21 @@ export default async function CertificatesPage() {
         .where('userId', '==', uid)
         .get();
 
-    let certificates = certsSnap.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        issuedAt: doc.data().issuedAt
-    } as Certificate));
+    let certificates = certsSnap.docs.map(doc => {
+        const data = doc.data();
+        return {
+            id: doc.id,
+            ...data,
+            // Serialize Timestamp to ISO string for Client Component
+            issuedAt: data.issuedAt?.toDate().toISOString() || new Date().toISOString()
+        } as Certificate;
+    });
 
     // Sort in memory (Newest first)
     certificates.sort((a, b) => {
-        const tA = (a.issuedAt as any)?._seconds || 0;
-        const tB = (b.issuedAt as any)?._seconds || 0;
-        return tB - tA;
+        const dateA = new Date(a.issuedAt).getTime();
+        const dateB = new Date(b.issuedAt).getTime();
+        return dateB - dateA;
     });
 
     return (

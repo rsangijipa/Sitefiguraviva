@@ -78,10 +78,10 @@ export function CertificateIssueCard({ courseId, courseTitle, progressPercent, i
                 </p>
             </div>
 
-            {issued && certId ? (
-                <Link href={`/portal/certificate/${certId}`} target="_blank">
+            {issued ? (
+                <Link href={`/portal/course/${courseId}/certificate`} target="_blank">
                     <Button className="bg-green-600 hover:bg-green-700 text-white border-none shadow-green-200">
-                        <Download className="mr-2" size={18} /> Baixar PDF
+                        <Download className="mr-2" size={18} /> Ver / Imprimir
                     </Button>
                 </Link>
             ) : (

@@ -8,35 +8,24 @@ export const revalidate = 3600;
 
 async function getCourses(): Promise<any[]> {
     try {
-        // Strategy: Run two queries in parallel to support legacy 'isPublished' and new 'status'
-        // This avoids complex OR queries that require composite indexes
-        const [openSnap, publishedSnap] = await Promise.all([
-            db.collection('courses').where('status', '==', 'open').get(),
-            db.collection('courses').where('isPublished', '==', true).get()
-        ]);
+        const snap = await db.collection('courses').get();
 
-        const coursesMap = new Map();
-
-        // Merge and deduplicate by ID
-        [...openSnap.docs, ...publishedSnap.docs].forEach(doc => {
-            if (!coursesMap.has(doc.id)) {
+        return snap.docs
+            .map(doc => {
                 const data = doc.data();
-                coursesMap.set(doc.id, {
+                return {
                     id: doc.id,
                     ...data,
-                    // Normalize for UI
-                    isPublished: true,
+                    isPublished: data.isPublished !== false,
                     createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : null
-                });
-            }
-        });
-
-        // Convert to array and sort by date (newest first)
-        return Array.from(coursesMap.values()).sort((a: any, b: any) => {
-            const dateA = new Date(a.createdAt || 0).getTime();
-            const dateB = new Date(b.createdAt || 0).getTime();
-            return dateB - dateA;
-        });
+                } as any;
+            })
+            .filter(c => c.isPublished !== false || c.status === 'open')
+            .sort((a, b) => {
+                const dateA = new Date(a.createdAt || 0).getTime();
+                const dateB = new Date(b.createdAt || 0).getTime();
+                return dateB - dateA;
+            });
 
     } catch (error) {
         console.error("Error fetching courses:", error);
