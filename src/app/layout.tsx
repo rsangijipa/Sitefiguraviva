@@ -75,6 +75,9 @@ export default async function RootLayout({
   return (
     <html lang="pt-BR" className={`${cormorant.variable} ${lato.variable}`}>
       <body className="antialiased bg-paper text-text overflow-x-hidden">
+        <a href="#main-content" className="skip-to-content">
+          Pular para o conteúdo principal
+        </a>
         <Providers>
           <WebVitalsReporter />
           {children}
