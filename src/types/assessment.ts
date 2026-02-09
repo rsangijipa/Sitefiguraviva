@@ -1,91 +1,214 @@
+/**
+ * Assessment & Quiz System - Type Definitions
+ *
+ * Covers multiple assessment types:
+ * - Multiple Choice (auto-graded)
+ * - True/False (auto-graded)
+ * - Essay (manual grading required)
+ * - Practical Assignment (file upload + manual grading)
+ */
 
-import { Timestamp } from 'firebase/firestore';
+export type QuestionType =
+  | "multiple_choice"
+  | "true_false"
+  | "essay"
+  | "practical";
+export type AssessmentStatus = "draft" | "published" | "archived";
+export type SubmissionStatus =
+  | "pending"
+  | "submitted"
+  | "graded"
+  | "failed"
+  | "passed";
 
-export type QuestionType = 'multiple_choice' | 'single_choice' | 'text' | 'boolean';
-
+/**
+ * Question Base Interface
+ */
 export interface QuestionBase {
+  id: string;
+  type: QuestionType;
+  title: string;
+  description?: string;
+  points: number;
+  order: number;
+}
+
+/**
+ * Multiple Choice Question
+ */
+export interface MultipleChoiceQuestion extends QuestionBase {
+  type: "multiple_choice";
+  options: {
     id: string;
     text: string;
-    type: QuestionType;
-    points: number;
-    required?: boolean;
-    feedback?: string; // Shown after grading
+    isCorrect: boolean;
+  }[];
+  allowMultiple?: boolean; // Permite múltiplas respostas corretas
 }
 
-export interface ChoiceQuestion extends QuestionBase {
-    type: 'multiple_choice' | 'single_choice';
-    options: {
-        id: string;
-        text: string;
-        isCorrect?: boolean; // Only present in secure server-side version or strictly hidden
-    }[];
-    shuffleOptions?: boolean;
+/**
+ * True/False Question
+ */
+export interface TrueFalseQuestion extends QuestionBase {
+  type: "true_false";
+  correctAnswer: boolean;
 }
 
-export interface TextQuestion extends QuestionBase {
-    type: 'text';
-    minLength?: number;
-    maxLength?: number;
-    placeholder?: string;
-    rubric?: string; // Guide for manual grading
+/**
+ * Essay Question
+ */
+export interface EssayQuestion extends QuestionBase {
+  type: "essay";
+  minWords?: number;
+  maxWords?: number;
+  rubric?: string; // Critérios de avaliação para o instrutor
 }
 
-export interface BooleanQuestion extends QuestionBase {
-    type: 'boolean';
-    correctAnswer?: boolean;
+/**
+ * Practical Assignment
+ */
+export interface PracticalQuestion extends QuestionBase {
+  type: "practical";
+  instructions: string;
+  acceptedFileTypes?: string[]; // e.g., ['.pdf', '.docx', '.mp4']
+  maxFileSize?: number; // em MB
+  rubric?: string;
 }
 
-export type Question = ChoiceQuestion | TextQuestion | BooleanQuestion;
+export type Question =
+  | MultipleChoiceQuestion
+  | TrueFalseQuestion
+  | EssayQuestion
+  | PracticalQuestion;
 
-export interface Assessment {
-    id: string;
-    courseId: string;
-    moduleId: string; // Linked to a module
-    title: string;
-    description?: string;
-    type: 'quiz' | 'exam' | 'assignment';
+/**
+ * Assessment Document (Firestore)
+ */
+export interface AssessmentDoc {
+  id: string;
+  courseId: string;
+  moduleId?: string; // Opcional: vincular a módulo específico
+  lessonId?: string; // Opcional: quiz ao final de aula
 
-    // Config
-    timeLimitMinutes?: number; // 0 = unlimited
-    maxAttempts?: number; // 0 = unlimited
-    passingScore: number; // Percentage 0-100
-    shuffleQuestions?: boolean;
+  title: string;
+  description: string;
+  instructions?: string;
 
-    // Status
-    status: 'draft' | 'published' | 'archived';
+  questions: Question[];
 
-    // Content
-    questions: Question[]; // Or questionIds if using subcollection
+  // Settings
+  timeLimit?: number; // em minutos (null = sem limite)
+  passingScore: number; // Porcentagem mínima para passar (e.g., 70)
+  maxAttempts?: number; // null = ilimitado
+  shuffleQuestions?: boolean;
+  shuffleOptions?: boolean; // Para multiple choice
+  showCorrectAnswers?: boolean; // Após submissão
 
-    // Dates
-    createdAt: Timestamp;
-    updatedAt: Timestamp;
-    dueDate?: Timestamp;
+  // Status
+  status: AssessmentStatus;
+  isRequired: boolean; // Necessário para certificação
+
+  // Stats
+  totalPoints: number; // Soma dos points de todas as questões
+  averageScore?: number;
+  completionRate?: number;
+
+  // Metadata
+  createdAt: any; // Timestamp
+  updatedAt: any;
+  createdBy: string; // Admin UID
 }
 
-export interface Answer {
+/**
+ * Student's Answer
+ */
+export interface StudentAnswer {
+  questionId: string;
+
+  // Múltipla escolha / Verdadeiro ou Falso
+  selectedOptions?: string[]; // IDs das opções selecionadas
+  booleanAnswer?: boolean;
+
+  // Dissertativa / Prática
+  textAnswer?: string;
+  fileUrl?: string;
+
+  // Auto-grading
+  isCorrect?: boolean;
+  pointsEarned?: number;
+}
+
+/**
+ * Assessment Submission (Firestore)
+ * Path: assessmentSubmissions/{submissionId}
+ */
+export interface AssessmentSubmissionDoc {
+  id: string;
+  assessmentId: string;
+  userId: string;
+  courseId: string;
+
+  // Answers
+  answers: StudentAnswer[];
+
+  // Grading
+  status: SubmissionStatus;
+  score?: number; // Pontuação total
+  percentage?: number; // Porcentagem (score / totalPoints)
+  passed?: boolean;
+
+  // Manual grading (for essays/practicals)
+  gradedBy?: string; // Admin/Instructor UID
+  feedback?: string;
+
+  // Attempts
+  attemptNumber: number;
+
+  // Timestamps
+  startedAt: any; // Timestamp
+  submittedAt?: any; // Timestamp
+  gradedAt?: any; // Timestamp
+}
+
+/**
+ * User's Assessment Progress (aggregated)
+ * Path: users/{uid}/assessmentProgress/{assessmentId}
+ */
+export interface UserAssessmentProgress {
+  assessmentId: string;
+  userId: string;
+  courseId: string;
+
+  attempts: number;
+  bestScore: number;
+  bestPercentage: number;
+  passed: boolean;
+
+  lastAttemptAt: any; // Timestamp
+  submissions: string[]; // Array de submission IDs
+}
+
+/**
+ * Assessment Analytics (for admin)
+ */
+export interface AssessmentAnalytics {
+  assessmentId: string;
+
+  totalSubmissions: number;
+  totalStudents: number;
+  completionRate: number;
+
+  averageScore: number;
+  medianScore: number;
+  lowestScore: number;
+  highestScore: number;
+
+  passRate: number; // % de alunos que passaram
+
+  // Per-Question Stats
+  questionStats: {
     questionId: string;
-    value: string | string[] | boolean; // Option ID(s) or text
-}
-
-export interface Submission {
-    id: string;
-    assessmentId: string;
-    userId: string;
-    attemptNumber: number;
-
-    // State
-    status: 'in_progress' | 'submitted' | 'graded';
-    answers: Record<string, Answer>; // Keyed by questionId
-
-    // Grading
-    score?: number;
-    grade?: number; // 0-100
-    passed?: boolean;
-    feedback?: string;
-
-    // Timing
-    startedAt: Timestamp;
-    submittedAt?: Timestamp;
-    lastSavedAt?: Timestamp; // For autosave
+    correctRate: number; // % de acertos
+    averagePoints: number;
+  }[];
 }

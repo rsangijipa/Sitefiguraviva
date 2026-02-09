@@ -15,6 +15,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Button } from "./ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
 import { getRedirectPathForRole } from "@/lib/auth/authService";
+import { cn } from "@/lib/utils";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -105,12 +106,16 @@ export default function Navbar() {
             <div className="flex items-center gap-2">
               <Button
                 onClick={handleDashboard}
-                variant="primary"
+                variant={role === "admin" ? "outline" : "primary"}
                 size="sm"
-                className="shadow-sm flex items-center gap-2"
+                className={cn(
+                  "shadow-sm flex items-center gap-2 transition-all duration-300",
+                  role === "admin" &&
+                    "border-gold text-gold hover:bg-gold hover:text-white",
+                )}
               >
                 <LayoutDashboard size={14} />
-                Painel
+                {role === "admin" ? "Administração" : "Área do Aluno"}
               </Button>
               <button
                 onClick={() => signOut()}
@@ -231,9 +236,16 @@ export default function Navbar() {
                         setMobileOpen(false);
                         handleDashboard();
                       }}
-                      className="w-full py-6 text-sm uppercase tracking-widest rounded-2xl shadow-xl shadow-primary/10 flex items-center justify-center gap-2"
+                      variant={role === "admin" ? "outline" : "primary"}
+                      className={cn(
+                        "w-full py-6 text-sm uppercase tracking-widest rounded-2xl shadow-xl flex items-center justify-center gap-2 transition-all",
+                        role === "admin"
+                          ? "border-gold text-gold shadow-gold/5"
+                          : "shadow-primary/10",
+                      )}
                     >
-                      <LayoutDashboard size={18} /> Painel
+                      <LayoutDashboard size={18} />
+                      {role === "admin" ? "Administração" : "Área do Aluno"}
                     </Button>
 
                     <button

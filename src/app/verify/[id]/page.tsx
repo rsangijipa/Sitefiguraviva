@@ -1,126 +1,165 @@
-import { adminDb } from "@/lib/firebase/admin";
-import { notFound } from "next/navigation";
-import { CheckCircle2, XCircle } from "lucide-react";
-import Link from "next/link";
-import { Button } from "@/components/ui/Button";
+"use client";
 
-// Force dynamic because we are reading from DB
-export const dynamic = "force-dynamic";
+import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
+import { verifyCertificate } from "@/actions/certificate";
+import { CheckCircle, XCircle, Loader2 } from "@/components/icons";
 
-interface Props {
-  params: Promise<{ id: string }>; // In Next.js 15, params are promises
-}
+export default function VerifyCertificatePage() {
+  const params = useParams();
+  const certificateId = params.id as string;
 
-export default async function VerifyCertificatePage({ params }: Props) {
-  const { id: code } = await params;
+  const [verifying, setVerifying] = useState(true);
+  const [result, setResult] = useState<any>(null);
 
-  // Fetch from certificatePublic
-  const docSnap = await adminDb.collection("certificatePublic").doc(code).get();
+  useEffect(() => {
+    if (certificateId) {
+      verify();
+    }
+  }, [certificateId]);
 
-  if (!docSnap.exists) {
+  const verify = async () => {
+    setVerifying(true);
+    try {
+      const verificationResult = await verifyCertificate(certificateId);
+      setResult(verificationResult);
+    } catch (error) {
+      console.error(error);
+      setResult({
+        valid: false,
+        message: "Erro ao verificar certificado",
+      });
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  const formatDate = (timestamp: any) => {
+    if (!timestamp) return "-";
+    const date = timestamp?.toDate?.() || new Date(timestamp);
+    return date.toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
+  };
+
+  if (verifying) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-stone-50 p-6 text-center">
-        <XCircle className="text-red-500 w-20 h-20 mb-6" />
-        <h1 className="font-serif text-3xl text-primary mb-4">
-          Certificado Não Encontrado
-        </h1>
-        <p className="text-stone-600 mb-8 max-w-md">
-          O código <strong>{code}</strong> não corresponde a nenhum certificado
-          válido em nossos registros.
-        </p>
-        <Link href="/">
-          <Button>Voltar ao Início</Button>
-        </Link>
+      <div className="min-h-screen bg-stone-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl border border-stone-200 p-12 shadow-lg text-center max-w-lg">
+          <Loader2
+            className="animate-spin text-primary mx-auto mb-4"
+            size={48}
+          />
+          <h2 className="text-xl font-bold text-stone-800">
+            Verificando Certificado...
+          </h2>
+        </div>
       </div>
     );
   }
 
-  const data = docSnap.data();
-  const issuedDate = data?.issuedAt?.toDate().toLocaleDateString("pt-BR", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-paper p-6 text-center">
-      <div className="bg-white p-10 md:p-16 rounded-3xl shadow-soft-xl border border-primary/5 max-w-2xl w-full relative overflow-hidden">
-        {/* Decorative elements */}
-        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary via-gold to-primary opacity-30" />
-        <div className="absolute -right-20 -top-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
+    <div className="min-h-screen bg-stone-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl border border-stone-200 p-12 shadow-lg max-w-2xl w-full">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div
+            className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center"
+            style={{
+              backgroundColor: result?.valid ? "#DEF7EC" : "#FEE2E2",
+            }}
+          >
+            {result?.valid ? (
+              <CheckCircle className="text-green-600" size={48} />
+            ) : (
+              <XCircle className="text-red-600" size={48} />
+            )}
+          </div>
+          <h1 className="text-3xl font-bold font-serif text-stone-800 mb-2">
+            {result?.valid ? "Certificado Válido" : "Certificado Inválido"}
+          </h1>
+          <p className="text-stone-600">{result?.message}</p>
+        </div>
 
-        <div className="flex justify-center mb-10 relative">
-          <div className="bg-primary/5 p-4 rounded-full relative">
-            <CheckCircle2 className="text-primary w-16 h-16" />
-            <div className="absolute -bottom-1 -right-1 bg-gold rounded-full p-1 border-2 border-white">
-              <div className="w-2 h-2 rounded-full bg-white opacity-80" />
+        {/* Certificate Details */}
+        {result?.valid && result?.certificate && (
+          <div className="space-y-4 border-t border-stone-200 pt-6">
+            <h2 className="font-bold text-stone-800 text-lg mb-4">
+              Detalhes do Certificado
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <div className="text-xs font-bold text-stone-500 uppercase tracking-wider mb-1">
+                  Aluno
+                </div>
+                <div className="text-stone-800 font-medium">
+                  {result.certificate.studentName}
+                </div>
+              </div>
+
+              <div>
+                <div className="text-xs font-bold text-stone-500 uppercase tracking-wider mb-1">
+                  Curso
+                </div>
+                <div className="text-stone-800 font-medium">
+                  {result.certificate.courseName}
+                </div>
+              </div>
+
+              <div>
+                <div className="text-xs font-bold text-stone-500 uppercase tracking-wider mb-1">
+                  Carga Horária
+                </div>
+                <div className="text-stone-800 font-medium">
+                  {result.certificate.workload} horas
+                </div>
+              </div>
+
+              <div>
+                <div className="text-xs font-bold text-stone-500 uppercase tracking-wider mb-1">
+                  Data de Emissão
+                </div>
+                <div className="text-stone-800 font-medium">
+                  {formatDate(result.certificate.issuedAt)}
+                </div>
+              </div>
+
+              <div className="md:col-span-2">
+                <div className="text-xs font-bold text-stone-500 uppercase tracking-wider mb-1">
+                  Número do Certificado
+                </div>
+                <div className="text-primary font-mono font-bold text-lg">
+                  {result.certificate.certificateNumber}
+                </div>
+              </div>
             </div>
+          </div>
+        )}
+
+        {/* Footer */}
+        <div className="mt-8 pt-6 border-t border-stone-200 text-center">
+          <div className="text-sm text-stone-600 mb-2">Emitido por</div>
+          <div className="font-bold text-primary text-lg">
+            INSTITUTO FIGURA VIVA
+          </div>
+          <div className="text-xs text-stone-500 mt-2">
+            CNPJ: 00.000.000/0001-00
           </div>
         </div>
 
-        <h1 className="font-serif text-3xl md:text-4xl text-primary mb-2 font-bold tracking-tight">
-          Certificado Autêntico
-        </h1>
-        <p className="text-gold font-bold tracking-[0.2em] uppercase text-[10px] mb-12">
-          Instituto Figura Viva • Integridade Acadêmica
-        </p>
-
-        <div className="space-y-8 text-left border-y border-primary/5 py-10 mb-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-              <span className="block text-[10px] uppercase text-stone-400 font-bold tracking-widest mb-2">
-                Titular do Certificado
-              </span>
-              <p className="text-xl font-serif text-primary font-bold">
-                {data?.userName}
-              </p>
-            </div>
-
-            <div>
-              <span className="block text-[10px] uppercase text-stone-400 font-bold tracking-widest mb-2">
-                Conclusão do Programa
-              </span>
-              <p className="text-lg text-stone-800 font-medium">
-                {data?.courseTitle}
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-8 pt-4">
-            <div>
-              <span className="block text-[10px] uppercase text-stone-400 font-bold tracking-widest mb-2">
-                Data de Emissão
-              </span>
-              <p className="text-stone-600 font-medium">{issuedDate}</p>
-            </div>
-            <div>
-              <span className="block text-[10px] uppercase text-stone-400 font-bold tracking-widest mb-2">
-                Selo de Validação
-              </span>
-              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-bold bg-green-50 text-green-700 border border-green-100 uppercase tracking-wider">
-                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                Validado via SSoT
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-col items-center gap-6">
-          <div className="px-4 py-2 bg-stone-50 rounded-lg border border-stone-100 font-mono text-[10px] text-stone-400">
-            Código Público:{" "}
-            <span className="font-bold text-stone-700">{code}</span>
-          </div>
-          <Link href="/" className="w-full sm:w-auto">
-            <Button variant="primary" className="w-full sm:w-auto px-10">
-              Conhecer o Instituto
-            </Button>
-          </Link>
+        {/* Action Button */}
+        <div className="mt-6 text-center">
+          <a
+            href="/"
+            className="inline-block px-6 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary/90 transition-colors"
+          >
+            Voltar para o site
+          </a>
         </div>
       </div>
-
-      <p className="mt-8 text-[10px] text-stone-400 font-bold tracking-widest uppercase opacity-50">
-        © 2024 Figura Viva • Segurança e Transparência
-      </p>
     </div>
   );
 }

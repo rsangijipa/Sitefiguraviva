@@ -1,46 +1,53 @@
 import * as Sentry from "@sentry/nextjs";
 
 Sentry.init({
-    dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
 
-    // Replay may only be enabled for the client-side
-    integrations: [
-        Sentry.replayIntegration(),
-    ],
+  // Set tracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring.
+  // We recommend adjusting this value in production
+  tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
 
-    // Set tracesSampleRate to 1.0 to capture 100%
-    // of transactions for performance monitoring.
-    // We recommend adjusting this value in production
-    tracesSampleRate: 1.0,
+  // Set profilesSampleRate to 1.0 to profile every transaction.
+  // Since profilesSampleRate is relative to tracesSampleRate,
+  // the final profiling rate can be computed as tracesSampleRate * profilesSampleRate
+  // For example, a tracesSampleRate of 0.5 and profilesSampleRate of 0.5 would
+  // results in 25% of your transactions being profiled (0.5*0.5=0.25)
+  profilesSampleRate: 1.0,
 
-    // Capture Replay for 10% of all sessions,
-    // plus for 100% of sessions with an error
-    replaysSessionSampleRate: 0.1,
-    replaysOnErrorSampleRate: 1.0,
+  // Note: if you want to override the automatic release value, do not set a
+  // `release` value here - use the environment variable `SENTRY_RELEASE`, so
+  // that it will also get attached to your source maps
 
-    // PII Scrubbing (SEN-01)
-    beforeSend(event) {
-        // 1. Scrub User Data
-        if (event.user) {
-            delete event.user.email;
-            delete event.user.ip_address;
-        }
+  // Disable Sentry in development
+  enabled: process.env.NODE_ENV === "production",
 
-        // 2. Scrub Emails from Messages
-        const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g;
+  // Filter out common noise
+  ignoreErrors: [
+    // Browser extensions
+    "top.GLOBALS",
+    // Random plugins/extensions
+    "originalCreateNotification",
+    "canvas.contentDocument",
+    "MyApp_RemoveAllHighlights",
+    // See: http://blog.errorception.com/2012/03/tale-of-unfindable-js-error.html
+    "Can't find variable: ZiteReader",
+    "jigsaw is not defined",
+    "ComboSearch is not defined",
+    // Facebook borked
+    "fb_xd_fragment",
+    // ISP injecting ads
+    "bmi_SafeAddOnload",
+    "EBCallBackMessageReceived",
+    // Chrome extensions
+    "chrome-extension://",
+    "moz-extension://",
+  ],
 
-        if (event.message) {
-            event.message = event.message.replace(emailRegex, '[EMAIL]');
-        }
-
-        if (event.exception?.values) {
-            event.exception.values.forEach(exception => {
-                if (exception.value) {
-                    exception.value = exception.value.replace(emailRegex, '[EMAIL]');
-                }
-            });
-        }
-
-        return event;
-    },
+  beforeSend(event, hint) {
+    // Check if it is an exception, and if so, show the report dialog
+    if (event.exception && process.env.NODE_ENV === "production") {
+      Sentry.showReportDialog({ eventId: event.event_id });
+    }
+    return event;
+  },
 });

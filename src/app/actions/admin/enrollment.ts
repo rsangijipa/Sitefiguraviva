@@ -15,6 +15,31 @@ async function assertAdmin() {
   return token;
 }
 
+// Helper to send internal notification
+async function sendNotification(
+  uid: string,
+  title: string,
+  body: string,
+  link: string = "/portal",
+) {
+  try {
+    const notificationRef = adminDb
+      .collection("users")
+      .doc(uid)
+      .collection("notifications");
+    await notificationRef.add({
+      title,
+      body,
+      link,
+      isRead: false,
+      createdAt: Timestamp.now(),
+      type: "course_update",
+    });
+  } catch (error) {
+    console.error("Failed to send notification:", error);
+  }
+}
+
 /**
  * Enrolls a user in a course.
  * If user does not exist, creates a placeholder account (staging user).
@@ -57,17 +82,38 @@ export async function enrollUser(email: string, courseId: string) {
     const enrollmentId = `${uid}_${courseId}`;
     const enrollmentRef = adminDb.collection("enrollments").doc(enrollmentId);
 
-    const enrollmentData: Enrollment = {
+    // Fetch Course Revision and User Snapshot for SSoT
+    const [courseSnap, userSnap] = await Promise.all([
+      adminDb.collection("courses").doc(courseId).get(),
+      adminDb.collection("users").doc(uid).get(),
+    ]);
+
+    if (!courseSnap.exists) throw new Error("Course not found");
+    const courseData = courseSnap.data();
+    const userData = userSnap.data();
+
+    const enrollmentData = {
       uid,
       courseId,
       status: "active",
-      createdAt: Timestamp.now() as any,
-      updatedAt: Timestamp.now() as any,
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now(),
       enrolledBy: adminUser.email || "admin@system",
       reason: "Manual Admin Enrollment",
+      courseVersionAtEnrollment: courseData?.contentRevision || 1,
+      courseTitle: courseData?.title || "Curso",
+      userName: userData?.displayName || normalizedEmail.split("@")[0],
     };
 
     await enrollmentRef.set(enrollmentData, { merge: true });
+
+    // Send Notification
+    await sendNotification(
+      uid,
+      "Nova Matrícula!",
+      `Você foi matriculado(a) no curso: ${enrollmentData.courseTitle}.`,
+      `/portal/course/${courseId}`,
+    );
 
     // Force cache revalidation if needed
     revalidatePath(`/portal/courses/${courseId}`);
