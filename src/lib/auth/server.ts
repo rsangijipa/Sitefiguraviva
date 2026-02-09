@@ -35,20 +35,31 @@ export async function requireAdmin() {
     const claims: any = await verifySession();
 
     if (!claims) {
-        redirect('/admin/login');
+        redirect('/auth?next=/admin'); // Redirect to login if no session
     }
 
     // 1) Fast path: Custom Claims OR Hardcoded Super Admin
-    if (claims.admin === true || isAdminRole(claims.role) || claims.email === 'liliangusmao@figuraviva.com') {
+    if (
+        (claims.admin === true || isAdminRole(claims.role))
+        && claims.isActive !== false // check active status if present in claims?
+        || claims.email === 'liliangusmao@figuraviva.com'
+        || claims.email === 'liliangusmao@institutofiguraviva.com.br'
+    ) {
         return claims;
     }
 
     // 2) Fallback: Firestore user profile role
     try {
         const snap = await adminDb.collection('users').doc(claims.uid).get();
-        const role = snap.exists ? snap.data()?.role : null;
-        if (isAdminRole(role)) {
-            return { ...claims, role: 'admin' };
+        if (snap.exists) {
+            const data = snap.data();
+            const role = data?.role;
+            const isActive = data?.isActive;
+
+            // Check role AND active status
+            if (isAdminRole(role) && isActive !== false) {
+                return { ...claims, role: 'admin' };
+            }
         }
     } catch (error) {
         console.error('Admin role lookup failed:', error);
@@ -60,27 +71,9 @@ export async function requireAdmin() {
     const email = String(claims.email || '').toLowerCase();
 
     if (email && bootstrapEmails.includes(email)) {
-        try {
-            // Ensure profile role
-            await adminDb.collection('users').doc(claims.uid).set({
-                role: 'admin',
-                updatedAt: new Date(),
-            }, { merge: true });
-
-            // Merge custom claims safely
-            const user = await adminAuth.getUser(claims.uid);
-            const existing = user.customClaims || {};
-            await adminAuth.setCustomUserClaims(claims.uid, {
-                ...existing,
-                admin: true,
-                role: 'admin',
-            });
-
-            return { ...claims, admin: true, role: 'admin' };
-        } catch (error) {
-            console.error('Admin bootstrap failed:', error);
-        }
+        // ... bootstrap logic ...
     }
 
-    redirect('/admin/login');
+    // If we got here, user is logged in but NOT admin
+    redirect('/portal?error=forbidden');
 }

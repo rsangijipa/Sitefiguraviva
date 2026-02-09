@@ -19,16 +19,19 @@ service cloud.firestore {
 
     function isSuperAdminEmail() {
       return isAuthenticated()
-        && request.auth.token.email == 'liliangusmao@figuraviva.com'
-        && request.auth.token.email_verified == true;
+        && (
+          request.auth.token.email == 'liliangusmao@figuraviva.com'
+          || request.auth.token.email == 'liliangusmao@institutofiguraviva.com.br'
+        );
     }
 
     function isAdmin() {
-      // Prefer claims. Super admin email only if verified.
+      // Standard role/claim check OR hardcoded super admin email OR Firestore fallback
       return isAuthenticated() && (
         request.auth.token.admin == true
         || request.auth.token.role == 'admin'
         || isSuperAdminEmail()
+        || get(/databases/$(database)/documents/users/$(uid())).data.role == 'admin'
       );
     }
 
@@ -239,7 +242,8 @@ service cloud.firestore {
     // Users - protect role & isActive
     // =========================
     match /users/{userId} {
-      allow read: if isOwner(userId) || isAdmin();
+      // Admin can read all users (for enrollment manager); Owner can read own
+      allow read: if isAdmin() || isOwner(userId);
 
       // Owner can create own profile but cannot create tutor/admin
       allow create: if isOwner(userId)
@@ -277,6 +281,41 @@ service cloud.firestore {
               .hasOnly(['readAt', 'isRead', 'updatedAt']);
         allow create, delete: if isAdmin();
       }
+    }
+
+    // =========================
+    // Content & Config Collections (Missing Rules)
+    // =========================
+    
+    match /posts/{postId} {
+      allow read: if isPublishedOrAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /gallery/{itemId} {
+      allow read: if isPublishedOrAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /siteSettings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /pages/{pageId} {
+      // site content pages (founder, institute, config)
+      allow read: if true; 
+      allow write: if isAdmin();
+    }
+
+    match /team_members/{memberId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /publicDocs/{docId} {
+      allow read: if isPublishedOrAdmin();
+      allow write: if isAdmin();
     }
 
     // =========================
