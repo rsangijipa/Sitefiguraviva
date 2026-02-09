@@ -275,6 +275,38 @@ export default function PortalDashboard() {
             trend={certificates.length > 0 ? "Parabéns!" : "Em breve"}
             href="/portal/certificates"
           />
+
+          {/* Activity Chart */}
+          <div className="bg-white rounded-xl border border-stone-100 p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-stone-800 text-sm uppercase tracking-wide">
+                Atividade Semanal
+              </h3>
+            </div>
+            {/* Mock Data for now - waiting for backend aggregation */}
+            <div className="flex items-end justify-between h-32 gap-2">
+              {[30, 45, 20, 60, 40, 80, 50].map((val, i) => (
+                <div
+                  key={i}
+                  className="flex-1 bg-stone-50 rounded-t-md hover:bg-gold/20 transition-colors relative group"
+                  style={{ height: `${val}%` }}
+                >
+                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 bg-stone-800 text-white text-[10px] px-2 py-1 rounded pointer-events-none transition-opacity">
+                    {val * 10} XP
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-between mt-2 text-[10px] text-stone-400 font-bold uppercase">
+              <span>Seg</span>
+              <span>Ter</span>
+              <span>Qua</span>
+              <span>Qui</span>
+              <span>Sex</span>
+              <span>Sáb</span>
+              <span>Dom</span>
+            </div>
+          </div>
         </div>
       </div>
 
