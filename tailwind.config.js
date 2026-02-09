@@ -41,11 +41,19 @@ module.exports = {
         "fluid-body": "clamp(1rem, 1.5vw, 1.125rem)",
       },
       boxShadow: {
-        "soft-sm": "0 2px 10px rgba(0, 0, 0, 0.03)",
-        "soft-md": "0 8px 30px rgba(0, 0, 0, 0.04)",
-        "soft-lg": "0 20px 40px rgba(0, 0, 0, 0.06)",
-        "soft-xl": "0 30px 60px -10px rgba(0, 0, 0, 0.08)",
-        "glow-gold": "0 0 20px rgba(176, 141, 85, 0.3)",
+        "soft-sm":
+          "0 2px 8px -1px rgba(27, 33, 45, 0.04), 0 1px 2px -1px rgba(27, 33, 45, 0.02)",
+        "soft-md":
+          "0 8px 24px -4px rgba(27, 33, 45, 0.06), 0 4px 8px -2px rgba(27, 33, 45, 0.03)",
+        "soft-lg":
+          "0 20px 48px -8px rgba(27, 33, 45, 0.08), 0 8px 16px -4px rgba(27, 33, 45, 0.04)",
+        "soft-xl":
+          "0 32px 64px -12px rgba(27, 33, 45, 0.10), 0 16px 32px -8px rgba(27, 33, 45, 0.05)",
+        premium:
+          "0 0 0 1px rgba(27, 33, 45, 0.04), 0 4px 12px rgba(27, 33, 45, 0.06), 0 12px 32px rgba(27, 33, 45, 0.04)",
+        "glow-gold":
+          "0 0 20px rgba(212, 175, 55, 0.25), 0 8px 30px rgba(212, 175, 55, 0.15)",
+        "inner-light": "inset 0 2px 4px 0 rgba(255, 255, 255, 0.3)",
       },
       borderRadius: {
         "organic-1": "60% 40% 30% 70% / 60% 30% 70% 40%",

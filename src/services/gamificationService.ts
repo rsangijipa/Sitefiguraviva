@@ -191,4 +191,36 @@ export const gamificationService = {
       logger.error("Error awarding badge", error, { userId, badgeId });
     }
   },
+
+  /**
+   * Get all badges for a user, including locked ones.
+   */
+  async getBadges(userId: string) {
+    if (!userId) return [];
+
+    try {
+      // Fetch User Profile
+      const profile = await this.getProfile(userId);
+      const earnedBadgeIds = profile?.badges || [];
+
+      // In a real app, badges metadata would come from a 'badges' collection
+      // For now, we use the static definitions from badgesData.ts
+      const { badges } = await import("@/lib/gamification/badgesData");
+
+      return badges
+        .map((badge) => ({
+          ...badge,
+          isLocked: !earnedBadgeIds.includes(badge.id),
+          earnedAt: null, // We could fetch earned date from earned_badges subcollection if needed
+        }))
+        .sort((a, b) => {
+          // Sort: Unlocked first, then by order
+          if (a.isLocked === b.isLocked) return a.order - b.order;
+          return a.isLocked ? 1 : -1;
+        });
+    } catch (error) {
+      logger.error("Error fetching user badges", error, { userId });
+      return [];
+    }
+  },
 };
