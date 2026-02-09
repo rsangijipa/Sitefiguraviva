@@ -1,102 +1,89 @@
 "use server";
 
-import { adminDb, auth } from "@/lib/firebase/admin";
-import { assertCanAccessCourse } from "@/lib/auth/access-gate";
-import { FieldValue } from "firebase-admin/firestore";
-import { revalidatePath } from "next/cache";
+import { adminAuth } from "@/lib/firebase/admin";
+import { progressService } from "@/lib/progress/progressService";
+import { assertCanAccessCourse } from "@/lib/courses/access";
 import { cookies } from "next/headers";
-import { publishEvent } from "@/lib/events/bus";
+import { revalidatePath } from "next/cache";
 
-import { issueCertificate } from '@/app/actions/certificate';
+/**
+ * Validates user session and enrollment, then marks lesson as complete.
+ */
+export async function markLessonCompleted(
+  courseId: string,
+  moduleId: string,
+  lessonId: string,
+) {
+  try {
+    // 1. Auth Check
+    const sessionCookie = (await cookies()).get("session")?.value;
+    if (!sessionCookie) throw new Error("Unauthenticated");
 
-// ...
+    const decodedToken = await adminAuth.verifySessionCookie(
+      sessionCookie,
+      true,
+    );
+    const uid = decodedToken.uid;
 
-export async function markLessonCompleted(courseId: string, moduleId: string, lessonId: string) {
-    const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get('session')?.value;
-    if (!sessionCookie) {
-        throw new Error("Unauthorized");
-    }
-
-    let uid;
-    try {
-        const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
-        uid = decodedClaims.uid;
-    } catch (e) {
-        throw new Error("Unauthorized");
-    }
-
+    // 2. Access Check (Enrollment SSoT)
+    // This ensures only enrolled students with active status can progress.
     await assertCanAccessCourse(uid, courseId);
 
-    try {
-        // Use the new SSoT Service
-        await import('@/lib/progress/progressService').then(m =>
-            m.progressService.markLessonCompleted(uid, courseId, moduleId, lessonId)
-        );
+    // 3. Service Call (Idempotent)
+    await progressService.markLessonCompleted(
+      uid,
+      courseId,
+      moduleId,
+      lessonId,
+    );
 
-        revalidatePath(`/portal/course/${courseId}/lesson/${lessonId}`);
-        revalidatePath(`/portal/course/${courseId}`);
+    // 4. Revalidate to show new progress in UI
+    revalidatePath(`/portal/courses/${courseId}`);
+    revalidatePath(`/portal/courses/${courseId}/learn/${lessonId}`);
 
-        return { success: true };
-    } catch (error) {
-        console.error("Error marking lesson completed:", error);
-        return { success: false, error: "Failed to update progress" };
-    }
+    return { success: true };
+  } catch (error: any) {
+    console.error("MarkLessonCompleted Error:", error);
+    return { success: false, error: error.message };
+  }
 }
 
+/**
+ * Updates partial progress (video watch time).
+ */
 export async function updateLessonProgress(
-    courseId: string,
-    moduleId: string,
-    lessonId: string,
-    data: { status: 'in_progress' | 'completed'; percent?: number; maxWatchedSecond?: number }
+  courseId: string,
+  moduleId: string,
+  lessonId: string,
+  data: { status: string; percent?: number; maxWatchedSecond?: number },
 ) {
-    // 1. Auth Check
-    const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get('session')?.value;
-    if (!sessionCookie) throw new Error("Unauthorized");
+  try {
+    const sessionCookie = (await cookies()).get("session")?.value;
+    if (!sessionCookie) throw new Error("Unauthenticated");
 
-    let uid;
-    try {
-        const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
-        uid = decodedClaims.uid;
-    } catch (e) {
-        throw new Error("Unauthorized");
-    }
+    const decodedToken = await adminAuth.verifySessionCookie(
+      sessionCookie,
+      true,
+    );
+    const uid = decodedToken.uid;
 
-    // 2. Access Gate
     await assertCanAccessCourse(uid, courseId);
 
-    try {
-        if (data.status === 'completed') {
-            // Use the SSoT service for completion (triggers recalc)
-            await import('@/lib/progress/progressService').then(m =>
-                m.progressService.markLessonCompleted(uid, courseId, moduleId, lessonId)
-            );
-        } else {
-            // Lightweight update for in-progress (video tracking)
-            // We can keep this "fast" and not trigger full recalculation every second
-            const progressRef = adminDb.collection('progress').doc(`${uid}_${courseId}_${lessonId}`);
-            await progressRef.set({
-                userId: uid,
-                courseId,
-                moduleId,
-                lessonId,
-                status: 'in_progress',
-                updatedAt: FieldValue.serverTimestamp(),
-                device: 'web',
-                ...data
-            }, { merge: true });
-        }
+    await progressService.updateLessonProgress(
+      uid,
+      courseId,
+      moduleId,
+      lessonId,
+      data,
+    );
 
-        // Only revalidate if completed, to avoid thrashing
-        if (data.status === 'completed') {
-            revalidatePath(`/portal/course/${courseId}`);
-            revalidatePath(`/portal/course/${courseId}/lesson/${lessonId}`);
-        }
-
-        return { success: true };
-    } catch (error) {
-        console.error("Error updating lesson progress:", error);
-        return { success: false, error: "Failed to update progress" };
+    if (data.status === "completed") {
+      revalidatePath(`/portal/courses/${courseId}`);
     }
+
+    return { success: true };
+  } catch (error: any) {
+    console.error("UpdateLessonProgress Error:", error);
+    return { success: false, error: error.message };
+  }
 }
