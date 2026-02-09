@@ -7,6 +7,7 @@ import {
     signOut as firebaseSignOut,
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
+    sendPasswordResetEmail,
     updateProfile as firebaseUpdateProfile,
     UserCredential
 } from "firebase/auth";
@@ -25,6 +26,7 @@ interface AuthContextType {
     signIn: (email: string, password: string) => Promise<UserCredential>;
     signUp: (email: string, password: string) => Promise<UserCredential>;
     updateProfile: (profile: { displayName?: string; photoURL?: string }) => Promise<void>;
+    resetPassword: (email: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -37,6 +39,7 @@ const AuthContext = createContext<AuthContextType>({
     signIn: async () => { throw new Error("Not implemented"); },
     signUp: async () => { throw new Error("Not implemented"); },
     updateProfile: async () => { throw new Error("Not implemented"); },
+    resetPassword: async () => { throw new Error("Not implemented"); },
 });
 
 import { useUserSync } from "@/hooks/useUserSync";
@@ -158,8 +161,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     };
 
+    const resetPassword = (email: string) => {
+        return sendPasswordResetEmail(auth, email);
+    };
+
     return (
-        <AuthContext.Provider value={{ user, role, status, isAdmin, loading, signOut, signIn, signUp, updateProfile }}>
+        <AuthContext.Provider value={{ user, role, status, isAdmin, loading, signOut, signIn, signUp, updateProfile, resetPassword }}>
             {children}
         </AuthContext.Provider>
     );
