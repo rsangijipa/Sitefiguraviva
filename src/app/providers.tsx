@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { UIProvider } from "@/context/UIContext";
+import { GamificationProvider } from "@/context/GamificationContext";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
@@ -14,7 +15,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <UIProvider>
-          <ToastProvider>{children}</ToastProvider>
+          <GamificationProvider>
+            <ToastProvider>{children}</ToastProvider>
+          </GamificationProvider>
         </UIProvider>
       </AuthProvider>
     </QueryClientProvider>

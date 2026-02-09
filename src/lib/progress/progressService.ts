@@ -2,6 +2,8 @@ import { db, adminDb } from "@/lib/firebase/admin";
 import { FieldValue } from "firebase-admin/firestore";
 import { publishEvent } from "@/lib/events/bus";
 import { issueCertificate } from "@/app/actions/certificate";
+import { gamificationService } from "@/lib/gamification/gamificationService";
+import { XP_VALUES } from "@/lib/gamification";
 
 /**
  * Service to manage course progress with SSoT (Single Source of Truth) principles.
@@ -50,7 +52,26 @@ export const progressService = {
       payload: { method: "manual_recalc" },
     });
 
-    // 3. Recalculate Course Progress (Canonical)
+    // 3. Award XP for Lesson Completion
+    await gamificationService.awardXp(
+      uid,
+      XP_VALUES.LESSON_COMPLETED,
+      "lesson_completed",
+      { courseId, lessonId },
+    );
+
+    // 4. Badge Trigger: First Steps
+    const progressSnap = await adminDb
+      .collection("progress")
+      .where("userId", "==", uid)
+      .limit(2) // More than 1 means not first or just finished first
+      .get();
+
+    if (progressSnap.size === 1) {
+      await gamificationService.awardBadge(uid, "first_steps", courseId);
+    }
+
+    // 5. Recalculate Course Progress (Canonical)
     await this.recalculateEnrollmentProgress(uid, courseId);
   },
 
@@ -214,6 +235,26 @@ export const progressService = {
           `[ProgressService] Triggering certificate for ${uid} in course ${courseId}`,
         );
         await issueCertificate(courseId, uid);
+
+        // Award XP for Course Completion
+        await gamificationService.awardXp(
+          uid,
+          XP_VALUES.COURSE_COMPLETED,
+          "course_completed",
+          { courseId },
+        );
+
+        // Badge Trigger: Scholar
+        const completedCoursesSnap = await adminDb
+          .collection("enrollments")
+          .where("userId", "==", uid)
+          .where("status", "==", "completed")
+          .limit(2)
+          .get();
+
+        if (completedCoursesSnap.size === 1) {
+          await gamificationService.awardBadge(uid, "scholar", courseId);
+        }
       } catch (e) {
         console.error("[ProgressService] Certificate issuance failed:", e);
       }

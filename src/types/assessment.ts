@@ -168,6 +168,7 @@ export interface AssessmentSubmissionDoc {
   startedAt: any; // Timestamp
   submittedAt?: any; // Timestamp
   gradedAt?: any; // Timestamp
+  lastSavedAt?: any; // Timestamp for drafts
 }
 
 /**

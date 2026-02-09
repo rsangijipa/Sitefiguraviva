@@ -20,6 +20,7 @@ import {
 import { useEffect, useState } from "react";
 import Loading from "./loading";
 import { useRouter } from "next/navigation";
+import { logger } from "@/lib/logger";
 
 const StatCard = ({ icon: Icon, label, value, trend, href }: any) => (
   <Link
@@ -156,7 +157,7 @@ export default function PortalDashboard() {
         );
         setCertificates(myCertificates);
       } catch (error) {
-        console.error("Dashboard Load Error", error);
+        logger.error("Dashboard Load Error", error, { uid: user.uid });
       } finally {
         setLoading(false);
       }
@@ -164,7 +165,7 @@ export default function PortalDashboard() {
     loadDashboard();
   }, [user?.uid]);
 
-  if (loading) return <Loading />; // Use the loading skeleton we made
+  if (loading) return <Loading />;
 
   return (
     <div className="space-y-8 animate-fade-in">

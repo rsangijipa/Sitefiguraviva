@@ -1,0 +1,21 @@
+name: Firestore Backup
+
+on:
+  schedule:
+    - cron: '0 3 * * *' # Run at 3:00 AM UTC every day
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v2'
+
+      - name: 'Backup Firestore'
+        run: |
+          gcloud firestore export gs://${{ secrets.BACKUP_BUCKET_NAME }} --async

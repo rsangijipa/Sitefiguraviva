@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth, db } from "@/lib/firebase/admin";
 import Link from "next/link";
+import Image from "next/image";
 import { FieldPath } from "firebase-admin/firestore";
 import { BookOpen, Library } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -64,10 +65,12 @@ const CourseCard = ({
       {/* Cover Image */}
       <div className="h-40 bg-stone-200 relative overflow-hidden">
         {course.image ? (
-          <img
+          <Image
             src={course.image}
             alt={course.title}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-stone-400">
@@ -191,12 +194,14 @@ export default async function MyCoursesPage() {
           .collection("courses")
           .where(FieldPath.documentId(), "in", chunk)
           .get();
-        const chunkCourses = snap.docs.map((doc) => {
-          const enrollment = enrollments.find(
-            (e: any) => e.courseId === doc.id,
-          );
-          return { id: doc.id, ...doc.data(), enrollment };
-        });
+        const chunkCourses = snap.docs
+          .map((doc) => {
+            const enrollment = enrollments.find(
+              (e: any) => e.courseId === doc.id,
+            );
+            return { id: doc.id, ...doc.data(), enrollment };
+          })
+          .filter((c: any) => c.isPublished !== false); // Filter out unpublished courses from "My Courses"
         enrolledCourses.push(...chunkCourses);
       }
     }

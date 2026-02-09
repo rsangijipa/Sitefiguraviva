@@ -12,10 +12,67 @@ import {
   User,
   LogOut,
   ShieldAlert,
+  Flame,
+  Star,
 } from "lucide-react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/context/AuthContext"; // Assuming context exists
+import { useAuth } from "@/context/AuthContext";
 import { ROUTES } from "@/lib/routes";
+import { gamificationService } from "@/services/gamificationService";
+import { UserGamificationProfile } from "@/types/gamification";
+import { motion } from "framer-motion";
+
+const UserGamificationSummary = () => {
+  const { user } = useAuth();
+  const [profile, setProfile] = useState<UserGamificationProfile | null>(null);
+
+  useEffect(() => {
+    if (user?.uid) {
+      gamificationService.getProfile(user.uid).then(setProfile);
+    }
+  }, [user?.uid]);
+
+  if (!profile) return null;
+
+  // XP Progress toward next level
+  const xpInCurrentLevel = profile.totalXp % 500;
+  const progressPercent = (xpInCurrentLevel / 500) * 100;
+
+  return (
+    <div className="px-4 py-3 bg-stone-50 rounded-xl mb-6 border border-stone-100 mx-4 mt-2">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-1.5">
+          <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
+            <Star size={10} className="text-primary fill-primary" />
+          </div>
+          <span className="text-[10px] font-bold text-stone-500 uppercase tracking-widest">
+            Nível {profile.level}
+          </span>
+        </div>
+        <span className="text-[10px] font-bold text-primary">
+          {profile.totalXp} XP
+        </span>
+      </div>
+      <div className="h-1.5 w-full bg-stone-200 rounded-full overflow-hidden">
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: `${progressPercent}%` }}
+          transition={{ duration: 1, ease: "easeOut" }}
+          className="h-full bg-primary"
+        />
+      </div>
+      {profile.currentStreak > 0 && (
+        <div className="flex items-center gap-1.5 mt-2.5 text-orange-600">
+          <Flame size={12} fill="currentColor" className="animate-pulse" />
+          <span className="text-[10px] font-bold uppercase tracking-wider">
+            {profile.currentStreak} dias ativos
+          </span>
+        </div>
+      )}
+    </div>
+  );
+};
 
 interface NavItemProps {
   href: string;
@@ -95,12 +152,13 @@ export const SidebarNav = ({ className }: { className?: string }) => {
         className,
       )}
     >
-      {/* Logo Area */}
       <div className="h-16 flex items-center px-6 border-b border-stone-50">
         <span className="font-serif text-xl font-bold text-stone-900">
           Figura Viva
         </span>
       </div>
+
+      <UserGamificationSummary />
 
       {/* Nav Items */}
       <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto custom-scrollbar">
