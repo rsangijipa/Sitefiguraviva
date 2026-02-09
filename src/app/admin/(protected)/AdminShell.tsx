@@ -63,6 +63,7 @@ export default function AdminShell({
     { icon: BookOpen, label: "Galeria", path: "/admin/gallery" },
     { icon: FileText, label: "Documentos", path: "/admin/public-docs" },
     { icon: Activity, label: "Logs de Sistema", path: "/admin/logs" },
+    { icon: Settings, label: "Utilidades (Dev)", path: "/admin/utilities" },
     { icon: Settings, label: "Configurações", path: "/admin/settings" },
   ];
 
