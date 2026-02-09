@@ -201,6 +201,7 @@ export async function issueCertificate(userId: string, courseId: string) {
 
 /**
  * Get certificate by ID (NO AUTH REQUIRED for student viewing their own)
+ * Handles both legacy and current certificate schemas
  */
 export async function getCertificate(certificateId: string) {
   try {
@@ -213,7 +214,26 @@ export async function getCertificate(certificateId: string) {
       return { error: "Certificado não encontrado" };
     }
 
-    const certificate = { id: certDoc.id, ...certDoc.data() } as Certificate;
+    const data = certDoc.data();
+
+    // Normalize certificate data to match expected Certificate type from analytics.ts
+    const certificate: Certificate = {
+      id: certDoc.id,
+      userId: data?.userId || "",
+      courseId: data?.courseId || "",
+      studentName: data?.studentName || data?.userName || "Aluno",
+      courseName: data?.courseName || data?.courseTitle || "Curso",
+      completedAt: data?.completedAt || data?.issuedAt || Timestamp.now(),
+      issuedAt: data?.issuedAt || Timestamp.now(),
+      certificateNumber: data?.certificateNumber || data?.code || "N/A",
+      instructorName: data?.instructorName || "Lilian Gusmão",
+      instructorTitle: data?.instructorTitle || "Diretora Pedagógica",
+      courseWorkload: data?.courseWorkload || data?.metadata?.hours || 40,
+      validationUrl:
+        data?.validationUrl ||
+        `${process.env.NEXT_PUBLIC_BASE_URL || "https://figuraviva.com"}/verify/${certDoc.id}`,
+      status: data?.status || "issued",
+    };
 
     return { certificate };
   } catch (error) {
