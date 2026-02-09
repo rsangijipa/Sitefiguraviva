@@ -15,19 +15,23 @@
   --color-accent-light: #D4E7D9;
 
   /* Surface & Background */
-  --color-paper: #F7F6EE;
+  --color-paper: #F8F7F0;
   /* Fundo Papel Institucional */
   --color-surface: #FFFFFF;
-  --color-text: #1A1C1E;
-  --color-muted: #5A6066;
-  /* WCAG AA: 4.5:1+ */
+  --color-text: #171717;
+  /* Neutral-900 */
+  --color-muted: #525252;
+  /* Neutral-600 */
+  /* WCAG AA OK */
   --color-border: #E5E7EB;
 
   /* Highlights */
-  --color-gold: #F0D418;
-  --color-gold-dark: #C6AF14;
-  /* WCAG AA accessible on white */
-  --color-gold-light: #F0E263;
+  --color-gold: #D4AF37;
+  /* Gold Clássico */
+  --color-gold-dark: #997B0F;
+  /* Escuro o suficiente para texto em branco */
+  /* WCAG AA OK */
+  --color-gold-light: #F7E78E;
   --color-beige: #F3E5D8;
 
   /* Feedback & Status */

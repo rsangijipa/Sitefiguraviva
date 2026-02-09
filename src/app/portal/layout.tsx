@@ -9,6 +9,7 @@ import { DashboardShell } from "@/components/portal/shell/DashboardShell";
 import { gamificationService } from "@/services/gamificationService";
 import { useGamificationFeedback } from "@/context/GamificationContext";
 import { XP_VALUES } from "@/lib/gamification";
+import GamificationTrigger from "@/components/gamification/GamificationTrigger";
 
 export default function PortalLayout({
   children,
