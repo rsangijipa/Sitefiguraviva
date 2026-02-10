@@ -138,6 +138,8 @@ export async function issueCertificate(courseId: string, userId?: string) {
         courseVersionAtCompletion:
           enrollmentData?.courseVersionAtEnrollment || 1,
         templateVersion: "v1",
+        enrolledAt:
+          enrollmentData?.enrolledAt || enrollmentData?.createdAt || issuedAt,
       });
 
       // Create Public Record
@@ -329,6 +331,7 @@ export async function getCertificate(certificateId: string) {
       courseName: data?.courseName || data?.courseTitle || "Curso",
       completedAt: serializeDate(data?.completedAt || data?.issuedAt),
       issuedAt: serializeDate(data?.issuedAt),
+      enrolledAt: serializeDate(data?.enrolledAt || data?.completedAt),
       certificateNumber: data?.certificateNumber || data?.code || "N/A",
       instructorName: data?.instructorName || "Lilian Gusmão",
       instructorTitle: data?.instructorTitle || "Diretora Pedagógica",

@@ -19,6 +19,7 @@ export interface Certificate {
   courseWorkload: number; // hours
   validationUrl: string; // QR code URL
   status: "issued" | "revoked";
+  enrolledAt?: FirestoreTimestamp; // Optional for backward compatibility
 }
 
 export interface CertificateTemplate {

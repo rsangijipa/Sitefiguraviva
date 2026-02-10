@@ -10,211 +10,239 @@ import {
 } from "@react-pdf/renderer";
 import type { Certificate } from "@/types/analytics";
 
-// Register fonts (optional - use standard fonts or load custom if needed)
-// For now, we stick to standard Helvetica/Times which are built-in for PDF
-// To match specific Python fonts, we'd need to register .ttf files
+// --- FONTS REGISTRATION ---
+// Since we cannot load custom fonts dynamically in this environment easily without file paths
+// or base64, we will use standard PDF fonts but style them to look premium.
+// Times-Roman / Times-Bold = Serif (Classic, Solemn)
+// Helvetica / Helvetica-Bold = Sans-Serif (Clean, Modern)
+
+// --- COLORS ---
+const COLORS = {
+  GREEN_DEEP: "#0E6330", // Verde profundo (Brand)
+  GOLD: "#C5A065", // Dourado (Details)
+  CREAM: "#F9F7F2", // Off-white/Cream (Background)
+  TEXT_MAIN: "#1A1A1A", // Almost Black
+  TEXT_MUTED: "#666666", // Grey
+};
+
+// --- STYLES ---
+const styles = StyleSheet.create({
+  page: {
+    backgroundColor: COLORS.CREAM,
+    padding: 0, // We control margins via container
+  },
+  // Background Pattern / Watercolor Effect
+  backgroundLayer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: -1,
+    opacity: 0.4, // Subtle watercolor
+  },
+  backgroundImage: {
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+  },
+  // Main Border Container (18mm safety margin approx = 50pt)
+  container: {
+    margin: 50,
+    flex: 1,
+    border: `5px solid ${COLORS.GREEN_DEEP}`, // Outer thick border
+    padding: 4, // Space between borders
+  },
+  innerBorder: {
+    flex: 1,
+    border: `2px solid ${COLORS.GOLD}`, // Inner thin gold border
+    padding: 30, // Internal padding
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "space-between", // Distribute vertical space
+  },
+  // Header Section
+  header: {
+    alignItems: "center",
+    width: "100%",
+    marginTop: 10,
+  },
+  logo: {
+    width: 100,
+    height: 100,
+    objectFit: "contain",
+    marginBottom: 20,
+  },
+  institutionName: {
+    fontFamily: "Times-Bold",
+    fontSize: 24,
+    color: COLORS.GREEN_DEEP, // Brand color for institution
+    textTransform: "uppercase",
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  certificateTitle: {
+    fontFamily: "Helvetica",
+    fontSize: 14,
+    color: COLORS.GOLD,
+    textTransform: "uppercase",
+    letterSpacing: 4, // Wide tracking
+    textAlign: "center",
+  },
+
+  // Body Section
+  body: {
+    alignItems: "center",
+    width: "100%",
+    marginTop: 20,
+    marginBottom: 20,
+  },
+  certifyLabel: {
+    fontFamily: "Times-Italic", // Elegant lead-in
+    fontSize: 16,
+    color: COLORS.TEXT_MUTED,
+    marginBottom: 20,
+  },
+  studentName: {
+    fontFamily: "Times-Bold",
+    fontSize: 32,
+    color: COLORS.GREEN_DEEP,
+    textTransform: "uppercase",
+    textAlign: "center",
+    marginBottom: 25,
+    paddingHorizontal: 20,
+    // Logic for resizing if too long is handled by react-pdf typically wrapping or we'd need text rendering logic.
+    // We will assume wrapping is acceptable or standard size.
+  },
+  bodyText: {
+    fontFamily: "Times-Roman",
+    fontSize: 14,
+    color: COLORS.TEXT_MAIN,
+    textAlign: "center",
+    lineHeight: 1.6,
+    width: "85%", // Constrain width for readability
+  },
+  boldText: {
+    fontFamily: "Times-Bold",
+  },
+
+  // Footer Section
+  footer: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+    marginTop: 30,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: "#E0E0E0", // Subtle separator
+    borderTopStyle: "dashed",
+  },
+
+  // Footer Columns
+  footerLeft: {
+    flex: 1,
+    alignItems: "flex-start",
+  },
+  footerCenter: {
+    flex: 2,
+    alignItems: "center",
+    justifyContent: "flex-end", // Align signature to bottom
+  },
+  footerRight: {
+    flex: 1,
+    alignItems: "flex-end",
+  },
+
+  // Signature Block
+  signatureArea: {
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  signatureLine: {
+    width: 220,
+    height: 1,
+    backgroundColor: COLORS.TEXT_MUTED,
+    marginBottom: 8,
+  },
+  curatorName: {
+    fontFamily: "Times-Bold",
+    fontSize: 12,
+    color: COLORS.TEXT_MAIN,
+    textTransform: "uppercase",
+  },
+  curatorTitle: {
+    fontFamily: "Helvetica",
+    fontSize: 10,
+    color: COLORS.GOLD,
+    textTransform: "uppercase",
+    marginTop: 4,
+  },
+  signatureLabel: {
+    fontFamily: "Helvetica-Oblique",
+    fontSize: 8,
+    color: COLORS.TEXT_MUTED,
+    marginTop: 4,
+  },
+
+  // Metadata labels
+  metaLabel: {
+    fontFamily: "Helvetica-Bold",
+    fontSize: 8,
+    color: COLORS.TEXT_MUTED,
+    textTransform: "uppercase",
+    marginBottom: 2,
+  },
+  metaValue: {
+    fontFamily: "Helvetica",
+    fontSize: 9,
+    color: COLORS.TEXT_MAIN,
+    marginBottom: 10,
+  },
+
+  // QR Code
+  qrImage: {
+    width: 60,
+    height: 60,
+    marginBottom: 5,
+  },
+  qrLabel: {
+    fontFamily: "Helvetica",
+    fontSize: 7,
+    color: COLORS.TEXT_MUTED,
+    textAlign: "right",
+  },
+
+  // Bottom Center URL
+  bottomDomain: {
+    position: "absolute",
+    bottom: -25, // Outside inner border
+    left: 0,
+    right: 0,
+    textAlign: "center",
+    fontFamily: "Helvetica",
+    fontSize: 8,
+    color: COLORS.GREEN_DEEP,
+    opacity: 0.7,
+  },
+});
 
 interface CertificateDocumentProps {
   certificate: Certificate;
   qrCodeDataUrl: string;
 }
 
-const COLORS = {
-  GREEN: "#0E6330",
-  GOLD: "#B08D55",
-  INK: "#102018",
-  MUTED: "#6B6A63",
-  SEPERATOR: "#D8D2C5",
-};
-
-const styles = StyleSheet.create({
-  page: {
-    padding: 0,
-    position: "relative",
-  },
-  background: {
-    position: "absolute",
-    minWidth: "100%",
-    minHeight: "100%",
-    display: "flex", // Changed from 'block' to 'flex'
-    height: "100%",
-    width: "100%",
-  },
-  backgroundImage: {
-    width: "100%",
-    height: "100%",
-  },
-  container: {
-    flex: 1,
-    padding: 40, // 14mm approx
-  },
-  outerBorder: {
-    border: `3px solid ${COLORS.GREEN}`,
-    flex: 1,
-    padding: 14, // 5mm approx inside outer to inner
-  },
-  innerBorder: {
-    border: `1.4px solid ${COLORS.GOLD}`,
-    flex: 1,
-    flexDirection: "column",
-    alignItems: "center",
-    paddingTop: 20, // Adjust for logo spacing
-  },
-  // Typography
-  institutionName: {
-    fontSize: 20,
-    fontFamily: "Times-Bold", // SerifBold equivalent
-    color: COLORS.INK,
-    marginTop: 15,
-    marginBottom: 10,
-    textTransform: "uppercase",
-  },
-  subtitle: {
-    fontSize: 12,
-    fontFamily: "Helvetica", // Lato equivalent
-    color: COLORS.MUTED,
-    marginBottom: 5,
-    letterSpacing: 1,
-    textTransform: "uppercase",
-  },
-  certifyText: {
-    fontSize: 12,
-    fontFamily: "Helvetica",
-    color: COLORS.MUTED,
-    marginTop: 25,
-    marginBottom: 15,
-  },
-  studentName: {
-    fontSize: 30,
-    fontFamily: "Times-Bold",
-    color: COLORS.GREEN,
-    textTransform: "uppercase",
-    marginBottom: 5,
-    textAlign: "center",
-  },
-  underline: {
-    width: "70%",
-    height: 1,
-    backgroundColor: COLORS.GOLD,
-    marginBottom: 20,
-  },
-  bodyTextContainer: {
-    width: "80%",
-    marginTop: 20,
-  },
-  bodyText: {
-    fontSize: 12.5,
-    fontFamily: "Helvetica",
-    color: COLORS.INK,
-    textAlign: "center",
-    lineHeight: 1.5,
-  },
-  logo: {
-    width: 140, // 52mm approx
-    height: 140,
-    marginBottom: 10,
-    objectFit: "contain",
-  },
-
-  // Footer area
-  footer: {
-    position: "absolute",
-    bottom: 50,
-    left: 40,
-    right: 40,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-end",
-    paddingTop: 20,
-  },
-  footerSeparator: {
-    position: "absolute",
-    bottom: 120, // 55mm approx from margin bottom?
-    left: 60,
-    right: 60,
-    height: 1,
-    backgroundColor: COLORS.SEPERATOR,
-  },
-
-  // Footer Columns
-  dateColumn: {
-    flex: 1,
-    alignItems: "flex-start",
-    paddingLeft: 20,
-  },
-  signatureColumn: {
-    flex: 2,
-    alignItems: "center",
-  },
-  qrColumn: {
-    flex: 1,
-    alignItems: "flex-end",
-    paddingRight: 20,
-  },
-
-  // Labels
-  label: {
-    fontSize: 10,
-    fontFamily: "Helvetica",
-    color: COLORS.MUTED,
-    marginBottom: 4,
-  },
-  value: {
-    fontSize: 12,
-    fontFamily: "Helvetica-Bold",
-    color: COLORS.INK,
-  },
-
-  // Signature
-  signatureLine: {
-    width: 200,
-    height: 1,
-    backgroundColor: COLORS.MUTED,
-    marginBottom: 8,
-  },
-  signatureName: {
-    fontSize: 12,
-    fontFamily: "Times-Bold",
-    color: COLORS.INK,
-  },
-  signatureTitle: {
-    fontSize: 10,
-    fontFamily: "Helvetica",
-    color: COLORS.MUTED,
-    marginTop: 2,
-  },
-
-  // QR
-  qrImage: {
-    width: 80,
-    height: 80,
-    marginBottom: 5,
-  },
-  certNumber: {
-    position: "absolute",
-    bottom: 20,
-    left: 60,
-    fontSize: 9,
-    fontFamily: "Helvetica",
-    color: COLORS.MUTED,
-  },
-  validationUrl: {
-    position: "absolute",
-    bottom: 20,
-    right: 60,
-    fontSize: 9,
-    fontFamily: "Helvetica",
-    color: COLORS.MUTED,
-    textAlign: "right",
-  },
-});
-
 export const CertificateDocument: React.FC<CertificateDocumentProps> = ({
   certificate,
   qrCodeDataUrl,
 }) => {
+  // --- UTILS ---
   const formatDate = (timestamp: any) => {
-    const date = timestamp?.toDate?.() || new Date(timestamp);
+    if (!timestamp) return "Data N/A";
+    const date = timestamp?.toDate?.() || new Date(timestamp); // Handle Firestore or ISO string
+    // Check if valid date
+    if (isNaN(date.getTime())) return timestamp || "Data Desconhecida";
+
     return date.toLocaleDateString("pt-BR", {
       day: "2-digit",
       month: "long",
@@ -225,94 +253,105 @@ export const CertificateDocument: React.FC<CertificateDocumentProps> = ({
   const formattedCompletedAt = formatDate(certificate.completedAt);
   const formattedIssuedAt = formatDate(certificate.issuedAt);
 
-  // Using absolute path for background image if in public folder
-  // Note: react-pdf in browser might need full URL or relative to public
-  // We'll use absolute URL if environment variable is set, otherwise relative
+  // Use enrolledAt for start date. If missing, fallback to "Início do curso" logic or just omit.
+  // Ideally, use a rough estimation if missing (enrollment date usually exists).
+  const formattedStartedAt = certificate.enrolledAt
+    ? formatDate(certificate.enrolledAt)
+    : "Início";
+
+  // --- ASSETS ---
+  // Using absolute path for public folder assets if needed, or relative
+  // Assuming logo is at public/assets/logo-figura-viva.jpg or .png
+  const logoUrl = "/assets/logo-figura-viva.png"; // Fallback to png usually better for transparency
+  // Optional watercolor background
   const bgUrl = "/assets/_bg_aquarela.png";
 
-  // Logo: Try to match what's available
-  const logoUrl = "/assets/logo-figura-viva.jpg";
-
+  // --- CONTENT ---
   return (
     <Document>
       <Page size="A4" orientation="landscape" style={styles.page}>
-        {/* Background Layer */}
-        <View style={styles.background}>
-          {/* Using a fixed image for watercolor background */}
+        {/* Watercolor Background (Optional) */}
+        <View style={styles.backgroundLayer}>
+          {/* If image exists, it will render. If not, low impact. */}
           <Image src={bgUrl} style={styles.backgroundImage} />
         </View>
 
-        {/* Content Container with Double Border */}
+        {/* Main Frame */}
         <View style={styles.container}>
-          <View style={styles.outerBorder}>
-            <View style={styles.innerBorder}>
-              {/* Header Logo */}
+          <View style={styles.innerBorder}>
+            {/* Header */}
+            <View style={styles.header}>
+              {/* Logo */}
+              {/* We use a conditional check or try/catch effectively by just rendering. 
+                   If src fails, PDF renderer usually warns but doesn't crash completely. */}
               <Image src={logoUrl} style={styles.logo} />
 
-              {/* Institution Name */}
               <Text style={styles.institutionName}>INSTITUTO FIGURA VIVA</Text>
+              <Text style={styles.certificateTitle}>
+                CERTIFICADO DE CONCLUSÃO
+              </Text>
+            </View>
 
-              {/* Subtitle */}
-              <Text style={styles.subtitle}>CERTIFICADO DE CONCLUSÃO</Text>
+            {/* Body */}
+            <View style={styles.body}>
+              <Text style={styles.certifyLabel}>Certificamos que</Text>
 
-              {/* Certify Text */}
-              <Text style={styles.certifyText}>Certificamos que</Text>
-
-              {/* Student Name */}
               <Text style={styles.studentName}>{certificate.studentName}</Text>
-              <View style={styles.underline} />
 
-              {/* Body Text */}
-              <View style={styles.bodyTextContainer}>
-                <Text style={styles.bodyText}>
-                  concluiu com êxito o curso {certificate.courseName}, com carga
-                  horária de {certificate.courseWorkload} horas, realizado no
-                  período de {formattedCompletedAt}.
+              <Text style={styles.bodyText}>
+                concluiu com êxito o curso{" "}
+                <Text style={styles.boldText}>{certificate.courseName}</Text>,
+                {"\n"}
+                com carga horária de{" "}
+                <Text style={styles.boldText}>
+                  {certificate.courseWorkload} horas
+                </Text>
+                ,{"\n"}
+                realizado no período de {formattedStartedAt} a{" "}
+                {formattedCompletedAt}.
+              </Text>
+            </View>
+
+            {/* Footer */}
+            <View style={styles.footer}>
+              {/* Left: Emission Data */}
+              <View style={styles.footerLeft}>
+                <Text style={styles.metaLabel}>DATA DE EMISSÃO</Text>
+                <Text style={styles.metaValue}>{formattedIssuedAt}</Text>
+
+                <Text style={styles.metaLabel}>REGISTRO</Text>
+                <Text style={styles.metaValue}>
+                  {certificate.certificateNumber}
                 </Text>
               </View>
 
-              {/* Footer Separator Line */}
-              <View style={styles.footerSeparator} />
-
-              {/* Footer Area */}
-              <View style={styles.footer}>
-                {/* Issued At (Left) */}
-                <View style={styles.dateColumn}>
-                  <Text style={styles.label}>DATA DE EMISSÃO</Text>
-                  <Text style={styles.value}>{formattedIssuedAt}</Text>
-                </View>
-
-                {/* Signature (Center) */}
-                <View style={styles.signatureColumn}>
-                  <Text style={styles.label}>ASSINATURA DA CURADORA</Text>
+              {/* Center: Signature */}
+              <View style={styles.footerCenter}>
+                <View style={styles.signatureArea}>
+                  {/* Signature Line is visual for now. 
+                       If we had a signature image: <Image src={sigUrl} style={{width: 120, height: 60}} /> */}
                   <View style={styles.signatureLine} />
-                  {/* Ideally use an image of signature here */}
-                  <Text style={styles.signatureName}>
+                  <Text style={styles.curatorName}>
                     {certificate.instructorName}
                   </Text>
-                  <Text style={styles.signatureTitle}>
+                  <Text style={styles.curatorTitle}>
                     {certificate.instructorTitle}
                   </Text>
-                </View>
-
-                {/* QR Code (Right) */}
-                <View style={styles.qrColumn}>
-                  <Image src={qrCodeDataUrl} style={styles.qrImage} />
-                  <Text style={{ ...styles.label, textAlign: "right" }}>
-                    Escaneie para validar
+                  <Text style={styles.signatureLabel}>
+                    Assinatura da Curadora
                   </Text>
                 </View>
               </View>
 
-              {/* Bottom Metadata */}
-              <Text style={styles.certNumber}>
-                Certificado Nº {certificate.certificateNumber} | Documento
-                válido
-              </Text>
-              <Text style={styles.validationUrl}>
-                {certificate.validationUrl.replace(/^https?:\/\//, "")}
-              </Text>
+              {/* Right: QR Code */}
+              <View style={styles.footerRight}>
+                <Image src={qrCodeDataUrl} style={styles.qrImage} />
+                <Text style={styles.qrLabel}>Escaneie para validar</Text>
+              </View>
             </View>
+
+            {/* Bottom Domain (Outside footer flex) */}
+            <Text style={styles.bottomDomain}>figuraviva.com</Text>
           </View>
         </View>
       </Page>
