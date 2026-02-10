@@ -6,6 +6,7 @@ import { FieldValue } from "firebase-admin/firestore";
 import { EnrollmentDoc, EnrollmentStatus } from "@/types/lms";
 import { logAudit } from "@/lib/audit";
 import { revalidatePath } from "next/cache";
+import { telemetry } from "@/lib/telemetry";
 
 /**
  * Aluno solicita acesso via PIX.
@@ -47,9 +48,14 @@ export async function createEnrollmentPending(courseId: string) {
     });
 
     revalidatePath(`/curso/${courseId}`);
+    telemetry.track("enrollment_pix_pending", { uid, courseId });
     return { success: true };
   } catch (error: any) {
-    console.error("Failed to create pending enrollment:", error);
+    telemetry.error(error, {
+      context: "createEnrollmentPending",
+      uid,
+      courseId,
+    });
     return { success: false, error: error.message };
   }
 }
@@ -96,6 +102,12 @@ export async function approvePixEnrollment(userId: string, courseId: string) {
     });
 
     if (result.success) {
+      telemetry.track("enrollment_pix_approved", {
+        adminId: adminSession.uid,
+        userId,
+        courseId,
+        transactionId: result.updates?.sourceRef,
+      });
       await logAudit({
         actor: {
           uid: adminSession.uid,
@@ -116,7 +128,11 @@ export async function approvePixEnrollment(userId: string, courseId: string) {
 
     return { success: true };
   } catch (error: any) {
-    console.error("Failed to approve PIX:", error);
+    telemetry.error(error, {
+      context: "approvePixEnrollment",
+      userId,
+      courseId,
+    });
     return { success: false, error: error.message };
   }
 }
@@ -168,9 +184,19 @@ export async function rejectPixEnrollment(
     });
 
     revalidatePath(`/admin/enrollments`);
+    telemetry.track("enrollment_pix_rejected", {
+      adminId: adminSession.uid,
+      userId,
+      courseId,
+      reason,
+    });
     return { success: true };
   } catch (error: any) {
-    console.error("Failed to reject PIX:", error);
+    telemetry.error(error, {
+      context: "rejectPixEnrollment",
+      userId,
+      courseId,
+    });
     return { success: false, error: error.message };
   }
 }

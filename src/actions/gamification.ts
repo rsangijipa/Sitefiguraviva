@@ -8,6 +8,9 @@ import {
   verifyStreakStatus,
   calculateLevel,
 } from "@/lib/gamification";
+import { telemetry } from "@/lib/telemetry";
+
+// ... imports remain the same
 
 /**
  * Server-Side Action to process gamification events securely.
@@ -25,36 +28,47 @@ export async function processGamificationEvent(data: {
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get("session")?.value;
 
-  if (!sessionCookie) return { error: "Unauthorized" };
+  if (!sessionCookie) {
+    telemetry.error(new Error("Gamification attempt without session"));
+    return { error: "Unauthorized" };
+  }
 
   try {
     const claims = await auth.verifySessionCookie(sessionCookie, true);
     const uid = claims.uid;
     if (!uid) return { error: "Unauthorized" };
 
-    // Deterministic Event ID
+    // 1. Deterministic Event ID (Idempotency Key)
+    // Critical: naming must be unique per logical event, but constant for retries.
     let eventId = "";
     if (data.actionType === "daily_login") {
-      const today = new Date().toISOString().split("T")[0];
-      eventId = `${uid}_daily_login_${today}`;
+      const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+      eventId = `daily_login_${uid}_${today}`;
+    } else if (data.actionType === "lesson_complete" && data.lessonId) {
+      eventId = `lesson_complete_${uid}_${data.lessonId}`;
+    } else if (data.actionType === "course_complete" && data.courseId) {
+      eventId = `course_complete_${uid}_${data.courseId}`;
     } else {
-      eventId = `${uid}_${data.courseId || "global"}_${data.lessonId || "global"}_${data.actionType}`;
+      // Fallback for generic events (quiz?) - use timestamp if not unique restricted
+      eventId = `event_${uid}_${Date.now()}_${Math.random().toString(36).slice(2)}`;
     }
 
-    // Transaction for Atomicity (XP + Level + Streak + Badges)
+    // 2. Transaction: Idempotency + State Update
     return await adminDb.runTransaction(async (transaction) => {
-      // 1. Idempotency Check
+      // A. Check Idempotency
       const eventRef = adminDb.collection("gamification_events").doc(eventId);
       const eventSnap = await transaction.get(eventRef);
 
       if (eventSnap.exists) {
-        return { success: true, alreadyProcessed: true };
+        // Event already processed. Return success to UI but do nothing.
+        telemetry.track("gamification_idempotent_skip", { eventId, uid });
+        return { success: true, processed: false, reason: "idempotent_skip" };
       }
 
-      // 2. Get User Profile
+      // B. Load User Profile
       const profileRef = adminDb.collection("gamification_profiles").doc(uid);
       const profileSnap = await transaction.get(profileRef);
-      // Explicit casting to any to access fields safely
+
       const profileData = profileSnap.exists ? profileSnap.data() : {};
       const profile = {
         totalXp: profileData?.totalXp || 0,
@@ -65,183 +79,112 @@ export async function processGamificationEvent(data: {
         badges: profileData?.badges || [],
       };
 
-      // 3. Validation & XP Logic
+      // C. Validation & Calculation
       let xpDelta = 0;
-      let streakUpdate = {};
-
-      if (data.actionType === "daily_login") {
-        // verifyStreakStatus expects a Firestore Timestamp (check lib/gamification.ts)
-        // profile.lastActivityDate is from Admin SDK.
-        const streakStatus = verifyStreakStatus(
-          profile.lastActivityDate as any,
-        );
-
-        if (streakStatus === "maintain") {
-          // Already handled in time window, but event didn't exist?
-          // Trust idempotent eventId. If we are here, we award.
-          // But if verifyStreakStatus says maintain, it means we logged in TODAY already.
-          // So maybe eventId from 'today' string is different from 'maintain' logic?
-          // Let's increment nothing but record event.
-          return {
-            success: true,
-            alreadyProcessed: true,
-            reason: "Streak maintained",
-          };
-        } else if (streakStatus === "increment") {
-          const nextStreak = profile.currentStreak + 1;
-          streakUpdate = {
-            currentStreak: nextStreak,
-            longestStreak: Math.max(nextStreak, profile.longestStreak),
-          };
-          xpDelta = XP_VALUES.DAILY_LOGIN || 10;
-        } else if (streakStatus === "reset") {
-          streakUpdate = { currentStreak: 1 };
-          xpDelta = XP_VALUES.DAILY_LOGIN || 10;
-        }
-      } else if (
-        data.actionType === "lesson_complete" &&
-        data.courseId &&
-        data.lessonId
-      ) {
-        // Proof of Work
-        const progressRef = adminDb
-          .collection("progress")
-          .doc(`${uid}_${data.courseId}`);
-        const progressSnap = await transaction.get(progressRef);
-
-        if (!progressSnap.exists) throw new Error("Progress not found");
-
-        const lessonProgress =
-          progressSnap.data()?.lessonProgress?.[data.lessonId];
-        if (!lessonProgress?.completed) {
-          console.warn(
-            `[Security] Spoof attempt ${uid} lesson ${data.lessonId}`,
-          );
-          throw new Error("Lesson not completed");
-        }
-        xpDelta = XP_VALUES.LESSON_COMPLETED || 50;
-      } else if (data.actionType === "course_complete" && data.courseId) {
-        // Proof of Work
-        const progressRef = adminDb
-          .collection("progress")
-          .doc(`${uid}_${data.courseId}`);
-        const progressSnap = await transaction.get(progressRef);
-        if (!progressSnap.exists || !progressSnap.data()?.completed) {
-          throw new Error("Course not completed");
-        }
-        xpDelta = XP_VALUES.COURSE_COMPLETED || 500;
-      } else if (data.actionType === "quiz_pass") {
-        xpDelta = XP_VALUES.QUIZ_PASSED || 100;
-      }
-
-      // 4. Badge Logic (Internal)
+      let streakUpdate: any = {};
       const newBadges: string[] = [];
-      const awardBadge = (badgeId: string) => {
-        if (!profile.badges.includes(badgeId) && !newBadges.includes(badgeId)) {
-          newBadges.push(badgeId);
-        }
-      };
 
-      if (data.actionType === "lesson_complete") {
-        awardBadge("first_steps"); // First lesson badge
-      }
-      if (data.actionType === "course_complete") {
-        awardBadge("course_completion_1"); // First course badge
-        if (data.metadata?.courseTitle?.toLowerCase().includes("gestalt")) {
-          awardBadge("gestalt_master");
-        }
-      }
-
-      // Check Pioneer (First Login / Early Adopter)
-      if (!profile.badges.includes("pioneer_student")) {
-        try {
-          const userRecord = await auth.getUser(uid);
-          const creationTime = new Date(userRecord.metadata.creationTime);
-          const cutoff = new Date("2026-03-01T00:00:00Z");
-          if (creationTime < cutoff) {
-            awardBadge("pioneer_student");
+      switch (data.actionType) {
+        case "daily_login":
+          const streakStatus = verifyStreakStatus(profile.lastActivityDate); // Lib handles Timestamp
+          if (streakStatus === "increment") {
+            xpDelta = XP_VALUES.DAILY_LOGIN || 10;
+            const next = profile.currentStreak + 1;
+            streakUpdate = {
+              currentStreak: next,
+              longestStreak: Math.max(next, profile.longestStreak),
+            };
+            if (next === 7) newBadges.push("dedicated_learner_week");
+            if (next === 30) newBadges.push("dedicated_learner_month");
+          } else if (streakStatus === "reset") {
+            xpDelta = XP_VALUES.DAILY_LOGIN || 5;
+            streakUpdate = { currentStreak: 1 };
+          } else {
+            // "maintain": already logged in today, but maybe no XP awarded previously?
+            // With idempotency key based on Date, we shouldn't reach here if we rely on eventId.
+            // But if logic differs, safe to just update timestamp.
+            streakUpdate = { updatedAt: FieldValue.serverTimestamp() };
           }
-        } catch (e) {
-          console.error("Error checking pioneer badge:", e);
-        }
+          break;
+
+        case "lesson_complete":
+          if (!data.lessonId || !data.courseId) throw new Error("Missing IDs");
+          xpDelta = XP_VALUES.LESSON_COMPLETED || 50;
+          if (!profile.badges.includes("first_lesson"))
+            newBadges.push("first_lesson");
+          break;
+
+        case "course_complete":
+          if (!data.courseId) throw new Error("Missing Course ID");
+          xpDelta = XP_VALUES.COURSE_COMPLETED || 500;
+          if (!profile.badges.includes("first_course"))
+            newBadges.push("first_course");
+          break;
+
+        case "quiz_pass":
+          xpDelta = XP_VALUES.QUIZ_PASSED || 100;
+          break;
       }
 
-      // Check Dedicated (Streak > 7)
-      if (!profile.badges.includes("dedicated_learner")) {
-        const currentStreak =
-          (streakUpdate as any).currentStreak || profile.currentStreak;
-        if (currentStreak >= 7) {
-          awardBadge("dedicated_learner");
-        }
-      }
-
-      // 5. Calculate New State
-      const newTotalXp = profile.totalXp + xpDelta;
+      // D. Apply Updates
+      const newTotalXp = (profile.totalXp || 0) + xpDelta;
       const newLevel = calculateLevel(newTotalXp);
       const leveledUp = newLevel > profile.level;
-      const allBadges = [...profile.badges, ...newBadges];
 
-      // 6. Writes
-      // A. Event
+      const allUniqueBadges = Array.from(
+        new Set([...profile.badges, ...newBadges]),
+      );
+
+      // E. Write to Ledger (Audit Trail)
       transaction.set(eventRef, {
         uid,
         actionType: data.actionType,
-        xpAmount: xpDelta,
+        eventId,
+        xpAwarded: xpDelta,
         badgesEarned: newBadges,
         metadata: data.metadata || {},
-        timestamp: Timestamp.now(),
-        userAgent: "Server Action",
+        timestamp: FieldValue.serverTimestamp(),
+        ip: "server-action",
       });
 
-      // B. Profile
+      // F. Update User Profile
       transaction.set(
         profileRef,
         {
+          ...streakUpdate,
           totalXp: newTotalXp,
           level: newLevel,
-          badges: allBadges,
-          lastActivityDate: Timestamp.now(),
-          updatedAt: Timestamp.now(),
-          ...streakUpdate,
+          badges: allUniqueBadges,
+          lastActivityDate: FieldValue.serverTimestamp(),
+          updatedAt: FieldValue.serverTimestamp(),
         },
         { merge: true },
       );
 
-      // C. Transaction Log (Legacy)
+      // G. Legacy Transaction Log (Optional, for backward compat if needed)
+      // Keeping it purely for admin logs if dashboard relies on it
       if (xpDelta > 0) {
-        const transRef = adminDb.collection("xp_transactions").doc();
-        transaction.set(transRef, {
+        const legacyRef = adminDb.collection("xp_transactions").doc();
+        transaction.set(legacyRef, {
           userId: uid,
           amount: xpDelta,
           reason: data.actionType,
-          timestamp: Timestamp.now(),
-          metadata: data.metadata || {},
+          eventId, // Link to idempotent event
+          timestamp: FieldValue.serverTimestamp(),
         });
       }
 
-      // D. Earned Badges Log
-      newBadges.forEach((badgeId) => {
-        const earnedRef = adminDb
-          .collection("earned_badges")
-          .doc(`${uid}_${badgeId}`);
-        transaction.set(earnedRef, {
-          userId: uid,
-          badgeId,
-          courseId: data.courseId || null,
-          earnedAt: Timestamp.now(),
-        });
-      });
-
       return {
         success: true,
+        processed: true,
         xpAwarded: xpDelta,
         newLevel,
         leveledUp,
-        newBadges, // Return for UI toast
+        newBadges,
       };
     });
   } catch (error) {
-    console.error("Process Gamification Event Error:", error);
-    return { error: "Internal Server Error" };
+    telemetry.error(error, { actionType: data.actionType });
+    return { error: "Could not process gamification event." };
   }
 }
