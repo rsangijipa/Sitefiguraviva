@@ -1,96 +1,158 @@
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { auth, db } from "@/lib/firebase/admin";
+import { LessonPlayerWrapper } from "@/components/portal/LessonPlayerWrapper";
+import { Lesson, Module } from "@/types/lms";
+import { deepSafeSerialize } from "@/lib/utils";
+import { assertCanAccessCourse } from "@/lib/auth/access-gate";
 
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
-import { auth, db } from '@/lib/firebase/admin';
-import { LessonPlayerWrapper } from '@/components/portal/LessonPlayerWrapper';
-import { Lesson, Module } from '@/types/lms';
-import { deepSafeSerialize } from '@/lib/utils';
-import { assertCanAccessCourse } from '@/lib/auth/access-gate';
-
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 // Helper to fetch full course structure
 async function getCourseData(courseId: string) {
-    const courseDoc = await db.collection('courses').doc(courseId).get();
-    if (!courseDoc.exists) return null;
+  const courseDoc = await db.collection("courses").doc(courseId).get();
+  if (!courseDoc.exists) return null;
 
-    const modulesSnap = await db.collection('courses').doc(courseId).collection('modules').orderBy('order', 'asc').get();
-    const modules = await Promise.all(modulesSnap.docs.map(async doc => {
-        const lessonsSnap = await doc.ref.collection('lessons').orderBy('order', 'asc').get();
-        const lessons = lessonsSnap.docs.map(l => ({ id: l.id, moduleId: doc.id, ...l.data() }));
-        return { id: doc.id, ...doc.data(), lessons };
-    }));
+  const modulesSnap = await db
+    .collection("courses")
+    .doc(courseId)
+    .collection("modules")
+    .orderBy("order", "asc")
+    .get();
+  const modules = await Promise.all(
+    modulesSnap.docs.map(async (doc) => {
+      const lessonsSnap = await doc.ref
+        .collection("lessons")
+        .orderBy("order", "asc")
+        .get();
+      const lessons = lessonsSnap.docs.map((l) => ({
+        id: l.id,
+        moduleId: doc.id,
+        ...l.data(),
+      }));
+      return { id: doc.id, ...doc.data(), lessons };
+    }),
+  );
 
-    return deepSafeSerialize({ id: courseDoc.id, ...courseDoc.data(), modules } as any);
+  return deepSafeSerialize({
+    id: courseDoc.id,
+    ...courseDoc.data(),
+    modules,
+  } as any);
 }
 
-export default async function LessonPage({ params }: { params: Promise<{ courseId: string, lessonId: string }> }) {
-    const { courseId, lessonId } = await params;
+export default async function LessonPage({
+  params,
+}: {
+  params: Promise<{ courseId: string; lessonId: string }>;
+}) {
+  const { courseId, lessonId } = await params;
 
-    const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get('session')?.value;
-    if (!sessionCookie) redirect('/login');
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get("session")?.value;
+  if (!sessionCookie) redirect("/login");
 
-    let uid;
+  let uid;
+  try {
+    const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
+    uid = decodedClaims.uid;
+  } catch {
+    redirect("/login");
+  }
+
+  // ORBITAL 01 & 05: Single Source of Truth Access Gate
+  await assertCanAccessCourse(uid, courseId);
+
+  const courseData = await getCourseData(courseId);
+  if (!courseData) redirect("/portal");
+
+  // 4. FETCH PROGRESS (Numerador) - FIX: Sincronismo (Audit PRG-01)
+  const progressSnap = await db
+    .collection("progress")
+    .where("userId", "==", uid)
+    .where("courseId", "==", courseId)
+    .get();
+
+  const progressMap: Record<string, any> = {};
+  progressSnap.docs.forEach((doc) => {
+    progressMap[doc.data().lessonId] = doc.data();
+  });
+
+  const allLessons: Lesson[] = courseData.modules.flatMap((m: any) =>
+    m.lessons.map((l: any) => {
+      const prog = progressMap[l.id];
+      return {
+        ...l,
+        isCompleted: prog?.status === "completed",
+        maxWatchedSecond: prog?.maxWatchedSecond || 0,
+      };
+    }),
+  ) as Lesson[];
+
+  const currentIndex = allLessons.findIndex((l) => l.id === lessonId);
+
+  if (currentIndex === -1) redirect(`/portal/course/${courseId}`);
+
+  const activeLesson = allLessons[currentIndex];
+
+  // FETCH CONTENT (Blocks)
+  // We must fetch the subcollection 'blocks' for this lesson to show content
+  if (activeLesson) {
     try {
-        const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
-        uid = decodedClaims.uid;
-    } catch { redirect('/login'); }
+      const blocksSnap = await db
+        .collection("courses")
+        .doc(courseId)
+        .collection("modules")
+        .doc(activeLesson.moduleId)
+        .collection("lessons")
+        .doc(activeLesson.id)
+        .collection("blocks")
+        .orderBy("order", "asc")
+        .get();
 
-    // ORBITAL 01 & 05: Single Source of Truth Access Gate
-    await assertCanAccessCourse(uid, courseId);
+      const blocks = blocksSnap.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+        isPublished: doc.data().isPublished !== false,
+      }));
 
-    const courseData = await getCourseData(courseId);
-    if (!courseData) redirect('/portal');
-
-    const allLessons: Lesson[] = courseData.modules.flatMap((m: any) => m.lessons) as Lesson[];
-    const currentIndex = allLessons.findIndex(l => l.id === lessonId);
-
-    if (currentIndex === -1) redirect(`/portal/course/${courseId}`);
-
-    const activeLesson = allLessons[currentIndex];
-
-    // FETCH CONTENT (Blocks)
-    // We must fetch the subcollection 'blocks' for this lesson to show content
-    if (activeLesson) {
-        try {
-            const blocksSnap = await db.collection('courses')
-                .doc(courseId)
-                .collection('modules')
-                .doc(activeLesson.moduleId)
-                .collection('lessons')
-                .doc(activeLesson.id)
-                .collection('blocks')
-                .orderBy('order', 'asc')
-                .get();
-
-            const blocks = blocksSnap.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data(),
-                isPublished: doc.data().isPublished !== false
-            }));
-
-            // @ts-ignore - injecting blocks into the lesson object for the player
-            activeLesson.blocks = blocks;
-        } catch (e) {
-            console.error("Error fetching lesson blocks:", e);
-        }
+      // @ts-ignore - injecting blocks into the lesson object for the player
+      activeLesson.blocks = blocks;
+    } catch (e) {
+      console.error("Error fetching lesson blocks:", e);
     }
+  }
 
-    const prevLessonId = currentIndex > 0 ? allLessons[currentIndex - 1].id : undefined;
-    const nextLessonId = currentIndex < allLessons.length - 1 ? allLessons[currentIndex + 1].id : undefined;
+  const prevLessonId =
+    currentIndex > 0 ? allLessons[currentIndex - 1].id : undefined;
+  const nextLessonId =
+    currentIndex < allLessons.length - 1
+      ? allLessons[currentIndex + 1].id
+      : undefined;
 
-    return (
-        <LessonPlayerWrapper
-            course={deepSafeSerialize({
-                id: courseData.id,
-                title: courseData.title,
-                backLink: `/portal/course/${courseId}`
-            })}
-            modules={courseData.modules as Module[]}
-            activeLesson={activeLesson}
-            prevLessonId={prevLessonId}
-            nextLessonId={nextLessonId}
-        />
-    );
+  // Merge progress into modules for the sidebar
+  const modulesWithProgress = courseData.modules.map((m: any) => ({
+    ...m,
+    lessons: m.lessons.map((l: any) => {
+      const prog = progressMap[l.id];
+      return {
+        ...l,
+        isCompleted: prog?.status === "completed",
+      };
+    }),
+  }));
+
+  return (
+    <LessonPlayerWrapper
+      course={deepSafeSerialize({
+        id: courseData.id,
+        title: courseData.title,
+        backLink: `/portal/course/${courseId}`,
+      })}
+      modules={modulesWithProgress as Module[]}
+      activeLesson={activeLesson}
+      prevLessonId={prevLessonId}
+      nextLessonId={nextLessonId}
+    />
+  );
 }

@@ -16,6 +16,16 @@ const nextConfig = {
             },
         ];
     },
+    async redirects() {
+        return [
+            {
+                source: '/instituto/laura-pierce',
+                destination: '/instituto/laura-perls',
+                permanent: true,
+            },
+        ];
+    },
+
     experimental: {
         serverActions: {
             bodySizeLimit: '5mb',
