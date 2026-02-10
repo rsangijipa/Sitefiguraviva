@@ -1,100 +1,133 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { getAuditLogs } from '@/actions/audit';
-import { Loader2, RefreshCw, Smartphone, Globe, ShieldAlert } from 'lucide-react';
-import { Card } from '@/components/ui/Card';
-import Button from '@/components/ui/Button';
+import { useState, useEffect } from "react";
+import { getAuditLogs } from "@/actions/audit";
+import { AdminPageShell } from "@/components/admin/AdminPageShell";
+import { DataTable, Column } from "@/components/admin/DataTable";
+import { Badge } from "@/components/ui/Badge";
+import { cn } from "@/lib/utils";
+import { RefreshCw, Terminal, User as UserIcon } from "lucide-react";
+import Button from "@/components/ui/Button";
 
 export default function AdminLogsPage() {
-    const [logs, setLogs] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
+  const [logs, setLogs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-    const fetchLogs = async () => {
-        setLoading(true);
-        const res = await getAuditLogs(50);
-        if (res.success) {
-            setLogs(res.logs);
-        } else {
-            alert('Failed to fetch logs: ' + res.error);
-        }
-        setLoading(false);
-    };
+  const fetchLogs = async () => {
+    setLoading(true);
+    const res = await getAuditLogs(100);
+    if (res.success) {
+      setLogs(res.logs || []);
+    }
+    setLoading(false);
+  };
 
-    useEffect(() => {
-        fetchLogs();
-    }, []);
+  useEffect(() => {
+    fetchLogs();
+  }, []);
 
-    return (
-        <div className="p-6 md:p-10 space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-serif font-bold text-stone-800">Logs de Auditoria</h1>
-                    <p className="text-stone-500">Rastreamento imutável de ações críticas do sistema.</p>
-                </div>
-                <Button onClick={fetchLogs} disabled={loading} leftIcon={<RefreshCw className={loading ? 'animate-spin' : ''} size={16} />}>
-                    Atualizar
-                </Button>
-            </div>
-
-            <Card className="overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left">
-                        <thead className="bg-stone-50 text-stone-500 font-medium border-b border-stone-100">
-                            <tr>
-                                <th className="px-6 py-4">Data/Hora</th>
-                                <th className="px-6 py-4">Ação</th>
-                                <th className="px-6 py-4">Ator (UID)</th>
-                                <th className="px-6 py-4">Alvo</th>
-                                <th className="px-6 py-4">Detalhes</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-stone-50">
-                            {logs.map((log) => (
-                                <tr key={log.id} className="hover:bg-stone-50/50 transition-colors">
-                                    <td className="px-6 py-4 font-mono text-xs text-stone-500 whitespace-nowrap">
-                                        {new Date(log.timestamp).toLocaleString()}
-                                    </td>
-                                    <td className="px-6 py-4 font-medium text-stone-700">
-                                        <span className="bg-stone-100 px-2 py-1 rounded border border-stone-200">
-                                            {log.action}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 text-stone-600 font-mono text-xs">
-                                        <div className="flex flex-col">
-                                            <span>{log.actor?.email || 'N/A'}</span>
-                                            <span className="text-stone-400">{log.actor?.uid}</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-stone-600">
-                                        <div className="flex flex-col">
-                                            <span className="font-bold">{log.target?.collection}</span>
-                                            <span className="font-mono text-xs text-stone-400">{log.target?.id}</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        {log.diff && (
-                                            <details className="cursor-pointer">
-                                                <summary className="text-xs text-blue-600 font-medium select-none hover:underline">Ver Diff</summary>
-                                                <div className="mt-2 p-2 bg-stone-900 text-green-400 rounded text-[10px] font-mono whitespace-pre-wrap max-w-xs overflow-auto max-h-40">
-                                                    {JSON.stringify(log.diff, null, 2)}
-                                                </div>
-                                            </details>
-                                        )}
-                                    </td>
-                                </tr>
-                            ))}
-                            {!loading && logs.length === 0 && (
-                                <tr>
-                                    <td colSpan={5} className="px-6 py-12 text-center text-stone-400">
-                                        Nenhum log encontrado.
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            </Card>
+  const columns: Column<any>[] = [
+    {
+      key: "timestamp",
+      label: "Data/Hora",
+      render: (log) => (
+        <div className="text-xs font-mono text-stone-500 whitespace-nowrap">
+          {log.timestamp
+            ? new Date(log.timestamp).toLocaleString("pt-BR")
+            : "-"}
         </div>
-    );
+      ),
+    },
+    {
+      key: "eventType",
+      label: "Evento",
+      render: (log) => (
+        <Badge variant="outline" className="bg-stone-50 text-[10px] font-mono">
+          {log.eventType}
+        </Badge>
+      ),
+    },
+    {
+      key: "actor",
+      label: "Autor",
+      render: (log) => (
+        <div className="flex items-center gap-2">
+          <UserIcon size={12} className="text-stone-400" />
+          <div className="flex flex-col">
+            <span className="text-xs font-medium text-stone-700">
+              {log.actor?.email || "Sistema"}
+            </span>
+            <span className="text-[10px] text-stone-400 font-mono truncate max-w-[80px]">
+              {log.actor?.uid}
+            </span>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "target",
+      label: "Alvo",
+      render: (log) => (
+        <div className="flex flex-col">
+          <span className="text-[10px] font-bold uppercase text-stone-500 tracking-wider">
+            {log.target?.collection}
+          </span>
+          <span className="text-[10px] font-mono text-stone-400 truncate max-w-[100px]">
+            {log.target?.id}
+          </span>
+        </div>
+      ),
+    },
+    {
+      key: "details",
+      label: "Dados",
+      render: (log) => (
+        <div className="flex gap-2">
+          {(log.diff || log.payload) && (
+            <details className="cursor-pointer">
+              <summary className="text-[10px] text-primary hover:underline font-bold uppercase">
+                Detalhes
+              </summary>
+              <div className="mt-2 p-2 bg-stone-900 text-green-400 rounded text-[9px] font-mono whitespace-pre-wrap max-w-sm overflow-auto max-h-40 border border-stone-800">
+                {JSON.stringify(
+                  { diff: log.diff, payload: log.payload },
+                  null,
+                  2,
+                )}
+              </div>
+            </details>
+          )}
+        </div>
+      ),
+    },
+  ];
+
+  return (
+    <AdminPageShell
+      title="Logs de Auditoria"
+      description="Histórico imutável de todas as ações administrativas realizadas no sistema."
+      breadcrumbs={[{ label: "Logs" }]}
+      actions={
+        <Button
+          onClick={fetchLogs}
+          size="sm"
+          variant="outline"
+          isLoading={loading}
+          leftIcon={
+            <RefreshCw size={14} className={cn(loading && "animate-spin")} />
+          }
+        >
+          Atualizar
+        </Button>
+      }
+    >
+      <DataTable
+        data={logs}
+        columns={columns}
+        isLoading={loading}
+        searchKey="eventType"
+        searchPlaceholder="Filtrar por tipo de evento..."
+      />
+    </AdminPageShell>
+  );
 }

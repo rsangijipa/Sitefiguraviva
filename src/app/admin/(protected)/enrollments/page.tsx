@@ -64,11 +64,16 @@ export default function EnrollmentsManager() {
     const q = query(
       collection(db, "enrollments"),
       where("uid", "==", selectedUser.id),
-      orderBy("createdAt", "desc"),
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const docs = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+      // Sort in memory (Newest first)
+      docs.sort((a: any, b: any) => {
+        const tA = a.createdAt?.seconds || 0;
+        const tB = b.createdAt?.seconds || 0;
+        return tB - tA;
+      });
       setEnrollments(docs);
     });
     return () => unsubscribe();

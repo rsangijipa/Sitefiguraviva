@@ -23,6 +23,8 @@ import {
   Activity,
   Shield,
   Calendar,
+  Trophy,
+  ClipboardList,
 } from "lucide-react";
 import PageShell from "@/components/ui/PageShell";
 
@@ -56,8 +58,14 @@ export default function AdminShell({
       label: "Avaliações (Provas)",
       path: "/admin/assessments",
     },
+    {
+      icon: ClipboardList,
+      label: "Correções (Provas)",
+      path: "/admin/assessments/submissions",
+    },
     { icon: Calendar, label: "Eventos Ao Vivo", path: "/admin/events" },
     { icon: Users, label: "Alunos & Matrículas", path: "/admin/enrollments" },
+    { icon: Trophy, label: "Gamificação", path: "/admin/gamification" },
     { icon: Globe, label: "Google Suite", path: "/admin/google" },
     { icon: PenTool, label: "Diário Visual", path: "/admin/blog" },
     { icon: BookOpen, label: "Galeria", path: "/admin/gallery" },

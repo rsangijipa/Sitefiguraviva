@@ -33,6 +33,12 @@ interface DataTableProps<T> {
   onRowClick?: (item: T) => void;
   pageSize?: number;
   emptyMessage?: string;
+  // Manual Pagination Props
+  manualPagination?: boolean;
+  onNextPage?: () => void;
+  onPrevPage?: () => void; // Optional if we only support simple infinite/load-more style
+  hasMore?: boolean;
+  isFirstPage?: boolean;
 }
 
 export function DataTable<T extends { id: string | number }>({
@@ -45,16 +51,23 @@ export function DataTable<T extends { id: string | number }>({
   onRowClick,
   pageSize = 10,
   emptyMessage = "Nenhum registro encontrado.",
+  manualPagination = false,
+  onNextPage,
+  onPrevPage,
+  hasMore = false,
+  isFirstPage = true,
 }: DataTableProps<T>) {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState<{
     key: string;
     direction: "asc" | "desc";
   } | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1); // Internal page for Client-Side pagination
 
-  // Filter data
+  // Filter data (Client-Side Only)
   const filteredData = useMemo(() => {
+    if (manualPagination) return data; // Server-side filtering expected
+
     if (!searchTerm || !searchKey) return data;
 
     return data.filter((item) => {
@@ -64,10 +77,12 @@ export function DataTable<T extends { id: string | number }>({
       }
       return false;
     });
-  }, [data, searchTerm, searchKey]);
+  }, [data, searchTerm, searchKey, manualPagination]);
 
-  // Sort data
+  // Sort data (Client-Side Only)
   const sortedData = useMemo(() => {
+    if (manualPagination) return filteredData; // Server-side sorting expected
+
     if (!sortConfig) return filteredData;
 
     return [...filteredData].sort((a, b) => {
@@ -78,16 +93,24 @@ export function DataTable<T extends { id: string | number }>({
       if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
       return 0;
     });
-  }, [filteredData, sortConfig]);
+  }, [filteredData, sortConfig, manualPagination]);
 
-  // Pagination
-  const totalPages = Math.ceil(sortedData.length / pageSize);
-  const paginatedData = sortedData.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize,
-  );
+  // Pagination (Client-Side)
+  const finalData = useMemo(() => {
+    if (manualPagination) return sortedData;
+    return sortedData.slice(
+      (currentPage - 1) * pageSize,
+      currentPage * pageSize,
+    );
+  }, [sortedData, currentPage, pageSize, manualPagination]);
+
+  const totalPages = manualPagination
+    ? 0
+    : Math.ceil(sortedData.length / pageSize);
 
   const handleSort = (key: string) => {
+    if (manualPagination) return; // TODO: Implement server-side sort callback
+
     let direction: "asc" | "desc" = "asc";
     if (sortConfig?.key === key && sortConfig.direction === "asc") {
       direction = "desc";
@@ -109,7 +132,8 @@ export function DataTable<T extends { id: string | number }>({
             placeholder={searchPlaceholder}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-stone-50 border border-stone-100 rounded-xl text-sm outline-none focus:bg-white focus:border-primary/30 focus:ring-4 focus:ring-primary/5 transition-all"
+            disabled={manualPagination} // Disable search for now if manual pagination (until server-side search implemented)
+            className="w-full pl-10 pr-4 py-2.5 bg-stone-50 border border-stone-100 rounded-xl text-sm outline-none focus:bg-white focus:border-primary/30 focus:ring-4 focus:ring-primary/5 transition-all disabled:opacity-50"
           />
         </div>
 
@@ -138,14 +162,14 @@ export function DataTable<T extends { id: string | number }>({
                     className={cn(
                       "px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-stone-400 select-none",
                       column.sortable &&
+                        !manualPagination &&
                         "cursor-pointer hover:text-stone-700 transition-colors",
                       column.className,
                     )}
                   >
                     <div className="flex items-center gap-2">
                       {column.label}
-                      {column.sortable &&
-                        sortConfig?.key === column.key &&
+                      {sortConfig?.key === column.key &&
                         (sortConfig.direction === "asc" ? (
                           <ChevronUp size={12} />
                         ) : (
@@ -155,7 +179,10 @@ export function DataTable<T extends { id: string | number }>({
                   </th>
                 ))}
                 {actions && (
-                  <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-stone-400 text-right">
+                  <th
+                    key="actions"
+                    className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-stone-400 text-right"
+                  >
                     Ações
                   </th>
                 )}
@@ -164,21 +191,24 @@ export function DataTable<T extends { id: string | number }>({
             <tbody className="divide-y divide-stone-50">
               {isLoading ? (
                 Array.from({ length: pageSize }).map((_, i) => (
-                  <tr key={i}>
+                  <tr key={`skeleton-row-${i}`}>
                     {columns.map((col) => (
                       <td key={col.key} className="px-6 py-4">
                         <Skeleton className="h-4 w-full opacity-50" />
                       </td>
                     ))}
                     {actions && (
-                      <td className="px-6 py-4 text-right">
+                      <td
+                        key="actions-skeleton"
+                        className="px-6 py-4 text-right"
+                      >
                         <Skeleton className="h-8 w-8 rounded-full ml-auto" />
                       </td>
                     )}
                   </tr>
                 ))
-              ) : paginatedData.length > 0 ? (
-                paginatedData.map((item) => (
+              ) : finalData.length > 0 ? (
+                finalData.map((item) => (
                   <tr
                     key={item.id}
                     onClick={() => onRowClick?.(item)}
@@ -201,7 +231,7 @@ export function DataTable<T extends { id: string | number }>({
                       </td>
                     ))}
                     {actions && (
-                      <td className="px-6 py-4 text-right">
+                      <td key="actions" className="px-6 py-4 text-right">
                         <div onClick={(e) => e.stopPropagation()}>
                           {actions(item)}
                         </div>
@@ -210,7 +240,7 @@ export function DataTable<T extends { id: string | number }>({
                   </tr>
                 ))
               ) : (
-                <tr>
+                <tr key="empty-state">
                   <td
                     colSpan={columns.length + (actions ? 1 : 0)}
                     className="px-6 py-20 text-center"
@@ -222,7 +252,7 @@ export function DataTable<T extends { id: string | number }>({
                         className="opacity-20 mb-2"
                       />
                       <p className="text-sm font-medium">{emptyMessage}</p>
-                      {searchTerm && (
+                      {!manualPagination && searchTerm && (
                         <button
                           onClick={() => setSearchTerm("")}
                           className="text-primary text-xs font-bold hover:underline mt-2"
@@ -239,55 +269,76 @@ export function DataTable<T extends { id: string | number }>({
         </div>
 
         {/* Pagination Footer */}
-        {!isLoading && sortedData.length > pageSize && (
-          <div className="px-6 py-4 bg-stone-50/30 border-t border-stone-100 flex items-center justify-between">
-            <p className="text-xs text-stone-400">
-              Mostrando{" "}
-              <span className="font-bold text-stone-600">
-                {(currentPage - 1) * pageSize + 1}
-              </span>{" "}
-              a{" "}
-              <span className="font-bold text-stone-600">
-                {Math.min(currentPage * pageSize, sortedData.length)}
-              </span>{" "}
-              de{" "}
-              <span className="font-bold text-stone-600">
-                {sortedData.length}
-              </span>{" "}
-              registros
+        {((!manualPagination && sortedData.length > pageSize) ||
+          (manualPagination && (hasMore || !isFirstPage))) && (
+          <div className="px-6 py-4 bg-stone-50/30 border-t border-stone-100 flex flex-col-reverse gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-xs text-stone-400 text-center sm:text-left">
+              {manualPagination ? (
+                <span>Página Atual (Cursor Base)</span>
+              ) : (
+                <>
+                  Mostrando{" "}
+                  <span className="font-bold text-stone-600">
+                    {(currentPage - 1) * pageSize + 1}
+                  </span>{" "}
+                  a{" "}
+                  <span className="font-bold text-stone-600">
+                    {Math.min(currentPage * pageSize, sortedData.length)}
+                  </span>{" "}
+                  de{" "}
+                  <span className="font-bold text-stone-600">
+                    {sortedData.length}
+                  </span>{" "}
+                  registros
+                </>
+              )}
             </p>
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-                className="p-2 text-stone-400 hover:text-stone-700 hover:bg-white rounded-lg border border-transparent hover:border-stone-100 disabled:opacity-30 disabled:pointer-events-none transition-all"
-              >
-                <ChevronLeft size={18} />
-              </button>
-              <div className="flex items-center px-1">
-                {Array.from({ length: totalPages }).map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setCurrentPage(i + 1)}
-                    className={cn(
-                      "w-8 h-8 text-xs font-bold rounded-lg transition-all",
-                      currentPage === i + 1
-                        ? "bg-primary text-white shadow-md shadow-primary/20"
-                        : "text-stone-400 hover:text-stone-700 hover:bg-white",
-                    )}
-                  >
-                    {i + 1}
-                  </button>
-                ))}
-              </div>
+            <div className="flex items-center justify-center gap-2">
               <button
                 onClick={() =>
-                  setCurrentPage((p) => Math.min(totalPages, p + 1))
+                  manualPagination
+                    ? onPrevPage?.()
+                    : setCurrentPage((p) => Math.max(1, p - 1))
                 }
-                disabled={currentPage === totalPages}
-                className="p-2 text-stone-400 hover:text-stone-700 hover:bg-white rounded-lg border border-transparent hover:border-stone-100 disabled:opacity-30 disabled:pointer-events-none transition-all"
+                disabled={manualPagination ? isFirstPage : currentPage === 1}
+                className="p-3 sm:p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-stone-400 hover:text-stone-700 hover:bg-white rounded-lg border border-transparent hover:border-stone-100 disabled:opacity-30 disabled:pointer-events-none transition-all active:scale-95"
+                aria-label="Página anterior"
               >
-                <ChevronRight size={18} />
+                <ChevronLeft size={20} />
+              </button>
+
+              {!manualPagination && (
+                <div className="flex items-center px-1 hidden sm:flex">
+                  {Array.from({ length: totalPages }).map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setCurrentPage(i + 1)}
+                      className={cn(
+                        "w-8 h-8 text-xs font-bold rounded-lg transition-all",
+                        currentPage === i + 1
+                          ? "bg-primary text-white shadow-md shadow-primary/20"
+                          : "text-stone-400 hover:text-stone-700 hover:bg-white",
+                      )}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              <button
+                onClick={() =>
+                  manualPagination
+                    ? onNextPage?.()
+                    : setCurrentPage((p) => Math.min(totalPages, p + 1))
+                }
+                disabled={
+                  manualPagination ? !hasMore : currentPage === totalPages
+                }
+                className="p-3 sm:p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-stone-400 hover:text-stone-700 hover:bg-white rounded-lg border border-transparent hover:border-stone-100 disabled:opacity-30 disabled:pointer-events-none transition-all active:scale-95"
+                aria-label="Próxima página"
+              >
+                <ChevronRight size={20} />
               </button>
             </div>
           </div>

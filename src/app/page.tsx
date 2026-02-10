@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import HomeClient from "../components/HomeClient";
 import { db } from "@/lib/firebase/admin";
+import { deepSafeSerialize } from "@/lib/utils";
 
 // Revalidate every hour
 export const revalidate = 3600;
@@ -29,16 +30,16 @@ async function getHomeData() {
       if (typeof val.toDate === "function") return val.toDate().toISOString();
       if (val instanceof Date) return val.toISOString();
       if (typeof val === "string") return new Date(val).toISOString();
+      if (val._seconds !== undefined)
+        return new Date(val._seconds * 1000).toISOString();
       return null;
     };
-
-    const sanitize = (obj: any) => JSON.parse(JSON.stringify(obj));
 
     // Course Merge & Deduplication Strategy - Visibility Guard: Published AND Open only
     const courses = coursesSnap.docs
       .map((doc) => {
         const data = doc.data();
-        return sanitize({
+        return deepSafeSerialize({
           id: doc.id,
           title: data.title || "",
           subtitle: data.subtitle || "",
@@ -62,7 +63,7 @@ async function getHomeData() {
     const posts = postsSnap.docs
       .map((doc) => {
         const data = doc.data();
-        return sanitize({
+        return deepSafeSerialize({
           id: doc.id,
           title: data.title || "",
           excerpt: data.excerpt || "",
@@ -83,7 +84,7 @@ async function getHomeData() {
     const gallery = gallerySnap.docs
       .map((doc) => {
         const data = doc.data();
-        return sanitize({
+        return deepSafeSerialize({
           id: doc.id,
           url: data.url || "",
           title: data.title || "",
@@ -98,11 +99,13 @@ async function getHomeData() {
       })
       .slice(0, 12);
 
-    const founder = founderSnap.exists ? sanitize(founderSnap.data()) : null;
-    const institute = instituteSnap.exists
-      ? sanitize(instituteSnap.data())
+    const founder = founderSnap.exists
+      ? deepSafeSerialize(founderSnap.data())
       : null;
-    const seo = seoSnap.exists ? sanitize(seoSnap.data()) : null;
+    const institute = instituteSnap.exists
+      ? deepSafeSerialize(instituteSnap.data())
+      : null;
+    const seo = seoSnap.exists ? deepSafeSerialize(seoSnap.data()) : null;
 
     return { courses, posts, gallery, founder, institute, seo };
   } catch (error) {

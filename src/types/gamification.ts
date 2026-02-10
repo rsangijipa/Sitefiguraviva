@@ -41,7 +41,8 @@ export interface XpTransaction {
     | "quiz_passed"
     | "course_completed"
     | "daily_login"
-    | "bonus";
+    | "bonus"
+    | "admin_reward";
   metadata?: Record<string, any>;
   timestamp: Timestamp;
 }

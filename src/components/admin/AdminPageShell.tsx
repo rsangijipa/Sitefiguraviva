@@ -47,12 +47,12 @@ export function AdminPageShell({
               <span>Admin</span>
             </Link>
             {breadcrumbs.map((crumb, idx) => (
-              <div key={idx} className="flex items-center">
+              <div key={idx} className="flex items-center text-stone-500">
                 <ChevronRight size={14} className="mx-1 text-stone-300" />
                 {crumb.href ? (
                   <Link
                     href={crumb.href}
-                    className="hover:text-primary transition-colors"
+                    className="hover:text-primary transition-colors flex items-center gap-1"
                   >
                     {crumb.label}
                   </Link>

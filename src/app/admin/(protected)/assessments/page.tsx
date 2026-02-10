@@ -1,132 +1,208 @@
-import { db } from "@/lib/firebase/admin";
-import { AssessmentDoc } from "@/types/assessment";
-import { FileText, Plus, Search, MoreVertical } from "lucide-react";
-import Button from "@/components/ui/Button";
-import Link from "next/link";
+"use client";
 
-export default async function AdminAssessmentsPage() {
-  // Fetch Assessments
-  const assessmentsSnap = await db
-    .collection("assessments")
-    .orderBy("title")
-    .get();
-  const assessments = assessmentsSnap.docs.map(
-    (doc) =>
-      ({
-        id: doc.id,
-        ...doc.data(),
-      }) as AssessmentDoc,
-  );
+import { useAdminAssessments } from "@/hooks/useAdminAssessments";
+import { useAllCourses } from "@/hooks/useCourses";
+import { AdminPageShell } from "@/components/admin/AdminPageShell";
+import { DataTable, Column } from "@/components/admin/DataTable";
+import { Badge } from "@/components/ui/Badge";
+import { FileText, Plus, MoreVertical, Edit, Trash2, Eye } from "lucide-react";
+import Button from "@/components/ui/Button";
+import { AssessmentDoc } from "@/types/assessment";
+import { useTransition, useState } from "react";
+import { useToast } from "@/context/ToastContext";
+import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import { deleteAssessment } from "@/actions/assessment";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+} from "@/components/ui/Modal";
+import QuizBuilder from "@/components/admin/assessment/QuizBuilder";
+
+export default function AdminAssessmentsPage() {
+  const {
+    data: assessments,
+    isLoading: assessmentsLoading,
+    refetch,
+  } = useAdminAssessments();
+  const { data: courses, isLoading: coursesLoading } = useAllCourses();
+  const { addToast } = useToast();
+  const [isPending, startTransition] = useTransition();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingAssessment, setEditingAssessment] = useState<
+    AssessmentDoc | undefined
+  >();
+  const router = useRouter();
+
+  const isLoading = assessmentsLoading || coursesLoading;
+
+  const handleDelete = async (id: string, title: string) => {
+    if (!confirm(`Tem certeza que deseja excluir a avaliação "${title}"?`))
+      return;
+
+    startTransition(async () => {
+      const result = await deleteAssessment(id);
+      if (result.success) {
+        addToast("Avaliação excluída com sucesso!", "success");
+      } else {
+        addToast(result.error || "Erro ao excluir avaliação", "error");
+      }
+    });
+  };
+
+  const columns: Column<AssessmentDoc>[] = [
+    {
+      key: "title",
+      label: "Título",
+      render: (item) => (
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-stone-100 rounded-lg text-stone-400">
+            <FileText size={16} />
+          </div>
+          <div className="flex flex-col">
+            <span className="font-bold text-stone-800">{item.title}</span>
+            <span className="text-[10px] text-stone-400 font-mono">
+              ID: {item.id}
+            </span>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "course",
+      label: "Curso / Módulo",
+      render: (item) => {
+        const course = courses?.find((c) => c.id === item.courseId);
+        return (
+          <div className="flex flex-col">
+            <span className="text-sm text-stone-600 font-medium">
+              {course ? course.title : item.courseId || "Geral"}
+            </span>
+            {item.moduleId && (
+              <span className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">
+                Módulo: {item.moduleId}
+              </span>
+            )}
+          </div>
+        );
+      },
+    },
+    {
+      key: "questions",
+      label: "Questões",
+      render: (item) => (
+        <Badge variant="secondary" className="font-bold">
+          {item.questions?.length || 0} QUESTÕES
+        </Badge>
+      ),
+    },
+    {
+      key: "passingScore",
+      label: "Média Mín.",
+      render: (item) => (
+        <div className="flex items-center gap-2">
+          <div
+            className={cn(
+              "w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs ring-2",
+              item.passingScore >= 70
+                ? "bg-green-50 text-green-600 ring-green-100"
+                : "bg-amber-50 text-amber-600 ring-amber-100",
+            )}
+          >
+            {item.passingScore}%
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "status",
+      label: "Status",
+      render: (item) => {
+        const statusMap: Record<string, { label: string; variant: any }> = {
+          draft: { label: "Rascunho", variant: "secondary" },
+          published: { label: "Publicado", variant: "success" },
+          archived: { label: "Arquivado", variant: "outline" },
+        };
+        const s = statusMap[item.status] || statusMap.draft;
+        return <Badge variant={s.variant}>{s.label}</Badge>;
+      },
+    },
+  ];
 
   return (
-    <div className="space-y-6">
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-stone-800">
-            Avaliações & Provas
-          </h1>
-          <p className="text-stone-500 text-sm">
-            Gerencie o conteúdo das provas de todos os cursos.
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant="primary"
-            className="shadow-lg shadow-primary/20"
-            leftIcon={<Plus size={18} />}
-          >
-            Nova Avaliação
-          </Button>
-        </div>
-      </header>
+    <AdminPageShell
+      title="Avaliações & Provas"
+      description="Crie e gerencie o conteúdo das provas, exames e quizzes dos cursos."
+      breadcrumbs={[{ label: "Avaliações" }]}
+      actions={
+        <Button
+          variant="primary"
+          className="shadow-lg shadow-primary/20"
+          leftIcon={<Plus size={18} />}
+          onClick={() => {
+            setEditingAssessment(undefined);
+            setIsModalOpen(true);
+          }}
+        >
+          Nova Avaliação
+        </Button>
+      }
+    >
+      <DataTable
+        data={assessments || []}
+        columns={columns}
+        isLoading={isLoading}
+        searchKey="title"
+        searchPlaceholder="Buscar por título da avaliação..."
+        actions={(item) => (
+          <div className="flex items-center justify-end gap-1">
+            <button
+              onClick={() => {
+                setEditingAssessment(item);
+                setIsModalOpen(true);
+              }}
+              className="p-2 text-stone-400 hover:text-primary hover:bg-primary/5 rounded-xl transition-all"
+              title="Editar Avaliação"
+            >
+              <Edit size={18} />
+            </button>
+            <button
+              onClick={() => handleDelete(item.id, item.title)}
+              className="p-2 text-stone-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+              title="Excluir"
+            >
+              <Trash2 size={18} />
+            </button>
+          </div>
+        )}
+      />
 
-      {/* Filters */}
-      <div className="flex bg-white p-4 rounded-xl border border-stone-200 shadow-sm gap-4 items-center">
-        <div className="relative flex-1">
-          <Search
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"
-            size={16}
-          />
-          <input
-            placeholder="Buscar por título ou curso..."
-            className="w-full pl-10 pr-4 py-2 bg-stone-50 border border-stone-200 rounded-lg text-sm focus:border-primary outline-none"
-          />
-        </div>
-        <select className="bg-stone-50 border border-stone-200 rounded-lg px-4 py-2 text-sm outline-none">
-          <option>Todos os Cursos</option>
-        </select>
-      </div>
-
-      {/* Table */}
-      <div className="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-stone-50 border-b border-stone-200">
-              <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-stone-400">
-                Título
-              </th>
-              <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-stone-400">
-                Curso / Módulo
-              </th>
-              <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-stone-400">
-                Questões
-              </th>
-              <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-stone-400">
-                Média Mín.
-              </th>
-              <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-stone-400">
-                Ações
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-stone-100">
-            {assessments.map((item) => (
-              <tr
-                key={item.id}
-                className="hover:bg-stone-50/50 transition-colors"
-              >
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-stone-100 rounded-lg text-stone-400">
-                      <FileText size={16} />
-                    </div>
-                    <span className="font-bold text-stone-800">
-                      {item.title}
-                    </span>
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-sm text-stone-500">
-                  {item.courseId ? `Curso: ${item.courseId}` : "Geral"}
-                </td>
-                <td className="px-6 py-4 text-sm text-stone-600 font-medium">
-                  {item.questions?.length || 0} questões
-                </td>
-                <td className="px-6 py-4 text-sm">
-                  <span className="bg-stone-100 px-2 py-1 rounded font-bold text-stone-500">
-                    {item.passingScore}%
-                  </span>
-                </td>
-                <td className="px-6 py-4">
-                  <button className="p-2 hover:bg-stone-200 rounded-lg transition-colors text-stone-400">
-                    <MoreVertical size={18} />
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {assessments.length === 0 && (
-              <tr>
-                <td
-                  colSpan={5}
-                  className="px-6 py-20 text-center text-stone-400 italic"
-                >
-                  Nenhuma avaliação encontrada. Clique em "Nova Avaliação" para
-                  começar.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-    </div>
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <ModalContent className="max-w-4xl">
+          <ModalHeader>
+            <div className="flex flex-col">
+              <h2 className="font-serif text-2xl font-bold text-stone-800">
+                {editingAssessment ? "Editar Avaliação" : "Nova Avaliação"}
+              </h2>
+              <p className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">
+                Agenda Viva & Mentorias
+              </p>
+            </div>
+          </ModalHeader>
+          <ModalBody>
+            <QuizBuilder
+              assessment={editingAssessment}
+              onSuccess={() => {
+                setIsModalOpen(false);
+                refetch();
+              }}
+              onCancel={() => setIsModalOpen(false)}
+            />
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+    </AdminPageShell>
   );
 }

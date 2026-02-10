@@ -30,8 +30,8 @@ export async function getCourseData(courseId: string, userId: string) {
     status = enrollmentDoc.data()?.status || "none";
   }
 
-  // Paywall gate: If not active, return limited data via DTO
-  if (status !== "active") {
+  // Paywall gate: If not active or completed, return limited data via DTO
+  if (status !== "active" && status !== "completed") {
     return toCourseFullDTO(
       courseDoc,
       [], // No modules

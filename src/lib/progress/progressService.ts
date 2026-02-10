@@ -71,7 +71,17 @@ export const progressService = {
       await gamificationService.awardBadge(uid, "first_steps", courseId);
     }
 
-    // 5. Recalculate Course Progress (Canonical)
+    // 5. Update last accessed lesson in enrollment
+    const enrollmentRef = adminDb
+      .collection("enrollments")
+      .doc(`${uid}_${courseId}`);
+    await enrollmentRef.update({
+      lastLessonId: lessonId,
+      lastAccessedAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+
+    // 6. Recalculate Course Progress (Canonical)
     await this.recalculateEnrollmentProgress(uid, courseId);
   },
 
@@ -103,6 +113,16 @@ export const progressService = {
     }
 
     await progressRef.set(updateData, { merge: true });
+
+    // Update last accessed lesson in enrollment
+    const enrollmentRef = adminDb
+      .collection("enrollments")
+      .doc(`${uid}_${courseId}`);
+    await enrollmentRef.update({
+      lastLessonId: lessonId,
+      lastAccessedAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+    });
 
     if (data.status === "completed") {
       await this.recalculateEnrollmentProgress(uid, courseId);

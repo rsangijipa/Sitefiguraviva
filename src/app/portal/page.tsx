@@ -135,13 +135,9 @@ export default function PortalDashboard() {
 
           const mostRecent = sorted[0];
           if (mostRecent) {
-            const progress = await progressService.getCourseProgress(
-              user.uid,
-              mostRecent.courseId,
-            );
             setLastCourse({
               ...mostRecent,
-              lastLessonId: progress?.lastLessonId,
+              lastLessonId: mostRecent.lastLessonId,
               percent: mostRecent.progressSummary?.percent || 0,
             });
           }

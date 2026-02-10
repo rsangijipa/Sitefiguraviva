@@ -27,8 +27,9 @@ export async function enrollLead(
 
   if (!sessionCookie) return { error: "Unauthorized" };
 
+  let claims;
   try {
-    const claims = await auth.verifySessionCookie(sessionCookie, true);
+    claims = await auth.verifySessionCookie(sessionCookie, true);
     if (claims.role !== "admin") {
       return { error: "Forbidden" };
     }
@@ -94,7 +95,7 @@ export async function enrollLead(
     console.log(`[EnrollLead] Creating enrollment ${enrollmentId}`);
     await finalEnrollmentRef.set(
       {
-        userId,
+        uid: userId,
         userName: data.name,
         userEmail: normalizedEmail,
         userPhone: data.phone || null,
@@ -124,7 +125,21 @@ export async function enrollLead(
       userId: userId, // Link application to user now
     });
 
-    // 6. Send Password Reset / Welcome Email (Optional)
+    // 6. Audit Logging
+    await import("@/services/auditService").then((m) =>
+      m.auditService.logEvent({
+        eventType: "LEAD_ENROLLED",
+        actor: { uid: claims.uid, email: claims.email },
+        target: { id: userId, collection: "enrollments" },
+        payload: {
+          applicationId,
+          courseId: data.courseId,
+          isNewUser,
+        },
+      }),
+    );
+
+    // 7. Send Password Reset / Welcome Email (Optional)
     let passwordResetLink = null;
     if (isNewUser) {
       passwordResetLink = await auth.generatePasswordResetLink(normalizedEmail);
@@ -135,6 +150,11 @@ export async function enrollLead(
     }
 
     revalidatePath("/admin/applications");
+    revalidatePath("/admin/users");
+    revalidatePath("/admin/enrollments");
+    revalidatePath(`/portal/course/${data.courseId}`);
+    revalidatePath(`/portal`);
+
     return { success: true, userId, isNewUser, passwordResetLink };
   } catch (error: any) {
     console.error("Enrollment error:", error);

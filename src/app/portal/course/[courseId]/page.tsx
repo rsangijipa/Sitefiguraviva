@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/firebase/admin";
 import { getCourseData } from "@/lib/courseService";
+import { deepSafeSerialize } from "@/lib/utils";
 import CourseClient from "./CourseClient";
 import { assertCanAccessCourse } from "@/lib/auth/access-gate";
 import { AccessError } from "@/lib/auth/access-types";
@@ -57,7 +58,7 @@ export default async function CoursePage({
   }
 
   // Serialize
-  const serializedData = JSON.parse(JSON.stringify(data));
+  const serializedData = deepSafeSerialize(data);
 
   return <CourseClient initialData={serializedData} />;
 }

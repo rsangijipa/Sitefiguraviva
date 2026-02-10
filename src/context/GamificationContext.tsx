@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Star, Trophy, Flame } from "lucide-react";
+import { LevelUpModal } from "@/components/gamification/LevelUpModal";
 
 interface GamificationFeedback {
   type: "xp" | "level_up" | "badge";
@@ -14,7 +15,11 @@ interface GamificationFeedback {
 interface GamificationContextType {
   showXpGain: (amount: number) => void;
   showLevelUp: (level: number) => void;
-  showBadgeEarned: (title: string) => void;
+  showBadgeEarned: (badge: {
+    id: string;
+    title: string;
+    description: string;
+  }) => void;
 }
 
 const GamificationContext = createContext<GamificationContextType | undefined>(
@@ -25,6 +30,12 @@ export const GamificationProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [feedbacks, setFeedbacks] = useState<GamificationFeedback[]>([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalData, setModalData] = useState<{
+    badge?: { slug: string; name: string; description: string };
+    level?: number;
+    xpEarned?: number;
+  }>({});
 
   const addFeedback = useCallback(
     (feedback: Omit<GamificationFeedback, "id">) => {
@@ -38,10 +49,28 @@ export const GamificationProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   const showXpGain = (amount: number) => addFeedback({ type: "xp", amount });
-  const showLevelUp = (level: number) =>
+
+  const showLevelUp = (level: number) => {
     addFeedback({ type: "level_up", title: `Nível ${level}` });
-  const showBadgeEarned = (title: string) =>
-    addFeedback({ type: "badge", title });
+    setModalData({ level });
+    setModalOpen(true);
+  };
+
+  const showBadgeEarned = (badge: {
+    id: string;
+    title: string;
+    description: string;
+  }) => {
+    addFeedback({ type: "badge", title: badge.title });
+    setModalData({
+      badge: {
+        slug: badge.id,
+        name: badge.title,
+        description: badge.description,
+      },
+    });
+    setModalOpen(true);
+  };
 
   return (
     <GamificationContext.Provider
@@ -89,6 +118,14 @@ export const GamificationProvider: React.FC<{ children: React.ReactNode }> = ({
           ))}
         </AnimatePresence>
       </div>
+
+      <LevelUpModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        badge={modalData.badge}
+        level={modalData.level}
+        xpEarned={modalData.xpEarned}
+      />
     </GamificationContext.Provider>
   );
 };

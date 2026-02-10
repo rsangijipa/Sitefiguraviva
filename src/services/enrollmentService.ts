@@ -21,6 +21,7 @@ export interface Enrollment {
     totalLessons: number;
     lastUpdated: any;
   };
+  lastLessonId?: string;
   lastAccessedAt?: any;
   enrolledAt: any;
 }
