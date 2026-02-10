@@ -6,6 +6,8 @@ import { assertCanAccessCourse } from "@/lib/courses/access";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 
+import { gamificationService } from "@/lib/gamification/gamificationService";
+
 /**
  * Validates user session and enrollment, then marks lesson as complete.
  */
@@ -37,7 +39,10 @@ export async function markLessonCompleted(
       lessonId,
     );
 
-    // 4. Revalidate to show new progress in UI
+    // 4. Gamification Logic
+    await gamificationService.onLessonCompletion(uid, courseId, lessonId);
+
+    // 5. Revalidate to show new progress in UI
     revalidatePath(`/portal/courses/${courseId}`);
     revalidatePath(`/portal/courses/${courseId}/learn/${lessonId}`);
 
@@ -78,6 +83,8 @@ export async function updateLessonProgress(
     );
 
     if (data.status === "completed") {
+      // Award XP
+      await gamificationService.onLessonCompletion(uid, courseId, lessonId);
       revalidatePath(`/portal/courses/${courseId}`);
     }
 

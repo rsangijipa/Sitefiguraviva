@@ -217,4 +217,29 @@ export const gamificationService = {
     // 4. Check for Scholar (3 courses? or same as First Step? In progressService it was 2nd course?)
     // Leaving logic simple for now.
   },
+
+  /**
+   * Process Lesson Completion Logic
+   */
+  async onLessonCompletion(userId: string, courseId: string, lessonId: string) {
+    console.log(
+      `[Gamification] Processing lesson completion: ${userId} -> ${lessonId}`,
+    );
+
+    // 1. Award XP
+    await this.awardXp(
+      userId,
+      XP_VALUES.LESSON_COMPLETED || 50,
+      "lesson_completed",
+      { courseId, lessonId },
+    );
+
+    // 2. Check for "First Steps" Badge
+    const profile = await this.getProfile(userId);
+    const earnedBadges = profile?.badges || [];
+
+    if (!earnedBadges.includes("first_steps")) {
+      await this.awardBadge(userId, "first_steps", courseId);
+    }
+  },
 };
