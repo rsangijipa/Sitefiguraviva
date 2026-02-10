@@ -26,12 +26,13 @@
   --color-border: #E5E7EB;
 
   /* Highlights */
-  --color-gold: #D4AF37;
-  /* Gold Clássico */
-  --color-gold-dark: #997B0F;
-  /* Escuro o suficiente para texto em branco */
+  /* WCAG AA OK - Adjusted for better contrast */
+  --color-gold: #B08D55;
+  /* Gold Clássico (Escurecido de #D4AF37) */
+  --color-gold-dark: #8A6D0B;
+  /* Escuro suficiente para texto em branco */
   /* WCAG AA OK */
-  --color-gold-light: #F7E78E;
+  --color-gold-light: #F9F1C0;
   --color-beige: #F3E5D8;
 
   /* Feedback & Status */
