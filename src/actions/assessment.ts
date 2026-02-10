@@ -10,6 +10,7 @@ import type {
   StudentAnswer,
   AssessmentSubmissionDoc,
 } from "@/types/assessment";
+import type { UserData } from "@/types/user";
 
 /**
  * Grade an assessment submission
@@ -348,7 +349,11 @@ export async function updateAssessmentStatus(
 /**
  * Get single submission detail (Admin only)
  */
-export async function getSubmissionDetail(id: string) {
+export async function getSubmissionDetail(id: string): Promise<{
+  submission: AssessmentSubmissionDoc;
+  user: UserData | null;
+  assessment: AssessmentDoc | null;
+} | null> {
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get("session")?.value;
   if (!sessionCookie) return null;
@@ -373,9 +378,11 @@ export async function getSubmissionDetail(id: string) {
 
     return {
       submission: { id: subSnap.id, ...data },
-      user: userSnap.exists ? { uid: userSnap.id, ...userSnap.data() } : null,
+      user: userSnap.exists
+        ? ({ uid: userSnap.id, ...userSnap.data() } as UserData)
+        : null,
       assessment: assessmentSnap.exists
-        ? { id: assessmentSnap.id, ...assessmentSnap.data() }
+        ? ({ id: assessmentSnap.id, ...assessmentSnap.data() } as AssessmentDoc)
         : null,
     };
   } catch (error) {
