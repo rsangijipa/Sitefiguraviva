@@ -3,6 +3,7 @@
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import {
   BookOpen,
@@ -298,9 +299,13 @@ function CourseContent({ initialData }: { initialData?: any }) {
                   }
                 >
                   {course.coverImage || course.image ? (
-                    <img
+                    <Image
                       src={course.coverImage || course.image}
-                      className="w-full h-full object-cover"
+                      alt={course.title}
+                      fill
+                      className="object-cover"
+                      priority
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 50vw"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-stone-300">

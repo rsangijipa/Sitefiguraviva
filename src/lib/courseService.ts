@@ -3,15 +3,16 @@ import { db } from "@/lib/firebase/admin";
 import { Course, Module, Lesson, Block } from "@/types/lms";
 import { deepSafeSerialize } from "./utils";
 
+import { toCourseFullDTO } from "@/lib/presenters/mappers";
+
 export async function getCourseData(courseId: string, userId: string) {
   if (!courseId || !userId) return null;
 
   // 1. Fetch Course & Enrollment (Parallel)
   const coursePromise = db.collection("courses").doc(courseId).get();
-  const enrollmentId = `${userId}_${courseId}`;
   const enrollmentPromise = db
     .collection("enrollments")
-    .doc(enrollmentId)
+    .doc(`${userId}_${courseId}`)
     .get();
 
   const [courseDoc, enrollmentDoc] = await Promise.all([
@@ -21,48 +22,30 @@ export async function getCourseData(courseId: string, userId: string) {
 
   if (!courseDoc.exists) return null;
 
-  const data = courseDoc.data() || {};
-  const courseData: any = { id: courseDoc.id, ...data };
-
-  // Manual serialization for known timestamps (fix for Next.js boundary)
-  ["publishedAt", "createdAt", "updatedAt"].forEach((field) => {
-    const val = courseData[field];
-    if (val) {
-      if (typeof val.toDate === "function") {
-        courseData[field] = val.toDate().toISOString();
-      } else if (val._seconds !== undefined) {
-        courseData[field] = new Date(val._seconds * 1000).toISOString();
-      } else if (val.seconds !== undefined) {
-        courseData[field] = new Date(val.seconds * 1000).toISOString();
-      }
-    }
-  });
   let enrollmentData = null;
   let status = "none";
 
   if (enrollmentDoc.exists) {
-    enrollmentData = { id: enrollmentDoc.id, ...enrollmentDoc.data() };
-    status = enrollmentData.status || "none";
+    enrollmentData = enrollmentDoc; // Pass the doc (or data) to mapper
+    status = enrollmentDoc.data()?.status || "none";
   }
 
-  // Paywall gate: If not active, return limited data
+  // Paywall gate: If not active, return limited data via DTO
   if (status !== "active") {
-    return {
-      course: courseData,
-      modules: [],
-      enrollment: enrollmentData,
-      status,
-      isAccessDenied: true,
-    };
+    return toCourseFullDTO(
+      courseDoc,
+      [], // No modules
+      new Map(), // No lessons
+      new Map(), // No progress
+      enrollmentData,
+    );
   }
 
-  // 2. Fetch Progress (ATOMIC - New Pattern)
-  // We query the 'progress' collection for this user and course
+  // 2. Fetch Progress (ATOMIC)
   const progressSnap = await db
     .collection("progress")
     .where("userId", "==", userId)
     .where("courseId", "==", courseId)
-    // Removed status filter to get all progress including in-progress for resume
     .get();
 
   const progressMap = new Map<string, any>();
@@ -73,8 +56,7 @@ export async function getCourseData(courseId: string, userId: string) {
     }
   });
 
-  // 3. Fetch Modules & Lessons
-  // Fetch all modules
+  // 3. Fetch Modules
   const modulesSnap = await db
     .collection("courses")
     .doc(courseId)
@@ -82,9 +64,12 @@ export async function getCourseData(courseId: string, userId: string) {
     .orderBy("order", "asc")
     .get();
 
-  const modules: Module[] = await Promise.all(
+  // 4. Fetch All Lessons (Optimized Parallel)
+  // We create a map of ModuleID -> LessonDocs[]
+  const lessonsMap = new Map<string, any[]>();
+
+  await Promise.all(
     modulesSnap.docs.map(async (mDoc) => {
-      // Fetch lessons for each module
       const lessonsSnap = await db
         .collection("courses")
         .doc(courseId)
@@ -94,75 +79,18 @@ export async function getCourseData(courseId: string, userId: string) {
         .orderBy("order", "asc")
         .get();
 
-      const lessons: Lesson[] = lessonsSnap.docs.map((lDoc) => {
-        const lData = lDoc.data();
-        const progress = progressMap.get(lDoc.id);
-        const isCompleted = progress?.status === "completed";
-
-        return {
-          id: lDoc.id,
-          moduleId: mDoc.id,
-          courseId: courseId,
-          title: lData.title,
-          description: lData.description,
-          order: lData.order,
-          isPublished: lData.isPublished,
-          duration: lData.duration, // Estimated minutes
-          thumbnail: lData.thumbnail,
-          // Add completion status to the runtime object
-          // @ts-ignore
-          isCompleted: isCompleted,
-          maxWatchedSecond: progress?.maxWatchedSecond || 0,
-          percent: progress?.percent || 0,
-          isLocked: false, // Implement lock logic if needed
-        } as Lesson;
-      });
-
-      return {
-        id: mDoc.id,
-        courseId,
-        title: mDoc.data().title,
-        description: mDoc.data().description,
-        order: mDoc.data().order,
-        isPublished: mDoc.data().isPublished,
-        lessons: lessons.filter((l) => l.isPublished !== false),
-      } as Module;
+      lessonsMap.set(mDoc.id, lessonsSnap.docs);
     }),
-  ).then((modules) => modules.filter((m) => m.isPublished !== false));
+  );
 
-  // 4. Recalculate Progress Stats (Live & Authoritative)
-  // We trust the filtered list of published lessons as the true denominator.
-  const allPublishedLessons = modules.flatMap((m) => m.lessons);
-  const totalPublished = allPublishedLessons.length;
-  const completedCount = allPublishedLessons.filter(
-    (l) => l.isCompleted,
-  ).length;
-
-  // Percent logic:
-  // If totalPublished is 0, percent is 0.
-  // Else, (completed / total) * 100.
-  const percent =
-    totalPublished > 0
-      ? Math.round((completedCount / totalPublished) * 100)
-      : 0;
-
-  // Override enrollment summary with live calculation to ensure UI is correct
-  if (enrollmentData) {
-    enrollmentData.progressSummary = {
-      ...enrollmentData.progressSummary,
-      completedLessonsCount: completedCount,
-      totalLessons: totalPublished,
-      percent: percent,
-    };
-  }
-
-  return deepSafeSerialize({
-    course: courseData,
-    modules,
-    enrollment: enrollmentData,
-    status,
-    isAccessDenied: false,
-  });
+  // 5. Map to DTO
+  return toCourseFullDTO(
+    courseDoc,
+    modulesSnap.docs,
+    lessonsMap,
+    progressMap,
+    enrollmentData,
+  );
 }
 
 export async function getLessonContent(
