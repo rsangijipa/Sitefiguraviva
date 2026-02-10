@@ -1,13 +1,20 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { gamificationService } from "@/services/gamificationService";
 import { useToast } from "@/context/ToastContext";
+import { LevelUpModal } from "./LevelUpModal";
 
 export default function GamificationTrigger() {
   const { user } = useAuth();
   const { addToast } = useToast();
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalData, setModalData] = useState<{
+    badge?: { slug: string; name: string; description: string };
+    xp?: number;
+  }>({});
 
   useEffect(() => {
     async function checkBadges() {
@@ -17,6 +24,7 @@ export default function GamificationTrigger() {
       if (!profile) return;
 
       const earnedBadges = profile.badges || [];
+      let newBadge = null;
 
       // BADGE: PIONEER (Primeiro Login - Early Adopters)
       if (!earnedBadges.includes("pioneer_student")) {
@@ -26,7 +34,12 @@ export default function GamificationTrigger() {
 
         if (creationTime && new Date(creationTime) < cutoffDate) {
           await gamificationService.awardBadge(user.uid, "pioneer_student");
-          addToast("Nova Conquista: Pioneiro! Bem-vindo à jornada.", "success");
+          newBadge = {
+            slug: "pioneer_student",
+            name: "Pioneiro",
+            description:
+              "Bem-vindo à jornada! Você faz parte dos primeiros alunos.",
+          };
         }
       }
 
@@ -36,15 +49,28 @@ export default function GamificationTrigger() {
         profile.currentStreak >= 7
       ) {
         await gamificationService.awardBadge(user.uid, "dedicated_learner");
-        addToast(
-          "Nova Conquista: Dedicado! 7 dias seguidos de estudo.",
-          "success",
-        );
+        newBadge = {
+          slug: "dedicated_learner",
+          name: "Dedicado",
+          description: "Você estudou 7 dias seguidos. Continue assim!",
+        };
+      }
+
+      if (newBadge) {
+        setModalData({ badge: newBadge, xp: 50 }); // 50 XP fixo por badge por enquanto
+        setModalOpen(true);
       }
     }
 
     checkBadges();
-  }, [user, addToast]);
+  }, [user]);
 
-  return null; // Componente lógico, sem renderização
+  return (
+    <LevelUpModal
+      isOpen={modalOpen}
+      onClose={() => setModalOpen(false)}
+      badge={modalData.badge}
+      xpEarned={modalData.xp}
+    />
+  );
 }
