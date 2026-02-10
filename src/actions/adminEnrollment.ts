@@ -139,7 +139,15 @@ export async function enrollLead(
       }),
     );
 
-    // 7. Send Password Reset / Welcome Email (Optional)
+    // 7. Robust Access Control: Store courseId in User Doc
+    await adminDb
+      .collection("users")
+      .doc(userId)
+      .update({
+        enrolledCourseIds: FieldValue.arrayUnion(data.courseId),
+      });
+
+    // 8. Send Password Reset / Welcome Email (Optional)
     let passwordResetLink = null;
     if (isNewUser) {
       passwordResetLink = await auth.generatePasswordResetLink(normalizedEmail);
