@@ -26,6 +26,7 @@ import InstituteSection from "./sections/InstituteSection";
 import MethodologySection from "./sections/MethodologySection";
 import TestimonialsSection from "./sections/TestimonialsSection";
 import FAQSection from "./sections/FAQSection";
+import { MemoryMiniFooter } from "./sections/MemoryMiniFooter";
 import LegalModal from "./LegalModal";
 
 // interface HomeClientProps removed
@@ -126,6 +127,10 @@ export default function HomeClient({ initialData }: HomeClientProps = {}) {
       >
         <HeroSection initialData={initialData?.institute} />
         <FounderSection initialData={initialData?.founder} />
+
+        {/* Laura Perls Tribute - Placed below Curator/Founder */}
+        <MemoryMiniFooter />
+
         <MethodologySection />
 
         <CoursesSection
@@ -191,6 +196,7 @@ export default function HomeClient({ initialData }: HomeClientProps = {}) {
       <FloatingControls />
 
       {/* MODALS */}
+
       <CourseModal
         isOpen={isCourseOpen}
         onClose={closeModals}

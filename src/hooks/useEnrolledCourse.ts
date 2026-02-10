@@ -13,6 +13,7 @@ import {
   limit,
 } from "firebase/firestore";
 import { Module, Lesson } from "@/types/lms";
+import { markLessonCompleted } from "@/app/actions/progress";
 
 export function useEnrolledCourse(
   courseId: string,
@@ -27,8 +28,6 @@ export function useEnrolledCourse(
     queryKey: ["enrolled-course", courseId, userId, isAdmin],
     initialData: initialData || undefined,
     queryFn: async () => {
-      // If we are admin, we continue even without userId for courses?
-      // Actually usually userId is always there if logged in.
       if (!courseId) return null;
 
       // 1. Check Enrollment (SSoT) - Skip if Admin
@@ -47,7 +46,6 @@ export function useEnrolledCourse(
             };
             status = enrollmentData.status || "none";
           } else {
-            // Fallback: Query by field
             const q = query(
               collection(db, "enrollments"),
               where("uid", "==", userId),
@@ -71,7 +69,6 @@ export function useEnrolledCourse(
       if (!courseSnap.exists()) return null;
       const course = { id: courseSnap.id, ...courseSnap.data() };
 
-      // Paywall check: if not member AND not admin, return limited data
       const isMember = isAdmin || status === "active" || status === "completed";
 
       if (!isMember) {
@@ -84,7 +81,22 @@ export function useEnrolledCourse(
         };
       }
 
-      // 3. Member/Admin Data: Modules & Lessons
+      // 3. User Progress (Numerador) - FIX: PRG-01 Sincronismo
+      const progressMap: Record<string, any> = {};
+      if (userId && !isAdmin) {
+        const progressQ = query(
+          collection(db, "progress"),
+          where("userId", "==", userId),
+          where("courseId", "==", courseId),
+        );
+        const progressSnap = await getDocs(progressQ);
+        progressSnap.docs.forEach((d) => {
+          const data = d.data();
+          if (data.lessonId) progressMap[data.lessonId] = data;
+        });
+      }
+
+      // 4. Member/Admin Data: Modules & Lessons
       try {
         const modulesQ = query(
           collection(db, "courses", courseId, "modules"),
@@ -102,10 +114,9 @@ export function useEnrolledCourse(
         const modules = modulesSnap.docs.map((d) => ({
           id: d.id,
           ...d.data(),
-          lessons: [], // Initialize lessons array
+          lessons: [],
         })) as any[];
 
-        // Lessons sub-fetch in parallel
         await Promise.all(
           modules.map(async (m) => {
             const lessonsSnap = await getDocs(
@@ -114,10 +125,16 @@ export function useEnrolledCourse(
                 orderBy("order", "asc"),
               ),
             );
-            m.lessons = lessonsSnap.docs.map((d) => ({
-              id: d.id,
-              ...d.data(),
-            }));
+            m.lessons = lessonsSnap.docs.map((d) => {
+              const lessonData = d.data();
+              const prog = progressMap[d.id];
+              return {
+                id: d.id,
+                ...lessonData,
+                isCompleted: prog?.status === "completed",
+                maxWatchedSecond: prog?.maxWatchedSecond || 0,
+              };
+            });
           }),
         );
 
@@ -130,26 +147,31 @@ export function useEnrolledCourse(
         };
       } catch (err) {
         console.error("[useEnrolledCourse] Full content fetch failed:", err);
-        throw err; // Trigger 403 screen if content is blocked
+        throw err;
       }
     },
-    staleTime: 0, // Force fresh data on every new mount/tab switch for course player
-    gcTime: 1000 * 60 * 10, // Keep in memory for 10 mins
-    retry: 1, // One retry on failure (helps with race conditions during enrollment)
+    staleTime: 0,
+    gcTime: 1000 * 60 * 10,
+    retry: 1,
   });
 
   // Mutation: Update Progress (Last Access)
   const updateLastAccess = useMutation({
     mutationFn: async (lessonId: string) => {
-      if (!userId || !courseId || isAdmin) return; // Admins don't track progress
-      const progressRef = doc(db, "progress", `${userId}_${courseId}`);
+      if (!userId || !courseId || isAdmin) return;
+      const progressRef = doc(
+        db,
+        "progress",
+        `${userId}_${courseId}_${lessonId}`,
+      );
       await setDoc(
         progressRef,
         {
-          uid: userId, // Match our consistent naming
+          userId,
           courseId,
-          lastLessonId: lessonId,
+          lessonId,
           lastAccessedAt: Timestamp.now(),
+          updatedAt: Timestamp.now(),
         },
         { merge: true },
       );
@@ -161,7 +183,7 @@ export function useEnrolledCourse(
     },
   });
 
-  // Mutation: Mark Complete
+  // Mutation: Mark Complete (FIX: Audit PRG-02)
   const markComplete = useMutation({
     mutationFn: async ({
       lessonId,
@@ -170,12 +192,19 @@ export function useEnrolledCourse(
       lessonId: string;
       moduleId: string;
     }) => {
-      // Validation/Logic is handled by Server Action
+      if (!userId || !courseId || isAdmin) return { success: true };
+      return await markLessonCompleted(courseId, moduleId, lessonId);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["enrolled-course", courseId, userId],
-      });
+    onSuccess: (result) => {
+      if (result?.success) {
+        queryClient.invalidateQueries({
+          queryKey: ["enrolled-course", courseId, userId],
+        });
+        // Also invalidate portal overview to show percentage update
+        queryClient.invalidateQueries({
+          queryKey: ["portal-enrollments", userId],
+        });
+      }
     },
   });
 
@@ -183,7 +212,6 @@ export function useEnrolledCourse(
     data: queryResult.data,
     isLoading: queryResult.isLoading,
     isError: queryResult.isError,
-    // Fix: check specifically for permission denied or the custom 'none' status
     isAccessDenied:
       queryResult.error &&
       (queryResult.error as any).code === "permission-denied",

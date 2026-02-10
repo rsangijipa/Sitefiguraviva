@@ -43,8 +43,9 @@ export async function markLessonCompleted(
     await gamificationService.onLessonCompletion(uid, courseId, lessonId);
 
     // 5. Revalidate to show new progress in UI
-    revalidatePath(`/portal/courses/${courseId}`);
-    revalidatePath(`/portal/courses/${courseId}/learn/${lessonId}`);
+    revalidatePath(`/portal/course/${courseId}`);
+    revalidatePath(`/portal/course/${courseId}/lesson/${lessonId}`);
+    revalidatePath(`/admin/enrollments`);
 
     return { success: true };
   } catch (error: any) {
@@ -85,7 +86,8 @@ export async function updateLessonProgress(
     if (data.status === "completed") {
       // Award XP
       await gamificationService.onLessonCompletion(uid, courseId, lessonId);
-      revalidatePath(`/portal/courses/${courseId}`);
+      revalidatePath(`/portal/course/${courseId}`);
+      revalidatePath(`/admin/enrollments`);
     }
 
     return { success: true };
@@ -135,8 +137,8 @@ export async function recalculateProgress(
     await progressService.recalculateEnrollmentProgress(uid, courseId);
 
     // Revalidate relevant paths
-    revalidatePath(`/portal/courses/${courseId}`);
     revalidatePath(`/portal/course/${courseId}`);
+    revalidatePath(`/admin/enrollments`);
 
     return { success: true };
   } catch (error: any) {
