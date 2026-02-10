@@ -1,6 +1,6 @@
 "use client";
 
-import { useAllUsers } from "@/hooks/useUsers";
+import { useAllUsers, useAllUsersPaginated } from "@/hooks/useUsers";
 import { UserRole, UserStatus } from "@/types/user";
 import { CheckCircle, Ban, Eye } from "lucide-react";
 import { useTransition, useState } from "react";
@@ -18,10 +18,35 @@ import { Badge } from "@/components/ui/Badge";
 import { cn } from "@/lib/utils";
 
 export default function UsersPage() {
-  const { data: users, isLoading, refetch } = useAllUsers();
+  const [pageSize] = useState(20);
+  const [pageStack, setPageStack] = useState<any[]>([]); // Stack of 'lastVisible' snapshots
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // The 'lastDoc' for the current query is the top of the stack (or undefined for page 1)
+  const lastDoc =
+    pageStack.length > 0 ? pageStack[pageStack.length - 1] : undefined;
+
+  const { data, isLoading, refetch } = useAllUsersPaginated(pageSize, lastDoc);
   const { addToast } = useToast();
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+
+  const users = data?.users || [];
+  const hasMore = data?.hasMore || false;
+
+  const handleNextPage = () => {
+    if (data?.lastVisible) {
+      setPageStack((prev) => [...prev, data.lastVisible]);
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (pageStack.length > 0) {
+      setPageStack((prev) => prev.slice(0, -1));
+      setCurrentPage((prev) => prev - 1);
+    }
+  };
 
   const handleRoleChange = (uid: string, newRole: UserRole) => {
     if (
@@ -175,11 +200,17 @@ export default function UsersPage() {
       breadcrumbs={[{ label: "Usuários" }]}
     >
       <DataTable
-        data={users || []}
+        data={users}
         columns={columns}
         isLoading={isLoading}
         searchKey="email"
         searchPlaceholder="Buscar por e-mail..."
+        pageSize={pageSize}
+        manualPagination={true}
+        onNextPage={handleNextPage}
+        onPrevPage={handlePrevPage}
+        hasMore={hasMore}
+        isFirstPage={currentPage === 1}
         actions={(user) => (
           <div className="flex items-center justify-end gap-1">
             <button

@@ -32,7 +32,33 @@ const pwaConfig = withPWA({
     register: true,
     skipWaiting: true,
     disable: process.env.NODE_ENV === 'development',
-    runtimeCaching: [],
+    runtimeCaching: [
+        {
+            urlPattern: /^https:\/\/firestore\.googleapis\.com\/.*$/,
+            handler: 'NetworkFirst',
+            options: {
+                cacheName: 'firestore-cache',
+                expiration: {
+                    maxEntries: 100,
+                    maxAgeSeconds: 30 * 24 * 60 * 60, // 30 Days
+                },
+            },
+        },
+        {
+            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
+            handler: 'CacheFirst',
+            options: {
+                cacheName: 'images-cache',
+                expiration: {
+                    maxEntries: 50,
+                    maxAgeSeconds: 30 * 24 * 60 * 60, // 30 Days
+                },
+            },
+        },
+    ],
+    fallbacks: {
+        document: '/offline',
+    },
     buildExcludes: [/middleware-manifest.json$/],
 });
 

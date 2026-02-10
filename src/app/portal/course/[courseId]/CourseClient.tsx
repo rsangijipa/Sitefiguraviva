@@ -38,7 +38,7 @@ function CourseContent({ initialData }: { initialData?: any }) {
   const { courseId: routeId } = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
 
   // ID Processing: standardizing param name from page
   const courseId = typeof routeId === "string" ? routeId : "";
@@ -47,7 +47,10 @@ function CourseContent({ initialData }: { initialData?: any }) {
 
   // State
   const { data, isLoading, isAccessDenied, updateLastAccess, markComplete } =
-    useEnrolledCourse(courseId, user?.uid, initialData);
+    useEnrolledCourse(courseId, user?.uid, isAdmin, initialData);
+
+  const status = data?.status || "none";
+  const isAuthorized = isAdmin || status === "active" || status === "completed";
 
   const course = data?.course;
   const modules = data?.modules || [];
@@ -74,32 +77,6 @@ function CourseContent({ initialData }: { initialData?: any }) {
       });
     }
   }, [enrollment?.progressSummary?.percent, user?.uid, courseId]);
-
-  // DIAGNOSTIC LOGGING
-  useEffect(() => {
-    if (course && enrollment) {
-      const completedCount =
-        enrollment.progressSummary?.completedLessonsCount || 0;
-      const total = enrollment.progressSummary?.totalLessons || 0;
-      const percent = enrollment.progressSummary?.percent || 0;
-
-      console.log("COURSE_VIEW_DIAGNOSTIC", {
-        courseId: course.id,
-        uid: user?.uid,
-        enrollment: {
-          completedCount,
-          total,
-          percent,
-          status: enrollment.status,
-          lastLessonId: enrollment.progressSummary?.lastLessonId,
-        },
-        integrity: {
-          hasProgress: !!enrollment.progressSummary,
-          isActive: enrollment.status === "active",
-        },
-      });
-    }
-  }, [course, enrollment, modules, user?.uid]);
 
   // Fetch Threads when tab becomes active
   useEffect(() => {
@@ -179,7 +156,7 @@ function CourseContent({ initialData }: { initialData?: any }) {
   }
 
   // Access Denied / Paywall (Ideally handled by server, but fail-safe here)
-  if (isAccessDenied || data?.status !== "active") {
+  if (isAccessDenied || !isAuthorized) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center text-center p-6">
         <Lock size={48} className="text-stone-300 mb-4" />

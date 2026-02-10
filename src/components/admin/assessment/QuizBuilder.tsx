@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useToast } from "@/context/ToastContext";
-import { createAssessment } from "@/actions/assessment";
+import { useAllCourses } from "@/hooks/useCourses";
+import { createAssessment, updateAssessment } from "@/actions/assessment";
 import type {
   AssessmentDoc,
   Question,
@@ -15,31 +16,41 @@ import {
   ModalHeader,
   ModalBody,
 } from "@/components/ui/Modal";
-import { Plus, Trash2, Save, Loader2 } from "@/components/icons";
+import { Plus, Trash2, Save, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface QuizBuilderProps {
-  courseId: string;
+  courseId?: string;
+  assessment?: AssessmentDoc;
   onSuccess?: (assessmentId: string) => void;
+  onCancel?: () => void;
 }
 
-export default function QuizBuilder({ courseId, onSuccess }: QuizBuilderProps) {
+export default function QuizBuilder({
+  courseId,
+  assessment,
+  onSuccess,
+  onCancel,
+}: QuizBuilderProps) {
   const { addToast } = useToast();
+  const { data: courses } = useAllCourses();
 
-  const [formData, setFormData] = useState<Partial<AssessmentDoc>>({
-    courseId,
-    title: "",
-    description: "",
-    questions: [],
-    passingScore: 70,
-    timeLimit: null,
-    maxAttempts: null,
-    isRequired: false,
-    shuffleQuestions: false,
-    shuffleOptions: true,
-    showCorrectAnswers: true,
-    status: "draft",
-  });
+  const [formData, setFormData] = useState<Partial<AssessmentDoc>>(
+    assessment || {
+      courseId: courseId || "",
+      title: "",
+      description: "",
+      questions: [],
+      passingScore: 70,
+      timeLimit: null,
+      maxAttempts: null,
+      isRequired: false,
+      shuffleQuestions: false,
+      shuffleOptions: true,
+      showCorrectAnswers: true,
+      status: "draft",
+    },
+  );
 
   const [isSaving, setIsSaving] = useState(false);
   const [isAddingQuestion, setIsAddingQuestion] = useState(false);
@@ -175,23 +186,41 @@ export default function QuizBuilder({ courseId, onSuccess }: QuizBuilderProps) {
     <div className="space-y-6">
       {/* Header Form */}
       <div className="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm space-y-4">
-        <h2 className="text-xl font-bold font-serif text-stone-800">
-          Nova Avaliação
-        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-bold text-stone-700 mb-2">
+              Título *
+            </label>
+            <input
+              type="text"
+              value={formData.title}
+              onChange={(e) =>
+                setFormData({ ...formData, title: e.target.value })
+              }
+              className="w-full px-4 py-3 rounded-xl border-2 border-stone-200 focus:border-primary outline-none"
+              placeholder="Ex: Quiz de Avaliação - Módulo 1"
+            />
+          </div>
 
-        <div>
-          <label className="block text-sm font-bold text-stone-700 mb-2">
-            Título *
-          </label>
-          <input
-            type="text"
-            value={formData.title}
-            onChange={(e) =>
-              setFormData({ ...formData, title: e.target.value })
-            }
-            className="w-full px-4 py-3 rounded-xl border-2 border-stone-200 focus:border-primary outline-none"
-            placeholder="Ex: Quiz de Avaliação - Módulo 1"
-          />
+          <div>
+            <label className="block text-sm font-bold text-stone-700 mb-2">
+              Curso Relacionado *
+            </label>
+            <select
+              value={formData.courseId}
+              onChange={(e) =>
+                setFormData({ ...formData, courseId: e.target.value })
+              }
+              className="w-full px-4 py-3 rounded-xl border-2 border-stone-200 focus:border-primary outline-none bg-white"
+            >
+              <option value="">Selecione um curso...</option>
+              {courses?.map((course: any) => (
+                <option key={course.id} value={course.id}>
+                  {course.title}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div>
@@ -203,7 +232,7 @@ export default function QuizBuilder({ courseId, onSuccess }: QuizBuilderProps) {
             onChange={(e) =>
               setFormData({ ...formData, description: e.target.value })
             }
-            className="w-full px-4 py-3 rounded-xl border-2 border-stone-200 focus:border-primary outline-none min-h-[100px] resize-y"
+            className="w-full px-4 py-3 rounded-xl border-2 border-stone-200 focus:border-primary outline-none min-h-[80px] resize-y"
             placeholder="Instruções para o aluno..."
           />
         </div>

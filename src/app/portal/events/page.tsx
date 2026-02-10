@@ -139,16 +139,25 @@ export default function PortalEventsPage() {
                   <div className="flex items-center justify-between mt-auto pt-4 border-t border-stone-50">
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-1.5 text-xs text-stone-400">
-                        <Video size={14} />
-                        <span>Google Meet / Zoom</span>
+                        {event.type === "in_person" ? (
+                          <MapPin size={14} />
+                        ) : (
+                          <Video size={14} />
+                        )}
+                        <span>
+                          {event.type === "in_person"
+                            ? event.location
+                            : "Online (Zoom/Meet)"}
+                        </span>
                       </div>
                     </div>
 
-                    {event.meetingUrl ? (
+                    {event.joinUrl ? (
                       <a
-                        href={event.meetingUrl}
+                        href={event.joinUrl}
                         target="_blank"
-                        className="btn-primary px-6 py-2 rounded-xl text-sm flex items-center gap-2"
+                        rel="noopener noreferrer"
+                        className="bg-primary text-white px-6 py-2 rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
                       >
                         Acessar Sala <ExternalLink size={14} />
                       </a>

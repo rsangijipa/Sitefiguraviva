@@ -101,3 +101,72 @@ export async function createEvent(data: CreateEventData) {
     return { error: "Failed to create event" };
   }
 }
+
+export async function deleteEvent(eventId: string) {
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get("session")?.value;
+  if (!sessionCookie) return { error: "Unauthorized" };
+
+  try {
+    const claims = await auth.verifySessionCookie(sessionCookie, true);
+    if (claims.role !== "admin" && claims.admin !== true) {
+      return { error: "Forbidden: Admins only" };
+    }
+
+    await db.collection("events").doc(eventId).delete();
+
+    // Audit
+    await import("@/services/auditService").then((m) =>
+      m.auditService.logEvent({
+        eventType: "EVENT_DELETED",
+        actor: { uid: claims.uid, email: claims.email },
+        target: { id: eventId, collection: "events" },
+      }),
+    );
+
+    revalidatePath("/admin/events");
+    revalidatePath("/portal/events");
+    return { success: true };
+  } catch (error) {
+    console.error("Delete Event Error:", error);
+    return { error: "Failed to delete event" };
+  }
+}
+
+export async function updateEventStatus(
+  eventId: string,
+  status: "scheduled" | "live" | "ended" | "cancelled",
+) {
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get("session")?.value;
+  if (!sessionCookie) return { error: "Unauthorized" };
+
+  try {
+    const claims = await auth.verifySessionCookie(sessionCookie, true);
+    if (claims.role !== "admin" && claims.admin !== true) {
+      return { error: "Forbidden: Admins only" };
+    }
+
+    await db.collection("events").doc(eventId).update({
+      status,
+      updatedAt: Timestamp.now(),
+    });
+
+    // Audit
+    await import("@/services/auditService").then((m) =>
+      m.auditService.logEvent({
+        eventType: "EVENT_STATUS_UPDATED",
+        actor: { uid: claims.uid, email: claims.email },
+        target: { id: eventId, collection: "events" },
+        payload: { status },
+      }),
+    );
+
+    revalidatePath("/admin/events");
+    revalidatePath("/portal/events");
+    return { success: true };
+  } catch (error) {
+    console.error("Update Event Status Error:", error);
+    return { error: "Failed to update event status" };
+  }
+}

@@ -115,8 +115,10 @@ export async function enrollUser(email: string, courseId: string) {
       `/portal/course/${courseId}`,
     );
 
-    // Force cache revalidation if needed
+    // Force cache revalidation for all relevant paths
     revalidatePath(`/portal/courses/${courseId}`);
+    revalidatePath(`/portal/course/${courseId}`);
+    revalidatePath(`/portal`);
     revalidatePath(`/admin/users/${uid}`);
 
     return { success: true, uid, enrollmentId };

@@ -60,6 +60,14 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
 };
 
+export const viewport = {
+  themeColor: "#D4AF37",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
 import { cookies } from "next/headers";
 import ImpersonationBanner from "@/components/admin/ImpersonationBanner";
 import { WebVitalsReporter } from "@/components/system/WebVitalsReporter";
