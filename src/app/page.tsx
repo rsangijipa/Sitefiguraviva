@@ -17,9 +17,19 @@ async function getHomeData() {
       instituteSnap,
       seoSnap,
     ] = await Promise.all([
-      db.collection("courses").get(),
-      db.collection("posts").where("isPublished", "==", true).get(),
-      db.collection("gallery").get(),
+      db
+        .collection("courses")
+        .where("isPublished", "==", true)
+        .where("status", "==", "open")
+        .limit(10)
+        .get(),
+      db
+        .collection("posts")
+        .where("isPublished", "==", true)
+        .orderBy("created_at", "desc")
+        .limit(4)
+        .get(),
+      db.collection("gallery").orderBy("created_at", "desc").limit(12).get(),
       db.collection("siteSettings").doc("founder").get(),
       db.collection("siteSettings").doc("institute").get(),
       db.collection("siteSettings").doc("seo").get(),
@@ -36,68 +46,47 @@ async function getHomeData() {
     };
 
     // Course Merge & Deduplication Strategy - Visibility Guard: Published AND Open only
-    const courses = coursesSnap.docs
-      .map((doc) => {
-        const data = doc.data();
-        return deepSafeSerialize({
-          id: doc.id,
-          title: data.title || "",
-          subtitle: data.subtitle || "",
-          description: data.description || "",
-          image: data.image && data.image.trim() !== "" ? data.image : null,
-          coverImage: data.coverImage || "",
-          status: data.status || "",
-          details: data.details || {},
-          isPublished: data.isPublished === true, // Strict boolean
-          created_at: toISO(data.created_at || data.createdAt),
-          updated_at: toISO(data.updated_at || data.updatedAt),
-        });
-      })
-      .filter((c: any) => c.isPublished === true && c.status === "open")
-      .sort((a: any, b: any) => {
-        const dateA = new Date(a.created_at || 0).getTime();
-        const dateB = new Date(b.created_at || 0).getTime();
-        return dateB - dateA;
+    const courses = coursesSnap.docs.map((doc) => {
+      const data = doc.data();
+      return deepSafeSerialize({
+        id: doc.id,
+        title: data.title || "",
+        subtitle: data.subtitle || "",
+        description: data.description || "",
+        image: data.image && data.image.trim() !== "" ? data.image : null,
+        coverImage: data.coverImage || "",
+        status: data.status || "",
+        details: data.details || {},
+        isPublished: data.isPublished === true,
+        created_at: toISO(data.created_at || data.createdAt),
+        updated_at: toISO(data.updated_at || data.updatedAt),
       });
+    });
 
-    const posts = postsSnap.docs
-      .map((doc) => {
-        const data = doc.data();
-        return deepSafeSerialize({
-          id: doc.id,
-          title: data.title || "",
-          excerpt: data.excerpt || "",
-          content: data.content || "",
-          type: data.type || "blog",
-          image: data.image || "",
-          created_at: toISO(data.created_at),
-          updated_at: toISO(data.updated_at),
-        });
-      })
-      .sort((a: any, b: any) => {
-        const dateA = new Date(a.created_at || 0).getTime();
-        const dateB = new Date(b.created_at || 0).getTime();
-        return dateB - dateA;
-      })
-      .slice(0, 4);
+    const posts = postsSnap.docs.map((doc) => {
+      const data = doc.data();
+      return deepSafeSerialize({
+        id: doc.id,
+        title: data.title || "",
+        excerpt: data.excerpt || "",
+        content: data.content || "",
+        type: data.type || "blog",
+        image: data.image || "",
+        created_at: toISO(data.created_at),
+        updated_at: toISO(data.updated_at),
+      });
+    });
 
-    const gallery = gallerySnap.docs
-      .map((doc) => {
-        const data = doc.data();
-        return deepSafeSerialize({
-          id: doc.id,
-          url: data.url || "",
-          title: data.title || "",
-          created_at: toISO(data.created_at),
-          updated_at: toISO(data.updated_at),
-        });
-      })
-      .sort((a: any, b: any) => {
-        const dateA = new Date(a.created_at || 0).getTime();
-        const dateB = new Date(b.created_at || 0).getTime();
-        return dateB - dateA;
-      })
-      .slice(0, 12);
+    const gallery = gallerySnap.docs.map((doc) => {
+      const data = doc.data();
+      return deepSafeSerialize({
+        id: doc.id,
+        url: data.url || "",
+        title: data.title || "",
+        created_at: toISO(data.created_at),
+        updated_at: toISO(data.updated_at),
+      });
+    });
 
     const founder = founderSnap.exists
       ? deepSafeSerialize(founderSnap.data())

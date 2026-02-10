@@ -29,6 +29,11 @@ module.exports = {
         warning: "var(--color-warning)",
         error: "var(--color-error)",
         info: colors.sky[500],
+        // Black & Sepia Evolution Tokens
+        ink: "#0d0c0b",
+        agedGold: "#c5a05b",
+        glassBg: "rgba(255, 255, 255, 0.03)",
+        glassBorder: "rgba(255, 255, 255, 0.08)",
       },
       fontFamily: {
         serif: ["var(--font-serif)", "serif"],
