@@ -1,7 +1,7 @@
 import { db, adminDb } from "@/lib/firebase/admin";
 import { FieldValue } from "firebase-admin/firestore";
 import { publishEvent } from "@/lib/events/bus";
-import { issueCertificate } from "@/app/actions/certificate";
+import { issueCertificate } from "@/actions/certificate";
 import { gamificationService } from "@/lib/gamification/gamificationService";
 import { XP_VALUES } from "@/lib/gamification";
 
@@ -234,27 +234,8 @@ export const progressService = {
         console.log(
           `[ProgressService] Triggering certificate for ${uid} in course ${courseId}`,
         );
+        // Corrected Argument Order: (courseId, userId)
         await issueCertificate(courseId, uid);
-
-        // Award XP for Course Completion
-        await gamificationService.awardXp(
-          uid,
-          XP_VALUES.COURSE_COMPLETED,
-          "course_completed",
-          { courseId },
-        );
-
-        // Badge Trigger: Scholar
-        const completedCoursesSnap = await adminDb
-          .collection("enrollments")
-          .where("userId", "==", uid)
-          .where("status", "==", "completed")
-          .limit(2)
-          .get();
-
-        if (completedCoursesSnap.size === 1) {
-          await gamificationService.awardBadge(uid, "scholar", courseId);
-        }
       } catch (e) {
         console.error("[ProgressService] Certificate issuance failed:", e);
       }

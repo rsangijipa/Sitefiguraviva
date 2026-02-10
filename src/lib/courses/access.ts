@@ -27,7 +27,7 @@ export async function assertCanAccessCourse(uid: string, courseId: string) {
   const data = enrollmentSnap.data();
 
   // 2. Strict Status Check
-  if (data?.status !== "active") {
+  if (data?.status !== "active" && data?.status !== "completed") {
     throw new Error(`Access Denied: Enrollment is ${data?.status}.`);
   }
 

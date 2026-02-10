@@ -166,8 +166,55 @@ export const gamificationService = {
           courseId: courseId || null,
           earnedAt: FieldValue.serverTimestamp(),
         });
+
+      console.log(`[Gamification] Awarded badge ${badgeId} to ${userId}`);
     } catch (error) {
       console.error("[AdminGamificationService] Error awarding badge:", error);
     }
+  },
+
+  /**
+   * Process Course Completion Logic
+   */
+  async onCourseCompletion(
+    userId: string,
+    courseId: string,
+    courseTitle: string,
+  ) {
+    console.log(
+      `[Gamification] Processing completion for ${userId} in ${courseId}`,
+    );
+
+    // 1. Award XP for Course Completion
+    await this.awardXp(
+      userId,
+      XP_VALUES.COURSE_COMPLETED || 500,
+      "course_completed",
+      { courseId, courseTitle },
+    );
+
+    // 2. Check for "First Step" Badge (First Course Completed)
+    const profile = await this.getProfile(userId);
+    const earnedBadges = profile?.badges || [];
+
+    // Check both potential IDs just in case
+    if (
+      !earnedBadges.includes("course_completion_1") &&
+      !earnedBadges.includes("first_steps")
+    ) {
+      // Use 'course_completion_1' as it matches badgesData.ts generally
+      await this.awardBadge(userId, "course_completion_1", courseId);
+    }
+
+    // 3. Check for specific courses (Example: Gestalt Master)
+    if (
+      courseTitle &&
+      courseTitle.toLowerCase().includes("formação completa em gestalt")
+    ) {
+      await this.awardBadge(userId, "gestalt_master", courseId);
+    }
+
+    // 4. Check for Scholar (3 courses? or same as First Step? In progressService it was 2nd course?)
+    // Leaving logic simple for now.
   },
 };

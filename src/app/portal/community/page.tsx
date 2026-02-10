@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   MessageCircle,
   Search,
@@ -9,47 +9,49 @@ import {
   ThumbsUp,
   MessageSquare,
   MoreHorizontal,
+  Loader2,
 } from "lucide-react";
 import { motion } from "framer-motion";
-
-const MOCK_TOPICS = [
-  {
-    id: 1,
-    author: { name: "Ana Clara", avatar: null, role: "student" },
-    title: "Dúvida sobre o conceito de Fundo-Figura na prática clínica",
-    excerpt:
-      "Estou tendo dificuldades em identificar o momento exato de transição...",
-    tags: ["Dúvida", "Gestalt Clínica"],
-    likes: 12,
-    replies: 4,
-    time: "2h atrás",
-  },
-  {
-    id: 2,
-    author: { name: "Roberto Silva", avatar: null, role: "moderator" },
-    title: "Leitura recomendada da semana: 'A Arte de Viver'",
-    excerpt:
-      "Pessoal, achei esse artigo incrível sobre a aplicação da Gestalt no cotidiano...",
-    tags: ["Leitura", "Indicação"],
-    likes: 45,
-    replies: 18,
-    time: "5h atrás",
-  },
-  {
-    id: 3,
-    author: { name: "Carla Mendes", avatar: null, role: "student" },
-    title: "Alguém para grupo de estudos em SP?",
-    excerpt:
-      "Gostaria de formar um grupo presencial para discutir os módulos do curso...",
-    tags: ["Networking", "São Paulo"],
-    likes: 8,
-    replies: 2,
-    time: "1d atrás",
-  },
-];
+import { communityService } from "@/services/communityService";
+import { CommunityThreadDoc } from "@/types/lms";
+import Link from "next/link";
+// Removed date-fns
 
 export default function CommunityPage() {
   const [activeTab, setActiveTab] = useState("all");
+  const [threads, setThreads] = useState<CommunityThreadDoc[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadThreads() {
+      try {
+        const data = await communityService.getGlobalThreads(20);
+        setThreads(data);
+      } catch (error) {
+        console.error("Failed to load community threads", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadThreads();
+  }, []);
+
+  const formatTimeAgo = (timestamp: any) => {
+    if (!timestamp) return "";
+    const date = timestamp?.toDate ? timestamp.toDate() : new Date(timestamp);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (diffInSeconds < 60) return "agora mesmo";
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    if (diffInMinutes < 60) return `${diffInMinutes} min atrás`;
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return `${diffInHours}h atrás`;
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7) return `${diffInDays}d atrás`;
+
+    return date.toLocaleDateString("pt-BR");
+  };
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-20">
@@ -95,66 +97,84 @@ export default function CommunityPage() {
 
       {/* Feed */}
       <div className="space-y-4">
-        {MOCK_TOPICS.map((topic, i) => (
-          <motion.div
-            key={topic.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.1 }}
-            className="bg-white p-6 rounded-xl border border-stone-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer group"
-          >
-            <div className="flex justify-between items-start mb-2">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-stone-200 to-stone-300 flex items-center justify-center text-xs font-bold text-stone-600">
-                  {topic.author.name[0]}
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <Loader2 className="animate-spin text-primary" size={32} />
+          </div>
+        ) : threads.length > 0 ? (
+          threads.map((topic, i) => (
+            <motion.div
+              key={topic.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1 }}
+              className="bg-white p-6 rounded-xl border border-stone-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer group"
+            >
+              <div className="flex justify-between items-start mb-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-stone-200 to-stone-300 flex items-center justify-center text-xs font-bold text-stone-600 overflow-hidden">
+                    {topic.authorAvatar ? (
+                      <img
+                        src={topic.authorAvatar}
+                        alt={topic.authorName}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      topic.authorName?.[0] || "?"
+                    )}
+                  </div>
+                  <span className="text-sm font-bold text-stone-700">
+                    {topic.authorName}
+                  </span>
+                  {/* Moderator logic would imply storing role in thread doc or fetching user */}
+                  <span className="text-xs text-stone-400">
+                    • {formatTimeAgo(topic.createdAt)}
+                  </span>
                 </div>
-                <span className="text-sm font-bold text-stone-700">
-                  {topic.author.name}
-                </span>
-                {topic.author.role === "moderator" && (
-                  <span className="text-[10px] font-bold uppercase bg-gold/10 text-gold-dark px-2 py-0.5 rounded-full">
-                    Mod
-                  </span>
-                )}
-                <span className="text-xs text-stone-400">• {topic.time}</span>
+                <button className="text-stone-300 hover:text-stone-500">
+                  <MoreHorizontal size={20} />
+                </button>
               </div>
-              <button className="text-stone-300 hover:text-stone-500">
-                <MoreHorizontal size={20} />
-              </button>
-            </div>
 
-            <h3 className="text-lg font-bold text-stone-800 mb-2 group-hover:text-primary transition-colors">
-              {topic.title}
+              <h3 className="text-lg font-bold text-stone-800 mb-2 group-hover:text-primary transition-colors">
+                {topic.title}
+              </h3>
+              <p className="text-stone-500 text-sm mb-4 line-clamp-2">
+                {topic.content}
+              </p>
+
+              <div className="flex items-center justify-between">
+                <div className="flex gap-2">
+                  {/* Tags are not currently in CommunityThreadDoc but useful for future */}
+                  <span className="text-xs font-medium text-stone-500 bg-stone-100 px-2 py-1 rounded-md">
+                    #Geral
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-4 text-stone-400 text-sm">
+                  <button className="flex items-center gap-1 hover:text-primary transition-colors">
+                    <ThumbsUp size={16} />
+                    <span>{topic.likeCount}</span>
+                  </button>
+                  <button className="flex items-center gap-1 hover:text-primary transition-colors">
+                    <MessageSquare size={16} />
+                    <span>{topic.replyCount}</span>
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          ))
+        ) : (
+          <div className="flex flex-col items-center justify-center py-20 bg-stone-50 rounded-xl border border-dashed border-stone-200">
+            <MessageCircle size={48} className="text-stone-300 mb-4" />
+            <h3 className="text-lg font-bold text-stone-700">
+              Comunidade Silenciosa
             </h3>
-            <p className="text-stone-500 text-sm mb-4 line-clamp-2">
-              {topic.excerpt}
+            <p className="text-stone-500 text-sm mb-6">
+              Seja o primeiro a iniciar uma discussão!
             </p>
-
-            <div className="flex items-center justify-between">
-              <div className="flex gap-2">
-                {topic.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="text-xs font-medium text-stone-500 bg-stone-100 px-2 py-1 rounded-md"
-                  >
-                    #{tag}
-                  </span>
-                ))}
-              </div>
-
-              <div className="flex items-center gap-4 text-stone-400 text-sm">
-                <button className="flex items-center gap-1 hover:text-primary transition-colors">
-                  <ThumbsUp size={16} />
-                  <span>{topic.likes}</span>
-                </button>
-                <button className="flex items-center gap-1 hover:text-primary transition-colors">
-                  <MessageSquare size={16} />
-                  <span>{topic.replies}</span>
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        ))}
+          </div>
+        )}
       </div>
     </div>
   );

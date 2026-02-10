@@ -2,7 +2,7 @@ import { auth, db } from "@/lib/firebase/admin";
 import { cookies } from "next/headers";
 import { redirect, notFound } from "next/navigation";
 import { assertCanAccessCourse } from "@/lib/auth/access-gate";
-import { issueCertificate } from "@/app/actions/certificate";
+import { issueCertificate } from "@/actions/certificate";
 import CertificateViewer from "@/components/certificates/CertificateViewer";
 import Link from "next/link";
 
