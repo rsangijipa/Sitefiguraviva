@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { FieldPath } from "firebase-admin/firestore";
 import { BookOpen, Library } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, deepSafeSerialize } from "@/lib/utils";
 import { Timestamp } from "firebase-admin/firestore";
 
 // --- Reusable Course Card (Inline for now, extract later) ---
@@ -207,6 +207,9 @@ export default async function MyCoursesPage() {
     }
   }
 
+  // Ensure serialization
+  enrolledCourses = deepSafeSerialize(enrolledCourses);
+
   // 3. Fetch Catalog (Published & Open, limit 10 for MVP)
   // Exclude enrolled? Ideally yes, but Firestore "not-in" has limits.
   // We will fetch widely and filter in memory for this page since catalog size is likely small (<100) for now.
@@ -216,11 +219,11 @@ export default async function MyCoursesPage() {
     .limit(20)
     .get();
 
-  const catalogCourses = (
-    catalogSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as any[]
-  )
-    .filter((c) => c.isPublished !== false) // Filter in memory for isPublished !== false
-    .filter((c) => !enrolledCourseIds.has(c.id));
+  const catalogCourses = deepSafeSerialize(
+    (catalogSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as any[])
+      .filter((c) => c.isPublished !== false) // Filter in memory for isPublished !== false
+      .filter((c) => !enrolledCourseIds.has(c.id)),
+  );
 
   return (
     <div className="space-y-12 pb-12">
