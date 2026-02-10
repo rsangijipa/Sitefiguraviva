@@ -11,7 +11,7 @@ interface BreadcrumbItem {
   href?: string;
 }
 
-interface AdminShellProps {
+interface AdminPageShellProps {
   title: string;
   description?: string;
   breadcrumbs?: BreadcrumbItem[];
@@ -20,14 +20,14 @@ interface AdminShellProps {
   backLink?: string;
 }
 
-export function AdminShell({
+export function AdminPageShell({
   title,
   description,
   breadcrumbs = [],
   actions,
   children,
   backLink,
-}: AdminShellProps) {
+}: AdminPageShellProps) {
   const { user } = useAuth();
 
   if (!user) return null; // Or skeleton
