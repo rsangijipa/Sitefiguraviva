@@ -50,6 +50,9 @@ export default function SubmissionGradingClient({
 
   if (!assessment) return <div>Avaliação não encontrada.</div>;
 
+  // TypeScript assertion: assessment is guaranteed to be non-null here
+  const assessmentData: AssessmentDoc = assessment;
+
   const handlePointChange = (questionId: string, points: number) => {
     setGradingAnswers((prev) =>
       prev.map((ans) =>
@@ -79,16 +82,16 @@ export default function SubmissionGradingClient({
     (sum, a) => sum + (a.pointsEarned || 0),
     0,
   );
-  const totalPossible = assessment.totalPoints || 0;
+  const totalPossible = assessmentData.totalPoints || 0;
   const currentPercentage =
     totalPossible > 0 ? (totalEarned / totalPossible) * 100 : 0;
-  const isPassing = currentPercentage >= assessment.passingScore;
+  const isPassing = currentPercentage >= assessmentData.passingScore;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-20">
       {/* Left Column: Answers & Grading */}
       <div className="lg:col-span-8 space-y-6">
-        {assessment.questions.map((q, idx) => {
+        {assessmentData.questions.map((q, idx) => {
           const answer = gradingAnswers.find((a) => a.questionId === q.id);
           const isManual = q.type === "essay" || q.type === "practical";
 
@@ -417,12 +420,12 @@ export default function SubmissionGradingClient({
             {isPassing ? (
               <div className="flex items-center gap-2 text-gold font-bold text-xs">
                 <CheckCircle size={16} /> Aluno Aprovado (Mín.{" "}
-                {assessment.passingScore}%)
+                {assessmentData.passingScore}%)
               </div>
             ) : (
               <div className="flex items-center gap-2 text-white/70 font-bold text-xs">
                 <XCircle size={16} /> Abaixo da Média (Mín.{" "}
-                {assessment.passingScore}%)
+                {assessmentData.passingScore}%)
               </div>
             )}
 
