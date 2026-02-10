@@ -1,7 +1,7 @@
 "use server";
 
 import { adminAuth, adminDb } from "@/lib/firebase/admin";
-import { Timestamp } from "firebase-admin/firestore";
+import { Timestamp, FieldValue } from "firebase-admin/firestore";
 import { Enrollment } from "@/types/schema";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
@@ -115,6 +115,14 @@ export async function enrollUser(email: string, courseId: string) {
       `/portal/course/${courseId}`,
     );
 
+    // Robust Access Control: Sync to User Doc
+    await adminDb
+      .collection("users")
+      .doc(uid)
+      .update({
+        enrolledCourseIds: FieldValue.arrayUnion(courseId),
+      });
+
     // Force cache revalidation for all relevant paths
     revalidatePath(`/portal/courses/${courseId}`);
     revalidatePath(`/portal/course/${courseId}`);
@@ -145,6 +153,14 @@ export async function revokeAccess(
       updatedAt: Timestamp.now(),
       reason,
     });
+
+    // Revoke access from User Doc
+    await adminDb
+      .collection("users")
+      .doc(uid)
+      .update({
+        enrolledCourseIds: FieldValue.arrayRemove(courseId),
+      });
 
     revalidatePath(`/portal`);
     return { success: true };

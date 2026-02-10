@@ -28,12 +28,16 @@ service cloud.firestore {
     }
 
     // Advanced enrollment check: allows access if ANY enrollment doc exists for this pair
+    // OR if the course ID is listed in the user's profile (robust Fallback)
     function hasActiveEnrollment(courseId) {
       let uid = request.auth.uid;
       return isAuthenticated() && (
         isAdmin() ||
         exists(/databases/$(database)/documents/enrollments/$(uid + '_' + courseId)) ||
-        exists(/databases/$(database)/documents/enrollments/$(courseId + '_' + uid))
+        exists(/databases/$(database)/documents/enrollments/$(courseId + '_' + uid)) ||
+        (exists(/databases/$(database)/documents/users/$(uid)) && 
+         get(/databases/$(database)/documents/users/$(uid)).data.keys().hasAny(['enrolledCourseIds']) &&
+         courseId in get(/databases/$(database)/documents/users/$(uid)).data.enrolledCourseIds)
       );
     }
 
