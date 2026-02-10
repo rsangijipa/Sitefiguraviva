@@ -93,13 +93,14 @@ service cloud.firestore {
     }
 
     match /gamification_profiles/{uid} {
-      allow read, write: if isAdmin() || isOwner(uid);
+      allow read: if isAdmin() || isOwner(uid);
+      allow write: if false; // LOCKED. Only Admin SDK.
     }
 
     match /xp_transactions/{id} {
-      allow read: if isAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
-      allow create: if isAuthenticated();
-      allow write: if isAdmin();
+      allow get: if isAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
+      allow list: if isAdmin();
+      allow write: if false; // LOCKED. Only Admin SDK.
     }
 
     // Public Collections

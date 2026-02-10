@@ -17,8 +17,8 @@ interface TelemetryProperties {
   [key: string]: string | number | boolean | undefined | null;
 }
 
-class Telemetry {
-  private isDev = env.NODE_ENV === "development";
+class TelemetryService {
+  private isDev = process.env.NODE_ENV === "development";
   private analytics: any = null;
 
   constructor() {
@@ -33,31 +33,40 @@ class Telemetry {
     }
   }
 
-  public track(event: EventName, properties?: TelemetryProperties) {
+  public track(event: string, properties?: Record<string, any>) {
+    // 1. Dev Logging
     if (this.isDev) {
-      console.groupCollapsed(`[Telemetry] ${event}`);
-      console.dir(properties, { depth: null });
-      console.groupEnd();
+      const scope = typeof window === "undefined" ? "[Server]" : "[Client]";
+      console.log(`${scope} [Telemetry] ${event}`, properties);
     }
 
-    if (this.analytics) {
+    // 2. Client-Side Analytics (Firebase)
+    if (this.analytics && typeof window !== "undefined") {
       try {
-        logEvent(this.analytics, event as string, properties as any);
+        logEvent(this.analytics, event, properties || {});
       } catch (e) {
-        // Fail silently
         if (this.isDev) console.warn("Analytics Error", e);
       }
     }
+
+    // 3. Server-Side Analytics (Future Sentry/PostHog)
+    if (typeof window === "undefined") {
+      // TODO: Add Server-Side Analytics provider here
+    }
   }
 
-  public error(error: any, context?: TelemetryProperties) {
-    this.track("error", {
-      message: error?.message || String(error),
-      stack: error?.stack,
-      ...context,
-    });
-    // Could also integrate Sentry here
+  public error(error: any, context?: Record<string, any>) {
+    const scope = typeof window === "undefined" ? "[Server]" : "[Client]";
+    console.error(`${scope} [Telemetry Error]`, error, context);
+    // TODO: Sentry.captureException(error, { extra: context });
+  }
+
+  public identify(userId: string, traits?: Record<string, any>) {
+    if (this.isDev) {
+      console.log(`[Telemetry] Identify: ${userId}`, traits);
+    }
+    // TODO: Set user context for Sentry/PostHog
   }
 }
 
-export const telemetry = new Telemetry();
+export const telemetry = new TelemetryService();

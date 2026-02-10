@@ -23,6 +23,9 @@ import Image from "next/image";
 import CourseModal from "./CourseModal";
 import BlogPostModal from "./BlogPostModal";
 import InstituteSection from "./sections/InstituteSection";
+import MethodologySection from "./sections/MethodologySection";
+import TestimonialsSection from "./sections/TestimonialsSection";
+import FAQSection from "./sections/FAQSection";
 import LegalModal from "./LegalModal";
 
 // interface HomeClientProps removed
@@ -123,12 +126,15 @@ export default function HomeClient({ initialData }: HomeClientProps = {}) {
       >
         <HeroSection initialData={initialData?.institute} />
         <FounderSection initialData={initialData?.founder} />
+        <MethodologySection />
 
         <CoursesSection
           courses={courses}
           onOpenCalendar={() => openModal("calendar")}
           onSelectCourse={selectCourse}
         />
+
+        <TestimonialsSection />
 
         <InstituteSection gallery={gallery} />
 
@@ -175,6 +181,8 @@ export default function HomeClient({ initialData }: HomeClientProps = {}) {
             </p>
           </div>
         </section>
+
+        <FAQSection />
 
         <InstagramSection />
       </main>

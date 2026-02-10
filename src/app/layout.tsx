@@ -64,8 +64,8 @@ export const viewport = {
   themeColor: "#D4AF37",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  maximumScale: 5,
+  userScalable: true,
 };
 
 import { cookies } from "next/headers";
