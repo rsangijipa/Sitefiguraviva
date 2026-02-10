@@ -26,27 +26,27 @@ const StatCard = ({ icon: Icon, label, value, trend, href }: any) => (
   <Link
     href={href || "#"}
     className={cn(
-      "bg-white p-4 rounded-xl border border-stone-100 shadow-sm flex items-center justify-between transition-all active:scale-95",
-      href ? "hover:border-gold/30 hover:shadow-md cursor-pointer" : "",
+      "bg-white p-4 rounded-xl border border-stone-100 shadow-sm flex items-center justify-between transition-all active:scale-95 group",
+      href ? "hover:border-agedGold/30 hover:shadow-md cursor-pointer" : "",
     )}
   >
     <div>
-      <p className="text-xs text-stone-400 font-medium uppercase tracking-wider">
+      <p className="text-[10px] text-stone-400 font-bold uppercase tracking-widest">
         {label}
       </p>
-      <p className="text-2xl font-bold text-stone-800 mt-1">{value}</p>
+      <p className="text-2xl font-bold text-ink mt-1">{value}</p>
       {trend && (
-        <p className="text-xs text-green-600 mt-1 flex items-center gap-1 font-bold">
+        <p className="text-[10px] text-agedGold mt-1 flex items-center gap-1 font-bold uppercase tracking-wide">
           {trend}
         </p>
       )}
     </div>
     <div
       className={cn(
-        "w-10 h-10 rounded-lg flex items-center justify-center transition-colors",
+        "w-10 h-10 rounded-lg flex items-center justify-center transition-all",
         href
-          ? "bg-gold/5 text-gold group-hover:bg-gold group-hover:text-white"
-          : "bg-stone-50 text-stone-400",
+          ? "bg-agedGold/5 text-agedGold group-hover:bg-agedGold group-hover:text-ink"
+          : "bg-stone-50 text-stone-300",
       )}
     >
       <Icon size={20} />
@@ -63,14 +63,14 @@ const ActionItem = ({ title, course, type, date, href }: any) => (
       className={cn(
         "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-sm transition-transform group-hover:scale-110",
         type === "live"
-          ? "bg-amber-50 text-amber-600"
-          : "bg-blue-50 text-blue-500",
+          ? "bg-agedGold/10 text-agedGold"
+          : "bg-stone-100 text-ink",
       )}
     >
       {type === "live" ? <Calendar size={20} /> : <Play size={20} />}
     </div>
     <div className="flex-1 min-w-0">
-      <h4 className="text-sm font-bold text-stone-800 truncate group-hover:text-primary transition-colors">
+      <h4 className="text-sm font-bold text-ink truncate group-hover:text-agedGold transition-colors">
         {title}
       </h4>
       <p className="text-[10px] text-stone-400 uppercase tracking-widest font-bold mt-0.5">
@@ -99,10 +99,16 @@ export default function PortalDashboard() {
     async function loadDashboard() {
       if (!user?.uid) return;
       try {
-        // 1. Fetch Enrollments
-        const myEnrollments = await enrollmentService.getActiveEnrollments(
-          user.uid,
-        );
+        // Parallel fetch for initial data to improve performance
+        const [myEnrollments, upcomingEvents, myCertificates] =
+          await Promise.all([
+            enrollmentService.getActiveEnrollments(user.uid),
+            eventService.getUpcomingEvents(3),
+            certificateService.getUserCertificates(user.uid),
+          ]);
+
+        setEvents(upcomingEvents);
+        setCertificates(myCertificates);
 
         if (myEnrollments.length > 0) {
           // 2. Fetch Course Data for Valid Enrollments
@@ -122,7 +128,6 @@ export default function PortalDashboard() {
           setEnrollments(enrichedEnrollments);
 
           // 3. Determine Last Accessed (Hero Card)
-          // Sort by lastAccessedAt desc
           const sorted = [...enrichedEnrollments].sort((a, b) => {
             const timeA = a.lastAccessedAt?.toMillis
               ? a.lastAccessedAt.toMillis()
@@ -142,16 +147,6 @@ export default function PortalDashboard() {
             });
           }
         }
-
-        // 4. Fetch Agenda (Events)
-        const upcomingEvents = await eventService.getUpcomingEvents(3);
-        setEvents(upcomingEvents);
-
-        // 5. Fetch Certificates
-        const myCertificates = await certificateService.getUserCertificates(
-          user.uid,
-        );
-        setCertificates(myCertificates);
       } catch (error) {
         logger.error("Dashboard Load Error", error, { uid: user.uid });
       } finally {
@@ -168,10 +163,10 @@ export default function PortalDashboard() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-serif text-stone-800">
+          <h1 className="text-4xl font-serif text-ink tracking-tight">
             Olá, {firstName}
           </h1>
-          <p className="text-stone-500 mt-1">
+          <p className="text-stone-500 mt-2 font-serif italic">
             Pronto para continuar sua jornada hoje?
           </p>
         </div>
@@ -194,41 +189,42 @@ export default function PortalDashboard() {
         {/* Hero Card: Resume (Col-8) */}
         <div className="lg:col-span-8">
           {lastCourse ? (
-            <div className="bg-white rounded-2xl p-6 border border-stone-100 shadow-lg relative overflow-hidden group h-full flex flex-col justify-center">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
+            <div className="bg-white rounded-2xl p-6 border border-stone-100 shadow-lg relative overflow-hidden group h-full flex flex-col justify-center transition-all hover:border-agedGold/20">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-agedGold/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
 
               <div className="relative z-10 flex flex-col md:flex-row gap-6 items-start md:items-center">
-                <div className="w-full md:w-48 aspect-video bg-stone-900 rounded-lg flex items-center justify-center shrink-0 shadow-md">
-                  <Play size={32} className="text-white fill-white" />
+                <div className="w-full md:w-48 aspect-video bg-ink rounded-lg flex items-center justify-center shrink-0 shadow-xl overflow-hidden relative">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                  <Play size={32} className="text-agedGold relative z-10" />
                 </div>
                 <div className="flex-1 w-full">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-[10px] font-bold uppercase rounded-full">
+                    <span className="px-3 py-1 bg-agedGold/10 text-agedGold text-[9px] font-bold uppercase tracking-[0.2em] rounded-sm border border-agedGold/10">
                       Continuar Estudando
                     </span>
                   </div>
-                  <h2 className="text-xl font-bold text-stone-800 mb-2 group-hover:text-primary transition-colors">
+                  <h2 className="text-2xl font-serif text-ink mb-2 group-hover:text-agedGold transition-colors tracking-tight">
                     {lastCourse.courseTitle}
                   </h2>
-                  <p className="text-sm text-stone-500 mb-4 line-clamp-1">
-                    Retome de onde parou.
+                  <p className="text-sm text-stone-500 mb-6 font-serif italic">
+                    Retome sua última lição e avance no seu processo.
                   </p>
 
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-6">
                     <Link
                       href={`/portal/course/${lastCourse.courseId}${lastCourse.lastLessonId ? `/lesson/${lastCourse.lastLessonId}` : ""}`}
-                      className="btn-primary px-6 py-2 rounded-lg flex items-center gap-2 text-sm"
+                      className="bg-ink text-agedGold hover:bg-agedGold hover:text-ink px-8 py-2.5 rounded-sm text-[10px] font-bold uppercase tracking-widest transition-all shadow-lg flex items-center gap-2"
                     >
-                      <Play size={16} className="fill-current" /> Continuar Aula
+                      <Play size={14} className="fill-current" /> Continuar Aula
                     </Link>
-                    <div className="flex-1 max-w-[120px]">
-                      <div className="h-1.5 w-full bg-stone-100 rounded-full overflow-hidden">
+                    <div className="flex-1 max-w-[140px]">
+                      <div className="h-1 bg-stone-100 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-primary transition-all duration-500"
+                          className="h-full bg-agedGold transition-all duration-1000"
                           style={{ width: `${lastCourse.percent}%` }}
                         />
                       </div>
-                      <p className="text-[10px] text-stone-400 mt-1 text-center">
+                      <p className="text-[9px] font-bold uppercase tracking-widest text-stone-400 mt-2">
                         {lastCourse.percent}% concluído
                       </p>
                     </div>
@@ -284,16 +280,16 @@ export default function PortalDashboard() {
               {[30, 45, 20, 60, 40, 80, 50].map((val, i) => (
                 <div
                   key={i}
-                  className="flex-1 bg-stone-50 rounded-t-md hover:bg-gold/20 transition-colors relative group"
+                  className="flex-1 bg-stone-50 rounded-t-md hover:bg-agedGold/20 transition-colors relative group"
                   style={{ height: `${val}%` }}
                 >
-                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 bg-stone-800 text-white text-[10px] px-2 py-1 rounded pointer-events-none transition-opacity">
+                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 bg-ink text-agedGold text-[10px] px-2 py-1 rounded pointer-events-none transition-opacity font-bold">
                     {val * 10} XP
                   </div>
                 </div>
               ))}
             </div>
-            <div className="flex justify-between mt-2 text-[10px] text-stone-400 font-bold uppercase">
+            <div className="flex justify-between mt-2 text-[10px] text-stone-400 font-bold uppercase tracking-tighter">
               <span>Seg</span>
               <span>Ter</span>
               <span>Qua</span>
@@ -328,23 +324,23 @@ export default function PortalDashboard() {
               enrollments.slice(0, 3).map((enr) => (
                 <div
                   key={enr.id}
-                  className="relative p-4 bg-stone-50/50 rounded-xl border border-stone-100 group transition-all hover:bg-white hover:shadow-md"
+                  className="relative p-4 bg-stone-50/50 rounded-xl border border-stone-100 group transition-all hover:bg-white hover:border-agedGold/30 hover:shadow-md"
                 >
                   <Link
                     href={`/portal/course/${enr.courseId}`}
                     className="block"
                   >
                     <div className="flex justify-between items-start mb-3">
-                      <h4 className="text-sm font-bold text-stone-700 group-hover:text-primary transition-colors line-clamp-2 pr-4">
+                      <h4 className="text-sm font-bold text-ink group-hover:text-agedGold transition-colors line-clamp-2 pr-4 font-serif">
                         {enr.courseTitle}
                       </h4>
-                      <span className="text-xs font-bold text-primary bg-white px-2 py-1 rounded-lg border border-stone-100 shadow-sm">
+                      <span className="text-[10px] font-bold text-agedGold bg-white px-2 py-1 rounded-lg border border-stone-100 shadow-sm uppercase tracking-tighter">
                         {enr.progressSummary?.percent || 0}%
                       </span>
                     </div>
-                    <div className="h-2 w-full bg-stone-200 rounded-full overflow-hidden">
+                    <div className="h-1.5 w-full bg-stone-200 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-primary transition-all duration-1000"
+                        className="h-full bg-agedGold transition-all duration-1000"
                         style={{
                           width: `${enr.progressSummary?.percent || 0}%`,
                         }}
@@ -382,16 +378,16 @@ export default function PortalDashboard() {
                   <Link
                     key={cert.id}
                     href={`/portal/certificates`}
-                    className="group p-4 bg-stone-50 rounded-xl border border-stone-100 hover:border-gold/30 transition-all flex items-center gap-4"
+                    className="group p-4 bg-stone-50 rounded-xl border border-stone-100 hover:border-agedGold/30 transition-all flex items-center gap-4"
                   >
-                    <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 shrink-0 group-hover:scale-110 transition-transform">
+                    <div className="w-12 h-12 bg-agedGold/10 rounded-full flex items-center justify-center text-agedGold shrink-0 group-hover:scale-110 transition-transform">
                       <Award size={24} />
                     </div>
                     <div className="min-w-0">
-                      <h4 className="text-sm font-bold text-stone-700 truncate group-hover:text-primary transition-colors">
+                      <h4 className="text-sm font-bold text-ink truncate group-hover:text-agedGold transition-colors font-serif">
                         {cert.courseTitle}
                       </h4>
-                      <p className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">
+                      <p className="text-[9px] text-stone-400 uppercase tracking-widest font-bold">
                         Concluído
                       </p>
                     </div>

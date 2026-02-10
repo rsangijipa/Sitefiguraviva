@@ -97,10 +97,22 @@ service cloud.firestore {
     }
 
     match /community/{id} {
-      allow read, create: if isAuthenticated(); // Broad for community
-      allow update, delete: if isAdmin() || (isAuthenticated() && resource.data.authorId == request.auth.uid);
+      allow read: if true;
+      allow create: if isAuthenticated() 
+        && request.resource.data.authorId == request.auth.uid
+        && request.resource.data.createdAt == request.time;
+      
+      allow update: if isAuthenticated() 
+        && resource.data.authorId == request.auth.uid
+        && request.resource.data.authorId == resource.data.authorId
+        && request.resource.data.createdAt == resource.data.createdAt;
+      
+      allow delete: if isAdmin() || (isAuthenticated() && resource.data.authorId == request.auth.uid);
+
       match /replies/{rId} {
-        allow read, create: if isAuthenticated();
+        allow read: if true;
+        allow create: if isAuthenticated()
+          && request.resource.data.authorId == request.auth.uid;
         allow update, delete: if isAdmin() || (isAuthenticated() && resource.data.authorId == request.auth.uid);
       }
     }
@@ -117,11 +129,15 @@ service cloud.firestore {
     }
 
     // Public Collections
-    match /stats/{id} { allow read, write: if true; }
+    match /stats/{id} { 
+      allow read: if true; 
+      allow write: if false; // LOCKED. Only Server Actions/Admin SDK.
+    }
     match /siteSettings/{id} { allow read: if true; allow write: if isAdmin(); }
     match /publicDocs/{id} { allow read: if true; allow write: if isAdmin(); }
     match /posts/{id} { allow read: if true; allow write: if isAdmin(); }
     match /gallery/{id} { allow read: if true; allow write: if isAdmin(); }
+    match /events/{id} { allow read: if true; allow write: if isAdmin(); }
 
     match /{document=**} {
       allow read, write: if isAdmin();
