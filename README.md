@@ -21,15 +21,19 @@ Este projeto foi migrado para Next.js 14+ (App Router) com foco em performance, 
 - **Admin Panel**: Gestão de cursos e configurações de integração Google.
 - **Integrações (Simuladas)**: Google Calendar, Drive, Forms e YouTube.
 - **Responsividade**: Mobile-first com menus adaptativos e scroll-snap.
+- **Certificados**: Geração de PDF com background personalizado (via `scripts/generate_bg.py`) e QR Code de validação.
+- **Gamification**: Sistema de XP, Níveis e Conquistas (Badges) com regras reais de engajamento.
 
 ## Como Rodar
 
 1. Instale as dependências:
+
    ```bash
    npm install
    ```
 
 2. Inicie o servidor de desenvolvimento:
+
    ```bash
    npm run dev
    ```
