@@ -5,6 +5,8 @@ import { cn } from "@/lib/utils";
 import NotificationBell from "@/components/layout/NotificationBell";
 import { motion, AnimatePresence } from "framer-motion";
 
+import { UserXPBadge } from "@/components/gamification/UserXPBadge";
+
 export const DashboardShell = ({ children }: { children: React.ReactNode }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -62,6 +64,7 @@ export const DashboardShell = ({ children }: { children: React.ReactNode }) => {
           </div>
 
           <div className="flex items-center gap-4">
+            <UserXPBadge />
             <NotificationBell />
 
             {/* Avatar / User Dropdown Placeholder */}
