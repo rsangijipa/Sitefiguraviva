@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/firebase/admin";
+import { auth, adminDb } from "@/lib/firebase/admin";
 import { getCourseData } from "@/lib/courseService";
 import { deepSafeSerialize } from "@/lib/utils";
 import CourseClient from "./CourseClient";
@@ -23,6 +23,14 @@ export default async function CoursePage({
   const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
   const uid = decodedClaims.uid;
 
+  // Orbit 05: Robust Admin Detection (Claims + Firestore Backup)
+  const userDoc = await adminDb.collection("users").doc(uid).get();
+  const userRole = userDoc.data()?.role?.toLowerCase().trim();
+  const isAdmin =
+    decodedClaims.admin === true ||
+    decodedClaims.role === "admin" ||
+    userRole === "admin";
+
   // ORBITAL 01 & 05: Single Source of Truth Access Gate
   try {
     await assertCanAccessCourse(uid, courseId);
@@ -40,7 +48,7 @@ export default async function CoursePage({
   }
 
   // Server-Side Data Fetch
-  const data = await getCourseData(courseId, uid);
+  const data = await getCourseData(courseId, uid, isAdmin);
 
   if (!data) {
     return (

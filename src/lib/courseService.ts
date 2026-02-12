@@ -5,39 +5,61 @@ import { deepSafeSerialize } from "./utils";
 
 import { toCourseFullDTO } from "@/lib/presenters/mappers";
 
-export async function getCourseData(courseId: string, userId: string) {
+export async function getCourseData(
+  courseId: string,
+  userId: string,
+  isAdmin: boolean = false,
+) {
   if (!courseId || !userId) return null;
 
-  // 1. Fetch Course & Enrollment (Parallel)
+  // 1. Fetch Course & Enrollment (Standard & Alternate)
   const coursePromise = db.collection("courses").doc(courseId).get();
+  const userPromise = db.collection("users").doc(userId).get();
   const enrollmentPromise = db
     .collection("enrollments")
     .doc(`${userId}_${courseId}`)
     .get();
+  const altEnrollmentPromise = db
+    .collection("enrollments")
+    .doc(`${courseId}_${userId}`)
+    .get();
 
-  const [courseDoc, enrollmentDoc] = await Promise.all([
-    coursePromise,
-    enrollmentPromise,
-  ]);
+  const [courseDoc, userDoc, enrollmentDoc, altEnrollmentDoc] =
+    await Promise.all([
+      coursePromise,
+      userPromise,
+      enrollmentPromise,
+      altEnrollmentPromise,
+    ]);
 
   if (!courseDoc.exists) return null;
 
   let enrollmentData = null;
-  let status = "none";
+  let status = isAdmin ? "active" : "none";
 
   if (enrollmentDoc.exists) {
-    enrollmentData = enrollmentDoc; // Pass the doc (or data) to mapper
-    status = enrollmentDoc.data()?.status || "none";
+    enrollmentData = enrollmentDoc;
+    status = enrollmentDoc.data()?.status || (isAdmin ? "active" : "none");
+  } else if (altEnrollmentDoc.exists) {
+    enrollmentData = altEnrollmentDoc;
+    status = altEnrollmentDoc.data()?.status || (isAdmin ? "active" : "none");
+  } else if (
+    userDoc.exists &&
+    userDoc.data()?.enrolledCourseIds?.includes(courseId)
+  ) {
+    status = "active"; // Profile-based enrollment
   }
 
   // Paywall gate: If not active or completed, return limited data via DTO
-  if (status !== "active" && status !== "completed") {
+  // Skip if Admin
+  if (!isAdmin && status !== "active" && status !== "completed") {
     return toCourseFullDTO(
       courseDoc,
       [], // No modules
       new Map(), // No lessons
       new Map(), // No progress
       enrollmentData,
+      isAdmin,
     );
   }
 
@@ -90,6 +112,7 @@ export async function getCourseData(courseId: string, userId: string) {
     lessonsMap,
     progressMap,
     enrollmentData,
+    isAdmin,
   );
 }
 

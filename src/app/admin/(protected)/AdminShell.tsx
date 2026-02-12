@@ -159,10 +159,7 @@ export default function AdminShell({
           </Link>
 
           <button
-            onClick={() => {
-              signOut();
-              router.push("/admin/login");
-            }}
+            onClick={() => signOut()}
             className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-red-50 text-red-400 hover:bg-red-100 hover:text-red-500 rounded-xl transition-all duration-300 text-[10px] font-bold uppercase tracking-[0.2em] group"
           >
             <LogOut

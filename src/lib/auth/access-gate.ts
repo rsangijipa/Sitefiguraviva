@@ -24,11 +24,49 @@ export async function assertCanAccessCourse(
 ): Promise<AccessContext> {
   if (!uid) throw new AuthError();
 
+  // 0. Admin Override Gate - FAST PATH
+  const userSnap = await adminDb.collection("users").doc(uid).get();
+  const userData = userSnap.data();
+  const isAdmin = userData?.role?.toLowerCase().trim() === "admin";
+
+  if (isAdmin) {
+    return {
+      uid,
+      courseId,
+      enrollmentId: `admin_${uid}_${courseId}`,
+      paymentMethod: "admin",
+      isAdminOverride: true,
+    };
+  }
+
   const enrollmentId = `${uid}_${courseId}`;
-  const enrollmentSnap = await adminDb
+  const altEnrollmentId = `${courseId}_${uid}`;
+
+  let enrollmentSnap = await adminDb
     .collection("enrollments")
     .doc(enrollmentId)
     .get();
+
+  // Try alternate ID if first one fails
+  if (!enrollmentSnap.exists) {
+    enrollmentSnap = await adminDb
+      .collection("enrollments")
+      .doc(altEnrollmentId)
+      .get();
+  }
+
+  // Final Fallback: Check if course is in user doc (legacy format)
+  if (
+    !enrollmentSnap.exists &&
+    userData?.enrolledCourseIds?.includes(courseId)
+  ) {
+    return {
+      uid,
+      courseId,
+      enrollmentId: `legacy_${uid}_${courseId}`,
+      paymentMethod: "legacy",
+    };
+  }
 
   if (!enrollmentSnap.exists) {
     logger.warn("Access Denied: Enrollment Not Found", { courseId, uid });
@@ -84,22 +122,6 @@ export async function assertCanAccessCourse(
   }
 
   const course = courseSnap.data() as CourseDoc;
-
-  // Admin Override: If user is admin, they can see draft/closed courses
-  const userSnap = await adminDb.collection("users").doc(uid).get();
-  const userRole = userSnap.data()?.role;
-
-  if (userRole === "admin") {
-    return {
-      uid,
-      courseId,
-      enrollmentId,
-      paymentMethod: enrollment.paymentMethod || "free",
-      courseVersion: enrollment.courseVersionAtEnrollment,
-      accessUntil: enrollment.accessUntil?.toDate().toISOString(),
-      isAdminOverride: true,
-    };
-  }
 
   // Policy: draft or archived block
   if (isCourseGloballyBlocked(course)) {

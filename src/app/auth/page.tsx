@@ -46,7 +46,7 @@ function AuthContent() {
   const { data: courses = [] } = useCourses();
 
   const mode = searchParams.get("mode");
-  const next = searchParams.get("next") || "/portal";
+  const next = searchParams.get("next") || "";
   const intent = searchParams.get("intent");
   const courseId = searchParams.get("courseId");
 
@@ -89,16 +89,18 @@ function AuthContent() {
       const userRole = syncResult.user?.role || "student";
 
       // D. Redirect Logic
+      // Priority 1: Use role-based redirect as default
       let targetPath = getRedirectPathForRole(userRole);
 
-      // If we have a 'next' param, check if it's safe and allowed
-      if (next && next.startsWith("/") && !next.startsWith("//")) {
+      // Priority 2: If we have an explicit 'next' param (not the default /portal), check if it's safe
+      const hasExplicitNext = searchParams.has("next") && next !== "/portal";
+      if (hasExplicitNext && next.startsWith("/") && !next.startsWith("//")) {
         // Security: Only admin can go to /admin
         if (next.startsWith("/admin") && userRole !== "admin") {
           console.warn(
             `Redirect blocked: User ${user.uid} (role: ${userRole}) tried to access ${next}`,
           );
-          targetPath = getRedirectPathForRole(userRole); // Fallback to their dashboard
+          // Keep role-based targetPath
         } else {
           targetPath = next;
         }
@@ -241,26 +243,37 @@ function AuthContent() {
                   className="space-y-4 overflow-hidden"
                 >
                   <Input
+                    id="full-name"
+                    name="name"
                     label="Nome Completo"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     required
+                    autoComplete="name"
                   />
                   <Input
+                    id="phone"
+                    name="phone"
                     label="Telefone (WhatsApp)"
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     required
                     placeholder="(00) 00000-0000"
+                    autoComplete="tel"
                   />
                   {courses.length > 0 && (
                     <div className="space-y-1">
-                      <label className="text-[10px] uppercase font-bold text-stone-500 ml-1">
+                      <label
+                        htmlFor="course-interest"
+                        className="text-[10px] uppercase font-bold text-stone-500 ml-1"
+                      >
                         Interesse
                       </label>
                       <div className="relative">
                         <select
+                          id="course-interest"
+                          name="course-interest"
                           value={selectedCourse}
                           onChange={(e) => setSelectedCourse(e.target.value)}
                           className="w-full h-12 px-4 rounded-xl border border-stone-200 bg-stone-50 text-sm focus:ring-2 focus:ring-primary/20 outline-none appearance-none"
@@ -284,15 +297,20 @@ function AuthContent() {
             </AnimatePresence>
 
             <Input
+              id="email"
+              name="email"
               label="E-mail"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              autoComplete="email"
             />
 
             <div className="space-y-1">
               <Input
+                id="password"
+                name="password"
                 label="Senha"
                 type={showPassword ? "text" : "password"}
                 value={password}
@@ -300,6 +318,7 @@ function AuthContent() {
                 required
                 rightIcon={showPassword ? EyeOff : Eye}
                 onRightIconClick={() => setShowPassword(!showPassword)}
+                autoComplete={isSignup ? "new-password" : "current-password"}
               />
               {!isSignup && (
                 <div className="text-right">

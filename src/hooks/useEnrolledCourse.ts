@@ -36,6 +36,7 @@ export function useEnrolledCourse(
 
       if (!isAdmin && userId) {
         try {
+          // A. Try Primary ID Format (standard)
           const enrollmentRef = doc(db, "enrollments", `${userId}_${courseId}`);
           const enrollmentSnap = await getDoc(enrollmentRef);
 
@@ -46,17 +47,48 @@ export function useEnrolledCourse(
             };
             status = enrollmentData.status || "none";
           } else {
-            const q = query(
-              collection(db, "enrollments"),
-              where("uid", "==", userId),
-              where("courseId", "==", courseId),
-              limit(1),
+            // B. Try Alternate ID Format
+            const altEnrollmentRef = doc(
+              db,
+              "enrollments",
+              `${courseId}_${userId}`,
             );
-            const fallbackSnap = await getDocs(q);
-            if (!fallbackSnap.empty) {
-              const d = fallbackSnap.docs[0];
-              enrollmentData = { id: d.id, ...d.data() };
+            const altEnrollmentSnap = await getDoc(altEnrollmentRef);
+
+            if (altEnrollmentSnap.exists()) {
+              enrollmentData = {
+                id: altEnrollmentSnap.id,
+                ...altEnrollmentSnap.data(),
+              };
               status = enrollmentData.status || "none";
+            } else {
+              // C. Check User Profile Fallback (Legacy/Async sync)
+              const userRef = doc(db, "users", userId);
+              const userSnap = await getDoc(userRef);
+              const userData = userSnap.data();
+
+              if (userData?.enrolledCourseIds?.includes(courseId)) {
+                status = "active";
+                enrollmentData = {
+                  id: `profile_${userId}_${courseId}`,
+                  status: "active",
+                  paymentMethod: "legacy",
+                };
+              } else {
+                // D. Final Query Fallback (for non-standard IDs)
+                const q = query(
+                  collection(db, "enrollments"),
+                  where("uid", "==", userId),
+                  where("courseId", "==", courseId),
+                  limit(1),
+                );
+                const fallbackSnap = await getDocs(q);
+                if (!fallbackSnap.empty) {
+                  const d = fallbackSnap.docs[0];
+                  enrollmentData = { id: d.id, ...d.data() };
+                  status = enrollmentData.status || "none";
+                }
+              }
             }
           }
         } catch (err) {

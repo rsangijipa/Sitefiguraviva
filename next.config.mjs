@@ -65,11 +65,41 @@ const pwaConfig = withPWA({
                 },
             },
         },
+        {
+            urlPattern: /\/_next\/(?:data|static)\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+                cacheName: 'next-assets',
+                expiration: {
+                    maxEntries: 32,
+                    maxAgeSeconds: 24 * 60 * 60, // 24 hours
+                },
+            },
+        },
+        {
+            urlPattern: /\/.*manifest\.json$/i,
+            handler: 'NetworkFirst',
+            options: {
+                cacheName: 'manifest-cache',
+                expiration: {
+                    maxEntries: 10,
+                    maxAgeSeconds: 24 * 60 * 60, // 24 hours
+                },
+            },
+        },
     ],
     fallbacks: {
         document: '/offline',
     },
-    buildExcludes: [/middleware-manifest.json$/],
+    buildExcludes: [
+        /middleware-manifest.json$/,
+        /_next\/app-build-manifest.json$/,
+        /_next\/static\/.*\/_buildManifest.js$/,
+        /_next\/static\/.*\/_ssgManifest.js$/,
+        /app-build-manifest.json$/,
+        /build-manifest.json$/,
+        /react-loadable-manifest.json$/,
+    ],
 });
 
 // Apply PWA first, then Sentry
