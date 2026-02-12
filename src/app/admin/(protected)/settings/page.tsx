@@ -48,7 +48,9 @@ export default function AdminContentPage() {
   const [founderForm, setFounderForm] = useState<any>({});
   const [instituteForm, setInstituteForm] = useState<any>({});
   const [legalForm, setLegalForm] = useState<any>({});
-  const { data: legalData, refetch: refetchLegal } = useLegalSettings();
+  const { data: legalData, refetch: refetchLegal } = useLegalSettings({
+    aggressiveRefresh: true,
+  });
 
   // Member form state
   const [editingMember, setEditingMember] = useState<string | null>(null);

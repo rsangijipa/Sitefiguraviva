@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { adminAuth, adminDb } from "@/lib/firebase/admin";
 import { FieldValue } from "firebase-admin/firestore";
+import { env } from "@/config/env";
 
 export async function POST(req: NextRequest) {
   try {
@@ -61,8 +62,8 @@ export async function POST(req: NextRequest) {
         },
       ],
       // Redirect to internal enrollment flow success/cancel pages
-      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/inscricao/${courseId}/sucesso?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/inscricao/${courseId}/cancelado`,
+      success_url: `${env.NEXT_PUBLIC_BASE_URL}/inscricao/${courseId}/sucesso?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${env.NEXT_PUBLIC_BASE_URL}/inscricao/${courseId}/cancelado`,
       metadata: {
         uid: uid,
         courseId: courseId,

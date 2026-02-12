@@ -41,6 +41,7 @@ export async function updateSiteSettings(
 ) {
   try {
     const user = await assertIsAdmin();
+    const updatedAt = Timestamp.now();
 
     await adminDb
       .collection("siteSettings")
@@ -48,14 +49,17 @@ export async function updateSiteSettings(
       .set(
         {
           ...data,
-          updatedAt: Timestamp.now(),
+          updatedAt,
           updatedBy: user.email,
         },
         { merge: true },
       );
 
-    revalidatePath("/", "layout"); // Revalidate everything as header/footer might change
-    return { success: true };
+    revalidatePath("/", "layout");
+    revalidatePath("/admin/settings", "page");
+    revalidatePath("/public-library", "page");
+    revalidatePath("/public-gallery", "page");
+    return { success: true, updatedAt: updatedAt.toDate().toISOString() };
   } catch (error: any) {
     console.error(`Error updating settings/${key}:`, error);
     return { success: false, error: error.message };

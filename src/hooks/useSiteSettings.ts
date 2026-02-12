@@ -53,11 +53,16 @@ export const useTeamSettings = () => {
   });
 };
 
-export const useLegalSettings = () => {
+export const useLegalSettings = (options?: {
+  initialData?: LegalSettings;
+  aggressiveRefresh?: boolean;
+}) => {
   return useQuery({
     queryKey: ["siteSettings", "legal"],
     queryFn: () => getSiteSettings<LegalSettings>("legal", DEFAULT_LEGAL),
-    initialData: DEFAULT_LEGAL,
-    staleTime: 1000 * 60 * 60, // 1 hour
+    initialData: options?.initialData || DEFAULT_LEGAL,
+    staleTime: options?.aggressiveRefresh ? 0 : 1000 * 60,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
   });
 };
