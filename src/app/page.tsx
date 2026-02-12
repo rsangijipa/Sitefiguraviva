@@ -19,7 +19,8 @@ async function getHomeData() {
     const [
       coursesSnap,
       postsSnap,
-      gallerySnap,
+      publicGallerySnap,
+      legacyGallerySnap,
       founderSnap,
       instituteSnap,
       seoSnap,
@@ -35,6 +36,11 @@ async function getHomeData() {
         .where("isPublished", "==", true)
         .orderBy("created_at", "desc")
         .limit(4)
+        .get(),
+      db
+        .collection("publicGallery")
+        .orderBy("created_at", "desc")
+        .limit(12)
         .get(),
       db.collection("gallery").orderBy("created_at", "desc").limit(12).get(),
       db.collection("siteSettings").doc("founder").get(),
@@ -84,12 +90,19 @@ async function getHomeData() {
       });
     });
 
-    const gallery = gallerySnap.docs.map((doc) => {
+    const gallerySource = !publicGallerySnap.empty
+      ? publicGallerySnap
+      : legacyGallerySnap;
+
+    const gallery = gallerySource.docs.map((doc) => {
       const data = doc.data();
       return deepSafeSerialize({
         id: doc.id,
-        url: data.url || "",
+        src: data.src || data.url || "",
+        url: data.url || data.src || "",
         title: data.title || "",
+        caption: data.caption || data.description || "",
+        tags: data.tags || [],
         created_at: toISO(data.created_at),
         updated_at: toISO(data.updated_at),
       });
