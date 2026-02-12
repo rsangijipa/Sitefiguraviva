@@ -2,6 +2,13 @@ import { Suspense } from "react";
 import HomeClient from "../components/HomeClient";
 import { db } from "@/lib/firebase/admin";
 import { deepSafeSerialize } from "@/lib/utils";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: "/",
+  },
+};
 
 // Revalidate every hour
 export const revalidate = 3600;

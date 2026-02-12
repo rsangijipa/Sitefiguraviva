@@ -18,6 +18,7 @@ const lato = Lato({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://figuraviva.com.br"),
   title: {
     default: "Instituto Figura Viva | Gestalt-Terapia & Formação",
     template: "%s | Instituto Figura Viva",
