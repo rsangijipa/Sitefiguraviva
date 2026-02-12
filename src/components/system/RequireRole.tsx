@@ -1,39 +1,40 @@
-'use client';
+"use client";
 
-import { useAuth } from '@/context/AuthContext';
-import { Role, canAccess } from '@/lib/rbac';
-import { NoPermission } from '@/components/system/NoPermission';
-import { LoadingState } from '@/components/system/LoadingState';
+import { useAuth } from "@/context/AuthContext";
+import { Role, canAccess } from "@/lib/rbac";
+import { NoPermission } from "@/components/system/NoPermission";
+import { LoadingState } from "@/components/system/LoadingState";
 
 interface RequireRoleProps {
-    roles: Role[];
-    children: React.ReactNode;
-    fallback?: React.ReactNode;
+  roles: Role[];
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
 }
 
 export function RequireRole({ roles, children, fallback }: RequireRoleProps) {
-    // We need to verify where useAuth comes from. 
-    // If it doesn't exist, we'll need to create a context or use one found in inventory.
-    // For now, assuming a standard pattern.
-    const { user, loading, role } = useAuth();
+  // We need to verify where useAuth comes from.
+  // If it doesn't exist, we'll need to create a context or use one found in inventory.
+  // For now, assuming a standard pattern.
+  const { user, loading, role } = useAuth();
 
-    if (loading) {
-        return <LoadingState message="Verificando permissões..." />;
-    }
+  if (loading) {
+    return <LoadingState message="Verificando permissões..." />;
+  }
 
-    // Cast the context role (string/UserRole) to our RBAC Role type
-    let hasAccess = canAccess(role as Role, roles);
+  // Cast the context role (string/UserRole) to our RBAC Role type
+  let hasAccess = canAccess(role as Role, roles);
 
-    // Emergency Bypass for Lilian
-    if (user?.email === 'liliangusmao@figuraviva.com' || user?.email === 'liliangusmao@institutofiguraviva.com.br') {
-        hasAccess = true;
-    }
+  console.log("[RequireRole] Access check:", {
+    role,
+    requiredRoles: roles,
+    hasAccess,
+    loading,
+    email: user?.email,
+  });
 
-    console.log('[RequireRole] Access check:', { role, requiredRoles: roles, hasAccess, loading, email: user?.email });
+  if (!hasAccess) {
+    return fallback || <NoPermission />;
+  }
 
-    if (!hasAccess) {
-        return fallback || <NoPermission />;
-    }
-
-    return <>{children}</>;
+  return <>{children}</>;
 }

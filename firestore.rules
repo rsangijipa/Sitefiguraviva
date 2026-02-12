@@ -16,8 +16,9 @@ service cloud.firestore {
 
     function isAdmin() {
       return isAuthenticated() && (
-        request.auth.token.admin == true || 
-        (request.auth.token.role != null && request.auth.token.role.lower() == 'admin') ||
+        ((request.auth.token.admin == true ||
+          (request.auth.token.role != null && request.auth.token.role.lower() == 'admin')) &&
+         request.auth.token.isActive != false) ||
         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
          getUserDoc().get('role', 'student').lower() in ['admin', 'administrador'] &&
          getUserDoc().get('isActive', true) == true)
@@ -43,10 +44,7 @@ service cloud.firestore {
         isAdmin() ||
         // Check standard deterministic ID format
         (exists(/databases/$(database)/documents/enrollments/$(enrollmentId)) &&
-         get(/databases/$(database)/documents/enrollments/$(enrollmentId)).data.status in ['active', 'completed']) ||
-        // Fallback for transition/legacy Check
-        (exists(/databases/$(database)/documents/users/$(uid)) && 
-         courseId in getUserDoc().get('enrolledCourseIds', []))
+         get(/databases/$(database)/documents/enrollments/$(enrollmentId)).data.status in ['active', 'completed'])
       );
     }
 
@@ -57,9 +55,13 @@ service cloud.firestore {
     match /users/{uid} {
       allow read: if isAdmin() || isOwner(uid);
       // Only admins can change roles/isActive. Users can update other fields.
-      allow create: if isAdmin() || isOwner(uid);
+      allow create: if isAdmin() || (isOwner(uid) &&
+                     request.resource.data.uid == request.auth.uid &&
+                     request.resource.data.role == 'student' &&
+                     request.resource.data.isActive == true &&
+                     request.resource.data.email == request.auth.token.email);
       allow update: if isAdmin() || (isOwner(uid) && 
-                      !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isActive', 'uid', 'email']));
+                      !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isActive', 'uid', 'email', 'status', 'disabledAt', 'disabledBy']));
       
       match /notifications/{id} { allow read, write: if isOwner(uid); }
     }
@@ -81,13 +83,15 @@ service cloud.firestore {
       match /modules/{mId} {
         allow read: if isAdmin() || 
                       (hasActiveEnrollment(courseId) && !isCourseBlocked(courseId)) ||
-                      (get(/databases/$(database)/documents/courses/$(courseId)).data.isPublished == true);
+                      ((get(/databases/$(database)/documents/courses/$(courseId)).data.isPublished == true) &&
+                        resource.data.isPublished == true);
         allow write: if isAdmin();
 
         match /lessons/{lId} {
           allow read: if isAdmin() || 
                         (hasActiveEnrollment(courseId) && !isCourseBlocked(courseId)) ||
-                        (get(/databases/$(database)/documents/courses/$(courseId)).data.isPublished == true);
+                        ((get(/databases/$(database)/documents/courses/$(courseId)).data.isPublished == true) &&
+                          resource.data.isPublished == true);
           allow write: if isAdmin();
 
           match /{allLessonsSub=**} {

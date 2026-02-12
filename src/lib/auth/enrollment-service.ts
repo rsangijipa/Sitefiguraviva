@@ -124,7 +124,7 @@ export async function expireSubscriptionEnrollment(
     .doc(courseId);
 
   const updates = {
-    status: "expired",
+    status: "canceled",
     updatedAt: FieldValue.serverTimestamp(),
   };
 

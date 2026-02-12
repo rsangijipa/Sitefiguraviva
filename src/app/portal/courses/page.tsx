@@ -20,7 +20,8 @@ const CourseCard = ({
   enrollment?: any;
   isCatalog?: boolean;
 }) => {
-  const status = enrollment?.status || (isCatalog ? "catalog" : "pending");
+  const status =
+    enrollment?.status || (isCatalog ? "catalog" : "pending_approval");
   const isActive = status === "active" || status === "completed";
   const progress = enrollment?.progressSummary?.percent || 0;
   const lastAccess = enrollment?.lastAccessedAt
@@ -41,10 +42,16 @@ const CourseCard = ({
             Concluído
           </span>
         );
-      case "expired":
+      case "canceled":
         return (
           <span className="px-2 py-0.5 bg-red-100 text-red-700 text-[10px] font-bold uppercase rounded-full">
-            Expirado
+            Cancelado
+          </span>
+        );
+      case "refunded":
+        return (
+          <span className="px-2 py-0.5 bg-stone-200 text-stone-700 text-[10px] font-bold uppercase rounded-full">
+            Reembolsado
           </span>
         );
       case "catalog":
@@ -56,7 +63,7 @@ const CourseCard = ({
       default:
         return (
           <span className="px-2 py-0.5 bg-stone-100 text-stone-500 text-[10px] font-bold uppercase rounded-full">
-            Pendente
+            Aguardando
           </span>
         );
     }
@@ -155,14 +162,14 @@ const CourseCard = ({
 export default async function MyCoursesPage() {
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get("session")?.value;
-  if (!sessionCookie) redirect("/login");
+  if (!sessionCookie) redirect("/auth");
 
   let uid;
   try {
     const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
     uid = decodedClaims.uid;
   } catch (error) {
-    redirect("/login");
+    redirect("/auth");
   }
 
   // 1. Fetch User Enrollments

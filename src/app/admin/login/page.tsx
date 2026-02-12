@@ -10,6 +10,7 @@ import { ArrowLeft } from "lucide-react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase/client";
 import { useAuth } from "@/context/AuthContext";
+import { ensureUserProfileAction } from "@/app/actions/auth";
 
 export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
@@ -56,6 +57,15 @@ export default function AdminLogin() {
       });
 
       if (response.ok) {
+        // Ensure users/{uid} exists + sync role/claims (SSoT)
+        const sync = await ensureUserProfileAction();
+        if (!sync.success) {
+          console.error("Admin profile sync failed:", sync.error);
+        }
+
+        // Force refresh token to pick up updated claims
+        await userCredential.user.getIdToken(true);
+
         addToast("Login realizado com sucesso!", "success");
         // Force router refresh to ensure cookies are seen by Server Components
         router.refresh();

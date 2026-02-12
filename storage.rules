@@ -6,28 +6,28 @@ service firebase.storage {
 
     function isAdmin() {
       return request.auth != null && (
-        request.auth.token.admin == true ||
-        request.auth.token.role in ['admin', 'administrador'] ||
+        ((request.auth.token.admin == true || request.auth.token.role in ['admin', 'administrador']) &&
+         request.auth.token.isActive != false) ||
         (firestore.exists(/databases/(default)/documents/users/$(request.auth.uid)) && 
-         (firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role in ['admin', 'administrador', 'ADMIN']))
+         (firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role in ['admin', 'administrador', 'ADMIN']) &&
+         firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.isActive == true)
       );
     }
 
     function isStaff() {
       return isAdmin() || (request.auth != null && (
-        request.auth.token.role == 'tutor' ||
+        (request.auth.token.role == 'tutor' && request.auth.token.isActive != false) ||
         (firestore.exists(/databases/(default)/documents/users/$(request.auth.uid)) && 
-         firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'tutor')
+         firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'tutor' &&
+         firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.isActive == true)
       ));
     }
 
     function isEnrolledActive(courseId) {
        let enrollmentId = request.auth.uid + '_' + courseId;
        return request.auth != null && 
-              ((firestore.exists(/databases/(default)/documents/enrollments/$(enrollmentId)) &&
-                firestore.get(/databases/(default)/documents/enrollments/$(enrollmentId)).data.status in ['active', 'completed']) ||
-               (firestore.exists(/databases/(default)/documents/users/$(request.auth.uid)) &&
-                courseId in firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.get('enrolledCourseIds', [])));
+               ((firestore.exists(/databases/(default)/documents/enrollments/$(enrollmentId)) &&
+                firestore.get(/databases/(default)/documents/enrollments/$(enrollmentId)).data.status in ['active', 'completed']));
     }
 
     function isBelowMaxSize(sizeMB) {
@@ -68,7 +68,7 @@ service firebase.storage {
     }
 
     match /courses/content/{allPaths=**} {
-      allow read: if true;
+      allow read: if isStaff();
       allow write: if isStaff() && isBelowMaxSize(10);
     }
 
@@ -85,7 +85,7 @@ service firebase.storage {
     }
 
     match /course-assets/{courseId}/{allPaths=**} {
-      allow read: if isAdmin() || firestore.get(/databases/(default)/documents/courses/$(courseId)).data.isPublished == true;
+      allow read: if isAdmin() || isEnrolledActive(courseId);
       allow write: if isAdmin();
     }
 
@@ -96,7 +96,7 @@ service firebase.storage {
 
     // General User Uploads
     match /uploads/{userId}/{allPaths=**} {
-       allow read: if true;
+       allow read: if isAdmin() || (request.auth != null && request.auth.uid == userId);
        allow write: if (isAdmin() || (request.auth != null && request.auth.uid == userId)) && isBelowMaxSize(10);
     }
 

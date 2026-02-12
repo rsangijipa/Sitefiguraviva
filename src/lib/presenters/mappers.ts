@@ -51,7 +51,7 @@ export function toEnrollmentDTO(doc: any): EnrollmentDTO {
 
   return {
     id,
-    status: data.status || "expired", // Safe default
+    status: data.status || "pending_approval",
     enrolledAt: toISO(data.enrolledAt || data.createdAt),
     progressSummary: {
       completedLessonsCount: data.progressSummary?.completedLessonsCount || 0,

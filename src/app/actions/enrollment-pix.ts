@@ -10,7 +10,7 @@ import { telemetry } from "@/lib/telemetry";
 
 /**
  * Aluno solicita acesso via PIX.
- * Cria uma matrícula com status 'pending'.
+ * Cria uma matrícula com status 'pending_approval'.
  */
 export async function createEnrollmentPending(courseId: string) {
   const session = await verifySession();
@@ -30,16 +30,14 @@ export async function createEnrollmentPending(courseId: string) {
           // Já possui acesso ou concluiu, não faz nada
           return;
         }
-        // Se estiver cancelado ou expirado, permitir re-solicitação?
-        // Para PIX, mantemos pending se já estiver pending.
-        if (data.status === "pending") return;
+        if (data.status === "pending_approval") return;
       }
 
       const newEnrollment: Partial<EnrollmentDoc> = {
         uid: uid,
         userId: uid,
         courseId: courseId,
-        status: "pending",
+        status: "pending_approval",
         paymentMethod: "pix",
         createdAt: FieldValue.serverTimestamp() as any,
         updatedAt: FieldValue.serverTimestamp() as any,
@@ -49,7 +47,7 @@ export async function createEnrollmentPending(courseId: string) {
     });
 
     revalidatePath(`/curso/${courseId}`);
-    telemetry.track("enrollment_pix_pending", { uid, courseId });
+    telemetry.track("enrollment_pix_pending_approval", { uid, courseId });
     return { success: true };
   } catch (error: any) {
     telemetry.error(error, {
