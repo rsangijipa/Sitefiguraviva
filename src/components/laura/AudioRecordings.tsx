@@ -2,19 +2,90 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, Pause, Volume2, VolumeX, Clock, FileAudio } from "lucide-react";
+import {
+  Play,
+  Pause,
+  Volume2,
+  VolumeX,
+  Clock,
+  FileAudio,
+  Subtitles,
+} from "lucide-react";
 import { lauraPerlsContent } from "@/content/laura-perls";
 
+interface Subtitle {
+  start: number;
+  end: number;
+  text: string;
+}
+
 interface AudioPlayerProps {
-  src?: string;
+  src: string;
+  vttSrc: string;
   title: string;
   duration: string;
   year: number;
   description: string;
 }
 
+function parseVTT(vttContent: string): Subtitle[] {
+  const subtitles: Subtitle[] = [];
+  const lines = vttContent.split("\n");
+  let currentSubtitle: Partial<Subtitle> = {};
+
+  for (const line of lines) {
+    const timecodeMatch = line.match(
+      /(\d{2}):(\d{2}):(\d{2})[,.](\d{3})\s-->\s(\d{2}):(\d{2}):(\d{2})[,.](\d{3})/,
+    );
+
+    if (timecodeMatch) {
+      if (
+        currentSubtitle.start &&
+        currentSubtitle.end &&
+        currentSubtitle.text
+      ) {
+        subtitles.push(currentSubtitle as Subtitle);
+      }
+
+      const startMs = parseInt(timecodeMatch[4]);
+      const endMs = parseInt(timecodeMatch[8]);
+
+      currentSubtitle = {
+        start:
+          parseInt(timecodeMatch[1]) * 3600 +
+          parseInt(timecodeMatch[2]) * 60 +
+          parseInt(timecodeMatch[3]) +
+          startMs / 1000,
+        end:
+          parseInt(timecodeMatch[5]) * 3600 +
+          parseInt(timecodeMatch[6]) * 60 +
+          parseInt(timecodeMatch[7]) +
+          endMs / 1000,
+        text: "",
+      };
+    } else if (
+      line.trim() &&
+      !line.startsWith("WEBVTT") &&
+      !line.startsWith("Speaker")
+    ) {
+      if (currentSubtitle.text) {
+        currentSubtitle.text += "\n" + line.trim();
+      } else {
+        currentSubtitle.text = line.trim();
+      }
+    }
+  }
+
+  if (currentSubtitle.start && currentSubtitle.end && currentSubtitle.text) {
+    subtitles.push(currentSubtitle as Subtitle);
+  }
+
+  return subtitles;
+}
+
 function AudioPlayer({
   src,
+  vttSrc,
   title,
   duration,
   year,
@@ -24,42 +95,67 @@ function AudioPlayer({
   const [progress, setProgress] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
+  const [showSubtitles, setShowSubtitles] = useState(true);
+  const [subtitles, setSubtitles] = useState<Subtitle[]>([]);
+  const [currentSubtitle, setCurrentSubtitle] = useState<string>("");
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Load subtitles
+  useEffect(() => {
+    const loadSubtitles = async () => {
+      try {
+        const response = await fetch(vttSrc);
+        const vttContent = await response.text();
+        const parsed = parseVTT(vttContent);
+        setSubtitles(parsed);
+      } catch (error) {
+        console.error("Failed to load subtitles:", error);
+      }
+    };
+    loadSubtitles();
+  }, [vttSrc]);
+
+  // Update current subtitle based on time
+  useEffect(() => {
+    const activeSubtitle = subtitles.find(
+      (sub) => currentTime >= sub.start && currentTime <= sub.end,
+    );
+    setCurrentSubtitle(activeSubtitle?.text || "");
+  }, [currentTime, subtitles]);
+
   useEffect(() => {
     if (isPlaying && audioRef.current) {
-      audioRef.current.play().catch(() => {
-        // Audio can't play (no source), simulate progress
-        simulatePlayback();
+      audioRef.current.play().catch((error) => {
+        console.log("Audio play failed:", error);
       });
     } else if (!isPlaying && audioRef.current) {
       audioRef.current.pause();
+    }
+  }, [isPlaying]);
+
+  useEffect(() => {
+    if (isPlaying) {
+      intervalRef.current = setInterval(() => {
+        if (audioRef.current && !audioRef.current.paused) {
+          const current = audioRef.current.currentTime;
+          setCurrentTime(current);
+          const duration = audioRef.current.duration || 1;
+          setProgress((current / duration) * 100);
+        }
+      }, 100);
+    } else {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
     }
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
   }, [isPlaying]);
-
-  const simulatePlayback = () => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
-
-    intervalRef.current = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          setIsPlaying(false);
-          setProgress(0);
-          setCurrentTime(0);
-          if (intervalRef.current) clearInterval(intervalRef.current);
-          return 0;
-        }
-        return prev + 0.5;
-      });
-      setCurrentTime((prev) => prev + 1);
-    }, 100);
-  };
 
   const togglePlay = () => {
     setIsPlaying(!isPlaying);
@@ -72,18 +168,46 @@ function AudioPlayer({
     }
   };
 
+  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const seekTime =
+      (parseFloat(e.target.value) / 100) * (audioRef.current?.duration || 1);
+    if (audioRef.current) {
+      audioRef.current.currentTime = seekTime;
+      setCurrentTime(seekTime);
+      setProgress(parseFloat(e.target.value));
+    }
+  };
+
+  const handleEnded = () => {
+    setIsPlaying(false);
+    setProgress(0);
+    setCurrentTime(0);
+  };
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const totalSeconds = parseDuration(duration);
+  const totalDuration = parseDuration(duration);
 
   return (
     <div className="bg-[#e8e4db] border border-[#b8ad96] rounded-lg shadow-md overflow-hidden group">
-      {/* Hidden Audio Element (for when real audio is provided) */}
-      <audio ref={audioRef} src={src} onEnded={() => setIsPlaying(false)} />
+      {/* Hidden Audio Element */}
+      <audio
+        ref={audioRef}
+        src={src}
+        onEnded={handleEnded}
+        onTimeUpdate={() => {
+          if (audioRef.current) {
+            const current = audioRef.current.currentTime;
+            setCurrentTime(current);
+            const duration = audioRef.current.duration || 1;
+            setProgress((current / duration) * 100);
+          }
+        }}
+      />
 
       {/* Play Button Overlay */}
       <button
@@ -100,7 +224,7 @@ function AudioPlayer({
       </button>
 
       {/* Content */}
-      <div className="pl-24 pr-6 py-6 pr-32">
+      <div className="pl-24 pr-6 py-6">
         <div className="flex items-center gap-3 mb-2">
           <span className="px-3 py-1 bg-[#a88a4d]/20 text-[#6a5a4a] text-[10px] uppercase tracking-widest font-bold rounded-full">
             {year}
@@ -114,38 +238,54 @@ function AudioPlayer({
         </div>
 
         <h3 className="font-serif text-2xl text-[#4a3a2a] mb-1">{title}</h3>
-        <p className="text-[#5a4838] font-serif italic text-sm">
+        <p className="text-[#5a4838] font-serif italic text-sm mb-4">
           {description}
         </p>
       </div>
 
+      {/* Subtitles Display */}
+      <AnimatePresence>
+        {showSubtitles && currentSubtitle && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="px-6 pb-4"
+          >
+            <div className="bg-[#d9d4c9] border border-[#a88a4d]/30 rounded-lg p-4">
+              <p className="font-serif text-[#3a2f25] text-lg leading-relaxed italic text-center">
+                {currentSubtitle}
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Progress Bar */}
-      <div className="h-1 bg-[#b8ad96]">
+      <div className="h-1 bg-[#b8ad96] cursor-pointer">
         <motion.div
-          className="h-full bg-[#a88a4d]"
-          initial={{ width: 0 }}
-          animate={{ width: `${progress}%` }}
-          transition={{ duration: 0.1 }}
+          className="h-full bg-[#a88a4d] cursor-pointer"
+          style={{ width: `${progress}%` }}
+        />
+        <input
+          type="range"
+          min="0"
+          max="100"
+          value={progress}
+          onChange={handleSeek}
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
         />
       </div>
 
       {/* Controls Bar */}
       <div className="px-6 py-3 bg-[#d9d4c9] flex items-center justify-between">
         {/* Waveform Visual */}
-        <div className="hidden md:flex items-center gap-0.5 h-8 flex-1">
+        <div className="hidden md:flex items-center gap-0.5 h-8 flex-1 mr-4">
           {Array.from({ length: 50 }).map((_, i) => (
             <motion.div
               key={i}
               animate={{
-                height: isPlaying
-                  ? [
-                      6 + Math.random() * 20,
-                      8,
-                      4 + Math.random() * 16,
-                      12,
-                      6 + Math.random() * 14,
-                    ]
-                  : 6,
+                height: isPlaying ? 6 + Math.random() * 20 : 6,
               }}
               transition={{
                 duration: 0.8,
@@ -162,6 +302,17 @@ function AudioPlayer({
             />
           ))}
         </div>
+
+        {/* Toggle Subtitles */}
+        <button
+          onClick={() => setShowSubtitles(!showSubtitles)}
+          className={`p-2 transition-colors ${
+            showSubtitles ? "text-[#4a3a2a]" : "text-[#8a7a6a]"
+          }`}
+          title={showSubtitles ? "Ocultar legendas" : "Mostrar legendas"}
+        >
+          <Subtitles size={18} />
+        </button>
 
         {/* Mute Button */}
         <button
@@ -214,27 +365,59 @@ export function AudioRecordings() {
             <span className="italic text-[#5a4838] font-light">Históricas</span>
           </h2>
           <p className="mt-6 text-[#4a3a2a] font-serif italic max-w-xl mx-auto">
-            Gravações históricas de Laura Perls. Clique em cada tarjeta para
-            ouvir.
+            Palestra de Laura Perls sobre Gestalt. Ative as legendas para
+            acompanhar em português.
           </p>
         </div>
 
-        {/* Audio Players */}
+        {/* Main Audio Player with Subtitles */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="mb-8"
+        >
+          <AudioPlayer
+            src="/laura/audio/Fritz Laura Perls Videos Audios and Biography1.mp3"
+            vttSrc="/laura/audio/laura-perls-pt.vtt"
+            title="The Art of Contact - Palestra Completa"
+            duration="28:50"
+            year={1978}
+            description="Palestra histórica de Laura Perls sobre a natureza do contato terapêutico na Gestalt. Legendas em português disponíveis."
+          />
+        </motion.div>
+
+        {/* Other recordings (placeholder) */}
         <div className="space-y-6">
-          {audioRecordings.map((recording, index) => (
+          {audioRecordings.slice(1).map((recording, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
+              transition={{ duration: 0.6, delay: (index + 1) * 0.1 }}
             >
-              <AudioPlayer
-                title={recording.title}
-                duration={recording.duration}
-                year={recording.year}
-                description={recording.description}
-              />
+              <div className="bg-[#e8e4db] border border-[#b8ad96] rounded-lg shadow-md p-6 opacity-75">
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="px-3 py-1 bg-[#a88a4d]/20 text-[#6a5a4a] text-[10px] uppercase tracking-widest font-bold rounded-full">
+                    {recording.year}
+                  </span>
+                  <div className="flex items-center gap-1 text-[#8a7a6a] text-xs">
+                    <Clock size={12} />
+                    <span>{recording.duration}</span>
+                  </div>
+                </div>
+                <h3 className="font-serif text-xl text-[#4a3a2a] mb-1">
+                  {recording.title}
+                </h3>
+                <p className="text-[#5a4838] font-serif italic text-sm">
+                  {recording.description}
+                </p>
+                <p className="text-xs text-[#8a7a6a] mt-3 italic">
+                  Em breve - Legendas em português
+                </p>
+              </div>
             </motion.div>
           ))}
         </div>
@@ -242,9 +425,9 @@ export function AudioRecordings() {
         {/* Note */}
         <div className="mt-12 p-6 bg-[#d9d4c9] border-l-4 border-[#a88a4d] rounded-r-sm">
           <p className="text-[#4a3a2a] font-serif italic text-sm">
-            <strong className="not-italic">Nota:</strong> Estas gravações são
-            simulações baseadas em registros históricos do NYIGT. Para acessar o
-            áudio real, visite o Gestalt Therapy Institute of New York.
+            <strong className="not-italic">Nota:</strong> Esta gravação foi
+            preservada pelo arquivo histórico do NYIGT. As legendas em português
+            foram traduzidas para fins educacionais.
           </p>
         </div>
       </div>
