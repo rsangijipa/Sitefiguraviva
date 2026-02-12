@@ -139,7 +139,7 @@ export default function HeroSection({ initialData }: { initialData?: any }) {
           >
             <div className="relative z-10 aspect-[4/5] rounded-[4rem] overflow-hidden shadow-2xl group border-[12px] border-white/50 backdrop-blur-sm">
               <Image
-                src="/assets/home-hero.jpg" // Specific Hero Image
+                src="/assets/foto-grupo.jpg"
                 alt="Formação em Gestalt-Terapia"
                 fill
                 className="object-cover transform scale-105 transition-transform duration-[2s] group-hover:scale-100"
