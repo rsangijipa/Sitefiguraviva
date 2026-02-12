@@ -34,19 +34,39 @@ export default function MethodologySection() {
       <div className="container mx-auto max-w-7xl grid lg:grid-cols-2 gap-16 items-center">
         {/* Left: Cinematic Image Container with Organic Reveal */}
         <motion.div
-          initial={{ opacity: 0, x: -50 }}
-          whileInView={{ opacity: 1, x: 0 }}
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="relative px-4"
+          transition={{ duration: 1.2, ease: "easeOut" }}
+          className="relative lg:scale-110"
         >
-          <div className="aspect-[4/5] relative rounded-organic-2 overflow-hidden shadow-soft-xl border border-white/50">
-            <div className="absolute inset-0 bg-primary/5 mix-blend-multiply z-10" />
-            <img
-              src="/essencia.jpg"
-              alt="Figura Viva - Nossa Essência"
-              className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-1000"
-            />
+          {/* Magic Reflection Wrapper - Efeito de Reflexo Aquático */}
+          <div className="magic-reflection mb-40 lg:mb-56 group">
+            <motion.div
+              whileHover={{ scale: 1.05, rotateY: 10, rotateX: 3 }}
+              transition={{ type: "spring", stiffness: 150, damping: 25 }}
+              className="aspect-[3/4] md:aspect-[4/5] relative rounded-organic-1 overflow-hidden shadow-soft-2xl border-[12px] border-white/10 backdrop-blur-sm cursor-pointer p-1"
+            >
+              {/* Inner Translucent Guard */}
+              <div className="absolute inset-0 border border-white/30 rounded-organic-1 z-30 pointer-events-none" />
+
+              {/* Magic Shimmer Overlay - Brilho Efervescente */}
+              <div className="absolute inset-0 z-20 pointer-events-none overflow-hidden">
+                <div className="absolute inset-y-0 -left-1/2 w-64 bg-gradient-to-r from-transparent via-white/50 to-transparent skew-x-[-25deg] blur-3xl animate-magic-shimmer" />
+              </div>
+
+              {/* Dynamic Aura - Atmosfera Mágica */}
+              <div className="absolute inset-0 bg-gradient-to-tr from-primary/40 via-transparent to-gold/30 opacity-50 z-10 mix-blend-overlay group-hover:opacity-80 transition-opacity duration-1000" />
+
+              <img
+                src="/essencia.jpg"
+                alt="Instituto Figura Viva - Nossa Essência"
+                className="w-full h-full object-cover transform transition-transform duration-[2000ms] group-hover:scale-110 rounded-organic-1"
+              />
+            </motion.div>
+
+            {/* Subtle light ripple below for extra "magic" feel */}
+            <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 w-[90%] h-8 bg-gold/10 blur-[50px] rounded-full opacity-60 group-hover:opacity-100 transition-opacity duration-1000" />
           </div>
 
           {/* Premium Floating Badge - Light Theme Version */}
@@ -54,7 +74,7 @@ export default function MethodologySection() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="absolute -bottom-8 -right-4 md:-right-8 bg-white p-8 rounded-organic-3 shadow-premium max-w-[220px] border border-stone-50"
+            className="absolute -bottom-8 -right-4 md:-right-8 bg-white p-8 rounded-organic-3 shadow-premium shadow-glow-gold/10 max-w-[220px] border border-stone-50 z-30"
           >
             <p className="font-serif text-3xl text-primary font-bold mb-1">
               15+

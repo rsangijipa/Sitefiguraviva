@@ -129,16 +129,16 @@ export default function HeroSection({ initialData }: { initialData?: any }) {
             transition={{ duration: 1, delay: 0.2 }}
             className="relative hidden lg:block"
           >
-            <div className="relative z-10 aspect-square rounded-[3rem] overflow-hidden shadow-2xl">
+            <div className="relative z-10 aspect-square rounded-[3rem] overflow-hidden group">
               <Image
-                src="/assets/foto-grupo.jpg"
-                alt="Encontro Instituto Figura Viva"
+                src="/assets/logo-figura-viva.jpg"
+                alt="Instituto Figura Viva Logo"
                 fill
-                className="object-cover"
+                className="object-cover transform transition-transform duration-1000 group-hover:scale-105"
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 priority
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent mix-blend-multiply" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-40 group-hover:opacity-20 transition-opacity duration-1000" />
             </div>
 
             {/* Organic Frames */}

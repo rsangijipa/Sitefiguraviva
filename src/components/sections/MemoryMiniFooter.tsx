@@ -7,14 +7,28 @@ import { ArrowRight } from "lucide-react";
 
 export function MemoryMiniFooter() {
   return (
-    <section className="relative py-14 bg-stone-100/80 overflow-hidden border-t border-stone-200">
-      {/* Texture Overlay */}
-      <div
-        className="absolute inset-0 opacity-[0.04] pointer-events-none"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-        }}
-      />
+    <section className="relative py-24 bg-paper overflow-hidden border-t border-stone-200">
+      {/* Historic Aesthetic Background */}
+      <div className="absolute inset-0 z-0">
+        <div
+          className="absolute inset-0 opacity-60 transition-opacity duration-[2000ms]"
+          style={{
+            backgroundImage: `url('/backgroundlaura1.jpeg')`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        />
+        {/* Subtle light gradient for better card separation */}
+        <div className="absolute inset-0 bg-gradient-to-b from-paper/80 via-transparent to-paper/80 z-10" />
+
+        {/* Fine Grain Texture */}
+        <div
+          className="absolute inset-0 opacity-[0.1] pointer-events-none z-20"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+          }}
+        />
+      </div>
 
       <div className="max-w-5xl mx-auto px-4 relative z-10">
         <Link
@@ -26,15 +40,15 @@ export function MemoryMiniFooter() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="relative overflow-hidden rounded-2xl border border-stone-200 bg-stone-50/70 backdrop-blur-md p-6 md:p-8 hover:bg-stone-50 hover:border-gold/30 hover:shadow-xl transition-all duration-500 group-focus:ring-2 group-focus:ring-gold/50 group-focus:ring-offset-2"
+            className="relative overflow-hidden rounded-[2.5rem] border border-stone-200 bg-white/70 backdrop-blur-md p-8 md:p-10 hover:bg-white/90 hover:border-gold/30 hover:shadow-2xl transition-all duration-700 group-focus:ring-2 group-focus:ring-gold/50 group-focus:ring-offset-2"
           >
             {/* Gloss Shine Effect */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-stone-200/0 via-white/30 to-stone-200/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-tr from-stone-100/0 via-white/50 to-stone-100/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
 
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
               {/* Left: Icon (Now Image) & Title */}
               <div className="flex items-center gap-6 text-center md:text-left">
-                <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-stone-200 group-hover:border-gold/40 group-hover:scale-105 transition-all duration-700 shadow-sm flex-shrink-0">
+                <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-stone-100 group-hover:border-gold/40 group-hover:scale-105 transition-all duration-700 shadow-sm flex-shrink-0">
                   <Image
                     src="/laura/laura1.jpg"
                     alt="Laura Perls Icon"
@@ -44,7 +58,7 @@ export function MemoryMiniFooter() {
                   />
                 </div>
                 <div>
-                  <span className="block text-[10px] tracking-[0.3em] uppercase text-stone-500 font-bold mb-1.5">
+                  <span className="block text-[10px] tracking-[0.3em] uppercase text-gold font-bold mb-1.5">
                     Memória Viva
                   </span>
                   <h3 className="font-serif text-3xl text-stone-800 group-hover:text-primary transition-colors duration-300 tracking-tight">
