@@ -8,7 +8,7 @@ export function InteractiveMap() {
   const { journeyMap } = lauraPerlsContent;
 
   return (
-    <section className="py-24 bg-[#5c4a32] relative overflow-hidden">
+    <section className="py-24 bg-[#3a2f25] relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <svg className="w-full h-full" viewBox="0 0 800 400">
@@ -21,7 +21,7 @@ export function InteractiveMap() {
               height="40"
               patternUnits="userSpaceOnUse"
             >
-              <circle cx="2" cy="2" r="1" fill="#f5f2eb" />
+              <circle cx="2" cy="2" r="1" fill="#e8e4db" />
             </pattern>
           </defs>
           <rect fill="url(#mapPattern)" width="100%" height="100%" />
@@ -33,7 +33,7 @@ export function InteractiveMap() {
         <path
           d="M 200,150 Q 300,100 400,120 T 600,100"
           fill="none"
-          stroke="#c9a86c"
+          stroke="#a88a4d"
           strokeWidth="2"
           strokeDasharray="10,10"
           className="animate-pulse"
@@ -44,19 +44,19 @@ export function InteractiveMap() {
         {/* Section Header */}
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-3 mb-6">
-            <div className="h-px w-12 bg-[#c9a86c]/60" />
-            <span className="w-12 h-12 rounded-full bg-[#f5f2eb] flex items-center justify-center">
-              <Globe size={24} className="text-[#5c4a32]" />
+            <div className="h-px w-12 bg-[#a88a4d]/60" />
+            <span className="w-12 h-12 rounded-full bg-[#e8e4db] flex items-center justify-center">
+              <Globe size={24} className="text-[#3a2f25]" />
             </span>
-            <div className="h-px w-12 bg-[#c9a86c]/60" />
+            <div className="h-px w-12 bg-[#a88a4d]/60" />
           </div>
 
-          <span className="text-[11px] tracking-[0.3em] uppercase font-bold text-[#d4c4a8] block mb-4">
+          <span className="text-[11px] tracking-[0.3em] uppercase font-bold text-[#b8ad96] block mb-4">
             Jornada Global
           </span>
-          <h2 className="font-serif text-4xl md:text-5xl text-[#f5f2eb] leading-tight">
+          <h2 className="font-serif text-4xl md:text-5xl text-[#e8e4db] leading-tight">
             Onde Laura{" "}
-            <span className="italic text-[#c9a86c] font-light">
+            <span className="italic text-[#a88a4d] font-light">
               Viviu e Trabalhou
             </span>
           </h2>
@@ -75,15 +75,15 @@ export function InteractiveMap() {
             >
               {/* Connection Line (except last) */}
               {index < journeyMap.length - 1 && (
-                <div className="hidden md:block absolute top-12 -right-4 w-8 h-px bg-[#c9a86c]/50 z-10" />
+                <div className="hidden md:block absolute top-12 -right-4 w-8 h-px bg-[#a88a4d]/50 z-10" />
               )}
 
               {/* Country Card */}
-              <div className="bg-[#f5f2eb] rounded-lg shadow-xl overflow-hidden h-full">
+              <div className="bg-[#e8e4db] rounded-lg shadow-xl overflow-hidden h-full">
                 {/* Header */}
-                <div className="bg-[#4a3f2a] px-6 py-4 flex items-center gap-3">
+                <div className="bg-[#2a231a] px-6 py-4 flex items-center gap-3">
                   <span className="text-3xl">{country.flag}</span>
-                  <h3 className="font-serif text-2xl text-[#f5f2eb]">
+                  <h3 className="font-serif text-2xl text-[#e8e4db]">
                     {country.country}
                   </h3>
                 </div>
@@ -93,24 +93,24 @@ export function InteractiveMap() {
                   {country.cities.map((city, cityIndex) => (
                     <div
                       key={cityIndex}
-                      className="relative pl-6 border-l-2 border-[#d4c4a8]"
+                      className="relative pl-6 border-l-2 border-[#b8ad96]"
                     >
                       {/* Timeline Dot */}
-                      <div className="absolute -left-[5px] top-2 w-2.5 h-2.5 rounded-full bg-[#c9a86c]" />
+                      <div className="absolute -left-[5px] top-2 w-2.5 h-2.5 rounded-full bg-[#a88a4d]" />
 
                       <div className="flex items-center gap-2 mb-1">
-                        <MapPin size={12} className="text-[#8b6f4e]" />
-                        <span className="font-bold text-[#5c4a32]">
+                        <MapPin size={12} className="text-[#6a5a4a]" />
+                        <span className="font-bold text-[#4a3a2a]">
                           {city.name}
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-2 text-xs text-[#a89080] mb-2">
+                      <div className="flex items-center gap-2 text-xs text-[#8a7a6a] mb-2">
                         <Calendar size={10} />
                         <span>{city.year}</span>
                       </div>
 
-                      <p className="text-sm text-[#6b5a45] font-serif italic">
+                      <p className="text-sm text-[#5a4838] font-serif italic">
                         {city.description}
                       </p>
                     </div>
@@ -118,18 +118,18 @@ export function InteractiveMap() {
                 </div>
 
                 {/* Decorative Footer */}
-                <div className="px-6 py-3 bg-[#f0ebe0] flex justify-center">
+                <div className="px-6 py-3 bg-[#d9d4c9] flex justify-center">
                   <div className="flex gap-1">
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#c9a86c]/40" />
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#c9a86c]/60" />
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#c9a86c]/40" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#a88a4d]/40" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#a88a4d]/60" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#a88a4d]/40" />
                   </div>
                 </div>
               </div>
 
               {/* Animated Arrow */}
               {index < journeyMap.length - 1 && (
-                <div className="hidden md:flex absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-4 bg-[#c9a86c] rotate-45 z-20 animate-pulse" />
+                <div className="hidden md:flex absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-4 bg-[#a88a4d] rotate-45 z-20 animate-pulse" />
               )}
             </motion.div>
           ))}
@@ -151,13 +151,13 @@ export function InteractiveMap() {
           ].map((stat, index) => (
             <div
               key={index}
-              className="text-center p-4 bg-[#f5f2eb]/10 rounded-lg border border-[#c9a86c]/30"
+              className="text-center p-4 bg-[#e8e4db]/10 rounded-lg border border-[#a88a4d]/30"
             >
               <span className="text-3xl block mb-2">{stat.icon}</span>
-              <span className="font-serif text-3xl text-[#f5f2eb] font-bold">
+              <span className="font-serif text-3xl text-[#e8e4db] font-bold">
                 {stat.value}
               </span>
-              <span className="block text-xs text-[#d4c4a8] uppercase tracking-widest mt-1">
+              <span className="block text-xs text-[#b8ad96] uppercase tracking-widest mt-1">
                 {stat.label}
               </span>
             </div>
