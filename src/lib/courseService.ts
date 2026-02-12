@@ -42,19 +42,6 @@ export async function getCourseData(
     .doc(enrollmentId)
     .get();
 
-  // Paywall gate: If access denied, return limited data via DTO
-  if (isAccessDenied && !isAdmin) {
-    return toCourseFullDTO(
-      courseSnap,
-      [], // No modules
-      new Map(), // No lessons
-      new Map(), // No progress
-      enrollmentDoc.exists ? enrollmentDoc : null,
-      isAdmin,
-      isAccessDenied,
-    );
-  }
-
   // 2. Fetch Progress (ATOMIC)
   const progressSnap = await db
     .collection("progress")

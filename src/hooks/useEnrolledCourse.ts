@@ -109,29 +109,9 @@ export function useEnrolledCourse(
 
       const isAuthorized = canConsumeCourse(course, enrollmentData, isAdmin);
 
-      console.log("[useEnrolledCourse] Access Evaluation:", {
-        courseId,
-        userId,
-        isAdmin,
-        status,
-        isAuthorized,
-        enrollmentId: enrollmentData?.id || "not_found",
-      });
-
-      if (!isAuthorized) {
-        return {
-          course,
-          enrollment: enrollmentData,
-          status,
-          isAccessDenied: true,
-          modules: [],
-          materials: [],
-        };
-      }
-
       // 3. User Progress (Numerador) - FIX: PRG-01 Sincronismo
       const progressMap: Record<string, any> = {};
-      if (userId && !isAdmin) {
+      if (userId && !isAdmin && isAuthorized) {
         const progressQ = query(
           collection(db, "progress"),
           where("userId", "==", userId),
@@ -145,6 +125,7 @@ export function useEnrolledCourse(
       }
 
       // 4. Member/Admin Data: Modules & Lessons
+      // We always fetch these if the course is published, to show the curriculum.
       try {
         const modulesQ = query(
           collection(db, "courses", courseId, "modules"),
@@ -190,6 +171,7 @@ export function useEnrolledCourse(
           course,
           enrollment: enrollmentData,
           status,
+          isAccessDenied: !isAuthorized,
           modules,
           materials: materialsSnap.docs.map((d) => ({ id: d.id, ...d.data() })),
         };
