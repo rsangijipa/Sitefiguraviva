@@ -231,7 +231,10 @@ export function DataTable<T extends { id: string | number }>({
                       </td>
                     ))}
                     {actions && (
-                      <td key="actions" className="px-6 py-4 text-right">
+                      <td
+                        key={`actions-${item.id}`}
+                        className="px-6 py-4 text-right"
+                      >
                         <div onClick={(e) => e.stopPropagation()}>
                           {actions(item)}
                         </div>

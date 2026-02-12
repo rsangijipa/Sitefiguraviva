@@ -55,7 +55,12 @@ export const DashboardShell = ({ children }: { children: React.ReactNode }) => {
             {/* Search Bar */}
             <div className="hidden md:flex items-center gap-2 px-3 py-2 bg-stone-50 rounded-lg border border-transparent focus-within:border-primary/20 focus-within:bg-white w-64 transition-all">
               <Search size={16} className="text-stone-400" />
+              <label htmlFor="global-search" className="sr-only">
+                Buscar no portal
+              </label>
               <input
+                id="global-search"
+                name="search"
                 type="text"
                 placeholder="Buscar..."
                 className="bg-transparent border-none outline-none text-sm placeholder:text-stone-400 w-full text-stone-700"

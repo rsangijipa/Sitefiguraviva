@@ -43,7 +43,14 @@ export function isEnrollmentAllowed(
 export function canConsumeCourse(
   course: CourseDoc,
   enrollment: EnrollmentDoc | null | undefined,
+  isAdmin: boolean = false,
 ): boolean {
+  // 0. Admin override - Admins can see everything except archived
+  if (isAdmin) {
+    if (course.status === "archived") return false;
+    return true;
+  }
+
   // 1. Hard deny overrides everything: archiving or draft
   if (isCourseGloballyBlocked(course)) return false;
 

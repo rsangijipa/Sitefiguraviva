@@ -214,9 +214,14 @@ export function ProfileForm() {
                 </div>
               )}
             </div>
-            <label className="absolute inset-0 flex items-center justify-center bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-full">
+            <label
+              htmlFor="avatar-upload"
+              className="absolute inset-0 flex items-center justify-center bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-full"
+            >
               <Camera size={24} />
               <input
+                id="avatar-upload"
+                name="avatar"
                 type="file"
                 className="hidden"
                 accept="image/*"
@@ -308,43 +313,61 @@ export function ProfileForm() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">
+              <label
+                htmlFor="currentPassword"
+                className="block text-sm font-medium text-stone-700 mb-1"
+              >
                 Senha Atual
               </label>
               <input
+                id="currentPassword"
+                name="currentPassword"
                 type="password"
                 className="w-full p-2 border border-stone-200 rounded-lg"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 required
+                autoComplete="current-password"
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">
+                <label
+                  htmlFor="newPassword"
+                  className="block text-sm font-medium text-stone-700 mb-1"
+                >
                   Nova Senha
                 </label>
                 <input
+                  id="newPassword"
+                  name="newPassword"
                   type="password"
                   className="w-full p-2 border border-stone-200 rounded-lg"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   required
                   minLength={6}
+                  autoComplete="new-password"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">
+                <label
+                  htmlFor="confirmPassword"
+                  className="block text-sm font-medium text-stone-700 mb-1"
+                >
                   Confirmar Nova Senha
                 </label>
                 <input
+                  id="confirmPassword"
+                  name="confirmPassword"
                   type="password"
                   className="w-full p-2 border border-stone-200 rounded-lg"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
                   minLength={6}
+                  autoComplete="new-password"
                 />
               </div>
             </div>

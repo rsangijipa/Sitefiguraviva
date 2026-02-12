@@ -13,9 +13,9 @@ service cloud.firestore {
     function isAdmin() {
       return isAuthenticated() && (
         request.auth.token.admin == true || 
-        request.auth.token.role == 'admin' ||
+        (request.auth.token.hasAny(['role']) && request.auth.token.role.lower() == 'admin') ||
         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
-         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', 'student').lower() in ['admin', 'administrador'])
       );
     }
 
@@ -23,16 +23,30 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == uid;
     }
 
+    // Check if course is globally blocked (archived or unpublished)
+    function isCourseBlocked(courseId) {
+      return exists(/databases/$(database)/documents/courses/$(courseId)) &&
+             get(/databases/$(database)/documents/courses/$(courseId)).data.status == 'archived';
+    }
+
     // Advanced enrollment check: allows access if ANY enrollment doc exists for this pair
     // OR if the course ID is listed in the user's profile (robust Fallback)
+    // SECURITY FIX: Now validates status is 'active' or 'completed'
     function hasActiveEnrollment(courseId) {
       let uid = request.auth.uid;
+      let enrollmentId = uid + '_' + courseId;
+      let altEnrollmentId = courseId + '_' + uid;
+      
       return isAuthenticated() && (
         isAdmin() ||
-        exists(/databases/$(database)/documents/enrollments/$(uid + '_' + courseId)) ||
-        exists(/databases/$(database)/documents/enrollments/$(courseId + '_' + uid)) ||
+        // Check standard ID format with active status
+        (exists(/databases/$(database)/documents/enrollments/$(enrollmentId)) &&
+         get(/databases/$(database)/documents/enrollments/$(enrollmentId)).data.status in ['active', 'completed']) ||
+        // Check alternate ID format with active status  
+        (exists(/databases/$(database)/documents/enrollments/$(altEnrollmentId)) &&
+         get(/databases/$(database)/documents/enrollments/$(altEnrollmentId)).data.status in ['active', 'completed']) ||
+        // Legacy fallback: check user profile
         (exists(/databases/$(database)/documents/users/$(uid)) && 
-         get(/databases/$(database)/documents/users/$(uid)).data.keys().hasAny(['enrolledCourseIds']) &&
          courseId in get(/databases/$(database)/documents/users/$(uid)).data.enrolledCourseIds)
       );
     }
@@ -64,25 +78,37 @@ service cloud.firestore {
       allow write: if isAdmin();
 
       match /modules/{mId} {
-        // Loosened: Allow authenticated users to read modules if course is published
-        allow read: if isAdmin() || hasActiveEnrollment(courseId) ||
-                      (isAuthenticated() && get(/databases/$(database)/documents/courses/$(courseId)).data.isPublished == true);
+        // Allow read if: admin, has active enrollment AND course not blocked, or course is published
+        allow read: if isAdmin() || 
+                      (hasActiveEnrollment(courseId) && !isCourseBlocked(courseId)) ||
+                      (isAuthenticated() && 
+                       get(/databases/$(database)/documents/courses/$(courseId)).data.isPublished == true &&
+                       get(/databases/$(database)/documents/courses/$(courseId)).data.status != 'archived');
         allow write: if isAdmin();
 
         match /lessons/{lId} {
-          // Loosened: Allow authenticated users to read lesson metadata if course is published
-          allow read: if isAdmin() || hasActiveEnrollment(courseId) ||
-                        (isAuthenticated() && get(/databases/$(database)/documents/courses/$(courseId)).data.isPublished == true);
+          // Same logic for lessons
+          allow read: if isAdmin() || 
+                        (hasActiveEnrollment(courseId) && !isCourseBlocked(courseId)) ||
+                        (isAuthenticated() && 
+                         get(/databases/$(database)/documents/courses/$(courseId)).data.isPublished == true &&
+                         get(/databases/$(database)/documents/courses/$(courseId)).data.status != 'archived');
           allow write: if isAdmin();
 
-          // CRITICAL: Subcollections (Blocks, Tests, etc) - restricted to enrolled students
+          // CRITICAL: Subcollections (Blocks, Tests, etc) - restricted to enrolled students with active status
+          // Also checks course is not archived
           match /{allLessonsSub=**} {
-            allow read: if isAdmin() || hasActiveEnrollment(courseId);
+            allow read: if isAdmin() || 
+                          (hasActiveEnrollment(courseId) && !isCourseBlocked(courseId));
             allow write: if isAdmin();
           }
         }
       }
-      match /materials/{id} { allow read: if isAdmin() || hasActiveEnrollment(courseId); allow write: if isAdmin(); }
+      match /materials/{id} { 
+        allow read: if isAdmin() || 
+                      (hasActiveEnrollment(courseId) && !isCourseBlocked(courseId)); 
+        allow write: if isAdmin(); 
+      }
       match /announcements/{id} { allow read: if isAdmin() || hasActiveEnrollment(courseId); allow write: if isAdmin(); }
     }
 

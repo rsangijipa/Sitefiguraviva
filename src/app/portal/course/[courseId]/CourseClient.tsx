@@ -38,7 +38,7 @@ function CourseContent({ initialData }: { initialData?: any }) {
   const { courseId: routeId } = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, loading: authLoading } = useAuth();
 
   // ID Processing: standardizing param name from page
   const courseId = typeof routeId === "string" ? routeId : "";
@@ -147,7 +147,7 @@ function CourseContent({ initialData }: { initialData?: any }) {
 
   // --- RENDER ---
 
-  if (isLoading) {
+  if (isLoading || authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#FDFCF9]">
         <Loader2 className="w-8 h-8 animate-spin text-primary/30" />

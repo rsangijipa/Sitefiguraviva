@@ -76,7 +76,12 @@ export default function CommunityPage() {
             className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"
             size={20}
           />
+          <label htmlFor="search-discussions" className="sr-only">
+            Pesquisar discussões
+          </label>
           <input
+            id="search-discussions"
+            name="search-query"
             type="text"
             placeholder="Pesquisar discussões..."
             className="w-full pl-10 pr-4 py-3 bg-white border border-stone-200 rounded-xl focus:ring-2 focus:ring-gold/20 outline-none"

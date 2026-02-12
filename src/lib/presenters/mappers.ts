@@ -109,6 +109,7 @@ export function toCourseFullDTO(
   lessonsMap: Map<string, any[]>,
   progressMap: Map<string, any>,
   enrollmentRaw?: any,
+  isAdmin: boolean = false,
 ): CourseFullDTO {
   const course = toCourseDTO(courseRaw);
 
@@ -162,6 +163,7 @@ export function toCourseFullDTO(
         ? enrollmentRaw.data()
         : enrollmentRaw
       : null,
+    isAdmin,
   );
 
   return deepSafeSerialize({
