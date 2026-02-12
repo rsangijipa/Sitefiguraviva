@@ -64,24 +64,7 @@ export default function HeroSection({ initialData }: { initialData?: any }) {
               className="text-6xl md:text-8xl lg:text-9xl font-serif text-primary leading-[0.95] tracking-tight mb-10"
             >
               A Arte da <br />
-              <span className="relative inline-block">
-                <span className="italic text-gold font-light">Presença</span>
-                <motion.svg
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  animate={{ pathLength: 1, opacity: 1 }}
-                  transition={{ duration: 1.5, delay: 0.8 }}
-                  className="absolute -bottom-2 left-0 w-full h-4 text-gold/30"
-                  viewBox="0 0 100 10"
-                  preserveAspectRatio="none"
-                >
-                  <path
-                    d="M0 5 C 20 0, 80 0, 100 5 C 80 10, 20 10, 0 5"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                  />
-                </motion.svg>
-              </span>
+              <span className="italic text-gold font-light">Presença</span>
             </motion.h1>
 
             <motion.p
@@ -139,7 +122,7 @@ export default function HeroSection({ initialData }: { initialData?: any }) {
           >
             <div className="relative z-10 aspect-[4/5] rounded-[4rem] overflow-hidden shadow-2xl group border-[12px] border-white/50 backdrop-blur-sm">
               <Image
-                src="/assets/foto-grupo.jpg"
+                src="/assets/logo-figura-viva.jpg"
                 alt="Formação em Gestalt-Terapia"
                 fill
                 className="object-cover transform scale-105 transition-transform duration-[2s] group-hover:scale-100"
