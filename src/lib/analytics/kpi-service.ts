@@ -3,7 +3,7 @@ import { adminDb } from "@/lib/firebase/admin";
 export interface DashboardKPIs {
   activeEnrollments: number;
   completionRate: number;
-  totalRevenue: number; // Placeholder/Estimated
+  billingKpiStatus: "todo_stripe_integration" | "unavailable";
   systemHealth: {
     lastReconciled: Date | null;
     status: "healthy" | "drift_detected" | "unknown";
@@ -25,7 +25,7 @@ export const KpiService = {
       // 2. Completion Rate (Sampled for performance or aggregate)
       const sampleSnap = await adminDb
         .collection("enrollments")
-        .where("status", "==", "active")
+        .where("status", "in", ["active", "completed"])
         .limit(100) // Sample size
         .get();
 
@@ -44,13 +44,10 @@ export const KpiService = {
         .get();
       const healthData = healthDoc.data();
 
-      // 4. Revenue (Placeholder logic - replace with Stripe API or Orders collection later)
-      const totalRevenue = activeEnrollments * 97;
-
       return {
         activeEnrollments,
         completionRate,
-        totalRevenue,
+        billingKpiStatus: "todo_stripe_integration",
         systemHealth: {
           lastReconciled: healthData?.lastRun?.toDate() || null,
           status: healthData?.status || "unknown",
@@ -61,7 +58,7 @@ export const KpiService = {
       return {
         activeEnrollments: 0,
         completionRate: 0,
-        totalRevenue: 0,
+        billingKpiStatus: "unavailable",
         systemHealth: { lastReconciled: null, status: "unknown" },
       };
     }

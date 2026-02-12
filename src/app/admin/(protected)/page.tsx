@@ -30,14 +30,35 @@ export default function AdminDashboard() {
   const { data: gallery = [] } = useGallery();
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [serverStats, setServerStats] = useState<any>(null);
+  const [statsError, setStatsError] = useState<string | null>(null);
 
   useEffect(() => {
-    getAuditLogs(10).then((res) => {
-      if (res.success) setAuditLogs(res.logs);
-    });
-    getDetailedDashboardStats().then((res) => {
-      if (res.success) setServerStats(res.stats);
-    });
+    const load = async () => {
+      setStatsError(null);
+
+      const [auditRes, statsRes] = await Promise.all([
+        getAuditLogs(10),
+        getDetailedDashboardStats(),
+      ]);
+
+      if (auditRes.success) {
+        setAuditLogs(auditRes.logs);
+      } else {
+        setStatsError("Falha ao carregar atividade recente.");
+      }
+
+      if (statsRes.success) {
+        setServerStats(statsRes.stats);
+      } else {
+        setStatsError(
+          "Falha ao carregar métricas do painel. Tente atualizar em alguns segundos.",
+        );
+      }
+    };
+
+    load();
+    const interval = setInterval(load, 45_000);
+    return () => clearInterval(interval);
   }, []);
 
   const libraryDocs = useMemo(
@@ -48,25 +69,25 @@ export default function AdminDashboard() {
   const stats = [
     {
       label: "Alunos Totais",
-      value: serverStats?.totalUsers || "...",
+      value: serverStats?.totalUsers ?? (statsError ? "—" : "..."),
       icon: Users,
       change: "Base de Dados",
     },
     {
-      label: "Matrículas Ativas",
-      value: serverStats?.activeEnrollments || "...",
+      label: "Acesso Liberado",
+      value: serverStats?.activeEnrollments ?? (statsError ? "—" : "..."),
       icon: Zap,
-      change: "Vigentes",
+      change: "Active + Completed",
     },
     {
       label: "Cursos",
-      value: serverStats?.totalCourses || "...",
+      value: serverStats?.totalCourses ?? (statsError ? "—" : "..."),
       icon: BookOpen,
       change: "Catálogo",
     },
     {
       label: "Documentos",
-      value: serverStats?.libraryDocs || "...",
+      value: serverStats?.libraryDocs ?? (statsError ? "—" : "..."),
       icon: FileText,
       change: "Biblioteca",
     },
@@ -164,6 +185,12 @@ export default function AdminDashboard() {
         </div>
         <div className="absolute top-0 right-0 w-64 h-64 bg-gold/10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2" />
       </header>
+
+      {statsError && (
+        <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          {statsError}
+        </div>
+      )}
 
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
         {stats.map((stat, idx) => (

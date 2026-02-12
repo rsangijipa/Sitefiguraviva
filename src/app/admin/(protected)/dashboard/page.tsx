@@ -3,9 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import {
   Activity,
   Users,
-  DollarSign,
   AlertTriangle,
   CheckCircle,
+  Info,
 } from "lucide-react";
 import { EngagementChart } from "@/components/admin/analytics/EngagementChart";
 
@@ -24,16 +24,18 @@ export default async function AdminDashboardPage() {
 
       {/* KPI Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Active Enrollments */}
+        {/* Access Enabled */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Alunos Ativos</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Acesso Liberado
+            </CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{kpis.activeEnrollments}</div>
             <p className="text-xs text-muted-foreground">
-              Matrículas ativas no momento
+              Matrículas com status active/completed
             </p>
           </CardContent>
         </Card>
@@ -54,20 +56,18 @@ export default async function AdminDashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Revenue (Est) */}
+        {/* Billing KPI (not yet integrated) */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Receita Estimada
+              Receita Stripe
             </CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <Info className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              R$ {kpis.totalRevenue.toLocaleString("pt-BR")}
-            </div>
+            <div className="text-base font-semibold text-stone-700">TODO</div>
             <p className="text-xs text-muted-foreground">
-              Baseado em ticket médio
+              Integração com Stripe para KPI de receita real.
             </p>
           </CardContent>
         </Card>
