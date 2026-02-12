@@ -9,6 +9,7 @@ import Navbar from "@/components/Navbar";
 import { BackToTop } from "@/components/laura/BackToTop";
 import { WhySheMatters } from "@/components/laura/WhySheMatters";
 import { AudioRecordings } from "@/components/laura/AudioRecordings";
+import { LauraVideo } from "@/components/laura/LauraVideo";
 import { InteractiveMap } from "@/components/laura/InteractiveMap";
 import { ConceptsDeepDive } from "@/components/laura/ConceptsDeepDive";
 import { LegacyTree } from "@/components/laura/LegacyTree";
@@ -58,6 +59,8 @@ export default function LauraPerlsPage() {
         <WhySheMatters />
 
         <InteractiveMap />
+
+        <LauraVideo />
 
         <AudioRecordings />
 
