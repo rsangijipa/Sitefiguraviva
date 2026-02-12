@@ -7,6 +7,7 @@ import { Timestamp } from "firebase-admin/firestore";
 import { revalidatePath } from "next/cache";
 
 import { auditService } from "@/lib/audit";
+import { deepSafeSerialize } from "@/lib/utils";
 
 // Removed local logAudit helper in favor of centralized auditService
 
@@ -181,7 +182,7 @@ export async function listUsersForAdmin(
 
     return {
       success: true,
-      users: merged,
+      users: deepSafeSerialize(merged),
       nextPageToken: authPage.pageToken || null,
     };
   } catch (error) {

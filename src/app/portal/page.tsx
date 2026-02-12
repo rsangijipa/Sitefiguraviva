@@ -24,6 +24,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import Button from "@/components/ui/Button";
 import { db } from "@/lib/firebase/client";
 import { doc, getDoc } from "firebase/firestore";
+import { getStudentWeeklyActivity } from "@/app/actions/portal-metrics";
 
 const StatCard = ({ icon: Icon, label, value, trend, href }: any) => (
   <Link
@@ -94,8 +95,16 @@ export default function PortalDashboard() {
   const [enrollments, setEnrollments] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [certificates, setCertificates] = useState<any[]>([]);
+  const [weeklyActivity, setWeeklyActivity] = useState<
+    { day: string; value: number }[]
+  >([]);
   const [lastCourse, setLastCourse] = useState<any>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [metricsStatus, setMetricsStatus] = useState({
+    enrollments: false,
+    certificates: false,
+    events: false,
+  });
   const [profileCompletion, setProfileCompletion] = useState<number | null>(
     null,
   );
@@ -112,6 +121,11 @@ export default function PortalDashboard() {
 
       setLoading(true);
       setLoadError(null);
+      setMetricsStatus({
+        enrollments: false,
+        certificates: false,
+        events: false,
+      });
       setEnrollments([]);
       setEvents([]);
       setCertificates([]);
@@ -125,6 +139,16 @@ export default function PortalDashboard() {
             eventService.getUpcomingEvents(3),
             certificateService.getUserCertificates(user.uid),
           ]);
+
+        const weeklyRes = await getStudentWeeklyActivity();
+        if (weeklyRes.success) {
+          setWeeklyActivity(weeklyRes.points || []);
+        } else {
+          setLoadError(
+            weeklyRes.error ||
+              "Não foi possível carregar sua atividade semanal no momento.",
+          );
+        }
 
         try {
           const userSnap = await getDoc(doc(db, "users", user.uid));
@@ -144,9 +168,19 @@ export default function PortalDashboard() {
 
         if (upcomingEvents.status === "fulfilled") {
           setEvents(upcomingEvents.value);
+          setMetricsStatus((prev) => ({ ...prev, events: true }));
+        } else {
+          setLoadError(
+            "Não foi possível carregar os próximos eventos neste momento.",
+          );
         }
         if (myCertificates.status === "fulfilled") {
           setCertificates(myCertificates.value);
+          setMetricsStatus((prev) => ({ ...prev, certificates: true }));
+        } else {
+          setLoadError(
+            "Não foi possível carregar seus certificados neste momento.",
+          );
         }
 
         if (myEnrollments.status !== "fulfilled") {
@@ -175,6 +209,7 @@ export default function PortalDashboard() {
             });
 
             setEnrollments(enrichedEnrollments);
+            setMetricsStatus((prev) => ({ ...prev, enrollments: true }));
 
             // 3. Determine Last Accessed (Hero Card)
             const sorted = [...enrichedEnrollments].sort((a, b) => {
@@ -201,10 +236,13 @@ export default function PortalDashboard() {
             });
 
             setEnrollments(enrollmentData);
+            setMetricsStatus((prev) => ({ ...prev, enrollments: true }));
             setLoadError(
               "Carregamos suas matrículas, mas parte dos detalhes do curso pode estar indisponível no momento.",
             );
           }
+        } else {
+          setMetricsStatus((prev) => ({ ...prev, enrollments: true }));
         }
       } catch (error) {
         logger.error("Dashboard Load Error", error, { uid: user.uid });
@@ -216,9 +254,21 @@ export default function PortalDashboard() {
       }
     }
     loadDashboard();
+
+    const interval = setInterval(loadDashboard, 90_000);
+    return () => clearInterval(interval);
   }, [user?.uid, reloadNonce]);
 
   if (loading) return <Loading />;
+
+  const activityPoints =
+    weeklyActivity.length > 0
+      ? weeklyActivity
+      : ["seg", "ter", "qua", "qui", "sex", "sab", "dom"].map((d) => ({
+          day: d,
+          value: 0,
+        }));
+  const maxActivityValue = Math.max(...activityPoints.map((p) => p.value), 1);
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -354,14 +404,26 @@ export default function PortalDashboard() {
           <StatCard
             icon={Target}
             label="Cursos Ativos"
-            value={enrollments.length}
+            value={
+              metricsStatus.enrollments
+                ? enrollments.length
+                : loadError
+                  ? "—"
+                  : "..."
+            }
             trend="Mantenha o foco!"
             href="/portal/courses"
           />
           <StatCard
             icon={Award}
             label="Certificados"
-            value={certificates.length}
+            value={
+              metricsStatus.certificates
+                ? certificates.length
+                : loadError
+                  ? "—"
+                  : "..."
+            }
             trend={certificates.length > 0 ? "Parabéns!" : "Em breve"}
             href="/portal/certificates"
           />
@@ -375,26 +437,27 @@ export default function PortalDashboard() {
             </div>
             {/* Mock Data for now - waiting for backend aggregation */}
             <div className="flex items-end justify-between h-32 gap-2">
-              {[30, 45, 20, 60, 40, 80, 50].map((val, i) => (
+              {activityPoints.map((point, i) => (
                 <div
                   key={i}
                   className="flex-1 bg-stone-50 rounded-t-md hover:bg-agedGold/20 transition-colors relative group"
-                  style={{ height: `${val}%` }}
+                  style={{
+                    height:
+                      point.value > 0
+                        ? `${Math.max(10, Math.round((point.value / maxActivityValue) * 100))}%`
+                        : "4%",
+                  }}
                 >
                   <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 bg-ink text-agedGold text-[10px] px-2 py-1 rounded pointer-events-none transition-opacity font-bold">
-                    {val * 10} XP
+                    {point.value} XP
                   </div>
                 </div>
               ))}
             </div>
             <div className="flex justify-between mt-2 text-[10px] text-stone-400 font-bold uppercase tracking-tighter">
-              <span>Seg</span>
-              <span>Ter</span>
-              <span>Qua</span>
-              <span>Qui</span>
-              <span>Sex</span>
-              <span>Sáb</span>
-              <span>Dom</span>
+              {activityPoints.map((point, idx) => (
+                <span key={`${point.day}-${idx}`}>{point.day}</span>
+              ))}
             </div>
           </div>
         </div>
@@ -557,9 +620,15 @@ export default function PortalDashboard() {
                   size={24}
                   className="text-stone-300 mb-2 opacity-50"
                 />
-                <p className="text-[10px] text-stone-400 font-bold uppercase tracking-widest">
-                  Nenhum evento agendado
-                </p>
+                {metricsStatus.events ? (
+                  <p className="text-[10px] text-stone-400 font-bold uppercase tracking-widest">
+                    Nenhum evento agendado
+                  </p>
+                ) : (
+                  <p className="text-[10px] text-stone-500 font-bold uppercase tracking-widest">
+                    Dados indisponíveis
+                  </p>
+                )}
               </div>
             )}
           </div>

@@ -51,7 +51,7 @@ export function UserXPBadge() {
       <div className="flex items-center gap-1.5">
         <Sparkles size={14} className="text-primary animate-pulse" />
         <span className="text-xs font-bold text-primary tabular-nums">
-          {profile.xp || 0}{" "}
+          {profile.totalXp || 0}{" "}
           <span className="text-[10px] opacity-60 ml-0.5">XP</span>
         </span>
       </div>

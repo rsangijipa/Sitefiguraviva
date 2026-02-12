@@ -2,6 +2,7 @@
 
 import { adminAuth, adminDb } from "@/lib/firebase/admin";
 import { cookies } from "next/headers";
+import { deepSafeSerialize } from "@/lib/utils";
 
 async function assertAdmin() {
   const sessionCookie = (await cookies()).get("session")?.value;
@@ -32,7 +33,7 @@ export async function getDetailedDashboardStats() {
         .then((s) => s.data().count),
       adminDb
         .collection("enrollments")
-        .where("status", "==", "active")
+        .where("status", "in", ["active", "completed"])
         .count()
         .get()
         .then((s) => s.data().count),
@@ -42,13 +43,13 @@ export async function getDetailedDashboardStats() {
         .get()
         .then((s) => s.data().count),
       adminDb
-        .collection("blog")
+        .collection("posts")
         .where("type", "!=", "library")
         .count()
         .get()
         .then((s) => s.data().count),
       adminDb
-        .collection("blog")
+        .collection("posts")
         .where("type", "==", "library")
         .count()
         .get()
@@ -81,8 +82,8 @@ export async function getDetailedDashboardStats() {
         blogPosts: blogPostsCount,
         libraryDocs: libraryCount,
         totalAuditLogs: pendingAuditCount,
-        recentUsers: recentUsers,
-        pendingEnrollments: pendingEnrollments,
+        recentUsers: deepSafeSerialize(recentUsers),
+        pendingEnrollments: deepSafeSerialize(pendingEnrollments),
       },
     };
   } catch (error: any) {
