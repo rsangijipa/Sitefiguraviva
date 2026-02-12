@@ -110,6 +110,18 @@ service cloud.firestore {
         allow write: if isAdmin(); 
       }
       match /announcements/{id} { allow read: if isAdmin() || hasActiveEnrollment(courseId); allow write: if isAdmin(); }
+      
+      match /communityThreads/{threadId} {
+        allow read: if isAdmin() || hasActiveEnrollment(courseId);
+        allow create: if isAdmin() || (hasActiveEnrollment(courseId) && request.resource.data.authorId == request.auth.uid);
+        allow update, delete: if isAdmin() || (isAuthenticated() && resource.data.authorId == request.auth.uid);
+
+        match /replies/{replyId} {
+          allow read: if isAdmin() || hasActiveEnrollment(courseId);
+          allow create: if isAdmin() || (hasActiveEnrollment(courseId) && request.resource.data.authorId == request.auth.uid);
+          allow update, delete: if isAdmin() || (isAuthenticated() && resource.data.authorId == request.auth.uid);
+        }
+      }
     }
 
 
@@ -137,6 +149,15 @@ service cloud.firestore {
           && request.resource.data.authorId == request.auth.uid;
         allow update, delete: if isAdmin() || (isAuthenticated() && resource.data.authorId == request.auth.uid);
       }
+    }
+
+    match /community_threads/{id} {
+      allow read: if true;
+      allow create: if isAuthenticated() 
+        && request.resource.data.authorId == request.auth.uid;
+      allow update: if isAuthenticated() 
+        && resource.data.authorId == request.auth.uid;
+      allow delete: if isAdmin() || (isAuthenticated() && resource.data.authorId == request.auth.uid);
     }
 
     match /gamification_profiles/{uid} {

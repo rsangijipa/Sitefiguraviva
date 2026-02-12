@@ -160,26 +160,10 @@ function CourseContent({ initialData }: { initialData?: any }) {
     );
   }
 
-  // Access Denied / Paywall (Ideally handled by server, but fail-safe here)
-  if (isAccessDenied) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center text-center p-6">
-        <Lock size={48} className="text-stone-300 mb-4" />
-        <h1 className="text-2xl font-bold text-stone-700">Acesso Restrito</h1>
-        <p className="text-stone-500 mb-6">
-          Você não tem permissão para acessar este conteúdo.
-        </p>
-        <Link href="/portal">
-          <Button>Voltar para o Portal</Button>
-        </Link>
-      </div>
-    );
-  }
-
   if (!course) return null;
 
   // View: PLAYER MODE
-  if (activeLessonId) {
+  if (activeLessonId && !isAccessDenied) {
     const activeLesson =
       modules.flatMap((m) => m.lessons).find((l) => l.id === activeLessonId) ||
       null;
@@ -234,10 +218,13 @@ function CourseContent({ initialData }: { initialData?: any }) {
             <Button
               size="sm"
               onClick={() => handleSelectLesson(lastLessonId)}
-              leftIcon={<PlayCircle size={14} />}
+              leftIcon={
+                isAccessDenied ? <Lock size={14} /> : <PlayCircle size={14} />
+              }
               className="hidden md:flex ml-4"
+              variant={isAccessDenied ? "outline" : "primary"}
             >
-              Continuar
+              {isAccessDenied ? "Ver Detalhes" : "Continuar"}
             </Button>
           )}
         </div>
@@ -340,8 +327,12 @@ function CourseContent({ initialData }: { initialData?: any }) {
                   <Button
                     className="w-full"
                     onClick={() => handleSelectLesson(lastLessonId)}
+                    variant={isAccessDenied ? "outline" : "primary"}
+                    leftIcon={isAccessDenied ? <Lock size={14} /> : undefined}
                   >
-                    Continuar Estudando
+                    {isAccessDenied
+                      ? "Matricule-se para Acessar"
+                      : "Continuar Estudando"}
                   </Button>
                 )}
               </Card>
@@ -394,7 +385,9 @@ function CourseContent({ initialData }: { initialData?: any }) {
                             "bg-primary text-white border-primary",
                         )}
                       >
-                        {lesson.isCompleted ? (
+                        {isAccessDenied ? (
+                          <Lock size={14} />
+                        ) : lesson.isCompleted ? (
                           <ArrowRight size={14} />
                         ) : (
                           <PlayCircle size={14} />
