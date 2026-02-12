@@ -172,6 +172,8 @@ export async function listUsersForAdmin(
         role: p?.role || "student",
         isActive,
         status: isActive ? "active" : "disabled",
+        profileCompletion: Number(p?.profileCompletion || 0),
+        phoneNumber: p?.phoneNumber || null,
         createdAt: p?.createdAt || null,
         lastLogin: p?.lastLogin || u.metadata?.lastSignInTime || null,
       };

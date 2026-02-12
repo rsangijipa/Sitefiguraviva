@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
@@ -25,6 +25,8 @@ import {
   Calendar,
   Trophy,
   ClipboardList,
+  Search,
+  ArrowRight,
 } from "lucide-react";
 import PageShell from "@/components/ui/PageShell";
 
@@ -37,6 +39,8 @@ export default function AdminShell({
   const router = useRouter();
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
 
   // Note: Auth checking is now done Server-Side in layout.tsx.
   // UseClient is only for UI state (Sidebar, Animations).
@@ -74,6 +78,20 @@ export default function AdminShell({
     { icon: Settings, label: "Utilidades (Dev)", path: "/admin/utilities" },
     { icon: Settings, label: "Configurações", path: "/admin/settings" },
   ];
+
+  const suggestions = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return navItems.slice(0, 6);
+    return navItems
+      .filter((item) => item.label.toLowerCase().includes(q))
+      .slice(0, 8);
+  }, [searchQuery]);
+
+  const goTo = (path: string) => {
+    setSearchOpen(false);
+    setSearchQuery("");
+    router.push(path);
+  };
 
   return (
     <PageShell
@@ -205,43 +223,84 @@ export default function AdminShell({
               </div>
             </div>
 
-            <div className="flex items-center gap-3 bg-white/60 backdrop-blur-md p-1.5 pr-2 rounded-full border border-white/50 shadow-sm">
-              <div className="flex items-center gap-3 pl-3">
-                <div className="flex flex-col items-end hidden md:flex">
-                  <span className="text-xs font-bold text-primary leading-tight">
-                    {user?.displayName || "Lilian"}
-                  </span>
-                  <span className="text-[9px] text-stone-400 uppercase tracking-widest leading-tight">
-                    {user?.email}
-                  </span>
+            <div className="w-full md:w-auto flex flex-col md:flex-row md:items-center gap-3">
+              <div className="relative w-full md:w-80">
+                <div className="flex items-center gap-2 px-3 py-2 bg-white border border-stone-200 rounded-xl">
+                  <Search size={16} className="text-stone-400" />
+                  <input
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setSearchOpen(true);
+                    }}
+                    onFocus={() => setSearchOpen(true)}
+                    onBlur={() => setTimeout(() => setSearchOpen(false), 120)}
+                    placeholder="Ir para seção do admin..."
+                    className="w-full bg-transparent text-sm text-stone-700 outline-none placeholder:text-stone-400"
+                  />
                 </div>
-                <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm bg-stone-100 flex items-center justify-center">
-                  {user?.photoURL ? (
-                    <img
-                      src={user.photoURL}
-                      alt="Profile"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-primary font-bold text-xs">
-                      {user?.displayName?.[0] || "L"}
-                    </span>
-                  )}
-                </div>
+
+                {searchOpen && (
+                  <div className="absolute top-full mt-2 w-full bg-white border border-stone-100 rounded-xl shadow-lg overflow-hidden z-30">
+                    {suggestions.length > 0 ? (
+                      suggestions.map((item) => (
+                        <button
+                          key={item.path}
+                          type="button"
+                          onClick={() => goTo(item.path)}
+                          className="w-full px-3 py-2.5 text-left text-sm text-stone-700 hover:bg-stone-50 flex items-center justify-between"
+                        >
+                          <span>{item.label}</span>
+                          <ArrowRight size={14} className="text-stone-400" />
+                        </button>
+                      ))
+                    ) : (
+                      <div className="px-3 py-3 text-xs text-stone-500">
+                        Nenhuma seção encontrada.
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
-              <div className="h-6 w-px bg-stone-200 mx-1" />
+              <div className="flex items-center gap-3 bg-white/60 backdrop-blur-md p-1.5 pr-2 rounded-full border border-white/50 shadow-sm">
+                <div className="flex items-center gap-3 pl-3">
+                  <div className="flex flex-col items-end hidden md:flex">
+                    <span className="text-xs font-bold text-primary leading-tight">
+                      {user?.displayName || "Lilian"}
+                    </span>
+                    <span className="text-[9px] text-stone-400 uppercase tracking-widest leading-tight">
+                      {user?.email}
+                    </span>
+                  </div>
+                  <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm bg-stone-100 flex items-center justify-center">
+                    {user?.photoURL ? (
+                      <img
+                        src={user.photoURL}
+                        alt="Profile"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-primary font-bold text-xs">
+                        {user?.displayName?.[0] || "L"}
+                      </span>
+                    )}
+                  </div>
+                </div>
 
-              <Link
-                href="/admin/settings"
-                title="Configurações"
-                className="w-10 h-10 rounded-full bg-white hover:bg-gold/10 transition-all duration-500 flex items-center justify-center text-stone-400 hover:text-gold shadow-sm hover:shadow-md group"
-              >
-                <Settings
-                  size={18}
-                  className="group-hover:rotate-90 transition-transform duration-500"
-                />
-              </Link>
+                <div className="h-6 w-px bg-stone-200 mx-1" />
+
+                <Link
+                  href="/admin/settings"
+                  title="Configurações"
+                  className="w-10 h-10 rounded-full bg-white hover:bg-gold/10 transition-all duration-500 flex items-center justify-center text-stone-400 hover:text-gold shadow-sm hover:shadow-md group"
+                >
+                  <Settings
+                    size={18}
+                    className="group-hover:rotate-90 transition-transform duration-500"
+                  />
+                </Link>
+              </div>
             </div>
           </header>
 
