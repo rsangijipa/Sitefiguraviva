@@ -5,7 +5,6 @@ import { adminDb } from "@/lib/firebase/admin";
 import { Timestamp } from "firebase-admin/firestore";
 import { revalidatePath } from "next/cache";
 import { logAudit } from "@/lib/audit";
-import { computeAccessStatus } from "@/lib/enrollmentStatus";
 
 // --- Actions ---
 
@@ -13,7 +12,6 @@ export async function approveEnrollment(
   enrollmentId: string,
   uid: string,
   courseId: string,
-  currentData: any,
 ) {
   try {
     const adminClaims = await requireAdmin(); // Throws if not admin
@@ -27,8 +25,6 @@ export async function approveEnrollment(
     if (!enrollmentSnap.exists) {
       throw new Error("Matrícula não encontrada.");
     }
-    const enrollment = enrollmentSnap.data() || {};
-
     // For manual admin approvals, always set status to 'active'
     // regardless of Stripe subscription status
     const newStatus = "active";
@@ -50,7 +46,7 @@ export async function approveEnrollment(
       .doc(uid)
       .collection("enrollments")
       .doc(courseId);
-    batch.update(userEnrollmentRef, updateData);
+    batch.set(userEnrollmentRef, updateData, { merge: true });
 
     await batch.commit();
 
@@ -94,13 +90,7 @@ export async function rejectEnrollment(
     if (!enrollmentSnap.exists) {
       throw new Error("Matrícula não encontrada.");
     }
-    const enrollment = enrollmentSnap.data() || {};
-
-    const newStatus = computeAccessStatus(
-      enrollment.paymentStatus,
-      "rejected",
-      enrollment["stripe.subscriptionStatus"] || "active",
-    );
+    const newStatus = "canceled";
 
     const updateData = {
       status: newStatus,
@@ -113,13 +103,14 @@ export async function rejectEnrollment(
 
     const batch = adminDb.batch();
     batch.update(enrollmentRef, updateData);
-    batch.update(
+    batch.set(
       adminDb
         .collection("users")
         .doc(uid)
         .collection("enrollments")
         .doc(courseId),
       updateData,
+      { merge: true },
     );
 
     await batch.commit();

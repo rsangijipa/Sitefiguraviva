@@ -14,7 +14,13 @@ export interface Enrollment {
   id: string;
   courseId: string;
   uid: string;
-  status: "active" | "expired" | "completed" | "pending";
+  status:
+    | "pending_approval"
+    | "active"
+    | "completed"
+    | "canceled"
+    | "refunded"
+    | "pending";
   progressSummary?: {
     percent: number;
     completedLessonsCount: number;
