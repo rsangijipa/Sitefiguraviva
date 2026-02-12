@@ -1,6 +1,19 @@
-import Stripe from 'stripe';
+import Stripe from "stripe";
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? 'sk_test_placeholder', {
-    apiVersion: '2024-12-18.acacia' as any,
+let stripeClient: Stripe | null = null;
+
+export function getStripe(): Stripe {
+  if (stripeClient) return stripeClient;
+
+  const secretKey = process.env.STRIPE_SECRET_KEY || "";
+  if (!secretKey) {
+    throw new Error("Missing STRIPE_SECRET_KEY");
+  }
+
+  stripeClient = new Stripe(secretKey, {
+    apiVersion: "2024-12-18.acacia" as any,
     typescript: true,
-});
+  });
+
+  return stripeClient;
+}
