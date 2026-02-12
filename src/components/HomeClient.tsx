@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 
 // import { useApp } from '../context/AppContext'; (Removed)
 import Navbar from "./Navbar";
@@ -8,26 +9,32 @@ import Footer from "./Footer";
 import AlertBar from "./AlertBar";
 import HeroSection from "./sections/HeroSection";
 import CoursesSection from "./sections/CoursesSection";
-import BlogSection from "./sections/BlogSection";
 import FounderSection from "./sections/FounderSection";
-import ResourcesSection from "./ResourcesSection";
-import InstagramSection from "./InstagramSection";
 import FloatingControls from "./ui/FloatingControls";
 import { useUI } from "@/context/UIContext";
-import GalleryModal from "./GalleryModal";
-import CalendarModal from "./CalendarModal";
-import PDFReader from "./PDFReader";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Image as ImageIcon } from "lucide-react";
 import Image from "next/image";
-import CourseModal from "./CourseModal";
-import BlogPostModal from "./BlogPostModal";
-import InstituteSection from "./sections/InstituteSection";
 import MethodologySection from "./sections/MethodologySection";
-import TestimonialsSection from "./sections/TestimonialsSection";
-import FAQSection from "./sections/FAQSection";
 import { MemoryMiniFooter } from "./sections/MemoryMiniFooter";
-import LegalModal from "./LegalModal";
+
+const BlogSection = dynamic(() => import("./sections/BlogSection"));
+const ResourcesSection = dynamic(() => import("./ResourcesSection"));
+const InstagramSection = dynamic(() => import("./InstagramSection"));
+const InstituteSection = dynamic(() => import("./sections/InstituteSection"));
+const TestimonialsSection = dynamic(
+  () => import("./sections/TestimonialsSection"),
+);
+const FAQSection = dynamic(() => import("./sections/FAQSection"));
+
+const GalleryModal = dynamic(() => import("./GalleryModal"), { ssr: false });
+const CalendarModal = dynamic(() => import("./CalendarModal"), { ssr: false });
+const PDFReader = dynamic(() => import("./PDFReader"), { ssr: false });
+const CourseModal = dynamic(() => import("./CourseModal"), { ssr: false });
+const BlogPostModal = dynamic(() => import("./BlogPostModal"), {
+  ssr: false,
+});
+const LegalModal = dynamic(() => import("./LegalModal"), { ssr: false });
 
 // interface HomeClientProps removed
 
