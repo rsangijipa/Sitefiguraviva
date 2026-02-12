@@ -8,6 +8,9 @@ import {
   UserCheck,
   UserMinus,
   ChevronRight,
+  RefreshCcw,
+  BadgeCheck,
+  AlertTriangle,
 } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
 import Button from "@/components/ui/Button";
@@ -29,6 +32,8 @@ type AdminUser = {
   isActive?: boolean;
   status?: string;
   createdAt?: { seconds?: number };
+  profileCompletion?: number;
+  phoneNumber?: string | null;
 };
 
 const isUserActive = (user: AdminUser) => {
@@ -40,39 +45,38 @@ const isUserActive = (user: AdminUser) => {
 export default function UsersManager() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingError, setLoadingError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const { addToast } = useToast();
 
+  const loadUsers = async () => {
+    setLoading(true);
+    setLoadingError(null);
+    const all: AdminUser[] = [];
+    let token: string | undefined;
+
+    for (let i = 0; i < 10; i++) {
+      const res = await listUsersForAdmin(token, 100);
+      if (!res.success) {
+        const msg = res.error || "Erro ao listar usuários.";
+        setLoadingError(msg);
+        addToast(msg, "error");
+        break;
+      }
+
+      all.push(...(res.users as AdminUser[]));
+      token = (res.nextPageToken || undefined) as string | undefined;
+      if (!token) break;
+    }
+
+    setUsers(all);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    let mounted = true;
-    (async () => {
-      setLoading(true);
-      const all: AdminUser[] = [];
-      let token: string | undefined;
-
-      for (let i = 0; i < 10; i++) {
-        const res = await listUsersForAdmin(token, 100);
-        if (!res.success) {
-          addToast(res.error || "Erro ao listar usuários.", "error");
-          break;
-        }
-
-        all.push(...(res.users as AdminUser[]));
-        token = (res.nextPageToken || undefined) as string | undefined;
-        if (!token) break;
-      }
-
-      if (mounted) {
-        setUsers(all);
-        setLoading(false);
-      }
-    })();
-
-    return () => {
-      mounted = false;
-    };
+    loadUsers();
   }, []);
 
   const filteredUsers = users.filter((u) => {
@@ -90,6 +94,12 @@ export default function UsersManager() {
 
     return matchesSearch && matchesRole && matchesStatus;
   });
+
+  const activeCount = users.filter((u) => isUserActive(u)).length;
+  const adminCount = users.filter((u) => u.role === "admin").length;
+  const profileReadyCount = users.filter(
+    (u) => (u.profileCompletion || 0) >= 100,
+  ).length;
 
   const toggleUserStatus = async (userId: string, currentStatus: boolean) => {
     try {
@@ -137,7 +147,52 @@ export default function UsersManager() {
             Controle de acessos e perfis da plataforma
           </p>
         </div>
+        <Button
+          variant="outline"
+          leftIcon={<RefreshCcw size={14} />}
+          onClick={loadUsers}
+          isLoading={loading}
+        >
+          Atualizar
+        </Button>
       </header>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="bg-white border border-stone-100 rounded-xl px-4 py-3">
+          <p className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">
+            Total de contas
+          </p>
+          <p className="text-2xl font-bold text-stone-800 mt-1">
+            {users.length}
+          </p>
+        </div>
+        <div className="bg-white border border-stone-100 rounded-xl px-4 py-3">
+          <p className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">
+            Ativos / Admins
+          </p>
+          <p className="text-2xl font-bold text-stone-800 mt-1">
+            {activeCount}{" "}
+            <span className="text-sm text-stone-400">/ {adminCount}</span>
+          </p>
+        </div>
+        <div className="bg-white border border-stone-100 rounded-xl px-4 py-3">
+          <p className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">
+            Cadastros completos
+          </p>
+          <p className="text-2xl font-bold text-stone-800 mt-1">
+            {profileReadyCount}
+          </p>
+        </div>
+      </div>
+
+      {loadingError && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-start gap-2 text-amber-800">
+          <AlertTriangle size={16} className="mt-0.5" />
+          <p className="text-sm">
+            {loadingError}. Você pode tentar novamente pelo botão "Atualizar".
+          </p>
+        </div>
+      )}
 
       <div className="grid md:grid-cols-12 gap-6">
         {/* Filters bar */}
@@ -194,6 +249,9 @@ export default function UsersManager() {
                     </th>
                     <th className="p-4 text-[10px] uppercase tracking-widest text-stone-400 font-bold">
                       Cadastro
+                    </th>
+                    <th className="p-4 text-[10px] uppercase tracking-widest text-stone-400 font-bold">
+                      Perfil
                     </th>
                     <th className="p-4 text-[10px] uppercase tracking-widest text-stone-400 font-bold text-right">
                       Ações
@@ -262,6 +320,17 @@ export default function UsersManager() {
                                 : "---"}
                             </p>
                           </td>
+                          <td className="p-4">
+                            {(user.profileCompletion || 0) >= 100 ? (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-green-700 bg-green-50 border border-green-100 px-2 py-1 rounded-md">
+                                <BadgeCheck size={12} /> Completo
+                              </span>
+                            ) : (
+                              <span className="text-xs text-stone-500">
+                                {user.profileCompletion || 0}%
+                              </span>
+                            )}
+                          </td>
                           <td className="p-4 text-right">
                             <div className="flex items-center justify-end gap-2">
                               <Button
@@ -302,7 +371,7 @@ export default function UsersManager() {
                   ) : (
                     <tr>
                       <td
-                        colSpan={5}
+                        colSpan={6}
                         className="p-12 text-center text-stone-400 italic"
                       >
                         {loading
