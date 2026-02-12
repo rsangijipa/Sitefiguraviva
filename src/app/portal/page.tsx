@@ -3,11 +3,6 @@
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { enrollmentService } from "@/services/enrollmentService";
-import { progressService } from "@/services/progressService";
-import { courseService } from "@/services/courseService";
-import { eventService } from "@/services/eventService";
-import { certificateService } from "@/services/certificateService";
 import {
   Award,
   Play,
@@ -22,9 +17,7 @@ import Loading from "./loading";
 import { logger } from "@/lib/logger";
 import { EmptyState } from "@/components/ui/EmptyState";
 import Button from "@/components/ui/Button";
-import { db } from "@/lib/firebase/client";
-import { doc, getDoc } from "firebase/firestore";
-import { getStudentWeeklyActivity } from "@/app/actions/portal-metrics";
+import { getStudentDashboardKPIs } from "@/app/actions/metrics";
 
 const StatCard = ({ icon: Icon, label, value, trend, href }: any) => (
   <Link
@@ -109,6 +102,10 @@ export default function PortalDashboard() {
     null,
   );
   const [reloadNonce, setReloadNonce] = useState(0);
+  const [kpiMeta, setKpiMeta] = useState<{
+    updatedAt?: string;
+    source?: Record<string, string>;
+  }>({});
   const firstName = user?.displayName?.split(" ")[0] || "Aluno";
 
   useEffect(() => {
@@ -132,118 +129,36 @@ export default function PortalDashboard() {
       setLastCourse(null);
 
       try {
-        // Parallel fetch for initial data to improve performance
-        const [myEnrollments, upcomingEvents, myCertificates] =
-          await Promise.allSettled([
-            enrollmentService.getActiveEnrollments(user.uid),
-            eventService.getUpcomingEvents(3),
-            certificateService.getUserCertificates(user.uid),
-          ]);
+        const kpi = await getStudentDashboardKPIs(user.uid);
 
-        const weeklyRes = await getStudentWeeklyActivity();
-        if (weeklyRes.success) {
-          setWeeklyActivity(weeklyRes.points || []);
-        } else {
+        if (!kpi.success || !kpi.data) {
+          logger.error("Student KPI load failed", kpi.error, { uid: user.uid });
           setLoadError(
-            weeklyRes.error ||
-              "Não foi possível carregar sua atividade semanal no momento.",
-          );
-        }
-
-        try {
-          const userSnap = await getDoc(doc(db, "users", user.uid));
-          if (userSnap.exists()) {
-            const pct = Number(userSnap.data()?.profileCompletion || 0);
-            setProfileCompletion(Number.isFinite(pct) ? pct : 0);
-          } else {
-            setProfileCompletion(0);
-          }
-        } catch (profileError) {
-          logger.warn("Profile completion read failed", {
-            profileError,
-            uid: user.uid,
-          });
-          setProfileCompletion(null);
-        }
-
-        if (upcomingEvents.status === "fulfilled") {
-          setEvents(upcomingEvents.value);
-          setMetricsStatus((prev) => ({ ...prev, events: true }));
-        } else {
-          setLoadError(
-            "Não foi possível carregar os próximos eventos neste momento.",
-          );
-        }
-        if (myCertificates.status === "fulfilled") {
-          setCertificates(myCertificates.value);
-          setMetricsStatus((prev) => ({ ...prev, certificates: true }));
-        } else {
-          setLoadError(
-            "Não foi possível carregar seus certificados neste momento.",
-          );
-        }
-
-        if (myEnrollments.status !== "fulfilled") {
-          setLoadError(
-            "Não foi possível carregar suas matrículas agora. Tente atualizar.",
+            kpi.error ||
+              "Não foi possível carregar o painel agora. Verifique sua conexão e tente novamente.",
           );
           return;
         }
 
-        if (myEnrollments.value.length > 0) {
-          const enrollmentData = myEnrollments.value;
-          // 2. Fetch Course Data for Valid Enrollments
-          const courseIds = enrollmentData.map((e) => e.courseId);
-
-          try {
-            const coursesData = await courseService.getCoursesByIds(courseIds);
-
-            // Merge data
-            const enrichedEnrollments = enrollmentData.map((e) => {
-              const course = coursesData.find((c) => c.id === e.courseId);
-              return {
-                ...e,
-                courseTitle: course?.title,
-                totalLessons: course?.totalLessons || 0,
-              };
-            });
-
-            setEnrollments(enrichedEnrollments);
-            setMetricsStatus((prev) => ({ ...prev, enrollments: true }));
-
-            // 3. Determine Last Accessed (Hero Card)
-            const sorted = [...enrichedEnrollments].sort((a, b) => {
-              const timeA = a.lastAccessedAt?.toMillis
-                ? a.lastAccessedAt.toMillis()
-                : 0;
-              const timeB = b.lastAccessedAt?.toMillis
-                ? b.lastAccessedAt.toMillis()
-                : 0;
-              return timeB - timeA;
-            });
-
-            const mostRecent = sorted[0];
-            if (mostRecent) {
-              setLastCourse({
-                ...mostRecent,
-                lastLessonId: mostRecent.lastLessonId,
-                percent: mostRecent.progressSummary?.percent || 0,
-              });
-            }
-          } catch (courseError) {
-            logger.error("Course Data Load Error", courseError, {
-              uid: user.uid,
-            });
-
-            setEnrollments(enrollmentData);
-            setMetricsStatus((prev) => ({ ...prev, enrollments: true }));
-            setLoadError(
-              "Carregamos suas matrículas, mas parte dos detalhes do curso pode estar indisponível no momento.",
-            );
-          }
-        } else {
-          setMetricsStatus((prev) => ({ ...prev, enrollments: true }));
-        }
+        const data = kpi.data;
+        setEnrollments(data.enrollments || []);
+        setEvents(data.events || []);
+        setCertificates(data.certificates || []);
+        setWeeklyActivity(data.weeklyActivity || []);
+        setProfileCompletion(
+          Number.isFinite(Number(data.profileCompletion))
+            ? Number(data.profileCompletion)
+            : null,
+        );
+        setLastCourse(data.lastCourse || null);
+        setKpiMeta({ updatedAt: kpi.updatedAt, source: kpi.source });
+        setMetricsStatus(
+          data.availability || {
+            enrollments: true,
+            certificates: true,
+            events: true,
+          },
+        );
       } catch (error) {
         logger.error("Dashboard Load Error", error, { uid: user.uid });
         setLoadError(
@@ -295,6 +210,13 @@ export default function PortalDashboard() {
           </div>
         </div>
       </div>
+
+      {kpiMeta.updatedAt && (
+        <p className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">
+          Dados atualizados em{" "}
+          {new Date(kpiMeta.updatedAt).toLocaleTimeString("pt-BR")}
+        </p>
+      )}
 
       {loadError && (
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
@@ -435,7 +357,6 @@ export default function PortalDashboard() {
                 Atividade Semanal
               </h3>
             </div>
-            {/* Mock Data for now - waiting for backend aggregation */}
             <div className="flex items-end justify-between h-32 gap-2">
               {activityPoints.map((point, i) => (
                 <div

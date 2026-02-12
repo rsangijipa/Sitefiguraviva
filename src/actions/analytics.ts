@@ -344,7 +344,12 @@ export type EventType =
   | "quiz_start"
   | "quiz_complete"
   | "document_open"
-  | "page_view";
+  | "page_view"
+  | "funnel_signup"
+  | "funnel_enrollment_pending"
+  | "funnel_enrollment_active"
+  | "funnel_course_completed"
+  | "funnel_certificate_issued";
 
 export async function trackEvent(
   type: EventType,
@@ -371,6 +376,50 @@ export async function trackEvent(
     return { success: true };
   } catch (error: any) {
     console.error("[TrackEvent Error]:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Track funnel milestones using server-side writes to analytics_events.
+ */
+export async function trackFunnelEvent(
+  type:
+    | "funnel_signup"
+    | "funnel_enrollment_pending"
+    | "funnel_enrollment_active"
+    | "funnel_course_completed"
+    | "funnel_certificate_issued",
+  metadata: Record<string, any> = {},
+  explicitUserId?: string,
+) {
+  try {
+    const sessionCookie = (await cookies()).get("session")?.value;
+    if (!sessionCookie) return { success: false, error: "Unauthenticated" };
+
+    const decodedToken = await auth.verifySessionCookie(sessionCookie, true);
+    const actorUid = decodedToken.uid;
+    const actorIsAdmin =
+      decodedToken.admin === true || decodedToken.role === "admin";
+
+    const userId = explicitUserId || actorUid;
+    if (explicitUserId && explicitUserId !== actorUid && !actorIsAdmin) {
+      return { success: false, error: "Forbidden" };
+    }
+
+    const eventId = `${userId}_${type}_${Date.now()}`;
+    await adminDb.collection("analytics_events").doc(eventId).set({
+      userId,
+      actorUid,
+      type,
+      metadata,
+      source: "server_action",
+      timestamp: new Date(),
+    });
+
+    return { success: true };
+  } catch (error: any) {
+    console.error("[trackFunnelEvent Error]:", error);
     return { success: false, error: error.message };
   }
 }
