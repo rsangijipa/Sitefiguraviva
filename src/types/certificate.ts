@@ -1,19 +1,24 @@
-// Firestore Document Type
+// Firestore Document Type for Certificates
 export interface Certificate {
-  id: string;
+  id: string; // Document ID (usually uid_courseId)
   userId: string;
   courseId: string;
 
-  // Snapshot Data
-  userName: string; // Was studentName
-  courseTitle: string;
+  // --- Display Data (Standardized) ---
+  studentName: string;
+  courseName: string;
+  certificateNumber: string; // The FV-YY-XXXXXX code
+  issuedAt: any; // Firestore Timestamp or ISO String
+  completedAt: any; // Usually same as issuedAt or from enrollment completion
+  validationUrl: string; // Public verification link
 
-  // Validation
-  code: string; // Was validationCode
-  issuedAt: any; // Firestore Timestamp
-  integrityHash?: string;
+  // --- Snapshot & Academic Data ---
+  instructorName?: string;
+  instructorTitle?: string;
+  courseWorkload?: number; // In hours
+  integrityHash?: string; // SHA-256 for tampering protection
 
-  // Snapshot Info
+  // --- Versioning & Context ---
   courseVersionAtCompletion?: number;
   courseSnapshot?: {
     courseId: string;
@@ -22,18 +27,17 @@ export interface Certificate {
     lessons: { id: string; title: string }[];
   };
 
-  // Optional
-  metadata?: {
-    version?: string;
-    hours?: number;
-  };
-
-  // Meta
-  issuedBy?: string;
+  // --- Metadata & Status ---
+  status: "issued" | "revoked" | "draft";
+  issuedBy?: "system" | "admin" | string;
   templateVersion?: string;
+  enrolledAt?: any; // Start date for period calculation
 
-  // Legacy / Future
-  pdfUrl?: string;
+  // --- Legacy / Alias Support (Backward Compatibility) ---
+  userName?: string; // Alias for studentName
+  courseTitle?: string; // Alias for courseName
+  code?: string; // Alias for certificateNumber
+  pdfUrl?: string; // Optional cloud storage link
 }
 
 export type CertificateDoc = Certificate;

@@ -68,10 +68,14 @@ export async function issueCertificate(courseId: string, userId?: string) {
   }
 }
 
+import { Certificate } from "@/types/certificate";
+
 /**
  * Get certificate by ID
  */
-export async function getCertificate(certificateId: string) {
+export async function getCertificate(
+  certificateId: string,
+): Promise<{ certificate?: Certificate; error?: string }> {
   // Logic remains mostly same but can be simplified if we rely on the natural key
   // I'll keep the recovery logic for now as it's useful
   try {
@@ -90,7 +94,7 @@ export async function getCertificate(certificateId: string) {
     if (!certDoc.exists) return { error: "Certificado não encontrado" };
 
     const data = certDoc.data();
-    return { certificate: { ...data, id: certDoc.id } };
+    return { certificate: { ...data, id: certDoc.id } as Certificate };
   } catch (error: any) {
     return { error: error.message };
   }

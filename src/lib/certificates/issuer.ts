@@ -156,9 +156,10 @@ export class CertificateIssuer {
       // 6. Generate Verification & Integrity Hash
       const verificationCode = await generateVerificationCode();
       const userSnap = await adminDb.collection("users").doc(uid).get();
-      const userName =
+      const studentName =
         userSnap.data()?.displayName || enrollment.userName || "Estudante";
       const now = FieldValue.serverTimestamp();
+      const validationUrl = `/verify/${verificationCode}`;
 
       const integrityHash = crypto
         .createHash("sha256")
@@ -180,9 +181,14 @@ export class CertificateIssuer {
           courseId,
           courseVersionAtCompletion,
           issuedAt: now,
-          code: verificationCode,
-          userName,
-          courseTitle: course.title,
+          completedAt: now, // Support both fields
+          certificateNumber: verificationCode,
+          code: verificationCode, // Keep for backward compat
+          studentName,
+          userName: studentName, // Keep for backward compat
+          courseName: course.title,
+          courseTitle: course.title, // Keep for backward compat
+          validationUrl,
           integrityHash,
           instructorName: course.instructorName || "Lilian Gusmão",
           instructorTitle: course.instructorTitle || "Diretora Pedagógica",
@@ -199,11 +205,12 @@ export class CertificateIssuer {
         });
 
         tx.set(adminDb.collection("certificatePublic").doc(verificationCode), {
-          code: verificationCode,
-          userName,
-          courseTitle: course.title,
+          certificateNumber: verificationCode,
+          studentName,
+          courseName: course.title,
           issuedAt: now,
           isValid: true,
+          validationUrl,
         });
 
         tx.update(enrollmentRef, {

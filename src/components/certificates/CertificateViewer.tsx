@@ -5,7 +5,7 @@ import { PDFDownloadLink } from "@react-pdf/renderer";
 import QRCode from "qrcode";
 import { useToast } from "@/context/ToastContext";
 import { getCertificate } from "@/actions/certificate";
-import type { Certificate } from "@/types/analytics";
+import type { Certificate } from "@/types/certificate";
 import { CertificateDocument } from "./CertificateTemplate";
 import Button from "@/components/ui/Button";
 import {

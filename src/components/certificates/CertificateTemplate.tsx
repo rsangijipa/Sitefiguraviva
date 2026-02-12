@@ -8,7 +8,7 @@ import {
   StyleSheet,
   Font,
 } from "@react-pdf/renderer";
-import type { Certificate } from "@/types/analytics";
+import type { Certificate } from "@/types/certificate";
 
 // --- FONTS REGISTRATION ---
 // Since we cannot load custom fonts dynamically in this environment easily without file paths
