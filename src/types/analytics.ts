@@ -5,22 +5,8 @@ type FirestoreTimestamp = any;
 /**
  * Certificate Types
  */
-export interface Certificate {
-  id: string;
-  userId: string;
-  courseId: string;
-  studentName: string;
-  courseName: string;
-  completedAt: FirestoreTimestamp;
-  issuedAt: FirestoreTimestamp;
-  certificateNumber: string; // Auto-generated unique number
-  instructorName: string;
-  instructorTitle: string;
-  courseWorkload: number; // hours
-  validationUrl: string; // QR code URL
-  status: "issued" | "revoked";
-  enrolledAt?: FirestoreTimestamp; // Optional for backward compatibility
-}
+import { Certificate } from "./certificate";
+export type { Certificate };
 
 export interface CertificateTemplate {
   logoUrl: string;
