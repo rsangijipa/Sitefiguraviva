@@ -195,6 +195,33 @@
   .animate-float-slow {
     animation: float-slow 8s ease-in-out infinite;
   }
+
+  /* Magic Reflection Effect */
+  .magic-reflection {
+    position: relative;
+    -webkit-box-reflect: below 2px linear-gradient(transparent 70%, rgba(255, 255, 255, 0.1));
+  }
+
+  /* Shimmer Glow Animation */
+  @keyframes magic-shimmer {
+    0% {
+      transform: translateX(-150%) skewX(-20deg);
+      opacity: 0;
+    }
+
+    20% {
+      opacity: 0.6;
+    }
+
+    100% {
+      transform: translateX(150%) skewX(-20deg);
+      opacity: 0;
+    }
+  }
+
+  .animate-magic-shimmer {
+    animation: magic-shimmer 5s ease-in-out infinite;
+  }
 }
 
 /* Base scrollbar for better overall feel */
