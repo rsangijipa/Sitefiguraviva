@@ -101,50 +101,65 @@ export default function PortalDashboard() {
       try {
         // Parallel fetch for initial data to improve performance
         const [myEnrollments, upcomingEvents, myCertificates] =
-          await Promise.all([
+          await Promise.allSettled([
             enrollmentService.getActiveEnrollments(user.uid),
             eventService.getUpcomingEvents(3),
             certificateService.getUserCertificates(user.uid),
           ]);
 
-        setEvents(upcomingEvents);
-        setCertificates(myCertificates);
+        if (upcomingEvents.status === "fulfilled")
+          setEvents(upcomingEvents.value);
+        if (myCertificates.status === "fulfilled")
+          setCertificates(myCertificates.value);
 
-        if (myEnrollments.length > 0) {
+        if (
+          myEnrollments.status === "fulfilled" &&
+          myEnrollments.value.length > 0
+        ) {
+          const enrollmentData = myEnrollments.value;
           // 2. Fetch Course Data for Valid Enrollments
-          const courseIds = myEnrollments.map((e) => e.courseId);
-          const coursesData = await courseService.getCoursesByIds(courseIds);
+          const courseIds = enrollmentData.map((e) => e.courseId);
 
-          // Merge data
-          const enrichedEnrollments = myEnrollments.map((e) => {
-            const course = coursesData.find((c) => c.id === e.courseId);
-            return {
-              ...e,
-              courseTitle: course?.title,
-              totalLessons: course?.totalLessons || 0,
-            };
-          });
+          try {
+            const coursesData = await courseService.getCoursesByIds(courseIds);
 
-          setEnrollments(enrichedEnrollments);
-
-          // 3. Determine Last Accessed (Hero Card)
-          const sorted = [...enrichedEnrollments].sort((a, b) => {
-            const timeA = a.lastAccessedAt?.toMillis
-              ? a.lastAccessedAt.toMillis()
-              : 0;
-            const timeB = b.lastAccessedAt?.toMillis
-              ? b.lastAccessedAt.toMillis()
-              : 0;
-            return timeB - timeA;
-          });
-
-          const mostRecent = sorted[0];
-          if (mostRecent) {
-            setLastCourse({
-              ...mostRecent,
-              lastLessonId: mostRecent.lastLessonId,
-              percent: mostRecent.progressSummary?.percent || 0,
+            // Merge data
+            const enrichedEnrollments = enrollmentData.map((e) => {
+              const course = coursesData.find((c) => c.id === e.courseId);
+              return {
+                ...e,
+                courseTitle: course?.title,
+                totalLessons: course?.totalLessons || 0,
+              };
             });
+
+            setEnrollments(enrichedEnrollments);
+
+            // 3. Determine Last Accessed (Hero Card)
+            const sorted = [...enrichedEnrollments].sort((a, b) => {
+              const timeA = a.lastAccessedAt?.toMillis
+                ? a.lastAccessedAt.toMillis()
+                : 0;
+              const timeB = b.lastAccessedAt?.toMillis
+                ? b.lastAccessedAt.toMillis()
+                : 0;
+              return timeB - timeA;
+            });
+
+            const mostRecent = sorted[0];
+            if (mostRecent) {
+              setLastCourse({
+                ...mostRecent,
+                lastLessonId: mostRecent.lastLessonId,
+                percent: mostRecent.progressSummary?.percent || 0,
+              });
+            }
+          } catch (courseError) {
+            logger.error("Course Data Load Error", courseError, {
+              uid: user.uid,
+            });
+            // Fallback: set enrollments without enriched course data if needed,
+            // but usually we want titles, so we just log.
           }
         }
       } catch (error) {

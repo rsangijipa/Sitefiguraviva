@@ -6,6 +6,7 @@ import {
   CourseFullDTO,
 } from "./types";
 import { deepSafeSerialize } from "@/lib/utils";
+import { canConsumeCourse } from "@/lib/auth/access-policy";
 
 // Mapper Helper: Firestore Timestamp to ISO String
 function toISO(val: any): string {
@@ -154,10 +155,19 @@ export function toCourseFullDTO(
   // Safe serialization one last time just in case (e.g. undefineds)
   // But strictly, our DTOs should already be safe.
   // Using deepSafeSerialize here is a redundant safety net.
+  const isAccessDenied = !canConsumeCourse(
+    courseRaw.data ? courseRaw.data() : courseRaw,
+    enrollmentRaw
+      ? enrollmentRaw.data
+        ? enrollmentRaw.data()
+        : enrollmentRaw
+      : null,
+  );
+
   return deepSafeSerialize({
     course,
     modules,
     enrollment,
-    isAccessDenied: !enrollment || enrollment.status !== "active",
+    isAccessDenied,
   });
 }

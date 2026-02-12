@@ -74,6 +74,6 @@ export const enrollmentService = {
   // Get active enrollments only
   async getActiveEnrollments(userId: string): Promise<Enrollment[]> {
     const all = await this.getUserEnrollments(userId);
-    return all.filter((e) => e.status === "active");
+    return all.filter((e) => e.status === "active" || e.status === "completed");
   },
 };
