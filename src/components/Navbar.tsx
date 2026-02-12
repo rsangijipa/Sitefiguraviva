@@ -123,12 +123,12 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop Menu (only on wide screens to avoid tablet clipping) */}
-        <div className="hidden xl:flex items-center gap-3 font-sans text-[10px] 2xl:text-xs font-bold tracking-[0.16em] uppercase text-text/80">
+        <div className="hidden xl:flex items-center gap-1 font-sans text-[11px] 2xl:text-xs font-bold tracking-[0.18em] uppercase text-text/80">
           {navItems.map((item) => (
             <a
               key={item.label}
               href={item.href}
-              className="hover:text-primary transition-colors hover:bg-black/5 px-3 py-2 rounded-lg min-h-[44px] flex items-center focus-visible:ring-2 focus-visible:ring-primary"
+              className="hover:text-primary transition-all duration-200 hover:bg-primary/5 px-4 py-2 rounded-xl min-h-[44px] flex items-center focus-visible:ring-2 focus-visible:ring-primary"
             >
               {item.display || item.label}
             </a>
@@ -193,8 +193,8 @@ export default function Navbar() {
             initial={{ opacity: 0, x: "100%" }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: "100%" }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed inset-0 z-[60] bg-white flex flex-col xl:hidden"
+            transition={{ type: "spring", damping: 30, stiffness: 300 }}
+            className="fixed inset-0 z-[60] bg-paper/98 backdrop-blur-xl flex flex-col xl:hidden"
           >
             {/* Mobile Header Inside Menu */}
             <div className="flex items-center justify-between px-6 py-6 border-b border-stone-100">
@@ -235,7 +235,7 @@ export default function Navbar() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.1 + idx * 0.05 }}
                   onClick={() => setMobileOpen(false)}
-                  className="block w-full text-left px-6 py-4 rounded-2xl hover:bg-stone-50 active:scale-[0.98] active:bg-stone-100 transition-all text-2xl font-serif text-primary border border-transparent active:border-primary/10"
+                  className="block w-full text-left px-6 py-5 rounded-3xl hover:bg-primary/5 active:scale-[0.97] transition-all text-3xl font-serif text-primary border border-transparent active:border-primary/10"
                 >
                   {item.display || item.label}
                 </motion.a>

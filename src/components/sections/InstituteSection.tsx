@@ -10,6 +10,7 @@ import {
 import { ArrowRight, MapPin, Phone, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import SectionShell from "../ui/SectionShell";
 
 export default function InstituteSection({
   gallery = [],
@@ -60,10 +61,7 @@ export default function InstituteSection({
   }, [slides.length]);
 
   return (
-    <section
-      id="instituto-sobre"
-      className="py-16 md:py-24 bg-white relative overflow-hidden transition-colors duration-500"
-    >
+    <SectionShell id="instituto-sobre" className="bg-white" container={false}>
       {/* Header */}
       <div className="container mx-auto px-6 max-w-6xl relative z-10">
         <div className="text-center max-w-3xl mx-auto mb-12 animate-fade-in-up">
@@ -324,6 +322,6 @@ export default function InstituteSection({
           </a>
         </div>
       </div>
-    </section>
+    </SectionShell>
   );
 }

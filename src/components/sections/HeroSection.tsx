@@ -6,6 +6,12 @@ import Image from "next/image";
 import OrganicBackground from "../ui/OrganicBackground";
 import WaveLines from "../ui/WaveLines";
 import { useInstituteSettings } from "@/hooks/useSiteSettings";
+import BackgroundEngine from "../visual/BackgroundEngine";
+import dynamic from "next/dynamic";
+
+const ParticlesLayer = dynamic(() => import("../visual/ParticlesLayer"), {
+  ssr: false,
+});
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 30 },
@@ -26,17 +32,18 @@ const staggerContainer = {
 
 export default function HeroSection({ initialData }: { initialData?: any }) {
   const { data } = useInstituteSettings(initialData);
-  const whatsappNumber = data.phone?.replace(/\D/g, "") || "11999999999"; // Fallback safe
+  const whatsappNumber = data.phone?.replace(/\D/g, "") || "11999999999";
+
+  const isParticlesEnabled = process.env.NEXT_PUBLIC_ENABLE_PARTICLES === "1";
 
   return (
-    <header className="relative min-h-screen flex items-center pt-32 pb-24 md:pt-40 md:pb-32 px-6 overflow-hidden bg-[#FEFDFB]">
-      {/* Premium Background Layers */}
-      <OrganicBackground />
-      <WaveLines className="opacity-30 mix-blend-multiply" />
+    <header className="relative min-h-screen flex items-center pt-32 pb-24 md:pt-40 md:pb-32 px-6 overflow-hidden bg-paper">
+      {/* Premium Background Engine */}
+      <BackgroundEngine />
+      {isParticlesEnabled && <ParticlesLayer />}
 
-      {/* Artistic Gradients */}
-      <div className="absolute top-[-20%] right-[-10%] w-[60%] aspect-square rounded-full bg-gradient-to-br from-gold/20 to-transparent blur-[120px] pointer-events-none animate-pulse-slow" />
-      <div className="absolute bottom-[-20%] left-[-10%] w-[50%] aspect-square rounded-full bg-gradient-to-tr from-primary/10 to-transparent blur-[100px] pointer-events-none" />
+      {/* Decorative Overlays */}
+      <WaveLines className="opacity-20 mix-blend-multiply" />
 
       <div className="container mx-auto max-w-7xl relative z-10">
         <div className="grid lg:grid-cols-2 gap-20 items-center">
@@ -61,7 +68,7 @@ export default function HeroSection({ initialData }: { initialData?: any }) {
 
             <motion.h1
               variants={fadeInUp}
-              className="text-6xl md:text-8xl lg:text-9xl font-serif text-primary leading-[0.95] tracking-tight mb-10"
+              className="text-fluid-h1 font-serif text-primary mb-10"
             >
               A Arte da <br />
               <span className="italic text-gold font-light">Presença</span>

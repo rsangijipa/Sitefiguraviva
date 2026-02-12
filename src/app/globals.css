@@ -20,10 +20,10 @@
   --color-surface: #ffffff;
   --color-text: #171717;
   /* Neutral-900 */
-  --color-muted: #525252;
-  /* Neutral-600 */
-  /* WCAG AA OK */
-  --color-border: #e5e7eb;
+  --color-muted: #4b4b4b;
+  /* Slightly darker for better contrast on paper */
+  --color-muted-foreground: #4b4b4b;
+  --color-border: #e0e0e0;
 
   /* Highlights */
   /* WCAG AA OK - Adjusted for better contrast */
@@ -57,7 +57,8 @@
 @layer base {
   html {
     scroll-behavior: smooth;
-    scroll-padding-top: 100px; /* Offset for fixed navbar */
+    scroll-padding-top: 100px;
+    /* Offset for fixed navbar */
   }
 
   body {
@@ -100,11 +101,11 @@
 
   /* Glassmorphism Variants */
   .glass-panel {
-    @apply bg-white/70 backdrop-blur-md border border-white/50 shadow-soft-lg;
+    @apply bg-white/60 backdrop-blur-glass border border-white/40 shadow-soft-lg;
   }
 
   .glass-panel-dark {
-    @apply bg-black/20 backdrop-blur-md border border-white/10 shadow-soft-lg;
+    @apply bg-black/30 backdrop-blur-glass border border-white/5 shadow-soft-lg;
   }
 
   .skip-to-content {
@@ -143,7 +144,13 @@
 
   /* Layout Utilities */
   .section-padding {
-    @apply py-12 md:py-24 px-6 md:px-12;
+    @apply py-14 md:py-20 lg:py-24 px-6 md:px-12;
+  }
+
+  .section-shell {
+    @apply relative overflow-hidden;
+    padding-top: clamp(3.5rem, 8vh, 7rem);
+    padding-bottom: clamp(3.5rem, 8vh, 7rem);
   }
 
   /* Scrollbar Hide Utility */
@@ -160,28 +167,34 @@
   }
 
   /* Custom Scrollbar */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #b08d55 rgba(0, 0, 0, 0.05);
+  }
+
   .custom-scrollbar::-webkit-scrollbar {
     width: 6px;
     height: 6px;
+    display: block !important;
   }
 
   .custom-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 10px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background-color: #b08d5533;
-    /* gold with opacity */
-    border-radius: 9999px;
-    transition: background-color 0.3s;
+    background-color: #b08d55 !important;
+    border-radius: 10px;
+    min-height: 40px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background-color: #b08d5566;
-    /* gold with more opacity */
+    background-color: #8c7044 !important;
   }
 
   @keyframes float-slow {
+
     0%,
     100% {
       transform: translateY(0);
@@ -199,8 +212,7 @@
   /* Magic Reflection Effect */
   .magic-reflection {
     position: relative;
-    -webkit-box-reflect: below 2px
-      linear-gradient(transparent 70%, rgba(255, 255, 255, 0.1));
+    -webkit-box-reflect: below 2px linear-gradient(transparent 70%, rgba(255, 255, 255, 0.1));
   }
 
   /* Shimmer Glow Animation */
@@ -222,6 +234,35 @@
 
   .animate-magic-shimmer {
     animation: magic-shimmer 5s ease-in-out infinite;
+  }
+
+  /* Premium Effects */
+  .fx-grain {
+    position: relative;
+  }
+
+  .fx-grain::after {
+    content: "";
+    @apply fixed inset-0 z-[99] pointer-events-none opacity-[0.03];
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3BaseFilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grain)'/%3E%3C/svg%3E");
+  }
+
+  .fx-watercolor {
+    @apply relative overflow-hidden;
+    mask-image: radial-gradient(circle at 50% 50%, black 60%, transparent 100%);
+  }
+
+  .fx-aurora {
+    @apply absolute inset-0 -z-10 overflow-hidden;
+    background: linear-gradient(135deg,
+        rgba(14, 99, 48, 0.05) 0%,
+        rgba(240, 212, 24, 0.05) 50%,
+        rgba(176, 141, 85, 0.05) 100%);
+    filter: blur(80px);
+  }
+
+  .mask-fade-y {
+    mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
   }
 }
 
@@ -245,6 +286,7 @@
 
 /* Accessibility: Reduced Motion Support */
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {

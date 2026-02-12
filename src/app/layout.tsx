@@ -63,11 +63,7 @@ export const metadata: Metadata = {
     follow: true,
   },
   icons: {
-    icon: [
-      { url: "/favicon.ico" },
-      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
-      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-    ],
+    icon: [{ url: "/favicon.ico" }],
     apple: [
       { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
     ],
@@ -86,6 +82,7 @@ export const viewport = {
 import { cookies } from "next/headers";
 import ImpersonationBanner from "@/components/admin/ImpersonationBanner";
 import { WebVitalsReporter } from "@/components/system/WebVitalsReporter";
+import LenisProvider from "@/components/providers/LenisProvider";
 
 export default async function RootLayout({
   children,
@@ -122,7 +119,7 @@ export default async function RootLayout({
             }}
           />
           <WebVitalsReporter />
-          {children}
+          <LenisProvider>{children}</LenisProvider>
           {isImpersonating && <ImpersonationBanner />}
         </Providers>
       </body>

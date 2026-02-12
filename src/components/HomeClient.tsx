@@ -17,6 +17,7 @@ import { Image as ImageIcon } from "lucide-react";
 import Image from "next/image";
 import MethodologySection from "./sections/MethodologySection";
 import { MemoryMiniFooter } from "./sections/MemoryMiniFooter";
+import SectionShell from "./ui/SectionShell";
 
 const BlogSection = dynamic(() => import("./sections/BlogSection"));
 const ResourcesSection = dynamic(() => import("./ResourcesSection"));
@@ -54,6 +55,10 @@ interface HomeClientProps {
     seo?: any;
   };
 }
+
+import methodology from "./sections/MethodologySection";
+import ScrollProgressBar from "./motion/ScrollProgressBar";
+import Reveal from "./motion/Reveal";
 
 export default function HomeClient({ initialData }: HomeClientProps = {}) {
   const { data: courses = [] } = useCourses(false, {
@@ -125,7 +130,8 @@ export default function HomeClient({ initialData }: HomeClientProps = {}) {
   };
 
   return (
-    <div className="bg-paper min-h-screen flex flex-col font-sans text-primary overflow-hidden">
+    <div className="bg-paper min-h-screen flex flex-col font-sans text-primary overflow-hidden fx-grain">
+      <ScrollProgressBar />
       <AlertBar />
       <Navbar />
 
@@ -136,70 +142,51 @@ export default function HomeClient({ initialData }: HomeClientProps = {}) {
         className="outline-none"
       >
         <HeroSection initialData={initialData?.institute} />
-        <FounderSection initialData={initialData?.founder} />
+
+        <Reveal variant="medium">
+          <FounderSection initialData={initialData?.founder} />
+        </Reveal>
 
         {/* Laura Perls Tribute - Placed below Curator/Founder */}
-        <MemoryMiniFooter />
+        <Reveal variant="soft">
+          <MemoryMiniFooter />
+        </Reveal>
 
-        <MethodologySection />
+        <Reveal variant="medium">
+          <MethodologySection />
+        </Reveal>
 
-        <CoursesSection
-          courses={courses}
-          onOpenCalendar={() => openModal("calendar")}
-          onSelectCourse={selectCourse}
-        />
+        <Reveal variant="medium">
+          <CoursesSection
+            courses={courses}
+            onOpenCalendar={() => openModal("calendar")}
+            onSelectCourse={selectCourse}
+          />
+        </Reveal>
 
-        <TestimonialsSection />
+        <Reveal variant="soft">
+          <TestimonialsSection />
+        </Reveal>
 
-        <InstituteSection gallery={gallery} />
+        <Reveal variant="medium">
+          <InstituteSection gallery={gallery} />
+        </Reveal>
 
-        <ResourcesSection />
+        <Reveal variant="soft">
+          <ResourcesSection />
+        </Reveal>
 
-        <BlogSection blogPosts={blogPosts} onSelectPost={selectPost} />
+        <Reveal variant="medium">
+          <BlogSection blogPosts={blogPosts} onSelectPost={selectPost} />
+        </Reveal>
 
-        {/* GALLERY TRIGGER SECTION */}
-        <section className="py-20 relative overflow-hidden bg-stone-100 border-t border-stone-200">
-          <div className="absolute inset-0 z-0">
-            <Image
-              src="/assets/fundo-galeria.png"
-              alt="Galeria de fundo"
-              fill
-              className="w-full h-full object-cover blur-[8px] opacity-40 scale-105"
-            />
-            <div className="absolute inset-0 bg-stone-100/60 mix-blend-overlay" />
-          </div>
+        <Reveal variant="soft">
+          <FAQSection />
+        </Reveal>
 
-          <div className="container mx-auto px-6 max-w-6xl text-center relative z-10">
-            <span className="text-xs font-bold tracking-[0.2em] uppercase text-gold mb-4 block">
-              Memória Viva
-            </span>
-            <h2 className="text-4xl md:text-5xl font-serif text-primary leading-tight mb-8">
-              Galeria{" "}
-              <span className="italic text-gold font-light">Visual</span>
-            </h2>
-
-            <button
-              onClick={() => openModal("gallery")}
-              className="group bg-white border border-stone-200 px-8 py-6 rounded-[2rem] hover:shadow-xl hover:-translate-y-1 transition-all duration-300 inline-flex flex-col items-center gap-4"
-            >
-              <div className="w-16 h-16 rounded-full bg-stone-50 flex items-center justify-center text-primary group-hover:bg-gold group-hover:text-white transition-colors">
-                <ImageIcon size={32} />
-              </div>
-              <span className="text-xs font-bold uppercase tracking-widest text-primary">
-                Abrir Galeria de Fotos
-              </span>
-            </button>
-
-            <p className="mt-8 text-primary/40 text-sm max-w-lg mx-auto">
-              Explore os registros fotográficos de nossas vivências, formações e
-              da natureza que compõe o instituto.
-            </p>
-          </div>
-        </section>
-
-        <FAQSection />
-
-        <InstagramSection />
+        <Reveal variant="soft">
+          <InstagramSection />
+        </Reveal>
       </main>
 
       <Footer />

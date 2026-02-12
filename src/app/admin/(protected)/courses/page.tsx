@@ -57,9 +57,12 @@ export default function CoursesPage() {
   const handleModalSuccess = (courseId: string) => {
     setIsModalOpen(false);
     setEditingCourse(null);
-    // Redirect directly to the curriculum tab of the new course
-    router.push(`/admin/courses/${courseId}?tab=curriculum`);
-    addToast("Curso criado! Comece a adicionar módulos.", "success");
+    // Refresh the list to show the new course
+    loadCourses();
+    addToast("Curso criado com sucesso!", "success");
+    // Optionally redirect to the full editor if needed, but let's stay on the list for now
+    // as per the user's "revert" request which might imply staying in context.
+    // If they want to edit the curriculum, they can click the new card.
   };
 
   const handleDelete = async (e: React.MouseEvent, id: string) => {

@@ -18,6 +18,7 @@ interface AdminPageShellProps {
   actions?: React.ReactNode;
   children: React.ReactNode;
   backLink?: string;
+  className?: string;
 }
 
 export function AdminPageShell({
@@ -27,16 +28,27 @@ export function AdminPageShell({
   actions,
   children,
   backLink,
+  className,
 }: AdminPageShellProps) {
   const { user } = useAuth();
 
   if (!user) return null; // Or skeleton
 
   return (
-    <div className="min-h-screen bg-stone-50 animate-fade-in">
+    <div
+      className={cn(
+        "min-h-screen flex flex-col bg-stone-50 animate-fade-in",
+        className,
+      )}
+    >
       {/* Top Bar / Breadcrumb Area */}
-      <div className="bg-white border-b border-stone-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+      <div className="bg-white border-b border-stone-100 shrink-0">
+        <div
+          className={cn(
+            "mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between",
+            !className?.includes("max-w-") && "max-w-7xl",
+          )}
+        >
           {/* Breadcrumbs */}
           <nav className="flex items-center text-sm text-stone-500">
             <Link
@@ -74,9 +86,14 @@ export function AdminPageShell({
       </div>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main
+        className={cn(
+          "mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 flex-1 flex flex-col min-h-0",
+          !className?.includes("max-w-") && "max-w-7xl",
+        )}
+      >
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-8">
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-8 shrink-0">
           <div className="space-y-1">
             {backLink && (
               <Link
@@ -102,7 +119,7 @@ export function AdminPageShell({
         </div>
 
         {/* Dynamic Content */}
-        <div className="space-y-6">{children}</div>
+        <div className="flex-1 flex flex-col min-h-0 space-y-6">{children}</div>
       </main>
     </div>
   );

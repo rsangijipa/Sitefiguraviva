@@ -11,6 +11,7 @@ import {
   RefreshCcw,
   BadgeCheck,
   AlertTriangle,
+  Trash2,
 } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
 import Button from "@/components/ui/Button";
@@ -19,6 +20,7 @@ import {
   toggleUserStatus as toggleUserStatusAction,
   updateUserRole,
   listUsersForAdmin,
+  deleteUser,
 } from "@/app/actions/user-management";
 import type { UserRole } from "@/types/user";
 
@@ -134,6 +136,28 @@ export default function UsersManager() {
     } catch (error) {
       console.error(error);
       addToast("Erro ao alterar cargo.", "error");
+    }
+  };
+
+  const handleDeleteUser = async (userId: string, userName?: string) => {
+    if (
+      !confirm(
+        `TEM CERTEZA que deseja EXCLUIR permanentemente o usuário ${userName || "selecionado"}? Esta ação não pode ser desfeita.`,
+      )
+    )
+      return;
+
+    try {
+      const result = await deleteUser(userId);
+      if (!result.success) {
+        addToast(result.error || "Erro ao excluir usuário.", "error");
+        return;
+      }
+      addToast("Usuário excluído com sucesso.", "success");
+      setUsers((prev) => prev.filter((u) => u.id !== userId));
+    } catch (error) {
+      console.error(error);
+      addToast("Erro ao excluir usuário.", "error");
     }
   };
 
@@ -359,6 +383,20 @@ export default function UsersManager() {
                                 ) : (
                                   <UserCheck size={14} />
                                 )}
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() =>
+                                  handleDeleteUser(
+                                    user.id,
+                                    user.displayName || user.email || undefined,
+                                  )
+                                }
+                                className="h-8 w-8 p-0 text-stone-400 hover:text-red-600 hover:bg-red-50"
+                                title="Excluir Usuário"
+                              >
+                                <Trash2 size={14} />
                               </Button>
                               <ChevronRight
                                 size={16}
