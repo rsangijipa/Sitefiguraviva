@@ -23,7 +23,9 @@ import {
   Image as ImageIcon,
   ChevronRight,
   Bell,
+  X as CloseIcon,
 } from "lucide-react";
+import Image from "next/image";
 import Button from "@/components/ui/Button";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -40,6 +42,7 @@ import CourseSettingsTab from "./tabs/CourseSettingsTab";
 import { toggleCourseStatus } from "@/app/actions/admin-publishing";
 import { AdminPageShell } from "@/components/admin/AdminPageShell";
 import { FormShell, FormSection } from "@/components/admin/FormShell";
+import { Modal } from "@/components/ui/Modal";
 
 const TABS = [
   {
@@ -164,297 +167,331 @@ export default function CourseEditorClient({
   const currentTab = TABS.find((t) => t.id === activeTab) || TABS[0];
 
   return (
-    <AdminPageShell
-      title={course.title || "Novo Curso"}
-      description={currentTab.description}
-      backLink="/admin/courses"
-      breadcrumbs={[
-        { label: "Cursos", href: "/admin/courses" },
-        { label: course.title || "Curso" },
-      ]}
-      actions={
-        <div className="flex items-center gap-2">
-          {/* Unsaved changes indicator */}
-          {hasUnsavedChanges && (
-            <span className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-orange-600 text-xs font-medium rounded-full">
-              <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-pulse" />
-              Pendentes
-            </span>
-          )}
+    <Modal isOpen={true} onClose={() => router.push("/admin/courses")}>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.98, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.98, y: 10 }}
+        className="bg-white/95 backdrop-blur-md rounded-[2.5rem] shadow-[0_0_50px_rgba(0,0,0,0.1)] w-[98vw] h-[96vh] flex flex-col overflow-hidden border border-white pointer-events-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <AdminPageShell
+          title={course.title || "Novo Curso"}
+          description={currentTab.description}
+          backLink="/admin/courses"
+          className="min-h-0 h-full flex-1 flex flex-col bg-transparent overflow-hidden max-w-none"
+          breadcrumbs={[
+            { label: "Cursos", href: "/admin/courses" },
+            { label: course.title || "Curso" },
+          ]}
+          actions={
+            <div className="flex items-center gap-4">
+              {/* Close Button */}
+              <button
+                onClick={() => router.push("/admin/courses")}
+                className="p-2.5 bg-stone-100 hover:bg-red-50 text-stone-400 hover:text-red-500 rounded-full transition-all border border-stone-200"
+                title="Fechar Editor"
+              >
+                <CloseIcon size={20} />
+              </button>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => window.open(`/portal/course/${course.id}`, "_blank")}
-            className="hidden sm:flex"
-          >
-            <ExternalLink size={16} />
-            <span className="ml-2">Preview</span>
-          </Button>
+              <div className="h-8 w-px bg-stone-200" />
 
-          <Button
-            variant={course.status === "open" ? "ghost" : "outline"}
-            size="sm"
-            onClick={handleTogglePublish}
-            isLoading={isPublishing}
-            className={cn(
-              course.status === "open"
-                ? "text-orange-600 hover:bg-orange-50"
-                : "text-green-600 border-green-200 hover:bg-green-50",
-            )}
-          >
-            {course.status === "open" ? (
-              <EyeOff size={16} />
-            ) : (
-              <Eye size={16} />
-            )}
-            <span className="ml-2 hidden sm:inline">
-              {course.status === "open" ? "Despublicar" : "Publicar"}
-            </span>
-          </Button>
+              <div className="flex items-center gap-2">
+                {/* Unsaved changes indicator */}
+                {hasUnsavedChanges && (
+                  <span className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-orange-600 text-xs font-medium rounded-full">
+                    <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-pulse" />
+                    Pendentes
+                  </span>
+                )}
 
-          <Button
-            onClick={handleSaveCourse}
-            isLoading={isSaving}
-            size="sm"
-            className="shadow-lg shadow-primary/20"
-          >
-            <Save size={16} />
-            <span className="ml-2">Salvar</span>
-          </Button>
-        </div>
-      }
-    >
-      {/* Tabs Navigation - Simplified for new Shell */}
-      <div className="flex overflow-x-auto -mb-px border-b border-stone-100 no-scrollbar">
-        {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={cn(
-              "flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-all whitespace-nowrap",
-              activeTab === tab.id
-                ? "border-primary text-primary"
-                : "border-transparent text-stone-500 hover:text-stone-800 hover:bg-stone-50",
-            )}
-          >
-            <tab.icon size={16} />
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Content Area */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={activeTab}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.2 }}
-          className="py-4"
-        >
-          {activeTab === "info" && (
-            <FormShell className="max-w-none grid lg:grid-cols-3 gap-8 bg-transparent border-0 shadow-none p-0">
-              {/* Left Column - Image & Meta */}
-              <div className="lg:col-span-1 space-y-6">
-                <FormSection
-                  title="Capa do Curso"
-                  description="Imagem de destaque"
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() =>
+                    window.open(`/portal/course/${course.id}`, "_blank")
+                  }
+                  className="hidden sm:flex"
                 >
-                  <div className="aspect-video rounded-2xl overflow-hidden bg-stone-100 relative group border border-stone-100 shadow-inner">
-                    {course.coverImage ? (
-                      <>
-                        <img
-                          src={course.coverImage}
-                          alt={course.title}
-                          className="w-full h-full object-cover"
-                        />
-                        <button
-                          onClick={() => updateCourse({ coverImage: "" })}
-                          className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </>
-                    ) : (
-                      <div className="w-full h-full flex flex-col items-center justify-center text-stone-300">
-                        <ImageIcon size={40} />
-                        <span className="text-xs mt-2">Sem imagem</span>
-                      </div>
-                    )}
-                  </div>
-                  <ImageUpload
-                    defaultImage={course.coverImage || ""}
-                    onUpload={(url) => updateCourse({ coverImage: url })}
-                    folder="courses/covers"
-                  />
-                </FormSection>
+                  <ExternalLink size={16} />
+                  <span className="ml-2">Preview</span>
+                </Button>
 
-                <FormSection title="Indicadores">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-3 bg-white rounded-xl border border-stone-100">
-                      <span className="text-sm text-stone-500 flex items-center gap-2">
-                        <Users size={16} /> Alunos
-                      </span>
-                      <span className="font-bold text-stone-800">
-                        {course.stats?.studentsCount || 0}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-white rounded-xl border border-stone-100">
-                      <span className="text-sm text-stone-500 flex items-center gap-2">
-                        <BookOpen size={16} /> Aulas
-                      </span>
-                      <span className="font-bold text-stone-800">
-                        {course.stats?.lessonsCount || 0}
-                      </span>
-                    </div>
-                  </div>
-                </FormSection>
+                <Button
+                  variant={course.status === "open" ? "ghost" : "outline"}
+                  size="sm"
+                  onClick={handleTogglePublish}
+                  isLoading={isPublishing}
+                  className={cn(
+                    course.status === "open"
+                      ? "text-orange-600 hover:bg-orange-50"
+                      : "text-green-600 border-green-200 hover:bg-green-50",
+                  )}
+                >
+                  {course.status === "open" ? (
+                    <EyeOff size={16} />
+                  ) : (
+                    <Eye size={16} />
+                  )}
+                  <span className="ml-2 hidden sm:inline">
+                    {course.status === "open" ? "Despublicar" : "Publicar"}
+                  </span>
+                </Button>
+
+                <Button
+                  onClick={handleSaveCourse}
+                  isLoading={isSaving}
+                  size="sm"
+                  className="shadow-lg shadow-primary/20"
+                >
+                  <Save size={16} />
+                  <span className="ml-2">Salvar</span>
+                </Button>
               </div>
+            </div>
+          }
+        >
+          {/* Tabs Navigation */}
+          <div className="flex overflow-x-auto -mb-px border-b border-stone-100 no-scrollbar bg-stone-50/50 backdrop-blur-sm -mx-8 px-8">
+            {TABS.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={cn(
+                  "flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-all whitespace-nowrap",
+                  activeTab === tab.id
+                    ? "border-primary text-primary"
+                    : "border-transparent text-stone-500 hover:text-stone-800 hover:bg-stone-50",
+                )}
+              >
+                <tab.icon size={16} />
+                {tab.label}
+              </button>
+            ))}
+          </div>
 
-              {/* Right Column - Main Info */}
-              <div className="lg:col-span-2 space-y-6">
-                <FormSection
-                  title="Dados Gerais"
-                  description="Como o curso aparece no portal"
-                >
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400 pl-1">
-                        Título
-                      </label>
-                      <input
-                        value={course.title || ""}
-                        onChange={(e) =>
-                          updateCourse({ title: e.target.value })
-                        }
-                        className="w-full text-xl font-bold p-4 bg-white rounded-xl border border-stone-100 focus:border-primary transition-all outline-none"
-                        placeholder="Ex: Formação em Gestalt-Terapia"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400 pl-1">
-                        Subtítulo
-                      </label>
-                      <input
-                        value={course.subtitle || ""}
-                        onChange={(e) =>
-                          updateCourse({ subtitle: e.target.value })
-                        }
-                        className="w-full p-4 bg-white rounded-xl border border-stone-100 focus:border-primary transition-all outline-none text-sm"
-                        placeholder="Frase de destaque..."
-                      />
-                    </div>
-                  </div>
-                </FormSection>
-
-                <FormSection
-                  title="Planejamento"
-                  description="Estrutura e instrutoria"
-                >
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400 pl-1">
-                        Instrutor
-                      </label>
-                      <input
-                        value={course.instructor || ""}
-                        onChange={(e) =>
-                          updateCourse({ instructor: e.target.value })
-                        }
-                        className="w-full p-4 bg-white rounded-xl border border-stone-100 focus:border-primary transition-all outline-none text-sm"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400 pl-1">
-                        Categoria
-                      </label>
-                      <input
-                        value={course.category || ""}
-                        onChange={(e) =>
-                          updateCourse({ category: e.target.value })
-                        }
-                        className="w-full p-4 bg-white rounded-xl border border-stone-100 focus:border-primary transition-all outline-none text-sm"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400 pl-1">
-                        Duração
-                      </label>
-                      <input
-                        value={course.duration || ""}
-                        onChange={(e) =>
-                          updateCourse({ duration: e.target.value })
-                        }
-                        className="w-full p-4 bg-white rounded-xl border border-stone-100 focus:border-primary transition-all outline-none text-sm"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400 pl-1">
-                        Nível
-                      </label>
-                      <select
-                        value={course.level || "beginner"}
-                        onChange={(e) =>
-                          updateCourse({ level: e.target.value })
-                        }
-                        className="w-full p-4 bg-white rounded-xl border border-stone-100 focus:border-primary transition-all outline-none text-sm cursor-pointer"
+          {/* Content Area */}
+          <div className="flex-1 overflow-y-auto custom-scrollbar px-4 sm:px-8 pb-12 scroll-smooth">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                {activeTab === "info" && (
+                  <FormShell className="max-w-none grid lg:grid-cols-3 gap-8 bg-transparent border-0 shadow-none p-0">
+                    {/* Left Column - Image & Meta */}
+                    <div className="lg:col-span-1 space-y-6">
+                      <FormSection
+                        title="Capa do Curso"
+                        description="Imagem de destaque"
                       >
-                        <option value="beginner">Iniciante</option>
-                        <option value="intermediate">Intermediário</option>
-                        <option value="advanced">Avançado</option>
-                      </select>
+                        <div className="aspect-video rounded-2xl overflow-hidden bg-stone-100 relative group border border-stone-100 shadow-inner">
+                          {course.coverImage ? (
+                            <>
+                              <Image
+                                src={course.coverImage}
+                                alt={course.title}
+                                fill
+                                priority
+                                className="object-cover"
+                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                              />
+                              <button
+                                onClick={() => updateCourse({ coverImage: "" })}
+                                className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </>
+                          ) : (
+                            <div className="w-full h-full flex flex-col items-center justify-center text-stone-300">
+                              <ImageIcon size={40} />
+                              <span className="text-xs mt-2">Sem imagem</span>
+                            </div>
+                          )}
+                        </div>
+                        <ImageUpload
+                          defaultImage={course.coverImage || ""}
+                          onUpload={(url) => updateCourse({ coverImage: url })}
+                          folder="courses/covers"
+                        />
+                      </FormSection>
+
+                      <FormSection title="Indicadores">
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between p-3 bg-white rounded-xl border border-stone-100">
+                            <span className="text-sm text-stone-500 flex items-center gap-2">
+                              <Users size={16} /> Alunos
+                            </span>
+                            <span className="font-bold text-stone-800">
+                              {course.stats?.studentsCount || 0}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between p-3 bg-white rounded-xl border border-stone-100">
+                            <span className="text-sm text-stone-500 flex items-center gap-2">
+                              <BookOpen size={16} /> Aulas
+                            </span>
+                            <span className="font-bold text-stone-800">
+                              {course.stats?.lessonsCount || 0}
+                            </span>
+                          </div>
+                        </div>
+                      </FormSection>
                     </div>
-                  </div>
-                </FormSection>
 
-                <FormSection
-                  title="Descrição"
-                  description="Detalhamento do programa"
-                >
-                  <textarea
-                    value={course.description || ""}
-                    onChange={(e) =>
-                      updateCourse({ description: e.target.value })
-                    }
-                    rows={6}
-                    className="w-full p-4 bg-white rounded-xl border border-stone-100 focus:border-primary transition-all outline-none resize-none text-sm"
-                  />
-                </FormSection>
-              </div>
-            </FormShell>
-          )}
+                    {/* Right Column - Main Info */}
+                    <div className="lg:col-span-2 space-y-6">
+                      <FormSection
+                        title="Dados Gerais"
+                        description="Como o curso aparece no portal"
+                      >
+                        <div className="space-y-4">
+                          <div className="space-y-2">
+                            <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400 pl-1">
+                              Título
+                            </label>
+                            <input
+                              value={course.title || ""}
+                              onChange={(e) =>
+                                updateCourse({ title: e.target.value })
+                              }
+                              className="w-full text-xl font-bold p-4 bg-white rounded-xl border border-stone-100 focus:border-primary transition-all outline-none"
+                              placeholder="Ex: Formação em Gestalt-Terapia"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400 pl-1">
+                              Subtítulo
+                            </label>
+                            <input
+                              value={course.subtitle || ""}
+                              onChange={(e) =>
+                                updateCourse({ subtitle: e.target.value })
+                              }
+                              className="w-full p-4 bg-white rounded-xl border border-stone-100 focus:border-primary transition-all outline-none text-sm"
+                              placeholder="Frase de destaque..."
+                            />
+                          </div>
+                        </div>
+                      </FormSection>
 
-          {activeTab === "curriculum" && (
-            <CourseCurriculumTab courseId={course.id} />
-          )}
-          {activeTab === "students" && (
-            <CourseStudentsTab courseId={course.id} />
-          )}
-          {activeTab === "materials" && (
-            <CourseMaterialsTab courseId={course.id} />
-          )}
-          {activeTab === "announcements" && (
-            <CourseAnnouncementsTab courseId={course.id} />
-          )}
-          {activeTab === "community" && (
-            <CourseCommunityTab courseId={course.id} />
-          )}
-          {activeTab === "settings" && <CourseSettingsTab course={course} />}
-        </motion.div>
-      </AnimatePresence>
+                      <FormSection
+                        title="Planejamento"
+                        description="Estrutura e instrutoria"
+                      >
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400 pl-1">
+                              Instrutor
+                            </label>
+                            <input
+                              value={course.instructor || ""}
+                              onChange={(e) =>
+                                updateCourse({ instructor: e.target.value })
+                              }
+                              className="w-full p-4 bg-white rounded-xl border border-stone-100 focus:border-primary transition-all outline-none text-sm"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400 pl-1">
+                              Categoria
+                            </label>
+                            <input
+                              value={course.category || ""}
+                              onChange={(e) =>
+                                updateCourse({ category: e.target.value })
+                              }
+                              className="w-full p-4 bg-white rounded-xl border border-stone-100 focus:border-primary transition-all outline-none text-sm"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400 pl-1">
+                              Duração
+                            </label>
+                            <input
+                              value={course.duration || ""}
+                              onChange={(e) =>
+                                updateCourse({ duration: e.target.value })
+                              }
+                              className="w-full p-4 bg-white rounded-xl border border-stone-100 focus:border-primary transition-all outline-none text-sm"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400 pl-1">
+                              Nível
+                            </label>
+                            <select
+                              value={course.level || "beginner"}
+                              onChange={(e) =>
+                                updateCourse({ level: e.target.value })
+                              }
+                              className="w-full p-4 bg-white rounded-xl border border-stone-100 focus:border-primary transition-all outline-none text-sm cursor-pointer"
+                            >
+                              <option value="beginner">Iniciante</option>
+                              <option value="intermediate">
+                                Intermediário
+                              </option>
+                              <option value="advanced">Avançado</option>
+                            </select>
+                          </div>
+                        </div>
+                      </FormSection>
 
-      {/* Mobile Save FAB */}
-      <div className="fixed bottom-6 right-6 md:hidden">
-        <Button
-          onClick={handleSaveCourse}
-          isLoading={isSaving}
-          className="rounded-full w-14 h-14 shadow-2xl"
-        >
-          <Save size={24} />
-        </Button>
-      </div>
-    </AdminPageShell>
+                      <FormSection
+                        title="Descrição"
+                        description="Detalhamento do programa"
+                      >
+                        <textarea
+                          value={course.description || ""}
+                          onChange={(e) =>
+                            updateCourse({ description: e.target.value })
+                          }
+                          rows={6}
+                          className="w-full p-4 bg-white rounded-xl border border-stone-100 focus:border-primary transition-all outline-none resize-none text-sm"
+                        />
+                      </FormSection>
+                    </div>
+                  </FormShell>
+                )}
+
+                {activeTab === "curriculum" && (
+                  <CourseCurriculumTab courseId={course.id} />
+                )}
+                {activeTab === "students" && (
+                  <CourseStudentsTab courseId={course.id} />
+                )}
+                {activeTab === "materials" && (
+                  <CourseMaterialsTab courseId={course.id} />
+                )}
+                {activeTab === "announcements" && (
+                  <CourseAnnouncementsTab courseId={course.id} />
+                )}
+                {activeTab === "community" && (
+                  <CourseCommunityTab courseId={course.id} />
+                )}
+                {activeTab === "settings" && (
+                  <CourseSettingsTab course={course} />
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Mobile Save FAB */}
+          <div className="fixed bottom-6 right-6 md:hidden">
+            <Button
+              onClick={handleSaveCourse}
+              isLoading={isSaving}
+              className="rounded-full w-14 h-14 shadow-2xl"
+            >
+              <Save size={24} />
+            </Button>
+          </div>
+        </AdminPageShell>
+      </motion.div>
+    </Modal>
   );
 }

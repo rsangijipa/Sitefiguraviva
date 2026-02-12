@@ -27,8 +27,10 @@ import {
   ClipboardList,
   Search,
   ArrowRight,
+  User as UserIcon,
 } from "lucide-react";
 import PageShell from "@/components/ui/PageShell";
+import { useFounderSettings } from "@/hooks/useSiteSettings";
 
 export default function AdminShell({
   children,
@@ -36,11 +38,15 @@ export default function AdminShell({
   children: React.ReactNode;
 }) {
   const { signOut, user, role } = useAuth(); // Get current user and role
+  const { data: founderData } = useFounderSettings();
   const router = useRouter();
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
+
+  // Fallback photo: use user's photo or founder's photo (if it's Lilian)
+  const profilePhoto = user?.photoURL || founderData?.image;
 
   // Note: Auth checking is now done Server-Side in layout.tsx.
   // UseClient is only for UI state (Sidebar, Animations).
@@ -207,26 +213,24 @@ export default function AdminShell({
       </AnimatePresence>
 
       {/* Main Content */}
-      <main className="flex-1 lg:ml-80 p-4 md:p-12 lg:p-16 min-h-screen relative overflow-y-auto custom-scrollbar">
+      <main className="flex-1 lg:ml-80 p-4 md:p-8 lg:p-10 min-h-screen relative overflow-y-auto custom-scrollbar">
         <div className="relative z-10 max-w-7xl mx-auto animate-fade-in-up">
-          <header className="mb-8 md:mb-12 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6">
+          <header className="mb-6 md:mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div className="flex items-center gap-4">
-              {/* Global Back to Site Button for context if needed, but existing Home link is there. */}
               <div>
-                <h2 className="font-serif text-3xl md:text-5xl text-primary mb-2 md:mb-3 tracking-tight">
+                <h2 className="font-serif text-2xl md:text-3xl text-primary mb-1 tracking-tight">
                   Painel de Controle
                 </h2>
-                <p className="text-stone-500 text-xs md:text-base font-light max-w-md leading-relaxed">
-                  Gerencie sua presença digital, cursos e conteúdos com
-                  organicidade e fluidez.
+                <p className="text-stone-400 text-[10px] md:text-xs font-medium uppercase tracking-wider">
+                  Gerencie sua presença digital, cursos e conteúdos
                 </p>
               </div>
             </div>
 
-            <div className="w-full md:w-auto flex flex-col md:flex-row md:items-center gap-3">
-              <div className="relative w-full md:w-80">
-                <div className="flex items-center gap-2 px-3 py-2 bg-white border border-stone-200 rounded-xl">
-                  <Search size={16} className="text-stone-400" />
+            <div className="w-full md:w-auto flex items-center gap-3">
+              <div className="relative flex-1 md:flex-none md:w-64">
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-white border border-stone-200 rounded-xl">
+                  <Search size={14} className="text-stone-400" />
                   <input
                     value={searchQuery}
                     onChange={(e) => {
@@ -235,8 +239,8 @@ export default function AdminShell({
                     }}
                     onFocus={() => setSearchOpen(true)}
                     onBlur={() => setTimeout(() => setSearchOpen(false), 120)}
-                    placeholder="Ir para seção do admin..."
-                    className="w-full bg-transparent text-sm text-stone-700 outline-none placeholder:text-stone-400"
+                    placeholder="Pesquisar..."
+                    className="w-full bg-transparent text-xs text-stone-700 outline-none placeholder:text-stone-400"
                   />
                 </div>
 
@@ -248,14 +252,14 @@ export default function AdminShell({
                           key={item.path}
                           type="button"
                           onClick={() => goTo(item.path)}
-                          className="w-full px-3 py-2.5 text-left text-sm text-stone-700 hover:bg-stone-50 flex items-center justify-between"
+                          className="w-full px-3 py-2 text-left text-xs text-stone-700 hover:bg-stone-50 flex items-center justify-between"
                         >
                           <span>{item.label}</span>
-                          <ArrowRight size={14} className="text-stone-400" />
+                          <ArrowRight size={12} className="text-stone-400" />
                         </button>
                       ))
                     ) : (
-                      <div className="px-3 py-3 text-xs text-stone-500">
+                      <div className="px-3 py-2 text-[10px] text-stone-500">
                         Nenhuma seção encontrada.
                       </div>
                     )}
@@ -263,41 +267,41 @@ export default function AdminShell({
                 )}
               </div>
 
-              <div className="flex items-center gap-3 bg-white/60 backdrop-blur-md p-1.5 pr-2 rounded-full border border-white/50 shadow-sm">
-                <div className="flex items-center gap-3 pl-3">
+              <div className="flex items-center gap-2 bg-white/60 backdrop-blur-md p-1 pr-1.5 rounded-full border border-white/50 shadow-sm">
+                <div className="flex items-center gap-2 pl-2">
                   <div className="flex flex-col items-end hidden md:flex">
                     <span className="text-xs font-bold text-primary leading-tight">
                       {user?.displayName || "Lilian"}
                     </span>
-                    <span className="text-[9px] text-stone-400 uppercase tracking-widest leading-tight">
+                    <span className="text-[9px] text-stone-400 font-medium leading-tight">
                       {user?.email}
                     </span>
                   </div>
-                  <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm bg-stone-100 flex items-center justify-center">
-                    {user?.photoURL ? (
+                  <div className="relative w-8 h-8 rounded-full overflow-hidden border border-stone-100 shadow-inner bg-stone-100 flex items-center justify-center">
+                    {profilePhoto ? (
                       <img
-                        src={user.photoURL}
+                        src={profilePhoto}
                         alt="Profile"
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <span className="text-primary font-bold text-xs">
+                      <span className="text-primary font-bold text-[10px]">
                         {user?.displayName?.[0] || "L"}
                       </span>
                     )}
                   </div>
                 </div>
 
-                <div className="h-6 w-px bg-stone-200 mx-1" />
+                <div className="h-4 w-px bg-stone-200 mx-0.5" />
 
                 <Link
                   href="/admin/settings"
                   title="Configurações"
-                  className="w-10 h-10 rounded-full bg-white hover:bg-gold/10 transition-all duration-500 flex items-center justify-center text-stone-400 hover:text-gold shadow-sm hover:shadow-md group"
+                  className="w-8 h-8 rounded-full bg-white hover:bg-gold/10 transition-all flex items-center justify-center text-stone-400 hover:text-gold shadow-sm group"
                 >
                   <Settings
-                    size={18}
-                    className="group-hover:rotate-90 transition-transform duration-500"
+                    size={14}
+                    className="group-hover:rotate-45 transition-transform"
                   />
                 </Link>
               </div>

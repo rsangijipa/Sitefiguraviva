@@ -140,6 +140,46 @@ export async function toggleUserStatus(
   }
 }
 
+export async function deleteUser(targetUid: string) {
+  const adminClaims = await requireAdmin();
+  const actorUid = adminClaims.uid;
+
+  if (targetUid === actorUid) {
+    return {
+      success: false,
+      error: "Você não pode excluir sua própria conta.",
+    };
+  }
+
+  try {
+    // 1. Delete from Firebase Auth
+    await adminAuth.deleteUser(targetUid).catch((err) => {
+      // If user not found in Auth but exists in DB, we still want to clean DB
+      if (err.code !== "auth/user-not-found") throw err;
+    });
+
+    // 2. Delete from Firestore Profile
+    await adminDb.collection("users").doc(targetUid).delete();
+
+    // 3. Audit
+    await auditService.logEvent({
+      eventType: "USER_DELETED",
+      actor: { uid: actorUid, email: adminClaims.email },
+      target: { id: targetUid, collection: "users" },
+      payload: { deletedAt: Timestamp.now() },
+    });
+
+    revalidatePath("/admin/users");
+    return { success: true };
+  } catch (error: any) {
+    console.error("deleteUser error:", error);
+    return {
+      success: false,
+      error: error.message || "Erro ao excluir usuário",
+    };
+  }
+}
+
 export async function listUsersForAdmin(
   pageToken?: string,
   pageSize: number = 100,
