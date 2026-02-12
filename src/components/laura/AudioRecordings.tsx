@@ -352,15 +352,16 @@ export function AudioRecordings() {
           </div>
 
           <span className="text-[11px] tracking-[0.3em] uppercase font-bold text-[#8a7a6a] block mb-4">
-            Arquivo de Áudio
+            Arquivo de Fritz Perls
           </span>
           <h2 className="font-serif text-4xl md:text-5xl text-[#3a2f25] leading-tight">
             Gravações{" "}
-            <span className="italic text-[#5a4838] font-light">Históricas</span>
+            <span className="italic text-[#5a4838] font-light">Históricas</span>{" "}
+            de Fritz Perls
           </h2>
           <p className="mt-6 text-[#4a3a2a] font-serif italic max-w-xl mx-auto">
-            Palestra de Laura Perls sobre Gestalt. Ative as legendas para
-            acompanhar em português.
+            Gravações originais de Fritz Perls sobre a teoria da Gestalt. Ative
+            as legendas para acompanhar em português.
           </p>
         </div>
 
@@ -375,10 +376,10 @@ export function AudioRecordings() {
           <AudioPlayer
             src="/laura/audio/Fritz Laura Perls Videos Audios and Biography1.mp3"
             vttSrc="/laura/audio/laura-perls-pt.vtt"
-            title="The Art of Contact - Palestra Completa"
+            title="Fritz Perls - Gestalt Theory (1966)"
             duration="28:50"
-            year={1978}
-            description="Palestra histórica de Laura Perls sobre a natureza do contato terapêutico na Gestalt. Legendas em português disponíveis."
+            year={1966}
+            description="Palestra histórica de Fritz Perls sobre a teoria da Gestalt. Legendas em português disponíveis."
           />
         </motion.div>
 
@@ -419,9 +420,10 @@ export function AudioRecordings() {
         {/* Note */}
         <div className="mt-12 p-6 bg-[#d9d4c9] border-l-4 border-[#a88a4d] rounded-r-sm">
           <p className="text-[#4a3a2a] font-serif italic text-sm">
-            <strong className="not-italic">Nota:</strong> Esta gravação foi
-            preservada pelo arquivo histórico do NYIGT. As legendas em português
-            foram traduzidas para fins educacionais.
+            <strong className="not-italic">Nota:</strong> Estas gravações são de
+            Fritz Perls, co-fundador da Gestalt-terapia. As legendas em
+            português foram traduzidas para fins educacionais pelo Instituto
+            Figura Viva.
           </p>
         </div>
       </div>

@@ -32,10 +32,11 @@ export const lauraPerlsContent = {
   ],
   audioRecordings: [
     {
-      title: "The Art of Contact",
-      duration: "12:34",
-      year: 1978,
-      description: "Palestra sobre a natureza do contato terapêutico",
+      title: "Fritz Perls - Gestalt Theory",
+      duration: "28:50",
+      year: 1966,
+      description:
+        "Palestra histórica de Fritz Perls sobre a teoria da Gestalt",
     },
     {
       title: "Support and Surrender",
