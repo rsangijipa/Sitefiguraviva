@@ -37,12 +37,8 @@ async function getHomeData() {
         .orderBy("created_at", "desc")
         .limit(4)
         .get(),
-      db
-        .collection("publicGallery")
-        .orderBy("created_at", "desc")
-        .limit(12)
-        .get(),
-      db.collection("gallery").orderBy("created_at", "desc").limit(12).get(),
+      db.collection("publicGallery").orderBy("created_at", "desc").get(),
+      db.collection("gallery").orderBy("created_at", "desc").get(),
       db.collection("siteSettings").doc("founder").get(),
       db.collection("siteSettings").doc("institute").get(),
       db.collection("siteSettings").doc("seo").get(),
