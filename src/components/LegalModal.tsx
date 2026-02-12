@@ -12,7 +12,7 @@ interface LegalModalProps {
 }
 
 export default function LegalModal({ isOpen, onClose, type }: LegalModalProps) {
-  const { data } = useLegalSettings();
+  const { data, isFetching } = useLegalSettings({ aggressiveRefresh: isOpen });
 
   if (!type || !data) return null;
 
@@ -38,6 +38,9 @@ export default function LegalModal({ isOpen, onClose, type }: LegalModalProps) {
               <div className="flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-primary/40 mt-1">
                 <Calendar size={10} />
                 <span>Atualizado em {content.lastUpdated}</span>
+                {isFetching && (
+                  <span className="text-gold">• sincronizando</span>
+                )}
               </div>
             </div>
           </div>
