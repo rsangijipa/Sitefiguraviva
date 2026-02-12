@@ -1,22 +1,19 @@
 "use client";
 
-// import { useApp } from '@/context/AppContext';
-import { useCourses, useBlogPosts, useGallery } from "@/hooks/useContent";
 import { motion } from "framer-motion";
 import {
   BarChart,
   Users,
   BookOpen,
-  DollarSign,
   Activity,
   FileText,
   Eye,
   Image as ImageIcon,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/Card";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { getAuditLogs } from "@/actions/audit";
-import { getDetailedDashboardStats } from "@/app/actions/admin/dashboard";
+import { getAdminDashboardKPIs } from "@/app/actions/metrics";
 import { Settings, Zap, Shield, Globe, Award, List } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -25,12 +22,13 @@ import { useToast } from "@/context/ToastContext";
 
 export default function AdminDashboard() {
   const { addToast } = useToast();
-  const { data: courses = [] } = useCourses(true);
-  const { data: blogPosts = [] } = useBlogPosts(true);
-  const { data: gallery = [] } = useGallery();
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [serverStats, setServerStats] = useState<any>(null);
   const [statsError, setStatsError] = useState<string | null>(null);
+  const [kpiMeta, setKpiMeta] = useState<{
+    updatedAt?: string;
+    source?: Record<string, string>;
+  }>({});
 
   useEffect(() => {
     const load = async () => {
@@ -38,7 +36,7 @@ export default function AdminDashboard() {
 
       const [auditRes, statsRes] = await Promise.all([
         getAuditLogs(10),
-        getDetailedDashboardStats(),
+        getAdminDashboardKPIs(),
       ]);
 
       if (auditRes.success) {
@@ -47,8 +45,19 @@ export default function AdminDashboard() {
         setStatsError("Falha ao carregar atividade recente.");
       }
 
-      if (statsRes.success) {
-        setServerStats(statsRes.stats);
+      if (statsRes.success && statsRes.data) {
+        setServerStats({
+          totalUsers: statsRes.data.totalUsers,
+          activeEnrollments: statsRes.data.accessGranted,
+          totalCourses: statsRes.data.totalCourses,
+          libraryDocs: statsRes.data.libraryDocs,
+          totalAuditLogs: statsRes.data.totalAuditLogs,
+          recentUsers: statsRes.data.recentUsers,
+          pendingEnrollments: statsRes.data.pendingEnrollments,
+          source: statsRes.source,
+          updatedAt: statsRes.updatedAt,
+        });
+        setKpiMeta({ updatedAt: statsRes.updatedAt, source: statsRes.source });
       } else {
         setStatsError(
           "Falha ao carregar métricas do painel. Tente atualizar em alguns segundos.",
@@ -60,11 +69,6 @@ export default function AdminDashboard() {
     const interval = setInterval(load, 45_000);
     return () => clearInterval(interval);
   }, []);
-
-  const libraryDocs = useMemo(
-    () => blogPosts.filter((p: any) => p.type === "library"),
-    [blogPosts],
-  );
 
   const stats = [
     {
@@ -190,6 +194,13 @@ export default function AdminDashboard() {
         <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
           {statsError}
         </div>
+      )}
+
+      {kpiMeta.updatedAt && (
+        <p className="mb-6 text-[10px] text-primary/40 uppercase tracking-widest font-bold">
+          KPIs atualizados em{" "}
+          {new Date(kpiMeta.updatedAt).toLocaleTimeString("pt-BR")}
+        </p>
       )}
 
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">

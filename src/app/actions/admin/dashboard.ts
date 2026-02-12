@@ -1,8 +1,8 @@
 "use server";
 
-import { adminAuth, adminDb } from "@/lib/firebase/admin";
+import { adminAuth } from "@/lib/firebase/admin";
 import { cookies } from "next/headers";
-import { deepSafeSerialize } from "@/lib/utils";
+import { buildAdminDashboardKPIs } from "@/lib/metrics/kpi";
 
 async function assertAdmin() {
   const sessionCookie = (await cookies()).get("session")?.value;
@@ -16,74 +16,24 @@ export async function getDetailedDashboardStats() {
   try {
     await assertAdmin();
 
-    const [
-      usersCount,
-      activeEnrollmentsCount,
-      coursesCount,
-      blogPostsCount,
-      libraryCount,
-      pendingAuditCount,
-      recentUsers,
-      pendingEnrollments,
-    ] = await Promise.all([
-      adminDb
-        .collection("users")
-        .count()
-        .get()
-        .then((s) => s.data().count),
-      adminDb
-        .collection("enrollments")
-        .where("status", "in", ["active", "completed"])
-        .count()
-        .get()
-        .then((s) => s.data().count),
-      adminDb
-        .collection("courses")
-        .count()
-        .get()
-        .then((s) => s.data().count),
-      adminDb
-        .collection("posts")
-        .where("type", "!=", "library")
-        .count()
-        .get()
-        .then((s) => s.data().count),
-      adminDb
-        .collection("posts")
-        .where("type", "==", "library")
-        .count()
-        .get()
-        .then((s) => s.data().count),
-      adminDb
-        .collection("audit_logs")
-        .count()
-        .get()
-        .then((s) => s.data().count),
-      adminDb
-        .collection("users")
-        .orderBy("createdAt", "desc")
-        .limit(5)
-        .get()
-        .then((s) => s.docs.map((d) => ({ id: d.id, ...d.data() }))),
-      adminDb
-        .collection("enrollments")
-        .where("status", "==", "pending_approval")
-        .limit(5)
-        .get()
-        .then((s) => s.docs.map((d) => ({ id: d.id, ...d.data() }))),
-    ]);
+    const kpi = await buildAdminDashboardKPIs();
+    if (!kpi.success || !kpi.data) {
+      return { success: false, error: kpi.error || "Failed to load KPIs" };
+    }
 
     return {
       success: true,
       stats: {
-        totalUsers: usersCount,
-        activeEnrollments: activeEnrollmentsCount,
-        totalCourses: coursesCount,
-        blogPosts: blogPostsCount,
-        libraryDocs: libraryCount,
-        totalAuditLogs: pendingAuditCount,
-        recentUsers: deepSafeSerialize(recentUsers),
-        pendingEnrollments: deepSafeSerialize(pendingEnrollments),
+        totalUsers: kpi.data.totalUsers,
+        activeEnrollments: kpi.data.accessGranted,
+        totalCourses: kpi.data.totalCourses,
+        blogPosts: null,
+        libraryDocs: kpi.data.libraryDocs,
+        totalAuditLogs: kpi.data.totalAuditLogs,
+        recentUsers: kpi.data.recentUsers,
+        pendingEnrollments: kpi.data.pendingEnrollments,
+        source: kpi.source,
+        updatedAt: kpi.updatedAt,
       },
     };
   } catch (error: any) {

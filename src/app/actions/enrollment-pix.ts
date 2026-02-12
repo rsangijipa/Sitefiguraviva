@@ -7,6 +7,7 @@ import { EnrollmentDoc, EnrollmentStatus } from "@/types/lms";
 import { logAudit } from "@/lib/audit";
 import { revalidatePath } from "next/cache";
 import { telemetry } from "@/lib/telemetry";
+import { trackFunnelEvent } from "@/actions/analytics";
 
 /**
  * Aluno solicita acesso via PIX.
@@ -48,6 +49,7 @@ export async function createEnrollmentPending(courseId: string) {
 
     revalidatePath(`/curso/${courseId}`);
     telemetry.track("enrollment_pix_pending_approval", { uid, courseId });
+    await trackFunnelEvent("funnel_enrollment_pending", { courseId }, uid);
     return { success: true };
   } catch (error: any) {
     telemetry.error(error, {
@@ -107,6 +109,15 @@ export async function approvePixEnrollment(userId: string, courseId: string) {
         courseId,
         transactionId: result.updates?.sourceRef,
       });
+      await trackFunnelEvent(
+        "funnel_enrollment_active",
+        {
+          courseId,
+          approvedBy: adminSession.uid,
+          paymentMethod: "pix",
+        },
+        userId,
+      );
       await logAudit({
         actor: {
           uid: adminSession.uid,

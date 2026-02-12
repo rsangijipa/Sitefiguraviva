@@ -1,4 +1,5 @@
 import { adminDb } from "@/lib/firebase/admin";
+import { buildAdminDashboardKPIs } from "@/lib/metrics/kpi";
 
 export interface DashboardKPIs {
   activeEnrollments: number;
@@ -13,14 +14,12 @@ export interface DashboardKPIs {
 export const KpiService = {
   async getDashboardMetrics(): Promise<DashboardKPIs> {
     try {
-      // 1. Active Enrollments
-      const enrollmentsSnap = await adminDb
-        .collection("enrollments")
-        .where("status", "==", "active")
-        .count()
-        .get();
+      const adminKpis = await buildAdminDashboardKPIs();
+      if (!adminKpis.success || !adminKpis.data) {
+        throw new Error(adminKpis.error || "Failed to load admin KPI core");
+      }
 
-      const activeEnrollments = enrollmentsSnap.data().count;
+      const activeEnrollments = Number(adminKpis.data.accessGranted || 0);
 
       // 2. Completion Rate (Sampled for performance or aggregate)
       const sampleSnap = await adminDb

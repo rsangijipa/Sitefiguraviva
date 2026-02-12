@@ -46,33 +46,34 @@ export default function UsersManager() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingError, setLoadingError] = useState<string | null>(null);
+  const [nextPageToken, setNextPageToken] = useState<string | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const { addToast } = useToast();
 
-  const loadUsers = async () => {
-    setLoading(true);
+  const loadUsers = async (mode: "reset" | "append" = "reset") => {
+    if (mode === "reset") setLoading(true);
+    if (mode === "append") setLoadingMore(true);
     setLoadingError(null);
-    const all: AdminUser[] = [];
-    let token: string | undefined;
 
-    for (let i = 0; i < 10; i++) {
-      const res = await listUsersForAdmin(token, 100);
-      if (!res.success) {
-        const msg = res.error || "Erro ao listar usuários.";
-        setLoadingError(msg);
-        addToast(msg, "error");
-        break;
-      }
-
-      all.push(...(res.users as AdminUser[]));
-      token = (res.nextPageToken || undefined) as string | undefined;
-      if (!token) break;
+    const token = mode === "append" ? nextPageToken || undefined : undefined;
+    const res = await listUsersForAdmin(token, 100);
+    if (!res.success) {
+      const msg = res.error || "Erro ao listar usuários.";
+      setLoadingError(msg);
+      addToast(msg, "error");
+      setLoading(false);
+      setLoadingMore(false);
+      return;
     }
 
-    setUsers(all);
+    const incoming = (res.users as AdminUser[]) || [];
+    setUsers((prev) => (mode === "append" ? [...prev, ...incoming] : incoming));
+    setNextPageToken((res.nextPageToken as string | null) || null);
     setLoading(false);
+    setLoadingMore(false);
   };
 
   useEffect(() => {
@@ -150,7 +151,7 @@ export default function UsersManager() {
         <Button
           variant="outline"
           leftIcon={<RefreshCcw size={14} />}
-          onClick={loadUsers}
+          onClick={() => loadUsers("reset")}
           isLoading={loading}
         >
           Atualizar
@@ -384,6 +385,18 @@ export default function UsersManager() {
               </table>
             </div>
           </Card>
+
+          {nextPageToken && (
+            <div className="mt-4 flex justify-center">
+              <Button
+                variant="outline"
+                onClick={() => loadUsers("append")}
+                isLoading={loadingMore}
+              >
+                Carregar mais
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </div>
