@@ -2,17 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { db } from "@/lib/firebase/client";
-import {
-  collection,
-  query,
-  orderBy,
-  limit,
-  onSnapshot,
-  where,
-  setDoc,
-  doc,
-  serverTimestamp,
-} from "firebase/firestore";
+import { collection, query, onSnapshot, where } from "firebase/firestore";
 import { Search, User, Plus, GraduationCap, X, Layers } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
 import { useCourses } from "@/hooks/useContent";
@@ -20,6 +10,7 @@ import Button from "@/components/ui/Button";
 import { EnrollmentCard } from "./EnrollmentCard";
 import BatchEnrollModal from "./BatchEnrollModal";
 import { enrollUser } from "@/app/actions/admin/enrollment";
+import { listUsersForAdmin } from "@/app/actions/user-management";
 
 export default function EnrollmentsManager() {
   const [users, setUsers] = useState<any[]>([]);
@@ -34,16 +25,30 @@ export default function EnrollmentsManager() {
 
   // Fetch Users
   useEffect(() => {
-    const q = query(
-      collection(db, "users"),
-      orderBy("lastLogin", "desc"),
-      limit(50),
-    );
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const docs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setUsers(docs);
-    });
-    return () => unsubscribe();
+    let mounted = true;
+
+    (async () => {
+      const all: any[] = [];
+      let token: string | undefined;
+
+      for (let i = 0; i < 10; i++) {
+        const res = await listUsersForAdmin(token, 100);
+        if (!res.success) {
+          addToast(res.error || "Erro ao carregar usuários.", "error");
+          break;
+        }
+
+        all.push(...res.users);
+        token = (res.nextPageToken || undefined) as string | undefined;
+        if (!token) break;
+      }
+
+      if (mounted) setUsers(all);
+    })();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   // Filter users locally

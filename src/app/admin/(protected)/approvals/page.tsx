@@ -82,7 +82,6 @@ export default function ApprovalsPage() {
         enrollment.id,
         enrollment.uid,
         enrollment.courseId,
-        enrollment,
       );
 
       if (result.success) {

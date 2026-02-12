@@ -35,6 +35,20 @@ export function useEnrolledCourse(
     queryFn: async () => {
       if (!courseId) return null;
 
+      // Keep server-authorized payload as canonical for this route render.
+      // This avoids client-side re-evaluation races/drift that can temporarily
+      // flip access to denied after hydration.
+      if (initialData) {
+        return initialData;
+      }
+
+      // Prevent hydration race: keep SSR payload while auth context resolves userId.
+      // Without this, the first client refetch can evaluate as unauthenticated and
+      // briefly flip access to denied before settling.
+      if (!isAdmin && !userId && initialData) {
+        return initialData;
+      }
+
       // 1. Check Enrollment (SSoT) - Skip if Admin
       let enrollmentData: any = null;
       let status = isAdmin ? "active" : "none";
@@ -52,49 +66,18 @@ export function useEnrolledCourse(
             };
             status = enrollmentData.status || "none";
           } else {
-            // B. Try Alternate ID Format (courseId_uid)
-            const altEnrollmentRef = doc(
-              db,
-              "enrollments",
-              `${courseId}_${userId}`,
+            // B. Compatibility fallback for legacy/non-deterministic IDs.
+            const q = query(
+              collection(db, "enrollments"),
+              where("uid", "==", userId),
+              where("courseId", "==", courseId),
+              limit(1),
             );
-            const altEnrollmentSnap = await getDoc(altEnrollmentRef);
-
-            if (altEnrollmentSnap.exists()) {
-              enrollmentData = {
-                id: altEnrollmentSnap.id,
-                ...altEnrollmentSnap.data(),
-              };
+            const fallbackSnap = await getDocs(q);
+            if (!fallbackSnap.empty) {
+              const d = fallbackSnap.docs[0];
+              enrollmentData = { id: d.id, ...d.data() };
               status = enrollmentData.status || "none";
-            } else {
-              // C. Check User Profile Fallback (Legacy)
-              const userRef = doc(db, "users", userId);
-              const userSnap = await getDoc(userRef);
-              const userData = userSnap.data();
-
-              if (userData?.enrolledCourseIds?.includes(courseId)) {
-                status = "active";
-                enrollmentData = {
-                  id: `profile_${userId}_${courseId}`,
-                  status: "active",
-                  paymentMethod: "legacy",
-                };
-                console.log("[useEnrolledCourse] Found legacy fallback access");
-              } else {
-                // D. Final Query Fallback (for non-standard IDs or missing fields)
-                const q = query(
-                  collection(db, "enrollments"),
-                  where("uid", "==", userId),
-                  where("courseId", "==", courseId),
-                  limit(1),
-                );
-                const fallbackSnap = await getDocs(q);
-                if (!fallbackSnap.empty) {
-                  const d = fallbackSnap.docs[0];
-                  enrollmentData = { id: d.id, ...d.data() };
-                  status = enrollmentData.status || "none";
-                }
-              }
             }
           }
         } catch (err) {
@@ -183,6 +166,7 @@ export function useEnrolledCourse(
     staleTime: 0,
     gcTime: 1000 * 60 * 10,
     retry: 1,
+    refetchOnWindowFocus: false,
   });
 
   // Mutation: Update Progress (Last Access)

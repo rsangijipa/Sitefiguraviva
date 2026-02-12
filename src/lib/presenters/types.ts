@@ -31,7 +31,6 @@ export interface EnrollmentDTO {
     | "completed"
     | "canceled"
     | "refunded"
-    | "expired"
     | "cancelled";
   enrolledAt: string;
 

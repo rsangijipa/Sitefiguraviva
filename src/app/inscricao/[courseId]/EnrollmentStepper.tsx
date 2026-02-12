@@ -71,9 +71,13 @@ export default function EnrollmentStepper({
 
     // Step 4: Any established enrollment status
     if (
-      ["active", "pending", "pending_approval", "past_due"].includes(
-        enrollmentStatus,
-      )
+      [
+        "pending_approval",
+        "active",
+        "completed",
+        "canceled",
+        "refunded",
+      ].includes(enrollmentStatus)
     ) {
       return 4;
     }
@@ -204,9 +208,9 @@ export default function EnrollmentStepper({
   };
 
   // Derived Status Flags for Render
-  const isPending = enrollment?.status === "pending";
   const isPendingApproval = enrollment?.status === "pending_approval";
-  const isPastDue = enrollment?.status === "past_due";
+  const isCanceled = enrollment?.status === "canceled";
+  const isRefunded = enrollment?.status === "refunded";
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -424,26 +428,7 @@ export default function EnrollmentStepper({
               exit={{ opacity: 0 }}
             >
               <div className="text-center">
-                {isPending ? (
-                  <>
-                    <div className="w-16 h-16 bg-yellow-50 rounded-full flex items-center justify-center mx-auto mb-6 text-yellow-600">
-                      <Loader2 size={32} className="animate-spin" />
-                    </div>
-                    <h2 className="font-serif text-2xl text-primary mb-4">
-                      Pagamento em Processamento
-                    </h2>
-                    <p className="text-stone-500 mb-8">
-                      Aguardando confirmação bancária. O acesso será liberado em
-                      instantes.
-                    </p>
-                    <button
-                      onClick={() => router.refresh()}
-                      className="px-6 py-2 border border-stone-200 rounded-lg text-sm text-stone-600 hover:bg-stone-50"
-                    >
-                      Atualizar Status
-                    </button>
-                  </>
-                ) : isPendingApproval ? (
+                {isPendingApproval ? (
                   <>
                     <div className="w-16 h-16 bg-gold/10 rounded-full flex items-center justify-center mx-auto mb-6 text-gold">
                       <Clock size={32} />
@@ -462,23 +447,24 @@ export default function EnrollmentStepper({
                       Ir para o Portal <ArrowRight size={18} />
                     </Link>
                   </>
-                ) : isPastDue ? (
+                ) : isCanceled || isRefunded ? (
                   <>
                     <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6 text-red-600">
                       <Clock size={32} />
                     </div>
                     <h2 className="font-serif text-2xl text-primary mb-4">
-                      Pagamento Pendente
+                      Inscrição não ativa
                     </h2>
                     <p className="text-stone-500 mb-8">
-                      Falha na renovação da assinatura. Atualize seu meio de
-                      pagamento.
+                      {isRefunded
+                        ? "Sua matrícula foi reembolsada."
+                        : "Sua matrícula foi cancelada."}
                     </p>
                     <Link
-                      href="/portal/settings"
+                      href={`/curso/${courseId}`}
                       className="px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg hover:bg-primary/90 transition-all inline-flex items-center gap-2"
                     >
-                      Gerenciar Assinatura <ArrowRight size={18} />
+                      Ver curso <ArrowRight size={18} />
                     </Link>
                   </>
                 ) : (
