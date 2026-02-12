@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Play,
@@ -10,6 +10,7 @@ import {
   Clock,
   FileAudio,
   Subtitles,
+  AlertCircle,
 } from "lucide-react";
 import { lauraPerlsContent } from "@/content/laura-perls";
 
@@ -95,23 +96,55 @@ function AudioPlayer({
   const [showSubtitles, setShowSubtitles] = useState(true);
   const [subtitles, setSubtitles] = useState<Subtitle[]>([]);
   const [currentSubtitle, setCurrentSubtitle] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Load audio
+  const loadAudio = useCallback(() => {
+    if (audioRef.current) {
+      setIsLoading(true);
+      setError(null);
+
+      audioRef.current.src = src;
+      audioRef.current.load();
+
+      audioRef.current.oncanplaythrough = () => {
+        setIsLoading(false);
+      };
+
+      audioRef.current.onerror = () => {
+        setIsLoading(false);
+        setError(
+          "Falha ao carregar o áudio. Verifique se o arquivo existe no servidor.",
+        );
+      };
+    }
+  }, [src]);
+
+  useEffect(() => {
+    loadAudio();
+  }, [loadAudio]);
+
+  // Load subtitles
   useEffect(() => {
     const loadSubtitles = async () => {
       try {
         const response = await fetch(vttSrc);
+        if (!response.ok) throw new Error("Legendas não encontradas");
         const vttContent = await response.text();
         const parsed = parseVTT(vttContent);
         setSubtitles(parsed);
-      } catch (error) {
-        console.error("Failed to load subtitles:", error);
+      } catch (err) {
+        console.error("Failed to load subtitles:", err);
+        setShowSubtitles(false);
       }
     };
     loadSubtitles();
   }, [vttSrc]);
 
+  // Update current subtitle based on time
   useEffect(() => {
     const activeSubtitle = subtitles.find(
       (sub) => currentTime >= sub.start && currentTime <= sub.end,
@@ -119,36 +152,41 @@ function AudioPlayer({
     setCurrentSubtitle(activeSubtitle?.text || "");
   }, [currentTime, subtitles]);
 
+  // Handle play/pause
   useEffect(() => {
-    if (isPlaying && audioRef.current) {
-      audioRef.current.play().catch((error) => {
-        console.log("Audio play failed:", error);
-      });
-    } else if (!isPlaying && audioRef.current) {
+    if (!audioRef.current) return;
+
+    if (isPlaying) {
+      audioRef.current
+        .play()
+        .then(() => {
+          setError(null);
+        })
+        .catch((err) => {
+          console.error("Play failed:", err);
+          setError("Clique no botão de play para iniciar a reprodução");
+          setIsPlaying(false);
+        });
+    } else {
       audioRef.current.pause();
     }
   }, [isPlaying]);
 
+  // Progress tracking
   useEffect(() => {
-    if (isPlaying) {
-      intervalRef.current = setInterval(() => {
-        if (audioRef.current && !audioRef.current.paused) {
-          const current = audioRef.current.currentTime;
-          setCurrentTime(current);
-          const duration = audioRef.current.duration || 1;
-          setProgress((current / duration) * 100);
-        }
-      }, 100);
-    } else {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
+    if (!isPlaying) return;
+
+    intervalRef.current = setInterval(() => {
+      if (audioRef.current && !audioRef.current.paused) {
+        const current = audioRef.current.currentTime;
+        setCurrentTime(current);
+        const dur = audioRef.current.duration || 1;
+        setProgress((current / dur) * 100);
       }
-    }
+    }, 100);
 
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
+      if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, [isPlaying]);
 
@@ -188,28 +226,19 @@ function AudioPlayer({
   return (
     <div className="bg-[#e8e4db] border border-[#b8ad96] rounded-lg shadow-md overflow-hidden relative">
       {/* Hidden Audio Element */}
-      <audio
-        ref={audioRef}
-        src={src}
-        onEnded={handleEnded}
-        onTimeUpdate={() => {
-          if (audioRef.current) {
-            const current = audioRef.current.currentTime;
-            setCurrentTime(current);
-            const dur = audioRef.current.duration || 1;
-            setProgress((current / dur) * 100);
-          }
-        }}
-      />
+      <audio ref={audioRef} onEnded={handleEnded} preload="metadata" />
 
       {/* Play Button - Fixed Position Left */}
       <button
         onClick={togglePlay}
-        className="absolute left-0 top-0 bottom-0 w-20 bg-[#4a3a2a] hover:bg-[#3a2f25] flex items-center justify-center z-20 transition-colors"
+        disabled={isLoading}
+        className="absolute left-0 top-0 bottom-0 w-20 bg-[#4a3a2a] hover:bg-[#3a2f25] flex items-center justify-center z-20 transition-colors disabled:opacity-50"
         style={{ borderRadius: "0.5rem 0 0 0.5rem" }}
       >
         <div className="w-12 h-12 rounded-full bg-[#d9d4c9] flex items-center justify-center shadow-lg">
-          {isPlaying ? (
+          {isLoading ? (
+            <div className="w-5 h-5 border-2 border-[#4a3a2a] border-t-transparent rounded-full animate-spin" />
+          ) : isPlaying ? (
             <Pause size={24} className="text-[#4a3a2a]" />
           ) : (
             <Play size={24} className="text-[#4a3a2a] ml-1" />
@@ -219,6 +248,23 @@ function AudioPlayer({
 
       {/* Main Content - Adjusted for Play Button */}
       <div className="pl-24 pr-4 py-4">
+        {/* Error Message */}
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mb-3"
+            >
+              <div className="flex items-center gap-2 p-3 bg-red-100 border border-red-300 rounded-lg text-red-700 text-sm">
+                <AlertCircle size={16} />
+                <span>{error}</span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Header Info */}
         <div className="flex items-center gap-3 mb-2">
           <span className="px-3 py-1 bg-[#a88a4d]/20 text-[#6a5a4a] text-[10px] uppercase tracking-widest font-bold rounded-full">
@@ -227,7 +273,8 @@ function AudioPlayer({
           <div className="flex items-center gap-1 text-[#8a7a6a] text-xs">
             <Clock size={12} />
             <span>
-              {formatTime(currentTime)} / {duration}
+              {isLoading ? "Carregando..." : formatTime(currentTime)} /{" "}
+              {duration}
             </span>
           </div>
         </div>
@@ -269,7 +316,8 @@ function AudioPlayer({
           max="100"
           value={progress}
           onChange={handleSeek}
-          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+          disabled={isLoading}
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
         />
       </div>
 
@@ -360,8 +408,8 @@ export function AudioRecordings() {
             de Fritz Perls
           </h2>
           <p className="mt-6 text-[#4a3a2a] font-serif italic max-w-xl mx-auto">
-            Gravações originais de Fritz Perls sobre a teoria da Gestalt. Ative
-            as legendas para acompanhar em português.
+            Gravações originais de Fritz Perls sobre a teoria da Gestalt. Clique
+            no play para ouvir.
           </p>
         </div>
 
@@ -374,7 +422,7 @@ export function AudioRecordings() {
           className="mb-8"
         >
           <AudioPlayer
-            src="/laura/audio/Fritz Laura Perls Videos Audios and Biography1.mp3"
+            src="/laura/audio/fritz-perls-gestalt-theory-1966.mp3"
             vttSrc="/laura/audio/laura-perls-pt.vtt"
             title="Fritz Perls - Gestalt Theory (1966)"
             duration="28:50"
@@ -383,7 +431,7 @@ export function AudioRecordings() {
           />
         </motion.div>
 
-        {/* Other recordings (placeholder) */}
+        {/* Other recordings */}
         <div className="space-y-6">
           {audioRecordings.slice(1).map((recording, index) => (
             <motion.div
