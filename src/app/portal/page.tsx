@@ -12,17 +12,18 @@ import {
   Award,
   Play,
   TrendingUp,
-  Clock,
   Target,
   Calendar,
-  ArrowRight,
+  AlertTriangle,
+  RefreshCcw,
 } from "@/components/icons";
 import { useEffect, useState } from "react";
 import Loading from "./loading";
-import { useRouter } from "next/navigation";
 import { logger } from "@/lib/logger";
 import { EmptyState } from "@/components/ui/EmptyState";
 import Button from "@/components/ui/Button";
+import { db } from "@/lib/firebase/client";
+import { doc, getDoc } from "firebase/firestore";
 
 const StatCard = ({ icon: Icon, label, value, trend, href }: any) => (
   <Link
@@ -89,17 +90,33 @@ const ActionItem = ({ title, course, type, date, href }: any) => (
 
 export default function PortalDashboard() {
   const { user } = useAuth();
-  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [enrollments, setEnrollments] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [certificates, setCertificates] = useState<any[]>([]);
   const [lastCourse, setLastCourse] = useState<any>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [profileCompletion, setProfileCompletion] = useState<number | null>(
+    null,
+  );
+  const [reloadNonce, setReloadNonce] = useState(0);
   const firstName = user?.displayName?.split(" ")[0] || "Aluno";
 
   useEffect(() => {
     async function loadDashboard() {
-      if (!user?.uid) return;
+      if (!user?.uid) {
+        setLoading(false);
+        setLoadError("Sua sessão não foi encontrada. Faça login novamente.");
+        return;
+      }
+
+      setLoading(true);
+      setLoadError(null);
+      setEnrollments([]);
+      setEvents([]);
+      setCertificates([]);
+      setLastCourse(null);
+
       try {
         // Parallel fetch for initial data to improve performance
         const [myEnrollments, upcomingEvents, myCertificates] =
@@ -109,15 +126,37 @@ export default function PortalDashboard() {
             certificateService.getUserCertificates(user.uid),
           ]);
 
-        if (upcomingEvents.status === "fulfilled")
-          setEvents(upcomingEvents.value);
-        if (myCertificates.status === "fulfilled")
-          setCertificates(myCertificates.value);
+        try {
+          const userSnap = await getDoc(doc(db, "users", user.uid));
+          if (userSnap.exists()) {
+            const pct = Number(userSnap.data()?.profileCompletion || 0);
+            setProfileCompletion(Number.isFinite(pct) ? pct : 0);
+          } else {
+            setProfileCompletion(0);
+          }
+        } catch (profileError) {
+          logger.warn("Profile completion read failed", {
+            profileError,
+            uid: user.uid,
+          });
+          setProfileCompletion(null);
+        }
 
-        if (
-          myEnrollments.status === "fulfilled" &&
-          myEnrollments.value.length > 0
-        ) {
+        if (upcomingEvents.status === "fulfilled") {
+          setEvents(upcomingEvents.value);
+        }
+        if (myCertificates.status === "fulfilled") {
+          setCertificates(myCertificates.value);
+        }
+
+        if (myEnrollments.status !== "fulfilled") {
+          setLoadError(
+            "Não foi possível carregar suas matrículas agora. Tente atualizar.",
+          );
+          return;
+        }
+
+        if (myEnrollments.value.length > 0) {
           const enrollmentData = myEnrollments.value;
           // 2. Fetch Course Data for Valid Enrollments
           const courseIds = enrollmentData.map((e) => e.courseId);
@@ -160,18 +199,24 @@ export default function PortalDashboard() {
             logger.error("Course Data Load Error", courseError, {
               uid: user.uid,
             });
-            // Fallback: set enrollments without enriched course data if needed,
-            // but usually we want titles, so we just log.
+
+            setEnrollments(enrollmentData);
+            setLoadError(
+              "Carregamos suas matrículas, mas parte dos detalhes do curso pode estar indisponível no momento.",
+            );
           }
         }
       } catch (error) {
         logger.error("Dashboard Load Error", error, { uid: user.uid });
+        setLoadError(
+          "Não foi possível carregar o painel agora. Verifique sua conexão e tente novamente.",
+        );
       } finally {
         setLoading(false);
       }
     }
     loadDashboard();
-  }, [user?.uid]);
+  }, [user?.uid, reloadNonce]);
 
   if (loading) return <Loading />;
 
@@ -200,6 +245,46 @@ export default function PortalDashboard() {
           </div>
         </div>
       </div>
+
+      {loadError && (
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+          <div className="flex items-start gap-2 text-amber-800">
+            <AlertTriangle size={18} className="mt-0.5" />
+            <p className="text-sm">{loadError}</p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="border-amber-300 text-amber-800 hover:bg-amber-100"
+            leftIcon={<RefreshCcw size={14} />}
+            onClick={() => setReloadNonce((v) => v + 1)}
+          >
+            Atualizar painel
+          </Button>
+        </div>
+      )}
+
+      {profileCompletion !== null && profileCompletion < 100 && (
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-blue-50 border border-blue-200 rounded-xl px-4 py-3">
+          <div>
+            <p className="text-sm font-semibold text-blue-900">
+              Complete seu cadastro para melhorar sua experiência
+            </p>
+            <p className="text-xs text-blue-800 mt-1">
+              Seu perfil está em {profileCompletion}%. Isso ajuda o time
+              pedagógico a personalizar seu acompanhamento.
+            </p>
+          </div>
+          <Link href="/portal/settings">
+            <Button
+              size="sm"
+              className="bg-blue-700 hover:bg-blue-800 text-white"
+            >
+              Completar Cadastro
+            </Button>
+          </Link>
+        </div>
+      )}
 
       {/* Row 1: Cockpit */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -429,7 +514,7 @@ export default function PortalDashboard() {
               href="/portal/events"
               className="text-xs font-bold text-primary hover:underline"
             >
-              Full Agenda
+              Ver agenda
             </Link>
           </div>
           <div className="flex-1 space-y-1">

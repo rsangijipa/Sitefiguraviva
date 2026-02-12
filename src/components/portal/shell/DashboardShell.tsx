@@ -1,14 +1,76 @@
 import { SidebarNav } from "./SidebarNav";
-import { Menu, Search } from "lucide-react";
-import { useState } from "react";
-import { cn } from "@/lib/utils";
+import { Menu, Search, ArrowRight } from "lucide-react";
+import { FormEvent, useMemo, useState } from "react";
 import NotificationBell from "@/components/layout/NotificationBell";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { ROUTES } from "@/lib/routes";
 
 import { UserXPBadge } from "@/components/gamification/UserXPBadge";
 
+const QUICK_LINKS = [
+  { label: "Visão Geral", href: ROUTES.portal, keywords: ["home", "inicio"] },
+  {
+    label: "Meus Cursos",
+    href: ROUTES.courses,
+    keywords: ["curso", "aula", "conteudo"],
+  },
+  {
+    label: "Certificados",
+    href: ROUTES.certificates,
+    keywords: ["certificado", "conclusao"],
+  },
+  {
+    label: "Comunidade",
+    href: ROUTES.community,
+    keywords: ["forum", "discussao"],
+  },
+  {
+    label: "Materiais",
+    href: ROUTES.materials,
+    keywords: ["pdf", "arquivo", "material"],
+  },
+  {
+    label: "Agenda Ao Vivo",
+    href: ROUTES.events,
+    keywords: ["evento", "aovivo", "mentoria"],
+  },
+  {
+    label: "Minha Conta",
+    href: ROUTES.settings,
+    keywords: ["perfil", "configuracao", "senha"],
+  },
+];
+
 export const DashboardShell = ({ children }: { children: React.ReactNode }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const router = useRouter();
+
+  const suggestions = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+
+    if (!q) return QUICK_LINKS.slice(0, 5);
+
+    return QUICK_LINKS.filter((item) => {
+      const haystack = `${item.label} ${item.keywords.join(" ")}`.toLowerCase();
+      return haystack.includes(q);
+    }).slice(0, 6);
+  }, [searchQuery]);
+
+  const goTo = (href: string) => {
+    setSearchOpen(false);
+    setSearchQuery("");
+    router.push(href);
+  };
+
+  const handleSearchSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (suggestions.length > 0) {
+      goTo(suggestions[0].href);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#FDFCF9] flex font-sans">
@@ -53,18 +115,52 @@ export const DashboardShell = ({ children }: { children: React.ReactNode }) => {
             </button>
 
             {/* Search Bar */}
-            <div className="hidden md:flex items-center gap-2 px-3 py-2 bg-stone-50 rounded-lg border border-transparent focus-within:border-primary/20 focus-within:bg-white w-64 transition-all">
-              <Search size={16} className="text-stone-400" />
-              <label htmlFor="global-search" className="sr-only">
-                Buscar no portal
-              </label>
-              <input
-                id="global-search"
-                name="search"
-                type="text"
-                placeholder="Buscar..."
-                className="bg-transparent border-none outline-none text-sm placeholder:text-stone-400 w-full text-stone-700"
-              />
+            <div className="hidden md:block relative w-72">
+              <form
+                onSubmit={handleSearchSubmit}
+                className="flex items-center gap-2 px-3 py-2 bg-stone-50 rounded-lg border border-transparent focus-within:border-primary/20 focus-within:bg-white transition-all"
+              >
+                <Search size={16} className="text-stone-400" />
+                <label htmlFor="global-search" className="sr-only">
+                  Buscar no portal
+                </label>
+                <input
+                  id="global-search"
+                  name="search"
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setSearchOpen(true);
+                  }}
+                  onFocus={() => setSearchOpen(true)}
+                  onBlur={() => setTimeout(() => setSearchOpen(false), 120)}
+                  placeholder="Buscar página..."
+                  className="bg-transparent border-none outline-none text-sm placeholder:text-stone-400 w-full text-stone-700"
+                />
+              </form>
+
+              {searchOpen && (
+                <div className="absolute top-full mt-2 w-full bg-white border border-stone-100 rounded-xl shadow-lg overflow-hidden z-30">
+                  {suggestions.length > 0 ? (
+                    suggestions.map((item) => (
+                      <button
+                        key={item.href}
+                        type="button"
+                        onClick={() => goTo(item.href)}
+                        className="w-full px-3 py-2.5 text-left text-sm text-stone-700 hover:bg-stone-50 flex items-center justify-between"
+                      >
+                        <span>{item.label}</span>
+                        <ArrowRight size={14} className="text-stone-400" />
+                      </button>
+                    ))
+                  ) : (
+                    <div className="px-3 py-3 text-xs text-stone-500">
+                      Nenhum resultado para essa busca.
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 

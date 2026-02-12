@@ -31,6 +31,13 @@ export interface UserData {
   lastLogin: Timestamp;
   phoneNumber?: string;
   bio?: string;
+  profession?: string;
+  city?: string;
+  state?: string;
+  dateOfBirth?: string;
+  instagram?: string;
+  profileCompletion?: number;
+  profileCompletedAt?: Timestamp | string | null;
 
   // Governance
   disabledReason?: string;
