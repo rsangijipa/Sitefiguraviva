@@ -16,6 +16,7 @@ export function LauraVideo() {
   const [isMuted, setIsMuted] = useState(false);
   const [progress, setProgress] = useState(0);
   const [showControls, setShowControls] = useState(true);
+  const [videoError, setVideoError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -23,13 +24,20 @@ export function LauraVideo() {
     "https://firebasestorage.googleapis.com/v0/b/lithe-transport-479116-m2.firebasestorage.app/o/public%2Flaura%2FLaura%20Perls%20in%20with%20Ilene%20Serlin.mp4?alt=media&token=a7a4568e-9bc4-4319-97b5-5c7295b7567e";
 
   const togglePlay = () => {
-    if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause();
-      } else {
-        videoRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
+    if (!videoRef.current || videoError) return;
+
+    if (isPlaying) {
+      videoRef.current.pause();
+      return;
+    }
+
+    const playPromise = videoRef.current.play();
+    if (playPromise && typeof playPromise.catch === "function") {
+      playPromise.catch((error) => {
+        console.error("Laura video playback failed:", error);
+        setVideoError("Não foi possível reproduzir este vídeo no navegador.");
+        setIsPlaying(false);
+      });
     }
   };
 
@@ -46,6 +54,11 @@ export function LauraVideo() {
         (videoRef.current.currentTime / videoRef.current.duration) * 100;
       setProgress(progress);
     }
+  };
+
+  const handleVideoError = () => {
+    setVideoError("Este navegador não conseguiu carregar a fonte do vídeo.");
+    setIsPlaying(false);
   };
 
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -124,11 +137,32 @@ export function LauraVideo() {
           {/* Video Element */}
           <video
             ref={videoRef}
-            src={videoUrl}
             className="w-full aspect-video bg-[#1a1510] object-contain cursor-pointer"
+            preload="metadata"
             onTimeUpdate={handleTimeUpdate}
             onClick={togglePlay}
-          />
+            onPlay={() => setIsPlaying(true)}
+            onPause={() => setIsPlaying(false)}
+            onError={handleVideoError}
+          >
+            <source src={videoUrl} type="video/mp4" />
+          </video>
+
+          {videoError && (
+            <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/70 px-6 text-center">
+              <div>
+                <p className="text-white text-sm font-medium">{videoError}</p>
+                <a
+                  href={videoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block mt-3 text-xs uppercase tracking-widest text-[#e2c98d] border border-[#e2c98d]/40 px-3 py-1 rounded"
+                >
+                  Abrir vídeo original
+                </a>
+              </div>
+            </div>
+          )}
 
           {/* Large Play Button Overlay */}
           <AnimatePresence>

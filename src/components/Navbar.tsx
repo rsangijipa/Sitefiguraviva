@@ -122,8 +122,8 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* Desktop Menu */}
-        <div className="hidden md:flex items-center gap-4 font-sans text-[10px] lg:text-xs font-bold tracking-[0.2em] uppercase text-text/80">
+        {/* Desktop Menu (only on wide screens to avoid tablet clipping) */}
+        <div className="hidden xl:flex items-center gap-3 font-sans text-[10px] 2xl:text-xs font-bold tracking-[0.16em] uppercase text-text/80">
           {navItems.map((item) => (
             <a
               key={item.label}
@@ -171,9 +171,9 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Mobile Toggle */}
+        {/* Mobile/Tablet Toggle */}
         <button
-          className="md:hidden text-primary w-12 h-12 flex items-center justify-center hover:bg-black/5 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-primary"
+          className="xl:hidden text-primary w-12 h-12 flex items-center justify-center hover:bg-black/5 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-primary"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label={mobileOpen ? "Fechar menu" : "Abrir menu"}
           aria-expanded={mobileOpen}
@@ -194,7 +194,7 @@ export default function Navbar() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed inset-0 z-[60] bg-white flex flex-col md:hidden"
+            className="fixed inset-0 z-[60] bg-white flex flex-col xl:hidden"
           >
             {/* Mobile Header Inside Menu */}
             <div className="flex items-center justify-between px-6 py-6 border-b border-stone-100">

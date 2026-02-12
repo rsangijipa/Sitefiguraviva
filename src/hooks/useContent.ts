@@ -55,14 +55,18 @@ const normalizeGalleryItem = (item: any) => ({
 });
 
 const fetchPublicGalleryCollection = async (): Promise<any[]> => {
-  const publicSnap = await getDocs(query(collection(db, "publicGallery")));
+  const publicSnap = await getDocs(
+    query(collection(db, "publicGallery"), orderBy("created_at", "desc")),
+  );
   if (!publicSnap.empty) {
     return publicSnap.docs.map((doc) =>
       normalizeGalleryItem({ id: doc.id, ...doc.data() }),
     );
   }
 
-  const legacySnap = await getDocs(query(collection(db, "gallery")));
+  const legacySnap = await getDocs(
+    query(collection(db, "gallery"), orderBy("created_at", "desc")),
+  );
   return legacySnap.docs.map((doc) =>
     normalizeGalleryItem({ id: doc.id, ...doc.data() }),
   );
@@ -109,6 +113,8 @@ export const usePublicGallery = (options?: { initialData?: any[] }) => {
     queryFn: fetchPublicGalleryCollection,
     initialData: options?.initialData,
     staleTime: 1000 * 60 * 10, // 10 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 };
 
