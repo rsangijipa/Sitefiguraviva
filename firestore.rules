@@ -138,6 +138,11 @@ service cloud.firestore {
     match /posts/{id} { allow read: if true; allow write: if isAdmin(); }
     match /gallery/{id} { allow read: if true; allow write: if isAdmin(); }
     match /events/{id} { allow read: if true; allow write: if isAdmin(); }
+    
+    match /certificates/{id} {
+      allow read: if isAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
+      allow write: if isAdmin();
+    }
 
     match /{document=**} {
       allow read, write: if isAdmin();

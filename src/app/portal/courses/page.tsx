@@ -19,7 +19,7 @@ const CourseCard = ({
   isCatalog?: boolean;
 }) => {
   const status = enrollment?.status || (isCatalog ? "catalog" : "pending");
-  const isActive = status === "active";
+  const isActive = status === "active" || status === "completed";
   const progress = enrollment?.progressSummary?.percent || 0;
   const lastAccess = enrollment?.lastAccessedAt
     ?.toDate?.()
