@@ -38,10 +38,24 @@ export const metadata: Metadata = {
     type: "website",
     locale: "pt_BR",
     url: "https://figuraviva.com.br",
-    title: "Instituto Figura Viva | Gestalt-Terapia",
+    title: "Instituto Figura Viva | Gestalt-Terapia & Formação Clínica",
     description:
-      "Acolhimento clínico e formação profissional em Gestalt-Terapia.",
+      "Acolhimento clínico e formação profissional em Gestalt-Terapia. Encontros que transformam vidas.",
     siteName: "Instituto Figura Viva",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Instituto Figura Viva",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Instituto Figura Viva",
+    description: "Gestalt-Terapia & Formação Clínica em Rondônia.",
+    images: ["/og-image.jpg"],
   },
   robots: {
     index: true,
@@ -87,6 +101,25 @@ export default async function RootLayout({
           Pular para o conteúdo principal
         </a>
         <Providers>
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "Organization",
+                name: "Instituto Figura Viva",
+                url: "https://figuraviva.com.br",
+                logo: "https://figuraviva.com.br/logo.png",
+                sameAs: ["https://www.instagram.com/institutofiguraviva/"],
+                address: {
+                  "@type": "PostalAddress",
+                  addressLocality: "Ouro Preto do Oeste",
+                  addressRegion: "RO",
+                  addressCountry: "BR",
+                },
+              }),
+            }}
+          />
           <WebVitalsReporter />
           {children}
           {isImpersonating && <ImpersonationBanner />}

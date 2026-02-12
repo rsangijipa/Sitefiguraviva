@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { adminAuth } from "@/lib/firebase/admin";
 import { PortalClientLayout } from "./PortalClientLayout";
+import { ensureUserDoc } from "@/lib/auth/user-service";
 
 export default async function PortalLayout({
   children,
@@ -17,7 +18,10 @@ export default async function PortalLayout({
 
   try {
     // Verify session server-side
-    await adminAuth.verifySessionCookie(session, true);
+    const decodedToken = await adminAuth.verifySessionCookie(session, true);
+
+    // SSoT: Ensure user document exists (Idempotent)
+    await ensureUserDoc(decodedToken);
   } catch (error) {
     console.error("[PortalLayout] Session verification failed:", error);
     redirect("/auth");

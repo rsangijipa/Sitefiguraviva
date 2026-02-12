@@ -1,8 +1,4 @@
 rules_version = '2';
-
-// Craft rules based on data in your Firestore database
-// allow write: if firestore.get(
-//    /databases/(default)/documents/users/$(request.auth.uid)).data.isAdmin;
 service firebase.storage {
   match /b/{bucket}/o {
     
@@ -25,23 +21,32 @@ service firebase.storage {
       ));
     }
 
+    function isEnrolledActive(courseId) {
+       let enrollmentId = request.auth.uid + '_' + courseId;
+       return request.auth != null && 
+              ((firestore.exists(/databases/(default)/documents/enrollments/$(enrollmentId)) &&
+                firestore.get(/databases/(default)/documents/enrollments/$(enrollmentId)).data.status in ['active', 'completed']) ||
+               (firestore.exists(/databases/(default)/documents/users/$(request.auth.uid)) &&
+                courseId in firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.get('enrolledCourseIds', [])));
+    }
+
     function isBelowMaxSize(sizeMB) {
       let limit = sizeMB == null ? 100 : sizeMB;
       return request.resource.size < limit * 1024 * 1024;
     }
-    
-    // Strict enrollment check (Active status)
-    // Strict enrollment check (Active status) - Root Collection as SoT
-    function isEnrolledActive(courseId) {
-       let enrollmentId = request.auth.uid + '_' + courseId;
-       return request.auth != null && 
-              firestore.exists(/databases/(default)/documents/enrollments/$(enrollmentId)) &&
-              firestore.get(/databases/(default)/documents/enrollments/$(enrollmentId)).data.status == 'active';
-    }
 
     // --- Public Assets ---
 
-    // Blog Images & Library PDFs
+    match /public-library/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /public-gallery/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     match /blog/{allPaths=**} {
       allow read: if true;
       allow write: if isStaff() && isBelowMaxSize(10);
@@ -52,13 +57,11 @@ service firebase.storage {
       allow write: if isStaff() && isBelowMaxSize(50);
     }
     
-    // Gallery
     match /gallery/{allPaths=**} {
       allow read: if true;
       allow write: if isStaff() && request.resource.contentType.matches('image/.*') && isBelowMaxSize(10);
     }
 
-    // Course Covers & Content
     match /courses/covers/{allPaths=**} {
       allow read: if true;
       allow write: if isStaff() && request.resource.contentType.matches('image/.*') && isBelowMaxSize(5);
@@ -69,40 +72,35 @@ service firebase.storage {
       allow write: if isStaff() && isBelowMaxSize(10);
     }
 
-    // Public Documents
     match /public/docs/{allPaths=**} {
        allow read: if true;
-        allow write: if isStaff() && isBelowMaxSize(20);
+       allow write: if isStaff() && isBelowMaxSize(20);
     }
 
-    // --- Restricted Academic Content ---
+    // --- Restricted Academic/Course Content ---
 
-    // Course Materials: courses/{courseId}/materials/{filename}
-    // Deep match to capture courseId
+    match /lesson-files/{courseId}/{lessonId}/{allPaths=**} {
+      allow read: if isAdmin() || isEnrolledActive(courseId);
+      allow write: if isAdmin();
+    }
+
+    match /course-assets/{courseId}/{allPaths=**} {
+      allow read: if isAdmin() || firestore.get(/databases/(default)/documents/courses/$(courseId)).data.isPublished == true;
+      allow write: if isAdmin();
+    }
+
     match /courses/{courseId}/materials/{allPaths=**} {
       allow read: if isStaff() || (request.auth != null && isEnrolledActive(courseId));
       allow write: if isStaff() && isBelowMaxSize(50);
     }
-    
-    // --- Legacy Clean-up Paths (Optional support during migration) ---
-    match /images/{allPaths=**} {
-       allow read: if true;
-       allow write: if isAdmin();
-    }
-    match /documents/{allPaths=**} {
-       allow read: if request.auth != null; 
-       allow write: if isAdmin();
-    }
 
-    // General Uploads (Users can only upload to their own folder)
+    // General User Uploads
     match /uploads/{userId}/{allPaths=**} {
        allow read: if true;
        allow write: if (isAdmin() || (request.auth != null && request.auth.uid == userId)) && isBelowMaxSize(10);
     }
 
-    // --- UNIVERSAL ADMIN ACCESS ---
-    // This allows admins to write ANYWHERE, overriding more specific rules if they fall through,
-    // and serves as a catch-all for legitimate administrative operations.
+    // --- CATCH-ALL ---
     match /{allPaths=**} {
       allow read: if isAdmin();
       allow write: if isAdmin();

@@ -77,13 +77,27 @@ export const useBlogPosts = (
 export const useGallery = (options?: { initialData?: any[] }) => {
   return useQuery({
     queryKey: ["gallery"],
-    queryFn: async () => {
-      const q = query(collection(db, "gallery"));
-      const snapshot = await getDocs(q);
-      return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-    },
+    queryFn: () => fetchCollection("gallery", false), // Use helper
     initialData: options?.initialData,
     staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+};
+
+export const usePublicGallery = (options?: { initialData?: any[] }) => {
+  return useQuery({
+    queryKey: ["publicGallery"],
+    queryFn: () => fetchCollection("publicGallery", false),
+    initialData: options?.initialData,
+    staleTime: 1000 * 60 * 10, // 10 minutes
+  });
+};
+
+export const usePublicLibrary = (options?: { initialData?: any[] }) => {
+  return useQuery({
+    queryKey: ["publicLibrary"],
+    queryFn: () => fetchCollection("publicLibrary", false),
+    initialData: options?.initialData,
+    staleTime: 1000 * 60 * 10, // 10 minutes
   });
 };
 

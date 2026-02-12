@@ -7,6 +7,8 @@ import { FieldPath } from "firebase-admin/firestore";
 import { BookOpen, Library } from "lucide-react";
 import { cn, deepSafeSerialize } from "@/lib/utils";
 import { Timestamp } from "firebase-admin/firestore";
+import { EmptyState } from "@/components/ui/EmptyState";
+import Button from "@/components/ui/Button";
 
 // --- Reusable Course Card (Inline for now, extract later) ---
 const CourseCard = ({
@@ -250,21 +252,23 @@ export default async function MyCoursesPage() {
             ))}
           </div>
         ) : (
-          <div className="bg-stone-50 border border-dashed border-stone-200 rounded-2xl p-8 text-center pt-16 pb-16">
-            <BookOpen size={48} className="mx-auto text-stone-300 mb-4" />
-            <h3 className="text-lg font-bold text-stone-700">
-              Comece sua jornada
-            </h3>
-            <p className="text-stone-500 mt-2">
-              Você ainda não está matriculado em nenhum curso.
-            </p>
-          </div>
+          <EmptyState
+            icon={<BookOpen size={32} />}
+            title="Sua Prateleira está Vazia"
+            description="Você ainda não se matriculou em nenhuma formação. Descubra novos caminhos no nosso catálogo."
+            action={
+              <Link href="/portal/courses#catalog">
+                <Button variant="primary">Ver Catálogo</Button>
+              </Link>
+            }
+            className="py-16"
+          />
         )}
       </section>
 
       {/* Section: Catalog */}
       {catalogCourses.length > 0 && (
-        <section className="space-y-6">
+        <section id="catalog" className="space-y-6">
           <header className="flex items-center gap-3 border-b border-stone-100 pb-4">
             <Library className="text-stone-400" />
             <div>

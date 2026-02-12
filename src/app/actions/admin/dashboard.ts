@@ -22,6 +22,8 @@ export async function getDetailedDashboardStats() {
       blogPostsCount,
       libraryCount,
       pendingAuditCount,
+      recentUsers,
+      pendingEnrollments,
     ] = await Promise.all([
       adminDb
         .collection("users")
@@ -56,6 +58,18 @@ export async function getDetailedDashboardStats() {
         .count()
         .get()
         .then((s) => s.data().count),
+      adminDb
+        .collection("users")
+        .orderBy("createdAt", "desc")
+        .limit(5)
+        .get()
+        .then((s) => s.docs.map((d) => ({ id: d.id, ...d.data() }))),
+      adminDb
+        .collection("enrollments")
+        .where("status", "==", "pending_approval")
+        .limit(5)
+        .get()
+        .then((s) => s.docs.map((d) => ({ id: d.id, ...d.data() }))),
     ]);
 
     return {
@@ -67,6 +81,8 @@ export async function getDetailedDashboardStats() {
         blogPosts: blogPostsCount,
         libraryDocs: libraryCount,
         totalAuditLogs: pendingAuditCount,
+        recentUsers: recentUsers,
+        pendingEnrollments: pendingEnrollments,
       },
     };
   } catch (error: any) {

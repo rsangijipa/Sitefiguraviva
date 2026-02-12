@@ -41,5 +41,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error("Sitemap Error:", error);
   }
 
-  return [...staticRoutes, ...courseRoutes];
+  // 3. Blog Posts
+  let blogRoutes: MetadataRoute.Sitemap = [];
+  try {
+    const postsSnap = await adminDb
+      .collection("posts")
+      .where("isPublished", "==", true)
+      .get();
+
+    blogRoutes = postsSnap.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        url: `${baseUrl}/blog/${data.slug || doc.id}`,
+        lastModified: data.updatedAt?.toDate() || new Date(),
+        changeFrequency: "monthly" as const,
+        priority: 0.7,
+      };
+    });
+  } catch (error) {
+    console.error("Blog Sitemap Error:", error);
+  }
+
+  return [...staticRoutes, ...courseRoutes, ...blogRoutes];
 }
