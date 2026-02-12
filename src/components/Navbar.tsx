@@ -83,7 +83,8 @@ export default function Navbar() {
     { label: "Instituto", href: "/#instituto-sobre" },
     { label: "Fundadora", href: "/#fundadora" },
     { label: "Formações", href: "/#instituto", display: "Formações e Grupos" },
-    { label: "Recursos", href: "/#recursos-interativos" },
+    { label: "Biblioteca", href: "/public-library" },
+    { label: "Galeria", href: "/public-gallery" },
     { label: "Blog", href: "/#blog" },
   ];
 

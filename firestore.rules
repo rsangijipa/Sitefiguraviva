@@ -10,12 +10,17 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function getUserDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
     function isAdmin() {
       return isAuthenticated() && (
         request.auth.token.admin == true || 
-        (request.auth.token.hasAny(['role']) && request.auth.token.role.lower() == 'admin') ||
+        (request.auth.token.role != null && request.auth.token.role.lower() == 'admin') ||
         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
-         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', 'student').lower() in ['admin', 'administrador'])
+         getUserDoc().get('role', 'student').lower() in ['admin', 'administrador'] &&
+         getUserDoc().get('isActive', true) == true)
       );
     }
 
@@ -29,25 +34,19 @@ service cloud.firestore {
              get(/databases/$(database)/documents/courses/$(courseId)).data.status == 'archived';
     }
 
-    // Advanced enrollment check: allows access if ANY enrollment doc exists for this pair
-    // OR if the course ID is listed in the user's profile (robust Fallback)
-    // SECURITY FIX: Now validates status is 'active' or 'completed'
+    // Advanced enrollment check: allows access if enrollment exists with correct status
     function hasActiveEnrollment(courseId) {
       let uid = request.auth.uid;
       let enrollmentId = uid + '_' + courseId;
-      let altEnrollmentId = courseId + '_' + uid;
       
       return isAuthenticated() && (
         isAdmin() ||
-        // Check standard ID format with active status
+        // Check standard deterministic ID format
         (exists(/databases/$(database)/documents/enrollments/$(enrollmentId)) &&
          get(/databases/$(database)/documents/enrollments/$(enrollmentId)).data.status in ['active', 'completed']) ||
-        // Check alternate ID format with active status  
-        (exists(/databases/$(database)/documents/enrollments/$(altEnrollmentId)) &&
-         get(/databases/$(database)/documents/enrollments/$(altEnrollmentId)).data.status in ['active', 'completed']) ||
-        // Legacy fallback: check user profile
+        // Fallback for transition/legacy Check
         (exists(/databases/$(database)/documents/users/$(uid)) && 
-         courseId in get(/databases/$(database)/documents/users/$(uid)).data.enrolledCourseIds)
+         courseId in getUserDoc().get('enrolledCourseIds', []))
       );
     }
 
@@ -57,46 +56,40 @@ service cloud.firestore {
 
     match /users/{uid} {
       allow read: if isAdmin() || isOwner(uid);
-      allow write: if isAdmin() || isOwner(uid); // Simplified for stability
+      // Only admins can change roles/isActive. Users can update other fields.
+      allow create: if isAdmin() || isOwner(uid);
+      allow update: if isAdmin() || (isOwner(uid) && 
+                      !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isActive', 'uid', 'email']));
+      
       match /notifications/{id} { allow read, write: if isOwner(uid); }
     }
 
     match /enrollments/{id} {
-      // Very permissive read for safety: if document ID contains your UID, you can see it
       allow read: if isAdmin() || (isAuthenticated() && (
         id.startsWith(request.auth.uid) || 
         id.endsWith(request.auth.uid) ||
-        (resource != null && (resource.data.uid == request.auth.uid || resource.data.userId == request.auth.uid))
+        resource.data.uid == request.auth.uid
       ));
       allow write: if isAdmin();
     }
 
     match /courses/{courseId} {
-      // Loosened: Authenticated users can read course metadata if published
       allow read: if isAdmin() || hasActiveEnrollment(courseId) || 
-                    (isAuthenticated() && resource.data.isPublished == true);
+                    (resource != null && resource.data.isPublished == true);
       allow write: if isAdmin();
 
       match /modules/{mId} {
-        // Allow read if: admin, has active enrollment AND course not blocked, or course is published
         allow read: if isAdmin() || 
                       (hasActiveEnrollment(courseId) && !isCourseBlocked(courseId)) ||
-                      (isAuthenticated() && 
-                       get(/databases/$(database)/documents/courses/$(courseId)).data.isPublished == true &&
-                       get(/databases/$(database)/documents/courses/$(courseId)).data.status != 'archived');
+                      (get(/databases/$(database)/documents/courses/$(courseId)).data.isPublished == true);
         allow write: if isAdmin();
 
         match /lessons/{lId} {
-          // Same logic for lessons
           allow read: if isAdmin() || 
                         (hasActiveEnrollment(courseId) && !isCourseBlocked(courseId)) ||
-                        (isAuthenticated() && 
-                         get(/databases/$(database)/documents/courses/$(courseId)).data.isPublished == true &&
-                         get(/databases/$(database)/documents/courses/$(courseId)).data.status != 'archived');
+                        (get(/databases/$(database)/documents/courses/$(courseId)).data.isPublished == true);
           allow write: if isAdmin();
 
-          // CRITICAL: Subcollections (Blocks, Tests, etc) - restricted to enrolled students with active status
-          // Also checks course is not archived
           match /{allLessonsSub=**} {
             allow read: if isAdmin() || 
                           (hasActiveEnrollment(courseId) && !isCourseBlocked(courseId));
@@ -105,8 +98,7 @@ service cloud.firestore {
         }
       }
       match /materials/{id} { 
-        allow read: if isAdmin() || 
-                      (hasActiveEnrollment(courseId) && !isCourseBlocked(courseId)); 
+        allow read: if isAdmin() || (hasActiveEnrollment(courseId) && !isCourseBlocked(courseId)); 
         allow write: if isAdmin(); 
       }
       match /announcements/{id} { allow read: if isAdmin() || hasActiveEnrollment(courseId); allow write: if isAdmin(); }
@@ -124,40 +116,22 @@ service cloud.firestore {
       }
     }
 
-
     match /progress/{id} {
       allow read: if isAdmin() || id.startsWith(request.auth.uid);
       allow write: if isAdmin() || (isAuthenticated() && id.startsWith(request.auth.uid));
     }
 
-    match /community/{id} {
-      allow read: if true;
-      allow create: if isAuthenticated() 
-        && request.resource.data.authorId == request.auth.uid
-        && request.resource.data.createdAt == request.time;
-      
-      allow update: if isAuthenticated() 
-        && resource.data.authorId == request.auth.uid
-        && request.resource.data.authorId == resource.data.authorId
-        && request.resource.data.createdAt == resource.data.createdAt;
-      
+    match /community_threads/{id} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.authorId == request.auth.uid;
+      allow update: if isAuthenticated() && resource.data.authorId == request.auth.uid;
       allow delete: if isAdmin() || (isAuthenticated() && resource.data.authorId == request.auth.uid);
 
       match /replies/{rId} {
-        allow read: if true;
-        allow create: if isAuthenticated()
-          && request.resource.data.authorId == request.auth.uid;
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated() && request.resource.data.authorId == request.auth.uid;
         allow update, delete: if isAdmin() || (isAuthenticated() && resource.data.authorId == request.auth.uid);
       }
-    }
-
-    match /community_threads/{id} {
-      allow read: if true;
-      allow create: if isAuthenticated() 
-        && request.resource.data.authorId == request.auth.uid;
-      allow update: if isAuthenticated() 
-        && resource.data.authorId == request.auth.uid;
-      allow delete: if isAdmin() || (isAuthenticated() && resource.data.authorId == request.auth.uid);
     }
 
     match /gamification_profiles/{uid} {
@@ -172,15 +146,14 @@ service cloud.firestore {
     }
 
     // Public Collections
-    match /stats/{id} { 
-      allow read: if true; 
-      allow write: if false; // LOCKED. Only Server Actions/Admin SDK.
-    }
+    match /stats/{id} { allow read: if true; allow write: if false; }
     match /siteSettings/{id} { allow read: if true; allow write: if isAdmin(); }
     match /publicDocs/{id} { allow read: if true; allow write: if isAdmin(); }
     match /posts/{id} { allow read: if true; allow write: if isAdmin(); }
     match /gallery/{id} { allow read: if true; allow write: if isAdmin(); }
     match /events/{id} { allow read: if true; allow write: if isAdmin(); }
+    match /publicLibrary/{id} { allow read: if true; allow write: if isAdmin(); }
+    match /publicGallery/{id} { allow read: if true; allow write: if isAdmin(); }
     
     match /certificates/{id} {
       allow read: if isAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
@@ -188,7 +161,8 @@ service cloud.firestore {
     }
 
     match /{document=**} {
-      allow read, write: if isAdmin();
+      allow read: if isAdmin();
+      allow write: if isAdmin();
     }
   }
 }

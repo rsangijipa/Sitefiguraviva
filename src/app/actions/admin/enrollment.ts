@@ -181,8 +181,7 @@ export async function batchEnrollUsers(emails: string[], courseId: string) {
       failed: [] as { email: string; error: string }[],
     };
 
-    // Process in sequence or small batches to avoid hitting rate limits if creating many users
-    // For simplicity and given expected small batch sizes (e.g. 50), we can do parallel with error isolation
+    // Process in parallel with error isolation
     await Promise.all(
       emails.map(async (email) => {
         try {
@@ -204,4 +203,74 @@ export async function batchEnrollUsers(emails: string[], courseId: string) {
     console.error("Batch Enrollment Error:", error);
     return { success: false, error: error.message };
   }
+}
+
+/**
+ * Updates the status of an enrollment.
+ * Ensures the user document's enrolledCourseIds is kept in sync.
+ */
+export async function updateEnrollmentStatus(
+  uid: string,
+  courseId: string,
+  newStatus: "active" | "completed" | "expired" | "locked" | "pending_approval",
+) {
+  try {
+    await assertAdmin();
+    const enrollmentId = `${uid}_${courseId}`;
+    const enrollmentRef = adminDb.collection("enrollments").doc(enrollmentId);
+    const userRef = adminDb.collection("users").doc(uid);
+
+    await adminDb.runTransaction(async (tx) => {
+      tx.update(enrollmentRef, {
+        status: newStatus,
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+
+      if (newStatus === "active") {
+        tx.update(userRef, {
+          enrolledCourseIds: FieldValue.arrayUnion(courseId),
+        });
+      } else if (newStatus === "locked" || newStatus === "expired") {
+        tx.update(userRef, {
+          enrolledCourseIds: FieldValue.arrayRemove(courseId),
+        });
+      }
+      // "completed" usually keeps access, so no change to enrolledCourseIds
+    });
+
+    revalidatePath(`/portal`);
+    revalidatePath(`/portal/courses/${courseId}`);
+    return { success: true };
+  } catch (error: any) {
+    console.error("Update Status Error:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Specifically approves a pending enrollment.
+ */
+export async function approveEnrollment(uid: string, courseId: string) {
+  const adminUser = await assertAdmin();
+  const res = await updateEnrollmentStatus(uid, courseId, "active");
+
+  if (res.success) {
+    const enrollmentId = `${uid}_${courseId}`;
+    await adminDb
+      .collection("enrollments")
+      .doc(enrollmentId)
+      .update({
+        approvedBy: adminUser.email || "admin",
+        approvedAt: FieldValue.serverTimestamp(),
+      });
+
+    await sendNotification(
+      uid,
+      "Matrícula Aprovada!",
+      "Sua matrícula foi aprovada. O acesso ao curso já está liberado!",
+      `/portal/course/${courseId}`,
+    );
+  }
+
+  return res;
 }

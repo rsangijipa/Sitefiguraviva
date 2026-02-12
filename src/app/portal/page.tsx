@@ -21,6 +21,8 @@ import { useEffect, useState } from "react";
 import Loading from "./loading";
 import { useRouter } from "next/navigation";
 import { logger } from "@/lib/logger";
+import { EmptyState } from "@/components/ui/EmptyState";
+import Button from "@/components/ui/Button";
 
 const StatCard = ({ icon: Icon, label, value, trend, href }: any) => (
   <Link
@@ -248,21 +250,17 @@ export default function PortalDashboard() {
               </div>
             </div>
           ) : (
-            <div className="bg-white rounded-2xl p-8 border border-stone-100 text-center h-full flex flex-col items-center justify-center">
-              <Target size={48} className="text-stone-300 mb-4" />
-              <h3 className="text-lg font-bold text-stone-700">
-                Comece sua Jornada
-              </h3>
-              <p className="text-stone-500 text-sm max-w-md mx-auto mb-6">
-                Você ainda não iniciou nenhum curso. Explore nossa biblioteca.
-              </p>
-              <Link
-                href="/portal/courses"
-                className="text-primary font-bold text-sm hover:underline"
-              >
-                Ver Cursos Disponíveis
-              </Link>
-            </div>
+            <EmptyState
+              icon={<Target size={32} />}
+              title="Comece sua Jornada"
+              description="Você ainda não iniciou nenhum curso. Explore nossa biblioteca de formações."
+              action={
+                <Link href="/portal/courses">
+                  <Button variant="primary">Ver Cursos</Button>
+                </Link>
+              }
+              className="h-full py-12"
+            />
           )}
         </div>
 
@@ -365,9 +363,9 @@ export default function PortalDashboard() {
                 </div>
               ))
             ) : (
-              <div className="col-span-full py-8 text-center bg-stone-50 rounded-xl border border-dashed border-stone-200">
-                <p className="text-sm text-stone-400 italic">
-                  Nenhum curso iniciado.
+              <div className="col-span-full py-4 text-center bg-stone-50/50 rounded-xl border border-stone-100">
+                <p className="text-[10px] text-stone-400 font-bold uppercase tracking-widest">
+                  Nenhum curso iniciado no momento
                 </p>
               </div>
             )}
@@ -410,10 +408,10 @@ export default function PortalDashboard() {
                 ))}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-6 bg-stone-50 rounded-xl border border-stone-100 border-dashed">
-                <Award size={32} className="text-stone-300 mb-2" />
-                <p className="text-xs text-stone-400 italic">
-                  Complete seus cursos para ganhar certificados.
+              <div className="flex flex-col items-center justify-center py-8 bg-stone-50/50 rounded-xl border border-stone-100 h-full">
+                <Award size={24} className="text-stone-300 mb-2 opacity-50" />
+                <p className="text-[10px] text-stone-400 font-bold uppercase tracking-widest">
+                  Nenhum certificado ainda
                 </p>
               </div>
             )}
@@ -469,10 +467,13 @@ export default function PortalDashboard() {
                 />
               ))
             ) : (
-              <div className="flex flex-col items-center justify-center py-10 bg-stone-50 rounded-xl border border-dashed border-stone-200">
-                <Calendar size={32} className="text-stone-300 mb-2" />
-                <p className="text-xs text-stone-400 italic">
-                  Nenhum evento agendado.
+              <div className="flex flex-col items-center justify-center py-10 bg-stone-50/50 rounded-xl border border-stone-100 h-full">
+                <Calendar
+                  size={24}
+                  className="text-stone-300 mb-2 opacity-50"
+                />
+                <p className="text-[10px] text-stone-400 font-bold uppercase tracking-widest">
+                  Nenhum evento agendado
                 </p>
               </div>
             )}

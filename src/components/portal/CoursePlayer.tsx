@@ -15,6 +15,9 @@ import Button from "../ui/Button";
 import { cn } from "@/lib/utils";
 import { useProgress } from "@/hooks/useProgress";
 import { trackEvent } from "@/actions/analytics";
+import { EmptyState } from "../ui/EmptyState";
+import { Skeleton } from "../ui/Skeleton";
+import { AlertCircle, VideoOff } from "lucide-react";
 
 interface CoursePlayerProps {
   course: {
@@ -67,8 +70,13 @@ const CourseVideoWrapper = ({
 
   if (!videoId)
     return (
-      <div className="aspect-video bg-black flex items-center justify-center text-white">
-        Vídeo indisponível
+      <div className="aspect-video bg-stone-900 flex items-center justify-center text-white p-6">
+        <EmptyState
+          icon={<VideoOff size={32} className="text-white/20" />}
+          title="Vídeo Indisponível"
+          description="O link do vídeo para esta aula não foi configurado ou é inválido."
+          className="bg-transparent border-none shadow-none text-white"
+        />
       </div>
     );
 
@@ -103,7 +111,33 @@ export const CoursePlayer = ({
   // ...
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  if (loading) return null; // Or skeleton
+  if (loading) {
+    return (
+      <div className="h-[calc(100vh-4rem)] flex flex-col bg-[#FDFCF9] animate-pulse">
+        <header className="h-16 bg-white border-b border-stone-100 flex items-center px-4">
+          <Skeleton className="w-10 h-10 rounded-full mr-4" />
+          <div className="space-y-2">
+            <Skeleton className="w-48 h-4" />
+            <Skeleton className="w-32 h-3" />
+          </div>
+        </header>
+        <div className="flex-1 flex overflow-hidden">
+          <main className="flex-1 p-6 md:p-12 space-y-8">
+            <Skeleton className="w-full aspect-video rounded-xl" />
+            <div className="space-y-4">
+              <Skeleton className="w-3/4 h-8" />
+              <Skeleton className="w-full h-24" />
+            </div>
+          </main>
+          <aside className="hidden md:block w-96 border-l border-stone-100 p-4 space-y-4">
+            {[1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} className="w-full h-12 rounded-lg" />
+            ))}
+          </aside>
+        </div>
+      </div>
+    );
+  }
 
   useEffect(() => {
     if (activeLesson?.id) {
@@ -272,8 +306,13 @@ export const CoursePlayer = ({
                   </div>
                 </div>
               ) : (
-                <div className="h-full flex items-center justify-center text-stone-400">
-                  <p>Selecione uma aula para começar.</p>
+                <div className="h-full flex items-center justify-center py-20">
+                  <EmptyState
+                    icon={<Menu size={32} />}
+                    title="Selecione uma Aula"
+                    description="Escolha um dos tópicos no menu lateral para iniciar seus estudos."
+                    className="bg-transparent border-none shadow-none"
+                  />
                 </div>
               )}
             </div>
