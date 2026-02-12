@@ -41,7 +41,7 @@ const pwaConfig = withPWA({
     dest: 'public',
     register: true,
     skipWaiting: true,
-    disable: process.env.NODE_ENV === 'development',
+    disable: true, // process.env.NODE_ENV === 'development', // Temporary disable due to Next.js 15 incompatibility with next-pwa 5.6.0
     runtimeCaching: [
         {
             urlPattern: /^https:\/\/firestore\.googleapis\.com\/.*$/,
@@ -88,9 +88,6 @@ const pwaConfig = withPWA({
             },
         },
     ],
-    fallbacks: {
-        document: '/offline',
-    },
     buildExcludes: [
         /middleware-manifest.json$/,
         /_next\/app-build-manifest.json$/,
