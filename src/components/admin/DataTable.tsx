@@ -41,7 +41,9 @@ interface DataTableProps<T> {
   isFirstPage?: boolean;
 }
 
-export function DataTable<T extends { id: string | number }>({
+export function DataTable<
+  T extends { id?: string | number; uid?: string | number },
+>({
   data,
   columns,
   isLoading = false,
@@ -208,9 +210,9 @@ export function DataTable<T extends { id: string | number }>({
                   </tr>
                 ))
               ) : finalData.length > 0 ? (
-                finalData.map((item) => (
+                finalData.map((item, index) => (
                   <tr
-                    key={item.id}
+                    key={item.id || item.uid || `row-${index}`}
                     onClick={() => onRowClick?.(item)}
                     className={cn(
                       "group hover:bg-stone-50/50 transition-colors",
@@ -232,7 +234,7 @@ export function DataTable<T extends { id: string | number }>({
                     ))}
                     {actions && (
                       <td
-                        key={`actions-${item.id}`}
+                        key={`actions-${item.id || item.uid || index}`}
                         className="px-6 py-4 text-right"
                       >
                         <div onClick={(e) => e.stopPropagation()}>
