@@ -121,6 +121,8 @@ export default function Footer() {
                   style={{ border: 0 }}
                   allowFullScreen
                   loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  sandbox="allow-scripts allow-same-origin allow-popups"
                   className="grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-soft duration-700"
                 ></iframe>
               </div>
