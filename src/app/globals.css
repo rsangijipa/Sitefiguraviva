@@ -4,41 +4,41 @@
 
 :root {
   /* Brand Colors - Figura Viva v1 */
-  --color-primary: #0E6330;
+  --color-primary: #0e6330;
   /* Verde Institucional */
-  --color-primary-dark: #0A4D25;
+  --color-primary-dark: #0a4d25;
   --color-primary-light: #158542;
 
-  --color-secondary: #F0D418;
+  --color-secondary: #f0d418;
   /* Ouro Figura Viva */
-  --color-accent: #0E6330;
-  --color-accent-light: #D4E7D9;
+  --color-accent: #0e6330;
+  --color-accent-light: #d4e7d9;
 
   /* Surface & Background */
-  --color-paper: #F8F7F0;
+  --color-paper: #f8f7f0;
   /* Fundo Papel Institucional */
-  --color-surface: #FFFFFF;
+  --color-surface: #ffffff;
   --color-text: #171717;
   /* Neutral-900 */
   --color-muted: #525252;
   /* Neutral-600 */
   /* WCAG AA OK */
-  --color-border: #E5E7EB;
+  --color-border: #e5e7eb;
 
   /* Highlights */
   /* WCAG AA OK - Adjusted for better contrast */
-  --color-gold: #B08D55;
+  --color-gold: #b08d55;
   /* Gold Clássico (Escurecido de #D4AF37) */
-  --color-gold-dark: #8A6D0B;
+  --color-gold-dark: #8a6d0b;
   /* Escuro suficiente para texto em branco */
   /* WCAG AA OK */
-  --color-gold-light: #F9F1C0;
-  --color-beige: #F3E5D8;
+  --color-gold-light: #f9f1c0;
+  --color-beige: #f3e5d8;
 
   /* Feedback & Status */
-  --color-success: #10B981;
-  --color-warning: #F59E0B;
-  --color-error: #EF4444;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
 
   /* Spacing Scale */
   --space-unit: 0.25rem;
@@ -57,6 +57,7 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    scroll-padding-top: 100px; /* Offset for fixed navbar */
   }
 
   body {
@@ -169,19 +170,18 @@
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background-color: #B08D5533;
+    background-color: #b08d5533;
     /* gold with opacity */
     border-radius: 9999px;
     transition: background-color 0.3s;
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background-color: #B08D5566;
+    background-color: #b08d5566;
     /* gold with more opacity */
   }
 
   @keyframes float-slow {
-
     0%,
     100% {
       transform: translateY(0);
@@ -199,7 +199,8 @@
   /* Magic Reflection Effect */
   .magic-reflection {
     position: relative;
-    -webkit-box-reflect: below 2px linear-gradient(transparent 70%, rgba(255, 255, 255, 0.1));
+    -webkit-box-reflect: below 2px
+      linear-gradient(transparent 70%, rgba(255, 255, 255, 0.1));
   }
 
   /* Shimmer Glow Animation */
@@ -244,7 +245,6 @@
 
 /* Accessibility: Reduced Motion Support */
 @media (prefers-reduced-motion: reduce) {
-
   *,
   *::before,
   *::after {

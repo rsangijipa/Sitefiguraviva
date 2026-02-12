@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const [hidden, setHidden] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user, role, signOut } = useAuth();
   const router = useRouter();
@@ -48,8 +49,33 @@ export default function Navbar() {
   };
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener("scroll", handleScroll);
+    let lastScrollY = window.scrollY;
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      // Detect if scrolled past threshold
+      setScrolled(currentScrollY > 10);
+
+      // Smart hide/show based on scroll direction
+      // Only hide after scrolling down 100px
+      if (currentScrollY > 100) {
+        if (currentScrollY > lastScrollY) {
+          // Scrolling down - hide navbar
+          setHidden(true);
+        } else {
+          // Scrolling up - show navbar
+          setHidden(false);
+        }
+      } else {
+        // Always show when near top
+        setHidden(false);
+      }
+
+      lastScrollY = currentScrollY;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -64,7 +90,13 @@ export default function Navbar() {
   return (
     <nav
       aria-label="Navegação principal"
-      className={`fixed w-full z-50 top-0 left-0 bg-white transition-all duration-300 ${scrolled ? "shadow-md py-4" : "shadow-sm py-5"}`}
+      className={`fixed w-full z-50 top-0 left-0 transition-all duration-500 ease-in-out ${
+        hidden ? "-translate-y-full" : "translate-y-0"
+      } ${
+        scrolled
+          ? "bg-white/80 backdrop-blur-lg shadow-lg py-3"
+          : "bg-white/60 backdrop-blur-md shadow-sm py-5"
+      }`}
     >
       <div className="container mx-auto px-6 max-w-7xl flex items-center justify-between">
         {/* Logo */}
