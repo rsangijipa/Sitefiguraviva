@@ -15,11 +15,7 @@ service cloud.firestore {
         request.auth.token.admin == true || 
         request.auth.token.role == 'admin' ||
         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
-         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin') ||
-        request.auth.token.email.matches('.*@figuraviva\\.com.*') || 
-        request.auth.token.email == 'liliangusmao@institutofiguraviva.com.br' ||
-        request.auth.token.email == 'erlanesangi@gmail.com' ||
-        request.auth.token.email == 'rsangijipa@gmail.com'
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
       );
     }
 

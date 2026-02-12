@@ -48,6 +48,7 @@ export async function activateEnrollmentFromStripe(
     }
 
     const updateData: Partial<EnrollmentDoc> = {
+      uid: uid,
       userId: uid,
       courseId: courseId,
       status: "active",

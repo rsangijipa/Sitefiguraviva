@@ -29,7 +29,7 @@ export async function createEvent(data: CreateEventData) {
     }
 
     // Rate limiting: Prevent abuse
-    const rateLimitResult = rateLimit(
+    const rateLimitResult = await rateLimit(
       claims.uid,
       "createEvent",
       RateLimitPresets.CREATE_EVENT,
@@ -116,7 +116,7 @@ export async function deleteEvent(eventId: string) {
     await db.collection("events").doc(eventId).delete();
 
     // Audit
-    await import("@/services/auditService").then((m) =>
+    await import("@/lib/audit").then((m) =>
       m.auditService.logEvent({
         eventType: "EVENT_DELETED",
         actor: { uid: claims.uid, email: claims.email },
@@ -153,7 +153,7 @@ export async function updateEventStatus(
     });
 
     // Audit
-    await import("@/services/auditService").then((m) =>
+    await import("@/lib/audit").then((m) =>
       m.auditService.logEvent({
         eventType: "EVENT_STATUS_UPDATED",
         actor: { uid: claims.uid, email: claims.email },

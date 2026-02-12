@@ -32,11 +32,10 @@ export async function manualGradeSubmission(
     }
 
     // Rate limiting
-    const rateLimitResult = rateLimit(
-      claims.uid,
-      "manualGrade",
-      { maxRequests: 50, windowMs: 60000 }, // 50 grades per minute
-    );
+    const rateLimitResult = await rateLimit(claims.uid, "manualGrade", {
+      maxRequests: 50,
+      windowMs: 60000,
+    });
 
     if (!rateLimitResult.allowed) {
       const waitSeconds = Math.ceil(

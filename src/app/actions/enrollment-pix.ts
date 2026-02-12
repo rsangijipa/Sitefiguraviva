@@ -36,6 +36,7 @@ export async function createEnrollmentPending(courseId: string) {
       }
 
       const newEnrollment: Partial<EnrollmentDoc> = {
+        uid: uid,
         userId: uid,
         courseId: courseId,
         status: "pending",

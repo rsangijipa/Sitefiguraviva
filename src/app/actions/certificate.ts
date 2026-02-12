@@ -24,10 +24,11 @@ async function generateVerificationCode(): Promise<string> {
   return code;
 }
 
+import { CertificateIssuer } from "@/lib/certificates/issuer";
+
 /**
  * Server Action to issue a course certificate.
- * Performs a full server-side re-check of eligibility and structural integrity.
- * Hardened for SSoT & Idempotency.
+ * Proxies to the canonical CertificateIssuer.
  */
 export async function issueCertificate(courseId: string, targetUid?: string) {
   const cookieStore = await cookies();
@@ -40,216 +41,36 @@ export async function issueCertificate(courseId: string, targetUid?: string) {
   try {
     const claims = await adminAuth.verifySessionCookie(sessionCookie, true);
     const actorUid = claims.uid;
-    const isAdminToken = !!claims.admin || claims.role === "admin";
+    const isAdmin = !!claims.admin || claims.role === "admin";
+    const uid = targetUid && isAdmin ? targetUid : actorUid;
 
-    // If targetUid is provided, actor must be admin
-    const uid = targetUid && isAdminToken ? targetUid : actorUid;
-
-    // Security Guard: Non-admins cannot issue certificates for other users
-    if (targetUid && targetUid !== actorUid && !isAdminToken) {
-      throw new Error(
-        "Unauthorized: Cannot issue certificate for another user",
-      );
-    }
-
-    const now = FieldValue.serverTimestamp();
-    const enrollmentId = `${uid}_${courseId}`;
-
-    // ORBITAL 01 & 05: Single Source of Truth Access Gate
-    await assertCanAccessCourse(uid, courseId);
-
-    // Continue with transaction for issuing
-    const courseRef = adminDb.collection("courses").doc(courseId);
-    const enrollmentRef = adminDb.collection("enrollments").doc(enrollmentId);
-
-    const [courseSnap, enrollmentSnap] = await Promise.all([
-      courseRef.get(),
-      enrollmentRef.get(),
-    ]);
-
-    if (!courseSnap.exists) throw new Error("Course not found");
-    if (!enrollmentSnap.exists) throw new Error("Enrollment not found");
-
-    const course = courseSnap.data() as CourseDoc;
-    const enrollment = enrollmentSnap.data() as EnrollmentDoc;
-
-    // 2. Determine Academic Version (Policy A: By Enrollment Version)
-    const courseVersionAtCompletion =
-      enrollment.courseVersionAtEnrollment || course.contentRevision || 1;
-
-    // STRICT ID: Certificate ID must be predictable for idempotency
-    const certNaturalKey = `${uid}_${courseId}`;
-    const certRef = adminDb.collection("certificates").doc(certNaturalKey);
-
-    // 3. Idempotency Check (Fast Path)
-    const existingCert = await certRef.get();
-    if (existingCert.exists) {
-      const data = existingCert.data();
-      return {
-        success: true,
-        certificateId: existingCert.id,
-        verificationCode: data?.code || data?.verificationCode,
-        issuedAt: data?.issuedAt,
-      };
-    }
-
-    // 4. FULL RECHECK - Build the "Considered Lessons" set
-    let consideredLessonIds: string[] = [];
-    let lessonsSnapshot: { id: string; title: string }[] = [];
-
-    // STRICT RULE: Only currently published content counts for issuance
-    const modulesSnap = await adminDb
-      .collection(`courses/${courseId}/modules`)
-      .orderBy("order")
-      .get();
-
-    const publishedModules = modulesSnap.docs.filter(
-      (m) => m.data().isPublished !== false,
+    const result = await CertificateIssuer.issue(
+      courseId,
+      uid,
+      actorUid,
+      isAdmin,
     );
 
-    for (const modDoc of publishedModules) {
-      const lessonsSnap = await adminDb
-        .collection(`courses/${courseId}/modules/${modDoc.id}/lessons`)
-        .orderBy("order")
-        .get();
-
-      lessonsSnap.docs.forEach((lDoc) => {
-        const lData = lDoc.data() as LessonDoc;
-        if (lData.isPublished !== false) {
-          consideredLessonIds.push(lDoc.id);
-          lessonsSnapshot.push({ id: lDoc.id, title: lData.title });
-        }
+    if (result.success) {
+      // 9. Publish Event (Keep action-specific events here if needed)
+      await publishEvent({
+        type: "CERTIFICATE_ISSUED",
+        actorUserId: uid,
+        targetId: result.certificateId!,
+        context: { courseId },
+        payload: { verificationCode: result.verificationCode },
       });
+
+      return result;
     }
-
-    if (consideredLessonIds.length === 0) {
-      return { error: "COURSE_EMPTY_OR_UNPUBLISHED", status: 400 };
-    }
-
-    // 5. FULL RECHECK - Read student's completed progress
-    const progressSnap = await adminDb
-      .collection("progress")
-      .where("userId", "==", uid)
-      .where("courseId", "==", courseId)
-      .where("status", "==", "completed")
-      .get();
-
-    const completedSet = new Set(
-      progressSnap.docs.map((d) => (d.data() as ProgressDoc).lessonId),
-    );
-
-    // 6. Apply Completion Rules (All Published Lessons)
-    const requiredCount = consideredLessonIds.length;
-    let completedRequiredCount = 0;
-
-    consideredLessonIds.forEach((id) => {
-      if (completedSet.has(id)) completedRequiredCount++;
-    });
-
-    if (completedRequiredCount < requiredCount) {
-      console.warn(
-        `[Certificate] Missing lessons for ${uid}. Req: ${requiredCount}, Has: ${completedRequiredCount}`,
-      );
-      return {
-        error: "PROGRESS_INCOMPLETE",
-        status: 400,
-        details: { required: requiredCount, completed: completedRequiredCount },
-      };
-    }
-
-    // 7. Generate Verification Code and Data
-    const verificationCode = await generateVerificationCode();
-
-    // Fetch User name for Snapshot
-    const userSnap = await adminDb.collection("users").doc(uid).get();
-    const userName = userSnap.data()?.displayName || enrollment.userName || uid;
-
-    const integrityHash = crypto
-      .createHash("sha256")
-      .update(
-        JSON.stringify({
-          uid,
-          courseId,
-          courseVersionAtCompletion,
-          consideredLessonIds,
-          issuedAt: new Date().toISOString(),
-        }),
-      )
-      .digest("hex");
-
-    // 8. Transactional Commit
-    await adminDb.runTransaction(async (tx) => {
-      // Create Private Certificate
-      tx.set(certRef, {
-        userId: uid,
-        courseId,
-        courseVersionAtCompletion,
-        issuedAt: now,
-        code: verificationCode,
-        userName,
-        courseTitle: course.title,
-        integrityHash,
-        courseSnapshot: {
-          courseId,
-          courseVersionAtCompletion,
-          totalLessonsConsidered: requiredCount,
-          lessons: lessonsSnapshot,
-        },
-        issuedBy: "system",
-        templateVersion: "v1",
-      });
-
-      // Create Public Verification Record
-      tx.set(adminDb.collection("certificatePublic").doc(verificationCode), {
-        code: verificationCode,
-        userName,
-        courseTitle: course.title,
-        issuedAt: now,
-        isValid: true,
-      });
-
-      // Update Enrollment Status
-      tx.update(enrollmentRef, {
-        status: "completed",
-        completedAt: now,
-        certificateId: certNaturalKey,
-        "progressSummary.percent": 100,
-        "progressSummary.completedLessonsCount": requiredCount,
-        updatedAt: now,
-      });
-
-      // Append Audit Log (Standardized)
-      await import("@/services/auditService").then((m) =>
-        m.auditService.logEventInTransaction(tx, {
-          eventType: "CERTIFICATE_ISSUED",
-          actor: { uid: actorUid },
-          target: { id: certNaturalKey, collection: "certificates" },
-          payload: {
-            enrollmentId,
-            verificationCode,
-            courseId,
-          },
-        }),
-      );
-    });
-
-    // 9. Publish Event
-    await publishEvent({
-      type: "CERTIFICATE_ISSUED",
-      actorUserId: uid,
-      targetId: certNaturalKey,
-      context: { courseId },
-      payload: { verificationCode },
-    });
 
     return {
-      success: true,
-      certificateId: certNaturalKey,
-      verificationCode,
-      issuedAt: new Date().toISOString(),
+      error: result.error,
+      status: result.status,
+      details: result.details,
     };
   } catch (error: any) {
-    console.error("Issue Certificate Error:", error);
+    console.error("Issue Certificate Action Error:", error);
     return { error: error.message || "INTERNAL_ERROR", status: 500 };
   }
 }
