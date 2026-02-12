@@ -15,6 +15,11 @@ import {
 import { Module, Lesson } from "@/types/lms";
 import { markLessonCompleted } from "@/app/actions/progress";
 
+import {
+  isEnrollmentAllowed,
+  canConsumeCourse,
+} from "@/lib/auth/access-policy";
+
 export function useEnrolledCourse(
   courseId: string,
   userId: string | undefined,
@@ -36,7 +41,7 @@ export function useEnrolledCourse(
 
       if (!isAdmin && userId) {
         try {
-          // A. Try Primary ID Format (standard)
+          // A. Try Primary ID Format (standard: uid_courseId)
           const enrollmentRef = doc(db, "enrollments", `${userId}_${courseId}`);
           const enrollmentSnap = await getDoc(enrollmentRef);
 
@@ -47,7 +52,7 @@ export function useEnrolledCourse(
             };
             status = enrollmentData.status || "none";
           } else {
-            // B. Try Alternate ID Format
+            // B. Try Alternate ID Format (courseId_uid)
             const altEnrollmentRef = doc(
               db,
               "enrollments",
@@ -62,7 +67,7 @@ export function useEnrolledCourse(
               };
               status = enrollmentData.status || "none";
             } else {
-              // C. Check User Profile Fallback (Legacy/Async sync)
+              // C. Check User Profile Fallback (Legacy)
               const userRef = doc(db, "users", userId);
               const userSnap = await getDoc(userRef);
               const userData = userSnap.data();
@@ -74,8 +79,9 @@ export function useEnrolledCourse(
                   status: "active",
                   paymentMethod: "legacy",
                 };
+                console.log("[useEnrolledCourse] Found legacy fallback access");
               } else {
-                // D. Final Query Fallback (for non-standard IDs)
+                // D. Final Query Fallback (for non-standard IDs or missing fields)
                 const q = query(
                   collection(db, "enrollments"),
                   where("uid", "==", userId),
@@ -96,18 +102,28 @@ export function useEnrolledCourse(
         }
       }
 
-      // 2. Fetch Course Metadata
+      // 2. Fetch Course Metadata & Evaluate Policy
       const courseSnap = await getDoc(doc(db, "courses", courseId));
       if (!courseSnap.exists()) return null;
-      const course = { id: courseSnap.id, ...courseSnap.data() };
+      const course = { id: courseSnap.id, ...courseSnap.data() } as any;
 
-      const isMember = isAdmin || status === "active" || status === "completed";
+      const isAuthorized = canConsumeCourse(course, enrollmentData, isAdmin);
 
-      if (!isMember) {
+      console.log("[useEnrolledCourse] Access Evaluation:", {
+        courseId,
+        userId,
+        isAdmin,
+        status,
+        isAuthorized,
+        enrollmentId: enrollmentData?.id || "not_found",
+      });
+
+      if (!isAuthorized) {
         return {
           course,
           enrollment: enrollmentData,
           status,
+          isAccessDenied: true,
           modules: [],
           materials: [],
         };

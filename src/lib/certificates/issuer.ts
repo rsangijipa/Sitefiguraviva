@@ -2,7 +2,7 @@ import { adminDb } from "@/lib/firebase/admin";
 import { FieldValue } from "firebase-admin/firestore";
 import { CourseDoc, EnrollmentDoc, ProgressDoc, LessonDoc } from "@/types/lms";
 import crypto from "crypto";
-import { assertCanAccessCourse } from "@/lib/courses/access";
+import { assertCanAccessCourse } from "@/lib/auth/access-gate";
 
 /**
  * Generates a unique short verification code for certificates.

@@ -46,11 +46,16 @@ function CourseContent({ initialData }: { initialData?: any }) {
   const initialTab = searchParams.get("tab") || "overview";
 
   // State
-  const { data, isLoading, isAccessDenied, updateLastAccess, markComplete } =
-    useEnrolledCourse(courseId, user?.uid, isAdmin, initialData);
+  const {
+    data,
+    isLoading,
+    isAccessDenied: hookDenied,
+    updateLastAccess,
+    markComplete,
+  } = useEnrolledCourse(courseId, user?.uid, isAdmin, initialData);
 
+  const isAccessDenied = data?.isAccessDenied || hookDenied;
   const status = data?.status || "none";
-  const isAuthorized = isAdmin || status === "active" || status === "completed";
 
   const course = data?.course;
   const modules = data?.modules || [];
@@ -156,7 +161,7 @@ function CourseContent({ initialData }: { initialData?: any }) {
   }
 
   // Access Denied / Paywall (Ideally handled by server, but fail-safe here)
-  if (isAccessDenied || !isAuthorized) {
+  if (isAccessDenied) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center text-center p-6">
         <Lock size={48} className="text-stone-300 mb-4" />

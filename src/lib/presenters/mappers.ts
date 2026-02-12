@@ -110,6 +110,7 @@ export function toCourseFullDTO(
   progressMap: Map<string, any>,
   enrollmentRaw?: any,
   isAdmin: boolean = false,
+  accessDeniedOverride?: boolean,
 ): CourseFullDTO {
   const course = toCourseDTO(courseRaw);
 
@@ -156,15 +157,18 @@ export function toCourseFullDTO(
   // Safe serialization one last time just in case (e.g. undefineds)
   // But strictly, our DTOs should already be safe.
   // Using deepSafeSerialize here is a redundant safety net.
-  const isAccessDenied = !canConsumeCourse(
-    courseRaw.data ? courseRaw.data() : courseRaw,
-    enrollmentRaw
-      ? enrollmentRaw.data
-        ? enrollmentRaw.data()
-        : enrollmentRaw
-      : null,
-    isAdmin,
-  );
+  const isAccessDenied =
+    accessDeniedOverride !== undefined
+      ? accessDeniedOverride
+      : !canConsumeCourse(
+          courseRaw.data ? courseRaw.data() : courseRaw,
+          enrollmentRaw
+            ? enrollmentRaw.data
+              ? enrollmentRaw.data()
+              : enrollmentRaw
+            : null,
+          isAdmin,
+        );
 
   return deepSafeSerialize({
     course,
