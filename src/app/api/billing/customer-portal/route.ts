@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 import { adminAuth, adminDb } from "@/lib/firebase/admin";
 import { env } from "@/config/env";
 
 export async function POST(req: NextRequest) {
   try {
+    const stripe = getStripe();
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
