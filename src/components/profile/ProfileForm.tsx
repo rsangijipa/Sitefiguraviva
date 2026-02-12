@@ -31,7 +31,12 @@ export function ProfileForm() {
   // Form State
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
-  const [dataLoaded, setDataLoaded] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [profession, setProfession] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [instagram, setInstagram] = useState("");
 
   // Avatar State
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -47,9 +52,15 @@ export function ProfileForm() {
       getDoc(doc(db, "users", user.uid))
         .then((snap) => {
           if (snap.exists()) {
-            setBio(snap.data().bio || "");
+            const data = snap.data();
+            setBio(data.bio || "");
+            setPhoneNumber(data.phoneNumber || "");
+            setProfession(data.profession || "");
+            setCity(data.city || "");
+            setState(data.state || "");
+            setDateOfBirth(data.dateOfBirth || "");
+            setInstagram(data.instagram || "");
           }
-          setDataLoaded(true);
         })
         .catch((err) => console.error(err));
     }
@@ -90,7 +101,16 @@ export function ProfileForm() {
 
       console.log("[DEBUG] Updating profile info...");
       // 2. Update Info
-      const updateRes = await updateProfileAction({ displayName, bio });
+      const updateRes = await updateProfileAction({
+        displayName,
+        bio,
+        phoneNumber,
+        profession,
+        city,
+        state,
+        dateOfBirth,
+        instagram,
+      });
       console.log("[DEBUG] Update result:", updateRes);
       if (updateRes.error) throw new Error(updateRes.error);
 
@@ -179,6 +199,23 @@ export function ProfileForm() {
     }
   };
 
+  const essentialFields = [
+    { label: "Nome completo", value: displayName?.trim() },
+    { label: "Telefone/WhatsApp", value: phoneNumber?.trim() },
+    { label: "Profissão", value: profession?.trim() },
+    { label: "Cidade", value: city?.trim() },
+    { label: "UF", value: state?.trim() },
+    { label: "Data de nascimento", value: dateOfBirth?.trim() },
+  ];
+  const completedCount = essentialFields.filter((f) => !!f.value).length;
+  const completionPercent = Math.round(
+    (completedCount / essentialFields.length) * 100,
+  );
+  const missingLabels = essentialFields
+    .filter((f) => !f.value)
+    .map((f) => f.label)
+    .slice(0, 3);
+
   return (
     <div className="max-w-2xl mx-auto space-y-8">
       {message && (
@@ -197,6 +234,33 @@ export function ProfileForm() {
         <h2 className="text-xl font-serif font-bold text-stone-800">
           Dados Pessoais
         </h2>
+
+        <div className="rounded-xl border border-stone-100 bg-stone-50/60 p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-semibold text-stone-700">
+              Cadastro completo
+            </p>
+            <span className="text-xs font-bold text-primary">
+              {completionPercent}%
+            </span>
+          </div>
+          <div className="h-2 w-full bg-stone-200 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-primary transition-all duration-500"
+              style={{ width: `${completionPercent}%` }}
+            />
+          </div>
+          {completionPercent < 100 ? (
+            <p className="text-xs text-stone-600">
+              Falta preencher: {missingLabels.join(", ")}
+              {completedCount + 3 < essentialFields.length ? "..." : ""}
+            </p>
+          ) : (
+            <p className="text-xs text-green-700">
+              Excelente! Seu cadastro está completo.
+            </p>
+          )}
+        </div>
 
         {/* Avatar */}
         <div className="flex items-center gap-6">
@@ -237,24 +301,134 @@ export function ProfileForm() {
 
         {/* Fields */}
         <div className="space-y-4">
-          <div>
-            <label
-              htmlFor="displayName"
-              className="block text-sm font-medium text-stone-700 mb-1"
-            >
-              Nome Completo
-            </label>
-            <input
-              id="displayName"
-              name="displayName"
-              type="text"
-              className="w-full p-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              required
-              aria-required="true"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="md:col-span-2">
+              <label
+                htmlFor="displayName"
+                className="block text-sm font-medium text-stone-700 mb-1"
+              >
+                Nome Completo
+              </label>
+              <input
+                id="displayName"
+                name="displayName"
+                type="text"
+                className="w-full p-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                required
+                aria-required="true"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="phoneNumber"
+                className="block text-sm font-medium text-stone-700 mb-1"
+              >
+                Telefone / WhatsApp
+              </label>
+              <input
+                id="phoneNumber"
+                name="phoneNumber"
+                type="tel"
+                className="w-full p-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                placeholder="(11) 99999-9999"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="profession"
+                className="block text-sm font-medium text-stone-700 mb-1"
+              >
+                Profissão / Área de Atuação
+              </label>
+              <input
+                id="profession"
+                name="profession"
+                type="text"
+                className="w-full p-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                value={profession}
+                onChange={(e) => setProfession(e.target.value)}
+                placeholder="Psicóloga, Estudante, etc."
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="city"
+                className="block text-sm font-medium text-stone-700 mb-1"
+              >
+                Cidade
+              </label>
+              <input
+                id="city"
+                name="city"
+                type="text"
+                className="w-full p-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="state"
+                className="block text-sm font-medium text-stone-700 mb-1"
+              >
+                UF
+              </label>
+              <input
+                id="state"
+                name="state"
+                type="text"
+                maxLength={2}
+                className="w-full p-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-primary/20 outline-none transition-all uppercase"
+                value={state}
+                onChange={(e) => setState(e.target.value.toUpperCase())}
+                placeholder="SP"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="dateOfBirth"
+                className="block text-sm font-medium text-stone-700 mb-1"
+              >
+                Data de Nascimento
+              </label>
+              <input
+                id="dateOfBirth"
+                name="dateOfBirth"
+                type="date"
+                className="w-full p-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                value={dateOfBirth}
+                onChange={(e) => setDateOfBirth(e.target.value)}
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label
+                htmlFor="instagram"
+                className="block text-sm font-medium text-stone-700 mb-1"
+              >
+                Instagram (opcional)
+              </label>
+              <input
+                id="instagram"
+                name="instagram"
+                type="text"
+                className="w-full p-2 border border-stone-200 rounded-lg focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                value={instagram}
+                onChange={(e) => setInstagram(e.target.value)}
+                placeholder="@seuusuario"
+              />
+            </div>
           </div>
+
           <div>
             <label
               htmlFor="bio"

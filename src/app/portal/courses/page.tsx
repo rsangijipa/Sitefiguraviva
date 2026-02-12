@@ -23,10 +23,17 @@ const CourseCard = ({
   const status =
     enrollment?.status || (isCatalog ? "catalog" : "pending_approval");
   const isActive = status === "active" || status === "completed";
+  const isPendingApproval = status === "pending_approval";
   const progress = enrollment?.progressSummary?.percent || 0;
   const lastAccess = enrollment?.lastAccessedAt
     ?.toDate?.()
     .toLocaleDateString();
+
+  const detailsHref = isCatalog
+    ? `/curso/${course.slug || course.id}`
+    : isPendingApproval
+      ? `/inscricao/${course.id}`
+      : `/portal/course/${course.id}`;
 
   const getStatusChip = () => {
     switch (status) {
@@ -54,9 +61,15 @@ const CourseCard = ({
             Reembolsado
           </span>
         );
+      case "pending_approval":
+        return (
+          <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-bold uppercase rounded-full">
+            Em análise
+          </span>
+        );
       case "catalog":
         return (
-          <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-[10px] font-bold uppercase rounded-full">
+          <span className="px-2 py-0.5 bg-stone-200 text-stone-700 text-[10px] font-bold uppercase rounded-full">
             Disponível
           </span>
         );
@@ -131,6 +144,10 @@ const CourseCard = ({
               <p className="text-xs text-stone-500 line-clamp-2 mb-3">
                 {course.description || "Domine novas habilidades."}
               </p>
+            ) : isPendingApproval ? (
+              <p className="text-xs text-amber-700">
+                Pagamento confirmado. Sua matrícula aguarda validação da equipe.
+              </p>
             ) : (
               <p className="text-xs text-stone-500 italic">
                 Acesso restrito ou pendente.
@@ -138,19 +155,21 @@ const CourseCard = ({
             )}
 
             <Link
-              href={
-                isCatalog
-                  ? `/curso/${course.slug || course.id}`
-                  : `/portal/course/${course.id}`
-              }
+              href={detailsHref}
               className={cn(
                 "block w-full py-2 border text-center text-xs font-bold uppercase tracking-widest rounded-lg transition-colors mt-3",
                 isCatalog
                   ? "border-primary text-primary hover:bg-primary hover:text-white"
-                  : "border-stone-200 text-stone-500 hover:bg-stone-50",
+                  : isPendingApproval
+                    ? "border-amber-300 text-amber-800 hover:bg-amber-50"
+                    : "border-stone-200 text-stone-500 hover:bg-stone-50",
               )}
             >
-              {isCatalog ? "Saiba Mais" : "Ver Detalhes"}
+              {isCatalog
+                ? "Saiba Mais"
+                : isPendingApproval
+                  ? "Acompanhar Inscrição"
+                  : "Ver Detalhes"}
             </Link>
           </div>
         )}
@@ -218,6 +237,13 @@ export default async function MyCoursesPage() {
 
   // Ensure serialization
   enrolledCourses = deepSafeSerialize(enrolledCourses);
+  const activeEnrolledCourses = enrolledCourses.filter((course: any) =>
+    ["active", "completed"].includes(course?.enrollment?.status),
+  );
+  const pendingEnrolledCourses = enrolledCourses.filter(
+    (course: any) =>
+      !["active", "completed"].includes(course?.enrollment?.status),
+  );
 
   // 3. Fetch Catalog (Published & Open, limit 10 for MVP)
   // Exclude enrolled? Ideally yes, but Firestore "not-in" has limits.
@@ -248,9 +274,41 @@ export default async function MyCoursesPage() {
           </div>
         </header>
 
-        {enrolledCourses.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="bg-white border border-stone-100 rounded-xl px-4 py-3">
+            <p className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">
+              Matrículas ativas
+            </p>
+            <p className="text-2xl font-bold text-stone-800 mt-1">
+              {activeEnrolledCourses.length}
+            </p>
+          </div>
+          <div className="bg-white border border-stone-100 rounded-xl px-4 py-3">
+            <p className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">
+              Em análise
+            </p>
+            <p className="text-2xl font-bold text-amber-700 mt-1">
+              {
+                pendingEnrolledCourses.filter(
+                  (course: any) =>
+                    course?.enrollment?.status === "pending_approval",
+                ).length
+              }
+            </p>
+          </div>
+          <div className="bg-white border border-stone-100 rounded-xl px-4 py-3">
+            <p className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">
+              Catálogo aberto
+            </p>
+            <p className="text-2xl font-bold text-stone-800 mt-1">
+              {catalogCourses.length}
+            </p>
+          </div>
+        </div>
+
+        {activeEnrolledCourses.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {enrolledCourses.map((course) => (
+            {activeEnrolledCourses.map((course) => (
               <CourseCard
                 key={course.id}
                 course={course}
@@ -270,6 +328,29 @@ export default async function MyCoursesPage() {
             }
             className="py-16"
           />
+        )}
+
+        {pendingEnrolledCourses.length > 0 && (
+          <div className="space-y-4">
+            <div className="border-b border-stone-100 pb-3">
+              <h2 className="font-serif text-2xl text-stone-800">
+                Matrículas em andamento
+              </h2>
+              <p className="text-sm text-stone-500">
+                Acompanhe aprovações e atualizações de acesso.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {pendingEnrolledCourses.map((course) => (
+                <CourseCard
+                  key={course.id}
+                  course={course}
+                  enrollment={course.enrollment}
+                />
+              ))}
+            </div>
+          </div>
         )}
       </section>
 
