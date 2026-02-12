@@ -48,6 +48,26 @@ const fetchCollection = async (
   return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 };
 
+const normalizeGalleryItem = (item: any) => ({
+  ...item,
+  src: item?.src || item?.url || "",
+  url: item?.url || item?.src || "",
+});
+
+const fetchPublicGalleryCollection = async (): Promise<any[]> => {
+  const publicSnap = await getDocs(query(collection(db, "publicGallery")));
+  if (!publicSnap.empty) {
+    return publicSnap.docs.map((doc) =>
+      normalizeGalleryItem({ id: doc.id, ...doc.data() }),
+    );
+  }
+
+  const legacySnap = await getDocs(query(collection(db, "gallery")));
+  return legacySnap.docs.map((doc) =>
+    normalizeGalleryItem({ id: doc.id, ...doc.data() }),
+  );
+};
+
 // --- Hooks ---
 
 export const useCourses = (
@@ -86,7 +106,7 @@ export const useGallery = (options?: { initialData?: any[] }) => {
 export const usePublicGallery = (options?: { initialData?: any[] }) => {
   return useQuery({
     queryKey: ["publicGallery"],
-    queryFn: () => fetchCollection("publicGallery", false),
+    queryFn: fetchPublicGalleryCollection,
     initialData: options?.initialData,
     staleTime: 1000 * 60 * 10, // 10 minutes
   });

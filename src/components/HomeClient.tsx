@@ -38,7 +38,11 @@ const LegalModal = dynamic(() => import("./LegalModal"), { ssr: false });
 
 // interface HomeClientProps removed
 
-import { useCourses, useBlogPosts, useGallery } from "../hooks/useContent";
+import {
+  useCourses,
+  useBlogPosts,
+  usePublicGallery,
+} from "../hooks/useContent";
 
 interface HomeClientProps {
   initialData?: {
@@ -52,14 +56,13 @@ interface HomeClientProps {
 }
 
 export default function HomeClient({ initialData }: HomeClientProps = {}) {
-  const { data: courses = [], isLoading: loadingCourses } = useCourses(false, {
+  const { data: courses = [] } = useCourses(false, {
     initialData: initialData?.courses,
   });
-  const { data: blogPosts = [], isLoading: loadingPosts } = useBlogPosts(
-    false,
-    { initialData: initialData?.posts },
-  );
-  const { data: gallery = [], isLoading: loadingGallery } = useGallery({
+  const { data: blogPosts = [] } = useBlogPosts(false, {
+    initialData: initialData?.posts,
+  });
+  const { data: gallery = [] } = usePublicGallery({
     initialData: initialData?.gallery,
   });
 

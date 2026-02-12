@@ -19,7 +19,6 @@ async function getLibraryData() {
         .collection("posts")
         .where("type", "==", "library")
         .where("isPublished", "==", true)
-        .orderBy("created_at", "desc")
         .get();
     }
 
@@ -41,6 +40,12 @@ async function getLibraryData() {
         tags: data.tags || [],
         created_at: toISO(data.created_at || data.createdAt),
       });
+    });
+
+    libraryItems.sort((a: any, b: any) => {
+      const timeA = a?.created_at ? new Date(a.created_at).getTime() : 0;
+      const timeB = b?.created_at ? new Date(b.created_at).getTime() : 0;
+      return timeB - timeA;
     });
 
     return libraryItems;
