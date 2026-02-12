@@ -7,6 +7,13 @@ import { LauraGallery } from "@/components/laura/LauraGallery";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { BackToTop } from "@/components/laura/BackToTop";
+import { WhySheMatters } from "@/components/laura/WhySheMatters";
+import { AudioRecordings } from "@/components/laura/AudioRecordings";
+import { InteractiveMap } from "@/components/laura/InteractiveMap";
+import { ConceptsDeepDive } from "@/components/laura/ConceptsDeepDive";
+import { LegacyTree } from "@/components/laura/LegacyTree";
+import { Quiz } from "@/components/laura/Quiz";
+import { Testimonials } from "@/components/laura/Testimonials";
 
 export const metadata: Metadata = {
   title: lauraPerlsContent.meta.title,
@@ -24,7 +31,7 @@ export default function LauraPerlsPage() {
     <main className="min-h-screen bg-[#f5f2eb] relative">
       {/* Aged Paper Texture Overlay */}
       <div
-        className="fixed inset-0 opacity-[0.08] pointer-events-none z-[9999]"
+        className="fixed inset-0 opacity-[0.04] pointer-events-none z-[9999]"
         style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
         }}
@@ -47,11 +54,26 @@ export default function LauraPerlsPage() {
 
       <div className="relative font-sans selection:bg-[#c9a86c]/30">
         <LauraHero />
-        <LauraTimeline />
-        <LauraContributions />
-        <LauraGallery />
 
-        {/* Sources Section */}
+        <WhySheMatters />
+
+        <InteractiveMap />
+
+        <AudioRecordings />
+
+        <LauraTimeline />
+
+        <ConceptsDeepDive />
+
+        <LauraContributions />
+
+        <LegacyTree />
+
+        <Testimonials />
+
+        <Quiz />
+
+        {/* Readings Section */}
         <section className="py-24 bg-[#f5f2eb] border-t border-[#e8dfd1] relative overflow-hidden">
           {/* Decorative Lines */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-20 bg-gradient-to-b from-[#c9a86c]/50 to-transparent" />
@@ -114,6 +136,8 @@ export default function LauraPerlsPage() {
             </div>
           </div>
         </section>
+
+        <LauraGallery />
       </div>
 
       <BackToTop />
