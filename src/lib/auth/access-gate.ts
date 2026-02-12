@@ -39,6 +39,35 @@ export async function assertCanAccessCourse(
     };
   }
 
+  // 1. Course Level Visibility Check (Fetch FIRST to verify existence)
+  const courseSnap = await adminDb.collection("courses").doc(courseId).get();
+  if (!courseSnap.exists) {
+    throw new NotFoundError("Course");
+  }
+  const course = courseSnap.data() as CourseDoc;
+
+  // Policy: draft or archived block
+  if (isCourseGloballyBlocked(course)) {
+    const reason =
+      course.isPublished === false
+        ? AccessErrorCode.COURSE_NOT_PUBLISHED
+        : AccessErrorCode.COURSE_ARCHIVED;
+
+    logger.warn("Access Denied: Course Blocked", {
+      courseId,
+      uid,
+      courseStatus: course.status,
+      isPublished: course.isPublished,
+      reason,
+    });
+
+    throw new AccessError(
+      reason,
+      `Course is ${course.isPublished === false ? "in draft" : course.status}`,
+    );
+  }
+
+  // 2. Enrollment Lookup (Standard, Alternate, or Legacy Profile)
   const enrollmentId = `${uid}_${courseId}`;
   const altEnrollmentId = `${courseId}_${uid}`;
 
@@ -55,11 +84,13 @@ export async function assertCanAccessCourse(
       .get();
   }
 
+  let enrollment = enrollmentSnap.exists
+    ? (enrollmentSnap.data() as EnrollmentDoc)
+    : null;
+
   // Final Fallback: Check if course is in user doc (legacy format)
-  if (
-    !enrollmentSnap.exists &&
-    userData?.enrolledCourseIds?.includes(courseId)
-  ) {
+  if (!enrollment && userData?.enrolledCourseIds?.includes(courseId)) {
+    // Treat as valid active enrollment for legacy users
     return {
       uid,
       courseId,
@@ -68,32 +99,32 @@ export async function assertCanAccessCourse(
     };
   }
 
-  if (!enrollmentSnap.exists) {
-    logger.warn("Access Denied: Enrollment Not Found", { courseId, uid });
-    throw new NotFoundError("Enrollment");
+  if (!enrollment) {
+    logger.warn("Access Denied: No Enrollment", { courseId, uid });
+    throw new AccessError(
+      AccessErrorCode.ENROLLMENT_NOT_FOUND,
+      "You are not enrolled in this course",
+    );
   }
 
-  const enrollment = enrollmentSnap.data() as EnrollmentDoc;
-
-  // 1. Enrollment Level Status Check (Policy: active or completed)
+  // 3. Enrollment Level Status Check (Policy: active or completed)
   if (!isEnrollmentAllowed(enrollment)) {
-    logger.warn("Access Denied: Enrollment Inactive", {
+    const reason =
+      enrollment.status === "pending"
+        ? AccessErrorCode.ENROLLMENT_PENDING
+        : AccessErrorCode.ENROLLMENT_STATUS_NOT_ACTIVE;
+
+    logger.warn("Access Denied: Enrollment Status", {
       courseId,
       uid,
       enrollmentStatus: enrollment.status,
-      reason: "ENROLLMENT_INACTIVE",
+      reason,
     });
 
-    if (enrollment.status === "pending") {
-      throw new ForbiddenError("Enrollment is pending approval");
-    }
-    if (enrollment.status === "expired") {
-      throw new ForbiddenError("Enrollment has expired");
-    }
-    throw new ForbiddenError(`Enrollment is ${enrollment.status}`);
+    throw new AccessError(reason, `Enrollment status is ${enrollment.status}`);
   }
 
-  // 2. Subscription Expiry Check
+  // 4. Subscription Expiry Check
   if (enrollment.paymentMethod === "subscription") {
     if (!enrollment.accessUntil) {
       throw new AccessError(
@@ -111,34 +142,17 @@ export async function assertCanAccessCourse(
         uid,
         expiry,
       });
-      throw new ForbiddenError("Subscription period has ended");
+      throw new AccessError(
+        AccessErrorCode.ENROLLMENT_EXPIRED,
+        "Subscription period has ended",
+      );
     }
-  }
-
-  // 3. Course Level Visibility Check
-  const courseSnap = await adminDb.collection("courses").doc(courseId).get();
-  if (!courseSnap.exists) {
-    throw new NotFoundError("Course");
-  }
-
-  const course = courseSnap.data() as CourseDoc;
-
-  // Policy: draft or archived block
-  if (isCourseGloballyBlocked(course)) {
-    logger.warn("Access Denied: Course Unavailable", {
-      courseId,
-      uid,
-      courseStatus: course.status,
-      isPublished: course.isPublished,
-      reason: "COURSE_UNAVAILABLE",
-    });
-    throw new ContentUnavailableError("Course is not available for students");
   }
 
   return {
     uid,
     courseId,
-    enrollmentId,
+    enrollmentId: enrollmentSnap.id || `profile_${uid}_${courseId}`,
     paymentMethod: enrollment.paymentMethod || "free",
     courseVersion: enrollment.courseVersionAtEnrollment,
     accessUntil: enrollment.accessUntil?.toDate().toISOString(),

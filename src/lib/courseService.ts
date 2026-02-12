@@ -5,6 +5,9 @@ import { deepSafeSerialize } from "./utils";
 
 import { toCourseFullDTO } from "@/lib/presenters/mappers";
 
+import { assertCanAccessCourse } from "./auth/access-gate";
+import { AccessError, AccessErrorCode } from "./auth/access-types";
+
 export async function getCourseData(
   courseId: string,
   userId: string,
@@ -12,54 +15,43 @@ export async function getCourseData(
 ) {
   if (!courseId || !userId) return null;
 
-  // 1. Fetch Course & Enrollment (Standard & Alternate)
-  const coursePromise = db.collection("courses").doc(courseId).get();
-  const userPromise = db.collection("users").doc(userId).get();
-  const enrollmentPromise = db
-    .collection("enrollments")
-    .doc(`${userId}_${courseId}`)
-    .get();
-  const altEnrollmentPromise = db
-    .collection("enrollments")
-    .doc(`${courseId}_${userId}`)
-    .get();
+  // 1. Fetch Course & Core Context via Canonical Gate
+  let accessContext;
+  let isAccessDenied = false;
 
-  const [courseDoc, userDoc, enrollmentDoc, altEnrollmentDoc] =
-    await Promise.all([
-      coursePromise,
-      userPromise,
-      enrollmentPromise,
-      altEnrollmentPromise,
-    ]);
-
-  if (!courseDoc.exists) return null;
-
-  let enrollmentData = null;
-  let status = isAdmin ? "active" : "none";
-
-  if (enrollmentDoc.exists) {
-    enrollmentData = enrollmentDoc;
-    status = enrollmentDoc.data()?.status || (isAdmin ? "active" : "none");
-  } else if (altEnrollmentDoc.exists) {
-    enrollmentData = altEnrollmentDoc;
-    status = altEnrollmentDoc.data()?.status || (isAdmin ? "active" : "none");
-  } else if (
-    userDoc.exists &&
-    userDoc.data()?.enrolledCourseIds?.includes(courseId)
-  ) {
-    status = "active"; // Profile-based enrollment
+  try {
+    accessContext = await assertCanAccessCourse(userId, courseId);
+  } catch (error) {
+    if (error instanceof AccessError) {
+      if (error.code === AccessErrorCode.COURSE_NOT_AVAILABLE) {
+        return null; // Don't even show metadata if not published
+      }
+      isAccessDenied = true;
+    } else {
+      throw error;
+    }
   }
 
-  // Paywall gate: If not active or completed, return limited data via DTO
-  // Skip if Admin
-  if (!isAdmin && status !== "active" && status !== "completed") {
+  const courseSnap = await db.collection("courses").doc(courseId).get();
+  if (!courseSnap.exists) return null;
+
+  // Fetch enrollment data if exists (using the ID from context or default)
+  const enrollmentId = accessContext?.enrollmentId || `${userId}_${courseId}`;
+  const enrollmentDoc = await db
+    .collection("enrollments")
+    .doc(enrollmentId)
+    .get();
+
+  // Paywall gate: If access denied, return limited data via DTO
+  if (isAccessDenied && !isAdmin) {
     return toCourseFullDTO(
-      courseDoc,
+      courseSnap,
       [], // No modules
       new Map(), // No lessons
       new Map(), // No progress
-      enrollmentData,
+      enrollmentDoc.exists ? enrollmentDoc : null,
       isAdmin,
+      isAccessDenied,
     );
   }
 
@@ -107,12 +99,13 @@ export async function getCourseData(
 
   // 5. Map to DTO
   return toCourseFullDTO(
-    courseDoc,
+    courseSnap,
     modulesSnap.docs,
     lessonsMap,
     progressMap,
-    enrollmentData,
+    enrollmentDoc.exists ? enrollmentDoc : null,
     isAdmin,
+    isAccessDenied,
   );
 }
 

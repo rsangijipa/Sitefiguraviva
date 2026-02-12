@@ -6,7 +6,7 @@ import { cookies } from "next/headers";
 import { publishEvent } from "@/lib/events/bus";
 import { CourseDoc, EnrollmentDoc, ProgressDoc, LessonDoc } from "@/types/lms";
 import crypto from "crypto";
-import { assertCanAccessCourse } from "@/lib/courses/access";
+import { assertCanAccessCourse } from "@/lib/auth/access-gate";
 
 /**
  * Generates a unique short verification code for certificates.

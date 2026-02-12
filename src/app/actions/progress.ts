@@ -2,7 +2,7 @@
 
 import { adminAuth } from "@/lib/firebase/admin";
 import { progressService } from "@/lib/progress/progressService";
-import { assertCanAccessCourse } from "@/lib/courses/access";
+import { assertCanAccessCourse } from "@/lib/auth/access-gate";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 
