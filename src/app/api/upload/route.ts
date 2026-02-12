@@ -23,6 +23,19 @@ export async function POST(request: NextRequest) {
 
     const claims = await auth.verifySessionCookie(sessionCookie, true);
 
+    // P1-02: Rate Limit Uploads
+    const { rateLimit, getClientIdentifier } = await import("@/lib/rateLimit");
+    const rl = await rateLimit(getClientIdentifier(request), "file_upload", {
+      maxRequests: 10,
+      windowMs: 60000,
+    });
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: "Too many uploads. Wait a minute." },
+        { status: 429 },
+      );
+    }
+
     // Parse form data
     const formData = await request.formData();
     const file = formData.get("file") as File;
@@ -40,7 +53,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate file extension
+    // P1-03: MIME validation + extension validation
+    const allowedMimeTypes = [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "image/jpeg",
+      "image/png",
+      "video/mp4",
+      "video/quicktime",
+    ];
+
+    if (!allowedMimeTypes.includes(file.type)) {
+      return NextResponse.json(
+        { error: "Invalid file type (MIME)" },
+        { status: 400 },
+      );
+    }
+
     const allowedExtensions = [
       ".pdf",
       ".doc",
@@ -56,7 +86,7 @@ export async function POST(request: NextRequest) {
     if (!allowedExtensions.includes(fileExt)) {
       return NextResponse.json(
         {
-          error: `File type not allowed. Accepted: ${allowedExtensions.join(", ")}`,
+          error: `File extension not allowed. Accepted: ${allowedExtensions.join(", ")}`,
         },
         { status: 400 },
       );

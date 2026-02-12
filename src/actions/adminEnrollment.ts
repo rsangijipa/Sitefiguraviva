@@ -126,7 +126,7 @@ export async function enrollLead(
     });
 
     // 6. Audit Logging
-    await import("@/services/auditService").then((m) =>
+    await import("@/lib/audit").then((m) =>
       m.auditService.logEvent({
         eventType: "LEAD_ENROLLED",
         actor: { uid: claims.uid, email: claims.email },

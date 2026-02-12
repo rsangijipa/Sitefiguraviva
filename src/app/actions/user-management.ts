@@ -6,7 +6,7 @@ import { UserRole, UserStatus, AuditLog } from "@/types/user";
 import { Timestamp } from "firebase-admin/firestore";
 import { revalidatePath } from "next/cache";
 
-import { auditService } from "@/services/auditService";
+import { auditService } from "@/lib/audit";
 
 // Removed local logAudit helper in favor of centralized auditService
 

@@ -2,7 +2,7 @@
 
 import { requireAdmin } from "@/lib/auth/server";
 import { gamificationService } from "@/lib/gamification/gamificationService";
-import { auditService } from "@/services/auditService";
+import { auditService } from "@/lib/audit";
 import { revalidatePath } from "next/cache";
 
 /**

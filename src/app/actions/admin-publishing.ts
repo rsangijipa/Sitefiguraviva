@@ -68,7 +68,7 @@ export async function toggleCourseStatus(
     const session = cookieStore.get("session")?.value;
     const actor = await adminAuth.verifySessionCookie(session || "", true);
 
-    await import("@/services/auditService").then((m) =>
+    await import("@/lib/audit").then((m) =>
       m.auditService.logEvent({
         eventType: "COURSE_STATUS_UPDATED",
         actor: { uid: actor.uid, email: actor.email },
@@ -119,7 +119,7 @@ export async function bumpCourseRevision(courseId: string) {
     const session = cookieStore.get("session")?.value;
     const actor = await adminAuth.verifySessionCookie(session || "", true);
 
-    await import("@/services/auditService").then((m) =>
+    await import("@/lib/audit").then((m) =>
       m.auditService.logEvent({
         eventType: "COURSE_VERSION_BUMPED",
         actor: { uid: actor.uid, email: actor.email },

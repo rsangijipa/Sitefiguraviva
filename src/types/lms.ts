@@ -48,6 +48,9 @@ export interface CourseDoc {
 
   // Quick Details
   instructor?: string;
+  instructorName?: string;
+  instructorTitle?: string;
+  workload?: number;
   duration?: string;
   level?: string;
   category?: string;
@@ -238,7 +241,8 @@ export interface CommunityReplyDoc {
 // --- USER PROGRESS & CERTIFICATES ---
 
 export interface EnrollmentDoc {
-  userId: string;
+  uid: string; // Cannonical UID (Firebase Auth)
+  userId?: string; // Legacy/Alias
   courseId: string;
   userName?: string; // Denormalized for certificates
   status: EnrollmentStatus;

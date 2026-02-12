@@ -29,7 +29,7 @@ export async function gradeAssessment(submissionId: string) {
     const claims = await auth.verifySessionCookie(sessionCookie, true);
 
     // Rate limiting: Prevent spam submissions
-    const rateLimitResult = rateLimit(
+    const rateLimitResult = await rateLimit(
       claims.uid,
       "submitAssessment",
       RateLimitPresets.SUBMIT_ASSIGNMENT,
@@ -263,7 +263,7 @@ export async function updateAssessment(
       });
 
     // Audit
-    await import("@/services/auditService").then((m) =>
+    await import("@/lib/audit").then((m) =>
       m.auditService.logEvent({
         eventType: "ASSESSMENT_UPDATED",
         actor: { uid: claims.uid, email: claims.email },
@@ -293,7 +293,7 @@ export async function deleteAssessment(id: string) {
     await adminDb.collection("assessments").doc(id).delete();
 
     // Audit
-    await import("@/services/auditService").then((m) =>
+    await import("@/lib/audit").then((m) =>
       m.auditService.logEvent({
         eventType: "ASSESSMENT_DELETED",
         actor: { uid: claims.uid, email: claims.email },
@@ -329,7 +329,7 @@ export async function updateAssessmentStatus(
     });
 
     // Audit
-    await import("@/services/auditService").then((m) =>
+    await import("@/lib/audit").then((m) =>
       m.auditService.logEvent({
         eventType: "ASSESSMENT_STATUS_UPDATED",
         actor: { uid: claims.uid, email: claims.email },
