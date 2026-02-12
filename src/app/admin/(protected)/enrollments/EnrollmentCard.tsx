@@ -110,9 +110,9 @@ export function EnrollmentCard({
         return "bg-yellow-50 text-yellow-600 border-yellow-100 animate-pulse";
       case "completed":
         return "bg-blue-50 text-blue-600 border-blue-100";
-      case "locked":
+      case "canceled":
         return "bg-red-50 text-red-600 border-red-100";
-      case "expired":
+      case "refunded":
         return "bg-stone-50 text-stone-600 border-stone-100";
       default:
         return "bg-stone-50 text-stone-500 border-stone-100";

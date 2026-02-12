@@ -2,9 +2,9 @@
 
 import { adminAuth, adminDb } from "@/lib/firebase/admin";
 import { Timestamp, FieldValue } from "firebase-admin/firestore";
-import { Enrollment } from "@/types/schema";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
+import { logAudit } from "@/lib/audit";
 
 // Helper to ensure admin
 async function assertAdmin() {
@@ -107,6 +107,13 @@ export async function enrollUser(email: string, courseId: string) {
 
     await enrollmentRef.set(enrollmentData, { merge: true });
 
+    await logAudit({
+      actor: { uid: adminUser.uid, email: adminUser.email, role: "admin" },
+      action: "ENROLLMENT_CREATED",
+      target: { collection: "enrollments", id: enrollmentId },
+      diff: { after: enrollmentData },
+    });
+
     // Send Notification
     await sendNotification(
       uid,
@@ -145,13 +152,20 @@ export async function revokeAccess(
   reason: string = "Admin Revoke",
 ) {
   try {
-    await assertAdmin();
+    const adminUser = await assertAdmin();
     const enrollmentId = `${uid}_${courseId}`;
 
     await adminDb.collection("enrollments").doc(enrollmentId).update({
-      status: "locked",
+      status: "canceled",
       updatedAt: Timestamp.now(),
       reason,
+    });
+
+    await logAudit({
+      actor: { uid: adminUser.uid, email: adminUser.email, role: "admin" },
+      action: "ENROLLMENT_REVOKED",
+      target: { collection: "enrollments", id: enrollmentId },
+      diff: { after: { status: "canceled", reason } },
     });
 
     // Revoke access from User Doc
@@ -212,10 +226,15 @@ export async function batchEnrollUsers(emails: string[], courseId: string) {
 export async function updateEnrollmentStatus(
   uid: string,
   courseId: string,
-  newStatus: "active" | "completed" | "expired" | "locked" | "pending_approval",
+  newStatus:
+    | "pending_approval"
+    | "active"
+    | "completed"
+    | "canceled"
+    | "refunded",
 ) {
   try {
-    await assertAdmin();
+    const adminUser = await assertAdmin();
     const enrollmentId = `${uid}_${courseId}`;
     const enrollmentRef = adminDb.collection("enrollments").doc(enrollmentId);
     const userRef = adminDb.collection("users").doc(uid);
@@ -230,7 +249,7 @@ export async function updateEnrollmentStatus(
         tx.update(userRef, {
           enrolledCourseIds: FieldValue.arrayUnion(courseId),
         });
-      } else if (newStatus === "locked" || newStatus === "expired") {
+      } else if (newStatus === "canceled" || newStatus === "refunded") {
         tx.update(userRef, {
           enrolledCourseIds: FieldValue.arrayRemove(courseId),
         });
@@ -240,6 +259,14 @@ export async function updateEnrollmentStatus(
 
     revalidatePath(`/portal`);
     revalidatePath(`/portal/courses/${courseId}`);
+
+    await logAudit({
+      actor: { uid: adminUser.uid, email: adminUser.email, role: "admin" },
+      action: "ENROLLMENT_STATUS_UPDATED",
+      target: { collection: "enrollments", id: enrollmentId },
+      diff: { after: { status: newStatus } },
+    });
+
     return { success: true };
   } catch (error: any) {
     console.error("Update Status Error:", error);
@@ -256,13 +283,17 @@ export async function approveEnrollment(uid: string, courseId: string) {
 
   if (res.success) {
     const enrollmentId = `${uid}_${courseId}`;
-    await adminDb
-      .collection("enrollments")
-      .doc(enrollmentId)
-      .update({
-        approvedBy: adminUser.email || "admin",
-        approvedAt: FieldValue.serverTimestamp(),
-      });
+    await adminDb.collection("enrollments").doc(enrollmentId).update({
+      approvedBy: adminUser.uid,
+      approvedAt: FieldValue.serverTimestamp(),
+    });
+
+    await logAudit({
+      actor: { uid: adminUser.uid, email: adminUser.email, role: "admin" },
+      action: "ENROLLMENT_APPROVED",
+      target: { collection: "enrollments", id: enrollmentId },
+      diff: { after: { status: "active", approvedBy: adminUser.uid } },
+    });
 
     await sendNotification(
       uid,

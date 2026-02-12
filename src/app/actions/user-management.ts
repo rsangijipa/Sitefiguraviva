@@ -1,8 +1,8 @@
 "use server";
 
 import { requireAdmin } from "@/lib/auth/server";
-import { adminDb } from "@/lib/firebase/admin";
-import { UserRole, UserStatus, AuditLog } from "@/types/user";
+import { adminAuth, adminDb } from "@/lib/firebase/admin";
+import { UserRole, UserStatus } from "@/types/user";
 import { Timestamp } from "firebase-admin/firestore";
 import { revalidatePath } from "next/cache";
 
@@ -25,6 +25,7 @@ export async function updateUserRole(targetUid: string, newRole: UserRole) {
     const userRef = adminDb.collection("users").doc(targetUid);
     const userDoc = await userRef.get();
     const oldRole = userDoc.data()?.role || "student";
+    const isActive = userDoc.data()?.isActive !== false;
 
     // 1. Update Firestore Doc
     await userRef.set(
@@ -39,11 +40,14 @@ export async function updateUserRole(targetUid: string, newRole: UserRole) {
     // We only set 'admin' claim if role is admin.
     // For 'tutor' we might want a 'tutor' claim, but currently we rely on DB for that permissions mostly.
     // But for consistency:
-    const claims = { admin: newRole === "admin", tutor: newRole === "tutor" };
+    const claims = {
+      role: newRole,
+      admin: newRole === "admin" && isActive,
+      tutor: newRole === "tutor" && isActive,
+      isActive,
+    };
     // Note: setCustomUserClaims overwrites existing claims.
-    await import("@/lib/firebase/admin").then((m) =>
-      m.adminAuth.setCustomUserClaims(targetUid, claims),
-    );
+    await adminAuth.setCustomUserClaims(targetUid, claims);
 
     // 3. Audit
     await auditService.logEvent({
@@ -80,9 +84,11 @@ export async function toggleUserStatus(
     const userRef = adminDb.collection("users").doc(targetUid);
     const userDoc = await userRef.get();
     const oldStatus = userDoc.data()?.status || "active";
+    const oldIsActive = userDoc.data()?.isActive;
 
     const updateData: any = {
       status: newStatus,
+      isActive: newStatus !== "disabled",
       updatedAt: Timestamp.now(),
     };
 
@@ -92,30 +98,35 @@ export async function toggleUserStatus(
       updateData.disabledReason = reason || "No reason provided";
 
       // Disable in Auth (Revoke tokens)
-      await import("@/lib/firebase/admin").then((m) => {
-        m.adminAuth.updateUser(targetUid, { disabled: true });
-        m.adminAuth.revokeRefreshTokens(targetUid);
-      });
+      await adminAuth.updateUser(targetUid, { disabled: true });
+      await adminAuth.revokeRefreshTokens(targetUid);
     } else {
       // Re-enable
       updateData.disabledAt = null;
       updateData.disabledBy = null;
       updateData.disabledReason = null;
 
-      await import("@/lib/firebase/admin").then((m) =>
-        m.adminAuth.updateUser(targetUid, { disabled: false }),
-      );
+      await adminAuth.updateUser(targetUid, { disabled: false });
     }
 
     await userRef.set(updateData, { merge: true });
+
+    const role = (userDoc.data()?.role || "student") as UserRole;
+    const isActive = newStatus !== "disabled";
+    await adminAuth.setCustomUserClaims(targetUid, {
+      role,
+      admin: role === "admin" && isActive,
+      tutor: role === "tutor" && isActive,
+      isActive,
+    });
 
     await auditService.logEvent({
       eventType: newStatus === "disabled" ? "USER_DISABLED" : "USER_ENABLED",
       actor: { uid: actorUid, email: adminClaims.email },
       target: { id: targetUid, collection: "users" },
       diff: {
-        before: { status: oldStatus },
-        after: { status: newStatus },
+        before: { status: oldStatus, isActive: oldIsActive },
+        after: { status: newStatus, isActive: newStatus !== "disabled" },
       },
       payload: { reason },
     });
@@ -125,5 +136,58 @@ export async function toggleUserStatus(
   } catch (error) {
     console.error("toggleUserStatus error:", error);
     return { success: false, error: "Failed to update user status" };
+  }
+}
+
+export async function listUsersForAdmin(
+  pageToken?: string,
+  pageSize: number = 100,
+) {
+  await requireAdmin();
+
+  try {
+    const authPage = await adminAuth.listUsers(
+      Math.min(pageSize, 1000),
+      pageToken,
+    );
+    const authUsers = authPage.users;
+
+    const profileMap = new Map<string, any>();
+    await Promise.all(
+      authUsers.map(async (u) => {
+        const snap = await adminDb.collection("users").doc(u.uid).get();
+        profileMap.set(u.uid, snap.exists ? snap.data() : null);
+      }),
+    );
+
+    const merged = authUsers.map((u) => {
+      const p = profileMap.get(u.uid) || {};
+      const isActive = p?.isActive !== undefined ? p.isActive : !u.disabled;
+      return {
+        id: u.uid,
+        uid: u.uid,
+        email: u.email || p?.email || null,
+        displayName: p?.displayName || u.displayName || null,
+        photoURL: p?.photoURL || u.photoURL || null,
+        role: p?.role || "student",
+        isActive,
+        status: isActive ? "active" : "disabled",
+        createdAt: p?.createdAt || null,
+        lastLogin: p?.lastLogin || u.metadata?.lastSignInTime || null,
+      };
+    });
+
+    return {
+      success: true,
+      users: merged,
+      nextPageToken: authPage.pageToken || null,
+    };
+  } catch (error) {
+    console.error("listUsersForAdmin error:", error);
+    return {
+      success: false,
+      error: "Failed to list users",
+      users: [] as any[],
+    };
   }
 }

@@ -50,14 +50,14 @@ export default async function LessonPage({
 
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get("session")?.value;
-  if (!sessionCookie) redirect("/login");
+  if (!sessionCookie) redirect("/auth");
 
   let uid;
   try {
     const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
     uid = decodedClaims.uid;
   } catch {
-    redirect("/login");
+    redirect("/auth");
   }
 
   // ORBITAL 01 & 05: Single Source of Truth Access Gate

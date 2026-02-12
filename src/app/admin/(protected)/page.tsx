@@ -155,7 +155,7 @@ export default function AdminDashboard() {
       <header className="mb-12 relative overflow-hidden p-8 rounded-[2rem] bg-gradient-to-r from-primary/5 to-transparent border border-primary/5">
         <div className="relative z-10">
           <h1 className="text-4xl md:text-5xl font-serif text-primary mb-2">
-            Bem-vinda, Lilian
+            Painel Administrativo
           </h1>
           <p className="text-lg text-primary/60 font-light flex items-center gap-2">
             <Activity className="w-4 h-4 text-gold" />

@@ -16,14 +16,14 @@ export default async function CertificatePage({ params }: PageProps) {
   // 1. Auth & Access Check
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get("session")?.value;
-  if (!sessionCookie) redirect("/login");
+  if (!sessionCookie) redirect("/auth");
 
   let uid;
   try {
     const claims = await auth.verifySessionCookie(sessionCookie, true);
     uid = claims.uid;
   } catch {
-    redirect("/login");
+    redirect("/auth");
   }
 
   try {

@@ -5,18 +5,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://figuraviva.com.br";
 
   // 1. Static Routes
-  const staticRoutes = [
-    "",
-    "/instituto",
-    "/fundadora",
-    "/auth/login",
-    "/auth/signup",
-  ].map((route) => ({
-    url: `${baseUrl}${route}`,
-    lastModified: new Date(),
-    changeFrequency: "monthly" as const,
-    priority: route === "" ? 1 : 0.8,
-  }));
+  const staticRoutes = ["", "/instituto", "/fundadora", "/auth"].map(
+    (route) => ({
+      url: `${baseUrl}${route}`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: route === "" ? 1 : 0.8,
+    }),
+  );
 
   // 2. Dynamic Routes (Courses)
   let courseRoutes: MetadataRoute.Sitemap = [];

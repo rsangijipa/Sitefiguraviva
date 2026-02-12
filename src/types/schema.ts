@@ -14,7 +14,7 @@ type FlexibleTimestamp =
 export interface Enrollment {
   uid: string;
   courseId: string;
-  status: "active" | "locked" | "expired" | "completed";
+  status: "pending_approval" | "active" | "completed" | "canceled" | "refunded";
   createdAt: FlexibleTimestamp | Date;
   updatedAt?: FlexibleTimestamp | Date;
 

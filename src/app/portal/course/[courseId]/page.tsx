@@ -17,7 +17,7 @@ export default async function CoursePage({
   const sessionCookie = cookieStore.get("session")?.value;
 
   if (!sessionCookie) {
-    redirect("/login");
+    redirect("/auth");
   }
 
   const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);

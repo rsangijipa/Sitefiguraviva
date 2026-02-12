@@ -67,7 +67,7 @@ export async function assertCanAccessCourse(
     );
   }
 
-  // 2. Enrollment Lookup (Standard, Alternate, or Legacy Profile)
+  // 2. Enrollment Lookup (deterministic ID + compatibility fallback)
   const enrollmentId = `${uid}_${courseId}`;
   const altEnrollmentId = `${courseId}_${uid}`;
 
@@ -88,17 +88,6 @@ export async function assertCanAccessCourse(
     ? (enrollmentSnap.data() as EnrollmentDoc)
     : null;
 
-  // Final Fallback: Check if course is in user doc (legacy format)
-  if (!enrollment && userData?.enrolledCourseIds?.includes(courseId)) {
-    // Treat as valid active enrollment for legacy users
-    return {
-      uid,
-      courseId,
-      enrollmentId: `legacy_${uid}_${courseId}`,
-      paymentMethod: "legacy",
-    };
-  }
-
   if (!enrollment) {
     logger.warn("Access Denied: No Enrollment", { courseId, uid });
     throw new AccessError(
@@ -110,7 +99,10 @@ export async function assertCanAccessCourse(
   // 3. Enrollment Level Status Check (Policy: active or completed)
   if (!isEnrollmentAllowed(enrollment)) {
     const reason =
-      enrollment.status === "pending"
+      enrollment.status === "pending" ||
+      enrollment.status === "pending_approval" ||
+      enrollment.status === "awaiting_approval" ||
+      enrollment.status === "awaiting_payment"
         ? AccessErrorCode.ENROLLMENT_PENDING
         : AccessErrorCode.ENROLLMENT_STATUS_NOT_ACTIVE;
 

@@ -4,12 +4,20 @@ import { Timestamp } from "firebase/firestore";
 
 export type Role = "admin" | "tutor" | "student";
 export type EnrollmentStatus =
-  | "pending"
+  | "pending_approval"
   | "active"
-  | "expired"
-  | "refunded"
+  | "completed"
   | "canceled"
-  | "completed";
+  | "refunded"
+  // Legacy statuses kept for migration compatibility.
+  | "pending"
+  | "expired"
+  | "locked"
+  | "awaiting_payment"
+  | "awaiting_approval"
+  | "blocked"
+  | "past_due"
+  | "rejected";
 export type BlockType =
   | "text"
   | "video"

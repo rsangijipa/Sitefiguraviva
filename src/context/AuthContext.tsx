@@ -53,8 +53,6 @@ const AuthContext = createContext<AuthContextType>({
   },
 });
 
-import { useUserSync } from "@/hooks/useUserSync";
-
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [role, setRole] = useState<UserRole | null>(null);
@@ -63,9 +61,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  // Call the sync hook
-  useUserSync();
-
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
@@ -73,6 +68,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (currentUser) {
         try {
           console.log("[AuthContext] User logged in:", currentUser.email);
+
           // 1. Check Custom Claims (Fastest, good for initial check)
           const token = await currentUser.getIdTokenResult(true);
           const claimAdmin = !!token.claims.admin;
@@ -87,12 +83,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
           let userRole: UserRole = "student"; // Default
           let userStatus: UserStatus = "active"; // Default
+          let isActive = true;
 
           if (userSnapshot.exists()) {
             const data = userSnapshot.data();
             console.log("[AuthContext] Firestore user data:", {
               role: data.role,
               status: data.status,
+              isActive: data.isActive,
             });
 
             // Role Mapping
@@ -102,10 +100,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               userRole = "admin";
             }
 
-            // Status Mapping
-            if (data.status) {
-              userStatus = data.status as UserStatus;
-            }
+            // Account status (SSoT uses isActive boolean; keep legacy status for compatibility)
+            isActive = data.isActive !== false;
+            const legacyDisabled = data.status === "disabled";
+            userStatus = !isActive || legacyDisabled ? "disabled" : "active";
           } else {
             console.warn("[AuthContext] No Firestore document found for user");
             // Fallback: Use Custom Claims if no Firestore document

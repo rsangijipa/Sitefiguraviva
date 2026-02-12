@@ -25,7 +25,14 @@ export interface CourseDTO {
 
 export interface EnrollmentDTO {
   id: string;
-  status: "active" | "completed" | "expired" | "cancelled";
+  status:
+    | "pending_approval"
+    | "active"
+    | "completed"
+    | "canceled"
+    | "refunded"
+    | "expired"
+    | "cancelled";
   enrolledAt: string;
 
   // Progress Snapshot
