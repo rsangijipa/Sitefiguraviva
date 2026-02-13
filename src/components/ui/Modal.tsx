@@ -157,6 +157,7 @@ export function ModalBody({
         "overflow-y-auto custom-scrollbar flex-1 relative bg-white",
         className,
       )}
+      data-lenis-prevent
       {...props}
     >
       <div className="p-5 md:p-8">{children}</div>

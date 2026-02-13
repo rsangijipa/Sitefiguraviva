@@ -20,6 +20,7 @@ interface AuthContextType {
   user: User | null;
   role: UserRole | null;
   status: UserStatus | null;
+  tenantId: string | null; // v3 Multi-tenancy
   isAdmin: boolean;
   loading: boolean;
   signOut: (redirectPath?: string) => Promise<void>;
@@ -36,6 +37,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   role: null,
   status: null,
+  tenantId: null, // v3 Multi-tenancy
   isAdmin: false,
   loading: true,
   signOut: async (path?: string) => {},
@@ -57,8 +59,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [role, setRole] = useState<UserRole | null>(null);
   const [status, setStatus] = useState<UserStatus | null>(null);
+  const [tenantId, setTenantId] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+
   const router = useRouter();
 
   useEffect(() => {
@@ -126,6 +130,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             return;
           }
 
+          // 4. Extract Tenant Context
+          const userData = userSnapshot.exists() ? userSnapshot.data() : null;
+          let resolvedTenant =
+            userData?.tenantId || (token.claims.tenantId as string) || "viva";
+          setTenantId(resolvedTenant);
+
           const normalizedRole = userRole.toLowerCase().trim();
           setRole(userRole);
           setStatus(userStatus);
@@ -133,18 +143,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           console.log("[AuthContext] Final state:", {
             role: userRole,
             status: userStatus,
+            tenantId: resolvedTenant,
             isAdmin: normalizedRole === "admin" || claimAdmin,
           });
         } catch (error) {
           console.error("Error fetching user data:", error);
           setRole("student");
-          setStatus("active"); // Fail safe to active unless proven disabled? Or 'disabled' for safety?
-          // Safe default: active, but if error is permission denied, they can't do much anyway.
+          setStatus("active");
+          setTenantId("viva"); // Safety fallback
           setIsAdmin(false);
         }
       } else {
         setRole(null);
         setStatus(null);
+        setTenantId(null);
         setIsAdmin(false);
       }
 
@@ -204,6 +216,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         user,
         role,
         status,
+        tenantId,
         isAdmin,
         loading,
         signOut,

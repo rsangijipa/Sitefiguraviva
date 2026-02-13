@@ -7,6 +7,7 @@ import { useState } from "react";
 
 import { UIProvider } from "@/context/UIContext";
 import { GamificationProvider } from "@/context/GamificationContext";
+import { AudioProvider } from "@/context/AudioContext";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
@@ -16,7 +17,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       <AuthProvider>
         <UIProvider>
           <GamificationProvider>
-            <ToastProvider>{children}</ToastProvider>
+            <AudioProvider>
+              <ToastProvider>{children}</ToastProvider>
+            </AudioProvider>
           </GamificationProvider>
         </UIProvider>
       </AuthProvider>

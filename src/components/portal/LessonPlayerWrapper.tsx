@@ -20,15 +20,26 @@ interface LessonPlayerWrapperProps {
   submission?: any;
 }
 
-// ... existing imports ...
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AssessmentPlayer } from "../assessment/AssessmentPlayer";
-
-// ... existing interface ...
+import { analyticsService } from "@/services/analyticsService";
+import { useAuth } from "@/context/AuthContext";
 
 export function LessonPlayerWrapper(props: LessonPlayerWrapperProps) {
   const router = useRouter();
+  const { user } = useAuth();
   const [autoAdvance, setAutoAdvance] = useState(false);
+
+  // v4: Retention Tracking
+  useEffect(() => {
+    if (user?.uid && props.course.id && props.activeLesson.id) {
+      analyticsService.trackLessonStart(
+        user.uid,
+        props.course.id,
+        props.activeLesson.id,
+      );
+    }
+  }, [user?.uid, props.course.id, props.activeLesson.id]);
 
   const handleSelectLesson = (lessonId: string) => {
     router.push(`/portal/course/${props.course.id}/lesson/${lessonId}`);
@@ -41,6 +52,15 @@ export function LessonPlayerWrapper(props: LessonPlayerWrapperProps) {
         props.activeLesson.moduleId,
         lessonId,
       );
+
+      // v4: Retention Tracking
+      if (user?.uid) {
+        analyticsService.trackLessonCompletion(
+          user.uid,
+          props.course.id,
+          lessonId,
+        );
+      }
     } catch (error) {
       console.error("Failed to mark lesson complete", error);
     }

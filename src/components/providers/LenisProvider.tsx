@@ -28,6 +28,24 @@ export default function LenisProvider({
       touchMultiplier: 2,
     });
 
+    // v4: Scroll Lock Detection for Lenis
+    const observer = new MutationObserver(() => {
+      if (
+        document.body.classList.contains("lenis-stopped") ||
+        document.body.style.overflow === "hidden" ||
+        window.getComputedStyle(document.body).overflow === "hidden"
+      ) {
+        lenis.stop();
+      } else {
+        lenis.start();
+      }
+    });
+
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ["style", "class"],
+    });
+
     function raf(time: number) {
       lenis.raf(time);
       requestAnimationFrame(raf);
@@ -36,6 +54,7 @@ export default function LenisProvider({
     requestAnimationFrame(raf);
 
     return () => {
+      observer.disconnect();
       lenis.destroy();
     };
   }, []);

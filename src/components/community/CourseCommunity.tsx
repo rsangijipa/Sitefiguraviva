@@ -6,7 +6,8 @@ import Button from "@/components/ui/Button";
 import { CommunityThreadDoc } from "@/types/lms";
 import { communityService } from "@/services/communityService";
 import ThreadView from "./ThreadView";
-import { cn } from "@/lib/utils"; // Assuming utils exists
+import { cn } from "@/lib/utils";
+import { useCommunityRealtime } from "@/hooks/useCommunityRealtime";
 
 interface CourseCommunityProps {
   courseId: string;
@@ -20,24 +21,12 @@ export default function CourseCommunity({
   const [view, setView] = useState<"list" | "detail" | "create">("list");
   const [selectedThread, setSelectedThread] =
     useState<CommunityThreadDoc | null>(null);
-  const [threads, setThreads] = useState<CommunityThreadDoc[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { threads, loading } = useCommunityRealtime(courseId);
 
   // Create Form State
   const [newThreadTitle, setNewThreadTitle] = useState("");
   const [newThreadContent, setNewThreadContent] = useState("");
   const [isCreating, setIsCreating] = useState(false);
-
-  useEffect(() => {
-    loadThreads();
-  }, [courseId]);
-
-  const loadThreads = async () => {
-    setLoading(true);
-    const data = await communityService.getCourseThreads(courseId);
-    setThreads(data);
-    setLoading(false);
-  };
 
   const handleSelectThread = (thread: CommunityThreadDoc) => {
     setSelectedThread(thread);
@@ -47,7 +36,6 @@ export default function CourseCommunity({
   const handleBack = () => {
     setView("list");
     setSelectedThread(null);
-    loadThreads(); // Refresh to update reply counts etc
   };
 
   const handleCreateThread = async (e: React.FormEvent) => {
@@ -56,14 +44,13 @@ export default function CourseCommunity({
 
     setIsCreating(true);
     try {
-      const id = await communityService.createThread(
+      await communityService.createThread(
         courseId,
         user,
         newThreadTitle,
         newThreadContent,
       );
-      // Optimistic update or reload
-      loadThreads();
+      // Real-time will update the list automatically
       setView("list");
       setNewThreadTitle("");
       setNewThreadContent("");
