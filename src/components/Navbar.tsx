@@ -57,6 +57,17 @@ export default function Navbar() {
   };
 
   useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [mobileOpen]);
+
+  useEffect(() => {
     let lastScrollY = window.scrollY;
 
     const handleScroll = () => {
@@ -102,104 +113,106 @@ export default function Navbar() {
   ];
 
   return (
-    <nav
-      aria-label="Navegação principal"
-      className={`fixed w-full z-50 top-0 left-0 transition-all duration-500 ease-in-out ${
-        hidden ? "-translate-y-full" : "translate-y-0"
-      } ${
-        scrolled
-          ? "bg-white/80 backdrop-blur-lg shadow-lg py-3"
-          : "bg-white/60 backdrop-blur-md shadow-sm py-5"
-      }`}
-    >
-      <div className="container mx-auto px-6 max-w-7xl flex items-center justify-between">
-        {/* Logo */}
-        <Link
-          href="/"
-          className="flex items-center gap-2 group focus-visible:ring-2 focus-visible:ring-primary rounded-lg p-1"
-          aria-label="Ir para a página inicial"
-        >
-          <div className="relative w-10 h-10 overflow-hidden">
-            <Image
-              src="/assets/logo.jpeg"
-              alt="Logo Instituto Figura Viva"
-              fill
-              className="rounded-full object-cover border border-primary/10"
-              sizes="40px"
-              priority
-              fetchPriority="high"
-            />
-          </div>
-          <span className="text-xl font-serif text-primary tracking-tight font-bold">
-            Figura <span className="font-light text-gold italic">Viva</span>
-          </span>
-        </Link>
-
-        {/* Desktop Menu (only on wide screens to avoid tablet clipping) */}
-        <div className="hidden xl:flex items-center gap-1 font-sans text-[11px] 2xl:text-xs font-bold tracking-[0.18em] uppercase text-text/80">
-          {navItems.map((item) => (
-            <a
-              key={item.label}
-              href={item.href}
-              className="hover:text-primary transition-all duration-200 hover:bg-primary/5 px-4 py-2 rounded-xl min-h-[44px] flex items-center focus-visible:ring-2 focus-visible:ring-primary"
-            >
-              {item.display || item.label}
-            </a>
-          ))}
-
-          <div className="h-6 w-[1px] bg-gray-200 mx-2" />
-
-          {user ? (
-            <div className="flex items-center gap-2">
-              <Button
-                onClick={handleDashboard}
-                variant={role === "admin" ? "outline" : "primary"}
-                size="sm"
-                className={cn(
-                  "shadow-sm flex items-center gap-2 transition-all duration-300",
-                  role === "admin" &&
-                    "border-gold text-gold hover:bg-gold hover:text-white",
-                )}
-              >
-                <LayoutDashboard size={14} />
-                {role === "admin" ? "Administração" : "Área do Aluno"}
-              </Button>
-              <button
-                onClick={() => signOut()}
-                className="p-2 text-stone-400 hover:text-red-500 transition-colors"
-                title="Sair"
-              >
-                <LogOut size={16} />
-              </button>
+    <>
+      <nav
+        aria-label="Navegação principal"
+        className={cn(
+          "fixed z-50 transition-all duration-500 ease-in-out",
+          hidden ? "-translate-y-full" : "translate-y-0",
+          scrolled
+            ? "top-2 left-1/2 -translate-x-1/2 w-[95%] max-w-7xl bg-white/80 backdrop-blur-lg shadow-lg py-2 rounded-full border border-stone-200/50"
+            : "top-0 left-0 w-full bg-white/60 backdrop-blur-md shadow-sm py-5",
+        )}
+      >
+        <div className="container mx-auto px-6 flex items-center justify-between">
+          {/* Logo */}
+          <Link
+            href="/"
+            className="flex items-center gap-2 group focus-visible:ring-2 focus-visible:ring-primary rounded-lg p-1"
+            aria-label="Ir para a página inicial"
+          >
+            <div className="relative w-10 h-10 overflow-hidden">
+              <Image
+                src="/assets/logo.jpeg"
+                alt="Logo Instituto Figura Viva"
+                fill
+                className="rounded-full object-cover border border-primary/10"
+                sizes="40px"
+                priority
+                fetchPriority="high"
+              />
             </div>
-          ) : (
-            <Button
-              onClick={handleLogin}
-              variant="primary"
-              size="sm"
-              className="shadow-sm ml-2"
-            >
-              Entrar
-            </Button>
-          )}
+            <span className="text-xl font-serif text-primary tracking-tight font-bold">
+              Figura <span className="font-light text-gold italic">Viva</span>
+            </span>
+          </Link>
+
+          {/* Desktop Menu */}
+          <div className="hidden xl:flex items-center gap-1 font-sans text-[11px] 2xl:text-xs font-bold tracking-[0.18em] uppercase text-text/80">
+            {navItems.map((item) => (
+              <a
+                key={item.label}
+                href={item.href}
+                className="hover:text-primary transition-all duration-200 hover:bg-primary/5 px-4 py-2 rounded-xl min-h-[44px] flex items-center focus-visible:ring-2 focus-visible:ring-primary"
+              >
+                {item.display || item.label}
+              </a>
+            ))}
+
+            <div className="h-6 w-[1px] bg-gray-200 mx-2" />
+
+            {user ? (
+              <div className="flex items-center gap-2">
+                <Button
+                  onClick={handleDashboard}
+                  variant={role === "admin" ? "outline" : "primary"}
+                  size="sm"
+                  className={cn(
+                    "shadow-sm flex items-center gap-2 transition-all duration-300",
+                    role === "admin" &&
+                      "border-gold text-gold hover:bg-gold hover:text-white",
+                  )}
+                >
+                  <LayoutDashboard size={14} />
+                  {role === "admin" ? "Administração" : "Área do Aluno"}
+                </Button>
+                <button
+                  onClick={() => signOut()}
+                  className="p-2 text-stone-400 hover:text-red-500 transition-colors"
+                  title="Sair"
+                >
+                  <LogOut size={16} />
+                </button>
+              </div>
+            ) : (
+              <Button
+                onClick={handleLogin}
+                variant="primary"
+                size="sm"
+                className="shadow-sm ml-2"
+              >
+                Entrar
+              </Button>
+            )}
+          </div>
+
+          {/* Mobile/Tablet Toggle */}
+          <button
+            className="xl:hidden text-primary w-12 h-12 flex items-center justify-center hover:bg-black/5 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-primary"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label={mobileOpen ? "Fechar menu" : "Abrir menu"}
+            aria-expanded={mobileOpen}
+          >
+            {mobileOpen ? (
+              <X size={24} aria-hidden="true" />
+            ) : (
+              <Menu size={24} aria-hidden="true" />
+            )}
+          </button>
         </div>
+      </nav>
 
-        {/* Mobile/Tablet Toggle */}
-        <button
-          className="xl:hidden text-primary w-12 h-12 flex items-center justify-center hover:bg-black/5 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-primary"
-          onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label={mobileOpen ? "Fechar menu" : "Abrir menu"}
-          aria-expanded={mobileOpen}
-        >
-          {mobileOpen ? (
-            <X size={24} aria-hidden="true" />
-          ) : (
-            <Menu size={24} aria-hidden="true" />
-          )}
-        </button>
-      </div>
-
-      {/* Mobile Menu Overlay */}
+      {/* Mobile Menu Overlay - Outside nav to avoid transform coordinate space issues */}
       <AnimatePresence>
         {mobileOpen && (
           <>
@@ -215,7 +228,7 @@ export default function Navbar() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed top-4 right-4 bottom-4 left-4 z-[70] bg-white/95 backdrop-blur-2xl rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-white flex flex-col overflow-hidden xl:hidden"
+              className="fixed top-2 right-2 bottom-2 left-2 z-[70] bg-white/95 backdrop-blur-2xl rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-white flex flex-col overflow-hidden xl:hidden"
             >
               {/* Mobile Header Inside Menu */}
               <div className="flex items-center justify-between px-8 py-6 border-b border-stone-100">
@@ -246,7 +259,10 @@ export default function Navbar() {
                 </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto px-6 py-8 flex flex-col">
+              <div
+                className="flex-1 overflow-y-auto px-6 py-8 flex flex-col"
+                data-lenis-prevent
+              >
                 <div className="space-y-1 mb-8">
                   <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-primary/30 px-4 mb-4 block">
                     Navegação principal
@@ -366,6 +382,6 @@ export default function Navbar() {
           </>
         )}
       </AnimatePresence>
-    </nav>
+    </>
   );
 }

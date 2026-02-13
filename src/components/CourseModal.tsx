@@ -262,7 +262,10 @@ export default function CourseModal({
                     {selectedMediator.name}
                   </h3>
                   <div className="h-0.5 w-12 bg-gold/30 mb-6 rounded-full" />
-                  <div className="max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
+                  <div
+                    className="max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar"
+                    data-lenis-prevent
+                  >
                     <p className="text-primary/70 font-light leading-relaxed text-lg text-balance">
                       {selectedMediator.bio || "Sem biografia disponível."}
                     </p>

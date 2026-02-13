@@ -87,6 +87,7 @@ import LenisProvider from "@/components/providers/LenisProvider";
 import JsonLd from "@/components/system/JsonLd";
 import GoogleAnalytics from "@/components/system/GoogleAnalytics";
 import PushNotificationManager from "@/components/system/PushNotificationManager";
+import FloatingAudioPlayer from "@/components/ui/FloatingAudioPlayer";
 
 export default async function RootLayout({
   children,
@@ -112,7 +113,7 @@ export default async function RootLayout({
                   window.navigator.serviceWorker.getRegistrations().then(function(registrations) {
                     for (let registration of registrations) {
                       registration.unregister();
-                      console.log('Old Service Worker unregistered');
+                      console.error('Old Service Worker unregistered');
                     }
                   });
                 }
@@ -139,6 +140,7 @@ export default async function RootLayout({
           <GoogleAnalytics />
           <PushNotificationManager />
           <LenisProvider>{children}</LenisProvider>
+          <FloatingAudioPlayer />
           {isImpersonating && <ImpersonationBanner />}
         </Providers>
       </body>
