@@ -41,6 +41,7 @@ export interface SEOSettings {
   defaultDescription: string;
   ogImage: string;
   keywords: string[];
+  googleAnalyticsId?: string;
   updatedAt?: any;
   updatedBy?: string;
 }
@@ -84,6 +85,7 @@ export const DEFAULT_SEO: SEOSettings = {
     "O Instituto Figura Viva é um espaço de excelência em formação, clínica e pesquisa em Gestalt-terapia.",
   ogImage: "/assets/og-image.jpg",
   keywords: ["Gestalt", "Psicologia", "Formação", "Terapia", "Rondônia"],
+  googleAnalyticsId: "",
 };
 
 export interface TeamMember {

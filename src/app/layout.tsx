@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+import { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { Cormorant_Garamond, Lato } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
@@ -84,6 +85,8 @@ import ImpersonationBanner from "@/components/admin/ImpersonationBanner";
 import { WebVitalsReporter } from "@/components/system/WebVitalsReporter";
 import LenisProvider from "@/components/providers/LenisProvider";
 import JsonLd from "@/components/system/JsonLd";
+import GoogleAnalytics from "@/components/system/GoogleAnalytics";
+import PushNotificationManager from "@/components/system/PushNotificationManager";
 
 export default async function RootLayout({
   children,
@@ -100,6 +103,22 @@ export default async function RootLayout({
           Pular para o conteúdo principal
         </a>
         <Providers>
+          <Script
+            id="unregister-sw"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
+                if (window.navigator && window.navigator.serviceWorker) {
+                  window.navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    for (let registration of registrations) {
+                      registration.unregister();
+                      console.log('Old Service Worker unregistered');
+                    }
+                  });
+                }
+              `,
+            }}
+          />
           <JsonLd
             data={{
               "@context": "https://schema.org",
@@ -117,6 +136,8 @@ export default async function RootLayout({
             }}
           />
           <WebVitalsReporter />
+          <GoogleAnalytics />
+          <PushNotificationManager />
           <LenisProvider>{children}</LenisProvider>
           {isImpersonating && <ImpersonationBanner />}
         </Providers>

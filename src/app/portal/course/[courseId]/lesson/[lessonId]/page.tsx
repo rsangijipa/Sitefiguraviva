@@ -5,6 +5,7 @@ import { LessonPlayerWrapper } from "@/components/portal/LessonPlayerWrapper";
 import { Lesson, Module } from "@/types/lms";
 import { deepSafeSerialize } from "@/lib/utils";
 import { assertCanAccessCourse } from "@/lib/auth/access-gate";
+import { AccessError } from "@/lib/auth/access-types";
 
 export const dynamic = "force-dynamic";
 
@@ -61,7 +62,15 @@ export default async function LessonPage({
   }
 
   // ORBITAL 01 & 05: Single Source of Truth Access Gate
-  await assertCanAccessCourse(uid, courseId);
+  try {
+    await assertCanAccessCourse(uid, courseId);
+  } catch (error) {
+    if (error instanceof AccessError) {
+      // Redirect to course intro page where they can see why they can't access
+      redirect(`/portal/course/${courseId}`);
+    }
+    throw error;
+  }
 
   const courseData = await getCourseData(courseId);
   if (!courseData) redirect("/portal");
@@ -190,7 +199,7 @@ export default async function LessonPage({
         backLink: `/portal/course/${courseId}`,
       })}
       modules={modulesWithProgress as Module[]}
-      activeLesson={activeLesson}
+      activeLesson={deepSafeSerialize(activeLesson)}
       assessment={deepSafeSerialize(assessment)}
       submission={deepSafeSerialize(submission)}
       prevLessonId={prevLessonId}

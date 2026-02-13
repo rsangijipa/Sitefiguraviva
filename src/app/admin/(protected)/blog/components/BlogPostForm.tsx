@@ -76,8 +76,16 @@ export function BlogPostForm({ post, onSuccess, onCancel }: BlogPostFormProps) {
     setIsSubmitting(true);
 
     try {
+      const slug = formData.title
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]/g, "-")
+        .replace(/-{2,}/g, "-");
+
       const payload = {
         ...formData,
+        slug,
         updated_at: serverTimestamp(),
         isPublished: true,
       };

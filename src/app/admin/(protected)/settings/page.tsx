@@ -1093,6 +1093,23 @@ export default function AdminContentPage() {
                   </div>
                 )}
               </div>
+
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-primary/40 mb-2">
+                  Google Analytics ID (G-XXXXXXX)
+                </label>
+                <input
+                  className="w-full p-4 bg-stone-50 border border-stone-100 rounded-xl focus:bg-white focus:border-gold transition-all outline-none text-xs"
+                  value={seoForm.googleAnalyticsId || ""}
+                  onChange={(e) =>
+                    setSeoForm({
+                      ...seoForm,
+                      googleAnalyticsId: e.target.value,
+                    })
+                  }
+                  placeholder="G-XXXXXXXXXX"
+                />
+              </div>
             </div>
           </div>
         </div>
