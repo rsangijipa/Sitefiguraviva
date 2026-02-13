@@ -2,6 +2,19 @@ import { Suspense } from "react";
 import { db } from "@/lib/firebase/admin";
 import { deepSafeSerialize } from "@/lib/utils";
 import LibraryClient from "./LibraryClient";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Biblioteca Pública | Instituto Figura Viva",
+  description:
+    "Acesse nosso acervo de artigos, livros e materiais sobre Gestalt-Terapia e Psicologia.",
+  keywords: [
+    "Biblioteca Gestalt",
+    "Artigos Psicologia",
+    "Livros Gestalt-Terapia",
+    "Estudos Clínicos",
+  ],
+};
 
 export const revalidate = 3600; // Revalidate every hour
 

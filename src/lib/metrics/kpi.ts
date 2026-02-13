@@ -15,12 +15,21 @@ export type StudentDashboardKpisData = {
   profileCompletion: number;
   weeklyActivity: WeeklyPoint[];
   lastCourse: any | null;
+  gamification: {
+    totalXp: number;
+    level: number;
+    currentStreak: number;
+    badgesCount: number;
+    nextLevelXp: number;
+    progressToNextLevel: number;
+  } | null;
   availability: {
     enrollments: boolean;
     certificates: boolean;
     events: boolean;
     weeklyActivity: boolean;
     profileCompletion: boolean;
+    gamification: boolean;
   };
 };
 
@@ -160,28 +169,37 @@ export async function buildStudentDashboardKPIs(
       (d) => ({ day: d, value: 0 }),
     ),
     lastCourse: null,
+    gamification: null,
     availability: {
       enrollments: false,
       certificates: false,
       events: false,
       weeklyActivity: false,
       profileCompletion: false,
+      gamification: false,
     },
   };
 
   try {
-    const [enrollmentRes, certificatesRes, eventsRes, profileRes, weeklyRes] =
-      await Promise.allSettled([
-        adminDb.collection("enrollments").where("uid", "==", uid).get(),
-        adminDb.collection("certificates").where("userId", "==", uid).get(),
-        adminDb
-          .collection("events")
-          .where("status", "in", ["scheduled", "live"])
-          .where("isPublic", "==", true)
-          .get(),
-        adminDb.collection("users").doc(uid).get(),
-        getWeeklyActivity(uid),
-      ]);
+    const [
+      enrollmentRes,
+      certificatesRes,
+      eventsRes,
+      profileRes,
+      weeklyRes,
+      gamificationRes,
+    ] = await Promise.allSettled([
+      adminDb.collection("enrollments").where("uid", "==", uid).get(),
+      adminDb.collection("certificates").where("userId", "==", uid).get(),
+      adminDb
+        .collection("events")
+        .where("status", "in", ["scheduled", "live"])
+        .where("isPublic", "==", true)
+        .get(),
+      adminDb.collection("users").doc(uid).get(),
+      getWeeklyActivity(uid),
+      adminDb.collection("gamification_profiles").doc(uid).get(),
+    ]);
 
     let enrollments: any[] = [];
 
@@ -272,6 +290,37 @@ export async function buildStudentDashboardKPIs(
       empty.weeklyActivity = weeklyRes.value.points;
       source.weeklyActivity = weeklyRes.value.source;
       empty.availability.weeklyActivity = true;
+    }
+
+    if (
+      gamificationRes &&
+      gamificationRes.status === "fulfilled" &&
+      gamificationRes.value &&
+      gamificationRes.value.exists
+    ) {
+      const gData = gamificationRes.value.data();
+      if (gData) {
+        const level = Number(gData.level || 1);
+        const totalXp = Number(gData.totalXp || 0);
+        // Basic XP formula: Level * 1000
+        const nextLevelXp = level * 1000;
+        const currentLevelBaseXp = (level - 1) * 1000;
+        const xpInCurrentLevel = totalXp - currentLevelBaseXp;
+        const xpNeededForNext = nextLevelXp - currentLevelBaseXp;
+
+        empty.gamification = {
+          totalXp,
+          level,
+          currentStreak: Number(gData.currentStreak || 0),
+          badgesCount: Array.isArray(gData.badges) ? gData.badges.length : 0,
+          nextLevelXp,
+          progressToNextLevel: Math.min(
+            100,
+            Math.max(0, (xpInCurrentLevel / xpNeededForNext) * 100),
+          ),
+        };
+        empty.availability.gamification = true;
+      }
     }
 
     const availableCount = Object.values(empty.availability).filter(

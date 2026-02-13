@@ -2,6 +2,7 @@ import { Play, Loader2 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import YouTube, { YouTubeEvent } from "react-youtube";
 import { trackEvent } from "@/actions/analytics";
+import * as Sentry from "@sentry/nextjs";
 
 interface VideoPlayerProps {
   url: string;
@@ -63,6 +64,15 @@ export const VideoPlayer = ({
         if (resourceId) trackEvent("video_complete", resourceId);
       }
     }
+  };
+
+  const onError = (event: any) => {
+    console.error("YouTube Player Error:", event.data);
+    setLoading(false);
+    Sentry.captureException(new Error(`YouTube Player Error ${event.data}`), {
+      extra: { url, videoId, errorCode: event.data },
+      tags: { resourceId, component: "VideoPlayer" },
+    });
   };
 
   // Polling for Time Update (YouTube API doesn't have onTimeUpdate event)
@@ -137,6 +147,7 @@ export const VideoPlayer = ({
         iframeClassName="w-full h-full"
         onReady={onReady}
         onStateChange={onStateChange}
+        onError={onError}
         opts={{
           playerVars: {
             autoplay: autoPlay ? 1 : 0,

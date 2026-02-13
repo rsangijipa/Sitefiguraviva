@@ -74,6 +74,9 @@ export { default as XCircle } from "lucide-react/dist/esm/icons/x-circle";
 export { default as Users } from "lucide-react/dist/esm/icons/users";
 export { default as BarChart } from "lucide-react/dist/esm/icons/bar-chart";
 export { default as Upload } from "lucide-react/dist/esm/icons/upload";
+export { default as Star } from "lucide-react/dist/esm/icons/star";
+export { default as Flame } from "lucide-react/dist/esm/icons/flame";
+export { default as Trophy } from "lucide-react/dist/esm/icons/trophy";
 
 // Type-only export (doesn't affect bundle)
 export type { LucideIcon } from "lucide-react";

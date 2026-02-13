@@ -2,6 +2,19 @@ import { Suspense } from "react";
 import { db } from "@/lib/firebase/admin";
 import { deepSafeSerialize } from "@/lib/utils";
 import GalleryClient from "./GalleryClient";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Galeria de Momentos | Instituto Figura Viva",
+  description:
+    "Explore os registros fotográficos de nossos encontros, formações e eventos no Instituto Figura Viva.",
+  keywords: [
+    "Eventos Gestalt",
+    "Fotos Instituto Figura Viva",
+    "Formação Rondônia",
+    "Encontros de Psicologia",
+  ],
+};
 
 export const revalidate = 3600; // Revalidate every hour
 

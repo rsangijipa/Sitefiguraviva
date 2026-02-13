@@ -1,14 +1,12 @@
 import { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = "https://figuraviva.com.br";
-
   return {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/portal/", "/admin/", "/api/"],
+      disallow: ["/admin/", "/portal/", "/api/"],
     },
-    sitemap: `${baseUrl}/sitemap.xml`,
+    sitemap: "https://figuraviva.com.br/sitemap.xml",
   };
 }

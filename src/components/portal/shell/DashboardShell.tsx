@@ -104,7 +104,7 @@ export const DashboardShell = ({ children }: { children: React.ReactNode }) => {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 relative">
         {/* Topbar */}
-        <header className="h-16 bg-white border-b border-stone-100 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-20">
+        <header className="h-16 bg-white/80 backdrop-blur-md border-b border-stone-100 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-20">
           <div className="flex items-center gap-4">
             <button
               className="lg:hidden p-2 text-stone-500 hover:bg-stone-50 rounded-lg active:scale-95 transition-transform"
@@ -164,7 +164,7 @@ export const DashboardShell = ({ children }: { children: React.ReactNode }) => {
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4 shrink-0">
             <UserXPBadge />
             <NotificationBell />
 

@@ -10,6 +10,14 @@ import {
   User as UserIcon,
   LogOut,
   LayoutDashboard,
+  Sparkles,
+  BookOpen,
+  Image as ImageIcon,
+  PenTool,
+  Award,
+  Users,
+  Instagram,
+  ChevronRight,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "./ui/Button";
@@ -80,12 +88,17 @@ export default function Navbar() {
   }, []);
 
   const navItems = [
-    { label: "Instituto", href: "/#instituto-sobre" },
-    { label: "Fundadora", href: "/#fundadora" },
-    { label: "Formações", href: "/#instituto", display: "Formações e Grupos" },
-    { label: "Biblioteca", href: "/public-library" },
-    { label: "Galeria", href: "/public-gallery" },
-    { label: "Blog", href: "/#blog" },
+    { label: "Instituto", href: "/#instituto-sobre", icon: Users },
+    { label: "Fundadora", href: "/#fundadora", icon: Award },
+    {
+      label: "Formações",
+      href: "/#instituto",
+      display: "Formações",
+      icon: Sparkles,
+    },
+    { label: "Biblioteca", href: "/public-library", icon: BookOpen },
+    { label: "Galeria", href: "/public-gallery", icon: ImageIcon },
+    { label: "Blog", href: "/#blog", icon: PenTool },
   ];
 
   return (
@@ -189,127 +202,168 @@ export default function Navbar() {
       {/* Mobile Menu Overlay */}
       <AnimatePresence>
         {mobileOpen && (
-          <motion.div
-            initial={{ opacity: 0, x: "100%" }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: "100%" }}
-            transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className="fixed inset-0 z-[60] bg-paper/98 backdrop-blur-xl flex flex-col xl:hidden"
-          >
-            {/* Mobile Header Inside Menu */}
-            <div className="flex items-center justify-between px-6 py-6 border-b border-stone-100">
-              <Link
-                href="/"
-                className="flex items-center gap-2"
-                onClick={() => setMobileOpen(false)}
-              >
-                <Image
-                  src="/assets/logo.jpeg"
-                  alt=""
-                  width={32}
-                  height={32}
-                  className="w-8 h-8 rounded-full"
-                />
-                <span className="text-lg font-serif text-primary font-bold">
-                  Figura <span className="italic text-gold">Viva</span>
-                </span>
-              </Link>
-              <button
-                onClick={() => setMobileOpen(false)}
-                className="w-12 h-12 flex items-center justify-center text-primary rounded-full bg-stone-50"
-                aria-label="Fechar menu"
-              >
-                <X size={24} />
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto px-6 py-8 flex flex-col gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/30 mb-4 px-4">
-                Navegação
-              </span>
-              {navItems.map((item, idx) => (
-                <motion.a
-                  key={item.label}
-                  href={item.href}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.1 + idx * 0.05 }}
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMobileOpen(false)}
+              className="fixed inset-0 z-[60] bg-primary/20 backdrop-blur-sm xl:hidden"
+            />
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="fixed top-4 right-4 bottom-4 left-4 z-[70] bg-white/95 backdrop-blur-2xl rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-white flex flex-col overflow-hidden xl:hidden"
+            >
+              {/* Mobile Header Inside Menu */}
+              <div className="flex items-center justify-between px-8 py-6 border-b border-stone-100">
+                <Link
+                  href="/"
+                  className="flex items-center gap-2"
                   onClick={() => setMobileOpen(false)}
-                  className="block w-full text-left px-6 py-5 rounded-3xl hover:bg-primary/5 active:scale-[0.97] transition-all text-3xl font-serif text-primary border border-transparent active:border-primary/10"
                 >
-                  {item.display || item.label}
-                </motion.a>
-              ))}
+                  <div className="w-8 h-8 rounded-full overflow-hidden border border-primary/10">
+                    <Image
+                      src="/assets/logo.jpeg"
+                      alt=""
+                      width={32}
+                      height={32}
+                      className="object-cover"
+                    />
+                  </div>
+                  <span className="text-xl font-serif text-primary font-bold">
+                    Figura <span className="italic text-gold">Viva</span>
+                  </span>
+                </Link>
+                <button
+                  onClick={() => setMobileOpen(false)}
+                  className="w-10 h-10 flex items-center justify-center text-primary rounded-full bg-stone-50 hover:bg-stone-100 transition-colors"
+                  aria-label="Fechar menu"
+                >
+                  <X size={20} />
+                </button>
+              </div>
 
-              <div className="h-px bg-stone-100 my-8 mx-4" />
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-                className="space-y-4"
-              >
-                {user ? (
-                  <>
-                    <div className="flex items-center gap-3 px-4 mb-4">
-                      <div className="w-10 h-10 rounded-full bg-stone-100 flex items-center justify-center text-primary font-bold">
-                        {user.displayName?.[0] || <UserIcon size={20} />}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-primary truncate">
-                          {user.displayName || "Usuário"}
-                        </p>
-                        <p className="text-xs text-stone-400 truncate">
-                          {user.email}
-                        </p>
-                      </div>
-                    </div>
-
-                    <Button
-                      onClick={() => {
-                        setMobileOpen(false);
-                        handleDashboard();
-                      }}
-                      variant={role === "admin" ? "outline" : "primary"}
-                      className={cn(
-                        "w-full py-6 text-sm uppercase tracking-widest rounded-2xl shadow-xl flex items-center justify-center gap-2 transition-all",
-                        role === "admin"
-                          ? "border-gold text-gold shadow-gold/5"
-                          : "shadow-primary/10",
-                      )}
+              <div className="flex-1 overflow-y-auto px-6 py-8 flex flex-col">
+                <div className="space-y-1 mb-8">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-primary/30 px-4 mb-4 block">
+                    Navegação principal
+                  </span>
+                  {navItems.map((item, idx) => (
+                    <motion.a
+                      key={item.label}
+                      href={item.href}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.1 + idx * 0.05 }}
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center justify-between w-full px-6 py-4 rounded-2xl hover:bg-primary/5 active:bg-primary/10 transition-all group"
                     >
-                      <LayoutDashboard size={18} />
-                      {role === "admin" ? "Administração" : "Área do Aluno"}
-                    </Button>
+                      <div className="flex items-center gap-4">
+                        <div className="p-2.5 rounded-xl bg-primary/5 text-primary group-hover:bg-gold group-hover:text-white transition-all">
+                          <item.icon size={18} />
+                        </div>
+                        <span className="text-xl font-serif text-primary">
+                          {item.display || item.label}
+                        </span>
+                      </div>
+                      <ChevronRight
+                        size={16}
+                        className="text-stone-300 group-hover:text-gold group-hover:translate-x-1 transition-all"
+                      />
+                    </motion.a>
+                  ))}
+                </div>
 
-                    <button
-                      onClick={() => {
-                        signOut();
-                        setMobileOpen(false);
-                      }}
-                      className="w-full py-4 text-xs font-bold uppercase tracking-widest text-red-500 hover:bg-red-50 rounded-2xl transition-colors flex items-center justify-center gap-2"
+                <div className="mt-auto space-y-6">
+                  {/* Social proof/Links */}
+                  <div className="px-4 flex items-center justify-between">
+                    <a
+                      href="https://instagram.com/institutofiguraviva"
+                      target="_blank"
+                      className="flex items-center gap-3 text-stone-400 hover:text-primary transition-colors font-bold text-[10px] uppercase tracking-widest"
                     >
-                      <LogOut size={16} /> Sair da Conta
-                    </button>
-                  </>
-                ) : (
-                  <Button
-                    onClick={() => {
-                      setMobileOpen(false);
-                      handleLogin();
-                    }}
-                    className="w-full py-6 text-sm uppercase tracking-widest rounded-2xl shadow-xl shadow-primary/10"
-                  >
-                    Entrar na Plataforma
-                  </Button>
-                )}
+                      <div className="p-2 bg-stone-50 rounded-lg">
+                        <Instagram size={14} />
+                      </div>
+                      Siga o Instituto
+                    </a>
+                  </div>
 
-                <p className="text-center text-[10px] text-stone-300 font-bold tracking-widest uppercase py-4">
-                  © 2024 INSTITUTO FIGURA VIVA
-                </p>
-              </motion.div>
-            </div>
-          </motion.div>
+                  <div className="p-1 bg-stone-50 rounded-[2rem] border border-stone-100">
+                    {user ? (
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-3 px-6 py-4">
+                          <div className="w-10 h-10 rounded-full bg-primary/5 flex items-center justify-center text-primary font-bold border border-primary/10">
+                            {user.photoURL ? (
+                              <img
+                                src={user.photoURL}
+                                alt=""
+                                className="w-full h-full rounded-full object-cover"
+                              />
+                            ) : (
+                              user.displayName?.[0] || <UserIcon size={18} />
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-bold text-primary truncate">
+                              {user.displayName || "Aluno"}
+                            </p>
+                            <p className="text-[10px] text-stone-400 uppercase tracking-tighter">
+                              Matrícula Ativa
+                            </p>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => {
+                            setMobileOpen(false);
+                            handleDashboard();
+                          }}
+                          className={cn(
+                            "w-full py-5 text-[11px] font-bold uppercase tracking-[0.2em] rounded-[1.8rem] flex items-center justify-center gap-2 transition-all shadow-lg active:scale-95",
+                            role === "admin"
+                              ? "bg-white border border-gold text-gold shadow-gold/5"
+                              : "bg-primary text-white shadow-primary/20",
+                          )}
+                        >
+                          <LayoutDashboard size={14} />
+                          {role === "admin" ? "Administração" : "Área do Aluno"}
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            signOut();
+                            setMobileOpen(false);
+                          }}
+                          className="w-full py-4 text-[10px] font-bold uppercase tracking-widest text-stone-400 hover:text-red-500 transition-colors flex items-center justify-center gap-2"
+                        >
+                          <LogOut size={14} /> Sair da Conta
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setMobileOpen(false);
+                          handleLogin();
+                        }}
+                        className="w-full py-6 text-[11px] font-bold uppercase tracking-[0.2em] bg-primary text-white rounded-[1.8rem] shadow-xl shadow-primary/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                      >
+                        <UserIcon size={14} />
+                        Acessar Plataforma
+                      </button>
+                    )}
+                  </div>
+
+                  <p className="text-center text-[9px] text-stone-300 font-bold tracking-[0.3em] uppercase pb-2">
+                    © 2024 Figura Viva
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </nav>

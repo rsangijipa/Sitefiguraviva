@@ -22,8 +22,18 @@ export interface InstituteSettings {
   quote: string;
   address: string;
   phone: string;
+  whatsapp?: string;
   updatedAt?: any;
   updatedBy?: string;
+}
+
+export interface ConfigSettings {
+  enableParticles?: boolean;
+  visualMode?: "modern" | "classic";
+  showAudioControl?: boolean;
+  whatsappNumber?: string;
+  whatsappMessage?: string;
+  updatedAt?: any;
 }
 
 export interface SEOSettings {
@@ -56,6 +66,16 @@ export const DEFAULT_INSTITUTE: InstituteSettings = {
   address:
     "Rua Santos Dumont, 156 - Uniao, Ouro Preto D'Oeste - RO - CEP 76920-000",
   phone: "(69) 99248-1585",
+  whatsapp: "556992481585",
+};
+
+export const DEFAULT_CONFIG: ConfigSettings = {
+  enableParticles: true,
+  visualMode: "modern",
+  showAudioControl: true,
+  whatsappNumber: "556992481585",
+  whatsappMessage:
+    "Olá! Gostaria de saber mais sobre as formações do Instituto Figura Viva.",
 };
 
 export const DEFAULT_SEO: SEOSettings = {
@@ -154,7 +174,7 @@ export const DEFAULT_LEGAL: LegalSettings = {
 // --- Fetchers (Client-Safe) ---
 
 export async function getSiteSettings<T>(
-  key: "founder" | "institute" | "seo" | "team" | "legal",
+  key: "founder" | "institute" | "seo" | "team" | "legal" | "config",
   fallback: T,
 ): Promise<T> {
   try {

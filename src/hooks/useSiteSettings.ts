@@ -7,6 +7,8 @@ import {
   FounderSettings,
   InstituteSettings,
   SEOSettings,
+  ConfigSettings,
+  DEFAULT_CONFIG,
 } from "@/lib/siteSettings";
 
 export const useFounderSettings = (initialData?: FounderSettings) => {
@@ -34,6 +36,15 @@ export const useSEOSettings = (initialData?: SEOSettings) => {
     queryFn: () => getSiteSettings<SEOSettings>("seo", DEFAULT_SEO),
     initialData: initialData || DEFAULT_SEO,
     staleTime: 1000 * 60 * 60, // 1 hour
+  });
+};
+
+export const useConfigSettings = (initialData?: ConfigSettings) => {
+  return useQuery({
+    queryKey: ["siteSettings", "config"],
+    queryFn: () => getSiteSettings<ConfigSettings>("config", DEFAULT_CONFIG),
+    initialData: initialData || DEFAULT_CONFIG,
+    staleTime: 1000 * 60 * 5,
   });
 };
 
