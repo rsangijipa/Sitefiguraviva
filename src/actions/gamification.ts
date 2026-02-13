@@ -22,7 +22,8 @@ export async function processGamificationEvent(data: {
     | "lesson_complete"
     | "quiz_pass"
     | "daily_login"
-    | "course_complete";
+    | "course_complete"
+    | "library_view";
   metadata?: Record<string, any>;
 }) {
   const cookieStore = await cookies();
@@ -123,6 +124,18 @@ export async function processGamificationEvent(data: {
 
         case "quiz_pass":
           xpDelta = XP_VALUES.QUIZ_PASSED || 100;
+          break;
+
+        case "library_view":
+          xpDelta = 5;
+          const libraryViews = (profileData?.libraryViews || 0) + 1;
+          streakUpdate = { libraryViews };
+          if (
+            libraryViews >= 20 &&
+            !profile.badges.includes("library_patron")
+          ) {
+            newBadges.push("library_patron");
+          }
           break;
       }
 

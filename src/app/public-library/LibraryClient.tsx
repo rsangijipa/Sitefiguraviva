@@ -14,6 +14,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PDFReader from "@/components/PDFReader";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { useAuth } from "@/context/AuthContext";
+import { processGamificationEvent } from "@/actions/gamification";
 
 export default function LibraryClient({
   initialItems,
@@ -23,6 +25,22 @@ export default function LibraryClient({
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("Todos");
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
+  const { user } = useAuth();
+
+  const handleOpenItem = async (item: any) => {
+    setSelectedItem(item);
+    if (user) {
+      // Trigger library view XP
+      try {
+        await processGamificationEvent({
+          actionType: "library_view",
+          metadata: { title: item.title, itemId: item.id },
+        });
+      } catch (e) {
+        console.error("Gamification error", e);
+      }
+    }
+  };
 
   const filteredItems = initialItems.filter((item) => {
     const matchesSearch =
@@ -118,7 +136,7 @@ export default function LibraryClient({
                 </p>
 
                 <button
-                  onClick={() => setSelectedItem(item)}
+                  onClick={() => handleOpenItem(item)}
                   className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-primary hover:text-gold transition-colors group/btn"
                 >
                   Ler Agora{" "}

@@ -40,4 +40,38 @@ export const badges = [
     iconName: "message-circle",
     order: 5,
   },
+  {
+    id: "clinical_explorer",
+    title: "Explorador Clínico",
+    description: "Concluiu todos os casos clínicos de um módulo.",
+    type: "bronze",
+    iconName: "search",
+    order: 6,
+  },
+  {
+    id: "theory_anchor",
+    title: "Âncora Teórica",
+    description: "Alcançou nota máxima em 5 avaliações teóricas.",
+    type: "silver",
+    iconName: "book",
+    order: 7,
+  },
+  {
+    id: "phenomenology_master",
+    title: "Mestre da Fenomenologia",
+    description:
+      "Demonstrou domínio avançado nos conceitos de campo e contato.",
+    type: "gold",
+    iconName: "target",
+    order: 8,
+  },
+  {
+    id: "library_patron",
+    title: "Patrono da Biblioteca",
+    description:
+      "Acessou mais de 20 materiais complementares na biblioteca pública.",
+    type: "bronze",
+    iconName: "library",
+    order: 9,
+  },
 ];

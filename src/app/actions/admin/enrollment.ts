@@ -5,6 +5,7 @@ import { Timestamp, FieldValue } from "firebase-admin/firestore";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { logAudit } from "@/lib/audit";
+import { whatsappService } from "@/services/whatsappService";
 
 // Helper to ensure admin
 async function assertAdmin() {
@@ -129,6 +130,15 @@ export async function enrollUser(email: string, courseId: string) {
       .update({
         enrolledCourseIds: FieldValue.arrayUnion(courseId),
       });
+
+    // Notify student via WhatsApp if phone exists
+    if (userData?.phone) {
+      await whatsappService.notifyEnrollment(
+        userData.phone,
+        userData.displayName || normalizedEmail.split("@")[0],
+        enrollmentData.courseTitle,
+      );
+    }
 
     // Force cache revalidation for all relevant paths
     revalidatePath(`/portal/courses/${courseId}`);
@@ -301,6 +311,18 @@ export async function approveEnrollment(uid: string, courseId: string) {
       "Sua matrícula foi aprovada. O acesso ao curso já está liberado!",
       `/portal/course/${courseId}`,
     );
+
+    // Notify student via WhatsApp if phone exists
+    const userDoc = await adminDb.collection("users").doc(uid).get();
+    const userData = userDoc.data();
+    if (userData?.phone) {
+      const courseDoc = await adminDb.collection("courses").doc(courseId).get();
+      await whatsappService.notifyEnrollment(
+        userData.phone,
+        userData.displayName || userData.email.split("@")[0],
+        courseDoc.data()?.title || "Curso",
+      );
+    }
   }
 
   return res;
