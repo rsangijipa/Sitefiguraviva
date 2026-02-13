@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import PageShell from "@/components/ui/PageShell";
 import { useFounderSettings } from "@/hooks/useSiteSettings";
+import Breadcrumbs from "@/components/ui/Breadcrumbs";
 
 export default function AdminShell({
   children,
@@ -213,16 +214,38 @@ export default function AdminShell({
       </AnimatePresence>
 
       {/* Main Content */}
-      <main className="flex-1 lg:ml-80 p-4 md:p-8 lg:p-10 min-h-screen relative overflow-y-auto custom-scrollbar">
+      <main className="flex-1 lg:ml-80 p-4 md:p-6 lg:p-8 min-h-screen relative overflow-y-auto custom-scrollbar">
+        {/* Sticky Mobile Tracker/Header background */}
+        <div className="lg:hidden sticky top-0 z-30 bg-paper/80 backdrop-blur-md -mx-4 px-4 py-2 mb-4 border-b border-stone-100 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Image
+              src="/assets/logo.jpeg"
+              alt="Logo"
+              width={24}
+              height={24}
+              className="rounded-full"
+            />
+            <span className="text-xs font-serif font-bold text-primary italic">
+              Admin
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-full bg-stone-100 flex items-center justify-center text-[8px] font-bold text-primary">
+              {user?.displayName?.[0] || "L"}
+            </div>
+          </div>
+        </div>
+
         <div className="relative z-10 max-w-7xl mx-auto animate-fade-in-up">
-          <header className="mb-6 md:mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <Breadcrumbs />
+          <header className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div className="flex items-center gap-4">
-              <div>
-                <h2 className="font-serif text-2xl md:text-3xl text-primary mb-1 tracking-tight">
+              <div className="hidden sm:block">
+                <h2 className="font-serif text-xl md:text-2xl text-primary mb-0.5 tracking-tight">
                   Painel de Controle
                 </h2>
-                <p className="text-stone-400 text-[10px] md:text-xs font-medium uppercase tracking-wider">
-                  Gerencie sua presença digital, cursos e conteúdos
+                <p className="text-stone-400 text-[9px] md:text-[10px] font-bold uppercase tracking-[0.15em]">
+                  Gestão Institucional
                 </p>
               </div>
             </div>

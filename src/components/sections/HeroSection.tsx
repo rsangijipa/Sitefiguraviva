@@ -67,7 +67,9 @@ export default function HeroSection({ initialData }: { initialData?: any }) {
             </motion.div>
 
             <motion.h1
-              variants={fadeInUp}
+              initial={{ opacity: 0.8, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
               className="text-fluid-h1 font-serif text-primary mb-10"
             >
               A Arte da <br />

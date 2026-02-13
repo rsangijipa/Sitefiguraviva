@@ -83,6 +83,7 @@ import { cookies } from "next/headers";
 import ImpersonationBanner from "@/components/admin/ImpersonationBanner";
 import { WebVitalsReporter } from "@/components/system/WebVitalsReporter";
 import LenisProvider from "@/components/providers/LenisProvider";
+import JsonLd from "@/components/system/JsonLd";
 
 export default async function RootLayout({
   children,
@@ -99,23 +100,20 @@ export default async function RootLayout({
           Pular para o conteúdo principal
         </a>
         <Providers>
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify({
-                "@context": "https://schema.org",
-                "@type": "Organization",
-                name: "Instituto Figura Viva",
-                url: "https://figuraviva.com.br",
-                logo: "https://figuraviva.com.br/logo.png",
-                sameAs: ["https://www.instagram.com/institutofiguraviva/"],
-                address: {
-                  "@type": "PostalAddress",
-                  addressLocality: "Ouro Preto do Oeste",
-                  addressRegion: "RO",
-                  addressCountry: "BR",
-                },
-              }),
+          <JsonLd
+            data={{
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              name: "Instituto Figura Viva",
+              url: "https://figuraviva.com.br",
+              logo: "https://figuraviva.com.br/logo.png",
+              sameAs: ["https://www.instagram.com/institutofiguraviva/"],
+              address: {
+                "@type": "PostalAddress",
+                addressLocality: "Ouro Preto do Oeste",
+                addressRegion: "RO",
+                addressCountry: "BR",
+              },
             }}
           />
           <WebVitalsReporter />

@@ -149,6 +149,7 @@ export default function CoursesSection({
                         sizes="(max-width: 768px) 100vw, 33vw"
                         className={`object-cover transition-transform duration-700 ease-out group-hover:scale-105 ${isClosed ? "grayscale opacity-70" : ""}`}
                       />
+                      <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none" />
                       <div className="absolute top-3 left-3 flex flex-wrap gap-2 pointer-events-none">
                         {course.category && (
                           <span className="bg-white/95 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider text-primary shadow-sm border border-gray-100">

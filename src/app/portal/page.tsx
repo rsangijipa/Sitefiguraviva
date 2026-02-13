@@ -4,13 +4,16 @@ import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import {
-  Award,
   Play,
   TrendingUp,
   Target,
   Calendar,
   AlertTriangle,
   RefreshCcw,
+  Star,
+  Flame,
+  Trophy,
+  Award,
 } from "@/components/icons";
 import { useEffect, useState } from "react";
 import Loading from "./loading";
@@ -92,11 +95,13 @@ export default function PortalDashboard() {
     { day: string; value: number }[]
   >([]);
   const [lastCourse, setLastCourse] = useState<any>(null);
+  const [gamification, setGamification] = useState<any>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [metricsStatus, setMetricsStatus] = useState({
     enrollments: false,
     certificates: false,
     events: false,
+    gamification: false,
   });
   const [profileCompletion, setProfileCompletion] = useState<number | null>(
     null,
@@ -122,11 +127,13 @@ export default function PortalDashboard() {
         enrollments: false,
         certificates: false,
         events: false,
+        gamification: false,
       });
       setEnrollments([]);
       setEvents([]);
       setCertificates([]);
       setLastCourse(null);
+      setGamification(null);
 
       try {
         const kpi = await getStudentDashboardKPIs(user.uid);
@@ -151,12 +158,14 @@ export default function PortalDashboard() {
             : null,
         );
         setLastCourse(data.lastCourse || null);
+        setGamification(data.gamification || null);
         setKpiMeta({ updatedAt: kpi.updatedAt, source: kpi.source });
         setMetricsStatus(
           data.availability || {
             enrollments: true,
             certificates: true,
             events: true,
+            gamification: true,
           },
         );
       } catch (error) {
@@ -323,6 +332,50 @@ export default function PortalDashboard() {
 
         {/* KPI Cards (Col-4) */}
         <div className="lg:col-span-4 space-y-4">
+          {gamification && (
+            <div className="bg-ink rounded-xl p-5 shadow-lg border border-white/5 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
+                <Star size={64} className="text-agedGold" />
+              </div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="bg-agedGold/20 p-2 rounded-lg">
+                    <Trophy size={16} className="text-agedGold" />
+                  </div>
+                  <span className="text-[10px] font-bold text-agedGold uppercase tracking-[0.2em]">
+                    Nível {gamification.level}
+                  </span>
+                </div>
+                <div className="flex items-end justify-between mb-2">
+                  <div className="text-3xl font-bold text-white tracking-tight">
+                    {gamification.totalXp}{" "}
+                    <span className="text-sm font-light text-stone-400">
+                      XP
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-orange-400">
+                    <Flame size={14} className="fill-current" />
+                    <span className="text-xs font-bold font-serif italic">
+                      {gamification.currentStreak} dias
+                    </span>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-agedGold transition-all duration-1000"
+                      style={{ width: `${gamification.progressToNextLevel}%` }}
+                    />
+                  </div>
+                  <div className="flex justify-between text-[9px] font-bold uppercase tracking-widest text-stone-500">
+                    <span>Progresso do Nível</span>
+                    <span>{gamification.nextLevelXp} XP</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           <StatCard
             icon={Target}
             label="Cursos Ativos"

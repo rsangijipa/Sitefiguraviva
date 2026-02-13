@@ -36,7 +36,7 @@ async function assertIsAdmin() {
 }
 
 export async function updateSiteSettings(
-  key: "founder" | "institute" | "seo" | "team" | "legal",
+  key: "founder" | "institute" | "seo" | "team" | "legal" | "config",
   data: any,
 ) {
   try {
@@ -120,18 +120,28 @@ export async function seedSiteSettingsAction() {
           ],
         },
       },
+      config: {
+        enableParticles: true,
+        visualMode: "modern",
+        showAudioControl: true,
+        whatsappNumber: "556992481585",
+        whatsappMessage:
+          "Olá! Gostaria de saber mais sobre as formações do Instituto Figura Viva.",
+      },
     };
 
     const founderRef = adminDb.collection("siteSettings").doc("founder");
     const instituteRef = adminDb.collection("siteSettings").doc("institute");
     const seoRef = adminDb.collection("siteSettings").doc("seo");
     const legalRef = adminDb.collection("siteSettings").doc("legal");
+    const configRef = adminDb.collection("siteSettings").doc("config");
 
-    const [fSnap, iSnap, sSnap, lSnap] = await Promise.all([
+    const [fSnap, iSnap, sSnap, lSnap, cSnap] = await Promise.all([
       founderRef.get(),
       instituteRef.get(),
       seoRef.get(),
       legalRef.get(),
+      configRef.get(),
     ]);
 
     if (!fSnap.exists)
@@ -148,6 +158,8 @@ export async function seedSiteSettingsAction() {
       batch.set(seoRef, { ...defaults.seo, updatedAt: Timestamp.now() });
     if (!lSnap.exists)
       batch.set(legalRef, { ...defaults.legal, updatedAt: Timestamp.now() });
+    if (!cSnap.exists)
+      batch.set(configRef, { ...defaults.config, updatedAt: Timestamp.now() });
 
     await batch.commit();
     revalidatePath("/", "layout");

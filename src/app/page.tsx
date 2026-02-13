@@ -4,11 +4,30 @@ import { db } from "@/lib/firebase/admin";
 import { deepSafeSerialize } from "@/lib/utils";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = {
-  alternates: {
-    canonical: "/",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  try {
+    const seoSnap = await db.collection("siteSettings").doc("seo").get();
+    const seo = seoSnap.data();
+
+    if (!seo) return { alternates: { canonical: "/" } };
+
+    return {
+      title: seo.defaultTitle || "Instituto Figura Viva | Gestalt-Terapia",
+      description:
+        seo.defaultDescription ||
+        "Um espaço vivo de acolhimento clínico e formação profissional.",
+      keywords: seo.keywords || [],
+      alternates: {
+        canonical: "/",
+      },
+      openGraph: {
+        images: seo.ogImage ? [{ url: seo.ogImage }] : [],
+      },
+    };
+  } catch (e) {
+    return { alternates: { canonical: "/" } };
+  }
+}
 
 // Revalidate every hour
 export const revalidate = 3600;

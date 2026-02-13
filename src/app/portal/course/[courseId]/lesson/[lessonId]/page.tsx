@@ -142,6 +142,46 @@ export default async function LessonPage({
     }),
   }));
 
+  // FETCH ASSESSMENT (if quiz)
+  let assessment = null;
+  let submission = null;
+
+  if (activeLesson.type === "quiz") {
+    try {
+      const assessmentSnap = await db
+        .collection("assessments")
+        .where("lessonId", "==", activeLesson.id)
+        .where("status", "==", "published")
+        .limit(1)
+        .get();
+
+      if (!assessmentSnap.empty) {
+        assessment = {
+          id: assessmentSnap.docs[0].id,
+          ...assessmentSnap.docs[0].data(),
+        };
+
+        // Also fetch user's last submission
+        const submissionSnap = await db
+          .collection("assessmentSubmissions")
+          .where("userId", "==", uid)
+          .where("assessmentId", "==", assessment.id)
+          .orderBy("startedAt", "desc")
+          .limit(1)
+          .get();
+
+        if (!submissionSnap.empty) {
+          submission = {
+            id: submissionSnap.docs[0].id,
+            ...submissionSnap.docs[0].data(),
+          };
+        }
+      }
+    } catch (e) {
+      console.error("Error fetching assessment:", e);
+    }
+  }
+
   return (
     <LessonPlayerWrapper
       course={deepSafeSerialize({
@@ -151,6 +191,8 @@ export default async function LessonPage({
       })}
       modules={modulesWithProgress as Module[]}
       activeLesson={activeLesson}
+      assessment={deepSafeSerialize(assessment)}
+      submission={deepSafeSerialize(submission)}
       prevLessonId={prevLessonId}
       nextLessonId={nextLessonId}
     />
