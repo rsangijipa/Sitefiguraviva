@@ -45,6 +45,11 @@ service cloud.firestore {
         allow read: if isSignedIn() && userId == uid();
         allow write: if isAdmin(); // Server only
       }
+
+      match /notifications/{notificationId} {
+        allow read, update: if isSignedIn() && userId == uid();
+        allow read, write: if isAdmin();
+      }
     }
 
     // COURSES
@@ -160,6 +165,66 @@ service cloud.firestore {
       allow create: if isSignedIn();
       allow update: if isAdmin();
       allow delete: if isAdmin();
+    }
+
+    // PUBLIC DOCUMENTS
+    match /publicDocs/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // BLOG POSTS
+    match /posts/{postId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // PUBLIC GALLERY (Extended)
+    match /publicGallery/{imageId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // PUBLIC LIBRARY
+    match /publicLibrary/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // STATIC PAGES
+    match /pages/{pageId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // TEAM MEMBERS
+    match /team_members/{memberId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // PRESENCE (Real-time)
+    match /presence/{presenceId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && (presenceId.startsWith(uid()) || isAdmin());
+    }
+
+    // APPLICATIONS / INTERESTS
+    match /applications/{appId} {
+      allow read, write: if isAdmin();
+      allow create: if true; // Public can submit interest
+    }
+
+    // GAMIFICATION
+    match /gamification_profiles/{profileId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // ANALYTICS (Optional/Pre-emptive)
+    match /analytics_events/{eventId} {
+      allow create: if true;
+      allow read, write: if isAdmin();
     }
   }
 }
