@@ -54,7 +54,7 @@ service cloud.firestore {
 
     // COURSES
     match /courses/{courseId} {
-      allow read: if isAdmin() || isStaff() || isEnrolled(courseId) || resource.data.status == 'open' || resource.data.status == 'published'; 
+      allow read: if isAdmin() || isStaff() || isEnrolled(courseId) || resource.data.isPublished == true; 
       allow write: if isAdmin() || isStaff();
 
       match /modules/{moduleId} {
@@ -219,6 +219,12 @@ service cloud.firestore {
     match /gamification_profiles/{profileId} {
       allow read: if isSignedIn();
       allow write: if isAdmin();
+    }
+
+    // STATS & INTERACTION
+    match /stats/{statId} {
+      allow read: if true;
+      allow write: if statId == 'tree'; // Allow public increment for the Feelings Tree
     }
 
     // ANALYTICS (Optional/Pre-emptive)
