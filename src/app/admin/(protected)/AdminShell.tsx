@@ -143,7 +143,7 @@ export default function AdminShell({
           </div>
         </div>
 
-        <nav className="flex-1 px-6 space-y-2 overflow-y-auto custom-scrollbar">
+        <nav className="flex-1 min-h-0 pb-6 px-6 space-y-2 overflow-y-auto custom-scrollbar overscroll-contain">
           {navItems.map((item) => {
             const isActive = pathname === item.path;
             return (

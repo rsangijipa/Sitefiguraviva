@@ -73,6 +73,7 @@ Thumbs.db
 Desktop.ini
 
 # Logs and Debug Files
+/docs/debug/
 *.log
 *.txt
 debug_cert*

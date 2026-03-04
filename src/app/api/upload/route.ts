@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/firebase/admin";
-import { writeFile, mkdir } from "fs/promises";
-import { join } from "path";
-import { existsSync } from "fs";
+import { auth, storage } from "@/lib/firebase/admin";
 
 /**
  * File Upload API
@@ -97,25 +94,32 @@ export async function POST(request: NextRequest) {
     const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
     const filename = `${claims.uid}_${timestamp}_${sanitizedName}`;
 
-    // Save to public/uploads directory
-    const uploadDir = join(process.cwd(), "public", "uploads", "assessments");
-
-    // Create directory if it doesn't exist
-    if (!existsSync(uploadDir)) {
-      await mkdir(uploadDir, { recursive: true });
-    }
-
-    const filepath = join(uploadDir, filename);
+    // Save to Firebase Storage instead of local filesystem
+    const bucket = storage.bucket();
+    const filepath = `uploads/${claims.uid}/assessments/${filename}`;
+    const fileRef = bucket.file(filepath);
 
     // Convert File to Buffer
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
     // Write file
-    await writeFile(filepath, buffer);
+    await fileRef.save(buffer, {
+      metadata: {
+        contentType: file.type,
+        metadata: {
+          originalName: file.name,
+          uid: claims.uid,
+        },
+      },
+    });
 
-    // Return public URL
-    const fileUrl = `/uploads/assessments/${filename}`;
+    // Generate a long-lived signed URL for downloading (or standard public URL)
+    // We use a 7-day signed URL as a secure default for private uploads.
+    const [fileUrl] = await fileRef.getSignedUrl({
+      action: "read",
+      expires: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
 
     return NextResponse.json({
       success: true,

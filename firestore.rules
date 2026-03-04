@@ -2,61 +2,144 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Helper functions
-    function isSignedIn() {
-      return request.auth != null;
+    // Helpers
+    function isSignedIn() { return request.auth != null; }
+    function uid() { return request.auth.uid; }
+    
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.admin == true ||
+        (exists(/databases/$(database)/documents/users/$(uid())) &&
+         get(/databases/$(database)/documents/users/$(uid())).data.role in ['admin', 'administrador', 'ADMIN'] &&
+         get(/databases/$(database)/documents/users/$(uid())).data.isActive == true)
+      );
     }
     
-    function hasTenant(tenantId) {
-      return request.auth.token.tenantId == tenantId;
+    function isStaff() {
+      return isAdmin() || (isSignedIn() && (
+        request.auth.token.role == 'tutor' ||
+        (exists(/databases/$(database)/documents/users/$(uid())) &&
+         get(/databases/$(database)/documents/users/$(uid())).data.role == 'tutor' &&
+         get(/databases/$(database)/documents/users/$(uid())).data.isActive == true)
+      ));
     }
 
-    function isSameTenant() {
-      return request.auth.token.tenantId == resource.data.tenantId;
+    function isEnrolled(courseId) {
+      let enrollmentId = uid() + '_' + courseId;
+      return exists(/databases/$(database)/documents/enrollments/$(enrollmentId))
+             && get(/databases/$(database)/documents/enrollments/$(enrollmentId)).data.status in ['active', 'completed'];
     }
 
-    // Default: Deny everything
+    // Default: Deny
     match /{document=**} {
       allow read, write: if false;
     }
 
-    // --- Users ---
+    // USERS
     match /users/{userId} {
-      allow read, write: if isSignedIn() && request.auth.uid == userId;
-      // Admin can read/write all users (add checks for admin claim)
-      allow read, write: if isSignedIn() && request.auth.token.admin == true;
-    }
-
-    // --- Courses (Hardened Isolation) ---
-    match /courses/{courseId} {
-      allow read: if isSignedIn() && (isSameTenant() || resource.data.isPublic == true);
-      allow write: if isSignedIn() && request.auth.token.admin == true && isSameTenant();
+      allow read, write: if isSignedIn() && userId == uid();
+      allow read, write: if isAdmin();
       
-      // Sub-collections: Materials, Announcements, Community
-      match /{allSubcollections=**} {
-        allow read: if isSignedIn() && (
-          get(/databases/$(database)/documents/courses/$(courseId)).data.tenantId == request.auth.token.tenantId
-        );
-        allow write: if isSignedIn() && (
-          get(/databases/$(database)/documents/courses/$(courseId)).data.tenantId == request.auth.token.tenantId
-        );
+      // subcollections like enrollments
+      match /enrollments/{courseId} {
+        allow read: if isSignedIn() && userId == uid();
+        allow write: if isAdmin(); // Server only
       }
     }
 
-    // --- Community Threads & Replies ---
-    match /community_threads/{threadId} {
-      allow read: if isSignedIn() && isSameTenant();
-      allow create: if isSignedIn() && request.resource.data.tenantId == request.auth.token.tenantId;
-      allow update, delete: if isSignedIn() && (
-        (request.auth.uid == resource.data.authorId && isSameTenant()) ||
-        (request.auth.token.admin == true && isSameTenant())
-      );
+    // COURSES
+    match /courses/{courseId} {
+      allow read: if isAdmin() || isStaff() || isEnrolled(courseId) || resource.data.status == 'open' || resource.data.status == 'published'; 
+      allow write: if isAdmin() || isStaff();
+
+      match /modules/{moduleId} {
+        allow read: if isAdmin() || isStaff() || isEnrolled(courseId);
+        allow write: if isAdmin() || isStaff();
+      }
+
+      match /lessons/{lessonId} {
+        allow read: if isAdmin() || isStaff() || isEnrolled(courseId);
+        allow write: if isAdmin() || isStaff();
+
+        match /blocks/{blockId} {
+            allow read: if isAdmin() || isStaff() || isEnrolled(courseId);
+            allow write: if isAdmin() || isStaff();
+        }
+      }
+
+      match /materials/{materialId} {
+        allow read: if isAdmin() || isStaff() || isEnrolled(courseId);
+        allow write: if isAdmin() || isStaff();
+      }
+
+      match /announcements/{announcementId} {
+        allow read: if isAdmin() || isStaff() || isEnrolled(courseId);
+        allow write: if isAdmin() || isStaff();
+      }
+
+      match /communityThreads/{threadId} {
+        allow read: if isAdmin() || isStaff() || isEnrolled(courseId);
+        allow create: if isEnrolled(courseId);
+        allow update, delete: if isAdmin() || isStaff() || (isSignedIn() && resource.data.authorId == uid());
+
+        match /replies/{replyId} {
+          allow read: if isAdmin() || isStaff() || isEnrolled(courseId);
+          allow create: if isEnrolled(courseId);
+          allow update, delete: if isAdmin() || isStaff() || (isSignedIn() && resource.data.authorId == uid());
+        }
+      }
     }
 
-    // --- Presence (TTL/Ephemeral) ---
-    match /presence/{presenceId} {
+    // GLOBAL COMMUNITY THREADS
+    match /community_threads/{threadId} {
       allow read: if isSignedIn();
-      allow write: if isSignedIn(); // Add tenant check if needed
+      allow create: if isSignedIn();
+      allow update, delete: if isAdmin() || isStaff() || (isSignedIn() && resource.data.authorId == uid());
+    }
+
+    // GLOBAL ENROLLMENTS
+    match /enrollments/{enrollmentId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == uid());
+      allow write: if false; // Writes should be handled by server/admin
+    }
+
+    // TRANSACTIONS / PAYMENTS
+    match /payments/{paymentId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == uid());
+      allow create: if isSignedIn() && request.resource.data.userId == uid();
+      allow update, delete: if false; // Server only
+    }
+
+    // PROGRESS
+    match /progress/{progressId} {
+      allow read: if isAdmin() || isStaff() || (isSignedIn() && resource.data.userId == uid());
+      allow write: if isSignedIn() && request.resource.data.userId == uid();
+    }
+
+    // CERTIFICATES
+    match /certificates/{certificateId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == uid());
+      allow write: if false; // Issued by backend
+    }
+
+    // EVENTS
+    match /events/{eventId} {
+      allow read: if isAdmin() || resource.data.isPublic == true || (resource.data.enrolledOnly == true && isEnrolled(resource.data.courseId));
+      allow write: if isAdmin();
+    }
+
+    // AUDIT & SYSTEM
+    match /audit_logs/{logId} {
+      allow read: if isAdmin();
+      allow write: if false; 
+    }
+    match /system_logs/{logId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+    match /system/{docId} {
+      allow read: if true; 
+      allow write: if false;
     }
   }
 }
