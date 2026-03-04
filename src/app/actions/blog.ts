@@ -5,33 +5,21 @@ import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 
-async function assertIsAdmin() {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("session")?.value;
+import { requireAdmin } from "@/lib/auth-server";
+import { z } from "zod";
 
-  if (!sessionCookie) {
-    throw new Error("Unauthenticated");
-  }
-
-  const decodedToken = await adminAuth.verifySessionCookie(sessionCookie, true);
-
-  if (decodedToken.role === "admin" || decodedToken.admin === true) {
-    return decodedToken;
-  }
-
-  const userDoc = await adminDb.collection("users").doc(decodedToken.uid).get();
-  const userData = userDoc.data();
-
-  if (userData?.role !== "admin") {
-    throw new Error("Access Denied: Admin role required.");
-  }
-
-  return decodedToken;
-}
+const blogPostSchema = z.object({
+  title: z.string().min(1, "Título é obrigatório"),
+  excerpt: z.string().optional(),
+  content: z.string().min(1, "Conteúdo é obrigatório"),
+  type: z.enum(["blog", "news", "announcement", "library"]).default("blog"),
+  image: z.string().url().or(z.literal("")).optional(),
+});
 
 export async function saveBlogPostAction(id: string | null, data: any) {
   try {
-    await assertIsAdmin();
+    await requireAdmin();
+    const validatedData = blogPostSchema.parse(data);
 
     const slug = data.title
       .toLowerCase()
@@ -41,7 +29,7 @@ export async function saveBlogPostAction(id: string | null, data: any) {
       .replace(/-{2,}/g, "-");
 
     const payload = {
-      ...data,
+      ...validatedData,
       slug,
       updated_at: FieldValue.serverTimestamp(),
       isPublished: true,
@@ -67,7 +55,7 @@ export async function saveBlogPostAction(id: string | null, data: any) {
 
 export async function deleteBlogPostAction(id: string) {
   try {
-    await assertIsAdmin();
+    await requireAdmin();
     await adminDb.collection("posts").doc(id).delete();
 
     revalidatePath("/");

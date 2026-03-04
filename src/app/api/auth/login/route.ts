@@ -1,9 +1,29 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/firebase/admin";
 import { cookies } from "next/headers";
+import {
+  rateLimit,
+  RateLimitPresets,
+  getClientIdentifier,
+} from "@/lib/rateLimit";
 
 export async function POST(request: Request) {
   try {
+    // 0. Rate Limiting
+    const ip = getClientIdentifier(request);
+    const rl = await rateLimit(
+      ip,
+      "LOGIN_ATTEMPT",
+      RateLimitPresets.LOGIN_ATTEMPT,
+    );
+
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: "Too many attempts. Please try again later." },
+        { status: 429 },
+      );
+    }
+
     const body = await request.json();
     const { idToken } = body;
 
