@@ -14,12 +14,18 @@ import SectionShell from "../ui/SectionShell";
 
 export default function InstituteSection({
   gallery = [],
+  initialData,
+  initialFounderData,
+  initialTeamData,
 }: {
   gallery?: any[];
+  initialData?: any;
+  initialFounderData?: any;
+  initialTeamData?: any;
 }) {
-  const { data: data } = useInstituteSettings();
-  const { data: founderData } = useFounderSettings();
-  const { data: teamSettings } = useTeamSettings();
+  const { data: data } = useInstituteSettings(initialData);
+  const { data: founderData } = useFounderSettings(initialFounderData);
+  const { data: teamSettings } = useTeamSettings(initialTeamData);
   const teamMembers = teamSettings.members || [];
   const [currentIndex, setCurrentIndex] = useState(0);
 

@@ -55,6 +55,7 @@ export async function updateSiteSettings(
         { merge: true },
       );
 
+    revalidatePath("/");
     revalidatePath("/", "layout");
     revalidatePath("/admin/settings", "page");
     revalidatePath("/public-library", "page");
@@ -162,6 +163,7 @@ export async function seedSiteSettingsAction() {
       batch.set(configRef, { ...defaults.config, updatedAt: Timestamp.now() });
 
     await batch.commit();
+    revalidatePath("/");
     revalidatePath("/", "layout");
     return { success: true };
   } catch (error: any) {

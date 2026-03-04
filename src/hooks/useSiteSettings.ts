@@ -15,8 +15,8 @@ export const useFounderSettings = (initialData?: FounderSettings) => {
   return useQuery({
     queryKey: ["siteSettings", "founder"],
     queryFn: () => getSiteSettings<FounderSettings>("founder", DEFAULT_FOUNDER),
-    initialData: initialData || DEFAULT_FOUNDER,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    initialData: initialData,
+    staleTime: 1000 * 60, // 1 minute
   });
 };
 
@@ -25,8 +25,8 @@ export const useInstituteSettings = (initialData?: InstituteSettings) => {
     queryKey: ["siteSettings", "institute"],
     queryFn: () =>
       getSiteSettings<InstituteSettings>("institute", DEFAULT_INSTITUTE),
-    initialData: initialData || DEFAULT_INSTITUTE,
-    staleTime: 1000 * 60 * 5,
+    initialData: initialData,
+    staleTime: 1000 * 60,
   });
 };
 
@@ -34,7 +34,7 @@ export const useSEOSettings = (initialData?: SEOSettings) => {
   return useQuery({
     queryKey: ["siteSettings", "seo"],
     queryFn: () => getSiteSettings<SEOSettings>("seo", DEFAULT_SEO),
-    initialData: initialData || DEFAULT_SEO,
+    initialData: initialData,
     staleTime: 1000 * 60 * 60, // 1 hour
   });
 };
@@ -43,8 +43,8 @@ export const useConfigSettings = (initialData?: ConfigSettings) => {
   return useQuery({
     queryKey: ["siteSettings", "config"],
     queryFn: () => getSiteSettings<ConfigSettings>("config", DEFAULT_CONFIG),
-    initialData: initialData || DEFAULT_CONFIG,
-    staleTime: 1000 * 60 * 5,
+    initialData: initialData,
+    staleTime: 1000 * 60,
   });
 };
 
@@ -55,12 +55,12 @@ import {
   LegalSettings,
 } from "@/lib/siteSettings";
 
-export const useTeamSettings = () => {
+export const useTeamSettings = (initialData?: TeamSettings) => {
   return useQuery({
     queryKey: ["siteSettings", "team"],
     queryFn: () => getSiteSettings<TeamSettings>("team", DEFAULT_TEAM),
-    initialData: DEFAULT_TEAM,
-    staleTime: 1000 * 60 * 15,
+    initialData: initialData,
+    staleTime: 1000 * 60 * 5,
   });
 };
 
@@ -71,7 +71,7 @@ export const useLegalSettings = (options?: {
   return useQuery({
     queryKey: ["siteSettings", "legal"],
     queryFn: () => getSiteSettings<LegalSettings>("legal", DEFAULT_LEGAL),
-    initialData: options?.initialData || DEFAULT_LEGAL,
+    initialData: options?.initialData,
     staleTime: options?.aggressiveRefresh ? 0 : 1000 * 60,
     refetchOnMount: "always",
     refetchOnWindowFocus: true,

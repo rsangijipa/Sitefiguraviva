@@ -4,14 +4,8 @@ import { useState } from "react";
 import { useToast } from "@/context/ToastContext";
 import { Save, Loader2, Upload, FileText, X } from "lucide-react";
 import ImageUpload from "@/components/admin/ImageUpload";
-import { db, storage } from "@/lib/firebase/client";
-import {
-  collection,
-  addDoc,
-  updateDoc,
-  doc,
-  serverTimestamp,
-} from "firebase/firestore";
+import { storage } from "@/lib/firebase/client";
+import { saveBlogPostAction } from "@/app/actions/blog";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import Button from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
@@ -76,35 +70,20 @@ export function BlogPostForm({ post, onSuccess, onCancel }: BlogPostFormProps) {
     setIsSubmitting(true);
 
     try {
-      const slug = formData.title
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^a-z0-9]/g, "-")
-        .replace(/-{2,}/g, "-");
+      const res = await saveBlogPostAction(post?.id || null, formData);
 
-      const payload = {
-        ...formData,
-        slug,
-        updated_at: serverTimestamp(),
-        isPublished: true,
-      };
-
-      if (post) {
-        const docRef = doc(db, "posts", post.id);
-        await updateDoc(docRef, payload);
-        addToast("Publicação atualizada!", "success");
+      if (res.success) {
+        addToast(
+          post ? "Publicação atualizada!" : "Publicação criada com sucesso!",
+          "success",
+        );
+        onSuccess();
       } else {
-        await addDoc(collection(db, "posts"), {
-          ...payload,
-          created_at: serverTimestamp(),
-        });
-        addToast("Publicação criada com sucesso!", "success");
+        throw new Error(res.error);
       }
-      onSuccess();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving post:", error);
-      addToast("Erro ao salvar publicação.", "error");
+      addToast("Erro ao salvar publicação: " + error.message, "error");
     } finally {
       setIsSubmitting(false);
     }
