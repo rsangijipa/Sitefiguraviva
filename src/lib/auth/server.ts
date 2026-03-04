@@ -22,6 +22,14 @@ export async function verifySession() {
   }
 }
 
+export async function requireSession(redirectTo = "/auth") {
+  const claims = await verifySession();
+  if (!claims) {
+    redirect(redirectTo);
+  }
+  return claims;
+}
+
 function isAdminRole(role: unknown) {
   const r = String(role || "").toLowerCase();
   return r === "admin" || r === "administrador";

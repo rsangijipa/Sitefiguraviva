@@ -1,7 +1,6 @@
 "use client";
 
-import * as motion from "motion/react-client";
-import { useScroll, useSpring, useTransform } from "framer-motion"; // Specific hooks from framer-motion as they might not be in react-client yet
+import { motion, useScroll, useSpring, useTransform } from "framer-motion";
 import { useEffect, useState } from "react";
 
 export default function ScrollProgressBar() {

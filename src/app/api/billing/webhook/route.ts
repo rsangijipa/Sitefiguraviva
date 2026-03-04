@@ -10,7 +10,10 @@ import {
   PaymentStatus,
   StripeSubscriptionStatus,
 } from "@/lib/enrollmentStatus";
-import { activateEnrollmentFromStripe } from "@/lib/auth/enrollment-service";
+import {
+  activateEnrollmentFromStripe,
+  writeEnrollmentMirror,
+} from "@/lib/auth/enrollment-service";
 import { logSystemError } from "@/lib/logging";
 import { logAudit } from "@/lib/audit";
 
@@ -107,22 +110,16 @@ export async function POST(req: NextRequest) {
             : null;
 
         if (uid && courseId && subscriptionId) {
-          const enrollmentId = `${uid}_${courseId}`;
-          const mirrorRef = adminDb
-            .collection("users")
-            .doc(uid)
-            .collection("enrollments")
-            .doc(courseId);
-          const rootRef = adminDb.collection("enrollments").doc(enrollmentId);
           const stripeMeta = {
             "stripe.subscriptionId": subscriptionId,
             "stripe.subscriptionStatus": "active",
             updatedAt: FieldValue.serverTimestamp(),
           };
-          const batch = adminDb.batch();
-          batch.set(rootRef, stripeMeta, { merge: true });
-          batch.set(mirrorRef, stripeMeta, { merge: true });
-          await batch.commit();
+          await writeEnrollmentMirror({
+            uid,
+            courseId,
+            enrollmentDoc: stripeMeta as any,
+          });
         }
 
         if (uid && courseId) {
@@ -199,16 +196,11 @@ export async function POST(req: NextRequest) {
             updatedAt: FieldValue.serverTimestamp(),
           };
 
-          const batch = adminDb.batch();
-          const userEnrollmentRef = adminDb
-            .collection("users")
-            .doc(data.uid)
-            .collection("enrollments")
-            .doc(data.courseId);
-
-          batch.set(docSnap.ref, updateData, { merge: true });
-          batch.set(userEnrollmentRef, updateData, { merge: true });
-          await batch.commit();
+          await writeEnrollmentMirror({
+            uid: data.uid || data.userId,
+            courseId: data.courseId,
+            enrollmentDoc: updateData as any,
+          });
         }
         break;
       }
@@ -252,16 +244,11 @@ export async function POST(req: NextRequest) {
             updateData.endedAt = FieldValue.serverTimestamp();
           }
 
-          const batch = adminDb.batch();
-          const userEnrollmentRef = adminDb
-            .collection("users")
-            .doc(data.uid)
-            .collection("enrollments")
-            .doc(data.courseId);
-
-          batch.update(docSnap.ref, updateData);
-          batch.update(userEnrollmentRef, updateData);
-          await batch.commit();
+          await writeEnrollmentMirror({
+            uid: data.uid || data.userId,
+            courseId: data.courseId,
+            enrollmentDoc: updateData as any,
+          });
         }
         break;
       }
@@ -297,16 +284,11 @@ export async function POST(req: NextRequest) {
             updatedAt: FieldValue.serverTimestamp(),
           };
 
-          const batch = adminDb.batch();
-          const userEnrollmentRef = adminDb
-            .collection("users")
-            .doc(data.uid)
-            .collection("enrollments")
-            .doc(data.courseId);
-
-          batch.update(docSnap.ref, updateData);
-          batch.update(userEnrollmentRef, updateData);
-          await batch.commit();
+          await writeEnrollmentMirror({
+            uid: data.uid || data.userId,
+            courseId: data.courseId,
+            enrollmentDoc: updateData as any,
+          });
 
           await logAudit({
             actor: { uid: "system", role: "webhook" },
