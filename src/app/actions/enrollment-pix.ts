@@ -8,6 +8,7 @@ import { logAudit } from "@/lib/audit";
 import { revalidatePath } from "next/cache";
 import { telemetry } from "@/lib/telemetry";
 import { trackFunnelEvent } from "@/actions/analytics";
+import { writeEnrollmentMirror } from "@/lib/auth/enrollment-service";
 
 /**
  * Aluno solicita acesso via PIX.
@@ -22,29 +23,31 @@ export async function createEnrollmentPending(courseId: string) {
   const enrollmentRef = adminDb.collection("enrollments").doc(enrollmentId);
 
   try {
-    await adminDb.runTransaction(async (tx) => {
-      const snap = await tx.get(enrollmentRef);
+    const snap = await enrollmentRef.get();
 
-      if (snap.exists) {
-        const data = snap.data() as EnrollmentDoc;
-        if (data.status === "active" || data.status === "completed") {
-          // Já possui acesso ou concluiu, não faz nada
-          return;
-        }
-        if (data.status === "pending_approval") return;
+    if (snap.exists) {
+      const data = snap.data() as EnrollmentDoc;
+      if (data.status === "active" || data.status === "completed") {
+        // Já possui acesso ou concluiu, não faz nada
+        return { success: true };
       }
+      if (data.status === "pending_approval") return { success: true };
+    }
 
-      const newEnrollment: Partial<EnrollmentDoc> = {
-        uid: uid,
-        userId: uid,
-        courseId: courseId,
-        status: "pending_approval",
-        paymentMethod: "pix",
-        createdAt: FieldValue.serverTimestamp() as any,
-        updatedAt: FieldValue.serverTimestamp() as any,
-      };
+    const newEnrollment: Partial<EnrollmentDoc> = {
+      uid: uid,
+      userId: uid,
+      courseId: courseId,
+      status: "pending_approval",
+      paymentMethod: "pix",
+      createdAt: FieldValue.serverTimestamp() as any,
+      updatedAt: FieldValue.serverTimestamp() as any,
+    };
 
-      tx.set(enrollmentRef, newEnrollment, { merge: true });
+    await writeEnrollmentMirror({
+      uid,
+      courseId,
+      enrollmentDoc: newEnrollment,
     });
 
     revalidatePath(`/curso/${courseId}`);
@@ -72,35 +75,30 @@ export async function approvePixEnrollment(userId: string, courseId: string) {
   const enrollmentRef = adminDb.collection("enrollments").doc(enrollmentId);
 
   try {
-    const result = await adminDb.runTransaction(async (tx) => {
-      const snap = await tx.get(enrollmentRef);
-      if (!snap.exists) throw new Error("Enrollment not found");
+    const snap = await enrollmentRef.get();
+    if (!snap.exists) throw new Error("Enrollment not found");
 
-      const data = snap.data() as EnrollmentDoc;
-      if (data.status === "active") return { alreadyActive: true };
+    const data = snap.data() as EnrollmentDoc;
+    if (data.status === "active") return { alreadyActive: true };
 
-      const approvalId = `pix_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const approvalId = `pix_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
 
-      const updates: Partial<EnrollmentDoc> = {
-        status: "active",
-        paymentMethod: "pix",
-        paidAt: FieldValue.serverTimestamp() as any,
-        approvedBy: adminSession.uid,
-        approvedAt: FieldValue.serverTimestamp() as any,
-        sourceRef: approvalId,
-        updatedAt: FieldValue.serverTimestamp() as any,
-      };
+    const updates: Partial<EnrollmentDoc> = {
+      status: "active",
+      paymentMethod: "pix",
+      paidAt: FieldValue.serverTimestamp() as any,
+      approvedBy: adminSession.uid,
+      approvedAt: FieldValue.serverTimestamp() as any,
+      sourceRef: approvalId,
+      updatedAt: FieldValue.serverTimestamp() as any,
+    };
 
-      tx.update(enrollmentRef, updates);
-
-      // Sync User Permissions
-      const userRef = adminDb.collection("users").doc(userId);
-      tx.update(userRef, {
-        enrolledCourseIds: FieldValue.arrayUnion(courseId),
-      });
-
-      return { success: true, updates };
+    await writeEnrollmentMirror({
+      uid: userId,
+      courseId,
+      enrollmentDoc: updates,
     });
+    const result = { success: true, updates };
 
     if (result.success) {
       telemetry.track("enrollment_pix_approved", {
@@ -162,21 +160,23 @@ export async function rejectPixEnrollment(
   const enrollmentRef = adminDb.collection("enrollments").doc(enrollmentId);
 
   try {
-    const result = await adminDb.runTransaction(async (tx) => {
-      const snap = await tx.get(enrollmentRef);
-      if (!snap.exists) throw new Error("Enrollment not found");
+    const snap = await enrollmentRef.get();
+    if (!snap.exists) throw new Error("Enrollment not found");
 
-      const updates: Partial<EnrollmentDoc> = {
-        status: "canceled",
-        rejectionReason: reason,
-        approvedBy: adminSession.uid, // "Decided by"
-        approvedAt: FieldValue.serverTimestamp() as any,
-        updatedAt: FieldValue.serverTimestamp() as any,
-      };
+    const updates: Partial<EnrollmentDoc> = {
+      status: "canceled",
+      rejectionReason: reason,
+      approvedBy: adminSession.uid, // "Decided by"
+      approvedAt: FieldValue.serverTimestamp() as any,
+      updatedAt: FieldValue.serverTimestamp() as any,
+    };
 
-      tx.update(enrollmentRef, updates);
-      return { success: true, updates };
+    await writeEnrollmentMirror({
+      uid: userId,
+      courseId,
+      enrollmentDoc: updates,
     });
+    const result = { success: true, updates };
 
     await logAudit({
       actor: {

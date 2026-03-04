@@ -126,17 +126,23 @@ export async function getLessonContent(
 
   const lesson = { id: lessonDoc.id, ...lessonDoc.data() } as Lesson;
 
-  const blocks = blocksSnap.docs.map((doc) => {
-    const data: any = doc.data();
-    return {
-      id: doc.id,
-      ...data,
-      // Default: visible unless explicitly disabled
-      isPublished: data?.isPublished !== false,
-    };
-  }) as Block[];
+  const blocks = blocksSnap.docs
+    .map((doc) => {
+      const data: any = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        // Default: visible unless explicitly disabled
+        isPublished: data?.isPublished !== false,
+      };
+    })
+    .filter((b: any) => b.isPublished !== false) as Block[];
 
-  return deepSafeSerialize({ lesson, blocks });
+  return deepSafeSerialize({
+    lesson,
+    blocks,
+    isEmpty: blocks.length === 0,
+  });
 }
 
 export async function saveLessonContent(

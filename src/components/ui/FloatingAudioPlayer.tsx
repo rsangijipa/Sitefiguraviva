@@ -13,6 +13,9 @@ import {
   SkipBack,
 } from "lucide-react";
 import { useAudio } from "@/context/AudioContext";
+import { useAuth } from "@/context/AuthContext";
+import { usePresence } from "@/hooks/usePresence";
+import { trackEvent } from "@/lib/telemetry/events";
 import { cn } from "@/lib/utils";
 import Button from "@/components/ui/Button";
 
@@ -28,6 +31,32 @@ export default function FloatingAudioPlayer() {
     playbackRate,
     setRate,
   } = useAudio();
+
+  const { user } = useAuth();
+  const userName = user?.displayName || "Anonymous Listener";
+  const userAvatar = user?.photoURL || undefined;
+
+  // Presence Integration (Who is listening?)
+  const { activeUsers } = usePresence(
+    user?.uid || "",
+    currentTrack?.id || "",
+    userName,
+    userAvatar,
+  );
+
+  // Telemetry: Track Start
+  useEffect(() => {
+    if (currentTrack && isPlaying) {
+      trackEvent("audio_player_start", { trackId: currentTrack.id });
+    }
+  }, [currentTrack?.id, isPlaying]);
+
+  // Telemetry: Track Complete (Approximate)
+  useEffect(() => {
+    if (currentTrack && duration > 0 && progress >= duration - 1) {
+      trackEvent("audio_player_complete", { trackId: currentTrack.id });
+    }
+  }, [progress, duration, currentTrack?.id]);
 
   const [isMinimized, setIsMinimized] = useState(false);
   const [showSpeedMenu, setShowSpeedMenu] = useState(false);
@@ -122,10 +151,38 @@ export default function FloatingAudioPlayer() {
                       {currentTrack.artist || "Instituto Figura Viva"}
                     </p>
                     {sleepRemaining !== null && (
-                      <span className="text-[10px] text-primary font-mono font-bold">
-                        Dormir em: {Math.floor(sleepRemaining / 60)}:
+                      <span className="text-[10px] text-primary font-mono font-bold block">
+                        Dormir: {Math.floor(sleepRemaining / 60)}:
                         {(sleepRemaining % 60).toString().padStart(2, "0")}
                       </span>
+                    )}
+                    {/* Presence Indicator */}
+                    {activeUsers.length > 0 && (
+                      <div className="flex items-center gap-1 mt-1 animate-in fade-in">
+                        <div className="flex -space-x-1.5">
+                          {activeUsers.slice(0, 3).map((u, i) => (
+                            <div
+                              key={i}
+                              className="w-4 h-4 rounded-full border border-white bg-gray-200 overflow-hidden"
+                            >
+                              {u.avatar ? (
+                                <img
+                                  src={u.avatar}
+                                  alt={u.name}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-primary text-[6px] text-white">
+                                  {u.name[0]}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                        <span className="text-[9px] text-stone-400 font-medium">
+                          +{activeUsers.length} ouvindo
+                        </span>
+                      </div>
                     )}
                   </div>
                 </div>

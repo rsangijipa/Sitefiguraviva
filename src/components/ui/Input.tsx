@@ -31,6 +31,7 @@ export interface InputProps
   leftIcon?: LucideIcon;
   rightIcon?: LucideIcon;
   onRightIconClick?: () => void;
+  isLoading?: boolean;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
@@ -44,6 +45,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       leftIcon: LeftIcon,
       rightIcon: RightIcon,
       onRightIconClick,
+      isLoading,
       ...props
     },
     ref,
@@ -56,7 +58,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           <label
             htmlFor={props.id}
             className={cn(
-              "text-sm font-bold ml-1",
+              "text-sm font-bold ml-1 block",
               isGlass ? "text-white/90" : "text-primary/80",
             )}
           >
@@ -65,7 +67,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
         <div className="relative">
           {LeftIcon && (
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
               <LeftIcon size={18} />
             </div>
           )}
@@ -74,12 +76,17 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             className={cn(
               inputVariants({ variant: error ? "error" : variant, className }),
               LeftIcon && "pl-11",
-              RightIcon && "pr-11",
+              (RightIcon || isLoading) && "pr-11",
             )}
             ref={ref}
+            disabled={props.disabled || isLoading}
             {...props}
           />
-          {RightIcon && (
+          {isLoading ? (
+            <div className="absolute right-4 top-1/2 -translate-y-1/2">
+              <div className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
+            </div>
+          ) : RightIcon ? (
             <div
               className={cn(
                 "absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground",
@@ -90,7 +97,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             >
               <RightIcon size={18} />
             </div>
-          )}
+          ) : null}
         </div>
         {error && (
           <p className="text-xs text-error font-medium ml-1 animate-in slide-in-from-top-1 fade-in">

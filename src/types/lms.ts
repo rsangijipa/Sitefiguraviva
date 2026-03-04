@@ -1,4 +1,5 @@
 import { Timestamp } from "firebase/firestore";
+import { z } from "zod";
 
 // --- PRIMITIVES ---
 
@@ -337,3 +338,34 @@ export interface AuditLogDoc {
   };
   timestamp: Timestamp;
 }
+
+// --- ZOD SCHEMAS ---
+export const BlockSchema = z.object({
+  id: z.string(),
+  lessonId: z.string().optional(),
+  type: z.enum([
+    "text",
+    "video",
+    "image",
+    "file",
+    "pdf",
+    "quiz",
+    "link",
+    "callout",
+    "divider",
+  ]),
+  order: z.number(),
+  title: z.string().optional(),
+  content: z.object({
+    text: z.string().optional(),
+    url: z.string().optional(),
+    fileId: z.string().optional(),
+    videoId: z.string().optional(),
+    calloutType: z.enum(["info", "warning", "success", "tip"]).optional(),
+    caption: z.string().optional(),
+  }),
+  isPublished: z.boolean().default(true),
+  createdAt: z.any().optional(), // allow Timestamp
+});
+
+export type ValidatedBlock = z.infer<typeof BlockSchema>;
