@@ -6,13 +6,15 @@ Documente o progresso do plano de estabilização da plataforma EAD.
 
 | FASE | Título | Status | PR / Commit / Detalhes |
 | --- | --- | --- | --- |
-| FASE 0 | Baseline, Inventário e Guardrails | DONE | Logs movidos para /docs/debug/, .gitignore att, lint OK |
-| FASE 1 | P0 Estabilidade Crítica | DONE | maxAge corrigido, upload para Storage pronto |
-| FASE 2 | Segurança e Regras | DONE | Firestore rules refatoradas, next.config restrito, guards validados |
-| FASE 3 | Consistência de Matrícula | DOING | |
-| FASE 4 | Governança LMS | TODO | |
-| FASE 5 | Observabilidade e Auditoria | TODO | |
-| FASE 6 | Performance e Qualidade | DONE | framer-motion unificado, error boundary criado, indexos add |
+| FASE 0 | Baseline, Inventário e Guardrails | DONE | Logs movidos, .gitignore att, lint OK |
+| FASE 1 | P0 Estabilidade Crítica | DONE | maxAge corrigido, Admin SDK robusto, Storage OK |
+| FASE 2 | Segurança e Regras | DONE | Firestore rules refatoradas, guards padronizados, Rate Limit OK |
+| FASE 3 | Consistência de Matrícula | DONE | Mirroring via batch, Stripe Webhook idempotente |
+| FASE 4 | Governança LMS | DONE | Validações antes de publicar, Cascading actions |
+| FASE 5 | Observabilidade e Auditoria | DONE | Sentry OK, Audit logs em todas as ações Admin |
+| FASE 6 | Performance e Qualidade | DONE | framer-motion unificado, error boundary, indexos add |
+| FASE 7 | Correções Emergência (Prod) | DONE | SiteSettings/Gallery permissions fixed |
+| FASE 8 | Auditoria Admin & Sync | DONE | Server Actions for Blog/Gallery, Instant Sync |
 
 ## Registro de Auditoria e Lint (FASE 0 e CHECKS FINAIS)
 
