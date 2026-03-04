@@ -58,37 +58,37 @@ service cloud.firestore {
       allow write: if isAdmin() || isStaff();
 
       match /modules/{moduleId} {
-        allow read: if isAdmin() || isStaff() || isEnrolled(courseId);
-        allow write: if isAdmin() || isStaff();
-      }
-
-      match /lessons/{lessonId} {
-        allow read: if isAdmin() || isStaff() || isEnrolled(courseId);
+        allow read: if isAdmin() || isStaff() || isEnrolled(courseId) || get(/databases/$(database)/documents/courses/$(courseId)).data.isPublished == true;
         allow write: if isAdmin() || isStaff();
 
-        match /blocks/{blockId} {
-            allow read: if isAdmin() || isStaff() || isEnrolled(courseId);
+        match /lessons/{lessonId} {
+          allow read: if isAdmin() || isStaff() || isEnrolled(courseId) || get(/databases/$(database)/documents/courses/$(courseId)).data.isPublished == true;
+          allow write: if isAdmin() || isStaff();
+
+          match /blocks/{blockId} {
+            allow read: if isAdmin() || isStaff() || isEnrolled(courseId) || get(/databases/$(database)/documents/courses/$(courseId)).data.isPublished == true;
             allow write: if isAdmin() || isStaff();
+          }
         }
       }
 
       match /materials/{materialId} {
-        allow read: if isAdmin() || isStaff() || isEnrolled(courseId);
+        allow read: if isAdmin() || isStaff() || isEnrolled(courseId) || get(/databases/$(database)/documents/courses/$(courseId)).data.isPublished == true;
         allow write: if isAdmin() || isStaff();
       }
 
       match /announcements/{announcementId} {
-        allow read: if isAdmin() || isStaff() || isEnrolled(courseId);
+        allow read: if isAdmin() || isStaff() || isEnrolled(courseId) || get(/databases/$(database)/documents/courses/$(courseId)).data.isPublished == true;
         allow write: if isAdmin() || isStaff();
       }
 
       match /communityThreads/{threadId} {
-        allow read: if isAdmin() || isStaff() || isEnrolled(courseId);
+        allow read: if isAdmin() || isStaff() || isEnrolled(courseId) || get(/databases/$(database)/documents/courses/$(courseId)).data.isPublished == true;
         allow create: if isEnrolled(courseId);
         allow update, delete: if isAdmin() || isStaff() || (isSignedIn() && resource.data.authorId == uid());
 
         match /replies/{replyId} {
-          allow read: if isAdmin() || isStaff() || isEnrolled(courseId);
+          allow read: if isAdmin() || isStaff() || isEnrolled(courseId) || get(/databases/$(database)/documents/courses/$(courseId)).data.isPublished == true;
           allow create: if isEnrolled(courseId);
           allow update, delete: if isAdmin() || isStaff() || (isSignedIn() && resource.data.authorId == uid());
         }
