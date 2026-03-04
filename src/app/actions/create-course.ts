@@ -4,26 +4,33 @@ import { adminDb } from "@/lib/firebase/admin";
 import { revalidatePath } from "next/cache";
 import { assertIsTutorOrAdmin } from "@/lib/auth/authoring-gate";
 
-export async function createCourseAction(data: {
-  title: string;
-  subtitle?: string;
-  instructor?: string;
-  category?: string;
-  duration?: string;
-  level?: string;
-}) {
+import { z } from "zod";
+
+const createCourseSchema = z.object({
+  title: z.string().min(3, "Título deve ter pelo menos 3 caracteres"),
+  subtitle: z.string().optional(),
+  instructor: z.string().optional(),
+  category: z.string().optional(),
+  duration: z.string().optional(),
+  level: z.enum(["beginner", "intermediate", "advanced"]).default("beginner"),
+});
+
+export async function createCourseAction(data: any) {
   try {
     await assertIsTutorOrAdmin();
-    console.log("===== [SERVER ACTION] Creating course with data:", data);
+    const validatedData = createCourseSchema.parse(data);
+    console.log(
+      "===== [SERVER ACTION] Creating course with data:",
+      validatedData,
+    );
 
-    // Create course using Admin SDK (same SDK used for reading)
     const docRef = await adminDb.collection("courses").add({
-      title: data.title || "Novo Curso",
-      subtitle: data.subtitle || "",
-      instructor: data.instructor || "",
-      category: data.category || "",
-      duration: data.duration || "",
-      level: data.level || "beginner",
+      title: validatedData.title,
+      subtitle: validatedData.subtitle || "",
+      instructor: validatedData.instructor || "",
+      category: validatedData.category || "",
+      duration: validatedData.duration || "",
+      level: validatedData.level,
       status: "draft",
       isPublished: false,
       coverImage: "",

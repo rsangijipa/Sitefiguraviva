@@ -9,38 +9,20 @@ import { revalidatePath } from "next/cache";
  * Helper to ensure the user is an admin.
  * @throws Error if not authenticated or not an admin.
  */
-async function assertIsAdmin() {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("session")?.value;
+import { requireAdmin } from "@/lib/auth-server";
+import { z } from "zod";
 
-  if (!sessionCookie) {
-    throw new Error("Unauthenticated");
-  }
-
-  const decodedToken = await adminAuth.verifySessionCookie(sessionCookie, true);
-
-  // Check role in token first (fastest)
-  if (decodedToken.role === "admin" || decodedToken.admin === true) {
-    return decodedToken;
-  }
-
-  // Double check database source of truth (safest)
-  const userDoc = await adminDb.collection("users").doc(decodedToken.uid).get();
-  const userData = userDoc.data();
-
-  if (userData?.role !== "admin") {
-    throw new Error("Access Denied: Admin role required.");
-  }
-
-  return decodedToken;
-}
+const siteSettingsSchema = z.record(z.string(), z.any());
 
 export async function updateSiteSettings(
   key: "founder" | "institute" | "seo" | "team" | "legal" | "config",
   data: any,
 ) {
   try {
-    const user = await assertIsAdmin();
+    const user = await requireAdmin();
+
+    // Basic structural validation
+    const validatedData = siteSettingsSchema.parse(data);
     const updatedAt = Timestamp.now();
 
     await adminDb
@@ -48,7 +30,7 @@ export async function updateSiteSettings(
       .doc(key)
       .set(
         {
-          ...data,
+          ...validatedData,
           updatedAt,
           updatedBy: user.email,
         },
@@ -69,7 +51,7 @@ export async function updateSiteSettings(
 
 export async function seedSiteSettingsAction() {
   try {
-    await assertIsAdmin();
+    await requireAdmin();
     const batch = adminDb.batch();
 
     // Import defaults from a place that doesn't trigger client-side firebase
