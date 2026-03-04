@@ -141,5 +141,25 @@ service cloud.firestore {
       allow read: if true; 
       allow write: if false;
     }
+
+    // SITE SETTINGS (Public info)
+    match /siteSettings/{settingsId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // GALLERY (Public)
+    match /gallery/{imageId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ASSESSMENT SUBMISSIONS
+    match /assessmentSubmissions/{submissionId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.studentId == uid());
+      allow create: if isSignedIn();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
   }
 }
