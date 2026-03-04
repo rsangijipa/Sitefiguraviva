@@ -53,6 +53,7 @@ interface HomeClientProps {
     founder?: any;
     institute?: any;
     seo?: any;
+    team?: any;
   };
 }
 
@@ -169,7 +170,12 @@ export default function HomeClient({ initialData }: HomeClientProps = {}) {
         </Reveal>
 
         <Reveal variant="medium">
-          <InstituteSection gallery={gallery} />
+          <InstituteSection
+            gallery={gallery}
+            initialData={initialData?.institute}
+            initialFounderData={initialData?.founder}
+            initialTeamData={initialData?.team}
+          />
         </Reveal>
 
         <Reveal variant="soft">

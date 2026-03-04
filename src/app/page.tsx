@@ -43,6 +43,7 @@ async function getHomeData() {
       founderSnap,
       instituteSnap,
       seoSnap,
+      teamSnap,
     ] = await Promise.all([
       db
         .collection("courses")
@@ -61,6 +62,7 @@ async function getHomeData() {
       db.collection("siteSettings").doc("founder").get(),
       db.collection("siteSettings").doc("institute").get(),
       db.collection("siteSettings").doc("seo").get(),
+      db.collection("siteSettings").doc("team").get(),
     ]);
 
     const toISO = (val: any) => {
@@ -130,8 +132,9 @@ async function getHomeData() {
       ? deepSafeSerialize(instituteSnap.data())
       : null;
     const seo = seoSnap.exists ? deepSafeSerialize(seoSnap.data()) : null;
+    const team = teamSnap.exists ? deepSafeSerialize(teamSnap.data()) : null;
 
-    return { courses, posts, gallery, founder, institute, seo };
+    return { courses, posts, gallery, founder, institute, seo, team };
   } catch (error) {
     console.error("Error fetching home data:", error);
     return {
@@ -141,6 +144,7 @@ async function getHomeData() {
       founder: null,
       institute: null,
       seo: null,
+      team: null,
     };
   }
 }
