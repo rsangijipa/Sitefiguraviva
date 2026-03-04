@@ -24,6 +24,7 @@ import {
   ChevronRight,
   Bell,
   X as CloseIcon,
+  AlertTriangle,
 } from "lucide-react";
 import Image from "next/image";
 import Button from "@/components/ui/Button";
@@ -273,6 +274,23 @@ export default function CourseEditorClient({
 
           {/* Content Area */}
           <div className="flex-1 overflow-y-auto custom-scrollbar px-4 sm:px-8 pb-12 scroll-smooth">
+            {/* Draft Warning Banner */}
+            {course.status === "draft" && (
+              <div className="bg-amber-50 border border-amber-300 text-amber-900 p-4 rounded-2xl mb-6 flex items-start gap-3 mt-6 shadow-sm">
+                <div className="mt-0.5">
+                  <AlertTriangle size={20} className="text-amber-600" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-sm">Curso em Rascunho</h4>
+                  <p className="text-sm text-amber-800/80 mt-0.5">
+                    Este curso não está visível para os alunos. Para aparecer na
+                    Home, adicione módulos e aulas publicadas, depois clique em
+                    "Publicar".
+                  </p>
+                </div>
+              </div>
+            )}
+
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}

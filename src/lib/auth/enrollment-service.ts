@@ -15,6 +15,53 @@ export interface StripeActivationPayload {
 }
 
 /**
+ * Unified logic to mirror enrollments to both collections bidirectionally.
+ * Used by Stripe Webhook, Admin PIX actions, etc.
+ */
+export async function writeEnrollmentMirror({
+  uid,
+  courseId,
+  enrollmentDoc,
+}: {
+  uid: string;
+  courseId: string;
+  enrollmentDoc: Partial<EnrollmentDoc>;
+}) {
+  const enrollmentId = `${uid}_${courseId}`;
+  const rootRef = adminDb.collection("enrollments").doc(enrollmentId);
+  const userRef = adminDb
+    .collection("users")
+    .doc(uid)
+    .collection("enrollments")
+    .doc(courseId);
+
+  const batch = adminDb.batch();
+
+  const dataToSet = {
+    ...enrollmentDoc,
+    updatedAt: FieldValue.serverTimestamp(),
+  };
+
+  batch.set(rootRef, dataToSet, { merge: true });
+  batch.set(userRef, dataToSet, { merge: true });
+
+  if (enrollmentDoc.status === "active") {
+    batch.update(adminDb.collection("users").doc(uid), {
+      enrolledCourseIds: FieldValue.arrayUnion(courseId),
+    });
+  } else if (
+    enrollmentDoc.status === "canceled" ||
+    enrollmentDoc.status === "refunded"
+  ) {
+    batch.update(adminDb.collection("users").doc(uid), {
+      enrolledCourseIds: FieldValue.arrayRemove(courseId),
+    });
+  }
+
+  await batch.commit();
+}
+
+/**
  * Unified logic to activate or update an enrollment from Stripe events.
  * Handles both one-time purchases and recurring subscriptions.
  */
@@ -38,61 +85,40 @@ export async function activateEnrollmentFromStripe(
   const contentRevision = courseData?.contentRevision || 1;
   const totalLessons = courseData?.stats?.lessonsCount || 0;
 
-  await adminDb.runTransaction(async (tx) => {
-    const snap = await tx.get(enrollmentRef);
-    const existing = snap.exists ? (snap.data() as EnrollmentDoc) : null;
+  const snap = await enrollmentRef.get();
+  const existing = snap.exists ? (snap.data() as EnrollmentDoc) : null;
 
-    // Idempotency: If sourceRef is the same and already active, skip
-    if (existing?.sourceRef === sessionId && existing?.status === "active") {
-      return;
-    }
+  // Idempotency: If sourceRef is the same and already active, skip
+  if (existing?.sourceRef === sessionId && existing?.status === "active") {
+    return;
+  }
 
-    const updateData: Partial<EnrollmentDoc> = {
-      uid: uid,
-      userId: uid,
-      courseId: courseId,
-      status: "active",
-      paymentMethod: isSubscription ? "subscription" : "stripe",
-      sourceRef: sessionId,
-      paidAt: FieldValue.serverTimestamp() as any,
-      updatedAt: FieldValue.serverTimestamp() as any,
+  const updateData: Partial<EnrollmentDoc> = {
+    uid: uid,
+    userId: uid,
+    courseId: courseId,
+    status: "active",
+    paymentMethod: isSubscription ? "subscription" : "stripe",
+    sourceRef: sessionId,
+    paidAt: FieldValue.serverTimestamp() as any,
+  };
+
+  if (isSubscription && accessUntil) {
+    updateData.accessUntil = Timestamp.fromDate(accessUntil) as any;
+  }
+
+  // Initialize progress if new or missing
+  if (!existing || !existing.progressSummary) {
+    updateData.progressSummary = {
+      completedLessonsCount: 0,
+      totalLessons: totalLessons,
+      percent: 0,
     };
+    updateData.courseVersionAtEnrollment = contentRevision;
+    updateData.createdAt = FieldValue.serverTimestamp() as any;
+  }
 
-    if (isSubscription && accessUntil) {
-      updateData.accessUntil = Timestamp.fromDate(accessUntil) as any;
-    }
-
-    // Initialize progress if new or missing
-    if (!existing || !existing.progressSummary) {
-      updateData.progressSummary = {
-        completedLessonsCount: 0,
-        totalLessons: totalLessons,
-        percent: 0,
-      };
-      updateData.courseVersionAtEnrollment = contentRevision;
-      updateData.createdAt = FieldValue.serverTimestamp() as any;
-    }
-
-    tx.set(enrollmentRef, updateData, { merge: true });
-
-    // User sub-collection mirror for faster client-side queries
-    const userEnrollmentRef = adminDb
-      .collection("users")
-      .doc(uid)
-      .collection("enrollments")
-      .doc(courseId);
-    tx.set(userEnrollmentRef, updateData, { merge: true });
-
-    // Robust Access Control: Sync to User Doc Array
-    const userRef = adminDb.collection("users").doc(uid);
-    tx.update(userRef, {
-      enrolledCourseIds: FieldValue.arrayUnion(courseId),
-    });
-
-    // Audit Log entry inside transaction (or right after)
-    // Note: logAudit is async and doesn't throw, but here we want it recorded.
-    // We'll record a reference to the audit log if needed.
-  });
+  await writeEnrollmentMirror({ uid, courseId, enrollmentDoc: updateData });
 
   await logAudit({
     actor: { uid: "system", role: "webhook" },
@@ -116,29 +142,12 @@ export async function expireSubscriptionEnrollment(
   courseId: string,
 ) {
   const enrollmentId = `${uid}_${courseId}`;
-  const enrollmentRef = adminDb.collection("enrollments").doc(enrollmentId);
-  const userEnrollmentRef = adminDb
-    .collection("users")
-    .doc(uid)
-    .collection("enrollments")
-    .doc(courseId);
 
-  const updates = {
-    status: "canceled",
-    updatedAt: FieldValue.serverTimestamp(),
-  };
-
-  const batch = adminDb.batch();
-  batch.update(enrollmentRef, updates);
-  batch.update(userEnrollmentRef, updates);
-
-  // Revoke from User Doc
-  const userRef = adminDb.collection("users").doc(uid);
-  batch.update(userRef, {
-    enrolledCourseIds: FieldValue.arrayRemove(courseId),
+  await writeEnrollmentMirror({
+    uid,
+    courseId,
+    enrollmentDoc: { status: "canceled" },
   });
-
-  await batch.commit();
 
   await logAudit({
     actor: { uid: "system", role: "cron" },

@@ -15,6 +15,7 @@ import { ConceptsDeepDive } from "@/components/laura/ConceptsDeepDive";
 import { LegacyTree } from "@/components/laura/LegacyTree";
 import { Quiz } from "@/components/laura/Quiz";
 import { Testimonials } from "@/components/laura/Testimonials";
+import { LauraChat } from "@/components/laura/LauraChat";
 
 export const metadata: Metadata = {
   title: lauraPerlsContent.meta.title,
@@ -143,6 +144,7 @@ export default function LauraPerlsPage() {
         <LauraGallery />
       </div>
 
+      <LauraChat />
       <BackToTop />
       <Footer />
     </main>
