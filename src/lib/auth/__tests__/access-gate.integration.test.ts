@@ -101,7 +101,7 @@ describe("assertCanAccessCourse Integration Gate", () => {
     expect(result.paymentMethod).toBe("pix");
   });
 
-  it("should ALLOW access via LEGACY profile fallback", async () => {
+  it("should DENY when enrollment document is missing", async () => {
     (adminDb.collection as jest.Mock).mockImplementation((name) => {
       if (name === "users")
         return mockCollection({
@@ -115,9 +115,9 @@ describe("assertCanAccessCourse Integration Gate", () => {
       return mockCollection({});
     });
 
-    const result = await assertCanAccessCourse(uid, courseId);
-    expect(result.paymentMethod).toBe("legacy");
-    expect(result.enrollmentId).toContain("legacy");
+    await expect(assertCanAccessCourse(uid, courseId)).rejects.toThrow(
+      expect.objectContaining({ code: AccessErrorCode.ENROLLMENT_NOT_FOUND }),
+    );
   });
 
   it("should DENY access if enrollment is PENDING", async () => {

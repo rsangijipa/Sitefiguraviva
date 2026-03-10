@@ -4,14 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import YouTube, { YouTubeEvent } from "react-youtube";
 import { updateLessonProgress } from "@/app/actions/progress";
 import { trackEvent } from "@/actions/analytics";
-import {
-  CheckCircle,
-  Loader2,
-  Play,
-  RotateCcw,
-  AlertTriangle,
-  Info,
-} from "lucide-react";
+import { CheckCircle, Loader2, RotateCcw, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface VideoPlayerProps {
@@ -45,7 +38,7 @@ export function VideoPlayer({
   } | null>(null);
 
   const playerRef = useRef<any>(null);
-  const lastPushedTime = useRef<number>(0);
+  const maxWatchedRef = useRef<number>(Math.max(initialMaxWatchedSecond, 0));
   const lastUpdateTs = useRef<number>(Date.now());
   const hasResumed = useRef(false);
 
@@ -75,6 +68,8 @@ export function VideoPlayer({
   const onReady = (event: YouTubeEvent) => {
     playerRef.current = event.target;
     if (initialMaxWatchedSecond > 5 && !initialCompleted) {
+      maxWatchedRef.current = initialMaxWatchedSecond;
+      setMaxWatched(initialMaxWatchedSecond);
       setResumeSeconds(initialMaxWatchedSecond);
       // We don't auto-seek immediately to let user decide,
       // OR we auto-seek and show "Start Over" button.
@@ -123,15 +118,14 @@ export function VideoPlayer({
   const checkAntiSkip = (currentTime: number) => {
     if (isCompleted) return; // No restrictions if already completed
 
-    // Allow strictly forward seek up to maxWatched + 15s
-    // We look at state `maxWatched`.
-    const allowedHorizon = maxWatched + 15;
+    // Allow strictly forward seek up to maxWatched + 15s.
+    const allowedHorizon = maxWatchedRef.current + 15;
 
     // Tolerance of 2s for seeking precision
     if (currentTime > allowedHorizon + 2) {
       // USER TRIED TO SKIP
       if (playerRef.current) {
-        playerRef.current.seekTo(maxWatched, true);
+        playerRef.current.seekTo(maxWatchedRef.current, true);
         showToast("Você não pode pular o vídeo ainda.", "warning");
       }
       return false;
@@ -162,7 +156,8 @@ export function VideoPlayer({
     if (!currentTime || currentTime < 0) return;
 
     // Update local maxWatched
-    if (currentTime > maxWatched) {
+    if (currentTime > maxWatchedRef.current) {
+      maxWatchedRef.current = currentTime;
       setMaxWatched(currentTime);
     }
 
@@ -182,7 +177,7 @@ export function VideoPlayer({
 
     // Only push if we have new maxWatched worth saving (or at least some progress)
     // For SSoT, we want to save maxWatchedSecond mostly.
-    const effectiveMax = Math.max(maxWatched, currentTime);
+    const effectiveMax = Math.max(maxWatchedRef.current, currentTime);
 
     try {
       await updateLessonProgress(courseId, moduleId, lessonId, {
@@ -207,7 +202,8 @@ export function VideoPlayer({
         if (!checkAntiSkip(currentTime)) return;
 
         // Sync local maxWatched
-        if (currentTime > maxWatched) {
+        if (currentTime > maxWatchedRef.current) {
+          maxWatchedRef.current = currentTime;
           setMaxWatched(currentTime);
         }
 
@@ -216,7 +212,7 @@ export function VideoPlayer({
     }, 1000); // Check every 1s
 
     return () => clearInterval(interval);
-  }, [courseId, moduleId, lessonId, maxWatched, isCompleted]);
+  }, [courseId, moduleId, lessonId, isCompleted]);
 
   function formatTime(seconds: number) {
     const date = new Date(0);

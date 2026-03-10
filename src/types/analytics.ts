@@ -1,6 +1,5 @@
-// Use 'any' for Timestamp to support both firebase and firebase-admin
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type FirestoreTimestamp = any;
+// Supports both firebase and firebase-admin timestamp shapes.
+type FirestoreTimestamp = unknown;
 
 /**
  * Certificate Types
@@ -133,5 +132,5 @@ export interface PlatformAnalytics {
  */
 export interface ExcelExportData {
   sheetName: string;
-  data: Record<string, any>[];
+  data: Record<string, unknown>[];
 }

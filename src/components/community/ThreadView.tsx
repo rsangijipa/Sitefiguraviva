@@ -67,6 +67,7 @@ export default function ThreadView({
                   {u.avatar ? (
                     <img
                       src={u.avatar}
+                      alt={`Avatar de ${u.name}`}
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -103,7 +104,11 @@ export default function ThreadView({
         <div className="flex items-center gap-3 mb-6 pb-6 border-b border-stone-100">
           <div className="w-10 h-10 rounded-full bg-stone-100 flex items-center justify-center overflow-hidden">
             {thread.authorAvatar ? (
-              <img src={thread.authorAvatar} className="w-full h-full" />
+              <img
+                src={thread.authorAvatar}
+                alt={`Avatar de ${thread.authorName}`}
+                className="w-full h-full"
+              />
             ) : (
               <User className="text-stone-400" />
             )}
@@ -143,7 +148,11 @@ export default function ThreadView({
             <div key={reply.id} className="flex gap-4 group">
               <div className="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center shrink-0 mt-1 overflow-hidden">
                 {reply.authorAvatar ? (
-                  <img src={reply.authorAvatar} className="w-full h-full" />
+                  <img
+                    src={reply.authorAvatar}
+                    alt={`Avatar de ${reply.authorName}`}
+                    className="w-full h-full"
+                  />
                 ) : (
                   <User size={14} className="text-stone-400" />
                 )}

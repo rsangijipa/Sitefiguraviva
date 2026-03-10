@@ -1,9 +1,10 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useMemo, useState, Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import {
   BookOpen,
@@ -27,11 +28,33 @@ import { useEnrolledCourse } from "@/hooks/useEnrolledCourse";
 import { cn } from "@/lib/utils";
 import { EnrollmentDoc, CommunityThreadDoc } from "@/types/lms";
 import { communityService } from "@/services/communityService";
-import CourseCommunity from "@/components/community/CourseCommunity";
-import AnnouncementList from "@/components/community/AnnouncementList";
 import { certificateService } from "@/services/certificateService";
 import { CertificateDoc } from "@/types/lms";
 import { CertificateIssueCard } from "@/components/portal/CertificateIssueCard";
+
+const CourseCommunity = dynamic(
+  () => import("@/components/community/CourseCommunity"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="text-center py-12 text-stone-400">
+        Carregando comunidade...
+      </div>
+    ),
+  },
+);
+
+const AnnouncementList = dynamic(
+  () => import("@/components/community/AnnouncementList"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="p-4 text-center text-xs text-stone-400">
+        Carregando avisos...
+      </div>
+    ),
+  },
+);
 
 // Separate component to handle search params usage inside Suspense
 function CourseContent({ initialData }: { initialData?: any }) {
@@ -61,6 +84,10 @@ function CourseContent({ initialData }: { initialData?: any }) {
   const modules = data?.modules || [];
   const materials = data?.materials || [];
   const enrollment = data?.enrollment as EnrollmentDoc | undefined;
+  const allLessons = useMemo(
+    () => modules.flatMap((m: any) => m.lessons),
+    [modules],
+  );
 
   // Player State
   const [activeLessonId, setActiveLessonId] = useState<string | null>(
@@ -119,11 +146,11 @@ function CourseContent({ initialData }: { initialData?: any }) {
     }
 
     // Fallback: Find it in modules
-    const module = modules.find((m) =>
+    const courseModule = modules.find((m) =>
       m.lessons.some((l) => l.id === lessonId),
     );
-    if (module) {
-      markComplete(lessonId, module.id);
+    if (courseModule) {
+      markComplete(lessonId, courseModule.id);
     } else {
       console.error("Could not find module for lesson", lessonId);
     }
@@ -143,8 +170,7 @@ function CourseContent({ initialData }: { initialData?: any }) {
   const getContinueLessonId = () => {
     if (enrollment?.progressSummary?.lastLessonId)
       return enrollment.progressSummary.lastLessonId;
-    if (modules.length > 0 && modules[0].lessons.length > 0)
-      return modules[0].lessons[0].id;
+    if (allLessons.length > 0) return allLessons[0].id;
     return null;
   };
 
@@ -165,11 +191,9 @@ function CourseContent({ initialData }: { initialData?: any }) {
   // View: PLAYER MODE
   if (activeLessonId && !isAccessDenied) {
     const activeLesson =
-      modules.flatMap((m) => m.lessons).find((l) => l.id === activeLessonId) ||
-      null;
+      allLessons.find((l) => l.id === activeLessonId) || null;
 
     // Navigation Logic
-    const allLessons = modules.flatMap((m) => m.lessons);
     const currentIndex = allLessons.findIndex((l) => l.id === activeLessonId);
     const prevLessonId =
       currentIndex > 0 ? allLessons[currentIndex - 1].id : undefined;

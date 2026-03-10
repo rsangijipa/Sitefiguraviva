@@ -15,6 +15,8 @@ export function LauraVideo() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const [showControls, setShowControls] = useState(true);
   const [videoError, setVideoError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -50,10 +52,24 @@ export function LauraVideo() {
 
   const handleTimeUpdate = () => {
     if (videoRef.current) {
-      const progress =
-        (videoRef.current.currentTime / videoRef.current.duration) * 100;
-      setProgress(progress);
+      const nextCurrentTime = videoRef.current.currentTime || 0;
+      const nextDuration = videoRef.current.duration || 0;
+      const nextProgress =
+        nextDuration > 0 ? (nextCurrentTime / nextDuration) * 100 : 0;
+
+      setCurrentTime(nextCurrentTime);
+      setDuration(nextDuration);
+      setProgress(nextProgress);
     }
+  };
+
+  const formatTime = (timeInSeconds: number) => {
+    if (!Number.isFinite(timeInSeconds) || timeInSeconds <= 0) return "0:00";
+    const minutes = Math.floor(timeInSeconds / 60);
+    const seconds = Math.floor(timeInSeconds % 60)
+      .toString()
+      .padStart(2, "0");
+    return `${minutes}:${seconds}`;
   };
 
   const handleVideoError = () => {
@@ -143,6 +159,7 @@ export function LauraVideo() {
             onClick={togglePlay}
             onPlay={() => setIsPlaying(true)}
             onPause={() => setIsPlaying(false)}
+            onLoadedMetadata={handleTimeUpdate}
             onError={handleVideoError}
           >
             <source src={videoUrl} type="video/mp4" />
@@ -225,20 +242,7 @@ export function LauraVideo() {
                 </div>
 
                 <span className="text-white/80 text-[10px] tracking-widest font-mono hidden md:block">
-                  {videoRef.current
-                    ? `${Math.floor(videoRef.current.currentTime / 60)}:${Math.floor(
-                        videoRef.current.currentTime % 60,
-                      )
-                        .toString()
-                        .padStart(
-                          2,
-                          "0",
-                        )} / ${Math.floor(videoRef.current.duration / 60)}:${Math.floor(
-                        videoRef.current.duration % 60,
-                      )
-                        .toString()
-                        .padStart(2, "0")}`
-                    : "0:00 / 0:00"}
+                  {formatTime(currentTime)} / {formatTime(duration)}
                 </span>
               </div>
 
