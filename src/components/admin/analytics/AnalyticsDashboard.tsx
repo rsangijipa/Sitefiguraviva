@@ -90,6 +90,14 @@ export default function AnalyticsDashboard({
         "Matricula",
       ];
 
+      const formatEnrollmentDate = (value: unknown) => {
+        if (value && typeof value === "object" && "toDate" in value) {
+          const date = (value as { toDate: () => Date }).toDate();
+          return date.toLocaleDateString("pt-BR");
+        }
+        return "";
+      };
+
       const rows = students.map((s) => [
         s.userName,
         s.userEmail,
@@ -100,7 +108,7 @@ export default function AnalyticsDashboard({
         s.passedAssessments,
         s.failedAssessments,
         s.certificateIssued ? "Sim" : "Nao",
-        s.enrolledAt?.toDate?.().toLocaleDateString("pt-BR") || "",
+        formatEnrollmentDate(s.enrolledAt),
       ]);
 
       const escapeCsv = (value: unknown) => {
