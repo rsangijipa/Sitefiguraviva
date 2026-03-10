@@ -26,7 +26,6 @@ import {
   Download,
 } from "@/components/icons";
 import { cn } from "@/lib/utils";
-import * as XLSX from "xlsx";
 
 interface AnalyticsDashboardProps {
   courseId: string;
@@ -75,34 +74,64 @@ export default function AnalyticsDashboard({
     }
   };
 
-  const exportToExcel = () => {
+  const exportToCsv = () => {
     setExporting(true);
     try {
-      const data = students.map((s) => ({
-        Nome: s.userName,
-        Email: s.userEmail,
-        "Progresso (%)": s.progressPercentage.toFixed(1),
-        "Aulas Completas": `${s.completedLessons}/${s.totalLessons}`,
-        "Avaliações Completas": `${s.completedAssessments}/${s.totalAssessments}`,
-        "Nota Média": s.averageScore.toFixed(1),
-        Aprovadas: s.passedAssessments,
-        Reprovadas: s.failedAssessments,
-        Certificado: s.certificateIssued ? "Sim" : "Não",
-        Matrícula: s.enrolledAt?.toDate?.().toLocaleDateString("pt-BR") || "",
-      }));
+      const headers = [
+        "Nome",
+        "Email",
+        "Progresso (%)",
+        "Aulas Completas",
+        "Avaliacoes Completas",
+        "Nota Media",
+        "Aprovadas",
+        "Reprovadas",
+        "Certificado",
+        "Matricula",
+      ];
 
-      const ws = XLSX.utils.json_to_sheet(data);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Alunos");
+      const rows = students.map((s) => [
+        s.userName,
+        s.userEmail,
+        s.progressPercentage.toFixed(1),
+        `${s.completedLessons}/${s.totalLessons}`,
+        `${s.completedAssessments}/${s.totalAssessments}`,
+        s.averageScore.toFixed(1),
+        s.passedAssessments,
+        s.failedAssessments,
+        s.certificateIssued ? "Sim" : "Nao",
+        s.enrolledAt?.toDate?.().toLocaleDateString("pt-BR") || "",
+      ]);
 
-      XLSX.writeFile(
-        wb,
-        `analytics-${courseAnalytics?.courseName || "curso"}-${Date.now()}.xlsx`,
-      );
-      addToast("Relatório exportado com sucesso!", "success");
+      const escapeCsv = (value: unknown) => {
+        const stringValue = String(value ?? "");
+        const escaped = stringValue.replace(/"/g, '""');
+        return `"${escaped}"`;
+      };
+
+      const csvContent = [
+        headers.map(escapeCsv).join(";"),
+        ...rows.map((row) => row.map(escapeCsv).join(";")),
+      ].join("\n");
+
+      const blob = new Blob(["\uFEFF" + csvContent], {
+        type: "text/csv;charset=utf-8;",
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      const fileName = `analytics-${courseAnalytics?.courseName || "curso"}-${Date.now()}.csv`;
+
+      link.href = url;
+      link.setAttribute("download", fileName);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      addToast("Relatorio CSV exportado com sucesso!", "success");
     } catch (error) {
       console.error("Export Error:", error);
-      addToast("Erro ao exportar relatório", "error");
+      addToast("Erro ao exportar relatorio", "error");
     } finally {
       setExporting(false);
     }
@@ -271,7 +300,7 @@ export default function AnalyticsDashboard({
         <div className="p-6 border-b border-stone-200 flex items-center justify-between">
           <h3 className="font-bold text-stone-800">Desempenho por Aluno</h3>
           <button
-            onClick={exportToExcel}
+            onClick={exportToCsv}
             disabled={exporting}
             className="px-4 py-2 bg-primary text-white rounded-xl font-bold hover:bg-primary/90 transition-colors flex items-center gap-2 disabled:opacity-50"
           >
@@ -280,7 +309,7 @@ export default function AnalyticsDashboard({
             ) : (
               <Download size={16} />
             )}
-            Exportar Excel
+            Exportar CSV
           </button>
         </div>
         <div className="overflow-x-auto">

@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Bell, Pin } from "lucide-react";
+import { Pin } from "lucide-react";
 import { AnnouncementDoc } from "@/types/lms";
 import { announcementService } from "@/services/announcementService";
-import { cn } from "@/lib/utils"; // Assuming utils exists
 
 export default function AnnouncementList({ courseId }: { courseId: string }) {
   const [announcements, setAnnouncements] = useState<AnnouncementDoc[]>([]);

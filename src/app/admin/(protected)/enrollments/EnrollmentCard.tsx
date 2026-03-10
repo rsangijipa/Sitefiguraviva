@@ -125,7 +125,11 @@ export function EnrollmentCard({
         <div className="flex items-start gap-4 flex-1">
           <div className="w-16 h-16 rounded-xl bg-stone-100 overflow-hidden shrink-0 border border-stone-200">
             {course?.image ? (
-              <img src={course.image} className="w-full h-full object-cover" />
+              <img
+                src={course.image}
+                alt={`Capa do curso ${course?.title || enrollment.courseId}`}
+                className="w-full h-full object-cover"
+              />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-stone-300 capitalize text-lg">
                 {course?.title?.[0] || "C"}

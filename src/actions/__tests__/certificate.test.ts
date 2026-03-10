@@ -1,127 +1,129 @@
+import { issueCertificate } from "@/actions/certificate";
+import { auth } from "@/lib/firebase/admin";
+import { CertificateIssuer } from "@/lib/certificates/issuer";
 
-import { generateCertificate } from '@/actions/certificate';
-import { db, auth } from '@/lib/firebase/admin';
+jest.mock("next/headers", () => ({
+  cookies: jest.fn(() =>
+    Promise.resolve({
+      get: jest.fn((name) => {
+        if (name === "session") return { value: "valid-token" };
+        return undefined;
+      }),
+    }),
+  ),
+}));
 
-// Mock Next.js
-jest.mock('next/headers', () => ({
-    cookies: jest.fn(() => Promise.resolve({
-        get: jest.fn((name) => {
-            if (name === 'session') return { value: 'valid-token' };
-            return undefined;
-        }),
+jest.mock("firebase-admin/firestore", () => ({
+  Timestamp: {
+    now: jest.fn(() => "MOCK_TIMESTAMP"),
+  },
+}));
+
+jest.mock("@/lib/certificates/issuer", () => ({
+  CertificateIssuer: {
+    issue: jest.fn(),
+  },
+}));
+
+jest.mock("@/lib/firebase/admin", () => {
+  const mockNotificationAdd = jest.fn().mockResolvedValue({ id: "notif_1" });
+
+  const usersDoc = {
+    get: jest.fn().mockResolvedValue({
+      exists: true,
+      data: () => ({ displayName: "Test Student" }),
+    }),
+    collection: jest.fn(() => ({
+      add: mockNotificationAdd,
     })),
-}));
+  };
 
-jest.mock('next/cache', () => ({
-    revalidatePath: jest.fn(),
-}));
+  const coursesDoc = {
+    get: jest.fn().mockResolvedValue({
+      exists: true,
+      data: () => ({ title: "Test Course" }),
+    }),
+  };
 
-// Mock Firebase Admin
-jest.mock('@/lib/firebase/admin', () => {
-    // Define helpers INSIDE the factory to avoid hoisting issues
-    const mockQueryChain = {
-        where: jest.fn().mockReturnThis(),
-        limit: jest.fn().mockReturnThis(),
-        get: jest.fn().mockResolvedValue({ empty: true, docs: [] }),
-    };
-
-    const mockDocFn = jest.fn((path) => ({
-        path,
-        get: jest.fn().mockImplementation(() => {
-            if (path.includes('enrollments')) {
-                if (path.includes('inactive_user')) {
-                    return Promise.resolve({ exists: true, data: () => ({ status: 'inactive' }) });
-                }
-                return Promise.resolve({ exists: true, data: () => ({ status: 'active' }) });
-            }
-            if (path.includes('users/user123')) {
-                return Promise.resolve({ exists: true, data: () => ({ displayName: 'Test Student' }) });
-            }
-            if (path.includes('courses/course1')) {
-                return Promise.resolve({ exists: true, data: () => ({ title: 'Test Course' }) });
-            }
-            return Promise.resolve({ exists: false, data: () => ({}) });
-        })
-    }));
-
-    const mockCollectionFn = jest.fn((name) => ({
-        doc: jest.fn((id) => mockDocFn(`${name}/${id}`)),
-        add: jest.fn().mockResolvedValue({ id: 'new_cert_id' }),
-        where: mockQueryChain.where,
-        limit: mockQueryChain.limit,
-        get: mockQueryChain.get
-    }));
-
-    return {
-        db: {
-            collection: mockCollectionFn,
-        },
-        auth: {
-            verifySessionCookie: jest.fn(),
-        },
-    };
+  return {
+    auth: {
+      verifySessionCookie: jest.fn(),
+    },
+    adminDb: {
+      collection: jest.fn((name: string) => ({
+        doc: jest.fn(() => {
+          if (name === "users") return usersDoc;
+          if (name === "courses") return coursesDoc;
+          return {
+            get: jest
+              .fn()
+              .mockResolvedValue({ exists: false, data: () => ({}) }),
+          };
+        }),
+      })),
+    },
+  };
 });
 
-// Mock Firebase Helpers
-jest.mock('firebase-admin/firestore', () => ({
-    FieldValue: {
-        serverTimestamp: jest.fn(() => 'MOCK_TIMESTAMP'),
-    },
-}));
+describe("issueCertificate action", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
-describe('generateCertificate Server Action', () => {
+  it("returns unauthorized when no session cookie is present", async () => {
+    const { cookies } = require("next/headers");
+    (cookies as jest.Mock).mockImplementationOnce(() =>
+      Promise.resolve({
+        get: jest.fn(() => undefined),
+      }),
+    );
 
-    beforeEach(() => {
-        jest.clearAllMocks();
+    const result = await issueCertificate("course1");
+    expect(result).toEqual({ error: "Unauthorized" });
+  });
+
+  it("propagates issuer errors", async () => {
+    (auth.verifySessionCookie as jest.Mock).mockResolvedValue({
+      uid: "user123",
+      role: "student",
+    });
+    (CertificateIssuer.issue as jest.Mock).mockResolvedValue({
+      success: false,
+      error: "PROGRESS_INCOMPLETE",
+      details: { required: 10, completed: 8 },
     });
 
-    it('should block unauthenticated requests', async () => {
-        require('next/headers').cookies.mockImplementationOnce(() => Promise.resolve({
-            get: jest.fn(() => undefined),
-        }));
+    const result = await issueCertificate("course1");
 
-        const result = await generateCertificate('course1');
-        expect(result).toEqual({ error: 'Unauthorized', status: 401 });
+    expect(result).toEqual({
+      error: "PROGRESS_INCOMPLETE",
+      details: { required: 10, completed: 8 },
+    });
+  });
+
+  it("returns success payload when issuer succeeds", async () => {
+    (auth.verifySessionCookie as jest.Mock).mockResolvedValue({
+      uid: "user123",
+      role: "student",
+    });
+    (CertificateIssuer.issue as jest.Mock).mockResolvedValue({
+      success: true,
+      certificateId: "cert_123",
+      verificationCode: "FV-26-ABC123",
     });
 
-    it('should reject inactive enrollments', async () => {
-        (auth.verifySessionCookie as jest.Mock).mockResolvedValue({ uid: 'inactive_user' });
+    const result = await issueCertificate("course1");
 
-        const result = await generateCertificate('course1');
-        expect(result).toEqual({ error: 'Matrícula não ativa ou não encontrada.', status: 403 });
+    expect(result).toEqual({
+      success: true,
+      certificateId: "cert_123",
+      certificateNumber: "FV-26-ABC123",
     });
-
-    it('should return existing certificate if already issued (Idempotency)', async () => {
-        (auth.verifySessionCookie as jest.Mock).mockResolvedValue({ uid: 'user123' });
-
-        // Access the "get" mock from the chain
-        const mockGet = require('@/lib/firebase/admin').db.collection('any').get; // Since we reused the object
-        mockGet.mockResolvedValueOnce({
-            empty: false,
-            docs: [{ id: 'existing_cert_id' }]
-        });
-
-        const result = await generateCertificate('course1');
-
-        expect(result).toEqual({ success: true, certificateId: 'existing_cert_id', alreadyExists: true });
-        // Ensure no new write happened
-        // Accessing the mocked collection 'add' method is tricky via the factory.
-        // We can spy on db.collection('certificates').add if we exposed it, but relying on result structure is decent.
-    });
-
-    it('should generate a new certificate for valid request', async () => {
-        (auth.verifySessionCookie as jest.Mock).mockResolvedValue({ uid: 'user123' });
-
-        // Reset query to empty for this test
-        const mockGet = require('@/lib/firebase/admin').db.collection('any').get;
-        mockGet.mockResolvedValueOnce({ empty: true, docs: [] });
-
-        const result = await generateCertificate('course1');
-
-        expect(result).toEqual({
-            success: true,
-            certificateId: 'new_cert_id',
-            code: expect.any(String)
-        });
-    });
+    expect(CertificateIssuer.issue).toHaveBeenCalledWith(
+      "course1",
+      "user123",
+      "user123",
+      false,
+    );
+  });
 });

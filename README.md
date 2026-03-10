@@ -1,46 +1,75 @@
 # Instituto Figura Viva - Plataforma Next.js
 
-Este projeto foi migrado para Next.js 14+ (App Router) com foco em performance, SEO e uma UX premium.
+Plataforma institucional e educacional baseada em Next.js (App Router), com area publica, portal do aluno e painel administrativo.
 
-## Estrutura do Projeto
+## Requisitos
 
-- `src/app/`: Rotas da aplicação (App Router).
-  - `page.tsx`: Home pública.
-  - `curso/[id]/`: Detalhes do curso.
-  - `blog/[slug]/`: Detalhes do post.
-  - `portal/`: Área do aluno (com login simulado).
-  - `admin/`: Painel administrativo (protegido).
-- `src/components/`: Componentes reutilizáveis (Navbar, Footer, CustomCursor).
-- `src/context/`: Gerenciamento de estado global (AppContext).
-- `src/services/`: Camada de dados (API Mock/Real).
+- Node.js 20+
+- npm 10+
 
-## Funcionalidades Implementadas
+## Setup Rapido
 
-- **Design System Premium**: Tailwind CSS configurado com fontes, cores e animações personalizadas.
-- **Micro-interações**: Framer Motion para entradas suaves, hover effects e cursor personalizado.
-- **Admin Panel**: Gestão de cursos e configurações de integração Google.
-- **Integrações (Simuladas)**: Google Calendar, Drive, Forms e YouTube.
-- **Responsividade**: Mobile-first com menus adaptativos e scroll-snap.
-- **Certificados**: Geração de PDF com background personalizado (via `scripts/generate_bg.py`) e QR Code de validação.
-- **Gamification**: Sistema de XP, Níveis e Conquistas (Badges) com regras reais de engajamento.
+1. Instale dependencias:
 
-## Como Rodar
+```bash
+npm install
+```
 
-1. Instale as dependências:
+2. Rode em desenvolvimento:
 
-   ```bash
-   npm install
-   ```
+```bash
+npm run dev
+```
 
-2. Inicie o servidor de desenvolvimento:
+3. Acesse:
 
-   ```bash
-   npm run dev
-   ```
+- App: [http://localhost:3000](http://localhost:3000)
 
-3. Acesse `http://localhost:3000`.
+## Scripts Principais
 
-## Credenciais de Admin
+- `npm run dev`: sobe app em modo desenvolvimento.
+- `npm run build`: build de producao.
+- `npm run start`: sobe app buildada.
+- `npm run lint`: valida regras ESLint.
+- `npm run typecheck`: validacao TypeScript sem emitir artefatos.
+- `npm test`: testes Jest (unitarios/integracao).
+- `npm run test:e2e`: testes Playwright (executar separadamente).
+- `npm run seed`: carga inicial de dados utilitarios.
 
-- **Usuário**: admin
-- **Senha**: admin
+## Estrutura de Pastas
+
+- `src/app`: rotas App Router.
+- `src/components`: componentes de UI e features.
+- `src/actions`: server actions canonicas consumidas pela app.
+- `src/app/actions`: wrappers de compatibilidade para imports legados.
+- `src/services`: camada de acesso a dados e integracoes.
+- `src/lib`: utilitarios, autenticacao, regras de dominio.
+- `src/hooks`: hooks de estado e realtime.
+- `tests` e `e2e`: cenarios E2E (Playwright).
+
+## Fluxo de Qualidade
+
+Executar localmente antes de abrir PR:
+
+```bash
+npm run lint
+npm run typecheck
+npm test -- --runInBand
+```
+
+Para E2E:
+
+```bash
+npm run test:e2e
+```
+
+## Padrao de Actions
+
+- Implementacoes canonicas ficam em `src/actions/*`.
+- `src/app/actions/*` existe para compatibilidade e nao deve duplicar regra de negocio.
+- Para progresso de aula, use `@/app/actions/progress` (ou `@/actions/progress` como alias de compatibilidade).
+
+## Credenciais de Admin (ambiente local/demo)
+
+- Usuario: `admin`
+- Senha: `admin`

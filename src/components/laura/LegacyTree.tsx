@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { Users, ArrowRight, Globe } from "lucide-react";
 import { lauraPerlsContent } from "@/content/laura-perls";
+import Link from "next/link";
 
 export function LegacyTree() {
   const { legacyTree } = lauraPerlsContent;
@@ -189,13 +190,13 @@ export function LegacyTree() {
             <span className="text-[#4a3a2a] font-serif italic">
               Faça parte dessa linhagem terapêutica
             </span>
-            <a
+            <Link
               href="/inscricao"
               className="flex items-center gap-2 px-6 py-2 bg-[#4a3a2a] text-[#e8e4db] font-bold uppercase tracking-widest text-xs rounded-sm hover:bg-[#3a2f25] transition-colors"
             >
               Inscrever-se
               <ArrowRight size={14} />
-            </a>
+            </Link>
           </div>
         </motion.div>
       </div>

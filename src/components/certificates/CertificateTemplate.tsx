@@ -273,7 +273,11 @@ export const CertificateDocument: React.FC<CertificateDocumentProps> = ({
         {/* Watercolor Background (Optional) */}
         <View style={styles.backgroundLayer}>
           {/* If image exists, it will render. If not, low impact. */}
-          <Image src={bgUrl} style={styles.backgroundImage} />
+          <Image
+            src={bgUrl}
+            style={styles.backgroundImage}
+            alt="Textura aquarela de fundo"
+          />
         </View>
 
         {/* Main Frame */}
@@ -284,7 +288,7 @@ export const CertificateDocument: React.FC<CertificateDocumentProps> = ({
               {/* Logo */}
               {/* We use a conditional check or try/catch effectively by just rendering. 
                    If src fails, PDF renderer usually warns but doesn't crash completely. */}
-              <Image src={logoUrl} style={styles.logo} />
+              <Image src={logoUrl} style={styles.logo} alt="Logo Figura Viva" />
 
               <Text style={styles.institutionName}>INSTITUTO FIGURA VIVA</Text>
               <Text style={styles.certificateTitle}>
@@ -345,7 +349,11 @@ export const CertificateDocument: React.FC<CertificateDocumentProps> = ({
 
               {/* Right: QR Code */}
               <View style={styles.footerRight}>
-                <Image src={qrCodeDataUrl} style={styles.qrImage} />
+                <Image
+                  src={qrCodeDataUrl}
+                  style={styles.qrImage}
+                  alt="QR Code de validacao do certificado"
+                />
                 <Text style={styles.qrLabel}>Escaneie para validar</Text>
               </View>
             </View>
