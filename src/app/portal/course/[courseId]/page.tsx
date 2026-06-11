@@ -1,11 +1,10 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { auth, adminDb } from "@/lib/firebase/admin";
 import { getCourseData } from "@/lib/courseService";
 import { deepSafeSerialize } from "@/lib/utils";
 import CourseClient from "./CourseClient";
 import { assertCanAccessCourse } from "@/lib/auth/access-gate";
 import { AccessError } from "@/lib/auth/access-types";
+import { requireSession } from "@/lib/auth/server";
 
 export default async function CoursePage({
   params,
@@ -13,27 +12,13 @@ export default async function CoursePage({
   params: Promise<{ courseId: string }>;
 }) {
   const { courseId } = await params;
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("session")?.value;
-
-  if (!sessionCookie) {
-    redirect("/auth");
-  }
-
-  const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
-  const uid = decodedClaims.uid;
-
-  // Orbit 05: Robust Admin Detection (Claims + Firestore Backup)
-  const userDoc = await adminDb.collection("users").doc(uid).get();
-  const userRole = userDoc.data()?.role?.toLowerCase().trim();
-  const isAdmin =
-    decodedClaims.admin === true ||
-    decodedClaims.role === "admin" ||
-    userRole === "admin";
+  const session = await requireSession("/auth");
+  const uid = session.uid;
+  const isAdmin = session.isAdmin;
 
   // ORBITAL 01 & 05: Single Source of Truth Access Gate
   try {
-    await assertCanAccessCourse(uid, courseId);
+    await assertCanAccessCourse(uid, courseId, { isAdmin });
   } catch (error) {
     if (error instanceof AccessError) {
       // If the course is not available/published, restrict access completely

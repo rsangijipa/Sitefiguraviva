@@ -45,7 +45,18 @@ export async function middleware(request: NextRequest) {
       url.pathname = "/auth";
       return NextResponse.redirect(url);
     }
-    // In production, we verify the JWT/Session here for 'professional' claim
+  }
+
+  // 5. Protected Routes Guard (Edge filtering)
+  if (pathname.startsWith("/portal") || pathname.startsWith("/admin")) {
+    const session = request.cookies.get("session")?.value;
+    if (!session) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/auth";
+      url.searchParams.set("next", pathname);
+      return NextResponse.redirect(url);
+    }
+    // Deep JWT signature verification happens in layouts and server actions using firebase-admin
   }
 
   return response;

@@ -1,12 +1,18 @@
 import { FieldValue } from "firebase-admin/firestore";
 import { db } from "@/lib/firebase/admin";
-import { Course, Module, Lesson, Block } from "@/types/lms";
+import { Lesson, Block } from "@/types/lms";
 import { deepSafeSerialize } from "./utils";
 
 import { toCourseFullDTO } from "@/lib/presenters/mappers";
 
 import { assertCanAccessCourse } from "./auth/access-gate";
 import { AccessError, AccessErrorCode } from "./auth/access-types";
+import {
+  getCourseSnapshot,
+  getLessonsSnapshot,
+  getModulesSnapshot,
+} from "@/lib/repositories/courseRepository.server";
+import { findEnrollmentForCourse } from "@/lib/repositories/enrollmentRepository.server";
 
 export async function getCourseData(
   courseId: string,
@@ -20,7 +26,7 @@ export async function getCourseData(
   let isAccessDenied = false;
 
   try {
-    accessContext = await assertCanAccessCourse(userId, courseId);
+    accessContext = await assertCanAccessCourse(userId, courseId, { isAdmin });
   } catch (error) {
     if (error instanceof AccessError) {
       if (error.code === AccessErrorCode.COURSE_NOT_AVAILABLE) {
@@ -32,15 +38,13 @@ export async function getCourseData(
     }
   }
 
-  const courseSnap = await db.collection("courses").doc(courseId).get();
+  const courseSnap = await getCourseSnapshot(courseId);
   if (!courseSnap.exists) return null;
 
-  // Fetch enrollment data if exists (using the ID from context or default)
-  const enrollmentId = accessContext?.enrollmentId || `${userId}_${courseId}`;
-  const enrollmentDoc = await db
-    .collection("enrollments")
-    .doc(enrollmentId)
-    .get();
+  const enrollmentResult = accessContext?.isAdminOverride
+    ? null
+    : await findEnrollmentForCourse(userId, courseId);
+  const enrollmentDoc = enrollmentResult?.snapshot || null;
 
   // 2. Fetch Progress (ATOMIC)
   const progressSnap = await db
@@ -58,12 +62,7 @@ export async function getCourseData(
   });
 
   // 3. Fetch Modules
-  const modulesSnap = await db
-    .collection("courses")
-    .doc(courseId)
-    .collection("modules")
-    .orderBy("order", "asc")
-    .get();
+  const modulesSnap = await getModulesSnapshot(courseId);
 
   // 4. Fetch All Lessons (Optimized Parallel)
   // We create a map of ModuleID -> LessonDocs[]
@@ -71,14 +70,7 @@ export async function getCourseData(
 
   await Promise.all(
     modulesSnap.docs.map(async (mDoc) => {
-      const lessonsSnap = await db
-        .collection("courses")
-        .doc(courseId)
-        .collection("modules")
-        .doc(mDoc.id)
-        .collection("lessons")
-        .orderBy("order", "asc")
-        .get();
+      const lessonsSnap = await getLessonsSnapshot(courseId, mDoc.id);
 
       lessonsMap.set(mDoc.id, lessonsSnap.docs);
     }),
@@ -90,7 +82,7 @@ export async function getCourseData(
     modulesSnap.docs,
     lessonsMap,
     progressMap,
-    enrollmentDoc.exists ? enrollmentDoc : null,
+    enrollmentDoc?.exists ? enrollmentDoc : null,
     isAdmin,
     isAccessDenied,
   );

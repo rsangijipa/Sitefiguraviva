@@ -4,7 +4,11 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 import { assessmentService } from "@/services/assessmentService";
-import { gradeAssessment } from "@/actions/assessment";
+import {
+  gradeAssessment,
+  startAssessmentAttempt,
+  submitAssessmentAttempt,
+} from "@/actions/assessment";
 import { trackEvent } from "@/actions/analytics";
 import type {
   AssessmentDoc,
@@ -81,11 +85,15 @@ export default function QuizTaker({
       setAssessment(data);
 
       // Start attempt
-      const submissionId = await assessmentService.startAssessment(
+      const startResult = await startAssessmentAttempt(
         assessmentId,
-        user.uid,
         data.courseId,
       );
+      if (!startResult.success || !startResult.submissionId) {
+        addToast(startResult.error || "Erro ao iniciar avaliação", "error");
+        return;
+      }
+      const submissionId = startResult.submissionId;
       setCurrentSubmissionId(submissionId);
       setStartTime(Date.now());
 
@@ -140,10 +148,14 @@ export default function QuizTaker({
       const answersArray = Object.values(answers);
 
       // Submit to Firestore
-      await assessmentService.submitAssessment(
+      const submitResult = await submitAssessmentAttempt(
         currentSubmissionId,
         answersArray,
       );
+      if (!submitResult.success) {
+        addToast(submitResult.error || "Erro ao enviar avaliação", "error");
+        return;
+      }
 
       trackEvent("quiz_complete", assessmentId, {
         courseId: assessment.courseId,

@@ -1,9 +1,10 @@
 "use server";
 
-import { adminAuth } from "@/lib/firebase/admin";
+import { adminDb } from "@/lib/firebase/admin";
+import { FieldValue } from "firebase-admin/firestore";
 import { progressService } from "@/lib/progress/progressService";
 import { assertCanAccessCourse } from "@/lib/auth/access-gate";
-import { cookies } from "next/headers";
+import { verifySession } from "@/lib/auth/server";
 import { revalidatePath } from "next/cache";
 
 import { gamificationService } from "@/lib/gamification/gamificationService";
@@ -17,15 +18,9 @@ export async function markLessonCompleted(
   lessonId: string,
 ) {
   try {
-    // 1. Auth Check
-    const sessionCookie = (await cookies()).get("session")?.value;
-    if (!sessionCookie) throw new Error("Unauthenticated");
-
-    const decodedToken = await adminAuth.verifySessionCookie(
-      sessionCookie,
-      true,
-    );
-    const uid = decodedToken.uid;
+    const session = await verifySession();
+    if (!session) throw new Error("Unauthenticated");
+    const uid = session.uid;
 
     // 2. Access Check (Enrollment SSoT)
     // This ensures only enrolled students with active status can progress.
@@ -64,14 +59,9 @@ export async function updateLessonProgress(
   data: { status: string; percent?: number; maxWatchedSecond?: number },
 ) {
   try {
-    const sessionCookie = (await cookies()).get("session")?.value;
-    if (!sessionCookie) throw new Error("Unauthenticated");
-
-    const decodedToken = await adminAuth.verifySessionCookie(
-      sessionCookie,
-      true,
-    );
-    const uid = decodedToken.uid;
+    const session = await verifySession();
+    if (!session) throw new Error("Unauthenticated");
+    const uid = session.uid;
 
     await assertCanAccessCourse(uid, courseId);
 
@@ -97,6 +87,35 @@ export async function updateLessonProgress(
   }
 }
 
+export async function updateLessonLastAccess(courseId: string, lessonId: string) {
+  try {
+    const session = await verifySession();
+    if (!session) throw new Error("Unauthenticated");
+    const uid = session.uid;
+
+    await assertCanAccessCourse(uid, courseId);
+
+    await adminDb
+      .collection("progress")
+      .doc(`${uid}_${courseId}_${lessonId}`)
+      .set(
+        {
+          userId: uid,
+          courseId,
+          lessonId,
+          lastAccessedAt: FieldValue.serverTimestamp(),
+          updatedAt: FieldValue.serverTimestamp(),
+        },
+        { merge: true },
+      );
+
+    return { success: true };
+  } catch (error: any) {
+    console.error("UpdateLessonLastAccess Error:", error);
+    return { success: false, error: error.message };
+  }
+}
+
 /**
  * Standalone action to force recalculate progress for a course.
  * Useful if course content changed (lessons added/removed) and
@@ -109,15 +128,11 @@ export async function recalculateProgress(
   targetUid?: string,
 ) {
   try {
-    const sessionCookie = (await cookies()).get("session")?.value;
-    if (!sessionCookie) throw new Error("Unauthenticated");
+    const session = await verifySession();
+    if (!session) throw new Error("Unauthenticated");
 
-    const decodedToken = await adminAuth.verifySessionCookie(
-      sessionCookie,
-      true,
-    );
-    const actorUid = decodedToken.uid;
-    const isAdminToken = !!decodedToken.admin || decodedToken.role === "admin";
+    const actorUid = session.uid;
+    const isAdminToken = session.isAdmin;
 
     // If targetUid is provided, actor must be admin
     const uid = targetUid && isAdminToken ? targetUid : actorUid;

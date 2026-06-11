@@ -5,6 +5,8 @@ import { DashboardShell } from "@/components/portal/shell/DashboardShell";
 import { SWRegistration } from "@/components/portal/SWRegistration";
 import { OfflineIndicator } from "@/components/portal/OfflineIndicator";
 import { PWAInstallBanner } from "@/components/portal/PWAInstallBanner";
+import { OnboardingModal } from "@/components/portal/OnboardingModal";
+import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import { useEffect } from "react";
 import { gamificationService } from "@/services/gamificationService";
 import { useGamificationFeedback } from "@/context/GamificationContext";
@@ -52,6 +54,10 @@ export function PortalClientLayout({
       <SWRegistration />
       <OfflineIndicator />
       <PWAInstallBanner />
+      <div className="px-4 py-2 md:px-8 md:py-4 pb-0 max-w-7xl mx-auto w-full">
+        <Breadcrumbs />
+      </div>
+      <OnboardingModal />
       {children}
     </DashboardShell>
   );

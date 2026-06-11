@@ -151,7 +151,7 @@ export default function LibraryClient({
             {filteredItems.length === 0 && (
               <div className="col-span-full py-20 bg-stone-50/50 rounded-[2rem] border border-dashed border-stone-200">
                 <EmptyState
-                  icon={<Search size={32} />}
+                  icon={Search}
                   title="Nenhum Recurso Encontrado"
                   description="Não encontramos artigos ou textos com os filtros selecionados. Experimente buscar por outros termos."
                   className="bg-transparent border-none shadow-none"

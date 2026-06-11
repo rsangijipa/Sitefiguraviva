@@ -1,11 +1,10 @@
-import { auth, db } from "@/lib/firebase/admin";
-import { cookies } from "next/headers";
-import { notFound, redirect } from "next/navigation";
+import { db } from "@/lib/firebase/admin";
 import { AssessmentDoc, AssessmentSubmissionDoc } from "@/types/assessment";
 import { ExamExitWrapper } from "@/components/assessment/ExamExitWrapper"; // Ensure this path is correct
-import { CheckCircle, AlertTriangle, ArrowLeft } from "lucide-react";
+import { CheckCircle, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
+import { requireSession } from "@/lib/auth/server";
 
 export default async function ExamPage({
   params,
@@ -13,18 +12,8 @@ export default async function ExamPage({
   params: Promise<{ examId: string }>;
 }) {
   const { examId } = await params;
-
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("session")?.value;
-  if (!sessionCookie) redirect("/auth");
-
-  let uid;
-  try {
-    const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
-    uid = decodedClaims.uid;
-  } catch {
-    redirect("/auth");
-  }
+  const session = await requireSession("/auth");
+  const uid = session.uid;
 
   // Fetch Assessment & Submission (Parallel)
   // NOTE: In production, use "submissions" collection query where assessmentId == examId AND userId == uid to find latest

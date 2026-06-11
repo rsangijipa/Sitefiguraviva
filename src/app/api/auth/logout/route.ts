@@ -1,10 +1,21 @@
+import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import { adminAuth } from "@/lib/firebase/admin";
 
-import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
+export async function POST() {
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get("session")?.value;
 
-export async function POST(request: Request) {
-    const cookieStore = await cookies();
-    cookieStore.delete('session');
+  if (sessionCookie) {
+    try {
+      const decoded = await adminAuth.verifySessionCookie(sessionCookie, true);
+      await adminAuth.revokeRefreshTokens(decoded.uid);
+    } catch (error) {
+      console.warn("Logout token revocation failed:", error);
+    }
+  }
 
-    return NextResponse.json({ status: 'success' });
+  cookieStore.delete("session");
+
+  return NextResponse.json({ status: "success" });
 }

@@ -1,11 +1,10 @@
 "use server";
 
-import { adminDb, adminAuth } from "@/lib/firebase/admin";
-import { FieldValue, Timestamp } from "firebase-admin/firestore";
-import { cookies } from "next/headers";
+import { adminDb } from "@/lib/firebase/admin";
+import { FieldValue } from "firebase-admin/firestore";
 import { revalidatePath } from "next/cache";
 
-import { requireAdmin } from "@/lib/auth-server";
+import { requireAdmin } from "@/lib/auth/server";
 import { z } from "zod";
 
 const blogPostSchema = z.object({

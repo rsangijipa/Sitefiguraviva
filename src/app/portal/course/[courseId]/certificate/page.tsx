@@ -1,10 +1,10 @@
-import { auth, db } from "@/lib/firebase/admin";
-import { cookies } from "next/headers";
+import { db } from "@/lib/firebase/admin";
 import { redirect, notFound } from "next/navigation";
 import { assertCanAccessCourse } from "@/lib/auth/access-gate";
 import { issueCertificate } from "@/actions/certificate";
 import CertificateViewer from "@/components/certificates/CertificateViewer";
 import Link from "next/link";
+import { requireSession } from "@/lib/auth/server";
 
 interface PageProps {
   params: Promise<{ courseId: string }>;
@@ -14,20 +14,12 @@ export default async function CertificatePage({ params }: PageProps) {
   const { courseId } = await params;
 
   // 1. Auth & Access Check
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("session")?.value;
-  if (!sessionCookie) redirect("/auth");
-
-  let uid;
-  try {
-    const claims = await auth.verifySessionCookie(sessionCookie, true);
-    uid = claims.uid;
-  } catch {
-    redirect("/auth");
-  }
+  const session = await requireSession("/auth");
+  const uid = session.uid;
+  const isAdmin = session.isAdmin;
 
   try {
-    await assertCanAccessCourse(uid, courseId);
+    await assertCanAccessCourse(uid, courseId, { isAdmin });
   } catch {
     redirect("/portal");
   }

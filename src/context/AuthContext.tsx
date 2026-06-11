@@ -15,6 +15,7 @@ import { auth, db } from "@/lib/firebase/client";
 import { doc, getDoc } from "firebase/firestore";
 import { UserRole, UserStatus } from "@/types/user";
 import { useRouter } from "next/navigation";
+import { logger } from "@/lib/logger";
 
 interface AuthContextType {
   user: User | null;
@@ -71,12 +72,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (currentUser) {
         try {
-          console.log("[AuthContext] User logged in:", currentUser.email);
+          logger.info("[AuthContext] User logged in:", currentUser.email);
 
           // 1. Check Custom Claims (Fastest, good for initial check)
           const token = await currentUser.getIdTokenResult(true);
           const claimAdmin = !!token.claims.admin;
-          console.log("[AuthContext] Custom Claims:", {
+          logger.info("[AuthContext] Custom Claims:", {
             admin: token.claims.admin,
             role: token.claims.role,
           });
@@ -91,7 +92,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
           if (userSnapshot.exists()) {
             const data = userSnapshot.data();
-            console.log("[AuthContext] Firestore user data:", {
+            logger.info("[AuthContext] Firestore user data:", {
               role: data.role,
               status: data.status,
               isActive: data.isActive,
@@ -109,7 +110,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             const legacyDisabled = data.status === "disabled";
             userStatus = !isActive || legacyDisabled ? "disabled" : "active";
           } else {
-            console.warn("[AuthContext] No Firestore document found for user");
+            logger.warn("[AuthContext] No Firestore document found for user");
             // Fallback: Use Custom Claims if no Firestore document
             if (claimAdmin || token.claims.role === "admin") {
               userRole = "admin";
@@ -118,7 +119,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
           // 3. SECURITY GUARD: Force Logout if Disabled
           if (userStatus === "disabled") {
-            console.warn("Account disabled. Forcing logout.");
+            logger.warn("Account disabled. Forcing logout.");
             await firebaseSignOut(auth);
             setUser(null);
             setRole(null);
@@ -140,14 +141,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setRole(userRole);
           setStatus(userStatus);
           setIsAdmin(normalizedRole === "admin" || claimAdmin);
-          console.log("[AuthContext] Final state:", {
+          logger.info("[AuthContext] Final state:", {
             role: userRole,
             status: userStatus,
             tenantId: resolvedTenant,
             isAdmin: normalizedRole === "admin" || claimAdmin,
           });
         } catch (error) {
-          console.error("Error fetching user data:", error);
+          logger.error("Error fetching user data:", error);
           setRole("student");
           setStatus("active");
           setTenantId("viva"); // Safety fallback
@@ -184,7 +185,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       router.refresh(); // Clear server-side router cache
       router.push(redirectPath); // Redirect to specified path (default to home)
     } catch (error) {
-      console.error("Error signing out:", error);
+      logger.error("Error signing out:", error);
     }
   };
 

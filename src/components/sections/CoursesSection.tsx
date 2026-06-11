@@ -107,7 +107,7 @@ export default function CoursesSection({
               <EmptyState
                 title="Nenhuma formação aberta"
                 description="No momento não temos inscrições abertas, mas você pode consultar nosso calendário para ver as próximas datas."
-                icon={<Calendar size={32} />}
+                icon={Calendar}
                 action={
                   <button
                     onClick={onOpenCalendar}

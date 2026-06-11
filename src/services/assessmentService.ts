@@ -4,13 +4,9 @@ import {
   doc,
   getDoc,
   getDocs,
-  addDoc,
-  updateDoc,
-  deleteDoc,
   query,
   where,
   orderBy,
-  serverTimestamp,
 } from "firebase/firestore";
 import type {
   AssessmentDoc,
@@ -90,46 +86,5 @@ export const assessmentService = {
     return snap.exists()
       ? ({ id: snap.id, ...snap.data() } as AssessmentSubmissionDoc)
       : null;
-  },
-
-  /**
-   * Start a new assessment attempt
-   * Creates a pending submission
-   */
-  async startAssessment(
-    assessmentId: string,
-    userId: string,
-    courseId: string,
-  ): Promise<string> {
-    const progress = await this.getUserProgress(userId, assessmentId);
-    const attemptNumber = progress ? progress.attempts + 1 : 1;
-
-    const submissionRef = await addDoc(
-      collection(db, "assessmentSubmissions"),
-      {
-        assessmentId,
-        userId,
-        courseId,
-        answers: [],
-        status: "pending",
-        attemptNumber,
-        startedAt: serverTimestamp(),
-      },
-    );
-
-    return submissionRef.id;
-  },
-
-  /**
-   * Submit assessment for grading
-   * (Actual grading happens server-side via Server Action)
-   */
-  async submitAssessment(submissionId: string, answers: any[]): Promise<void> {
-    const submissionRef = doc(db, "assessmentSubmissions", submissionId);
-    await updateDoc(submissionRef, {
-      answers,
-      status: "submitted",
-      submittedAt: serverTimestamp(),
-    });
   },
 };

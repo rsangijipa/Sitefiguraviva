@@ -104,6 +104,7 @@ export async function POST(req: NextRequest) {
         const uid = checkoutSession.metadata?.uid;
         const courseId = checkoutSession.metadata?.courseId;
         const isSubscription = checkoutSession.mode === "subscription";
+        const checkoutPaymentStatus = checkoutSession.payment_status;
         const subscriptionId =
           typeof checkoutSession.subscription === "string"
             ? checkoutSession.subscription
@@ -122,16 +123,34 @@ export async function POST(req: NextRequest) {
           });
         }
 
-        if (uid && courseId) {
-          // Note: We'll wait for invoice.paid for subscriptions if we want strictness,
-          // but for one-time or trial starts, we activate now.
-          // For simplicity and immediate access as requested in Orbital 03:
+        if (
+          uid &&
+          courseId &&
+          !isSubscription &&
+          checkoutPaymentStatus === "paid"
+        ) {
           await activateEnrollmentFromStripe({
             uid,
             courseId,
             sessionId: checkoutSession.id,
             isSubscription,
             paymentStatus: "paid",
+          });
+        } else if (uid && courseId) {
+          await logAudit({
+            actor: { uid: "system", role: "webhook" },
+            action: "billing.activation_deferred",
+            target: {
+              collection: "enrollments",
+              id: `${uid}_${courseId}`,
+              summary: "Activation deferred until confirmed payment event",
+            },
+            metadata: {
+              eventType: event.type,
+              isSubscription,
+              checkoutPaymentStatus: checkoutPaymentStatus || "unknown",
+              subscriptionId: subscriptionId || null,
+            },
           });
         }
         break;
@@ -141,16 +160,20 @@ export async function POST(req: NextRequest) {
         const invoice = session as Stripe.Invoice;
         const subscriptionId = (invoice as any).subscription as string;
 
-        // Authoritative metadata: userId/courseId are often in the subscription or initial checkout
-        // But for safety, we try to find the enrollment by subscriptionId
-        const enrollmentQuery = await adminDb
+        let enrollmentQuery = await adminDb
           .collection("enrollments")
-          .where("sourceRef", "==", subscriptionId) // Assuming subId was used as sourceRef if subscription
+          .where("stripe.subscriptionId", "==", subscriptionId)
           .limit(1)
           .get();
 
-        // If not found by sourceRef, try metadata from initial checkout if available
-        // Usually better to have a helper that finds it
+        if (enrollmentQuery.empty) {
+          enrollmentQuery = await adminDb
+            .collection("enrollments")
+            .where("sourceRef", "==", subscriptionId)
+            .limit(1)
+            .get();
+        }
+
         if (!enrollmentQuery.empty) {
           const data = enrollmentQuery.docs[0].data() as EnrollmentDoc;
           await activateEnrollmentFromStripe({

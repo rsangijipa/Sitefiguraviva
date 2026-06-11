@@ -1,6 +1,5 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { auth, db } from "@/lib/firebase/admin";
+import { db } from "@/lib/firebase/admin";
 import Link from "next/link";
 import Image from "next/image";
 import { FieldPath } from "firebase-admin/firestore";
@@ -9,6 +8,7 @@ import { cn, deepSafeSerialize } from "@/lib/utils";
 import { Timestamp } from "firebase-admin/firestore";
 import { EmptyState } from "@/components/ui/EmptyState";
 import Button from "@/components/ui/Button";
+import { requireSession } from "@/lib/auth/server";
 
 // --- Reusable Course Card (Inline for now, extract later) ---
 const CourseCard = ({
@@ -179,17 +179,8 @@ const CourseCard = ({
 };
 
 export default async function MyCoursesPage() {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("session")?.value;
-  if (!sessionCookie) redirect("/auth");
-
-  let uid;
-  try {
-    const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
-    uid = decodedClaims.uid;
-  } catch (error) {
-    redirect("/auth");
-  }
+  const session = await requireSession("/auth");
+  const uid = session.uid;
 
   // 1. Fetch User Enrollments
   const enrollmentsSnap = await db
@@ -318,7 +309,7 @@ export default async function MyCoursesPage() {
           </div>
         ) : (
           <EmptyState
-            icon={<BookOpen size={32} />}
+            icon={BookOpen}
             title="Sua Prateleira está Vazia"
             description="Você ainda não se matriculou em nenhuma formação. Descubra novos caminhos no nosso catálogo."
             action={

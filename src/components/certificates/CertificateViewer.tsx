@@ -1,13 +1,18 @@
 "use client";
 
+import React from "react";
 import { useState, useEffect } from "react";
-import { PDFDownloadLink } from "@react-pdf/renderer";
-import QRCode from "qrcode";
 import { useToast } from "@/context/ToastContext";
 import { getCertificate } from "@/actions/certificate";
 import type { Certificate } from "@/types/certificate";
-import { CertificateDocument } from "./CertificateTemplate";
 import Button from "@/components/ui/Button";
+import dynamic from "next/dynamic";
+import QRCode from "qrcode";
+
+// Dynamically import the wrapper with SSR disabled to prevent ESM/SSR errors with @react-pdf/renderer
+const CertificatePDFWrapper = dynamic(() => import("./CertificatePDFWrapper"), {
+  ssr: false,
+});
 import {
   Download,
   Loader2,
@@ -142,31 +147,10 @@ export default function CertificateViewer({
         <div className="flex flex-wrap gap-3">
           {/* Download PDF */}
           {qrCodeDataUrl && (
-            <PDFDownloadLink
-              document={
-                <CertificateDocument
-                  certificate={certificate}
-                  qrCodeDataUrl={qrCodeDataUrl}
-                />
-              }
-              fileName={`certificado-${certificate.certificateNumber}.pdf`}
-            >
-              {({ loading: pdfLoading }) => (
-                <Button disabled={pdfLoading} className="gap-2">
-                  {pdfLoading ? (
-                    <>
-                      <Loader2 className="animate-spin" size={16} />
-                      Gerando PDF...
-                    </>
-                  ) : (
-                    <>
-                      <Download size={16} />
-                      Baixar Certificado PDF
-                    </>
-                  )}
-                </Button>
-              )}
-            </PDFDownloadLink>
+            <CertificatePDFWrapper
+              certificate={certificate}
+              qrCodeDataUrl={qrCodeDataUrl}
+            />
           )}
 
           {/* Verify Online */}

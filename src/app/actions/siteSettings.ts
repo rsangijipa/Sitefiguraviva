@@ -1,15 +1,14 @@
 "use server";
 
-import { adminDb, adminAuth } from "@/lib/firebase/admin";
+import { adminDb } from "@/lib/firebase/admin";
 import { Timestamp } from "firebase-admin/firestore";
-import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 
 /**
  * Helper to ensure the user is an admin.
  * @throws Error if not authenticated or not an admin.
  */
-import { requireAdmin } from "@/lib/auth-server";
+import { requireAdmin } from "@/lib/auth/server";
 import { z } from "zod";
 
 const siteSettingsSchema = z.record(z.string(), z.any());

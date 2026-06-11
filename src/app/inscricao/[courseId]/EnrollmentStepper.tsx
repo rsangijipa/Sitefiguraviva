@@ -7,6 +7,8 @@ import { Check, Loader2, ArrowRight, User, Clock } from "lucide-react";
 import Link from "next/link";
 import { Input } from "@/components/ui/Input";
 import { useToast } from "@/context/ToastContext";
+import { createEnrollmentPending } from "@/app/actions/enrollment-pix";
+import QRCode from "qrcode";
 
 // --- AUTH HELPER (Robust P0 Fix) ---
 const getIdToken = async (): Promise<string> => {
@@ -94,6 +96,8 @@ export default function EnrollmentStepper({
 
   const [currentStep, setCurrentStep] = useState(derivedStep);
   const [loading, setLoading] = useState(false);
+  const [pixDataUrl, setPixDataUrl] = useState("");
+  const [pixLoading, setPixLoading] = useState(false);
 
   // Sync state with prop changes (e.g. after router.refresh)
   useEffect(() => {
@@ -207,8 +211,31 @@ export default function EnrollmentStepper({
     }
   };
 
+  const handleGeneratePix = async () => {
+    setPixLoading(true);
+    try {
+      // Create pending enrollment in DB
+      const result = await createEnrollmentPending(courseId);
+      if (!result.success && result.error) throw new Error(result.error);
+
+      // Random mock PIX Payload for visual purposes
+      const pixPayload = `00020101021226580014BR.GOV.BCB.PIX0136${Math.random().toString(36).substring(2)}520400005303986540510.005802BR5915INSTITUTO FIGURA VIVA6009SAO PAULO62140510FIGURA${courseId}6304`;
+
+      const qrDataUrl = await QRCode.toDataURL(pixPayload, {
+        width: 250,
+        margin: 2,
+      });
+      setPixDataUrl(qrDataUrl);
+    } catch (err: any) {
+      addToast(err.message || "Erro ao gerar PIX", "error");
+    } finally {
+      setPixLoading(false);
+    }
+  };
+
   // Derived Status Flags for Render
-  const isPendingApproval = enrollment?.status === "pending_approval";
+  const isPendingApproval =
+    enrollment?.status === "pending_approval" || pixDataUrl !== "";
   const isCanceled = enrollment?.status === "canceled";
   const isRefunded = enrollment?.status === "refunded";
 
@@ -350,7 +377,7 @@ export default function EnrollmentStepper({
             </motion.div>
           )}
 
-          {/* STEP 3: INTERESSE REGISTRADO */}
+          {/* STEP 3: PAGAMENTO PIX */}
           {currentStep === 3 && (
             <motion.div
               key="step3"
@@ -359,62 +386,52 @@ export default function EnrollmentStepper({
               exit={{ opacity: 0 }}
             >
               <div className="text-center">
-                <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600">
-                  <Check size={40} />
-                </div>
                 <h2 className="font-serif text-3xl text-primary mb-4">
-                  Interesse Registrado!
+                  Pagamento via PIX
                 </h2>
                 <p className="text-stone-500 mb-8 max-w-md mx-auto leading-relaxed">
-                  Sua demonstração de interesse foi enviada com sucesso. Nossa
-                  equipe entrará em contato em breve com mais informações sobre
-                  o curso e formas de pagamento.
+                  Escaneie o QR Code abaixo para confirmar a sua matrícula. A
+                  liberação será feita após a confirmação pela nossa equipe.
                 </p>
 
-                <div className="bg-stone-50 rounded-2xl p-6 border border-stone-200 mb-8 text-left max-w-md mx-auto">
-                  <h3 className="font-bold text-primary mb-4 text-sm uppercase tracking-widest">
-                    Resumo da Inscrição
-                  </h3>
-                  <div className="space-y-3 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-stone-500">Curso:</span>
-                      <span className="font-medium text-primary">
-                        {course.courseTitle || course.title}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-stone-500">Nome:</span>
-                      <span className="font-medium text-primary">
-                        {formData.fullName || application?.answers?.fullName}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-stone-500">Telefone:</span>
-                      <span className="font-medium text-primary">
-                        {formData.phone || application?.answers?.phone}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-stone-500">Status:</span>
-                      <span className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-bold">
-                        Aguardando Contato
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <p className="text-xs text-stone-400">
-                    Você receberá um e-mail com mais detalhes. Fique atento ao
-                    seu WhatsApp!
-                  </p>
-                  <Link
-                    href="/"
-                    className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg hover:bg-primary/90 transition-all uppercase tracking-widest text-xs"
+                {!pixDataUrl ? (
+                  <button
+                    onClick={handleGeneratePix}
+                    disabled={pixLoading}
+                    className="px-8 py-4 bg-green-600 text-white font-bold rounded-xl shadow-lg hover:bg-green-700 transition-all flex items-center justify-center gap-2 max-w-sm mx-auto uppercase tracking-widest text-sm"
                   >
-                    Voltar para Home <ArrowRight size={16} />
-                  </Link>
-                </div>
+                    {pixLoading ? (
+                      <Loader2 className="animate-spin" />
+                    ) : (
+                      "Gerar QR Code PIX"
+                    )}
+                  </button>
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="flex flex-col items-center bg-stone-50 p-8 rounded-2xl border border-stone-200 shadow-inner max-w-md mx-auto"
+                  >
+                    <img
+                      src={pixDataUrl}
+                      alt="PIX QR Code"
+                      className="w-56 h-56 rounded-lg shadow-sm mb-4"
+                    />
+                    <p className="text-xs text-stone-400 mb-6 px-4">
+                      Utilize o aplicativo do seu banco para ler o QR Code ou
+                      copie o código Pix Copia e Cola.
+                    </p>
+                    <button
+                      onClick={() => {
+                        setCurrentStep(4);
+                        router.refresh();
+                      }}
+                      className="w-full px-6 py-4 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-all uppercase tracking-widest text-xs"
+                    >
+                      Já realizei o pagamento
+                    </button>
+                  </motion.div>
+                )}
               </div>
             </motion.div>
           )}

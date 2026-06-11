@@ -84,6 +84,32 @@ export class CertificateIssuer {
       const course = courseSnap.data() as CourseDoc;
       const enrollment = enrollmentSnap.data() as EnrollmentDoc;
 
+      const enrollmentStatus = String(enrollment.status || "").toLowerCase();
+      if (!["active", "completed"].includes(enrollmentStatus)) {
+        return {
+          success: false,
+          error: "ENROLLMENT_NOT_ACTIVE",
+          status: 403,
+        };
+      }
+
+      const enrollmentUid = (enrollment as any).uid || enrollment.userId;
+      if (enrollmentUid && enrollmentUid !== uid) {
+        return {
+          success: false,
+          error: "ENROLLMENT_USER_MISMATCH",
+          status: 400,
+        };
+      }
+
+      if (enrollment.courseId && enrollment.courseId !== courseId) {
+        return {
+          success: false,
+          error: "ENROLLMENT_COURSE_MISMATCH",
+          status: 400,
+        };
+      }
+
       // 4. Calculate Version & Required Lessons
       const courseVersionAtCompletion =
         enrollment.courseVersionAtEnrollment || course.contentRevision || 1;
@@ -149,6 +175,34 @@ export class CertificateIssuer {
           details: {
             required: requiredCount,
             completed: completedRequiredCount,
+          },
+        };
+      }
+
+      const summary = (enrollment as any).progressSummary || {};
+      const summaryPercent = Number(summary.percent ?? 0);
+      const summaryCompleted = Number(summary.completedLessonsCount ?? 0);
+      const hasSummary = summary && Object.keys(summary).length > 0;
+      const expectedPercent = Math.floor(
+        (completedRequiredCount / requiredCount) * 100,
+      );
+
+      if (
+        hasSummary &&
+        ((Number.isFinite(summaryPercent) &&
+          summaryPercent < expectedPercent) ||
+          (Number.isFinite(summaryCompleted) &&
+            summaryCompleted < completedRequiredCount))
+      ) {
+        return {
+          success: false,
+          error: "PROGRESS_ENROLLMENT_MISMATCH",
+          status: 409,
+          details: {
+            progressCompletedLessons: completedRequiredCount,
+            enrollmentSummaryCompleted: summaryCompleted,
+            progressPercent: expectedPercent,
+            enrollmentSummaryPercent: summaryPercent,
           },
         };
       }
