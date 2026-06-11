@@ -5,22 +5,18 @@ service firebase.storage {
     // --- Helpers ---
 
     function isAdmin() {
-      return request.auth != null && (
-        ((request.auth.token.admin == true || request.auth.token.role in ['admin', 'administrador']) &&
-         request.auth.token.isActive != false) ||
-        (firestore.exists(/databases/(default)/documents/users/$(request.auth.uid)) && 
-         (firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role in ['admin', 'administrador', 'ADMIN']) &&
-         firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.isActive == true)
-      );
+      return request.auth != null &&
+        (request.auth.token.admin == true ||
+         request.auth.token.role in ['admin', 'administrador', 'ADMIN']) &&
+        request.auth.token.isActive != false;
     }
 
     function isStaff() {
-      return isAdmin() || (request.auth != null && (
-        (request.auth.token.role == 'tutor' && request.auth.token.isActive != false) ||
-        (firestore.exists(/databases/(default)/documents/users/$(request.auth.uid)) && 
-         firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'tutor' &&
-         firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.isActive == true)
-      ));
+      return isAdmin() || (
+        request.auth != null &&
+        request.auth.token.role == 'tutor' &&
+        request.auth.token.isActive != false
+      );
     }
 
     function isEnrolledActive(courseId) {

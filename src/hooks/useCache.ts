@@ -1,37 +1,31 @@
-import useSWR from "swr";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { enrollmentService } from "@/services/enrollmentService";
 import { progressService } from "@/services/progressService";
 import { eventService } from "@/services/eventService";
 import { certificateService } from "@/services/certificateService";
-
-// SWR Configuration
-const swrConfig = {
-  revalidateOnFocus: false, // Don't refetch on window focus
-  revalidateOnReconnect: true, // Refetch on reconnect
-  dedupingInterval: 30000, // Dedupe requests within 30s
-  refreshInterval: 0, // No auto-refresh (manual trigger only)
-  shouldRetryOnError: false,
-};
 
 /**
  * Cached hook for user enrollments
  * Reduces Firestore reads by ~70% on portal dashboard
  */
 export function useCachedEnrollments(userId: string | undefined) {
-  const { data, error, mutate, isLoading } = useSWR(
-    userId ? `enrollments-${userId}` : null,
-    () => enrollmentService.getUserEnrollments(userId!),
-    {
-      ...swrConfig,
-      refreshInterval: 300000, // Refresh every 5 minutes
-    },
-  );
+  const { data, error, isLoading, refetch } = useQuery({
+    queryKey: ["enrollments", userId],
+    queryFn: () =>
+      userId
+        ? enrollmentService.getUserEnrollments(userId)
+        : Promise.resolve([]),
+    enabled: !!userId,
+    staleTime: 300000, // Refresh every 5 minutes
+    refetchOnWindowFocus: false,
+    retry: false,
+  });
 
   return {
     enrollments: data || [],
     isLoading,
     error,
-    refresh: mutate,
+    refresh: refetch,
   };
 }
 
@@ -39,20 +33,23 @@ export function useCachedEnrollments(userId: string | undefined) {
  * Cached hook for user certificates
  */
 export function useCachedCertificates(userId: string | undefined) {
-  const { data, error, mutate, isLoading } = useSWR(
-    userId ? `certificates-${userId}` : null,
-    () => certificateService.getUserCertificates(userId!),
-    {
-      ...swrConfig,
-      refreshInterval: 600000, // Refresh every 10 minutes (certificates change rarely)
-    },
-  );
+  const { data, error, isLoading, refetch } = useQuery({
+    queryKey: ["certificates", userId],
+    queryFn: () =>
+      userId
+        ? certificateService.getUserCertificates(userId)
+        : Promise.resolve([]),
+    enabled: !!userId,
+    staleTime: 600000, // Refresh every 10 minutes (certificates change rarely)
+    refetchOnWindowFocus: false,
+    retry: false,
+  });
 
   return {
     certificates: data || [],
     isLoading,
     error,
-    refresh: mutate,
+    refresh: refetch,
   };
 }
 
@@ -60,20 +57,19 @@ export function useCachedCertificates(userId: string | undefined) {
  * Cached hook for upcoming events
  */
 export function useCachedEvents(limit: number = 5) {
-  const { data, error, mutate, isLoading } = useSWR(
-    `events-upcoming-${limit}`,
-    () => eventService.getUpcomingEvents(limit),
-    {
-      ...swrConfig,
-      refreshInterval: 180000, // Refresh every 3 minutes
-    },
-  );
+  const { data, error, isLoading, refetch } = useQuery({
+    queryKey: ["events", "upcoming", limit],
+    queryFn: () => eventService.getUpcomingEvents(limit),
+    staleTime: 180000, // Refresh every 3 minutes
+    refetchOnWindowFocus: false,
+    retry: false,
+  });
 
   return {
     events: data || [],
     isLoading,
     error,
-    refresh: mutate,
+    refresh: refetch,
   };
 }
 
@@ -84,50 +80,53 @@ export function useCachedProgress(
   userId: string | undefined,
   courseId: string | undefined,
 ) {
-  const { data, error, mutate, isLoading } = useSWR(
-    userId && courseId ? `progress-${userId}-${courseId}` : null,
-    () => progressService.getCourseProgress(userId!, courseId!),
-    {
-      ...swrConfig,
-      refreshInterval: 60000, // Refresh every 1 minute (active studying)
-    },
-  );
+  const { data, error, isLoading, refetch } = useQuery({
+    queryKey: ["progress", userId, courseId],
+    queryFn: () =>
+      userId && courseId
+        ? progressService.getCourseProgress(userId, courseId)
+        : Promise.resolve(null),
+    enabled: !!userId && !!courseId,
+    staleTime: 60000, // Refresh every 1 minute (active studying)
+    refetchOnWindowFocus: false,
+    retry: false,
+  });
 
   return {
     progress: data || null,
     isLoading,
     error,
-    refresh: mutate,
+    refresh: refetch,
   };
 }
 
 /**
  * Optimistic update helper
  * Use when you want to update cache immediately after mutation
- *
- * Example:
- * const { enrollments, refresh } = useCachedEnrollments(uid);
- * await enrollUser(email, courseId);
- * refresh(); // Force cache refresh
  */
 export function useOptimisticUpdate<T>(
-  key: string,
-  updateFn: (current: T) => T,
+  queryKey: any[],
+  updateFn: (current: T | undefined) => T,
 ) {
-  const { data, mutate } = useSWR<T>(key);
+  const queryClient = useQueryClient();
 
   const update = async (serverUpdate: () => Promise<any>) => {
-    if (!data) return;
+    // Cancel any outgoing refetches so they don't overwrite our optimistic update
+    await queryClient.cancelQueries({ queryKey });
 
-    // Optimistic update
-    const optimisticData = updateFn(data);
-    mutate(optimisticData, false); // Update cache without revalidation
+    // Snapshot the previous value
+    const previousData = queryClient.getQueryData<T>(queryKey);
+
+    // Optimistically update to the new value
+    queryClient.setQueryData<T>(queryKey, updateFn(previousData));
 
     try {
       await serverUpdate();
-      mutate(); // Revalidate from server
+      // On success, invalidate the query to re-fetch
+      queryClient.invalidateQueries({ queryKey });
     } catch (error) {
-      mutate(); // Revert on error
+      // If error, rollback to the previous value
+      queryClient.setQueryData<T>(queryKey, previousData);
       throw error;
     }
   };

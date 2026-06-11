@@ -1,11 +1,11 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { auth, db } from "@/lib/firebase/admin";
+import { db } from "@/lib/firebase/admin";
 import { LessonPlayerWrapper } from "@/components/portal/LessonPlayerWrapper";
 import { Lesson, Module } from "@/types/lms";
 import { deepSafeSerialize } from "@/lib/utils";
 import { assertCanAccessCourse } from "@/lib/auth/access-gate";
 import { AccessError } from "@/lib/auth/access-types";
+import { requireSession } from "@/lib/auth/server";
 
 export const dynamic = "force-dynamic";
 
@@ -48,22 +48,13 @@ export default async function LessonPage({
   params: Promise<{ courseId: string; lessonId: string }>;
 }) {
   const { courseId, lessonId } = await params;
-
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("session")?.value;
-  if (!sessionCookie) redirect("/auth");
-
-  let uid;
-  try {
-    const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
-    uid = decodedClaims.uid;
-  } catch {
-    redirect("/auth");
-  }
+  const session = await requireSession("/auth");
+  const uid = session.uid;
+  const isAdmin = session.isAdmin;
 
   // ORBITAL 01 & 05: Single Source of Truth Access Gate
   try {
-    await assertCanAccessCourse(uid, courseId);
+    await assertCanAccessCourse(uid, courseId, { isAdmin });
   } catch (error) {
     if (error instanceof AccessError) {
       // Redirect to course intro page where they can see why they can't access

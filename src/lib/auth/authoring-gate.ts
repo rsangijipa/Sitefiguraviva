@@ -1,4 +1,4 @@
-import { requireStaff } from "@/lib/auth-server";
+import { requireStaff } from "@/lib/auth/server";
 
 /**
  * Strict Guard for Content Authoring Actions.

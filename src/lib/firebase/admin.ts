@@ -62,13 +62,30 @@ export function getAdminApp(): admin.app.App {
         /^["']|["']$/g,
         "",
       );
-      let privateKey = process.env.FIREBASE_PRIVATE_KEY.replace(
-        /^["']|["']$/g,
-        "",
-      );
+      let privateKey = process.env.FIREBASE_PRIVATE_KEY;
 
-      // Fix Vercel's \n escaping issue robustly
-      privateKey = privateKey.replace(/\\n/g, "\n").replace(/\r/g, "").trim();
+      // Fix Vercel's \n escaping issue robustly and handle missing newlines
+      privateKey = privateKey
+        .replace(/^["']|["']$/g, "")
+        .replace(/\\n/g, "\n")
+        .replace(/\r/g, "")
+        .trim();
+
+      // If the key is a single string but contains the BEGIN/END headers, ensure proper newlines
+      if (
+        privateKey.includes("-----BEGIN PRIVATE KEY-----") &&
+        !privateKey.includes("\n")
+      ) {
+        const match = privateKey.match(
+          /-----BEGIN PRIVATE KEY-----\s*(.*?)\s*-----END PRIVATE KEY-----/,
+        );
+        if (match) {
+          const keyBodyChunks = match[1].replace(/\s+/g, "").match(/.{1,64}/g);
+          if (keyBodyChunks) {
+            privateKey = `-----BEGIN PRIVATE KEY-----\n${keyBodyChunks.join("\n")}\n-----END PRIVATE KEY-----`;
+          }
+        }
+      }
 
       credential = admin.credential.cert({
         projectId,

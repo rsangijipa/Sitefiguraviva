@@ -52,17 +52,22 @@ export default defineConfig({
       },
       dependencies: ["setup"],
     },
+    {
+      name: "public",
+      testMatch: /.*smoke\.spec\.ts/,
+      use: {
+        ...devices["Desktop Chrome"],
+      },
+    },
   ],
 
   /* Run your local dev server before starting the tests */
-  /*
-    webServer: {
-        command: 'npm run dev',
-        url: 'http://localhost:3000',
-        reuseExistingServer: !process.env.CI,
-        stdout: 'pipe',
-        stderr: 'pipe',
-        timeout: 120 * 1000, // Increased for CI/CD stability
-    },
-    */
+  webServer: {
+    command: "npm run dev",
+    url: process.env.BASE_URL || "http://localhost:3000",
+    reuseExistingServer: !process.env.CI,
+    stdout: "pipe",
+    stderr: "pipe",
+    timeout: 120 * 1000,
+  },
 });

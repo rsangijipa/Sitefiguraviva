@@ -1,29 +1,21 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { adminAuth } from "@/lib/firebase/admin";
 import { PortalClientLayout } from "./PortalClientLayout";
 import { ensureUserDoc } from "@/lib/auth/user-service";
+import { requireSession } from "@/lib/auth/server";
+
+export const dynamic = "force-dynamic";
 
 export default async function PortalLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const cookieStore = await cookies();
-  const session = cookieStore.get("session")?.value;
-
-  if (!session) {
-    redirect("/auth");
-  }
+  const session = await requireSession("/auth");
 
   try {
-    // Verify session server-side
-    const decodedToken = await adminAuth.verifySessionCookie(session, true);
-
-    // SSoT: Ensure user document exists (Idempotent)
-    await ensureUserDoc(decodedToken);
+    await ensureUserDoc(session);
   } catch (error) {
-    console.error("[PortalLayout] Session verification failed:", error);
+    console.error("[PortalLayout] Failed to ensure user document:", error);
     redirect("/auth");
   }
 

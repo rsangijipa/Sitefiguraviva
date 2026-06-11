@@ -1,8 +1,50 @@
 import { cookies } from "next/headers";
-import { adminAuth, adminDb } from "@/lib/firebase/admin";
 import { redirect } from "next/navigation";
+import type { DecodedIdToken } from "firebase-admin/auth";
+import { adminAuth } from "@/lib/firebase/admin";
+import { logger } from "@/lib/logger";
+import { getUserByUid } from "@/lib/repositories/userRepository.server";
 
-export async function verifySession() {
+export type ServerAuthContext = DecodedIdToken & {
+  role?: string;
+  isAdmin: boolean;
+  isStaff: boolean;
+  isActive: boolean;
+};
+
+function normalizeRole(role: unknown): string {
+  return String(role || "").trim().toLowerCase();
+}
+
+function isAdminRole(role: unknown): boolean {
+  const normalized = normalizeRole(role);
+  return normalized === "admin" || normalized === "administrador";
+}
+
+function isStaffRole(role: unknown): boolean {
+  const normalized = normalizeRole(role);
+  return isAdminRole(normalized) || normalized === "tutor";
+}
+
+function normalizeClaims(
+  claims: DecodedIdToken,
+  userData?: { role?: unknown; isActive?: unknown } | null,
+): ServerAuthContext {
+  const role = normalizeRole(userData?.role || claims.role);
+  const isActive = userData?.isActive !== false && claims.isActive !== false;
+
+  return {
+    ...claims,
+    role: role || (claims.role as string | undefined),
+    isAdmin: isActive && (claims.admin === true || isAdminRole(role)),
+    isStaff:
+      isActive &&
+      (claims.admin === true || isAdminRole(role) || isStaffRole(role)),
+    isActive,
+  };
+}
+
+export async function verifySession(): Promise<ServerAuthContext | null> {
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get("session")?.value;
 
@@ -15,74 +57,66 @@ export async function verifySession() {
       sessionCookie,
       true,
     );
-    return decodedClaims;
+    return normalizeClaims(decodedClaims);
   } catch (error) {
-    console.error("Session verification failed:", error);
+    logger.warn("Session verification failed:", error);
     return null;
   }
 }
 
-export async function requireSession(redirectTo = "/auth") {
+export async function requireSession(
+  redirectTo = "/auth",
+): Promise<ServerAuthContext> {
   const claims = await verifySession();
+
   if (!claims) {
     redirect(redirectTo);
   }
+
   return claims;
 }
 
-function isAdminRole(role: unknown) {
-  const r = String(role || "").toLowerCase();
-  return r === "admin" || r === "administrador";
+async function hydrateAuthorizationContext(
+  claims: ServerAuthContext,
+): Promise<ServerAuthContext> {
+  if (!claims.uid) return claims;
+
+  const user = await getUserByUid(claims.uid);
+  return normalizeClaims(claims, user);
 }
 
-function parseCsvEnv(name: string) {
-  return (process.env[name] || "")
-    .split(",")
-    .map((s) => s.trim().toLowerCase())
-    .filter(Boolean);
+export async function requireAdmin(): Promise<ServerAuthContext> {
+  const claims = await requireSession("/auth?next=/admin");
+  const context = await hydrateAuthorizationContext(claims);
+
+  if (context.isAdmin) {
+    return context;
+  }
+
+  logger.warn("[SECURITY] Access denied: missing admin role.", {
+    uid: context.uid,
+    email: context.email,
+    role: context.role,
+    isActive: context.isActive,
+  });
+
+  redirect("/portal?error=forbidden");
 }
 
-export async function requireAdmin() {
-  const claims: any = await verifySession();
+export async function requireStaff(): Promise<ServerAuthContext> {
+  const claims = await requireSession("/auth?next=/admin");
+  const context = await hydrateAuthorizationContext(claims);
 
-  if (!claims) {
-    redirect("/auth?next=/admin"); // Redirect to login if no session
+  if (context.isStaff) {
+    return context;
   }
 
-  // 1) Fast path: Custom Claims
-  if (
-    (claims.admin === true || isAdminRole(claims.role)) &&
-    claims.isActive !== false
-  ) {
-    return claims;
-  }
+  logger.warn("[SECURITY] Access denied: missing staff role.", {
+    uid: context.uid,
+    email: context.email,
+    role: context.role,
+    isActive: context.isActive,
+  });
 
-  // 2) Fallback: Firestore user profile role
-  try {
-    const snap = await adminDb.collection("users").doc(claims.uid).get();
-    if (snap.exists) {
-      const data = snap.data();
-      const role = data?.role;
-      const isActive = data?.isActive;
-
-      // Check role AND active status
-      if (isAdminRole(role) && isActive !== false) {
-        return { ...claims, role: "admin" };
-      }
-    }
-  } catch (error) {
-    console.error("Admin role lookup failed:", error);
-  }
-
-  // 3) Bootstrap (optional): allow a known email to become admin automatically
-  // Set ADMIN_BOOTSTRAP_EMAILS="you@domain.com,other@domain.com" in your env.
-  const bootstrapEmails = parseCsvEnv("ADMIN_BOOTSTRAP_EMAILS");
-  const email = String(claims.email || "").toLowerCase();
-
-  if (email && bootstrapEmails.includes(email)) {
-    // ... bootstrap logic ...
-  }
-
-  // If we got here, user is logged in but NOT admin
   redirect("/portal?error=forbidden");
 }

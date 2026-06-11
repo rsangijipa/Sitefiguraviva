@@ -72,7 +72,7 @@ const CourseVideoWrapper = ({
     return (
       <div className="aspect-video bg-stone-900 flex items-center justify-center text-white p-6">
         <EmptyState
-          icon={<VideoOff size={32} className="text-white/20" />}
+          icon={VideoOff}
           title="Vídeo Indisponível"
           description="O link do vídeo para esta aula não foi configurado ou é inválido."
           className="bg-transparent border-none shadow-none text-white"
@@ -308,7 +308,7 @@ export const CoursePlayer = ({
               ) : (
                 <div className="h-full flex items-center justify-center py-20">
                   <EmptyState
-                    icon={<Menu size={32} />}
+                    icon={Menu}
                     title="Selecione uma Aula"
                     description="Escolha um dos tópicos no menu lateral para iniciar seus estudos."
                     className="bg-transparent border-none shadow-none"

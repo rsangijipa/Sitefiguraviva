@@ -1,4 +1,6 @@
 /** @type {import('next').NextConfig} */
+const isProd = process.env.NODE_ENV === "production";
+
 const nextConfig = {
     images: {
         remotePatterns: [
@@ -11,14 +13,24 @@ const nextConfig = {
     },
     poweredByHeader: false,
     async headers() {
+        const securityHeaders = [
+            { key: 'X-Content-Type-Options', value: 'nosniff' },
+            { key: 'X-Frame-Options', value: 'DENY' },
+            { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+            { key: 'Content-Security-Policy', value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.google-analytics.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://firebasestorage.googleapis.com https://storage.googleapis.com https://lh3.googleusercontent.com https://img.youtube.com https://i.ytimg.com; font-src 'self' data:; connect-src 'self' https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://firebasestorage.googleapis.com wss://*.firebaseio.com https://*.sentry.io; frame-src 'self' https://www.youtube.com;" }
+        ];
+
+        if (isProd) {
+            securityHeaders.push({
+                key: 'Strict-Transport-Security',
+                value: 'max-age=31536000; includeSubDomains; preload',
+            });
+        }
+
         return [
             {
                 source: '/(.*)',
-                headers: [
-                    { key: 'X-Content-Type-Options', value: 'nosniff' },
-                    { key: 'X-Frame-Options', value: 'DENY' },
-                    { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-                ],
+                headers: securityHeaders,
             },
         ];
     },

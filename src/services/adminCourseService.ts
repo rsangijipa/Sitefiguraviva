@@ -1,267 +1,182 @@
-import { db } from '@/lib/firebase/client';
-import { collection, doc, getDocs, getDoc, addDoc, setDoc, updateDoc, deleteDoc, serverTimestamp, query, orderBy, where, increment, writeBatch } from 'firebase/firestore';
-import { CourseDoc, ModuleDoc, LessonDoc } from '@/types/lms';
+import {
+  CommunityThreadDoc,
+  CourseDoc,
+  EnrollmentDoc,
+  LessonDoc,
+  MaterialDoc,
+  ModuleDoc,
+} from "@/types/lms";
+import {
+  addMaterialAction,
+  createCourseAction,
+  createLessonAction,
+  createModuleAction,
+  deleteCourseAction,
+  deleteLessonAction,
+  deleteMaterialAction,
+  deleteModuleAction,
+  deleteThreadAction,
+  getAllCoursesAction,
+  getCourseAction,
+  getCourseEnrollmentsAction,
+  getCourseThreadsAction,
+  getLessonsAction,
+  getMaterialsAction,
+  getModulesAction,
+  syncLessonsCountAction,
+  toggleEnrollmentStatusAction,
+  updateCourseAction,
+  updateLessonAction,
+  updateMaterialAction,
+  updateModuleAction,
+  updateThreadAction,
+} from "@/app/actions/admin/course-mutations";
 
 export const adminCourseService = {
-    // --- COURSES ---
+  // --- COURSES ---
 
-    async getAllCourses(): Promise<CourseDoc[]> {
-        const q = query(collection(db, 'courses'));
-        const snapshot = await getDocs(q);
-        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as CourseDoc));
-    },
+  async getAllCourses(): Promise<CourseDoc[]> {
+    return getAllCoursesAction();
+  },
 
-    async getCourse(courseId: string): Promise<CourseDoc | null> {
-        const docRef = doc(db, 'courses', courseId);
-        const snap = await getDoc(docRef);
-        return snap.exists() ? ({ id: snap.id, ...snap.data() } as CourseDoc) : null;
-    },
+  async getCourse(courseId: string): Promise<CourseDoc | null> {
+    return getCourseAction(courseId);
+  },
 
-    async createCourse(data: Partial<CourseDoc>): Promise<string> {
-        const docRef = await addDoc(collection(db, 'courses'), {
-            ...data,
-            // Dual-write for schema consistency
-            image: (data as any).coverImage || (data as any).image || '',
-            coverImage: data.coverImage || (data as any).image || '',
-            status: 'draft',
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp()
-        });
-        return docRef.id;
-    },
+  async createCourse(data: Partial<CourseDoc>): Promise<string> {
+    return createCourseAction(data);
+  },
 
-    async updateCourse(courseId: string, data: Partial<CourseDoc>): Promise<void> {
-        const docRef = doc(db, 'courses', courseId);
-        const { id, ...updateData } = data as any;
-        const updatePayload: any = {
-            ...updateData,
-            updatedAt: serverTimestamp()
-        };
+  async updateCourse(
+    courseId: string,
+    data: Partial<CourseDoc>,
+  ): Promise<void> {
+    return updateCourseAction(courseId, data);
+  },
 
-        // Dual-write check
-        if (updateData.coverImage) updatePayload.image = updateData.coverImage;
-        if (updateData.image) updatePayload.coverImage = updateData.image;
+  async deleteCourse(courseId: string): Promise<void> {
+    return deleteCourseAction(courseId);
+  },
 
-        await updateDoc(docRef, updatePayload);
-    },
+  // --- MODULES ---
 
-    async deleteCourse(courseId: string): Promise<void> {
-        // Fix: Deep delete modules and lessons to avoid massive data leaks
-        const modulesRef = collection(db, 'courses', courseId, 'modules');
-        const modulesSnap = await getDocs(modulesRef);
+  async getModules(courseId: string): Promise<ModuleDoc[]> {
+    return getModulesAction(courseId);
+  },
 
-        const batch = writeBatch(db);
+  async createModule(
+    courseId: string,
+    title: string,
+    order: number,
+  ): Promise<string> {
+    return createModuleAction(courseId, title, order);
+  },
 
-        // Delete all modules and their sub-lessons
-        for (const modDoc of modulesSnap.docs) {
-            const lessonsRef = collection(db, 'courses', courseId, 'modules', modDoc.id, 'lessons');
-            const lessonsSnap = await getDocs(lessonsRef);
-            lessonsSnap.docs.forEach(l => batch.delete(l.ref));
-            batch.delete(modDoc.ref);
-        }
+  async updateModule(
+    courseId: string,
+    moduleId: string,
+    data: Partial<ModuleDoc>,
+  ): Promise<void> {
+    return updateModuleAction(courseId, moduleId, data);
+  },
 
-        // Delete other course subcollections if needed (e.g. materials, community)
-        const materialsRef = collection(db, 'courses', courseId, 'materials');
-        const materialsSnap = await getDocs(materialsRef);
-        materialsSnap.docs.forEach(m => batch.delete(m.ref));
+  async deleteModule(courseId: string, moduleId: string): Promise<void> {
+    return deleteModuleAction(courseId, moduleId);
+  },
 
-        const threadsRef = collection(db, 'courses', courseId, 'communityThreads');
-        const threadsSnap = await getDocs(threadsRef);
-        threadsSnap.docs.forEach(t => batch.delete(t.ref));
+  // --- LESSONS ---
 
-        // Delete the course itself
-        batch.delete(doc(db, 'courses', courseId));
+  async getLessons(courseId: string, moduleId: string): Promise<LessonDoc[]> {
+    return getLessonsAction(courseId, moduleId);
+  },
 
-        await batch.commit();
-    },
+  async createLesson(
+    courseId: string,
+    moduleId: string,
+    title: string,
+    order: number,
+  ): Promise<string> {
+    return createLessonAction(courseId, moduleId, title, order);
+  },
 
-    // --- MODULES ---
+  async updateLesson(
+    courseId: string,
+    moduleId: string,
+    lessonId: string,
+    data: Partial<LessonDoc>,
+  ): Promise<void> {
+    return updateLessonAction(courseId, moduleId, lessonId, data);
+  },
 
-    async getModules(courseId: string): Promise<ModuleDoc[]> {
-        const q = query(collection(db, 'courses', courseId, 'modules'));
-        const snapshot = await getDocs(q);
-        // Helper to fetch lessons for each module could go here, or separate calls
-        // For simplicity, we might just return modules and fetch lessons lazily or in parallel
-        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ModuleDoc));
-    },
+  async deleteLesson(
+    courseId: string,
+    moduleId: string,
+    lessonId: string,
+  ): Promise<void> {
+    return deleteLessonAction(courseId, moduleId, lessonId);
+  },
 
-    async createModule(courseId: string, title: string, order: number): Promise<string> {
-        const docRef = await addDoc(collection(db, 'courses', courseId, 'modules'), {
-            title,
-            order,
-            isPublished: false,
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp()
-        });
-        return docRef.id;
-    },
+  // --- ENROLLMENTS ---
 
-    async updateModule(courseId: string, moduleId: string, data: Partial<ModuleDoc>): Promise<void> {
-        const docRef = doc(db, 'courses', courseId, 'modules', moduleId);
-        await updateDoc(docRef, { ...data, updatedAt: serverTimestamp() });
+  async getCourseEnrollments(
+    courseId: string,
+  ): Promise<Array<EnrollmentDoc & { id: string }>> {
+    return getCourseEnrollmentsAction(courseId);
+  },
 
-        if (data.isPublished !== undefined) {
-            await this.syncLessonsCount(courseId);
-        }
-    },
+  async toggleEnrollmentStatus(
+    enrollmentId: string,
+    currentStatus: string,
+  ): Promise<void> {
+    return toggleEnrollmentStatusAction(enrollmentId, currentStatus);
+  },
 
-    async deleteModule(courseId: string, moduleId: string): Promise<void> {
-        // Fix: Delete sub-lessons automatically to avoid orphaned data
-        const lessonsRef = collection(db, 'courses', courseId, 'modules', moduleId, 'lessons');
-        const lessonsSnap = await getDocs(lessonsRef);
+  // --- COMMUNITY ---
 
-        const batch = writeBatch(db);
+  async getCourseThreads(courseId: string): Promise<CommunityThreadDoc[]> {
+    return getCourseThreadsAction(courseId);
+  },
 
-        // Delete all lessons
-        lessonsSnap.docs.forEach(lessonDoc => {
-            batch.delete(lessonDoc.ref);
-        });
+  async updateThread(
+    courseId: string,
+    threadId: string,
+    updates: Record<string, unknown>,
+  ): Promise<void> {
+    return updateThreadAction(courseId, threadId, updates);
+  },
 
-        // Delete the module
-        batch.delete(doc(db, 'courses', courseId, 'modules', moduleId));
+  async deleteThread(courseId: string, threadId: string): Promise<void> {
+    return deleteThreadAction(courseId, threadId);
+  },
 
-        // Update lesson count if needed (optional, but good for consistency)
-        if (lessonsSnap.size > 0) {
-            const courseRef = doc(db, 'courses', courseId);
-            batch.update(courseRef, {
-                'stats.lessonsCount': increment(-lessonsSnap.size),
-                updatedAt: serverTimestamp()
-            });
-        }
+  // --- MATERIALS ---
 
-        await batch.commit();
-    },
+  async getMaterials(courseId: string): Promise<MaterialDoc[]> {
+    return getMaterialsAction(courseId);
+  },
 
-    // --- LESSONS ---
+  async addMaterial(
+    courseId: string,
+    data: Record<string, unknown>,
+  ): Promise<void> {
+    return addMaterialAction(courseId, data);
+  },
 
-    async getLessons(courseId: string, moduleId: string): Promise<LessonDoc[]> {
-        const q = query(
-            collection(db, 'courses', courseId, 'modules', moduleId, 'lessons')
-        );
-        const snapshot = await getDocs(q);
-        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as LessonDoc));
-    },
+  async updateMaterial(
+    courseId: string,
+    materialId: string,
+    data: Record<string, unknown>,
+  ): Promise<void> {
+    return updateMaterialAction(courseId, materialId, data);
+  },
 
-    async createLesson(courseId: string, moduleId: string, title: string, order: number): Promise<string> {
-        const lessonsCol = collection(db, 'courses', courseId, 'modules', moduleId, 'lessons');
-        const newLessonRef = doc(lessonsCol);
+  async deleteMaterial(courseId: string, materialId: string): Promise<void> {
+    return deleteMaterialAction(courseId, materialId);
+  },
 
-        await setDoc(newLessonRef, {
-            title,
-            order,
-            moduleId,
-            courseId,
-            type: 'text',
-            isPublished: false, // Default to draft
-            status: 'draft',
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp()
-        });
+  // --- UTILS ---
 
-        // We don't increment published count yet because default is draft
-        return newLessonRef.id;
-    },
-
-    async updateLesson(courseId: string, moduleId: string, lessonId: string, data: Partial<LessonDoc>): Promise<void> {
-        const docRef = doc(db, 'courses', courseId, 'modules', moduleId, 'lessons', lessonId);
-        await updateDoc(docRef, { ...data, updatedAt: serverTimestamp() });
-
-        // If sub-published state might have changed, sync count
-        if (data.isPublished !== undefined) {
-            await this.syncLessonsCount(courseId);
-        }
-    },
-
-    async deleteLesson(courseId: string, moduleId: string, lessonId: string): Promise<void> {
-        const lessonRef = doc(db, 'courses', courseId, 'modules', moduleId, 'lessons', lessonId);
-        const snap = await getDoc(lessonRef);
-        const wasPublished = snap.exists() && snap.data()?.isPublished === true;
-
-        await deleteDoc(lessonRef);
-
-        if (wasPublished) {
-            await this.syncLessonsCount(courseId);
-        }
-    },
-
-    // --- ENROLLMENTS ---
-
-    async getCourseEnrollments(courseId: string): Promise<any[]> {
-        const q = query(collection(db, 'enrollments'), where('courseId', '==', courseId));
-        const snapshot = await getDocs(q);
-        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    },
-
-    async toggleEnrollmentStatus(enrollmentId: string, currentStatus: string): Promise<void> {
-        const newStatus = currentStatus === 'active' ? 'cancelled' : 'active';
-        await updateDoc(doc(db, 'enrollments', enrollmentId), { status: newStatus });
-    },
-
-    // --- COMMUNITY ---
-
-    async getCourseThreads(courseId: string): Promise<any[]> {
-        const q = query(collection(db, 'courses', courseId, 'communityThreads'), orderBy('isPinned', 'desc'), orderBy('lastReplyAt', 'desc'));
-        const snapshot = await getDocs(q);
-        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    },
-
-    async updateThread(courseId: string, threadId: string, updates: any): Promise<void> {
-        await updateDoc(doc(db, 'courses', courseId, 'communityThreads', threadId), updates);
-    },
-
-    async deleteThread(courseId: string, threadId: string): Promise<void> {
-        await deleteDoc(doc(db, 'courses', courseId, 'communityThreads', threadId));
-    },
-
-    // --- MATERIALS ---
-
-    async getMaterials(courseId: string): Promise<any[]> {
-        const q = query(collection(db, 'courses', courseId, 'materials'));
-        const snapshot = await getDocs(q);
-        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    },
-
-    async addMaterial(courseId: string, data: any): Promise<void> {
-        await addDoc(collection(db, 'courses', courseId, 'materials'), {
-            ...data,
-            createdAt: serverTimestamp(),
-            downloadCount: 0,
-            isPublished: true
-        });
-    },
-
-    async updateMaterial(courseId: string, materialId: string, data: any): Promise<void> {
-        await updateDoc(doc(db, 'courses', courseId, 'materials', materialId), data);
-    },
-
-    async deleteMaterial(courseId: string, materialId: string): Promise<void> {
-        await deleteDoc(doc(db, 'courses', courseId, 'materials', materialId));
-    },
-
-    // --- UTILS ---
-
-    async syncLessonsCount(courseId: string): Promise<number> {
-        const modulesSnap = await getDocs(collection(db, 'courses', courseId, 'modules'));
-        let totalPublished = 0;
-
-        for (const modDoc of modulesSnap.docs) {
-            const mData = modDoc.data();
-            // Optional: If module is not published, maybe its lessons shouldn't count?
-            // Usually, yes. Let's be strict: published module + published lesson.
-            if (mData.isPublished === true) {
-                const lessonsSnap = await getDocs(
-                    query(collection(db, 'courses', courseId, 'modules', modDoc.id, 'lessons'),
-                        where('isPublished', '==', true))
-                );
-                totalPublished += lessonsSnap.size;
-            }
-        }
-
-        await updateDoc(doc(db, 'courses', courseId), {
-            'stats.lessonsCount': totalPublished,
-            updatedAt: serverTimestamp()
-        });
-
-        return totalPublished;
-    }
+  async syncLessonsCount(courseId: string): Promise<number> {
+    return syncLessonsCountAction(courseId);
+  },
 };

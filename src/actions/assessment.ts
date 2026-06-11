@@ -12,6 +12,108 @@ import type {
 } from "@/types/assessment";
 import type { UserData } from "@/types/user";
 
+async function requireUserClaims() {
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get("session")?.value;
+
+  if (!sessionCookie) {
+    throw new Error("Unauthorized");
+  }
+
+  return auth.verifySessionCookie(sessionCookie, true);
+}
+
+/**
+ * Start a new assessment attempt in a server-authoritative way.
+ */
+export async function startAssessmentAttempt(
+  assessmentId: string,
+  courseId: string,
+) {
+  try {
+    const claims = await requireUserClaims();
+    const uid = claims.uid;
+
+    const assessmentSnap = await adminDb
+      .collection("assessments")
+      .doc(assessmentId)
+      .get();
+    if (!assessmentSnap.exists) {
+      return { error: "Avaliação não encontrada" };
+    }
+
+    const assessment = assessmentSnap.data() as AssessmentDoc;
+    if (assessment.courseId !== courseId) {
+      return { error: "Curso da avaliação inválido" };
+    }
+
+    const existingAttempts = await adminDb
+      .collection("assessmentSubmissions")
+      .where("assessmentId", "==", assessmentId)
+      .where("userId", "==", uid)
+      .get();
+
+    const maxAttempt = existingAttempts.docs.reduce((max, d) => {
+      const value = Number(d.data()?.attemptNumber || 0);
+      return value > max ? value : max;
+    }, 0);
+
+    const submissionRef = await adminDb
+      .collection("assessmentSubmissions")
+      .add({
+        assessmentId,
+        userId: uid,
+        courseId,
+        answers: [],
+        status: "pending",
+        attemptNumber: maxAttempt + 1,
+        startedAt: Timestamp.now(),
+      });
+
+    return { success: true, submissionId: submissionRef.id };
+  } catch (error) {
+    console.error("Start Assessment Attempt Error:", error);
+    return { error: "Erro ao iniciar avaliação" };
+  }
+}
+
+/**
+ * Submit an assessment attempt answer payload before grading.
+ */
+export async function submitAssessmentAttempt(
+  submissionId: string,
+  answers: StudentAnswer[],
+) {
+  try {
+    const claims = await requireUserClaims();
+    const uid = claims.uid;
+
+    const submissionRef = adminDb
+      .collection("assessmentSubmissions")
+      .doc(submissionId);
+    const submissionSnap = await submissionRef.get();
+    if (!submissionSnap.exists) {
+      return { error: "Submissão não encontrada" };
+    }
+
+    const submission = submissionSnap.data() as AssessmentSubmissionDoc;
+    if (submission.userId !== uid) {
+      return { error: "Acesso negado" };
+    }
+
+    await submissionRef.update({
+      answers,
+      status: "submitted",
+      submittedAt: Timestamp.now(),
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Submit Assessment Attempt Error:", error);
+    return { error: "Erro ao enviar avaliação" };
+  }
+}
+
 /**
  * Grade an assessment submission
  * Auto-grades multiple choice and true/false

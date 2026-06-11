@@ -14,6 +14,7 @@ import {
 import { motion } from "framer-motion";
 import { communityService } from "@/services/communityService";
 import { CommunityThreadDoc } from "@/types/lms";
+import { EmptyState } from "@/components/ui/EmptyState";
 import Link from "next/link";
 // Removed date-fns
 
@@ -170,15 +171,11 @@ export default function CommunityPage() {
             </motion.div>
           ))
         ) : (
-          <div className="flex flex-col items-center justify-center py-20 bg-stone-50 rounded-xl border border-dashed border-stone-200">
-            <MessageCircle size={48} className="text-stone-300 mb-4" />
-            <h3 className="text-lg font-bold text-stone-700">
-              Comunidade Silenciosa
-            </h3>
-            <p className="text-stone-500 text-sm mb-6">
-              Seja o primeiro a iniciar uma discussão!
-            </p>
-          </div>
+          <EmptyState
+            icon={MessageCircle}
+            title="Comunidade Silenciosa"
+            description="Seja o primeiro a iniciar uma discussão!"
+          />
         )}
       </div>
     </div>

@@ -20,7 +20,7 @@ export function ErrorState({
   return (
     <div className="h-full flex flex-col items-center justify-center p-8">
       <EmptyState
-        icon={<AlertCircle size={32} className="text-error animate-pulse" />}
+        icon={AlertCircle}
         title={title}
         description={
           description ||

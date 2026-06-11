@@ -1,18 +1,17 @@
 "use server";
 
-import { adminDb } from "@/lib/firebase/admin";
-import { EnrollmentDoc, CourseDoc } from "@/types/lms";
+import { CourseDoc } from "@/types/lms";
 import {
   AccessErrorCode,
   AccessError,
   AccessContext,
   AuthError,
-  ForbiddenError,
   NotFoundError,
-  ContentUnavailableError,
 } from "./access-types";
 import { isCourseGloballyBlocked, isEnrollmentAllowed } from "./access-policy";
 import { logger } from "@/lib/logger";
+import { getCourseSnapshot } from "@/lib/repositories/courseRepository.server";
+import { findEnrollmentForCourse } from "@/lib/repositories/enrollmentRepository.server";
 
 /**
  * Canonical Server-Side Access Guard.
@@ -21,15 +20,14 @@ import { logger } from "@/lib/logger";
 export async function assertCanAccessCourse(
   uid: string | undefined,
   courseId: string,
+  options?: {
+    isAdmin?: boolean;
+  },
 ): Promise<AccessContext> {
   if (!uid) throw new AuthError();
 
-  // 0. Admin Override Gate - FAST PATH
-  const userSnap = await adminDb.collection("users").doc(uid).get();
-  const userData = userSnap.data();
-  const isAdmin = userData?.role?.toLowerCase().trim() === "admin";
-
-  if (isAdmin) {
+  // 0. Admin Override Gate - only from verified claims passed by caller
+  if (options?.isAdmin === true) {
     return {
       uid,
       courseId,
@@ -40,7 +38,7 @@ export async function assertCanAccessCourse(
   }
 
   // 1. Course Level Visibility Check (Fetch FIRST to verify existence)
-  const courseSnap = await adminDb.collection("courses").doc(courseId).get();
+  const courseSnap = await getCourseSnapshot(courseId);
   if (!courseSnap.exists) {
     throw new NotFoundError("Course");
   }
@@ -68,25 +66,8 @@ export async function assertCanAccessCourse(
   }
 
   // 2. Enrollment Lookup (deterministic ID + compatibility fallback)
-  const enrollmentId = `${uid}_${courseId}`;
-  const altEnrollmentId = `${courseId}_${uid}`;
-
-  let enrollmentSnap = await adminDb
-    .collection("enrollments")
-    .doc(enrollmentId)
-    .get();
-
-  // Try alternate ID if first one fails
-  if (!enrollmentSnap.exists) {
-    enrollmentSnap = await adminDb
-      .collection("enrollments")
-      .doc(altEnrollmentId)
-      .get();
-  }
-
-  let enrollment = enrollmentSnap.exists
-    ? (enrollmentSnap.data() as EnrollmentDoc)
-    : null;
+  const enrollmentResult = await findEnrollmentForCourse(uid, courseId);
+  const enrollment = enrollmentResult?.data || null;
 
   if (!enrollment) {
     logger.warn("Access Denied: No Enrollment", { courseId, uid });
@@ -144,7 +125,7 @@ export async function assertCanAccessCourse(
   return {
     uid,
     courseId,
-    enrollmentId: enrollmentSnap.id || `profile_${uid}_${courseId}`,
+    enrollmentId: enrollmentResult?.id || `profile_${uid}_${courseId}`,
     paymentMethod: enrollment.paymentMethod || "free",
     courseVersion: enrollment.courseVersionAtEnrollment,
     accessUntil: enrollment.accessUntil?.toDate().toISOString(),

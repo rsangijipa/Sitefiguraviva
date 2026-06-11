@@ -264,7 +264,7 @@ export default function GalleryClient({
             {filteredPhotos.length === 0 && (
               <div className="col-span-full py-20 bg-stone-50/50 rounded-[2rem] border border-dashed border-stone-200">
                 <EmptyState
-                  icon={<ImageIcon size={32} />}
+                  icon={ImageIcon}
                   title="Nenhum Momento Encontrado"
                   description="Não encontramos imagens para os filtros selecionados. Tente ajustar sua busca ou categoria."
                   className="bg-transparent border-none shadow-none"

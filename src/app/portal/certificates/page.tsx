@@ -1,22 +1,13 @@
-import { auth, db } from "@/lib/firebase/admin";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { db } from "@/lib/firebase/admin";
 import { Certificate } from "@/types/certificate";
 import { CertificateCardWrapper } from "@/components/portal/certificates/CertificateCardWrapper"; // Client wrapper for clicks
+import { EmptyState } from "@/components/ui/EmptyState";
 import { Award } from "lucide-react";
+import { requireSession } from "@/lib/auth/server";
 
 export default async function CertificatesPage() {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("session")?.value;
-  if (!sessionCookie) redirect("/auth");
-
-  let uid;
-  try {
-    const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
-    uid = decodedClaims.uid;
-  } catch {
-    redirect("/auth");
-  }
+  const session = await requireSession("/auth");
+  const uid = session.uid;
 
   // Fetch Certificates (Removed orderBy to avoid index requirement)
   const certsSnap = await db
@@ -65,18 +56,11 @@ export default async function CertificatesPage() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-20 px-6 bg-stone-50 rounded-2xl border border-stone-100 border-dashed">
-          <div className="w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-4 text-stone-300">
-            <Award size={32} />
-          </div>
-          <h2 className="text-lg font-bold text-stone-700 mb-2">
-            Nenhum certificado ainda
-          </h2>
-          <p className="text-stone-500 max-w-sm mx-auto">
-            Complete 100% de um curso para desbloquear seu certificado oficial.
-            Continue firme na jornada!
-          </p>
-        </div>
+        <EmptyState
+          icon={Award}
+          title="Nenhum certificado ainda"
+          description="Complete 100% de um curso para desbloquear seu certificado oficial. Continue firme na jornada!"
+        />
       )}
     </div>
   );

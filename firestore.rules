@@ -7,21 +7,18 @@ service cloud.firestore {
     function uid() { return request.auth.uid; }
     
     function isAdmin() {
-      return isSignedIn() && (
-        request.auth.token.admin == true ||
-        (exists(/databases/$(database)/documents/users/$(uid())) &&
-         get(/databases/$(database)/documents/users/$(uid())).data.role in ['admin', 'administrador', 'ADMIN'] &&
-         get(/databases/$(database)/documents/users/$(uid())).data.isActive == true)
-      );
+      return isSignedIn() &&
+        (request.auth.token.admin == true ||
+         request.auth.token.role in ['admin', 'administrador', 'ADMIN']) &&
+        request.auth.token.isActive != false;
     }
     
     function isStaff() {
-      return isAdmin() || (isSignedIn() && (
-        request.auth.token.role == 'tutor' ||
-        (exists(/databases/$(database)/documents/users/$(uid())) &&
-         get(/databases/$(database)/documents/users/$(uid())).data.role == 'tutor' &&
-         get(/databases/$(database)/documents/users/$(uid())).data.isActive == true)
-      ));
+      return isAdmin() || (
+        isSignedIn() &&
+        request.auth.token.role == 'tutor' &&
+        request.auth.token.isActive != false
+      );
     }
 
     function isEnrolled(courseId) {
@@ -35,9 +32,48 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    function isSafeProfileFieldUpdate() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        'displayName',
+        'photoURL',
+        'bio',
+        'phone',
+        'whatsapp',
+        'timezone',
+        'locale',
+        'preferences',
+        'notificationPreferences',
+        'updatedAt',
+        'lastSeenAt'
+      ]);
+    }
+
+    function isSafeProfileCreate() {
+      return request.resource.data.keys().hasOnly([
+        'uid',
+        'displayName',
+        'photoURL',
+        'bio',
+        'phone',
+        'whatsapp',
+        'timezone',
+        'locale',
+        'preferences',
+        'notificationPreferences',
+        'createdAt',
+        'updatedAt',
+        'lastSeenAt'
+      ]);
+    }
+
     // USERS
     match /users/{userId} {
-      allow read, write: if isSignedIn() && userId == uid();
+      allow read: if isSignedIn() && userId == uid();
+      allow create: if isSignedIn() && userId == uid() &&
+                    request.resource.data.uid == uid() &&
+                    isSafeProfileCreate();
+      allow update: if isSignedIn() && userId == uid() &&
+                    isSafeProfileFieldUpdate();
       allow read, write: if isAdmin();
       
       // subcollections like enrollments
@@ -118,7 +154,7 @@ service cloud.firestore {
     // PROGRESS
     match /progress/{progressId} {
       allow read: if isAdmin() || isStaff() || (isSignedIn() && resource.data.userId == uid());
-      allow write: if isSignedIn() && request.resource.data.userId == uid();
+      allow write: if false;
     }
 
     // CERTIFICATES
@@ -161,8 +197,22 @@ service cloud.firestore {
 
     // ASSESSMENT SUBMISSIONS
     match /assessmentSubmissions/{submissionId} {
-      allow read: if isAdmin() || (isSignedIn() && resource.data.studentId == uid());
-      allow create: if isSignedIn();
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == uid());
+      allow create: if isSignedIn() &&
+                    request.resource.data.userId == uid() &&
+                    request.resource.data.status in ['pending', 'submitted'] &&
+                    !request.resource.data.keys().hasAny(['gradedBy', 'score', 'percentage', 'passed']) &&
+                    (
+                      !request.resource.data.keys().hasAny(['courseId']) ||
+                      isEnrolled(request.resource.data.courseId)
+                    );
+      allow update: if isSignedIn() &&
+                    resource.data.userId == uid() &&
+                    request.resource.data.userId == uid() &&
+                    request.resource.data.assessmentId == resource.data.assessmentId &&
+                    request.resource.data.courseId == resource.data.courseId &&
+                    !request.resource.data.diff(resource.data).affectedKeys().hasAny(['gradedBy', 'score', 'percentage', 'passed']) &&
+                    request.resource.data.status in ['pending', 'submitted'];
       allow update: if isAdmin();
       allow delete: if isAdmin();
     }
@@ -224,12 +274,12 @@ service cloud.firestore {
     // STATS & INTERACTION
     match /stats/{statId} {
       allow read: if true;
-      allow write: if statId == 'tree'; // Allow public increment for the Feelings Tree
+      allow write: if statId == 'tree' && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['clicks']);
     }
 
     // ANALYTICS (Optional/Pre-emptive)
     match /analytics_events/{eventId} {
-      allow create: if true;
+      allow create: if isSignedIn();
       allow read, write: if isAdmin();
     }
   }

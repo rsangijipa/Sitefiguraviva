@@ -70,6 +70,14 @@ export const metadata: Metadata = {
     ],
   },
   manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Figura Viva",
+  },
+  formatDetection: {
+    telephone: false,
+  },
 };
 
 export const viewport = {
@@ -139,7 +147,13 @@ export default async function RootLayout({
           <WebVitalsReporter />
           <GoogleAnalytics />
           <PushNotificationManager />
-          <LenisProvider>{children}</LenisProvider>
+          <main
+            id="main-content"
+            className="flex-1 w-full outline-none"
+            tabIndex={-1}
+          >
+            <LenisProvider>{children}</LenisProvider>
+          </main>
           <FloatingAudioPlayer />
           {isImpersonating && <ImpersonationBanner />}
         </Providers>

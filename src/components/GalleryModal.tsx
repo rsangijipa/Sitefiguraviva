@@ -12,8 +12,28 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { Modal, ModalContent, ModalBody } from "./ui/Modal";
+import { Variants } from "framer-motion";
 
-export default function GalleryModal({ isOpen, onClose, gallery }) {
+export interface Photo {
+  id: string;
+  src?: string;
+  url?: string;
+  title: string;
+  caption?: string;
+  tags?: string | string[];
+}
+
+interface GalleryModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  gallery: Photo[];
+}
+
+export default function GalleryModal({
+  isOpen,
+  onClose,
+  gallery,
+}: GalleryModalProps) {
   // Fallback if empty (handling async state or empty DB)
   const safeGallery = useMemo(
     () =>
@@ -109,8 +129,7 @@ export default function GalleryModal({ isOpen, onClose, gallery }) {
     }
   };
 
-  /** @type {any} */
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -122,13 +141,12 @@ export default function GalleryModal({ isOpen, onClose, gallery }) {
     exit: { opacity: 0 },
   };
 
-  /** @type {any} */
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { y: 20, opacity: 0 },
     visible: {
       y: 0,
       opacity: 1,
-      transition: { duration: 0.5, ease: "easeOut" },
+      transition: { duration: 0.5, ease: "easeOut" as const },
     },
   };
 

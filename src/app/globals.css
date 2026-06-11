@@ -78,7 +78,7 @@
   h4,
   h5,
   h6 {
-    @apply font-serif font-semibold text-primary;
+    @apply font-serif font-semibold;
   }
 }
 
@@ -127,13 +127,11 @@
 
   .text-body-lg {
     @apply font-sans text-fluid-body text-primary leading-relaxed;
-    opacity: 0.7;
   }
 
   /* Reading Utility: Organic Prose */
   .prose-organic {
     @apply max-w-[70ch] mx-auto text-primary leading-[1.7] space-y-6 text-lg;
-    opacity: 0.8;
   }
 
   .prose-organic h1,

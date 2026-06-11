@@ -28,10 +28,24 @@ if (!supabaseUrl || !serviceKey) {
 
 const supabase = createClient(supabaseUrl, serviceKey);
 
-const USERS = [
-    { email: 'richardsangi@figuraviva.com', password: 'adminfiguraviva2025', role: 'admin' },
-    { email: 'liliangusmao@figuraviva.com', password: 'adminfiguraviva2025', role: 'admin' }
-];
+const usersConfigRaw = process.env.ADMIN_USERS_JSON;
+if (!usersConfigRaw) {
+    console.error("❌ Missing ADMIN_USERS_JSON. Example: [{\"email\":\"admin@domain.com\",\"password\":\"...\",\"role\":\"admin\"}]");
+    process.exit(1);
+}
+
+let USERS = [];
+try {
+    USERS = JSON.parse(usersConfigRaw);
+} catch (error) {
+    console.error("❌ ADMIN_USERS_JSON must be valid JSON.");
+    process.exit(1);
+}
+
+if (!Array.isArray(USERS) || USERS.length === 0) {
+    console.error("❌ ADMIN_USERS_JSON must be a non-empty array.");
+    process.exit(1);
+}
 
 async function manageUsers() {
     console.log("🚀 Starting Admin User Creation...");
