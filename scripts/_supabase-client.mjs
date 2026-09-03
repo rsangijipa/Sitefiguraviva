@@ -1,5 +1,10 @@
-import "dotenv/config";
+import dotenv from "dotenv";
 import { createClient } from "@supabase/supabase-js";
+
+// The project keeps its secrets in .env.local, which dotenv does not read by
+// default, so load it explicitly before falling back to a plain .env.
+dotenv.config({ path: ".env.local" });
+dotenv.config();
 
 /**
  * Shared Supabase client for the maintenance scripts.
