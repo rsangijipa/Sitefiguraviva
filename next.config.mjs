@@ -4,6 +4,7 @@ const isProd = process.env.NODE_ENV === "production";
 const nextConfig = {
     images: {
         remotePatterns: [
+            { protocol: 'https', hostname: '*.supabase.co' },
             { protocol: 'https', hostname: 'firebasestorage.googleapis.com' },
             { protocol: 'https', hostname: 'storage.googleapis.com' },
             { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
@@ -17,7 +18,7 @@ const nextConfig = {
             { key: 'X-Content-Type-Options', value: 'nosniff' },
             { key: 'X-Frame-Options', value: 'DENY' },
             { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-            { key: 'Content-Security-Policy', value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.google-analytics.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://firebasestorage.googleapis.com https://storage.googleapis.com https://lh3.googleusercontent.com https://img.youtube.com https://i.ytimg.com; font-src 'self' data:; connect-src 'self' https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://firebasestorage.googleapis.com wss://*.firebaseio.com https://*.sentry.io; frame-src 'self' https://www.youtube.com;" }
+            { key: 'Content-Security-Policy', value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.google-analytics.com https://www.googletagmanager.com https://www.gstatic.com https://*.behold.so https://w.behold.so; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.supabase.co https://firebasestorage.googleapis.com https://storage.googleapis.com https://lh3.googleusercontent.com https://img.youtube.com https://i.ytimg.com https://*.behold.so; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.behold.so https://w.behold.so https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.google.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://*.googleapis.com https://firebasestorage.googleapis.com wss://*.firebaseio.com https://*.sentry.io; frame-src 'self' https://www.youtube.com https://*.behold.so;" }
         ];
 
         if (isProd) {
@@ -48,6 +49,15 @@ const nextConfig = {
         serverActions: {
             bodySizeLimit: '5mb',
         },
+        // Most files import icons straight from "lucide-react" rather than the
+        // curated barrel in src/components/icons, so without this the whole
+        // icon set rides along. Same idea for the other barrel-heavy packages.
+        optimizePackageImports: [
+            'lucide-react',
+            'framer-motion',
+            'recharts',
+            '@hello-pangea/dnd',
+        ],
     },
 };
 
