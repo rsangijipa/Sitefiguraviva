@@ -43,7 +43,10 @@ node scripts/migrate-supabase.js
 
 The new system uses "Custom Claims" for admin security (RBAC).
 
-1. Create a user via the Login page (Sign Up is not implemented publicly, so create via Firebase Console > Authentication > Add User).
+1. Create a user. Public sign-up exists, but it is bound to enrollment: an
+   account can only be created from `/auth?mode=signup` together with a
+   published course (see `src/app/actions/signup.ts`). To create a standalone
+   admin account, use Firebase Console > Authentication > Add User.
 2. Copy the **User UID**.
 3. Run the script:
 

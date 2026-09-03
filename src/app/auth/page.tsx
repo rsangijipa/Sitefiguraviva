@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/Input";
 import PageShell from "@/components/ui/PageShell";
 import { signInWithGoogle } from "@/lib/firebase/client";
 import { ensureUserProfileAction } from "@/app/actions/auth";
+import { registerForCourseAction } from "@/app/actions/signup";
 import { getRedirectPathForRole } from "@/lib/auth/authService";
 
 // Error mapping
@@ -39,7 +40,7 @@ const getFriendlyErrorMessage = (code: string) => {
 };
 
 function AuthContent() {
-  const { signIn, signUp } = useAuth();
+  const { signIn } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   // Helper hook for content (if used)
@@ -69,7 +70,7 @@ function AuthContent() {
     setError("");
   }, [mode]);
 
-  const handleSuccess = async (user: any) => {
+  const handleSuccess = async (user: any, preferredPath?: string) => {
     try {
       // A. Sync Profile
       const token = await user.getIdToken();
@@ -89,6 +90,12 @@ function AuthContent() {
       const userRole = syncResult.user?.role || "student";
 
       // D. Redirect Logic
+      // Priority 0: Continue the enrollment the account was created for.
+      if (preferredPath) {
+        router.push(preferredPath);
+        return;
+      }
+
       // Priority 1: Use role-based redirect as default
       let targetPath = getRedirectPathForRole(userRole);
 
@@ -120,13 +127,32 @@ function AuthContent() {
     setLoading(true);
 
     try {
-      let userCredential;
       if (isSignup) {
-        userCredential = await signUp(email, password);
-        // Update basic profile logic if needed (e.g. displayName)
-      } else {
-        userCredential = await signIn(email, password);
+        // Accounts are created server-side and only in the context of a
+        // course, so name/phone are persisted and the request is rate limited.
+        const result = await registerForCourseAction({
+          fullName,
+          phone,
+          email,
+          password,
+          courseId: selectedCourse,
+        });
+
+        if (!result.success) {
+          setError(result.error || "Não foi possível concluir o cadastro.");
+          setLoading(false);
+          return;
+        }
+
+        const credential = await signIn(email, password);
+        await handleSuccess(
+          credential.user,
+          `/inscricao/${result.courseId || selectedCourse}`,
+        );
+        return;
       }
+
+      const userCredential = await signIn(email, password);
       await handleSuccess(userCredential.user);
     } catch (err: any) {
       console.error(err);
@@ -138,6 +164,13 @@ function AuthContent() {
 
   const handleGoogleAuth = async () => {
     setError("");
+
+    // Same rule as the e-mail form: new accounts exist because of a course.
+    if (isSignup && !selectedCourse) {
+      setError("Selecione o curso que deseja cursar para criar sua conta.");
+      return;
+    }
+
     setLoading(true);
     const { user, error: googleError } = await signInWithGoogle();
 
@@ -149,7 +182,10 @@ function AuthContent() {
     }
 
     if (user) {
-      await handleSuccess(user);
+      await handleSuccess(
+        user,
+        isSignup ? `/inscricao/${selectedCourse}` : undefined,
+      );
     } else {
       setLoading(false);
     }
@@ -262,36 +298,47 @@ function AuthContent() {
                     placeholder="(00) 00000-0000"
                     autoComplete="tel"
                   />
-                  {courses.length > 0 && (
-                    <div className="space-y-1">
-                      <label
-                        htmlFor="course-interest"
-                        className="text-[10px] uppercase font-bold text-stone-500 ml-1"
-                      >
-                        Interesse
-                      </label>
-                      <div className="relative">
-                        <select
-                          id="course-interest"
-                          name="course-interest"
-                          value={selectedCourse}
-                          onChange={(e) => setSelectedCourse(e.target.value)}
-                          className="w-full h-12 px-4 rounded-xl border border-stone-200 bg-stone-50 text-sm focus:ring-2 focus:ring-primary/20 outline-none appearance-none"
-                        >
-                          <option value="">Selecione um curso...</option>
-                          {courses.map((c: any) => (
-                            <option key={c.id} value={c.id}>
-                              {c.title}
-                            </option>
-                          ))}
-                        </select>
-                        <ChevronDown
-                          size={16}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
-                        />
-                      </div>
-                    </div>
-                  )}
+                  <div className="space-y-1">
+                    <label
+                      htmlFor="course-interest"
+                      className="text-[10px] uppercase font-bold text-stone-500 ml-1"
+                    >
+                      Curso desejado
+                    </label>
+                    {courses.length > 0 ? (
+                      <>
+                        <div className="relative">
+                          <select
+                            id="course-interest"
+                            name="course-interest"
+                            value={selectedCourse}
+                            onChange={(e) => setSelectedCourse(e.target.value)}
+                            required
+                            className="w-full h-12 px-4 rounded-xl border border-stone-200 bg-stone-50 text-sm focus:ring-2 focus:ring-primary/20 outline-none appearance-none"
+                          >
+                            <option value="">Selecione um curso...</option>
+                            {courses.map((c: any) => (
+                              <option key={c.id} value={c.id}>
+                                {c.title}
+                              </option>
+                            ))}
+                          </select>
+                          <ChevronDown
+                            size={16}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
+                          />
+                        </div>
+                        <p className="text-[10px] text-stone-400 ml-1 pt-1">
+                          A conta é criada junto com a sua inscrição no curso.
+                        </p>
+                      </>
+                    ) : (
+                      <p className="text-xs text-stone-500 bg-stone-50 border border-stone-200 rounded-xl p-3">
+                        Não há turmas abertas no momento. Assim que uma nova
+                        turma for anunciada, a inscrição ficará disponível aqui.
+                      </p>
+                    )}
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -340,8 +387,8 @@ function AuthContent() {
 
             <button
               type="submit"
-              disabled={loading}
-              className="w-full h-12 bg-primary text-white font-bold rounded-xl shadow-lg hover:shadow-primary/30 hover:bg-primary/90 transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-xs"
+              disabled={loading || (isSignup && !selectedCourse)}
+              className="w-full h-12 bg-primary text-white font-bold rounded-xl shadow-lg hover:shadow-primary/30 hover:bg-primary/90 transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-xs disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
             >
               {loading ? (
                 <Loader2 className="animate-spin" size={18} />
