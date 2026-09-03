@@ -12,6 +12,7 @@
     "lint": "eslint",
     "seed": "node scripts/sync_data.mjs",
     "test": "jest",
+    "test:rules": "firebase emulators:exec --only firestore --project demo-sitefiguraviva \"jest src/security --runInBand\"",
     "test:e2e": "playwright test",
     "test:watch": "jest --watch",
     "typecheck": "tsc --noEmit",

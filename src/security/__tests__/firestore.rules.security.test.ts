@@ -173,4 +173,51 @@ describeWithEmulator("firestore security rules (critical abuse cases)", () => {
       }),
     );
   });
+
+  it("denies client-side creation of applications", async () => {
+    // Public interest submissions go through /api/applications/submit, which
+    // uses the Admin SDK and bypasses rules. Nothing should be able to write
+    // here from a client, signed in or not.
+    const anonDb = testEnv.unauthenticatedContext().firestore();
+
+    await assertFails(
+      setDoc(doc(anonDb, "applications/spam-1"), {
+        name: "Spam",
+        courseId: "course-1",
+      }),
+    );
+
+    const studentDb = testEnv
+      .authenticatedContext("u1", {
+        role: "student",
+        admin: false,
+        isActive: true,
+      })
+      .firestore();
+
+    await assertFails(
+      setDoc(doc(studentDb, "applications/spam-2"), {
+        name: "Spam",
+        courseId: "course-1",
+      }),
+    );
+  });
+
+  it("allows an admin to manage applications", async () => {
+    const adminDb = testEnv
+      .authenticatedContext("admin-1", {
+        role: "admin",
+        admin: true,
+        isActive: true,
+      })
+      .firestore();
+
+    await assertSucceeds(
+      setDoc(doc(adminDb, "applications/a1"), {
+        name: "Aluna",
+        courseId: "course-1",
+        status: "submitted",
+      }),
+    );
+  });
 });
