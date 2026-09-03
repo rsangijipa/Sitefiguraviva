@@ -1,6 +1,7 @@
 import { env } from "@/config/env";
 import { getAnalytics, logEvent, isSupported } from "firebase/analytics";
-import { app } from "@/lib/firebase/client"; // Ensure app is exported from client init
+import { app } from "@/lib/firebase/client";
+import { CONSENT_EVENT, CONSENT_STORAGE_KEY } from "@/lib/consent.constants";
 
 type EventName =
   | "page_view"
@@ -11,7 +12,7 @@ type EventName =
   | "auth_logout"
   | "feature_usage"
   | "web_vital"
-  | "gamification_event"; // Added for tracking gamification
+  | "gamification_event";
 
 interface TelemetryProperties {
   [key: string]: string | number | boolean | undefined | null;
@@ -22,50 +23,73 @@ class TelemetryService {
   private analytics: any = null;
 
   constructor() {
-    if (typeof window !== "undefined") {
-      isSupported()
-        .then((supported) => {
-          if (supported) {
-            this.analytics = getAnalytics(app);
-          }
-        })
-        .catch((err) => console.warn("Firebase Analytics not supported", err));
+    if (typeof window === "undefined") return;
+
+    this.initAnalyticsIfConsented();
+
+    // Pick up the visitor's decision without a reload, and mirror it across
+    // tabs, the same way the cookie banner does.
+    window.addEventListener(CONSENT_EVENT, () =>
+      this.initAnalyticsIfConsented(),
+    );
+    window.addEventListener("storage", () => this.initAnalyticsIfConsented());
+  }
+
+  /**
+   * Firebase Analytics is audience measurement, so under the LGPD it waits for
+   * the same opt-in as Google Analytics instead of initialising on import.
+   */
+  private hasConsent(): boolean {
+    try {
+      return window.localStorage.getItem(CONSENT_STORAGE_KEY) === "granted";
+    } catch {
+      return false;
     }
   }
 
+  private initAnalyticsIfConsented() {
+    if (this.analytics || !this.hasConsent()) return;
+
+    isSupported()
+      .then((supported) => {
+        if (!supported || !this.hasConsent()) return;
+        try {
+          this.analytics = getAnalytics(app);
+        } catch (e) {
+          if (this.isDev)
+            console.warn("[Telemetry] Firebase Analytics init error", e);
+        }
+      })
+      .catch(() => {
+        // Silent fallback if analytics is blocked or unsupported
+      });
+  }
+
   public track(event: string, properties?: Record<string, any>) {
-    // 1. Dev Logging
     if (this.isDev) {
       const scope = typeof window === "undefined" ? "[Server]" : "[Client]";
       console.log(`${scope} [Telemetry] ${event}`, properties);
     }
 
-    // 2. Client-Side Analytics (Firebase)
-    if (this.analytics && typeof window !== "undefined") {
+    // Re-checked per call so revoking consent stops collection immediately.
+    if (this.analytics && typeof window !== "undefined" && this.hasConsent()) {
       try {
         logEvent(this.analytics, event, properties || {});
       } catch (e) {
-        if (this.isDev) console.warn("Analytics Error", e);
+        // Ignore analytics tracking errors
       }
-    }
-
-    // 3. Server-Side Analytics (Future Sentry/PostHog)
-    if (typeof window === "undefined") {
-      // TODO: Add Server-Side Analytics provider here
     }
   }
 
   public error(error: any, context?: Record<string, any>) {
     const scope = typeof window === "undefined" ? "[Server]" : "[Client]";
     console.error(`${scope} [Telemetry Error]`, error, context);
-    // TODO: Sentry.captureException(error, { extra: context });
   }
 
   public identify(userId: string, traits?: Record<string, any>) {
     if (this.isDev) {
       console.log(`[Telemetry] Identify: ${userId}`, traits);
     }
-    // TODO: Set user context for Sentry/PostHog
   }
 }
 

@@ -8,10 +8,6 @@ jest.mock("next/headers", () => ({
   ),
 }));
 
-jest.mock("firebase-admin/firestore", () => ({
-  Timestamp: { now: jest.fn(() => "MOCK_TIMESTAMP") },
-}));
-
 const mockRateLimit = jest.fn();
 jest.mock("@/lib/rateLimit", () => ({
   rateLimit: (...args: unknown[]) => mockRateLimit(...args),
@@ -19,25 +15,28 @@ jest.mock("@/lib/rateLimit", () => ({
   RateLimitPresets: { SIGNUP_ATTEMPT: { maxRequests: 5, windowMs: 600000 } },
 }));
 
+const mockCourseMaybeSingle = jest.fn();
 const mockCreateUser = jest.fn();
-const mockSetCustomUserClaims = jest.fn();
-const mockCourseGet = jest.fn();
-const mockUserSet = jest.fn();
+const mockProfileUpsert = jest.fn();
 
-jest.mock("@/lib/firebase/admin", () => ({
-  adminAuth: {
-    createUser: (...args: unknown[]) => mockCreateUser(...args),
-    setCustomUserClaims: (...args: unknown[]) =>
-      mockSetCustomUserClaims(...args),
-  },
-  adminDb: {
-    collection: jest.fn((name: string) => ({
-      doc: jest.fn(() => {
-        if (name === "courses") return { get: mockCourseGet };
-        return { set: mockUserSet };
-      }),
-    })),
-  },
+jest.mock("@/infrastructure/supabase/server", () => ({
+  createSupabaseServiceClient: () => ({
+    auth: {
+      admin: {
+        createUser: (...args: unknown[]) => mockCreateUser(...args),
+      },
+    },
+    from: (table: string) => {
+      if (table === "courses") {
+        return {
+          select: () => ({
+            eq: () => ({ maybeSingle: mockCourseMaybeSingle }),
+          }),
+        };
+      }
+      return { upsert: (...args: unknown[]) => mockProfileUpsert(...args) };
+    },
+  }),
 }));
 
 const validInput = {
@@ -48,11 +47,6 @@ const validInput = {
   courseId: "curso-gestalt",
 };
 
-const publishedCourse = {
-  exists: true,
-  data: () => ({ title: "Formação em Gestalt", isPublished: true }),
-};
-
 describe("registerForCourseAction", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -61,10 +55,14 @@ describe("registerForCourseAction", () => {
       remaining: 4,
       resetAt: Date.now() + 60000,
     });
-    mockCourseGet.mockResolvedValue(publishedCourse);
-    mockCreateUser.mockResolvedValue({ uid: "uid-123" });
-    mockSetCustomUserClaims.mockResolvedValue(undefined);
-    mockUserSet.mockResolvedValue(undefined);
+    mockCourseMaybeSingle.mockResolvedValue({
+      data: { id: "curso-gestalt", is_published: true },
+    });
+    mockCreateUser.mockResolvedValue({
+      data: { user: { id: "uuid-123" } },
+      error: null,
+    });
+    mockProfileUpsert.mockResolvedValue({ error: null });
   });
 
   it("refuses to create an account without a course", async () => {
@@ -78,7 +76,7 @@ describe("registerForCourseAction", () => {
   });
 
   it("refuses when the course does not exist", async () => {
-    mockCourseGet.mockResolvedValue({ exists: false, data: () => undefined });
+    mockCourseMaybeSingle.mockResolvedValue({ data: null });
 
     const result = await registerForCourseAction(validInput);
 
@@ -87,9 +85,8 @@ describe("registerForCourseAction", () => {
   });
 
   it("refuses when the course is not published", async () => {
-    mockCourseGet.mockResolvedValue({
-      exists: true,
-      data: () => ({ title: "Rascunho", isPublished: false }),
+    mockCourseMaybeSingle.mockResolvedValue({
+      data: { id: "curso-gestalt", is_published: false },
     });
 
     const result = await registerForCourseAction(validInput);
@@ -98,7 +95,7 @@ describe("registerForCourseAction", () => {
     expect(mockCreateUser).not.toHaveBeenCalled();
   });
 
-  it("refuses a weak password before touching Firebase", async () => {
+  it("refuses a weak password before touching Supabase", async () => {
     const result = await registerForCourseAction({
       ...validInput,
       password: "123",
@@ -130,41 +127,39 @@ describe("registerForCourseAction", () => {
       expect.objectContaining({
         email: "maria@example.com",
         password: "senha-forte-123",
-        displayName: "Maria Souza",
+        user_metadata: expect.objectContaining({
+          full_name: "Maria Souza",
+          phone: "(69) 99999-1234",
+          course_interest: "curso-gestalt",
+        }),
       }),
     );
 
-    // The old client-side signup dropped name and phone on the floor.
-    expect(mockUserSet).toHaveBeenCalledWith(
+    // The old client-side signup dropped the name on the floor.
+    expect(mockProfileUpsert).toHaveBeenCalledWith(
       expect.objectContaining({
-        uid: "uid-123",
+        id: "uuid-123",
         email: "maria@example.com",
-        displayName: "Maria Souza",
-        phone: "(69) 99999-1234",
+        display_name: "Maria Souza",
         role: "student",
-        isActive: true,
-        courseInterest: "curso-gestalt",
+        is_active: true,
       }),
-      expect.anything(),
     );
-
-    expect(mockSetCustomUserClaims).toHaveBeenCalledWith("uid-123", {
-      role: "student",
-      admin: false,
-      isActive: true,
-    });
   });
 
   it("reports an already-registered email without leaking internals", async () => {
-    mockCreateUser.mockRejectedValue({
-      code: "auth/email-already-exists",
-      message: "The email address is already in use by another account.",
+    mockCreateUser.mockResolvedValue({
+      data: { user: null },
+      error: {
+        code: "email_exists",
+        message: "A user with this email address has already been registered",
+      },
     });
 
     const result = await registerForCourseAction(validInput);
 
     expect(result.success).toBe(false);
     expect(result.error).toMatch(/já/i);
-    expect(result.error).not.toMatch(/firebase|auth\//i);
+    expect(result.error).not.toMatch(/supabase|email_exists/i);
   });
 });

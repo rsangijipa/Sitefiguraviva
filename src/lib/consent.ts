@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { CONSENT_EVENT, CONSENT_STORAGE_KEY } from "./consent.constants";
 
 /**
  * Cookie consent (LGPD).
@@ -13,8 +14,7 @@ import { useCallback, useEffect, useState } from "react";
 
 export type ConsentState = "granted" | "denied";
 
-const STORAGE_KEY = "fv:cookie-consent";
-const CONSENT_EVENT = "fv:consent-change";
+const STORAGE_KEY = CONSENT_STORAGE_KEY;
 
 export function readConsent(): ConsentState | null {
   if (typeof window === "undefined") return null;
