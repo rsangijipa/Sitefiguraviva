@@ -31,5 +31,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: route === "" ? 1.0 : 0.7,
   }));
 
-  return [...routes, ...courses, ...posts];
+  const legalRoutes = ["/privacidade", "/termos"].map((route) => ({
+    url: `${baseUrl}${route}`,
+    lastModified: new Date(),
+    changeFrequency: "yearly" as const,
+    priority: 0.3,
+  }));
+
+  return [...routes, ...legalRoutes, ...courses, ...posts];
 }

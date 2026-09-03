@@ -1,6 +1,7 @@
 "use client";
 
 import { Instagram, Mail, MapPin, Phone, ArrowRight } from "lucide-react";
+import CookiePreferencesButton from "@/components/system/CookiePreferencesButton";
 import Link from "next/link";
 import { useInstituteSettings } from "@/hooks/useSiteSettings";
 
@@ -131,17 +132,18 @@ export default function Footer() {
           </p>
           <div className="flex gap-10">
             <Link
-              href="/?modal=privacy"
+              href="/privacidade"
               className="hover:text-paper transition-soft min-h-[44px] flex items-center"
             >
               Privacidade
             </Link>
             <Link
-              href="/?modal=terms"
+              href="/termos"
               className="hover:text-paper transition-soft min-h-[44px] flex items-center"
             >
               Termos
             </Link>
+            <CookiePreferencesButton />
           </div>
         </div>
       </div>
