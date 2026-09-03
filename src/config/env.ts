@@ -38,6 +38,13 @@ const envSchema = z.object({
   FIREBASE_CLIENT_EMAIL: z.string().email().optional(),
   FIREBASE_PRIVATE_KEY: z.string().optional(),
 
+  // Supabase — auth and LMS data since the P2 migration.
+  // Public vars are required in production because the browser client cannot
+  // start without them. The service role key is intentionally NOT validated
+  // here: this schema is also evaluated in the browser, where server-only
+  // vars are always undefined. createSupabaseServiceClient() enforces it.
+  NEXT_PUBLIC_SUPABASE_URL: isProd ? z.string().url() : z.string().optional(),
+
   // Stripe
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
@@ -66,6 +73,7 @@ function validateEnv() {
     FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID,
     FIREBASE_CLIENT_EMAIL: process.env.FIREBASE_CLIENT_EMAIL,
     FIREBASE_PRIVATE_KEY: process.env.FIREBASE_PRIVATE_KEY,
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
     ADMIN_BOOTSTRAP_EMAILS: process.env.ADMIN_BOOTSTRAP_EMAILS,

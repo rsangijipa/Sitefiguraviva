@@ -113,6 +113,10 @@ export const RateLimitPresets = {
   // Auth actions (very strict)
   LOGIN_ATTEMPT: { maxRequests: 5, windowMs: 300000 },
   SIGNUP_ATTEMPT: { maxRequests: 5, windowMs: 600000 },
+  // Exchanging an already-verified Supabase token for the session cookie.
+  // Looser than LOGIN_ATTEMPT because it carries no credentials and every
+  // call must present a valid token, but it runs on each token refresh.
+  SESSION_SYNC: { maxRequests: 30, windowMs: 300000 },
   PASSWORD_RESET: { maxRequests: 3, windowMs: 600000 },
   CERTIFICATE_VERIFY: { maxRequests: 10, windowMs: 60000 }, // P1 addition
 } as const;

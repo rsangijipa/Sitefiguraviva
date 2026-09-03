@@ -2,8 +2,7 @@
 
 import { headers } from "next/headers";
 import { z } from "zod";
-import { Timestamp } from "firebase-admin/firestore";
-import { adminAuth, adminDb } from "@/lib/firebase/admin";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import {
   getClientIdentifier,
   rateLimit,
@@ -12,10 +11,9 @@ import {
 
 /**
  * Account creation is bound to enrollment: an account only exists because
- * someone is signing up for a course. This replaces the previous client-side
- * `createUserWithEmailAndPassword` call, which had no rate limiting, no
- * server-side validation, and silently discarded the name and phone the
- * visitor had just typed.
+ * someone is signing up for a course. Runs server-side so the request is rate
+ * limited, the course is verified, and the name/phone the visitor typed are
+ * actually persisted.
  */
 
 const signupSchema = z.object({
@@ -41,6 +39,17 @@ export interface SignupResult {
   success: boolean;
   courseId?: string;
   error?: string;
+}
+
+function isEmailTakenError(error: any): boolean {
+  const code = String(error?.code || "");
+  const message = String(error?.message || "").toLowerCase();
+  return (
+    code === "email_exists" ||
+    message.includes("already been registered") ||
+    message.includes("already registered") ||
+    message.includes("already exists")
+  );
 }
 
 export async function registerForCourseAction(
@@ -75,57 +84,69 @@ export async function registerForCourseAction(
       };
     }
 
-    // The course gate: no open course, no account.
-    const courseSnap = await adminDb.collection("courses").doc(courseId).get();
-    const course = courseSnap.exists ? courseSnap.data() : null;
+    const supabase = createSupabaseServiceClient();
 
-    if (!course || course.isPublished !== true) {
+    // The course gate: no open course, no account.
+    const { data: course } = await supabase
+      .from("courses")
+      .select("id, is_published")
+      .eq("id", courseId)
+      .maybeSingle();
+
+    if (!course || course.is_published !== true) {
       return {
         success: false,
         error: "Curso indisponível para inscrição. Escolha outro curso.",
       };
     }
 
-    const user = await adminAuth.createUser({
-      email,
-      password,
-      displayName: fullName,
-    });
-
-    await adminAuth.setCustomUserClaims(user.uid, {
-      role: "student",
-      admin: false,
-      isActive: true,
-    });
-
-    await adminDb.collection("users").doc(user.uid).set(
-      {
-        uid: user.uid,
+    // Confirmed on creation so the visitor can be signed in immediately and
+    // continue into the enrollment flow; access to paid content is still
+    // gated by an approved enrollment, not by having an account.
+    const { data: created, error: createError } =
+      await supabase.auth.admin.createUser({
         email,
-        displayName: fullName,
-        phone,
-        role: "student",
-        isActive: true,
-        courseInterest: courseId,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
-      },
-      { merge: true },
-    );
+        password,
+        email_confirm: true,
+        user_metadata: {
+          full_name: fullName,
+          phone,
+          course_interest: courseId,
+        },
+      });
 
-    return { success: true, courseId };
-  } catch (error: any) {
-    if (error?.code === "auth/email-already-exists") {
+    if (createError || !created?.user) {
+      if (isEmailTakenError(createError)) {
+        return {
+          success: false,
+          error: "Este e-mail já possui cadastro. Faça login para continuar.",
+        };
+      }
+
+      console.error("registerForCourseAction createUser failed:", createError);
       return {
         success: false,
-        error: "Este e-mail já possui cadastro. Faça login para continuar.",
+        error: "Não foi possível concluir o cadastro. Tente novamente.",
       };
     }
 
-    if (error?.code === "auth/invalid-password") {
-      return { success: false, error: "Senha inválida ou muito fraca." };
+    const { error: profileError } = await supabase.from("profiles").upsert({
+      id: created.user.id,
+      email,
+      display_name: fullName,
+      role: "student",
+      is_active: true,
+    });
+
+    if (profileError) {
+      console.error(
+        "registerForCourseAction profile upsert failed:",
+        profileError,
+      );
     }
 
+    return { success: true, courseId };
+  } catch (error: any) {
     console.error("registerForCourseAction failed:", error);
     return {
       success: false,
