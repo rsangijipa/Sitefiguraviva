@@ -20,9 +20,10 @@ export async function generateMetadata(): Promise<Metadata> {
       alternates: {
         canonical: "/",
       },
-      openGraph: {
-        images: seo.ogImage ? [{ url: seo.ogImage }] : [],
-      },
+      // Only override the generated card (src/app/opengraph-image.tsx) when an
+      // admin has actually configured a custom image. An empty `images` array
+      // would suppress the fallback and leave shares with no preview at all.
+      ...(seo.ogImage ? { openGraph: { images: [{ url: seo.ogImage }] } } : {}),
     };
   } catch (e) {
     return { alternates: { canonical: "/" } };

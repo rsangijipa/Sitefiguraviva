@@ -86,6 +86,7 @@ import { WebVitalsReporter } from "@/components/system/WebVitalsReporter";
 import LenisProvider from "@/components/providers/LenisProvider";
 import JsonLd from "@/components/system/JsonLd";
 import GoogleAnalytics from "@/components/system/GoogleAnalytics";
+import CookieConsent from "@/components/system/CookieConsent";
 import PushNotificationManager from "@/components/system/PushNotificationManager";
 import FloatingAudioPlayer from "@/components/ui/FloatingAudioPlayer";
 
@@ -138,6 +139,7 @@ export default async function RootLayout({
           />
           <WebVitalsReporter />
           <GoogleAnalytics />
+          <CookieConsent />
           <PushNotificationManager />
           <main
             id="main-content"

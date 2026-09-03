@@ -77,7 +77,7 @@ export async function seedSiteSettingsAction() {
         defaultTitle: "Instituto Figura Viva | Gestalt-Terapia",
         defaultDescription:
           "O Instituto Figura Viva é um espaço de excelência em formação, clínica e pesquisa em Gestalt-terapia.",
-        ogImage: "/assets/og-image.jpg",
+        ogImage: "",
         keywords: ["Gestalt", "Psicologia", "Formação", "Terapia", "Rondônia"],
       },
       legal: {
