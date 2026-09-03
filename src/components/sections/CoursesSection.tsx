@@ -141,7 +141,7 @@ export default function CoursesSection({
                             : course.images?.[0] &&
                                 course.images[0].trim() !== ""
                               ? course.images[0]
-                              : "https://via.placeholder.com/400x300"
+                              : "/assets/course-placeholder.jpg"
                         }
                         alt={course.title || "Course Image"}
                         fill

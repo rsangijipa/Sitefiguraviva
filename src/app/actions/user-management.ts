@@ -193,13 +193,23 @@ export async function listUsersForAdmin(
     );
     const authUsers = authPage.users;
 
+    // Batched profile lookup: one BatchGetDocuments call per chunk instead of
+    // one round-trip per user (was up to `pageSize` individual reads per load).
     const profileMap = new Map<string, any>();
-    await Promise.all(
-      authUsers.map(async (u) => {
-        const snap = await adminDb.collection("users").doc(u.uid).get();
-        profileMap.set(u.uid, snap.exists ? snap.data() : null);
-      }),
-    );
+    const PROFILE_CHUNK_SIZE = 300;
+
+    for (let i = 0; i < authUsers.length; i += PROFILE_CHUNK_SIZE) {
+      const refs = authUsers
+        .slice(i, i + PROFILE_CHUNK_SIZE)
+        .map((u) => adminDb.collection("users").doc(u.uid));
+
+      if (refs.length === 0) continue;
+
+      const snaps = await adminDb.getAll(...refs);
+      for (const snap of snaps) {
+        profileMap.set(snap.id, snap.exists ? snap.data() : null);
+      }
+    }
 
     const merged = authUsers.map((u) => {
       const p = profileMap.get(u.uid) || {};
