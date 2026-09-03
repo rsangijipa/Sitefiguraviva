@@ -13,7 +13,7 @@ export function MemoryMiniFooter() {
         <div
           className="absolute inset-0 opacity-60 transition-opacity duration-[2000ms]"
           style={{
-            backgroundImage: `url('/backgroundlaura1.jpeg')`,
+            backgroundImage: `url('/backgroundlaura1.webp')`,
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
