@@ -670,6 +670,19 @@
     }
   }
 
+  /* `transition-soft` aparece em 12 posições de classe (rodapé, navegação,
+     cartões), mas o Tailwind nomeia a curva de `transitionTimingFunction`
+     como `ease-soft`: `transition-soft` nunca foi gerado e aqueles doze
+     elementos trocavam de cor sem transição nenhuma. Em vez de reescrever as
+     doze chamadas, a classe passa a existir com o sentido que elas esperavam:
+     a curva suave aplicada às propriedades que de fato mudam no hover. */
+  .transition-soft {
+    transition-property: color, background-color, border-color, fill, stroke,
+      opacity, box-shadow, transform;
+    transition-duration: var(--dur-base);
+    transition-timing-function: var(--ease-out-soft);
+  }
+
   /* Superfície padrão de card, já temável */
   .surface {
     background-color: rgb(var(--color-surface));
@@ -723,4 +736,416 @@
 
 .dark .bg-\[\#fff7ed\] {
   background-color: rgb(var(--color-beige));
+}
+
+/* ---------------------------------------------------------------------------
+   Camada editorial `fv-*`
+   Vocabulário de composição do plano de reformulação visual, montado POR CIMA
+   dos tokens do Design System v1 que já existem acima — nada aqui redefine cor
+   da marca. Repetir os hex (`--fv-verde-raiz: #005A1F`) criaria um segundo
+   sistema de cor que não inverte no tema escuro: os `--color-*` já carregam
+   exatamente esses valores e já têm contrapartida em `.dark`.
+   O que faltava de fato — e está aqui — é escala de espaçamento nomeada,
+   largura de contêiner, raio e um léxico de seção/tipografia editorial.
+--------------------------------------------------------------------------- */
+:root {
+  /* Espaçamento editorial — base 8 do Design System, em passos nomeados.
+     Convive com `--space-*` (base 4, usada por componente); estes são os
+     saltos de composição de página: respiro entre bloco, seção e faixa. */
+  --fv-space-1: 4px;
+  --fv-space-2: 8px;
+  --fv-space-3: 16px;
+  --fv-space-4: 24px;
+  --fv-space-5: 32px;
+  --fv-space-6: 48px;
+  --fv-space-7: 64px;
+  --fv-space-8: 96px;
+
+  /* 1280px — o mesmo valor de `max-w-7xl` que o Container.tsx já aplica.
+     Existe como variável para que CSS puro (fundos, máscaras) possa alinhar
+     ao mesmo eixo sem repetir o número. */
+  --fv-container: 1280px;
+  --fv-radius-sm: 4px;
+  --fv-radius-md: 8px;
+}
+
+@layer utilities {
+  /* Faixa de página. O respiro é fluido porque a mesma seção precisa caber em
+     um notebook de 768px de altura e respirar em um monitor de 1440. */
+  .fv-section {
+    position: relative;
+    overflow: hidden;
+    padding-top: clamp(var(--fv-space-7), 8vh, var(--fv-space-8));
+    padding-bottom: clamp(var(--fv-space-7), 8vh, var(--fv-space-8));
+  }
+
+  /* Profundidade por alternância de superfície, não por sombra — a regra do
+     Design System para separar seções sem elevar caixa. */
+  .fv-section--cream {
+    background-color: rgb(var(--color-paper));
+  }
+
+  .fv-section--sand {
+    background-color: rgb(var(--color-areia));
+  }
+
+  /* Memoria Viva Laura Perls.
+     A pagina e um tema fechado, como o Portal do aluno: 435 valores sepia
+     escritos a mao em 14 arquivos desenham um acervo museologico coerente, e
+     reescrever todos seria trocar um risco estetico por um risco de regressao.
+     O que esta classe faz e nomear a superficie desse tema e ancora-la nos
+     tokens da marca, para que a pagina pare de ser um bloco de hex solto: o
+     papel envelhecido e Areia, o traco e Nevoa, o acento e Terra Barro.
+     A pagina permanece clara nos dois temas, de proposito - acervo historico
+     nao inverte. */
+  .fv-section--archive {
+    --fv-arq-papel: 233 228 219;
+    --fv-arq-fundo: var(--color-areia);
+    --fv-arq-traco: var(--color-border);
+    --fv-arq-acento: var(--color-terra);
+
+    background-color: rgb(var(--fv-arq-fundo));
+    color: rgb(var(--color-text));
+  }
+
+  .fv-container {
+    width: 100%;
+    max-width: var(--fv-container);
+    margin-inline: auto;
+    padding-inline: var(--fv-space-4);
+  }
+
+  @media (min-width: 768px) {
+    .fv-container {
+      padding-inline: var(--fv-space-6);
+    }
+  }
+
+  /* Rótulo acima do título. Codifica o padrão já espalhado pelas seções
+     (`text-xs font-bold tracking-[0.2em] uppercase`) em um nome só. */
+  .fv-eyebrow {
+    display: block;
+    font-family: var(--font-sans), sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    /* Igarapé sólido. Verde Raiz a 60% — o valor que as seções usavam — cai
+       para ~2,9:1 sobre Areia, abaixo do mínimo AA para corpo pequeno; sólido
+       sobe para ~9:1 e o rótulo continua mais quieto que o título. */
+    color: rgb(var(--color-igarape));
+  }
+
+  .fv-display {
+    font-family: var(--font-serif), serif;
+    font-weight: 600;
+    font-optical-sizing: auto;
+    font-size: clamp(2.25rem, 5.4vw, 3.75rem);
+    line-height: 1.06;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    color: rgb(var(--color-primary));
+  }
+
+  .fv-lead {
+    font-family: var(--font-sans), sans-serif;
+    font-size: clamp(1.0625rem, 1.5vw, 1.1875rem);
+    line-height: 1.7;
+    max-width: 58ch;
+    color: rgb(var(--color-text) / 0.78);
+    text-wrap: pretty;
+  }
+
+  /* Card editorial: borda Névoa e troca de superfície no hover. Sem sombra —
+     a elevação de caixa é o que faz o site parecer aplicativo em vez de
+     impresso. O `card-premium` continua existindo para onde sombra é desejada. */
+  .fv-card {
+    display: flex;
+    flex-direction: column;
+    background-color: rgb(var(--color-paper));
+    border: 1px solid rgb(var(--color-border));
+    border-radius: var(--fv-radius-md);
+    transition:
+      background-color var(--dur-base) var(--ease-out-soft),
+      border-color var(--dur-base) var(--ease-out-soft);
+  }
+
+  .fv-card:hover {
+    background-color: rgb(var(--color-areia));
+    border-color: rgb(var(--color-igarape));
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Fundos decorativos `fv-bg-*`
+   Os arquivos vivem em /public/assets/fv/backgrounds/ e ainda não existem —
+   as classes já estão de pé para que soltar o .avif/.webp na pasta acenda a
+   seção sem tocar em componente nenhum.
+
+   Três decisões que valem a explicação:
+
+   1. A imagem entra por `::before`, não como `background-image` da seção.
+      Assim a cor de superfície do token continua sendo o fundo real e a arte
+      é uma camada por cima, com opacidade governável. Uma arte em Creme Papel
+      aplicada direto na seção acenderia uma placa clara no tema escuro.
+   2. `image-set()` resolve AVIF→WebP em uma declaração. A linha `url(.webp)`
+      logo acima é a queda para navegador sem `image-set` — a cascata descarta
+      a declaração inválida e fica com a anterior.
+   3. Nada de `<img alt="">`. Fundo é decoração: fora da árvore de acessibilidade.
+--------------------------------------------------------------------------- */
+@layer utilities {
+  .fv-bg {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .fv-bg::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-repeat: no-repeat;
+    background-position: var(--fv-bg-position, center);
+    background-size: var(--fv-bg-size, cover);
+    opacity: var(--fv-bg-strength, 1);
+  }
+
+  /* No escuro a arte é quase toda feita de Creme e Areia: sem este recuo ela
+     vira uma mancha acesa sobre o fundo Mata. */
+  .dark .fv-bg::before {
+    opacity: var(--fv-bg-strength-dark, 0.2);
+    filter: saturate(0.72);
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    .fv-bg::before {
+      display: none;
+    }
+  }
+}
+
+@layer utilities {
+  .fv-bg-hero::before {
+    background-image: url("/assets/fv/backgrounds/hero.webp");
+    background-image: image-set(
+      url("/assets/fv/backgrounds/hero.avif") type("image/avif"),
+      url("/assets/fv/backgrounds/hero.webp") type("image/webp")
+    );
+  }
+
+  .fv-bg-explore::before {
+    background-image: url("/assets/fv/backgrounds/explore.webp");
+    background-image: image-set(
+      url("/assets/fv/backgrounds/explore.avif") type("image/avif"),
+      url("/assets/fv/backgrounds/explore.webp") type("image/webp")
+    );
+  }
+
+  .fv-bg-formations::before {
+    background-image: url("/assets/fv/backgrounds/formations.webp");
+    background-image: image-set(
+      url("/assets/fv/backgrounds/formations.avif") type("image/avif"),
+      url("/assets/fv/backgrounds/formations.webp") type("image/webp")
+    );
+  }
+
+  .fv-bg-enrollment::before {
+    background-image: url("/assets/fv/backgrounds/enrollment.webp");
+    background-image: image-set(
+      url("/assets/fv/backgrounds/enrollment.avif") type("image/avif"),
+      url("/assets/fv/backgrounds/enrollment.webp") type("image/webp")
+    );
+  }
+
+  .fv-bg-manifesto::before {
+    background-image: url("/assets/fv/backgrounds/manifesto.webp");
+    background-image: image-set(
+      url("/assets/fv/backgrounds/manifesto.avif") type("image/avif"),
+      url("/assets/fv/backgrounds/manifesto.webp") type("image/webp")
+    );
+  }
+
+  .fv-bg-laura-archive::before {
+    background-image: url("/assets/fv/backgrounds/laura-archive.webp");
+    background-image: image-set(
+      url("/assets/fv/backgrounds/laura-archive.avif") type("image/avif"),
+      url("/assets/fv/backgrounds/laura-archive.webp") type("image/webp")
+    );
+  }
+
+  .fv-bg-library::before {
+    background-image: url("/assets/fv/backgrounds/library.webp");
+    background-image: image-set(
+      url("/assets/fv/backgrounds/library.avif") type("image/avif"),
+      url("/assets/fv/backgrounds/library.webp") type("image/webp")
+    );
+  }
+
+  .fv-bg-bookshelf::before {
+    background-image: url("/assets/fv/backgrounds/bookshelf.webp");
+    background-image: image-set(
+      url("/assets/fv/backgrounds/bookshelf.avif") type("image/avif"),
+      url("/assets/fv/backgrounds/bookshelf.webp") type("image/webp")
+    );
+  }
+
+  .fv-bg-articles::before {
+    background-image: url("/assets/fv/backgrounds/articles.webp");
+    background-image: image-set(
+      url("/assets/fv/backgrounds/articles.avif") type("image/avif"),
+      url("/assets/fv/backgrounds/articles.webp") type("image/webp")
+    );
+  }
+
+  .fv-bg-resources::before {
+    background-image: url("/assets/fv/backgrounds/resources.webp");
+    background-image: image-set(
+      url("/assets/fv/backgrounds/resources.avif") type("image/avif"),
+      url("/assets/fv/backgrounds/resources.webp") type("image/webp")
+    );
+  }
+
+  .fv-bg-gallery::before {
+    background-image: url("/assets/fv/backgrounds/gallery.webp");
+    background-image: image-set(
+      url("/assets/fv/backgrounds/gallery.avif") type("image/avif"),
+      url("/assets/fv/backgrounds/gallery.webp") type("image/webp")
+    );
+  }
+
+  .fv-bg-testimonials::before {
+    background-image: url("/assets/fv/backgrounds/testimonials.webp");
+    background-image: image-set(
+      url("/assets/fv/backgrounds/testimonials.avif") type("image/avif"),
+      url("/assets/fv/backgrounds/testimonials.webp") type("image/webp")
+    );
+  }
+
+  .fv-bg-faq::before {
+    background-image: url("/assets/fv/backgrounds/faq.webp");
+    background-image: image-set(
+      url("/assets/fv/backgrounds/faq.avif") type("image/avif"),
+      url("/assets/fv/backgrounds/faq.webp") type("image/webp")
+    );
+  }
+
+  .fv-bg-cta::before {
+    background-image: url("/assets/fv/backgrounds/cta.webp");
+    background-image: image-set(
+      url("/assets/fv/backgrounds/cta.avif") type("image/avif"),
+      url("/assets/fv/backgrounds/cta.webp") type("image/webp")
+    );
+  }
+
+  .fv-bg-footer::before {
+    background-image: url("/assets/fv/backgrounds/footer.webp");
+    background-image: image-set(
+      url("/assets/fv/backgrounds/footer.avif") type("image/avif"),
+      url("/assets/fv/backgrounds/footer.webp") type("image/webp")
+    );
+  }
+
+  .fv-bg-login::before {
+    background-image: url("/assets/fv/backgrounds/login.webp");
+    background-image: image-set(
+      url("/assets/fv/backgrounds/login.avif") type("image/avif"),
+      url("/assets/fv/backgrounds/login.webp") type("image/webp")
+    );
+  }
+
+  .fv-bg-admin::before {
+    background-image: url("/assets/fv/backgrounds/admin.webp");
+    background-image: image-set(
+      url("/assets/fv/backgrounds/admin.avif") type("image/avif"),
+      url("/assets/fv/backgrounds/admin.webp") type("image/webp")
+    );
+  }
+
+  /* Variantes reduzidas para telas estreitas. Só declare aqui o fundo que
+     realmente ganhou um arquivo `-mobile`: apontar para um arquivo ausente
+     custa um 404 por seção. */
+  @media (max-width: 768px) {
+    .fv-bg-hero::before {
+      background-image: url("/assets/fv/backgrounds/hero-mobile.webp");
+      background-image: image-set(
+        url("/assets/fv/backgrounds/hero-mobile.avif") type("image/avif"),
+        url("/assets/fv/backgrounds/hero-mobile.webp") type("image/webp")
+      );
+    }
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Painel administrativo — item 19 do plano
+   O admin usa branco literal, cinza do Tailwind e raio de 16px em 25 arquivos.
+   Converter os 25 na mão trocaria um problema estético por risco de regressão
+   numa ferramenta que a equipe usa todo dia, então a estratégia é a mesma que
+   este arquivo já emprega para o tema escuro: uma camada com escopo, ancorada
+   em `.fv-admin` na raiz do shell. Nenhuma lógica é tocada e nada disso vaza
+   para o site público.
+
+   O admin é ferramenta, não peça editorial: sem fundo ilustrado, sem aquarela.
+   Só papel, traço e o mesmo raio de 8px do resto do sistema.
+
+   A sombra é anulada pelas variáveis do próprio Tailwind, e não por
+   `box-shadow: none`. Os utilitários `ring-*` compõem no mesmo `box-shadow`:
+   zerar a propriedade apagaria junto o anel de foco do teclado.
+--------------------------------------------------------------------------- */
+.fv-admin .bg-white,
+.fv-admin .bg-stone-50,
+.fv-admin .bg-stone-100\/50,
+.fv-admin .bg-stone-50\/50 {
+  background-color: rgb(var(--color-paper));
+}
+
+.fv-admin .border-stone-100,
+.fv-admin .border-stone-200,
+.fv-admin [class*="border-stone-100/"],
+.fv-admin [class*="border-stone-200/"] {
+  border-color: rgb(var(--color-border));
+}
+
+.fv-admin .divide-stone-50 > :not([hidden]) ~ :not([hidden]),
+.fv-admin .divide-stone-100 > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgb(var(--color-border) / 0.7);
+}
+
+/* Cabeçalho de tabela e faixas de agrupamento em Areia: é a alternância de
+   superfície que separa a linha do cabeçalho, no lugar de uma borda dupla. */
+.fv-admin thead .bg-stone-50,
+.fv-admin thead .bg-stone-50\/50,
+.fv-admin th {
+  background-color: rgb(var(--color-areia));
+}
+
+.fv-admin .rounded-2xl,
+.fv-admin .rounded-xl,
+.fv-admin .rounded-3xl {
+  border-radius: var(--fv-radius-md);
+}
+
+.fv-admin .shadow-sm,
+.fv-admin .shadow,
+.fv-admin .shadow-md,
+.fv-admin .shadow-lg,
+.fv-admin .shadow-xl,
+.fv-admin .shadow-2xl,
+.fv-admin .shadow-soft-sm,
+.fv-admin .shadow-soft-md,
+.fv-admin .shadow-soft-lg,
+.fv-admin .shadow-soft-xl {
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+  box-shadow:
+    var(--tw-ring-offset-shadow, 0 0 #0000),
+    var(--tw-ring-shadow, 0 0 #0000),
+    var(--tw-shadow);
+}
+
+/* Modal e menu suspenso continuam precisando se destacar do que está atrás.
+   Ali a separação passa a ser o traço Névoa, não a sombra. */
+.fv-admin [role="dialog"],
+.fv-admin [role="menu"] {
+  border: 1px solid rgb(var(--color-border));
 }

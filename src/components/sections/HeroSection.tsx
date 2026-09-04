@@ -44,7 +44,7 @@ export default function HeroSection({
   const isParticlesEnabled = process.env.NEXT_PUBLIC_ENABLE_PARTICLES === "1";
 
   return (
-    <header className="relative min-h-screen flex items-center pt-32 pb-24 md:pt-40 md:pb-32 px-6 overflow-hidden bg-paper">
+    <header className="fv-bg fv-bg-hero relative flex min-h-[min(820px,90vh)] items-center overflow-hidden bg-paper px-6 pt-32 pb-24 md:pt-40 md:pb-32">
       {/* Premium Background Engine */}
       <BackgroundEngine />
       {isParticlesEnabled && <ParticlesLayer />}
@@ -67,7 +67,7 @@ export default function HeroSection({
       <WaveLines className="opacity-20 mix-blend-multiply" />
 
       <div className="container mx-auto max-w-7xl relative z-10">
-        <div className="grid lg:grid-cols-2 gap-20 items-center">
+        <div className="grid items-center gap-20 lg:grid-cols-[0.9fr_1.1fr]">
           <motion.div
             initial="hidden"
             animate="visible"
@@ -90,7 +90,7 @@ export default function HeroSection({
 
             <motion.p
               variants={fadeInUp}
-              className="text-xl md:text-2xl text-stone-600 font-light leading-relaxed mb-14 max-w-xl"
+              className="mb-14 max-w-xl text-xl font-light leading-relaxed text-text/75 md:text-2xl"
             >
               Transforme sua percepção e prática através da{" "}
               <span className="font-medium text-primary">Gestalt-Terapia</span>.
@@ -105,7 +105,7 @@ export default function HeroSection({
                 href={`https://wa.me/55${whatsappNumber}?text=Olá! Gostaria de informações sobre as formações do Instituto Figura Viva.`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group relative px-10 py-6 bg-primary text-white rounded-full overflow-hidden transition-all hover:shadow-2xl hover:shadow-primary/30 flex items-center justify-center gap-4 active:scale-95"
+                className="group relative flex items-center justify-center gap-4 overflow-hidden rounded-md bg-primary px-10 py-5 text-white transition-colors hover:bg-primary-dark active:scale-[0.98]"
               >
                 <div className="relative z-10 flex items-center gap-3">
                   <span className="font-bold uppercase tracking-[0.15em] text-[13px]">
@@ -116,19 +116,18 @@ export default function HeroSection({
                     className="group-hover:translate-x-1.5 transition-transform duration-300"
                   />
                 </div>
-                <div className="absolute inset-0 bg-gradient-to-r from-gold to-[#D4AF37] translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-[0.16,1,0.3,1]" />
               </a>
 
               <a
                 href="#cursos"
-                className="group px-10 py-6 border border-primary/20 bg-white/40 backdrop-blur-xl text-primary rounded-full hover:bg-white hover:border-primary/40 transition-all flex items-center justify-center gap-4 active:scale-95 shadow-sm"
+                className="group flex items-center justify-center gap-4 rounded-md border border-border bg-paper px-10 py-5 text-primary transition-colors hover:border-igarape hover:bg-areia active:scale-[0.98]"
               >
                 <span className="font-bold uppercase tracking-[0.15em] text-[13px]">
                   Ver Formações
                 </span>
                 <Sparkles
                   size={18}
-                  className="text-stone-400 group-hover:text-gold group-hover:rotate-12 transition-all"
+                  className="text-muted transition-all group-hover:rotate-12 group-hover:text-primary"
                 />
               </a>
             </motion.div>
@@ -149,17 +148,17 @@ export default function HeroSection({
                 duration: 0.45,
                 ease: [0.22, 1, 0.36, 1],
               }}
-              className="absolute -bottom-10 right-10 z-20 glass-panel p-8 rounded-[2.5rem] max-w-[240px] transition-transform duration-200 hover:-translate-y-1"
+              className="absolute -bottom-10 right-10 z-20 max-w-[240px] rounded-md border border-border bg-paper/95 p-8 backdrop-blur-sm"
             >
               <div className="flex items-center gap-3 mb-4">
                 <div className="flex -space-x-3">
                   {[1, 2, 3].map((i) => (
                     <div
                       key={i}
-                      className="w-8 h-8 rounded-full border-2 border-white bg-stone-200"
+                      className="w-8 h-8 rounded-full border-2 border-paper bg-areia"
                     />
                   ))}
-                  <div className="w-8 h-8 rounded-full border-2 border-white bg-gold text-[8px] flex items-center justify-center font-bold text-white">
+                  <div className="w-8 h-8 rounded-full border-2 border-paper bg-gold text-[8px] flex items-center justify-center font-bold text-white">
                     +500
                   </div>
                 </div>
@@ -167,10 +166,10 @@ export default function HeroSection({
               <h4 className="text-sm font-bold text-primary uppercase tracking-widest mb-1 italic">
                 Vagas Abertas
               </h4>
-              <p className="text-xs text-stone-500 leading-tight">
+              <p className="text-xs leading-tight text-text/65">
                 Pós-Graduação reconhecida com selo de excelência.
               </p>
-              <div className="mt-4 pt-4 border-t border-stone-100 flex items-center justify-between">
+              <div className="mt-4 flex items-center justify-between border-t border-border/70 pt-4">
                 <span className="text-[10px] font-bold text-gold uppercase tracking-[0.2em]">
                   Início Abr/24
                 </span>

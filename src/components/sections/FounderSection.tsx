@@ -13,14 +13,14 @@ export default function FounderSection({ initialData }: { initialData?: any }) {
   return (
     <SectionShell
       id="fundadora"
-      className="bg-stone-50 border-t border-stone-200"
+      className="bg-areia border-t border-border"
       containerClassName="max-w-5xl"
     >
       <div className="flex flex-col md:flex-row items-center gap-10 md:gap-16">
         {/* Image - Compact */}
         <div className="relative w-48 h-48 md:w-64 md:h-64 shrink-0">
-          <div className="absolute inset-0 rounded-full border-2 border-gold/30 scale-105" />
-          <div className="w-full h-full rounded-full overflow-hidden shadow-lg border-4 border-white bg-stone-200 relative">
+          <div className="absolute inset-0 scale-105 rounded-full border border-terra/40" aria-hidden />
+          <div className="relative h-full w-full overflow-hidden rounded-full border-4 border-paper bg-nevoa">
             <Image
               src={data.image}
               alt={data.name}
@@ -34,16 +34,16 @@ export default function FounderSection({ initialData }: { initialData?: any }) {
 
         {/* Content - Compact */}
         <div className="text-center md:text-left flex-1">
-          <span className="text-xs font-bold tracking-[0.2em] uppercase text-gold mb-2 block">
+          <span className="fv-eyebrow mb-2">
             Curadoria
           </span>
           <h2 className="font-serif text-3xl md:text-4xl text-primary mb-2">
             {data.name}
           </h2>
-          <p className="text-sm font-bold uppercase tracking-wider text-primary/40 mb-6">
+          <p className="mb-6 text-sm font-bold uppercase tracking-wider text-terra">
             {data.role}
           </p>
-          <p className="text-primary/70 leading-relaxed mb-6 max-w-2xl font-light text-lg">
+          <p className="fv-lead mb-6">
             {data.bio}
           </p>
 

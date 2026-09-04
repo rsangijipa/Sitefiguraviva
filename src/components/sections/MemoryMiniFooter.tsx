@@ -7,11 +7,11 @@ import { ArrowRight } from "lucide-react";
 
 export function MemoryMiniFooter() {
   return (
-    <section className="relative py-24 bg-paper overflow-hidden border-t border-stone-200">
+    <section className="fv-section fv-section--cream border-t border-border">
       {/* Historic Aesthetic Background */}
       <div className="absolute inset-0 z-0">
         <div
-          className="absolute inset-0 opacity-60 transition-opacity duration-[2000ms]"
+          className="fv-bg fv-bg-laura-archive absolute inset-0 opacity-50 transition-opacity duration-[2000ms]"
           style={{
             backgroundImage: `url('/backgroundlaura1.webp')`,
             backgroundSize: "cover",
@@ -30,7 +30,7 @@ export function MemoryMiniFooter() {
         />
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 relative z-10">
+      <div className="fv-container relative z-10 max-w-5xl">
         <Link
           href="/instituto/laura-perls"
           className="block group focus:outline-none"
@@ -40,15 +40,12 @@ export function MemoryMiniFooter() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="relative overflow-hidden rounded-[2.5rem] border border-stone-200 bg-white/70 backdrop-blur-md p-8 md:p-10 hover:bg-white/90 hover:border-gold/30 hover:shadow-2xl transition-all duration-700 group-focus:ring-2 group-focus:ring-gold/50 group-focus:ring-offset-2"
+            className="relative overflow-hidden rounded-md border border-border bg-paper/90 p-8 backdrop-blur-md transition-colors duration-500 hover:border-igarape hover:bg-paper md:p-10 group-focus:ring-2 group-focus:ring-primary group-focus:ring-offset-2"
           >
-            {/* Gloss Shine Effect */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-stone-100/0 via-white/50 to-stone-100/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
-
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
               {/* Left: Icon (Now Image) & Title */}
               <div className="flex items-center gap-6 text-center md:text-left">
-                <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-stone-100 group-hover:border-gold/40 group-hover:scale-105 transition-all duration-700 shadow-sm flex-shrink-0">
+                <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border border-border transition-colors duration-500 group-hover:border-terra">
                   <Image
                     src="/laura/laura1.jpg"
                     alt="Laura Perls Icon"
@@ -58,23 +55,23 @@ export function MemoryMiniFooter() {
                   />
                 </div>
                 <div>
-                  <span className="block text-[10px] tracking-[0.3em] uppercase text-gold font-bold mb-1.5">
+                  <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.3em] text-terra">
                     Memória Viva
                   </span>
-                  <h3 className="font-serif text-3xl text-stone-800 group-hover:text-primary transition-colors duration-300 tracking-tight">
+                  <h3 className="font-serif text-3xl tracking-tight text-primary">
                     Laura Perls
                   </h3>
-                  <p className="text-sm text-stone-500 mt-1 max-w-sm italic font-serif">
+                  <p className="mt-1 max-w-sm font-serif text-sm italic text-text/75">
                     "Onde há vida, há esperança e direção."
                   </p>
                 </div>
               </div>
 
               {/* Right: CTA */}
-              <div className="flex items-center gap-3 text-sm font-bold uppercase tracking-widest text-stone-400 group-hover:text-gold transition-colors duration-300">
+              <div className="flex items-center gap-3 text-sm font-bold uppercase tracking-widest text-primary">
                 <span className="relative">
                   Explorar Arquivo
-                  <span className="absolute left-0 -bottom-1 w-0 h-px bg-gold group-hover:w-full transition-all duration-500" />
+                  <span className="absolute -bottom-1 left-0 h-px w-0 bg-primary transition-all duration-500 group-hover:w-full" />
                 </span>
                 <ArrowRight
                   size={18}

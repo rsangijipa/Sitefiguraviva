@@ -69,16 +69,16 @@ export default function ResourcesSection() {
   return (
     <section
       id="recursos-interativos"
-      className="py-24 bg-surface border-t border-stone-100 relative overflow-hidden transition-colors duration-500"
+      className="fv-section fv-section--cream fv-bg fv-bg-resources border-t border-border/60"
     >
-      <div className="container mx-auto px-6 max-w-7xl relative z-10">
+      <div className="fv-container relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="mb-12 text-center max-w-2xl mx-auto"
         >
-          <span className="text-xs font-bold tracking-[0.2em] uppercase text-accent mb-4 block">
+          <span className="fv-eyebrow mb-4">
             Ferramentas de Cuidado
           </span>
           <h2 className="heading-section text-primary">
@@ -94,8 +94,8 @@ export default function ResourcesSection() {
         {/* Horizontal Scroll Container */}
         <div className="relative w-full">
           {/* Fade Edges */}
-          <div className="absolute left-0 top-0 bottom-12 w-12 bg-gradient-to-r from-surface to-transparent z-10 pointer-events-none" />
-          <div className="absolute right-0 top-0 bottom-12 w-12 bg-gradient-to-l from-surface to-transparent z-10 pointer-events-none" />
+          <div className="absolute left-0 top-0 bottom-12 w-12 bg-gradient-to-r from-paper to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-12 w-12 bg-gradient-to-l from-paper to-transparent z-10 pointer-events-none" />
 
           <div
             ref={scrollContainerRef}
@@ -107,17 +107,16 @@ export default function ResourcesSection() {
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              whileHover={{ y: -5 }}
-              className="flex-shrink-0 w-80 md:w-auto snap-center group relative bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col items-center text-center"
+              className="fv-card group relative w-80 shrink-0 cursor-pointer snap-center items-center overflow-hidden p-8 text-center md:w-auto"
               onClick={() => openResource("breathing")}
             >
-              <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center text-accent mb-6 group-hover:scale-110 transition-transform">
+              <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-md bg-accent/10 text-accent transition-transform group-hover:scale-105">
                 <Wind size={32} />
               </div>
               <h3 className="text-xl font-serif text-primary font-bold mb-2">
                 Guia de Respiração
               </h3>
-              <p className="text-text/60 text-sm mb-6 flex-grow">
+              <p className="mb-6 flex-grow text-sm text-text/75">
                 Uma pausa guiada para reduzir a ansiedade e reconectar com o
                 agora.
               </p>
@@ -132,17 +131,16 @@ export default function ResourcesSection() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              whileHover={{ y: -5 }}
-              className="flex-shrink-0 w-80 md:w-auto snap-center group relative bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col items-center text-center"
+              className="fv-card group relative w-80 shrink-0 cursor-pointer snap-center items-center overflow-hidden p-8 text-center md:w-auto"
               onClick={() => openResource("tree")}
             >
-              <div className="w-16 h-16 rounded-2xl bg-gold/10 flex items-center justify-center text-gold mb-6 group-hover:scale-110 transition-transform">
+              <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-md bg-gold/15 text-gold-dark transition-transform group-hover:scale-105">
                 <Sprout size={32} />
               </div>
               <h3 className="text-xl font-serif text-primary font-bold mb-2">
                 Árvore da Awareness
               </h3>
-              <p className="text-text/60 text-sm mb-6 flex-grow">
+              <p className="mb-6 flex-grow text-sm text-text/75">
                 Visualize e nomeie suas emoções em uma experiência interativa
                 3D.
               </p>
@@ -157,20 +155,19 @@ export default function ResourcesSection() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
-              whileHover={{ y: -5 }}
-              className="flex-shrink-0 w-80 md:w-auto snap-center group relative bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col items-center text-center"
+              className="fv-card group relative w-80 shrink-0 cursor-pointer snap-center items-center overflow-hidden p-8 text-center md:w-auto"
               onClick={() => openResource("somascan")}
             >
-              <div className="w-16 h-16 rounded-2xl bg-stone-100 flex items-center justify-center text-stone-600 mb-6 group-hover:scale-110 transition-transform">
+              <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-md bg-terra/10 text-terra transition-transform group-hover:scale-105">
                 <Fingerprint size={32} />
               </div>
               <h3 className="text-xl font-serif text-primary font-bold mb-2">
                 SomaScan
               </h3>
-              <p className="text-text/60 text-sm mb-6 flex-grow">
+              <p className="mb-6 flex-grow text-sm text-text/75">
                 Mapeamento corporal consciente para escutar o que o corpo diz.
               </p>
-              <span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-stone-600 group-hover:text-primary transition-colors">
+              <span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-terra transition-colors group-hover:text-primary">
                 Iniciar Scan
               </span>
             </motion.div>
@@ -181,17 +178,16 @@ export default function ResourcesSection() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.3 }}
-              whileHover={{ y: -5 }}
-              className="flex-shrink-0 w-80 md:w-auto snap-center group relative bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col items-center text-center"
+              className="fv-card group relative w-80 shrink-0 cursor-pointer snap-center items-center overflow-hidden p-8 text-center md:w-auto"
               onClick={() => openResource("quiz")}
             >
-              <div className="w-16 h-16 rounded-2xl bg-sage/10 flex items-center justify-center text-sage mb-6 group-hover:scale-110 transition-transform">
+              <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-md bg-sage/10 text-sage transition-transform group-hover:scale-105">
                 <Sparkles size={32} />
               </div>
               <h3 className="text-xl font-serif text-primary font-bold mb-2">
                 Quiz de Saúde Mental
               </h3>
-              <p className="text-text/60 text-sm mb-6 flex-grow">
+              <p className="mb-6 flex-grow text-sm text-text/75">
                 Mindful Roots: Um check-in rápido de 14 dias para sua saúde
                 emocional.
               </p>
@@ -205,15 +201,15 @@ export default function ResourcesSection() {
           <div className="flex md:hidden items-center justify-center gap-6 mt-4 opacity-70 hover:opacity-100 transition-opacity pb-4">
             <button
               onClick={() => scroll("left")}
-              className="p-3 rounded-full hover:bg-stone-100 text-stone-400 hover:text-stone-800 transition-colors border border-transparent hover:border-stone-200"
+              className="rounded-full border border-transparent p-3 text-muted transition-colors hover:border-border hover:bg-areia hover:text-primary"
               aria-label="Scroll Left"
             >
               <ChevronLeft size={24} />
             </button>
 
-            <div className="w-32 h-1.5 bg-stone-100 rounded-full overflow-hidden">
+            <div className="h-1.5 w-32 overflow-hidden rounded-full bg-areia">
               <motion.div
-                className="h-full bg-stone-300 w-1/3 rounded-full"
+                className="h-full w-1/3 rounded-full bg-nevoa"
                 animate={{ x: [0, 80, 0] }}
                 transition={{
                   repeat: Infinity,
@@ -225,7 +221,7 @@ export default function ResourcesSection() {
 
             <button
               onClick={() => scroll("right")}
-              className="p-3 rounded-full hover:bg-stone-100 text-stone-400 hover:text-stone-800 transition-colors border border-transparent hover:border-stone-200"
+              className="rounded-full border border-transparent p-3 text-muted transition-colors hover:border-border hover:bg-areia hover:text-primary"
               aria-label="Scroll Right"
             >
               <ChevronRight size={24} />
@@ -242,7 +238,7 @@ export default function ResourcesSection() {
           <div className="absolute top-6 left-6 z-50">
             <button
               onClick={closeResource}
-              className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 backdrop-blur border border-stone-200 text-stone-600 hover:text-primary hover:border-gold/50 font-bold text-xs uppercase tracking-wider shadow-sm hover:shadow-md transition-all active:scale-95"
+              className="flex items-center gap-2 rounded-md border border-border bg-paper/90 px-4 py-2 text-xs font-bold uppercase tracking-wider text-text backdrop-blur transition-colors hover:border-igarape hover:bg-areia hover:text-primary active:scale-[0.98]"
             >
               <ArrowLeft size={16} />
               <span className="hidden md:inline">Voltar</span>
@@ -252,12 +248,12 @@ export default function ResourcesSection() {
           {/* Premium Close Button (Top Right) */}
           <button
             onClick={closeResource}
-            className="absolute top-6 right-6 z-50 group flex items-center gap-2 bg-white/80 backdrop-blur border border-stone-200 pl-3 pr-2 py-2 rounded-full text-primary hover:bg-gold hover:text-white transition-all focus:outline-none focus:ring-2 focus:ring-primary shadow-sm hover:translate-y-[-1px]"
+            className="group absolute right-6 top-6 z-50 flex items-center gap-2 rounded-md border border-border bg-paper/90 py-2 pl-3 pr-2 text-primary backdrop-blur transition-colors hover:bg-primary hover:text-white focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <span className="text-[10px] font-bold uppercase tracking-widest opacity-0 w-0 group-hover:w-auto group-hover:opacity-100 transition-all duration-300 overflow-hidden whitespace-nowrap">
               Fechar
             </span>
-            <div className="w-6 h-6 flex items-center justify-center rounded-full bg-stone-100 group-hover:bg-white/20 transition-colors">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-areia transition-colors group-hover:bg-white/20">
               <span className="text-xl leading-none -mt-1">×</span>
             </div>
           </button>
@@ -279,7 +275,7 @@ export default function ResourcesSection() {
             )}
 
             {activeResource === "somascan" && (
-              <div className="w-full h-full relative min-h-[80vh] bg-[#faf9f6]">
+              <div className="relative h-full min-h-[80vh] w-full bg-paper">
                 <SomaScan />
               </div>
             )}

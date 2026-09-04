@@ -59,6 +59,12 @@ module.exports = {
         info: token("igarape"),
         // Design System v1 — nomes da casa
         igarape: token("igarape"),
+        // `sage` é usado em 12 posições de classe (Formações, Recursos,
+        // SomaScan, Quiz) mas nunca existiu aqui: `text-sage` e `bg-sage/10`
+        // eram descartados na compilação e aquelas cores simplesmente não
+        // apareciam. É o mesmo verde de apoio que o Design System chama de
+        // Igarapé — o alias acende as 12 sem tocar em nenhuma chamada.
+        sage: token("igarape"),
         terra: token("terra"),
         areia: token("areia"),
         mata: token("text"),
@@ -150,7 +156,12 @@ module.exports = {
         "inner-light": "inset 0 1px 0 0 rgb(255 255 255 / 0.28)",
         none: "none",
       },
+      // 8px, o `--fv-radius-md` do plano editorial. O padrão do Tailwind para
+      // `md` é 6px, e como o raio aparece tanto em classe quanto em CSS puro,
+      // dois valores diferentes deixavam cartão e campo desalinhados por 2px.
       borderRadius: {
+        md: "var(--fv-radius-md)",
+        sm: "var(--fv-radius-sm)",
         "organic-1": "60% 40% 30% 70% / 60% 30% 70% 40%",
         "organic-2": "50% 50% 20% 80% / 25% 80% 20% 75%",
         "organic-3": "30% 70% 70% 30% / 30% 30% 70% 70%",

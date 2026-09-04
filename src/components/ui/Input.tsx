@@ -3,17 +3,23 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
 
+// Traco de 1px em Nevoa, raio do sistema e foco em Verde Raiz. A borda de 2px
+// anterior engrossava o campo ate ele competir com o botao ao lado, e o fundo
+// `bg-white/50` era branco literal: no tema escuro virava um veu claro.
 const inputVariants = cva(
-  "flex h-12 w-full rounded-xl border-2 px-4 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300",
+  "flex h-12 w-full rounded-md border px-4 py-2 text-sm ring-offset-paper file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors duration-200",
   {
     variants: {
       variant: {
         default:
-          "border-primary/10 bg-white/50 focus-visible:ring-primary/20 focus-visible:border-primary hover:border-primary/30 hover:bg-white",
+          "border-border bg-paper text-text hover:border-igarape focus-visible:border-primary focus-visible:ring-primary/15",
         glass:
           "bg-white/10 border-white/20 text-white placeholder:text-white/60 focus-visible:ring-white/30 focus-visible:border-white/50 hover:bg-white/20",
+        // Terra Barro, como manda o Design System para estado de erro em
+        // formulario. A cor nunca carrega o aviso sozinha: o campo tambem
+        // recebe `aria-invalid` e aponta para a mensagem por `aria-describedby`.
         error:
-          "border-error/50 bg-error/5 focus-visible:border-error focus-visible:ring-error/20 text-error placeholder:text-error/50",
+          "border-terra bg-terra/5 text-text focus-visible:border-terra focus-visible:ring-terra/20",
       },
     },
     defaultVariants: {
@@ -51,15 +57,20 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     ref,
   ) => {
     const isGlass = variant === "glass";
+    // Um id estavel para ligar a mensagem de erro ao campo. Sem essa ligacao o
+    // leitor de tela anuncia o rotulo e o valor, mas nunca o motivo da recusa.
+    const generatedId = React.useId();
+    const inputId = props.id ?? generatedId;
+    const errorId = `${inputId}-erro`;
 
     return (
       <div className="w-full space-y-2">
         {label && (
           <label
-            htmlFor={props.id}
+            htmlFor={inputId}
             className={cn(
               "text-sm font-bold ml-1 block",
-              isGlass ? "text-white/90" : "text-primary/80",
+              isGlass ? "text-white/90" : "text-text",
             )}
           >
             {label}
@@ -81,6 +92,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             disabled={props.disabled || isLoading}
             {...props}
+            id={inputId}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? errorId : props["aria-describedby"]}
           />
           {isLoading ? (
             <div className="absolute right-4 top-1/2 -translate-y-1/2">
@@ -100,7 +114,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           ) : null}
         </div>
         {error && (
-          <p className="text-xs text-error font-medium ml-1 animate-in slide-in-from-top-1 fade-in">
+          <p
+            id={errorId}
+            className="ml-1 text-xs font-medium text-terra animate-in slide-in-from-top-1 fade-in"
+          >
             {error}
           </p>
         )}

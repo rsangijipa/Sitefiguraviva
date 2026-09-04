@@ -4,7 +4,6 @@ import { useAuth } from "@/context/AuthContext";
 import { useState, Suspense, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { Eye, EyeOff, Loader2, ArrowRight, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCourses } from "@/hooks/useContent";
@@ -256,30 +255,33 @@ function AuthContent() {
     <PageShell variant="auth" className="p-4 md:p-8 min-h-screen">
       <Link
         href="/"
-        className="absolute top-8 left-8 z-50 flex items-center gap-2 text-primary/40 hover:text-primary transition-colors font-bold uppercase tracking-widest text-xs"
+        className="absolute left-8 top-8 z-50 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-text/70 transition-colors hover:text-primary"
       >
         <ArrowRight className="rotate-180" size={16} /> Voltar ao Início
       </Link>
 
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <Image
-          src="/assets/auth-bg.jpg"
-          alt="Background"
-          fill
-          className="object-cover blur-[3px] opacity-90"
-          priority
-        />
-        <div className="absolute inset-0 bg-white/20 mix-blend-overlay" />
-      </div>
+      <div className="relative z-10 mx-auto grid min-h-[calc(100vh-6rem)] w-full max-w-6xl items-center gap-12 py-20 lg:grid-cols-[1fr_480px] lg:gap-20">
+        {/* Coluna editorial. Vem depois do formulario na ordem do documento,
+            para que no telefone o campo de e-mail seja a primeira coisa sob o
+            polegar; no desktop `lg:order-first` a devolve para a esquerda. */}
+        <aside className="fv-bg fv-bg-login hidden rounded-md lg:order-first lg:block lg:p-12">
+          <span className="fv-eyebrow mb-6">Instituto Figura Viva</span>
+          <p className="font-serif text-4xl font-semibold leading-[1.15] text-primary xl:text-5xl">
+            Um espaço de estudo dedicado à profundidade da relação.
+          </p>
+          <p className="fv-lead mt-8">
+            Sua área de aluno reúne as formações em andamento, o material de
+            cada encontro, os certificados e a comunidade do Instituto.
+          </p>
+        </aside>
 
-      <div className="w-full min-h-[calc(100vh-6rem)] flex items-center justify-center relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white/80 backdrop-blur-xl p-8 md:p-12 rounded-[2rem] shadow-2xl w-full max-w-[480px] relative z-10 border border-white/60"
+          className="relative z-10 w-full rounded-md border border-border bg-paper p-8 md:p-12"
         >
           <div className="flex flex-col items-center mb-8">
-            <div className="w-20 h-20 rounded-full mb-6 flex items-center justify-center p-1 border border-primary/10 bg-white shadow-soft-md">
+            <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full border border-border bg-paper p-1">
               <img
                 src="/assets/logo.jpeg"
                 alt="Logo"
@@ -289,7 +291,7 @@ function AuthContent() {
             <h1 className="font-serif text-3xl text-primary font-bold mb-1">
               {isSignup ? "Criar Conta" : "Bem-vindo(a)"}
             </h1>
-            <p className="text-stone-500 text-xs uppercase tracking-widest font-semibold">
+            <p className="text-xs font-semibold uppercase tracking-widest text-text/70">
               Instituto Figura Viva
             </p>
           </div>
@@ -297,7 +299,7 @@ function AuthContent() {
           <button
             onClick={handleGoogleAuth}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-3 bg-white border border-stone-200 text-stone-700 font-bold py-3.5 rounded-xl hover:bg-stone-50 transition-all shadow-sm active:scale-[0.98] mb-6"
+            className="mb-6 flex w-full items-center justify-center gap-3 rounded-md border border-border bg-paper py-3.5 font-bold text-text transition-colors hover:border-igarape hover:bg-areia active:scale-[0.98]"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path
@@ -322,10 +324,10 @@ function AuthContent() {
 
           <div className="relative mb-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-stone-200"></div>
+              <div className="w-full border-t border-border"></div>
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white px-2 text-stone-400">Ou</span>
+              <span className="bg-paper px-2 text-muted">Ou</span>
             </div>
           </div>
 
@@ -362,7 +364,7 @@ function AuthContent() {
                   <div className="space-y-1">
                     <label
                       htmlFor="course-interest"
-                      className="text-[10px] uppercase font-bold text-stone-500 ml-1"
+                      className="ml-1 text-[10px] font-bold uppercase text-text/80"
                     >
                       Curso desejado
                     </label>
@@ -375,7 +377,7 @@ function AuthContent() {
                             value={selectedCourse}
                             onChange={(e) => setSelectedCourse(e.target.value)}
                             required
-                            className="w-full h-12 px-4 rounded-xl border border-stone-200 bg-stone-50 text-sm focus:ring-2 focus:ring-primary/20 outline-none appearance-none"
+                            className="h-12 w-full appearance-none rounded-md border border-border bg-paper px-4 text-sm text-text outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/15"
                           >
                             <option value="">Selecione um curso...</option>
                             {courses.map((c: any) => (
@@ -386,15 +388,15 @@ function AuthContent() {
                           </select>
                           <ChevronDown
                             size={16}
-                            className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
+                            className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-muted"
                           />
                         </div>
-                        <p className="text-[10px] text-stone-400 ml-1 pt-1">
+                        <p className="ml-1 pt-1 text-[10px] text-muted">
                           A conta é criada junto com a sua inscrição no curso.
                         </p>
                       </>
                     ) : (
-                      <p className="text-xs text-stone-500 bg-stone-50 border border-stone-200 rounded-xl p-3">
+                      <p className="rounded-md border border-border bg-areia p-3 text-xs text-text/80">
                         Não há turmas abertas no momento. Assim que uma nova
                         turma for anunciada, a inscrição ficará disponível aqui.
                       </p>
@@ -432,7 +434,7 @@ function AuthContent() {
                 <div className="text-right">
                   <Link
                     href="/auth/reset-password"
-                    className="text-[10px] uppercase font-bold text-primary/60 hover:text-primary"
+                    className="text-[10px] font-bold uppercase text-primary underline-offset-4 hover:underline"
                   >
                     Esqueceu a senha?
                   </Link>
@@ -441,7 +443,10 @@ function AuthContent() {
             </div>
 
             {error && (
-              <div className="p-3 rounded-lg bg-red-50 text-red-600 text-xs font-medium text-center border border-red-100">
+              <div
+                role="alert"
+                className="rounded-md border border-terra/40 bg-terra/5 p-3 text-center text-xs font-medium text-terra"
+              >
                 {error}
               </div>
             )}
@@ -449,7 +454,7 @@ function AuthContent() {
             <button
               type="submit"
               disabled={loading || (isSignup && !selectedCourse)}
-              className="w-full h-12 bg-primary text-white font-bold rounded-xl shadow-lg hover:shadow-primary/30 hover:bg-primary/90 transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-xs disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
+              className="flex h-12 w-full items-center justify-center gap-2 rounded-md bg-primary text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loading ? (
                 <Loader2 className="animate-spin" size={18} />
@@ -461,12 +466,12 @@ function AuthContent() {
             </button>
           </form>
 
-          <div className="mt-8 text-center border-t border-stone-100 pt-6">
+          <div className="mt-8 border-t border-border/70 pt-6 text-center">
             <button
               onClick={() =>
                 router.push(isSignup ? "/auth" : "/auth?mode=signup")
               }
-              className="text-stone-500 hover:text-primary transition-colors text-sm"
+              className="text-sm text-text/80 transition-colors hover:text-primary"
             >
               {isSignup ? (
                 <>
@@ -485,7 +490,7 @@ function AuthContent() {
           <div className="mt-8 text-center">
             <Link
               href="/admin"
-              className="text-[10px] text-stone-400/50 hover:text-stone-500 transition-all uppercase tracking-widest font-medium"
+              className="text-[10px] font-medium uppercase tracking-widest text-muted transition-colors hover:text-text"
             >
               Admin
             </Link>
@@ -500,7 +505,7 @@ export default function AuthPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-[#FDFCF9]">
+        <div className="flex min-h-screen items-center justify-center bg-paper">
           <Loader2 className="animate-spin text-primary" />
         </div>
       }

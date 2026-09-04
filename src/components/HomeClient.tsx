@@ -16,6 +16,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Image as ImageIcon } from "lucide-react";
 import Image from "next/image";
 import MethodologySection from "./sections/MethodologySection";
+import ExploreSection from "./sections/ExploreSection";
 import { MemoryMiniFooter } from "./sections/MemoryMiniFooter";
 import SectionShell from "./ui/SectionShell";
 
@@ -151,6 +152,10 @@ export default function HomeClient({
           initialData={initialData?.institute}
           backgroundArt={heroBackground}
         />
+
+        <Reveal variant="soft">
+          <ExploreSection />
+        </Reveal>
 
         <Reveal variant="medium">
           <FounderSection initialData={initialData?.founder} />
