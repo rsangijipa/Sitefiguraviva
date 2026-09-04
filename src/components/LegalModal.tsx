@@ -69,7 +69,7 @@ export default function LegalModal({ isOpen, onClose, type }: LegalModalProps) {
               <h3 className="font-serif text-lg text-primary mb-3 font-bold">
                 {section.heading}
               </h3>
-              <p className="text-primary/70 leading-relaxed font-light text-sm text-justify">
+              <p className="text-primary/70 leading-relaxed font-light text-sm">
                 {section.text}
               </p>
             </motion.section>

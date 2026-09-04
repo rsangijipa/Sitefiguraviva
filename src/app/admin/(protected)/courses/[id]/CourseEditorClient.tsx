@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { CourseDoc } from "@/types/lms";
+import { getImageSrc } from "@/lib/imageUtils";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
@@ -311,7 +312,10 @@ export default function CourseEditorClient({
                           {course.coverImage ? (
                             <>
                               <Image
-                                src={course.coverImage}
+                                src={getImageSrc(
+                                  course.coverImage,
+                                  "/assets/course-placeholder.jpg",
+                                )}
                                 alt={course.title}
                                 fill
                                 priority

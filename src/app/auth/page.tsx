@@ -72,13 +72,15 @@ function AuthContent() {
 
   const handleSuccess = async (user: any, preferredPath?: string) => {
     try {
-      // A. Sync Profile
-      const token = await user.getIdToken();
-      await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idToken: token }),
-      });
+      // A. Sync Profile Cookie (Firebase legacy fallback)
+      if (user && typeof user.getIdToken === "function") {
+        const token = await user.getIdToken();
+        await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ idToken: token, accessToken: token }),
+        });
+      }
 
       // B. Enforce Profile Sync (SSoT)
       const syncResult = await ensureUserProfileAction();

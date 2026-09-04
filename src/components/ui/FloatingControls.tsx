@@ -10,6 +10,7 @@ import {
   Pause,
   Music,
   Plus,
+  MonitorSmartphone,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Tooltip from "./Tooltip";
@@ -17,10 +18,10 @@ import {
   useConfigSettings,
   useInstituteSettings,
 } from "@/hooks/useSiteSettings";
+import { useTheme } from "@/components/providers/ThemeProvider";
 
 export default function FloatingControls() {
   const [showScrollTop, setShowScrollTop] = useState(false);
-  const [theme, setTheme] = useState<"light" | "dark">("light");
   const [isPlaying, setIsPlaying] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -38,36 +39,29 @@ export default function FloatingControls() {
   // Música meditativa local
   const meditationMusic = "/assets/audio/meditation.mp3";
 
-  // Theme Logic
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme") as "light" | "dark" | null;
-    if (savedTheme) {
-      setTheme(savedTheme);
-      document.documentElement.classList.toggle("dark", savedTheme === "dark");
-    } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      setTheme("dark");
-      document.documentElement.classList.add("dark");
-    }
+  // O tema mora no ThemeProvider: aqui só existe o gatilho. Antes esta lógica
+  // vivia neste componente e nascia sempre em "light", então o botão mostrava
+  // o ícone errado para quem já estava no escuro.
+  const { theme, preference, setPreference, toggle, mounted } = useTheme();
 
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const handleChange = (e: MediaQueryListEvent) => {
-      if (!localStorage.getItem("theme")) {
-        const newSystemTheme = e.matches ? "dark" : "light";
-        setTheme(newSystemTheme);
-        document.documentElement.classList.toggle("dark", e.matches);
-      }
-    };
-
-    mediaQuery.addEventListener("change", handleChange);
-    return () => mediaQuery.removeEventListener("change", handleChange);
-  }, []);
-
-  const toggleTheme = () => {
-    const newTheme = theme === "light" ? "dark" : "light";
-    setTheme(newTheme);
-    localStorage.setItem("theme", newTheme);
-    document.documentElement.classList.toggle("dark", newTheme === "dark");
+  // Ciclo de três estados: claro → escuro → sistema. O terceiro é o que
+  // devolve o controle ao sistema operacional depois de uma escolha manual.
+  const cyclePreference = () => {
+    setPreference(
+      preference === "light"
+        ? "dark"
+        : preference === "dark"
+          ? "system"
+          : "light",
+    );
   };
+
+  const themeLabel =
+    preference === "system"
+      ? "Tema: seguindo o sistema"
+      : preference === "dark"
+        ? "Tema escuro"
+        : "Tema claro";
 
   // Scroll Logic
   useEffect(() => {
@@ -119,17 +113,26 @@ export default function FloatingControls() {
               exit={{ opacity: 0, y: 10, scale: 0.9 }}
               className="flex flex-col items-center gap-3"
             >
-              {/* Theme Toggle */}
-              <Tooltip
-                content={theme === "light" ? "Modo Escuro" : "Modo Claro"}
-              >
+              {/* Alternador de tema */}
+              <Tooltip content={themeLabel}>
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={toggleTheme}
-                  className="w-10 h-10 rounded-full bg-white border border-stone-200 text-primary shadow-md flex items-center justify-center transition-colors"
+                  onClick={cyclePreference}
+                  onDoubleClick={toggle}
+                  aria-label={themeLabel}
+                  title={themeLabel}
+                  className="w-10 h-10 rounded-full bg-surface border border-border text-primary shadow-soft-sm flex items-center justify-center transition-colors hover:border-primary/40"
                 >
-                  {theme === "light" ? <Sun size={18} /> : <Moon size={18} />}
+                  {!mounted ? (
+                    <Sun size={18} />
+                  ) : preference === "system" ? (
+                    <MonitorSmartphone size={18} />
+                  ) : theme === "dark" ? (
+                    <Moon size={18} />
+                  ) : (
+                    <Sun size={18} />
+                  )}
                 </motion.button>
               </Tooltip>
 
@@ -145,7 +148,7 @@ export default function FloatingControls() {
                     className={`w-10 h-10 rounded-full shadow-md flex items-center justify-center transition-all border ${
                       isPlaying
                         ? "bg-gold border-gold text-white"
-                        : "bg-white border-stone-200 text-primary"
+                        : "bg-surface border-border text-primary"
                     }`}
                   >
                     {isPlaying ? <Pause size={18} /> : <Music size={18} />}
@@ -179,7 +182,7 @@ export default function FloatingControls() {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={scrollToTop}
-                className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/10 text-primary shadow-lg flex items-center justify-center transition-all hover:bg-gold hover:text-white"
+                className="w-10 h-10 rounded-full glass-panel text-primary shadow-soft-md flex items-center justify-center transition-all hover:bg-gold hover:text-white"
               >
                 <ArrowUp size={20} />
               </motion.button>

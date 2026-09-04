@@ -1,8 +1,8 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, ArrowUpRight, Sparkles } from "lucide-react";
-import Image from "next/image";
 import OrganicBackground from "../ui/OrganicBackground";
 import WaveLines from "../ui/WaveLines";
 import { useInstituteSettings } from "@/hooks/useSiteSettings";
@@ -30,7 +30,14 @@ const staggerContainer = {
   },
 };
 
-export default function HeroSection({ initialData }: { initialData?: any }) {
+export default function HeroSection({
+  initialData,
+  backgroundArt,
+}: {
+  initialData?: any;
+  /** Árvore da marca, renderizada no servidor (ver src/app/page.tsx). */
+  backgroundArt?: ReactNode;
+}) {
   const { data } = useInstituteSettings(initialData);
   const whatsappNumber = data.phone?.replace(/\D/g, "") || "11999999999";
 
@@ -41,6 +48,20 @@ export default function HeroSection({ initialData }: { initialData?: any }) {
       {/* Premium Background Engine */}
       <BackgroundEngine />
       {isParticlesEnabled && <ParticlesLayer />}
+
+      {/* Árvore da marca: fundo vivo ancorado à direita da página.
+          A máscara horizontal apaga a copa antes da coluna de texto, então a
+          árvore pode ficar opaca de verdade sem disputar leitura com o título. */}
+      {backgroundArt && (
+        <div
+          aria-hidden
+          className="fv-tree-mask pointer-events-none absolute inset-y-0 right-0 z-0 flex w-[118%] translate-x-[6%] translate-y-[2%] items-end justify-end overflow-hidden select-none sm:w-[92%] lg:w-[64%] lg:translate-x-[3%] lg:translate-y-[1%] xl:w-[60%] 2xl:w-[56%]"
+        >
+          <div className="fv-tree-layer h-[72%] w-full opacity-30 sm:h-[80%] sm:opacity-[0.38] lg:h-[94%] lg:opacity-100">
+            {backgroundArt}
+          </div>
+        </div>
+      )}
 
       {/* Decorative Overlays */}
       <WaveLines className="opacity-20 mix-blend-multiply" />
@@ -53,27 +74,18 @@ export default function HeroSection({ initialData }: { initialData?: any }) {
             variants={staggerContainer}
             className="text-left"
           >
-            <motion.div
-              variants={fadeInUp}
-              className="inline-flex items-center gap-2.5 px-5 py-2 rounded-full bg-white/40 backdrop-blur-md border border-white/60 shadow-sm mb-10 group hover:border-gold/30 transition-colors"
-            >
-              <div className="relative">
-                <div className="w-2.5 h-2.5 rounded-full bg-gold animate-ping absolute inset-0" />
-                <div className="w-2.5 h-2.5 rounded-full bg-gold relative" />
-              </div>
-              <span className="text-[11px] font-bold tracking-[0.3em] uppercase text-primary/80">
-                {data.title || "Instituto Figura Viva"}
-              </span>
-            </motion.div>
-
+            {/* O nome da instituição é o título. A etiqueta que ficava acima
+                repetia essa mesma frase — duas vezes a mesma informação, e a
+                de cima em corpo miúdo. Ficou só a de baixo, em tamanho de
+                título, que é onde ela trabalha. */}
             <motion.h1
-              initial={{ opacity: 0.8, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="text-fluid-h1 font-serif text-primary mb-10"
+              variants={fadeInUp}
+              className="font-serif font-bold text-primary mb-8 text-balance tracking-tight leading-[1.08] text-[clamp(1.9rem,4vw,3.05rem)] max-w-[15ch]"
             >
-              A Arte da <br />
-              <span className="italic text-gold font-light">Presença</span>
+              Instituto de Gestalt-terapia de Rondônia
+              <span className="mt-3 block text-gold font-light italic text-[0.82em]">
+                Figura Viva
+              </span>
             </motion.h1>
 
             <motion.p
@@ -122,48 +134,22 @@ export default function HeroSection({ initialData }: { initialData?: any }) {
             </motion.div>
           </motion.div>
 
-          {/* Premium Visual Composition */}
-          <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-            className="relative hidden lg:block"
-          >
-            <div className="relative z-10 aspect-[4/5] rounded-[4rem] overflow-hidden shadow-2xl group border-[12px] border-white/50 backdrop-blur-sm">
-              <Image
-                src="/assets/logo-figura-viva.jpg"
-                alt="Formação em Gestalt-Terapia"
-                fill
-                className="object-cover transform scale-105 transition-transform duration-[2s] group-hover:scale-100"
-                sizes="50vw"
-                priority
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-primary/40 via-transparent to-transparent opacity-60 mix-blend-overlay" />
-            </div>
+          {/* Coluna visual: a árvore do fundo é o assunto. Os dois anéis que
+              flutuavam em laço infinito saíram — eram dois temporizadores
+              permanentes por uma decoração que ninguém olhava. */}
+          <div className="relative hidden lg:block">
+            <div className="aspect-[4/5] w-full" aria-hidden />
 
-            {/* Float Elements */}
+            {/* Cartão de status */}
             <motion.div
-              animate={{ y: [0, -20, 0] }}
-              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute -top-12 -right-12 w-48 h-48 border-[1.5px] border-gold/30 rounded-full mix-blend-multiply"
-            />
-            <motion.div
-              animate={{ y: [0, 25, 0] }}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{
-                duration: 8,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 1,
+                delay: 0.35,
+                duration: 0.45,
+                ease: [0.22, 1, 0.36, 1],
               }}
-              className="absolute -bottom-16 -left-16 w-64 h-64 border-[1.5px] border-primary/10 rounded-full mix-blend-multiply"
-            />
-
-            {/* Social Proof/Status Floating Card */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 1.2 }}
-              className="absolute -bottom-10 right-10 z-20 bg-white/80 backdrop-blur-2xl p-8 rounded-[2.5rem] shadow-2xl border border-white max-w-[240px] group hover:-translate-y-2 transition-transform duration-500"
+              className="absolute -bottom-10 right-10 z-20 glass-panel p-8 rounded-[2.5rem] max-w-[240px] transition-transform duration-200 hover:-translate-y-1"
             >
               <div className="flex items-center gap-3 mb-4">
                 <div className="flex -space-x-3">
@@ -191,7 +177,7 @@ export default function HeroSection({ initialData }: { initialData?: any }) {
                 <ArrowUpRight size={14} className="text-gold" />
               </div>
             </motion.div>
-          </motion.div>
+          </div>
         </div>
       </div>
     </header>

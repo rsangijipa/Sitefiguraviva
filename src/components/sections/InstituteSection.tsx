@@ -11,6 +11,7 @@ import { ArrowRight, MapPin, Phone, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import SectionShell from "../ui/SectionShell";
+import { getImageSrc } from "@/lib/imageUtils";
 
 export default function InstituteSection({
   gallery = [],
@@ -124,14 +125,14 @@ export default function InstituteSection({
                     className="absolute inset-0 w-full h-full"
                   >
                     <Image
-                      src={
-                        slides[currentIndex].src ||
-                        slides[currentIndex].url ||
-                        slides[currentIndex].image ||
-                        "/assets/foto-grupo.jpg"
-                      }
+                      src={getImageSrc(
+                        slides[currentIndex]?.src ||
+                          slides[currentIndex]?.url ||
+                          slides[currentIndex]?.image,
+                        "/assets/foto-grupo.jpg",
+                      )}
                       alt={
-                        slides[currentIndex].title || "Instituto Figura Viva"
+                        slides[currentIndex]?.title || "Instituto Figura Viva"
                       }
                       fill
                       className="object-cover"
@@ -226,7 +227,10 @@ export default function InstituteSection({
               <div className="flex items-center gap-4 mb-4">
                 <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gold/20 relative">
                   <Image
-                    src={founderData?.image || "/assets/lilian-vanessa.jpeg"}
+                    src={getImageSrc(
+                      founderData?.image,
+                      "/assets/lilian-vanessa.jpeg",
+                    )}
                     alt={founderData?.name || "Lilian Vanessa"}
                     fill
                     className="object-cover"
@@ -267,7 +271,10 @@ export default function InstituteSection({
                   <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-stone-100 bg-stone-50 relative">
                     {member.image ? (
                       <Image
-                        src={member.image}
+                        src={getImageSrc(
+                          member.image,
+                          "/assets/lilian-vanessa.jpeg",
+                        )}
                         alt={member.name}
                         fill
                         className="object-cover"

@@ -1,29 +1,46 @@
+import { createSupabaseBrowserClient } from "@/infrastructure/supabase/client";
 
-import { storage } from '@/lib/firebase/client';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+export const uploadFiles = async (
+  files: File[],
+  folder: string = "uploads",
+): Promise<string[]> => {
+  const supabase = createSupabaseBrowserClient();
 
-export const uploadFiles = async (files: File[], folder: string = 'uploads'): Promise<string[]> => {
-    const uploadPromises = files.map(async (file) => {
-        const timestamp = Date.now();
+  const uploadPromises = files.map(async (file) => {
+    const timestamp = Date.now();
 
-        // Slugify the filename to avoid issues with special characters and spaces
-        const cleanName = file.name
-            .toLowerCase()
-            .normalize('NFD') // Decompose accented characters
-            .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
-            .replace(/[^a-z0-9.]/g, '_') // Replace anything not alphanumeric or dot with underscore
-            .replace(/_{2,}/g, '_'); // Collapse multiple underscores
+    // Slugify the filename to avoid issues with special characters and spaces
+    const cleanName = file.name
+      .toLowerCase()
+      .normalize("NFD") // Decompose accented characters
+      .replace(/[\u0300-\u036f]/g, "") // Remove diacritics
+      .replace(/[^a-z0-9.]/g, "_") // Replace anything not alphanumeric or dot with underscore
+      .replace(/_{2,}/g, "_"); // Collapse multiple underscores
 
-        const path = `${folder}/${timestamp}-${cleanName}`;
-        const storageRef = ref(storage, path);
+    const path = `${folder}/${timestamp}-${cleanName}`;
 
-        await uploadBytes(storageRef, file);
-        return await getDownloadURL(storageRef);
-    });
+    const { data, error } = await supabase.storage
+      .from("uploads")
+      .upload(path, file, {
+        cacheControl: "3600",
+        upsert: true,
+      });
 
-    return Promise.all(uploadPromises);
+    if (error) {
+      console.error("[UploadService] Error uploading file to Supabase:", error);
+      throw error;
+    }
+
+    const { data: publicUrlData } = supabase.storage
+      .from("uploads")
+      .getPublicUrl(path);
+
+    return publicUrlData.publicUrl;
+  });
+
+  return Promise.all(uploadPromises);
 };
 
 export const uploadService = {
-    uploadFiles
+  uploadFiles,
 };

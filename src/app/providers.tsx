@@ -8,6 +8,7 @@ import { useState } from "react";
 import { UIProvider } from "@/context/UIContext";
 import { GamificationProvider } from "@/context/GamificationContext";
 import { AudioProvider } from "@/context/AudioContext";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -28,15 +29,17 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <UIProvider>
-          <GamificationProvider>
-            <AudioProvider>
-              <ToastProvider>{children}</ToastProvider>
-            </AudioProvider>
-          </GamificationProvider>
-        </UIProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <UIProvider>
+            <GamificationProvider>
+              <AudioProvider>
+                <ToastProvider>{children}</ToastProvider>
+              </AudioProvider>
+            </GamificationProvider>
+          </UIProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

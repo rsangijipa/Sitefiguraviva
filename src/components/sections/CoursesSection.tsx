@@ -9,6 +9,7 @@ import { Skeleton } from "../ui/Skeleton";
 import { Card } from "../ui/Card";
 import { EmptyState } from "../ui/EmptyState";
 import { Calendar } from "lucide-react";
+import { getImageSrc } from "@/lib/imageUtils";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
@@ -60,7 +61,7 @@ export default function CoursesSection({
   };
 
   return (
-    <SectionShell id="instituto" className="bg-[#EFECE5]">
+    <SectionShell id="instituto" className="bg-areia">
       <motion.div
         initial="hidden"
         whileInView="visible"
@@ -135,14 +136,10 @@ export default function CoursesSection({
                   <Card className="h-full p-4 flex flex-col">
                     <div className="aspect-[4/3] overflow-hidden rounded-xl mb-6 relative shrink-0">
                       <Image
-                        src={
-                          course.image && course.image.trim() !== ""
-                            ? course.image
-                            : course.images?.[0] &&
-                                course.images[0].trim() !== ""
-                              ? course.images[0]
-                              : "/assets/course-placeholder.jpg"
-                        }
+                        src={getImageSrc(
+                          course.image || course.images?.[0],
+                          "/assets/course-placeholder.jpg",
+                        )}
                         alt={course.title || "Course Image"}
                         fill
                         priority={index === 0}
@@ -216,13 +213,9 @@ export default function CoursesSection({
             <ArrowLeft size={24} />
           </button>
 
-          <div className="w-32 h-1.5 bg-stone-200 rounded-full overflow-hidden">
-            <motion.div
-              className="h-full bg-primary/30 rounded-full"
-              animate={{ x: ["-100%", "0%", "100%"] }}
-              transition={{ repeat: Infinity, duration: 3, ease: "linear" }}
-            />
-          </div>
+          {/* Régua estática. A barra que percorria o trilho em laço não media
+              nada: não acompanhava o scroll, só se movia. */}
+          <div className="w-32 h-px bg-stone-200" aria-hidden />
 
           <button
             onClick={() => scroll("right")}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 
 // import { useApp } from '../context/AppContext'; (Removed)
@@ -46,6 +46,8 @@ import {
 } from "../hooks/useContent";
 
 interface HomeClientProps {
+  /** Árvore da marca do hero, renderizada no servidor por src/app/page.tsx. */
+  heroBackground?: ReactNode;
   initialData?: {
     courses: any[];
     posts: any[];
@@ -61,7 +63,10 @@ import methodology from "./sections/MethodologySection";
 import ScrollProgressBar from "./motion/ScrollProgressBar";
 import Reveal from "./motion/Reveal";
 
-export default function HomeClient({ initialData }: HomeClientProps = {}) {
+export default function HomeClient({
+  initialData,
+  heroBackground,
+}: HomeClientProps = {}) {
   const { data: courses = [] } = useCourses(false, {
     initialData: initialData?.courses,
   });
@@ -142,7 +147,10 @@ export default function HomeClient({ initialData }: HomeClientProps = {}) {
         tabIndex={-1}
         className="outline-none"
       >
-        <HeroSection initialData={initialData?.institute} />
+        <HeroSection
+          initialData={initialData?.institute}
+          backgroundArt={heroBackground}
+        />
 
         <Reveal variant="medium">
           <FounderSection initialData={initialData?.founder} />

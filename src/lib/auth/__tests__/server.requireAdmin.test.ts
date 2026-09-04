@@ -1,6 +1,5 @@
 import { requireAdmin, requireStaff } from "@/lib/auth/server";
-import { adminAuth } from "@/lib/firebase/admin";
-import { getUserByUid } from "@/lib/repositories/userRepository.server";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 
 jest.mock("next/headers", () => ({
   cookies: jest.fn(() =>
@@ -18,14 +17,16 @@ jest.mock("next/navigation", () => ({
   redirect: (path: string) => redirectMock(path),
 }));
 
-jest.mock("@/lib/firebase/admin", () => ({
-  adminAuth: {
-    verifySessionCookie: jest.fn(),
-  },
-}));
+const mockGetUser = jest.fn();
+const mockFrom = jest.fn();
 
-jest.mock("@/lib/repositories/userRepository.server", () => ({
-  getUserByUid: jest.fn(),
+jest.mock("@/infrastructure/supabase/server", () => ({
+  createSupabaseServiceClient: jest.fn(() => ({
+    auth: {
+      getUser: mockGetUser,
+    },
+    from: mockFrom,
+  })),
 }));
 
 jest.mock("@/lib/logger", () => ({
@@ -37,21 +38,26 @@ jest.mock("@/lib/logger", () => ({
 describe("server auth guards", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (getUserByUid as jest.Mock).mockResolvedValue(null);
   });
 
-  it("returns normalized context when admin custom claim is true and active", async () => {
-    (adminAuth.verifySessionCookie as jest.Mock).mockResolvedValue({
-      uid: "admin-1",
-      admin: true,
-      role: "student",
-      isActive: true,
+  it("returns normalized context when profile role is admin and active", async () => {
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: "admin-1", email: "admin@example.com" } },
+      error: null,
+    });
+
+    mockFrom.mockReturnValue({
+      select: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(),
+      maybeSingle: jest.fn().mockResolvedValue({
+        data: { role: "admin", is_active: true },
+      }),
     });
 
     await expect(requireAdmin()).resolves.toEqual(
       expect.objectContaining({
         uid: "admin-1",
-        admin: true,
+        role: "admin",
         isAdmin: true,
         isStaff: true,
       }),
@@ -59,33 +65,18 @@ describe("server auth guards", () => {
     expect(redirectMock).not.toHaveBeenCalled();
   });
 
-  it("uses Firestore user role fallback when claims do not include admin", async () => {
-    (adminAuth.verifySessionCookie as jest.Mock).mockResolvedValue({
-      uid: "admin-2",
-      role: "student",
-      isActive: true,
-    });
-    (getUserByUid as jest.Mock).mockResolvedValue({
-      uid: "admin-2",
-      role: "admin",
-      isActive: true,
+  it("allows staff access for tutors from Supabase profile", async () => {
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: "tutor-1", email: "tutor@example.com" } },
+      error: null,
     });
 
-    await expect(requireAdmin()).resolves.toEqual(
-      expect.objectContaining({ uid: "admin-2", role: "admin", isAdmin: true }),
-    );
-  });
-
-  it("allows staff access for tutors from Firestore fallback", async () => {
-    (adminAuth.verifySessionCookie as jest.Mock).mockResolvedValue({
-      uid: "tutor-1",
-      role: "student",
-      isActive: true,
-    });
-    (getUserByUid as jest.Mock).mockResolvedValue({
-      uid: "tutor-1",
-      role: "tutor",
-      isActive: true,
+    mockFrom.mockReturnValue({
+      select: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(),
+      maybeSingle: jest.fn().mockResolvedValue({
+        data: { role: "tutor", is_active: true },
+      }),
     });
 
     await expect(requireStaff()).resolves.toEqual(
@@ -94,10 +85,17 @@ describe("server auth guards", () => {
   });
 
   it("redirects forbidden when no admin role is present", async () => {
-    (adminAuth.verifySessionCookie as jest.Mock).mockResolvedValue({
-      uid: "user-1",
-      role: "student",
-      isActive: true,
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: "user-1", email: "student@example.com" } },
+      error: null,
+    });
+
+    mockFrom.mockReturnValue({
+      select: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(),
+      maybeSingle: jest.fn().mockResolvedValue({
+        data: { role: "student", is_active: true },
+      }),
     });
 
     await expect(requireAdmin()).rejects.toThrow(
@@ -106,10 +104,17 @@ describe("server auth guards", () => {
   });
 
   it("redirects forbidden when admin user is inactive", async () => {
-    (adminAuth.verifySessionCookie as jest.Mock).mockResolvedValue({
-      uid: "admin-3",
-      role: "admin",
-      isActive: false,
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: "admin-3", email: "admin@example.com" } },
+      error: null,
+    });
+
+    mockFrom.mockReturnValue({
+      select: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(),
+      maybeSingle: jest.fn().mockResolvedValue({
+        data: { role: "admin", is_active: false },
+      }),
     });
 
     await expect(requireAdmin()).rejects.toThrow(
@@ -118,9 +123,10 @@ describe("server auth guards", () => {
   });
 
   it("redirects to auth when session is invalid", async () => {
-    (adminAuth.verifySessionCookie as jest.Mock).mockRejectedValue(
-      new Error("invalid session"),
-    );
+    mockGetUser.mockResolvedValue({
+      data: { user: null },
+      error: new Error("invalid session"),
+    });
 
     await expect(requireAdmin()).rejects.toThrow("REDIRECT:/auth?next=/admin");
   });
