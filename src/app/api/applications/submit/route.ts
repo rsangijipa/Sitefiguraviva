@@ -1,33 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { adminAuth, adminDb } from '@/lib/firebase/admin';
+import { adminDb } from '@/lib/firebase/admin';
+import { getBearerSupabaseSessionClaims } from '@/lib/auth/supabase-session';
 import { FieldValue } from 'firebase-admin/firestore';
 
 export async function POST(req: NextRequest) {
     try {
-        const authHeader = req.headers.get('Authorization');
-        if (!authHeader?.startsWith('Bearer ')) {
+        const claims = await getBearerSupabaseSessionClaims(req);
+        if (!claims || !claims.isActive) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const token = authHeader.split('Bearer ')[1];
-        const decodedToken = await adminAuth.verifyIdToken(token);
-        const uid = decodedToken.uid;
+        const uid = claims.uid;
 
-        const body = await req.json();
+        const body = await req.json().catch(() => ({}));
         const { courseId, answers, consent } = body;
 
-        if (!courseId) {
+        if (typeof courseId !== 'string' || !courseId.trim()) {
             return NextResponse.json({ error: 'Course ID required' }, { status: 400 });
         }
 
-        const applicationId = `${uid}_${courseId}`;
+        const normalizedCourseId = courseId.trim();
+        const applicationId = `${uid}_${normalizedCourseId}`;
         const applicationRef = adminDb.collection('applications').doc(applicationId);
 
         await applicationRef.set({
             uid,
-            courseId,
-            answers: answers || {},
-            consent: consent || {},
+            courseId: normalizedCourseId,
+            answers: answers && typeof answers === 'object' ? answers : {},
+            consent: consent && typeof consent === 'object' ? consent : {},
             status: 'submitted',
             source: 'internal',
             createdAt: FieldValue.serverTimestamp(),
@@ -38,6 +38,6 @@ export async function POST(req: NextRequest) {
 
     } catch (error: any) {
         console.error('Application submit error:', error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json({ error: 'Unable to submit application' }, { status: 500 });
     }
 }

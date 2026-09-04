@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
-import { useState, Suspense, useEffect } from "react";
+import { useState, Suspense, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useCourses } from "@/hooks/useContent";
 import { Input } from "@/components/ui/Input";
 import PageShell from "@/components/ui/PageShell";
-import { signInWithGoogle } from "@/lib/firebase/client";
+import { createSupabaseBrowserClient } from "@/infrastructure/supabase/client";
 import { ensureUserProfileAction } from "@/app/actions/auth";
 import { registerForCourseAction } from "@/app/actions/signup";
 import { getRedirectPathForRole } from "@/lib/auth/authService";
@@ -40,7 +40,7 @@ const getFriendlyErrorMessage = (code: string) => {
 };
 
 function AuthContent() {
-  const { signIn } = useAuth();
+  const { signIn, user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   // Helper hook for content (if used)
@@ -63,6 +63,7 @@ function AuthContent() {
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [selectedCourse, setSelectedCourse] = useState(courseId || "");
+  const completedOAuthRedirect = useRef(false);
 
   // Toggle Mode
   useEffect(() => {
@@ -123,6 +124,57 @@ function AuthContent() {
     }
   };
 
+  useEffect(() => {
+    if (
+      searchParams.get("oauth") !== "google" ||
+      !user ||
+      completedOAuthRedirect.current
+    ) {
+      return;
+    }
+
+    completedOAuthRedirect.current = true;
+
+    const finishGoogleSignIn = async () => {
+      setLoading(true);
+      try {
+        // OAuth returns to the browser with a Supabase session, but server
+        // actions need its httpOnly mirror before we create/sync the profile.
+        const supabase = createSupabaseBrowserClient();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        if (!session?.access_token) {
+          throw new Error("Sessão Google não encontrada.");
+        }
+
+        const response = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ accessToken: session.access_token }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Não foi possível concluir a autenticação.");
+        }
+
+        await handleSuccess(
+          user,
+          isSignup && selectedCourse
+            ? `/inscricao/${selectedCourse}`
+            : undefined,
+        );
+      } catch (err) {
+        console.error("Google sign-in completion failed", err);
+        setError("Não foi possível concluir a autenticação com Google.");
+        setLoading(false);
+      }
+    };
+
+    void finishGoogleSignIn();
+  }, [isSignup, searchParams, selectedCourse, user]);
+
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -174,21 +226,28 @@ function AuthContent() {
     }
 
     setLoading(true);
-    const { user, error: googleError } = await signInWithGoogle();
-
-    if (googleError) {
-      const msg = getFriendlyErrorMessage(googleError) || googleError;
-      if (msg) setError(msg);
-      setLoading(false);
-      return;
+    const callbackUrl = new URL("/auth", window.location.origin);
+    callbackUrl.searchParams.set("oauth", "google");
+    if (isSignup) {
+      callbackUrl.searchParams.set("mode", "signup");
+      callbackUrl.searchParams.set("courseId", selectedCourse);
+    }
+    if (next.startsWith("/") && !next.startsWith("//")) {
+      callbackUrl.searchParams.set("next", next);
     }
 
-    if (user) {
-      await handleSuccess(
-        user,
-        isSignup ? `/inscricao/${selectedCourse}` : undefined,
-      );
-    } else {
+    const supabase = createSupabaseBrowserClient();
+    const { error: googleError } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: callbackUrl.toString(),
+        queryParams: { prompt: "select_account" },
+      },
+    });
+
+    if (googleError) {
+      const msg = getFriendlyErrorMessage(googleError.code) || googleError.message;
+      if (msg) setError(msg);
       setLoading(false);
     }
   };

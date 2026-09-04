@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
+import { getSupabaseSessionClaims } from "@/lib/auth/supabase-session";
 import { logger } from "@/lib/logger";
 
 export type ServerAuthContext = {
@@ -38,32 +38,16 @@ export async function verifySession(): Promise<ServerAuthContext | null> {
   }
 
   try {
-    const supabase = createSupabaseServiceClient();
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser(sessionCookie);
-
-    if (error || !user) {
-      return null;
-    }
-
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role, is_active")
-      .eq("id", user.id)
-      .maybeSingle();
-
-    const role = normalizeRole(profile?.role);
-    const isActive = profile?.is_active !== false;
+    const claims = await getSupabaseSessionClaims(sessionCookie);
+    if (!claims) return null;
 
     return {
-      uid: user.id,
-      email: user.email,
-      role,
-      isAdmin: isActive && isAdminRole(role),
-      isStaff: isActive && isStaffRole(role),
-      isActive,
+      uid: claims.uid,
+      email: claims.email,
+      role: claims.role,
+      isAdmin: claims.admin,
+      isStaff: claims.admin || claims.tutor,
+      isActive: claims.isActive,
     };
   } catch (error) {
     logger.warn("Session verification failed:", error);

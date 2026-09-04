@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth, storage } from "@/lib/firebase/admin";
+import { storage } from "@/lib/firebase/admin";
+import { getSupabaseSessionClaims } from "@/lib/auth/supabase-session";
 
 /**
  * File Upload API
@@ -18,7 +19,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const claims = await auth.verifySessionCookie(sessionCookie, true);
+    const claims = await getSupabaseSessionClaims(sessionCookie);
+    if (!claims || !claims.isActive) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     // P1-02: Rate Limit Uploads
     const { rateLimit, getClientIdentifier } = await import("@/lib/rateLimit");

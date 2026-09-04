@@ -50,15 +50,13 @@ Após as refatorações de SSoT (Single Source of Truth) e Hardening, a estraté
 * **Notificações**: Implementar disparos de e-mail automáticos (via SendGrid/Resend) ao concluir um curso ou receber um novo certificado.
 * **Dashboard Admin V2**: Gráficos de retenção e progresso médio por curso.
 
-### ✨ 90 Dias: Experiência Premium & IA
+### ✨ 90 Dias: Experiência Premium
 
 * **Checkout Integrado (P0)**: Integração nativa com Stripe/MercadoPago para venda automática de cursos (Webhooks sincronizando com `enrollments`).
 * **LMS Gamificado**: Implementar sistema de "Conquistas" (Badges) baseadas no progresso e participação na comunidade.
-* **IA Tutor Figura Viva**: Utilizar LLMs para gerar resumos automáticos de aulas e facilitar a busca de conceitos dentro do conteúdo transcrito dos vídeos.
 * **App Nativo (PWA)**: Otimizar o portal para instalação em dispositivos mobile, removendo frames do browser para uma experiência mais imersiva.
 * **Checkout Integrado (P0)**: Integração nativa com Stripe/MercadoPago para venda automática de cursos (Webhooks sincronizando com `enrollments`).
 * **LMS Gamificado**: Implementar sistema de "Conquistas" (Badges) baseadas no progresso e participação na comunidade.
-* **IA Tutor Figura Viva**: Utilizar LLMs para gerar resumos automáticos de aulas e facilitar a busca de conceitos dentro do conteúdo transcrito dos vídeos.
 * **App Nativo (PWA)**: Otimizar o portal para instalação em dispositivos mobile, removendo frames do browser para uma experiência mais imersiva.
 
 ---
@@ -76,4 +74,4 @@ Para cada novo lançamento (ex: Lançamento de Nova Turma):
 
 ### 📝 Notas Adicionais
 
-*Assinado: Antigravity AI*
+*Assinado: Equipe Figura Viva*

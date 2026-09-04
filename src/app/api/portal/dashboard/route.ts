@@ -1,18 +1,17 @@
 
 import { NextResponse } from 'next/server';
-import { auth, db } from '@/lib/firebase/admin';
+import { db } from '@/lib/firebase/admin';
+import { getBearerSupabaseSessionClaims } from '@/lib/auth/supabase-session';
 import { FieldPath } from 'firebase-admin/firestore';
 
 export async function GET(request: Request) {
     try {
-        const authHeader = request.headers.get('Authorization');
-        if (!authHeader?.startsWith('Bearer ')) {
+        const claims = await getBearerSupabaseSessionClaims(request);
+        if (!claims || !claims.isActive) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const token = authHeader.split('Bearer ')[1];
-        const decodedToken = await auth.verifyIdToken(token);
-        const uid = decodedToken.uid;
+        const uid = claims.uid;
 
         // 1. Fetch User Enrollments (Server-side)
         const enrollmentsSnap = await db.collection('users').doc(uid).collection('enrollments')

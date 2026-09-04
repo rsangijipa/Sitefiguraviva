@@ -1,4 +1,5 @@
 import admin from "firebase-admin";
+import { getSupabaseSessionClaims } from "@/lib/auth/supabase-session";
 
 /**
  * Validates that this code is running in a server environment.
@@ -196,6 +197,41 @@ export function getAdminStorage(): admin.storage.Storage {
   return admin.storage(getAdminApp());
 }
 
+/**
+ * The browser authenticates through Supabase, while some legacy services still
+ * store data in Firebase. Keep those services working by validating the
+ * Supabase cookie and exposing equivalent, server-derived claims. Firebase
+ * session cookies remain supported for existing back-office sessions.
+ */
+async function verifyPlatformSessionCookie(
+  sessionCookie: string,
+  checkRevoked?: boolean,
+): Promise<admin.auth.DecodedIdToken> {
+  const claims = await getSupabaseSessionClaims(sessionCookie);
+
+  if (claims) {
+    if (!claims.isActive) {
+      throw new Error("auth/user-disabled");
+    }
+
+    return {
+      uid: claims.uid,
+      sub: claims.uid,
+      email: claims.email,
+      role: claims.role,
+      admin: claims.admin,
+      tutor: claims.tutor,
+      isActive: claims.isActive,
+      firebase: {
+        identities: {},
+        sign_in_provider: "supabase",
+      },
+    } as unknown as admin.auth.DecodedIdToken;
+  }
+
+  return getAdminAuth().verifySessionCookie(sessionCookie, checkRevoked);
+}
+
 // Proxies for Lazy Initialization to prevent build-time crashes if envs are missing in some CI contexts,
 // BUT they do NOT catch or swallow errors. They simply delay execution until property access.
 export const db = new Proxy({} as FirebaseFirestore.Firestore, {
@@ -208,6 +244,10 @@ export const db = new Proxy({} as FirebaseFirestore.Firestore, {
 
 export const auth = new Proxy({} as admin.auth.Auth, {
   get: (_, prop) => {
+    if (prop === "verifySessionCookie") {
+      return verifyPlatformSessionCookie;
+    }
+
     const adminAuth = getAdminAuth();
     const value = (adminAuth as any)[prop];
     return typeof value === "function" ? value.bind(adminAuth) : value;
