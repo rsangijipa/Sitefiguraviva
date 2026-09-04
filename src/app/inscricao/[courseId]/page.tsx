@@ -1,23 +1,12 @@
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
-import { auth, db } from '@/lib/firebase/admin';
+import { db } from '@/lib/firebase/admin';
+import { verifySession } from '@/lib/auth/server';
 import EnrollmentStepper from './EnrollmentStepper';
 import PageShell from '@/components/ui/PageShell';
 
 export default async function EnrollmentPage({ params }: { params: Promise<{ courseId: string }> }) {
     const { courseId } = await params;
-    const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get('session')?.value;
-
-    let uid = null;
-    if (sessionCookie) {
-        try {
-            const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
-            uid = decodedClaims.uid;
-        } catch (e) {
-            // Invalid session
-        }
-    }
+    const session = await verifySession();
+    const uid = session?.isActive ? session.uid : null;
 
     // 1. Fetch Course Data
     const courseDoc = await db.collection('courses').doc(courseId).get();
@@ -54,13 +43,6 @@ export default async function EnrollmentPage({ params }: { params: Promise<{ cou
         application: applicationData ? JSON.parse(JSON.stringify(applicationData)) : null,
         uid
     };
-
-
-
-    // ... imports remain the same
-
-    // ... code ...
-
     return (
         <PageShell variant="default" className="py-12 px-4">
             <EnrollmentStepper

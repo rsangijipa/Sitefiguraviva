@@ -2,7 +2,7 @@
 
 **Data da Análise**: 13 de Fevereiro de 2026  
 **Status do Sistema**: Produção / Estável  
-**Responsável**: Antigravity AI (Google DeepMind)
+**Responsável**: Equipe Figura Viva
 
 ---
 
@@ -54,9 +54,8 @@ O design segue uma estética **Aged Gold & Ink**, transmitindo autoridade, sofis
 
 ### 🥈 Médio Prazo (Recursos Avançados)
 
-1. **AI Tutor (Gestalt-Bot)**: Um assistente de IA treinado com os textos da Lilian Gusmão para tirar dúvidas dos alunos dentro de cada aula.
-2. **App Mobile (Tauri/PWA)**: Estabilização do PWA para permitir o download de materiais para leitura offline e notificações push nativas.
-3. **Sistema de Avaliações Dinâmicas**: Quizzes interativos que liberam módulos extras apenas após a aprovação, aumentando o engajamento.
+1. **App Mobile (Tauri/PWA)**: Estabilização do PWA para permitir o download de materiais para leitura offline e notificações push nativas.
+2. **Sistema de Avaliações Dinâmicas**: Quizzes interativos que liberam módulos extras apenas após a aprovação, aumentando o engajamento.
 
 ### 🥉 Longo Prazo (Escala)
 
@@ -77,4 +76,4 @@ O design segue uma estética **Aged Gold & Ink**, transmitindo autoridade, sofis
 
 ---
 **Assinado**,  
-*Antigravity AI* 🚀
+*Equipe Figura Viva*
