@@ -17,6 +17,8 @@
 
 # Next.js
 /.next/
+# Throwaway builds produced with NEXT_DIST_DIR (audits, CSP checks)
+/.next-*/
 /out/
 
 # Production
