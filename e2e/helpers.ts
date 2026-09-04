@@ -1,5 +1,25 @@
 import { Page, expect } from "@playwright/test";
 
+/**
+ * The authenticated journeys need real accounts, which only exist where
+ * someone configured them. Throwing when they are absent made the whole e2e
+ * command fail, so CI could never go green and the public smoke tests never
+ * got a chance to report. Specs gate on these flags and skip instead.
+ */
+export const HAS_STUDENT_CREDENTIALS = Boolean(
+  process.env.STUDENT_EMAIL && process.env.STUDENT_PASSWORD,
+);
+
+export const HAS_ADMIN_CREDENTIALS = Boolean(
+  process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD,
+);
+
+export const MISSING_STUDENT_CREDENTIALS =
+  "Set STUDENT_EMAIL and STUDENT_PASSWORD to run the student journeys.";
+
+export const MISSING_ADMIN_CREDENTIALS =
+  "Set ADMIN_EMAIL and ADMIN_PASSWORD to run the admin journeys.";
+
 export async function loginAsStudent(page: Page) {
   if (!process.env.STUDENT_EMAIL || !process.env.STUDENT_PASSWORD) {
     throw new Error("STUDENT_EMAIL or STUDENT_PASSWORD not set");

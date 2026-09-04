@@ -93,9 +93,7 @@ export const stopScanIntro = () => {
   }
 };
 
-// --- Motor de Inferência Somática (Nova Lógica Inteligente) ---
-
-import { analyzeSomascan } from "@/app/actions/somascan";
+// --- Motor local de recomendações somáticas ---
 
 const getSensation = (
   data: BodyData,
@@ -107,24 +105,14 @@ const getIntensity = (data: BodyData, part: BodyPartId): number =>
 export const generateRecommendation = async (
   data: BodyData,
 ): Promise<RecommendationResponse> => {
-  // Tentar usar o verdadeiro Gemini AI primariamente
-  try {
-    const aiResult = await analyzeSomascan(data);
-    if (aiResult) {
-      return aiResult;
-    }
-  } catch (err) {
-    console.error("AI Fallback:", err);
-  }
-
-  // Fallback para o Motor Heurístico
+  // Todas as recomendações são calculadas localmente no navegador.
   return generateHeuristicRecommendation(data);
 };
 
 export const generateHeuristicRecommendation = async (
   data: BodyData,
 ): Promise<RecommendationResponse> => {
-  // Simular processamento para dar peso à "análise"
+  // Pequena pausa para preservar o feedback de processamento na interface.
   await new Promise((resolve) => setTimeout(resolve, 800));
 
   const entries = Object.values(data);
@@ -219,8 +207,8 @@ export const generateHeuristicRecommendation = async (
     };
   }
 
-  // 4. Fallback Inteligente (Baseado na Sensação Dominante)
-  // Se nenhum padrão complexo for detectado, usamos a lógica de contagem mas com textos mais ricos.
+  // 4. Recomendação baseada na sensação predominante.
+  // Se nenhum padrão complexo for detectado, usamos a lógica de contagem.
 
   const counts: Record<string, number> = {};
   entries.forEach((entry) => {

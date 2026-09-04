@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Play, Pause, X, Check, Thermometer, Activity, Anchor, Zap, Minus, Save } from 'lucide-react';
 import BodyMap from './BodyMap';
 import { BodyData, BodyPartId, SensationType, BodyLog } from '../types';
-import { playScanIntro, pauseScanIntro, stopScanIntro } from '../services/geminiService';
+import { playScanIntro, pauseScanIntro, stopScanIntro } from "../services/bodyScanService";
 
 interface ScannerProps {
   onComplete: (data: BodyData) => void;
