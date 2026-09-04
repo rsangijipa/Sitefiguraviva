@@ -3,8 +3,20 @@ import { test, expect } from '@playwright/test';
 /**
  * E2E Tests for Enrollment Gate (Orbital 07)
  * Proves that access is synchronized between Admin and Student.
+ *
+ * MARKED FIXME: these are placeholders, not working tests. Every case leaves
+ * its setup as a comment ("Simulate Stripe Webhook...", "Setup enrollment with
+ * accessUntil in the past") and then asserts against invented ids such as
+ * demo-course and draft-course, on a /cursos route that does not exist. They
+ * cannot pass, so they were failing the e2e command on every run.
+ *
+ * They are kept rather than deleted because they describe the access rules
+ * worth covering. Implementing them needs seeded fixtures and a signed-in
+ * context; until then fixme keeps the intent visible without a red pipeline.
+ * Note that the project docs list this file as completed E2E verification of
+ * the enrollment gate — it is not.
  */
-test.describe('Enrollment Gate SSoT', () => {
+test.describe.fixme('Enrollment Gate SSoT', () => {
 
     test('PIX Flow: Pending enrollment blocks access, Admin approval grants it', async ({ page }) => {
         // 1. Student requests PIX access (Assuming a button exists)

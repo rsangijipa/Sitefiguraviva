@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { BodyData, RecommendationResponse } from "../types";
 import BodyMap from "./BodyMap";
-import { generateRecommendation } from "../services/geminiService";
+import { generateRecommendation } from "../services/bodyScanService";
 import { RefreshCcw, Droplet, Sun, Wind } from "lucide-react";
 
 interface ResultsProps {
@@ -51,7 +51,7 @@ const Results: React.FC<ResultsProps> = ({ data, onRestart }) => {
           />
         </div>
 
-        {/* AI Insight Card */}
+        {/* Local recommendation card */}
         <div className="w-full max-w-md space-y-8">
           {loading ? (
             <div className="space-y-6 animate-pulse">

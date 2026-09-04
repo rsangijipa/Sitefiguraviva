@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test';
-import { loginAsStudent } from './helpers';
+import { loginAsStudent, HAS_STUDENT_CREDENTIALS, MISSING_STUDENT_CREDENTIALS } from './helpers';
 
 test.describe('Student Portal Experience', () => {
+    test.skip(!HAS_STUDENT_CREDENTIALS, MISSING_STUDENT_CREDENTIALS);
+
 
     test('should see active enrollments and course content @smoke', async ({ page }) => {
         // 1. Login

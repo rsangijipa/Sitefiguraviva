@@ -47,6 +47,12 @@ jobs:
       env:
         CI: true
         BASE_URL: http://localhost:3000
+        # Optional. Without them the authenticated journeys skip and the public
+        # smoke tests still run, instead of the whole command failing.
+        STUDENT_EMAIL: ${{ secrets.E2E_STUDENT_EMAIL }}
+        STUDENT_PASSWORD: ${{ secrets.E2E_STUDENT_PASSWORD }}
+        ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
+        ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
 
   firestore-rules:
     # Separate job: the rules suite needs the Firestore emulator (and a JVM),
