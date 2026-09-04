@@ -224,13 +224,9 @@ export default function BlogSection({
           <ArrowLeft size={24} />
         </button>
 
-        <div className="w-32 h-1.5 bg-stone-100 rounded-full overflow-hidden">
-          <motion.div
-            className="h-full bg-primary/30 rounded-full"
-            animate={{ x: ["-100%", "0%", "100%"] }}
-            transition={{ repeat: Infinity, duration: 3, ease: "linear" }}
-          />
-        </div>
+        {/* Régua estática. A barra que percorria o trilho em laço não media
+            nada: não acompanhava o scroll, só se movia. */}
+        <div className="w-32 h-px bg-stone-100" aria-hidden />
 
         <button
           onClick={() => {

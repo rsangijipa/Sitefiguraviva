@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import HomeClient from "../components/HomeClient";
+import RainbowTree from "@/components/visual/RainbowTree";
 import { db } from "@/lib/firebase/admin";
 import { deepSafeSerialize } from "@/lib/utils";
 import type { Metadata } from "next";
@@ -166,7 +167,15 @@ export default async function Home() {
         </div>
       }
     >
-      <HomeClient initialData={data} />
+      <HomeClient
+        initialData={data}
+        heroBackground={
+          <RainbowTree
+            className="h-full w-full"
+            preserveAspectRatio="xMaxYMax meet"
+          />
+        }
+      />
     </Suspense>
   );
 }

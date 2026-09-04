@@ -12,44 +12,18 @@ import QRCode from "qrcode";
 
 // --- AUTH HELPER (Robust P0 Fix) ---
 const getIdToken = async (): Promise<string> => {
-  const { auth } = await import("@/lib/firebase/client");
-  if (auth.currentUser) return auth.currentUser.getIdToken();
-
-  return new Promise((resolve, reject) => {
-    let settled = false;
-
-    const cleanup = () => {
-      settled = true;
-      clearTimeout(timeoutId);
-      unsubscribe();
-    };
-
-    const timeoutId = setTimeout(() => {
-      if (settled) return;
-      cleanup();
-      reject(new Error("Timeout de autenticação"));
-    }, 5000);
-
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      if (settled) return;
-
-      if (user) {
-        // Ensure we clean up immediately to prevent race conditions
-        cleanup();
-        try {
-          const token = await user.getIdToken();
-          resolve(token);
-        } catch (e) {
-          reject(e);
-        }
-      } else {
-        // Determine if we should wait or reject immediately.
-        // Standard: wait for initial load. If null comes after load, then reject.
-        // But onAuthStateChanged fires immediately. If null, we might want to wait.
-        // However, without logic to know "auth initialized", we rely on timeout for "not logged in" case.
-      }
-    });
-  });
+  try {
+    const { createSupabaseBrowserClient } =
+      await import("@/infrastructure/supabase/client");
+    const supabase = createSupabaseBrowserClient();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (session?.access_token) return session.access_token;
+  } catch (e) {
+    // Ignore
+  }
+  return "";
 };
 
 export default function EnrollmentStepper({

@@ -1,12 +1,36 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
+
+/**
+ * Entrada de seção.
+ *
+ * O que mudou e por quê:
+ *
+ * 1. Saiu o `filter: blur()` animado. Desfocar um bloco inteiro obriga o
+ *    navegador a repintar a seção a cada quadro por 800 ms — era o efeito mais
+ *    caro da home, e o responsável pelo aspecto lavado das seções em trânsito.
+ * 2. O estado inicial é VISÍVEL. Antes o conteúdo nascia em `opacity: 0` e só
+ *    aparecia se o observador disparasse; qualquer falha deixava a seção em
+ *    branco. Agora só é escondido o que está abaixo da dobra, e só depois que
+ *    o JavaScript confirmou que consegue revelá-lo.
+ * 3. A animação é CSS. Uma transição de opacidade e deslocamento, 420 ms, na
+ *    curva única do sistema — sem framer-motion nesta camada.
+ */
+
+const DISTANCE = { soft: 8, medium: 14, hero: 18 } as const;
 
 interface RevealProps {
   children: ReactNode;
-  variant?: "soft" | "medium" | "hero";
+  variant?: keyof typeof DISTANCE;
   className?: string;
+  /** Atraso em segundos, para escalonar irmãos. */
   delay?: number;
 }
 
@@ -16,34 +40,51 @@ export default function Reveal({
   className = "",
   delay = 0,
 }: RevealProps) {
-  const variants = {
-    soft: {
-      initial: { opacity: 0, y: 10, filter: "blur(4px)" },
-      whileInView: { opacity: 1, y: 0, filter: "blur(0px)" },
-    },
-    medium: {
-      initial: { opacity: 0, y: 14, filter: "blur(6px)" },
-      whileInView: { opacity: 1, y: 0, filter: "blur(0px)" },
-    },
-    hero: {
-      initial: { opacity: 0, scale: 0.98, filter: "blur(8px)" },
-      whileInView: { opacity: 1, scale: 1, filter: "blur(0px)" },
-    },
-  };
+  const ref = useRef<HTMLDivElement>(null);
+  // "pronto" = sem animação nenhuma (SSR, movimento reduzido, já na tela).
+  const [state, setState] = useState<"pronto" | "oculto" | "revelado">(
+    "pronto",
+  );
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    // Já visível no primeiro quadro: fica como está. O topo da página não deve
+    // depender de observador para existir.
+    if (el.getBoundingClientRect().top < window.innerHeight * 0.92) return;
+
+    setState("oculto");
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setState("revelado");
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "0px 0px -8% 0px" },
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const style = {
+    "--reveal-y": `${DISTANCE[variant]}px`,
+    transitionDelay: delay ? `${delay}s` : undefined,
+  } as CSSProperties;
 
   return (
-    <motion.div
-      initial={variants[variant].initial}
-      whileInView={variants[variant].whileInView}
-      viewport={{ once: true, margin: "-10% 0px -10% 0px" }}
-      transition={{
-        duration: 0.8,
-        ease: [0.21, 0.47, 0.32, 0.98],
-        delay: delay,
-      }}
-      className={className}
+    <div
+      ref={ref}
+      data-reveal={state === "pronto" ? undefined : state}
+      className={`reveal ${className}`}
+      style={style}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }

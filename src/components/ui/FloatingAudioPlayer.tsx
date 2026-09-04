@@ -300,13 +300,6 @@ export default function FloatingAudioPlayer() {
             </div>
           )}
         </div>
-
-        {/* Animated Dust Paticles (Subtle Effect) */}
-        {!isMinimized && isPlaying && (
-          <div className="absolute -z-10 inset-0 overflow-hidden pointer-events-none opacity-20">
-            <div className="absolute top-0 left-0 w-full h-full bg-aurora-gold animate-aurora rounded-2xl" />
-          </div>
-        )}
       </div>
 
       <style jsx>{`
