@@ -42,6 +42,7 @@ const nextConfig = {
                     `script-src ${scriptSrc}`,
                     "style-src 'self' 'unsafe-inline'",
                     "img-src 'self' data: https://*.supabase.co https://firebasestorage.googleapis.com https://storage.googleapis.com https://lh3.googleusercontent.com https://img.youtube.com https://i.ytimg.com https://*.behold.so",
+                    "media-src 'self' blob: data: https://firebasestorage.googleapis.com https://storage.googleapis.com",
                     "font-src 'self' data:",
                     "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.behold.so https://w.behold.so https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.google.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://*.googleapis.com https://firebasestorage.googleapis.com wss://*.firebaseio.com https://*.sentry.io",
                     "frame-src 'self' https://www.youtube.com https://*.behold.so",

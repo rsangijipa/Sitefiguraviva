@@ -103,12 +103,12 @@ export default function AdminShell({
   return (
     <PageShell
       variant="admin"
-      className="flex min-h-screen selection:bg-gold/20"
+      className="fv-admin flex min-h-screen selection:bg-gold/20"
     >
       {/* Mobile Toggle */}
       <button
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className="lg:hidden fixed bottom-6 right-6 z-50 p-4 bg-primary text-white rounded-full shadow-2xl transition-transform active:scale-90"
+        className="fixed bottom-6 right-6 z-50 rounded-full bg-primary p-4 text-white transition-transform active:scale-90 lg:hidden"
       >
         {isSidebarOpen ? <X size={24} /> : <LayoutDashboard size={24} />}
       </button>
@@ -116,7 +116,7 @@ export default function AdminShell({
       {/* Sidebar */}
       <aside
         className={`
-                w-80 bg-white/60 backdrop-blur-2xl border-r border-stone-200/60 flex flex-col fixed h-full z-40 transition-all duration-500
+                fixed z-40 flex h-full w-80 flex-col border-r border-border bg-areia transition-all duration-500
                 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
             `}
       >
@@ -171,10 +171,10 @@ export default function AdminShell({
           })}
         </nav>
 
-        <div className="p-6 border-t border-stone-200/60 space-y-3 bg-white/40">
+        <div className="space-y-3 border-t border-border p-6">
           <Link
             href="/"
-            className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-white border border-stone-200 text-stone-600 hover:border-gold hover:text-gold rounded-xl transition-all duration-300 text-[10px] font-bold uppercase tracking-[0.2em] group shadow-sm hover:shadow-md"
+            className="group flex w-full items-center justify-center gap-3 rounded-md border border-border bg-paper px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-text transition-colors hover:border-igarape hover:text-primary"
           >
             <Home
               size={16}
@@ -185,7 +185,7 @@ export default function AdminShell({
 
           <button
             onClick={() => signOut()}
-            className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-red-50 text-red-400 hover:bg-red-100 hover:text-red-500 rounded-xl transition-all duration-300 text-[10px] font-bold uppercase tracking-[0.2em] group"
+            className="group flex w-full items-center justify-center gap-3 rounded-md px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-muted transition-colors hover:bg-error/10 hover:text-error"
           >
             <LogOut
               size={16}
@@ -208,7 +208,7 @@ export default function AdminShell({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setIsSidebarOpen(false)}
-            className="fixed inset-0 bg-primary/20 backdrop-blur-sm z-30 lg:hidden"
+            className="fixed inset-0 z-30 bg-text/45 backdrop-blur-sm lg:hidden"
           />
         )}
       </AnimatePresence>
@@ -252,7 +252,7 @@ export default function AdminShell({
 
             <div className="w-full md:w-auto flex items-center gap-3">
               <div className="relative flex-1 md:flex-none md:w-64">
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-white border border-stone-200 rounded-xl">
+                <div className="flex items-center gap-2 rounded-md border border-border bg-paper px-3 py-1.5">
                   <Search size={14} className="text-stone-400" />
                   <input
                     value={searchQuery}
@@ -268,7 +268,7 @@ export default function AdminShell({
                 </div>
 
                 {searchOpen && (
-                  <div className="absolute top-full mt-2 w-full bg-white border border-stone-100 rounded-xl shadow-lg overflow-hidden z-30">
+                  <div className="absolute top-full z-30 mt-2 w-full overflow-hidden rounded-md border border-border bg-paper">
                     {suggestions.length > 0 ? (
                       suggestions.map((item) => (
                         <button

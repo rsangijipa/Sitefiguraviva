@@ -52,14 +52,17 @@ export default function BlogSection({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   return (
-    <SectionShell id="blog" className="bg-white border-t border-stone-100">
+    <SectionShell
+      id="blog"
+      className="fv-bg fv-bg-articles bg-paper border-t border-border/60"
+    >
       <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
         <div className="max-w-xl">
-          <span className="text-xs font-bold tracking-[0.2em] uppercase text-gold mb-4 block">
+          <span className="fv-eyebrow mb-4">
             Reflexões & Saberes
           </span>
           <h2 className="heading-section text-primary">Blog Figura Viva</h2>
-          <p className="text-lg text-text/60 mt-4">
+          <p className="fv-lead mt-4">
             Artigos, ensaios e pílulas de awareness sobre a clínica, a vida e o
             encontro.
           </p>
@@ -73,7 +76,7 @@ export default function BlogSection({
         {loading ? (
           [1, 2, 3].map((i) => (
             <div key={i}>
-              <Skeleton className="aspect-[16/10] rounded-2xl mb-8 w-full" />
+              <Skeleton className="mb-8 aspect-[16/10] w-full rounded-md" />
               <div className="space-y-4">
                 <div className="flex gap-3">
                   <Skeleton className="h-3 w-1/4 rounded" />
@@ -110,11 +113,11 @@ export default function BlogSection({
                     className="group block h-full cursor-pointer"
                   >
                     {isPdf ? (
-                      <Card className="rounded-[2rem] overflow-hidden group h-full flex flex-col border border-stone-100 shadow-lg hover:shadow-2xl transition-all duration-300">
+                      <Card className="group flex h-full flex-col overflow-hidden">
                         <div
                           className={`h-64 ${dynamicStyle} flex items-center justify-center relative overflow-hidden p-8 shrink-0`}
                         >
-                          <span className="absolute top-6 left-6 z-10 px-3 py-1 text-[8px] font-bold uppercase tracking-widest rounded bg-white/50 backdrop-blur-sm shadow-sm opacity-70">
+                          <span className="absolute left-6 top-6 z-10 rounded-sm bg-paper/85 px-3 py-1 text-[8px] font-bold uppercase tracking-widest text-primary backdrop-blur-sm">
                             {post.category || "Biblioteca"}
                           </span>
 
@@ -131,14 +134,14 @@ export default function BlogSection({
                           </div>
                         </div>
                         <CardContent className="p-8 flex flex-col flex-1">
-                          <div className="flex items-center gap-2 text-text/40 text-[10px] font-bold uppercase tracking-widest mb-4">
+                          <div className="mb-4 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-terra">
                             <FileText size={14} />{" "}
                             {post.category || "Biblioteca"}
                           </div>
                           <h4 className="font-serif text-2xl text-primary leading-tight mb-4 group-hover:text-gold transition-colors line-clamp-2 min-h-[3.5rem]">
                             {post.title}
                           </h4>
-                          <p className="text-sm text-text/60 mb-8 leading-relaxed line-clamp-3">
+                          <p className="mb-8 line-clamp-3 text-sm leading-relaxed text-text/75">
                             {post.excerpt ||
                               "Clique para acessar este conteúdo."}
                           </p>
@@ -148,8 +151,8 @@ export default function BlogSection({
                         </CardContent>
                       </Card>
                     ) : (
-                      <Card className="h-full border border-stone-200/60 shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 p-0 overflow-hidden rounded-2xl bg-white flex flex-col">
-                        <div className="relative mb-6 overflow-hidden aspect-[16/10] bg-paper border-b border-stone-100 shrink-0">
+                      <Card className="flex h-full flex-col overflow-hidden p-0">
+                        <div className="relative mb-6 aspect-[16/10] shrink-0 overflow-hidden border-b border-border/70 bg-areia">
                           <Image
                             src={
                               post.image ||
@@ -161,7 +164,7 @@ export default function BlogSection({
                             className="object-cover transition-transform duration-700 group-hover:scale-110"
                           />
                           <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
-                            <span className="bg-white/90 backdrop-blur px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest text-primary">
+                            <span className="rounded-md bg-paper/95 px-6 py-2 text-xs font-bold uppercase tracking-widest text-primary backdrop-blur">
                               Ler Artigo
                             </span>
                           </div>
@@ -172,15 +175,15 @@ export default function BlogSection({
                               <span className="text-[10px] font-bold tracking-widest uppercase text-gold">
                                 {post.category || "Gestalt-Terapia"}
                               </span>
-                              <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-                              <span className="text-[10px] font-bold tracking-widest uppercase text-text/40">
+                              <span className="h-1 w-1 rounded-full bg-nevoa" aria-hidden></span>
+                              <span className="text-[10px] font-bold uppercase tracking-widest text-terra">
                                 {post.date}
                               </span>
                             </div>
                             <h3 className="font-serif text-2xl text-primary leading-snug group-hover:text-gold transition-colors duration-300 line-clamp-2 min-h-[3.5rem]">
                               {post.title}
                             </h3>
-                            <p className="text-sm text-text/60 line-clamp-3 leading-relaxed mb-4 flex-1">
+                            <p className="mb-4 line-clamp-3 flex-1 text-sm leading-relaxed text-text/75">
                               {post.excerpt}
                             </p>
                             <div className="pt-2 flex items-center gap-2 text-primary font-bold text-[10px] uppercase tracking-widest group-hover:gap-3 transition-all mt-auto">
@@ -218,7 +221,7 @@ export default function BlogSection({
               });
             }
           }}
-          className="p-3 rounded-full hover:bg-stone-100 text-stone-400 hover:text-primary transition-colors border border-transparent hover:border-stone-200"
+          className="rounded-full border border-transparent p-3 text-muted transition-colors hover:border-border hover:bg-areia hover:text-primary"
           aria-label="Scroll Left"
         >
           <ArrowLeft size={24} />
@@ -226,7 +229,7 @@ export default function BlogSection({
 
         {/* Régua estática. A barra que percorria o trilho em laço não media
             nada: não acompanhava o scroll, só se movia. */}
-        <div className="w-32 h-px bg-stone-100" aria-hidden />
+        <div className="h-px w-32 bg-border" aria-hidden />
 
         <button
           onClick={() => {
@@ -237,7 +240,7 @@ export default function BlogSection({
               });
             }
           }}
-          className="p-3 rounded-full hover:bg-stone-100 text-stone-400 hover:text-primary transition-colors border border-transparent hover:border-stone-200"
+          className="rounded-full border border-transparent p-3 text-muted transition-colors hover:border-border hover:bg-areia hover:text-primary"
           aria-label="Scroll Right"
         >
           <ArrowRight size={24} />

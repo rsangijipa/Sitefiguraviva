@@ -47,6 +47,8 @@ async function getLibraryData() {
         id: doc.id,
         title: data.title || "",
         subtitle: data.subtitle || data.excerpt || "",
+        type: data.type || "",
+        externalUrl: data.externalUrl || data.url || "",
         content: data.content || "",
         pdfUrl: data.pdfUrl || data.pdf_url || "",
         image: data.image || data.coverImage || "",

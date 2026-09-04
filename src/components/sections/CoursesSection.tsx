@@ -61,7 +61,7 @@ export default function CoursesSection({
   };
 
   return (
-    <SectionShell id="instituto" className="bg-areia">
+    <SectionShell id="instituto" className="fv-bg fv-bg-formations bg-areia">
       <motion.div
         initial="hidden"
         whileInView="visible"
@@ -70,7 +70,7 @@ export default function CoursesSection({
         className="mb-12 md:flex justify-between items-end"
       >
         <div className="max-w-2xl">
-          <span className="text-xs font-bold tracking-[0.2em] uppercase text-primary/60 mb-4 block">
+          <span className="fv-eyebrow mb-4">
             Formação & Estudos
           </span>
           <h2 className="heading-section text-primary">
@@ -94,11 +94,11 @@ export default function CoursesSection({
           {loading ? (
             [1, 2, 3].map((i) => (
               <div key={i} className="flex-shrink-0 w-80 md:w-96 snap-center">
-                <div className="flex flex-col h-full bg-white rounded-2xl p-4 shadow-sm border border-stone-100/50">
-                  <Skeleton className="aspect-[4/3] w-full rounded-xl mb-6 bg-stone-200" />
+                <div className="flex h-full flex-col rounded-md border border-border bg-paper p-4">
+                  <Skeleton className="mb-6 aspect-[4/3] w-full rounded-md bg-areia" />
                   <div className="space-y-4 flex-1">
-                    <Skeleton className="h-6 w-3/4 rounded bg-stone-200" />
-                    <Skeleton className="h-4 w-1/4 rounded bg-stone-200" />
+                    <Skeleton className="h-6 w-3/4 rounded bg-areia" />
+                    <Skeleton className="h-4 w-1/4 rounded bg-areia" />
                   </div>
                 </div>
               </div>
@@ -134,7 +134,7 @@ export default function CoursesSection({
                   onClick={() => onSelectCourse(course)}
                 >
                   <Card className="h-full p-4 flex flex-col">
-                    <div className="aspect-[4/3] overflow-hidden rounded-xl mb-6 relative shrink-0">
+                    <div className="relative mb-6 aspect-[4/3] shrink-0 overflow-hidden rounded-md">
                       <Image
                         src={getImageSrc(
                           course.image || course.images?.[0],
@@ -146,10 +146,9 @@ export default function CoursesSection({
                         sizes="(max-width: 768px) 100vw, 33vw"
                         className={`object-cover transition-transform duration-700 ease-out group-hover:scale-105 ${isClosed ? "grayscale opacity-70" : ""}`}
                       />
-                      <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none" />
                       <div className="absolute top-3 left-3 flex flex-wrap gap-2 pointer-events-none">
                         {course.category && (
-                          <span className="bg-white/95 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider text-primary shadow-sm border border-gray-100">
+                          <span className="rounded-sm border border-border bg-paper/95 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary backdrop-blur-sm">
                             {course.category === "Formacao"
                               ? "Formação"
                               : course.category === "GrupoEstudos"
@@ -158,7 +157,7 @@ export default function CoursesSection({
                           </span>
                         )}
                         {isClosed && (
-                          <span className="bg-red-500/90 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider text-white shadow-sm">
+                          <span className="rounded-sm bg-error/90 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-sm">
                             {course.status}
                           </span>
                         )}
@@ -175,7 +174,7 @@ export default function CoursesSection({
                             {course.subtitle}
                           </p>
                         )}
-                        <p className="text-xs font-medium uppercase tracking-wider text-sage">
+                        <p className="text-xs font-medium uppercase tracking-wider text-terra">
                           {course.date}
                         </p>
                       </div>
@@ -184,13 +183,13 @@ export default function CoursesSection({
                         {course.description || course.details?.intro}
                       </p>
 
-                      <div className="mt-auto pt-4 border-t border-gray-100">
+                      <div className="mt-auto border-t border-border/70 pt-4">
                         {isClosed ? (
-                          <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400 cursor-not-allowed py-2">
+                          <span className="inline-flex cursor-not-allowed items-center gap-2 py-2 text-xs font-bold uppercase tracking-widest text-muted">
                             Inscrições Encerradas
                           </span>
                         ) : (
-                          <button className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary group-hover:gap-4 transition-all py-3 px-2 -ml-2 rounded-lg hover:bg-gray-50 bg-transparent active:scale-95 touch-manipulation">
+                          <button className="-ml-2 inline-flex touch-manipulation items-center gap-2 rounded-md bg-transparent px-2 py-3 text-xs font-bold uppercase tracking-widest text-primary transition-all hover:bg-areia group-hover:gap-4 active:scale-95">
                             Saiba Mais <span className="text-gold">→</span>
                           </button>
                         )}
@@ -207,7 +206,7 @@ export default function CoursesSection({
         <div className="flex md:hidden items-center justify-center gap-6 mt-6 opacity-70 hover:opacity-100 transition-opacity">
           <button
             onClick={() => scroll("left")}
-            className="p-3 rounded-full hover:bg-stone-200/50 text-stone-400 hover:text-primary transition-colors border border-transparent hover:border-stone-300"
+            className="rounded-full border border-transparent p-3 text-muted transition-colors hover:border-border hover:bg-areia hover:text-primary"
             aria-label="Scroll Left"
           >
             <ArrowLeft size={24} />
@@ -215,11 +214,11 @@ export default function CoursesSection({
 
           {/* Régua estática. A barra que percorria o trilho em laço não media
               nada: não acompanhava o scroll, só se movia. */}
-          <div className="w-32 h-px bg-stone-200" aria-hidden />
+          <div className="h-px w-32 bg-border" aria-hidden />
 
           <button
             onClick={() => scroll("right")}
-            className="p-3 rounded-full hover:bg-stone-200/50 text-stone-400 hover:text-primary transition-colors border border-transparent hover:border-stone-300"
+            className="rounded-full border border-transparent p-3 text-muted transition-colors hover:border-border hover:bg-areia hover:text-primary"
             aria-label="Scroll Right"
           >
             <ArrowRight size={24} />

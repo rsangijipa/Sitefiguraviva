@@ -15,9 +15,9 @@ export default function CookiePreferencesButton() {
     <button
       type="button"
       onClick={reset}
-      className="hover:text-paper transition-soft min-h-[44px] flex items-center uppercase tracking-[0.2em] font-bold text-[10px]"
+      className="flex min-h-[44px] items-center py-1 text-left transition-soft hover:text-gold-light"
     >
-      Cookies
+      Preferências de cookies
     </button>
   );
 }

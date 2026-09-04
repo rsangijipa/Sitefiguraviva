@@ -68,20 +68,24 @@ export default function InstituteSection({
   }, [slides.length]);
 
   return (
-    <SectionShell id="instituto-sobre" className="bg-white" container={false}>
+    <SectionShell
+      id="instituto-sobre"
+      className="fv-bg fv-bg-manifesto bg-paper"
+      container={false}
+    >
       {/* Header */}
-      <div className="container mx-auto px-6 max-w-6xl relative z-10">
+      <div className="fv-container relative z-10 max-w-6xl">
         <div className="text-center max-w-3xl mx-auto mb-12 animate-fade-in-up">
-          <span className="text-xs font-bold tracking-[0.2em] uppercase text-gold mb-4 block">
+          <span className="fv-eyebrow mb-4">
             Sobre Nós
           </span>
           <h2 className="font-serif text-4xl md:text-6xl text-primary leading-tight mb-6">
             {data.title}
           </h2>
-          <p className="text-lg md:text-xl text-primary/60 font-serif italic mb-8">
+          <p className="mb-8 font-serif text-lg italic text-text/80 md:text-xl">
             {data.subtitle}
           </p>
-          <p className="text-primary/70 leading-relaxed mb-10 max-w-2xl mx-auto">
+          <p className="fv-lead mx-auto mb-10">
             Aqui, Gestalt-terapia não é vitrine. É caminho. Um campo de estudo,
             prática e presença para quem quer cuidar e se formar com densidade
             teórica e sensibilidade clínica.
@@ -90,13 +94,13 @@ export default function InstituteSection({
           <div className="flex flex-col md:flex-row items-center justify-center gap-4">
             <Link
               href="/#clinica"
-              className="bg-primary text-white px-8 py-4 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-gold transition-colors shadow-lg hover:shadow-xl hover:-translate-y-1"
+              className="rounded-md bg-primary px-8 py-4 text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-primary-dark"
             >
               Conhecer a Clínica
             </Link>
             <Link
               href="/#instituto"
-              className="bg-white border border-stone-200 text-primary px-8 py-4 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-stone-50 transition-colors"
+              className="rounded-md border border-border bg-paper px-8 py-4 text-xs font-bold uppercase tracking-widest text-primary transition-colors hover:border-igarape hover:bg-areia"
             >
               Ver Formações
             </Link>
@@ -104,7 +108,7 @@ export default function InstituteSection({
               href={`https://wa.me/5569992481585`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-widest hover:text-green-600 transition-colors p-4"
+              className="flex items-center gap-2 p-4 text-xs font-bold uppercase tracking-widest text-primary transition-colors hover:text-igarape"
             >
               <MessageCircle size={16} /> WhatsApp
             </a>
@@ -113,7 +117,7 @@ export default function InstituteSection({
 
         <div className="grid md:grid-cols-2 gap-16 items-center mb-24">
           <div className="order-2 md:order-1 relative w-[85%] mx-auto">
-            <div className="aspect-[4/5] rounded-[2rem] overflow-hidden relative z-10 bg-stone-100 shadow-xl">
+            <div className="relative z-10 aspect-[4/5] overflow-hidden rounded-md bg-areia">
               <AnimatePresence mode="popLayout">
                 {slides.length > 0 ? (
                   <motion.div
@@ -154,24 +158,27 @@ export default function InstituteSection({
                 )}
               </AnimatePresence>
             </div>
-            <div className="absolute top-10 -left-10 w-full h-full border-2 border-gold/30 rounded-[2rem] -z-0 hidden md:block" />
+            <div
+              className="absolute -left-10 top-10 -z-0 hidden h-full w-full rounded-md border border-terra/40 md:block"
+              aria-hidden
+            />
           </div>
 
           <div className="order-1 md:order-2 space-y-8">
             <div>
-              <span className="text-xs font-bold tracking-[0.2em] uppercase text-primary/40 mb-2 block">
+              <span className="fv-eyebrow mb-2">
                 Manifesto
               </span>
-              <h3 className="font-serif text-3xl text-primary mb-6">
+              <h3 className="mb-6 font-serif text-3xl text-paper md:text-4xl">
                 {data.manifesto_title}
               </h3>
-              <p className="text-lg text-primary/70 leading-relaxed whitespace-pre-line">
+              <p className="whitespace-pre-line text-lg leading-relaxed text-text/80">
                 {data.manifesto_text}
               </p>
             </div>
 
-            <blockquote className="border-l-4 border-gold pl-6 py-2 my-8 bg-stone-50 rounded-r-xl p-6">
-              <p className="font-serif text-2xl text-primary italic mb-2">
+            <blockquote className="my-8 border-l-2 border-terra bg-areia p-6 pl-6">
+              <p className="mb-2 font-serif text-2xl italic text-primary">
                 "{data.quote}"
               </p>
             </blockquote>
@@ -197,12 +204,12 @@ export default function InstituteSection({
               ].map((card, i) => (
                 <div
                   key={i}
-                  className="bg-stone-50 p-4 rounded-xl border border-stone-100 hover:border-gold/30 transition-colors"
+                  className="rounded-md border border-border bg-areia p-4 transition-colors hover:border-igarape"
                 >
                   <h4 className="font-bold text-primary text-sm mb-1">
                     {card.title}
                   </h4>
-                  <p className="text-xs text-primary/60">{card.text}</p>
+                  <p className="text-xs text-text/75">{card.text}</p>
                 </div>
               ))}
             </div>
@@ -215,7 +222,7 @@ export default function InstituteSection({
             <h3 className="font-serif text-3xl text-primary mb-4">
               Fundação e Curadoria
             </h3>
-            <p className="text-primary/60 max-w-2xl mx-auto">
+            <p className="fv-lead mx-auto text-center">
               Uma equipe comprometida com a ética do cuidado e a contínua
               formação.
             </p>
@@ -223,9 +230,9 @@ export default function InstituteSection({
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* Founder */}
-            <div className="group bg-white rounded-2xl p-6 border border-stone-100 hover:border-gold/30 shadow-sm hover:shadow-xl transition-all">
+            <div className="fv-card group p-6">
               <div className="flex items-center gap-4 mb-4">
-                <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gold/20 relative">
+                <div className="relative h-16 w-16 overflow-hidden rounded-full border border-terra/40">
                   <Image
                     src={getImageSrc(
                       founderData?.image,
@@ -243,19 +250,19 @@ export default function InstituteSection({
                       " " +
                       (founderData?.name?.split(" ")[1] || "")}
                   </h4>
-                  <span className="text-xs font-bold text-gold uppercase tracking-wider">
+                  <span className="text-xs font-bold uppercase tracking-wider text-terra">
                     Fundadora
                   </span>
                 </div>
               </div>
-              <p className="text-sm text-primary/70 leading-relaxed mb-4 line-clamp-3">
+              <p className="mb-4 line-clamp-3 text-sm leading-relaxed text-text/75">
                 {founderData?.bio ||
                   "Psicóloga, gestalt-terapeuta e pesquisadora. Mestre em Psicologia."}
               </p>
               <a
                 href={founderData?.link || "http://lattes.cnpq.br/"}
                 target="_blank"
-                className="text-[10px] font-bold uppercase tracking-widest text-primary hover:text-gold flex items-center gap-2"
+                className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-primary underline-offset-4 hover:underline"
               >
                 Ver Currículo Lattes <ArrowRight size={12} />
               </a>
@@ -265,10 +272,10 @@ export default function InstituteSection({
             {teamMembers.map((member: any) => (
               <div
                 key={member.id}
-                className="group bg-white rounded-2xl p-6 border border-stone-100 hover:border-gold/30 shadow-sm hover:shadow-xl transition-all"
+                className="fv-card group p-6"
               >
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-stone-100 bg-stone-50 relative">
+                  <div className="relative h-16 w-16 overflow-hidden rounded-full border border-border bg-areia">
                     {member.image ? (
                       <Image
                         src={getImageSrc(
@@ -281,7 +288,7 @@ export default function InstituteSection({
                         sizes="64px"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-stone-300 font-bold text-xl">
+                      <div className="flex h-full w-full items-center justify-center text-xl font-bold text-muted">
                         {member.name.charAt(0)}
                       </div>
                     )}
@@ -290,12 +297,12 @@ export default function InstituteSection({
                     <h4 className="font-bold text-primary text-lg">
                       {member.name}
                     </h4>
-                    <span className="text-xs font-bold text-stone-400 uppercase tracking-wider">
+                    <span className="text-xs font-bold uppercase tracking-wider text-terra">
                       {member.role}
                     </span>
                   </div>
                 </div>
-                <p className="text-sm text-primary/70 leading-relaxed">
+                <p className="text-sm leading-relaxed text-text/75">
                   {member.bio}
                 </p>
               </div>
@@ -304,23 +311,23 @@ export default function InstituteSection({
         </div>
 
         {/* Location */}
-        <div className="bg-paper rounded-[3rem] p-8 md:p-16 text-center border border-transparent">
-          <h3 className="font-serif text-3xl text-primary mb-6">
+        <div className="fv-bg fv-bg-cta rounded-md bg-primary-solid p-8 text-center text-paper md:p-16">
+          <h3 className="mb-6 font-serif text-3xl text-paper md:text-4xl">
             Presença local, campo aberto
           </h3>
-          <p className="text-primary/70 max-w-2xl mx-auto mb-10 leading-relaxed">
+          <p className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-paper/80">
             Estamos em Ouro Preto D'Oeste (RO), com o compromisso de construir
             um campo vivo de cuidado e formação. Um lugar para chegar com
             perguntas, ficar com presença e sair com mais mundo por dentro.
           </p>
 
-          <div className="flex flex-col md:flex-row justify-center gap-8 md:gap-16 text-sm text-primary/60 mb-10">
+          <div className="mb-10 flex flex-col justify-center gap-8 text-sm text-paper/80 md:flex-row md:gap-16">
             <div className="flex items-center justify-center gap-3">
-              <MapPin className="text-gold" size={20} />
+              <MapPin className="text-gold-light" size={20} aria-hidden />
               <span>{data.address || "Ouro Preto D'Oeste - RO"}</span>
             </div>
             <div className="flex items-center justify-center gap-3">
-              <Phone className="text-gold" size={20} />
+              <Phone className="text-gold-light" size={20} aria-hidden />
               <span>{data.phone}</span>
             </div>
           </div>
@@ -329,7 +336,7 @@ export default function InstituteSection({
             href={`https://wa.me/5569992481585`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-3 bg-primary text-white px-10 py-5 rounded-full text-xs font-bold uppercase tracking-[0.2em] hover:bg-gold hover:scale-105 transition-all shadow-xl"
+            className="inline-flex items-center gap-3 rounded-md bg-paper px-10 py-5 text-xs font-bold uppercase tracking-[0.2em] text-primary transition-colors hover:bg-gold-light"
           >
             Agendar Conversa
           </a>
