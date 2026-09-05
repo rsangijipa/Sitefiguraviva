@@ -70,7 +70,7 @@ Para E2E:
 $env:BASE_URL='http://localhost:3000'; npm run test:e2e -- --project=public
 ```
 
-Defina `BASE_URL` para validar uma instancia ja em execucao. Os testes Jest ignoram artefatos de build, cenarios E2E e o projeto legado isolado da Arvore das Emocoes.
+Defina `BASE_URL` para validar uma instancia ja em execucao. Os testes Jest ignoram artefatos de build e cenarios E2E do Playwright.
 
 ## Padrao de Actions
 
@@ -78,7 +78,6 @@ Defina `BASE_URL` para validar uma instancia ja em execucao. Os testes Jest igno
 - `src/app/actions/*` existe para compatibilidade e nao deve duplicar regra de negocio.
 - Para progresso de aula, use `@/app/actions/progress` (ou `@/actions/progress` como alias de compatibilidade).
 
-## Credenciais de Admin (ambiente local/demo)
+## Acesso de Admin em ambiente local
 
-- Usuario: `admin`
-- Senha: `admin`
+Credenciais de demonstracao sao opcionais e devem existir apenas na carga local. Configure `DEMO_ADMIN_EMAIL` e `DEMO_ADMIN_PASSWORD` no seu arquivo `.env.local`; os valores precisam corresponder a uma conta criada pelo processo de seed. Nunca reutilize essa senha em producao.

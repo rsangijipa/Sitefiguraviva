@@ -13,6 +13,10 @@ import { createSupabaseBrowserClient } from "@/infrastructure/supabase/client";
 import { ensureUserProfileAction } from "@/app/actions/auth";
 import { registerForCourseAction } from "@/app/actions/signup";
 import { getRedirectPathForRole } from "@/lib/auth/authService";
+import {
+  getAuthIntent,
+  getSafeNextPath,
+} from "@/features/auth/auth-intent";
 
 // Error mapping
 const getFriendlyErrorMessage = (code: string) => {
@@ -47,8 +51,9 @@ function AuthContent() {
 
   const mode = searchParams.get("mode");
   const next = searchParams.get("next") || "";
-  const intent = searchParams.get("intent");
   const courseId = searchParams.get("courseId");
+  const authIntent = getAuthIntent(searchParams);
+  const isAdminIntent = authIntent === "admin";
 
   // 1. Initial State
   const [isSignup, setIsSignup] = useState(mode === "signup");
@@ -70,7 +75,7 @@ function AuthContent() {
     setError("");
   }, [mode]);
 
-  const handleSuccess = async (user: any, preferredPath?: string) => {
+  const handleSuccess = async (preferredPath?: string) => {
     try {
       // The httpOnly session cookie is already synced by this point: signIn()
       // (email/password) and finishGoogleSignIn() (OAuth) both await the
@@ -91,22 +96,9 @@ function AuthContent() {
         return;
       }
 
-      // Priority 1: Use role-based redirect as default
-      let targetPath = getRedirectPathForRole(userRole);
-
-      // Priority 2: If we have an explicit 'next' param (not the default /portal), check if it's safe
-      const hasExplicitNext = searchParams.has("next") && next !== "/portal";
-      if (hasExplicitNext && next.startsWith("/") && !next.startsWith("//")) {
-        // Security: Only admin can go to /admin
-        if (next.startsWith("/admin") && userRole !== "admin") {
-          console.warn(
-            `Redirect blocked: User ${user.uid} (role: ${userRole}) tried to access ${next}`,
-          );
-          // Keep role-based targetPath
-        } else {
-          targetPath = next;
-        }
-      }
+      const targetPath = searchParams.has("next")
+        ? getSafeNextPath(next, userRole)
+        : getRedirectPathForRole(userRole);
 
       router.push(targetPath);
     } catch (err) {
@@ -152,7 +144,6 @@ function AuthContent() {
         }
 
         await handleSuccess(
-          user,
           isSignup && selectedCourse
             ? `/inscricao/${selectedCourse}`
             : undefined,
@@ -190,16 +181,13 @@ function AuthContent() {
           return;
         }
 
-        const credential = await signIn(email, password);
-        await handleSuccess(
-          credential.user,
-          `/inscricao/${result.courseId || selectedCourse}`,
-        );
+        await signIn(email, password);
+        await handleSuccess(`/inscricao/${result.courseId || selectedCourse}`);
         return;
       }
 
-      const userCredential = await signIn(email, password);
-      await handleSuccess(userCredential.user);
+      await signIn(email, password);
+      await handleSuccess();
     } catch (err: any) {
       console.error(err);
       const msg = getFriendlyErrorMessage(err.code);
@@ -261,11 +249,14 @@ function AuthContent() {
         <aside className="fv-bg fv-bg-login hidden rounded-md lg:order-first lg:block lg:p-12">
           <span className="fv-eyebrow mb-6">Instituto Figura Viva</span>
           <p className="font-serif text-4xl font-semibold leading-[1.15] text-primary xl:text-5xl">
-            Um espaço de estudo dedicado à profundidade da relação.
+            {isAdminIntent && !isSignup
+              ? "Gestão cuidadosa para uma experiência que permanece humana."
+              : "Um espaço de estudo dedicado à profundidade da relação."}
           </p>
           <p className="fv-lead mt-8">
-            Sua área de aluno reúne as formações em andamento, o material de
-            cada encontro, os certificados e a comunidade do Instituto.
+            {isAdminIntent && !isSignup
+              ? "Entre com a conta autorizada para acompanhar conteúdos, turmas e operações do Instituto."
+              : "Sua área de aluno reúne as formações em andamento, o material de cada encontro, os certificados e a comunidade do Instituto."}
           </p>
         </aside>
 
@@ -283,10 +274,16 @@ function AuthContent() {
               />
             </div>
             <h1 className="font-serif text-3xl text-primary font-bold mb-1">
-              {isSignup ? "Criar Conta" : "Bem-vindo(a)"}
+              {isSignup
+                ? "Criar Conta"
+                : isAdminIntent
+                  ? "Acesso administrativo"
+                  : "Bem-vindo(a)"}
             </h1>
             <p className="text-xs font-semibold uppercase tracking-widest text-text/70">
-              Instituto Figura Viva
+              {isAdminIntent && !isSignup
+                ? "Painel de gestão"
+                : "Instituto Figura Viva"}
             </p>
           </div>
 
@@ -483,10 +480,10 @@ function AuthContent() {
 
           <div className="mt-8 text-center">
             <Link
-              href="/admin"
+              href={isAdminIntent ? "/auth" : "/auth?next=%2Fadmin"}
               className="text-[10px] font-medium uppercase tracking-widest text-muted transition-colors hover:text-text"
             >
-              Admin
+              {isAdminIntent ? "Acesso de aluno" : "Acesso administrativo"}
             </Link>
           </div>
         </motion.div>
