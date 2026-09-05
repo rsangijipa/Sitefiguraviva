@@ -1,246 +1,202 @@
-"use client";
-
-import { useState, useEffect, type ReactNode } from "react";
-import dynamic from "next/dynamic";
-
-// import { useApp } from '../context/AppContext'; (Removed)
-import Navbar from "./Navbar";
-import Footer from "./Footer";
-import AlertBar from "./AlertBar";
-import HeroSection from "./sections/HeroSection";
-import CoursesSection from "./sections/CoursesSection";
-import FounderSection from "./sections/FounderSection";
-import FloatingControls from "./ui/FloatingControls";
-import { useUI } from "@/context/UIContext";
-import { useSearchParams, useRouter } from "next/navigation";
-import { Image as ImageIcon } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight, BookOpen, CalendarDays } from "lucide-react";
+
+import AlertBar from "./AlertBar";
+import Footer from "./Footer";
+import Navbar from "./Navbar";
+import FloatingControls from "./ui/FloatingControls";
+import HeroSection from "./sections/HeroSection";
 import MethodologySection from "./sections/MethodologySection";
-import ExploreSection from "./sections/ExploreSection";
-import { MemoryMiniFooter } from "./sections/MemoryMiniFooter";
-import SectionShell from "./ui/SectionShell";
+import TestimonialsSection from "./sections/TestimonialsSection";
+import { ConsultationCta } from "@/features/public-site/components/ConsultationCta";
+import { getImageSrc } from "@/lib/imageUtils";
 
-const BlogSection = dynamic(() => import("./sections/BlogSection"));
-const ResourcesSection = dynamic(() => import("./ResourcesSection"));
-const InstagramSection = dynamic(() => import("./InstagramSection"));
-const InstituteSection = dynamic(() => import("./sections/InstituteSection"));
-const TestimonialsSection = dynamic(
-  () => import("./sections/TestimonialsSection"),
-);
-const FAQSection = dynamic(() => import("./sections/FAQSection"));
-
-const GalleryModal = dynamic(() => import("./GalleryModal"), { ssr: false });
-const CalendarModal = dynamic(() => import("./CalendarModal"), { ssr: false });
-const PDFReader = dynamic(() => import("./PDFReader"), { ssr: false });
-const CourseModal = dynamic(() => import("./CourseModal"), { ssr: false });
-const BlogPostModal = dynamic(() => import("./BlogPostModal"), {
-  ssr: false,
-});
-const LegalModal = dynamic(() => import("./LegalModal"), { ssr: false });
-
-// interface HomeClientProps removed
-
-import {
-  useCourses,
-  useBlogPosts,
-  usePublicGallery,
-} from "../hooks/useContent";
+interface HomeItem {
+  id: string | number;
+  title: string;
+  subtitle?: string;
+  description?: string;
+  excerpt?: string;
+  image?: string | null;
+  coverImage?: string;
+  created_at?: string | null;
+}
 
 interface HomeClientProps {
-  /** Árvore da marca do hero, renderizada no servidor por src/app/page.tsx. */
-  heroBackground?: ReactNode;
   initialData?: {
-    courses: any[];
-    posts: any[];
-    gallery: any[];
-    founder?: any;
-    institute?: any;
-    seo?: any;
-    team?: any;
+    courses: HomeItem[];
+    posts: HomeItem[];
+    gallery: unknown[];
+    institute?: unknown;
   };
 }
 
-import methodology from "./sections/MethodologySection";
-import ScrollProgressBar from "./motion/ScrollProgressBar";
-import Reveal from "./motion/Reveal";
+function formatDate(value?: string | null) {
+  if (!value) return "Conteúdo recente";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Conteúdo recente";
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(date);
+}
 
-export default function HomeClient({
-  initialData,
-  heroBackground,
-}: HomeClientProps = {}) {
-  const { data: courses = [] } = useCourses(false, {
-    initialData: initialData?.courses,
-  });
-  const { data: blogPosts = [] } = useBlogPosts(false, {
-    initialData: initialData?.posts,
-  });
-  const { data: gallery = [] } = usePublicGallery({
-    initialData: initialData?.gallery,
-  });
-
-  const { showAlert } = useUI();
-
-  useEffect(() => {
-    // Set initial alert if needed, or fetch from DB
-    showAlert("Bem-vindos ao Instituto Figura Viva");
-  }, []);
-  const searchParams = useSearchParams();
-  const router = useRouter();
-
-  // Modal states derived from URL
-  const modalType = searchParams.get("modal");
-  const isCalendarOpen = modalType === "calendar";
-  const isReaderOpen = modalType === "reader";
-  const isGalleryOpen = modalType === "gallery";
-
-  // New Modal types for Course and Blog
-  const isCourseOpen = modalType === "course";
-  const isBlogOpen = modalType === "blog";
-  const isPrivacyOpen = modalType === "privacy";
-  const isTermsOpen = modalType === "terms";
-  const legalType = isPrivacyOpen ? "privacy" : isTermsOpen ? "terms" : null;
-
-  // Item IDs
-  const articleId = searchParams.get("articleId");
-  const courseId = searchParams.get("courseId");
-  const postId = searchParams.get("postId");
-
-  // Resolve selections
-  const selectedArticle = articleId
-    ? blogPosts.find((p: any) => String(p.id) === String(articleId))
-    : null;
-  const selectedCourse = courseId
-    ? courses.find((c: any) => String(c.id) === String(courseId))
-    : null;
-  const selectedPost = postId
-    ? blogPosts.find((p: any) => String(p.id) === String(postId))
-    : null;
-
-  const closeModals = () => {
-    router.push("/", { scroll: false });
-  };
-
-  const openModal = (name: string) => {
-    router.push(`/?modal=${name}`, { scroll: false });
-  };
-
-  const selectCourse = (course: any) => {
-    router.push(`/?modal=course&courseId=${course.id}`, { scroll: false });
-  };
-
-  const selectPost = (post: any) => {
-    if (post.type === "library") {
-      router.push(`/?modal=reader&articleId=${post.id}`, { scroll: false });
-    } else {
-      router.push(`/?modal=blog&postId=${post.id}`, { scroll: false });
-    }
-  };
+export default function HomeClient({ initialData }: HomeClientProps = {}) {
+  const featuredCourses = (initialData?.courses ?? []).slice(0, 3);
+  const latestPosts = (initialData?.posts ?? []).slice(0, 3);
 
   return (
-    <div className="bg-paper min-h-screen flex flex-col font-sans text-primary overflow-hidden fx-grain">
-      <ScrollProgressBar />
+    <div className="min-h-screen overflow-hidden bg-paper font-sans text-text fx-grain">
       <AlertBar />
       <Navbar />
 
-      <main
-        id="main-content"
-        role="main"
-        tabIndex={-1}
-        className="outline-none"
-      >
-        <HeroSection
-          initialData={initialData?.institute}
-          backgroundArt={heroBackground}
-        />
+      <div>
+        <span id="instituto-sobre" className="sr-only" aria-hidden="true" />
+        <span id="fundadora" className="sr-only" aria-hidden="true" />
+        <HeroSection initialData={initialData?.institute} />
 
-        <Reveal variant="soft">
-          <ExploreSection />
-        </Reveal>
+        <section
+          id="cursos"
+          className="fv-bg fv-bg-formations border-y border-border/60 bg-areia py-20 md:py-28"
+        >
+          <span id="instituto" className="sr-only" aria-hidden="true" />
+          <div className="fv-container">
+            <div className="mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-end">
+              <div className="max-w-2xl">
+                <p className="fv-eyebrow mb-4">Formações em destaque</p>
+                <h2 className="heading-section text-primary">
+                  Percursos para aprofundar prática e presença.
+                </h2>
+              </div>
+              <Link
+                href="/formacoes"
+                className="inline-flex min-h-11 items-center gap-2 self-start text-xs font-bold uppercase tracking-[0.16em] text-primary hover:text-gold md:self-auto"
+              >
+                Ver todas as formações <ArrowRight size={16} aria-hidden="true" />
+              </Link>
+            </div>
 
-        <Reveal variant="medium">
-          <FounderSection initialData={initialData?.founder} />
-        </Reveal>
+            {featuredCourses.length > 0 ? (
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {featuredCourses.map((course, index) => (
+                  <Link
+                    key={course.id}
+                    href={`/curso/${course.id}`}
+                    data-testid="formation-card"
+                    className="group overflow-hidden rounded-md border border-border bg-paper transition-transform duration-300 hover:-translate-y-1 hover:border-igarape focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+                  >
+                    <div className="relative aspect-[4/3] overflow-hidden bg-surface">
+                      <Image
+                        src={getImageSrc(
+                          course.image || course.coverImage,
+                          "/assets/course-placeholder.jpg",
+                        )}
+                        alt=""
+                        fill
+                        unoptimized
+                        priority={index === 0}
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                        className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                      />
+                    </div>
+                    <div className="p-6">
+                      <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.17em] text-terra">
+                        {course.subtitle || "Gestalt-terapia"}
+                      </p>
+                      <h3 className="font-serif text-2xl leading-tight text-primary">
+                        {course.title}
+                      </h3>
+                      <p className="mt-4 line-clamp-3 text-sm leading-relaxed text-text/70">
+                        {course.description ||
+                          "Conheça este percurso de formação do Instituto Figura Viva."}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-md border border-dashed border-border bg-paper p-10 text-center">
+                <CalendarDays className="mx-auto text-gold" aria-hidden="true" />
+                <p className="mt-4 font-serif text-2xl text-primary">
+                  Novas turmas serão anunciadas em breve.
+                </p>
+                <Link
+                  href="/formacoes"
+                  data-testid="formation-card"
+                  className="mt-5 inline-flex min-h-11 items-center text-sm font-bold text-primary underline underline-offset-4"
+                >
+                  Consultar calendário e percursos
+                </Link>
+              </div>
+            )}
+          </div>
+        </section>
 
-        {/* Laura Perls Tribute - Placed below Curator/Founder */}
-        <Reveal variant="soft">
-          <MemoryMiniFooter />
-        </Reveal>
+        <MethodologySection />
+        <TestimonialsSection />
 
-        <Reveal variant="medium">
-          <MethodologySection />
-        </Reveal>
+        <section
+          id="blog"
+          className="fv-bg fv-bg-articles border-t border-border/60 bg-paper py-20 md:py-28"
+        >
+          <div className="fv-container">
+            <div className="mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-end">
+              <div className="max-w-2xl">
+                <p className="fv-eyebrow mb-4">Reflexões & saberes</p>
+                <h2 className="heading-section text-primary">
+                  Leituras para continuar o encontro.
+                </h2>
+              </div>
+              <Link
+                href="/blog"
+                className="inline-flex min-h-11 items-center gap-2 self-start text-xs font-bold uppercase tracking-[0.16em] text-primary hover:text-gold md:self-auto"
+              >
+                Visitar o blog <ArrowRight size={16} aria-hidden="true" />
+              </Link>
+            </div>
 
-        <Reveal variant="medium">
-          <CoursesSection
-            courses={courses}
-            onOpenCalendar={() => openModal("calendar")}
-            onSelectCourse={selectCourse}
-          />
-        </Reveal>
+            {latestPosts.length > 0 ? (
+              <div className="grid gap-6 md:grid-cols-3">
+                {latestPosts.map((post) => (
+                  <Link
+                    key={post.id}
+                    href={`/blog/${post.id}`}
+                    data-testid="content-card"
+                    className="group flex min-h-64 flex-col rounded-md border border-border bg-surface p-7 transition-colors hover:border-igarape focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+                  >
+                    <BookOpen className="mb-10 text-gold" size={24} aria-hidden="true" />
+                    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-terra">
+                      {formatDate(post.created_at)}
+                    </p>
+                    <h3 className="mt-3 font-serif text-2xl leading-tight text-primary group-hover:text-igarape">
+                      {post.title}
+                    </h3>
+                    <p className="mt-4 line-clamp-3 text-sm leading-relaxed text-text/70">
+                      {post.excerpt || "Leia esta reflexão do Instituto Figura Viva."}
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <Link
+                href="/public-library"
+                data-testid="content-card"
+                className="flex min-h-44 items-center justify-center rounded-md border border-dashed border-border bg-areia px-6 text-center font-serif text-2xl text-primary"
+              >
+                Enquanto o blog floresce, explore nossa biblioteca.
+              </Link>
+            )}
+          </div>
+        </section>
 
-        <Reveal variant="soft">
-          <TestimonialsSection />
-        </Reveal>
-
-        <Reveal variant="medium">
-          <InstituteSection
-            gallery={gallery}
-            initialData={initialData?.institute}
-            initialFounderData={initialData?.founder}
-            initialTeamData={initialData?.team}
-          />
-        </Reveal>
-
-        <Reveal variant="soft">
-          <ResourcesSection />
-        </Reveal>
-
-        <Reveal variant="medium">
-          <BlogSection blogPosts={blogPosts} onSelectPost={selectPost} />
-        </Reveal>
-
-        <Reveal variant="soft">
-          <FAQSection />
-        </Reveal>
-
-        <Reveal variant="soft">
-          <InstagramSection />
-        </Reveal>
-      </main>
+        <span id="recursos-interativos" className="sr-only" aria-hidden="true" />
+        <ConsultationCta />
+      </div>
 
       <Footer />
       <FloatingControls />
-
-      {/* MODALS */}
-
-      <CourseModal
-        isOpen={isCourseOpen}
-        onClose={closeModals}
-        course={selectedCourse}
-      />
-
-      <BlogPostModal
-        isOpen={isBlogOpen}
-        onClose={closeModals}
-        post={selectedPost}
-      />
-
-      <PDFReader
-        isOpen={isReaderOpen}
-        onClose={closeModals}
-        article={selectedArticle}
-      />
-      <CalendarModal
-        isOpen={isCalendarOpen}
-        onClose={closeModals}
-        courses={courses}
-      />
-      <GalleryModal
-        isOpen={isGalleryOpen}
-        onClose={closeModals}
-        gallery={gallery}
-      />
-      <LegalModal isOpen={!!legalType} onClose={closeModals} type={legalType} />
     </div>
   );
 }

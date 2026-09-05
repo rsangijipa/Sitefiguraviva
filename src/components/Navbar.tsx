@@ -18,12 +18,23 @@ import {
   Users,
   Instagram,
   ChevronRight,
+  type LucideIcon,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "./ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
 import { getRedirectPathForRole } from "@/lib/auth/authService";
 import { cn } from "@/lib/utils";
+import { PUBLIC_NAV_ITEMS } from "@/features/public-site/content/navigation";
+
+const NAV_ICONS: Record<string, LucideIcon> = {
+  Instituto: Users,
+  Formações: Award,
+  Recursos: Sparkles,
+  Biblioteca: BookOpen,
+  Galeria: ImageIcon,
+  Blog: PenTool,
+};
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -98,19 +109,10 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const navItems = [
-    { label: "Instituto", href: "/#instituto-sobre", icon: Users },
-    { label: "Fundadora", href: "/#fundadora", icon: Award },
-    {
-      label: "Formações",
-      href: "/#instituto",
-      display: "Formações",
-      icon: Sparkles,
-    },
-    { label: "Biblioteca", href: "/public-library", icon: BookOpen },
-    { label: "Galeria", href: "/public-gallery", icon: ImageIcon },
-    { label: "Blog", href: "/#blog", icon: PenTool },
-  ];
+  const navItems = PUBLIC_NAV_ITEMS.map((item) => ({
+    ...item,
+    icon: NAV_ICONS[item.label] || ChevronRight,
+  }));
 
   return (
     <>
@@ -159,7 +161,7 @@ export default function Navbar() {
                 href={item.href}
                 className="hover:text-primary transition-colors duration-200 hover:bg-areia px-4 py-2 rounded-md min-h-[44px] flex items-center focus-visible:ring-2 focus-visible:ring-primary"
               >
-                {item.display || item.label}
+                {item.label}
               </a>
             ))}
 
@@ -286,7 +288,7 @@ export default function Navbar() {
                           <item.icon size={18} />
                         </div>
                         <span className="text-xl font-serif text-primary">
-                          {item.display || item.label}
+                          {item.label}
                         </span>
                       </div>
                       <ChevronRight

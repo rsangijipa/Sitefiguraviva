@@ -1,6 +1,5 @@
 "use client";
 
-import type { ReactNode } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, ArrowUpRight, Sparkles } from "lucide-react";
 import OrganicBackground from "../ui/OrganicBackground";
@@ -32,11 +31,8 @@ const staggerContainer = {
 
 export default function HeroSection({
   initialData,
-  backgroundArt,
 }: {
   initialData?: any;
-  /** Árvore da marca, renderizada no servidor (ver src/app/page.tsx). */
-  backgroundArt?: ReactNode;
 }) {
   const { data } = useInstituteSettings(initialData);
   const whatsappNumber = data.phone?.replace(/\D/g, "") || "11999999999";
@@ -48,20 +44,6 @@ export default function HeroSection({
       {/* Premium Background Engine */}
       <BackgroundEngine />
       {isParticlesEnabled && <ParticlesLayer />}
-
-      {/* Árvore da marca: fundo vivo ancorado à direita da página.
-          A máscara horizontal apaga a copa antes da coluna de texto, então a
-          árvore pode ficar opaca de verdade sem disputar leitura com o título. */}
-      {backgroundArt && (
-        <div
-          aria-hidden
-          className="fv-tree-mask pointer-events-none absolute inset-y-0 right-0 z-0 flex w-[118%] translate-x-[6%] translate-y-[2%] items-end justify-end overflow-hidden select-none sm:w-[92%] lg:w-[64%] lg:translate-x-[3%] lg:translate-y-[1%] xl:w-[60%] 2xl:w-[56%]"
-        >
-          <div className="fv-tree-layer h-[72%] w-full opacity-30 sm:h-[80%] sm:opacity-[0.38] lg:h-[94%] lg:opacity-100">
-            {backgroundArt}
-          </div>
-        </div>
-      )}
 
       {/* Decorative Overlays */}
       <WaveLines className="opacity-20 mix-blend-multiply" />
@@ -119,7 +101,7 @@ export default function HeroSection({
               </a>
 
               <a
-                href="#cursos"
+                href="/formacoes"
                 className="group flex items-center justify-center gap-4 rounded-md border border-border bg-paper px-10 py-5 text-primary transition-colors hover:border-igarape hover:bg-areia active:scale-[0.98]"
               >
                 <span className="font-bold uppercase tracking-[0.15em] text-[13px]">
