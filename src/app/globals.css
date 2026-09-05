@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+html[data-cookie-consent="pending"] [data-secondary-floating-control],
+html[data-cookie-consent="pending"] [data-floating-whatsapp] {
+  display: none !important;
+}
+
 /* ---------------------------------------------------------------------------
    Tokens da marca — Figura Viva Design System v1
    Os valores são triplas RGB, não hex: é o formato que o Tailwind precisa para

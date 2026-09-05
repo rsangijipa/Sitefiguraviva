@@ -15,9 +15,10 @@ export default function CookieConsent() {
       role="dialog"
       aria-modal="false"
       aria-labelledby="cookie-consent-title"
-      className="fixed bottom-0 inset-x-0 z-[100] p-4 sm:p-6"
+      aria-describedby="cookie-consent-description"
+      className="fixed inset-x-0 bottom-0 z-[120] p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-6"
     >
-      <div className="mx-auto max-w-3xl rounded-2xl border border-stone-200 bg-white/95 backdrop-blur-md shadow-2xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-5">
+      <div className="mx-auto flex max-h-[min(44vh,360px)] max-w-3xl flex-col gap-4 overflow-y-auto rounded-2xl border border-stone-200 bg-white/95 p-4 shadow-2xl backdrop-blur-md sm:max-h-none sm:flex-row sm:items-center sm:gap-5 sm:p-6">
         <div className="flex gap-4 flex-1">
           <div
             className="hidden sm:flex w-11 h-11 shrink-0 rounded-xl bg-stone-50 border border-stone-100 items-center justify-center text-gold"
@@ -32,11 +33,13 @@ export default function CookieConsent() {
             >
               Cookies e privacidade
             </h2>
-            <p className="text-sm text-primary/70 leading-relaxed">
-              Usamos cookies necessários para o site funcionar. Com a sua
-              autorização, usamos também cookies de medição de audiência para
-              entender como o site é usado. Você pode mudar de ideia quando
-              quiser no rodapé.{" "}
+            <p
+              id="cookie-consent-description"
+              className="text-sm leading-relaxed text-primary/70"
+            >
+              Usamos cookies necessários para o site funcionar. Com sua
+              autorização, medimos a audiência; você pode mudar essa escolha no
+              rodapé e consultar nossa{" "}
               <Link
                 href="/privacidade"
                 className="underline font-medium text-primary hover:text-gold transition-colors"
