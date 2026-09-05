@@ -11,6 +11,9 @@ it("renders one named resource dialog and closes from either global control", ()
   );
 
   expect(screen.getByRole("dialog", { name: "SomaScan" })).toBeInTheDocument();
+  expect(
+    screen.getByRole("dialog").querySelector('[class*="max-h-"]'),
+  ).toHaveClass("max-h-[90vh]");
   expect(screen.getAllByRole("button", { name: /voltar|fechar/i })).toHaveLength(2);
 
   fireEvent.click(screen.getByRole("button", { name: "Fechar SomaScan" }));

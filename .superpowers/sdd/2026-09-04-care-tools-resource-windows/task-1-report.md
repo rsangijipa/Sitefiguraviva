@@ -47,3 +47,26 @@ Tests:       1 passed, 1 total
 ## Commit
 
 `fd85da2 feat: add shared resource window`
+
+## Fix round 1 — 90vh maximum height
+
+### Finding addressed
+
+The resource window supplied `max-h-[90dvh]`, which tailwind-merge retained instead of the base modal's `max-h-[90vh]`. On a mobile dynamic viewport, that could exceed the required 90vh cap.
+
+### RED/GREEN
+
+- Test file: `src/components/resources/__tests__/ResourceWindow.test.tsx`
+- Command: `npm test -- src/components/resources/__tests__/ResourceWindow.test.tsx --runInBand`
+- RED output: expected `max-h-[90vh]`; received `max-h-[90dvh]`.
+- GREEN output:
+
+```text
+PASS src/components/resources/__tests__/ResourceWindow.test.tsx
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+```
+
+### Change and review
+
+Changed the resource-specific maximum-height utility to `max-h-[90vh]`; its preferred `h-[90dvh]` remains bounded by that maximum. The regression assertion reads the rendered class after `ModalContent` applies tailwind-merge, protecting the effective utility rather than only the source input. `git diff --check` completed cleanly.

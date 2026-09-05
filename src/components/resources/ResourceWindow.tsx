@@ -20,7 +20,7 @@ export function ResourceWindow({
     <Modal isOpen={isOpen} onClose={onClose} ariaLabel={title}>
       <ModalContent
         size="full"
-        className="h-[90dvh] max-h-[90dvh] w-[min(96vw,1440px)] rounded-[1.5rem] bg-paper p-0"
+        className="h-[90dvh] max-h-[90vh] w-[min(96vw,1440px)] rounded-[1.5rem] bg-paper p-0"
       >
         <div className="pointer-events-none absolute inset-x-0 top-0 z-[70] flex items-center justify-between p-3 sm:p-4">
           <button
