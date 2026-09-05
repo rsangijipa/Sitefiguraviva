@@ -7,9 +7,17 @@ const createJestConfig = nextJest({
 
 // Add any custom config to be passed to Jest
 const customJestConfig = {
+  roots: ["<rootDir>/src"],
   setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
   testEnvironment: "jest-environment-jsdom",
-  testPathIgnorePatterns: ["<rootDir>/e2e/", "<rootDir>/tests/e2e/"],
+  testPathIgnorePatterns: [
+    "<rootDir>/.worktrees/",
+    "<rootDir>/.next/",
+    "<rootDir>/.next-audit/",
+    "<rootDir>/e2e/",
+    "<rootDir>/tests/e2e/",
+    "<rootDir>/src/components/arvoredasemocoes/",
+  ],
   moduleNameMapper: {
     // Handle module aliases (this will be automatically configured for you soon)
     "^@/(.*)$": "<rootDir>/src/$1",
