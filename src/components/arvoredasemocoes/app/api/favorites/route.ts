@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { verifySessionToken } from "@/lib/firebase/admin";
+import { verifySessionToken } from "../../../lib/firebase/admin";
 import { listFavorites, saveFavorite } from "@/lib/server/quote-repository";
 
 /**
@@ -11,17 +11,30 @@ import { listFavorites, saveFavorite } from "@/lib/server/quote-repository";
  * rota aceitava qualquer `sessionId` em texto puro, o que permitia ler e
  * escrever as favoritas de qualquer pessoa cujo id fosse conhecido.
  */
-async function resolveOwner(request: Request, fallbackSessionId: string | null) {
+async function resolveOwner(
+  request: Request,
+  fallbackSessionId: string | null,
+) {
   const uid = await verifySessionToken(request.headers.get("authorization"));
 
   if (uid === null) {
-    return { error: NextResponse.json({ error: "Sessao nao autenticada" }, { status: 401 }) };
+    return {
+      error: NextResponse.json(
+        { error: "Sessao nao autenticada" },
+        { status: 401 },
+      ),
+    };
   }
 
   // sem Firebase configurado o backend roda em memoria (modo local/demo)
   if (uid === "unverified") {
     if (!fallbackSessionId) {
-      return { error: NextResponse.json({ error: "sessionId obrigatorio" }, { status: 400 }) };
+      return {
+        error: NextResponse.json(
+          { error: "sessionId obrigatorio" },
+          { status: 400 },
+        ),
+      };
     }
     return { ownerId: fallbackSessionId };
   }
@@ -31,7 +44,10 @@ async function resolveOwner(request: Request, fallbackSessionId: string | null) 
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const { ownerId, error } = await resolveOwner(request, searchParams.get("sessionId"));
+  const { ownerId, error } = await resolveOwner(
+    request,
+    searchParams.get("sessionId"),
+  );
 
   if (error) {
     return error;
@@ -50,7 +66,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "JSON invalido" }, { status: 400 });
   }
 
-  if (typeof body.quoteId !== "string" || body.quoteId.length === 0 || body.quoteId.length > 128) {
+  if (
+    typeof body.quoteId !== "string" ||
+    body.quoteId.length === 0 ||
+    body.quoteId.length > 128
+  ) {
     return NextResponse.json({ error: "quoteId invalido" }, { status: 400 });
   }
 
