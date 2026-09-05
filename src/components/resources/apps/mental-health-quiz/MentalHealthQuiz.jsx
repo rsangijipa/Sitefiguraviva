@@ -261,7 +261,7 @@ const Result = ({ data, bonusAlert, onRetake }) => {
     );
 };
 
-export default function MentalHealthQuiz({ onClose }) {
+export default function MentalHealthQuiz() {
     const [view, setView] = useState('intro'); // 'intro' | 'quiz' | 'result'
     const [answers, setAnswers] = useState([]);
     const [bonusAnswer, setBonusAnswer] = useState(false);
@@ -294,9 +294,9 @@ export default function MentalHealthQuiz({ onClose }) {
     };
 
     return (
-        <div className="w-full h-full overflow-y-auto bg-stone-50 flex flex-col relative animate-fade-in">
+        <div className="w-full h-full min-h-0 overflow-y-auto bg-stone-50 flex flex-col relative animate-fade-in">
 
-            <div className="flex-1 flex flex-col items-center justify-center min-h-screen py-20">
+            <div className="flex-1 min-h-0 flex flex-col items-center justify-center py-20">
 
                 <div className="mb-8 flex items-center gap-2 text-primary opacity-50 uppercase tracking-[0.3em] text-xs font-bold">
                     <span>Mindful Roots</span>
@@ -306,18 +306,6 @@ export default function MentalHealthQuiz({ onClose }) {
 
                 {view === 'intro' && (
                     <div className="flex flex-col items-center justify-center px-6 text-center animate-fade-in max-w-2xl mx-auto w-full">
-
-                        {/* Standard Back Button */}
-                        <div className="w-full flex justify-start mb-8">
-                            <button
-                                onClick={onClose}
-                                className="flex items-center gap-2 p-3 md:px-5 md:py-2.5 rounded-full bg-white border border-gray-200 text-gray-700 hover:text-primary hover:border-primary/30 font-bold shadow-sm hover:shadow-md transition-all active:scale-95"
-                                aria-label="Voltar"
-                            >
-                                <ArrowLeft size={20} />
-                                <span className="hidden md:inline">Voltar</span>
-                            </button>
-                        </div>
 
                         <div className="w-24 h-24 mb-6 rounded-full bg-accent/10 flex items-center justify-center text-accent animate-pulse">
                             <ArrowRight size={32} />

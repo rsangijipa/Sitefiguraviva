@@ -4,7 +4,7 @@ import Results from "./components/Results";
 import { AppState, BodyData } from "./types";
 import { Fingerprint } from "lucide-react";
 
-const App: React.FC = () => {
+const SomaScan: React.FC = () => {
   const [appState, setAppState] = useState<AppState>("intro");
   const [scanData, setScanData] = useState<BodyData>({});
 
@@ -23,7 +23,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="h-screen w-full bg-paper flex flex-col overflow-hidden relative selection:bg-clay/30">
+    <div className="h-full min-h-0 w-full bg-paper flex flex-col overflow-hidden relative selection:bg-clay/30">
       {/* Organic Background Shapes */}
       <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-[#f5f5f4] rounded-full blur-[80px] opacity-60 pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#e7e5e4] rounded-full blur-[100px] opacity-50 pointer-events-none" />
@@ -84,4 +84,4 @@ const App: React.FC = () => {
   );
 };
 
-export default App;
+export default SomaScan;

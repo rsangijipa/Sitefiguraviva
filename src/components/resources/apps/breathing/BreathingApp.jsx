@@ -6,7 +6,7 @@ import { Play, ArrowLeft, Wind, Leaf, Info, CheckCircle2, Pause, Square, X, Circ
 import { clsx } from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function BreathingApp({ onClose }) {
+export default function BreathingApp() {
     // STATES: 'menu' -> 'instructions' -> 'active' -> 'completed'
     // Added 'instructions' step for pagination feel
     const [appState, setAppState] = useState('menu');
@@ -159,17 +159,6 @@ export default function BreathingApp({ onClose }) {
         >
             <StepIndicator step={1} />
 
-            <div className="w-full flex justify-start mb-4 relative z-50">
-                <button
-                    onClick={onClose}
-                    className="flex items-center gap-2 p-3 md:px-5 md:py-2.5 rounded-full bg-white border border-gray-200 text-gray-700 hover:text-primary hover:border-primary/30 font-bold shadow-sm hover:shadow-md transition-all active:scale-95"
-                    aria-label="Voltar"
-                >
-                    <ArrowLeft size={20} />
-                    <span className="hidden md:inline">Voltar</span>
-                </button>
-            </div>
-
             <header className="mb-12 text-center max-w-2xl relative">
                 <h1 className="text-4xl md:text-5xl font-serif text-primary mb-4 tracking-tight">Escolha sua Prática</h1>
                 <p className="text-lg font-sans text-gray-500">
@@ -258,7 +247,7 @@ export default function BreathingApp({ onClose }) {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="w-full max-w-2xl mx-auto px-4 flex flex-col items-center min-h-[80vh] justify-center"
+                className="w-full max-w-2xl mx-auto px-4 flex min-h-0 flex-col items-center justify-center"
             >
                 <StepIndicator step={3} />
 
@@ -323,12 +312,6 @@ export default function BreathingApp({ onClose }) {
                     >
                         Voltar ao Início
                     </button>
-                    <button
-                        onClick={onClose}
-                        className="text-primary font-bold uppercase tracking-widest text-xs py-4 hover:bg-gray-50 rounded-full transition-colors"
-                    >
-                        Fechar Aplicativo
-                    </button>
                 </div>
 
             </PaperCard>
@@ -336,12 +319,12 @@ export default function BreathingApp({ onClose }) {
     );
 
     return (
-        <div className="fixed inset-0 z-50 flex flex-col bg-paper overflow-y-auto">
+        <div className="relative z-0 flex h-full min-h-0 w-full flex-col overflow-y-auto bg-paper">
             {/* Background Elements */}
-            <div className="fixed inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/cream-paper.png')]" />
-            <div className="fixed top-0 left-0 w-full h-full bg-gradient-to-br from-white/40 via-blue-50/5 to-accent/5 pointer-events-none" />
+            <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/cream-paper.png')]" />
+            <div className="absolute top-0 left-0 h-full w-full pointer-events-none bg-gradient-to-br from-white/40 via-blue-50/5 to-accent/5" />
 
-            <main className="flex-grow flex flex-col justify-center relative z-10 py-8 min-h-screen">
+            <main className="relative z-10 flex flex-1 min-h-0 flex-col justify-center py-8">
                 <AnimatePresence mode="wait">
                     {appState === 'menu' && (
                         <motion.div key="menu" className="w-full">
