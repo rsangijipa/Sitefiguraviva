@@ -144,7 +144,7 @@ export function LauraVideo() {
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="relative group rounded-sm overflow-hidden shadow-[20px_20px_60px_-15px_rgba(58,47,37,0.3)] border-8 border-[#e8e4db]"
+          className="relative group rounded-sm overflow-hidden border-8 border-[#e8e4db]"
           onMouseMove={handleMouseMove}
         >
           {/* Inner Golden Border */}

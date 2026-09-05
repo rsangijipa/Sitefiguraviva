@@ -113,7 +113,7 @@ const NavItem = ({
     />
     <span className="text-sm">{label}</span>
     {isHighlight && (
-      <span className="absolute right-3 w-1.5 h-1.5 bg-gold rounded-full animate-pulse shadow-[0_0_8px_rgba(180,147,75,0.8)]" />
+      <span className="absolute right-3 w-1.5 h-1.5 bg-gold rounded-full animate-pulse" />
     )}
   </Link>
 );

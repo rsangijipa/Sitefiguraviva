@@ -34,6 +34,20 @@ module.exports = {
         agedGold: "#c5a05b",
         glassBg: "rgba(255, 255, 255, 0.03)",
         glassBorder: "rgba(255, 255, 255, 0.08)",
+        // Design tokens oficiais Figura Viva (definidos em globals.css :root)
+        fv: {
+          "verde-raiz": "var(--fv-verde-raiz)",
+          "verde-igarape": "var(--fv-verde-igarape)",
+          "terra-barro": "var(--fv-terra-barro)",
+          creme: "var(--fv-creme)",
+          areia: "var(--fv-areia)",
+          nevoa: "var(--fv-nevoa)",
+          mata: "var(--fv-mata)",
+          pedra: "var(--fv-pedra)",
+          aurora: "var(--fv-aurora)",
+          vazante: "var(--fv-vazante)",
+          broto: "var(--fv-broto)",
+        },
       },
       fontFamily: {
         serif: ["var(--font-serif)", "serif"],
@@ -60,25 +74,27 @@ module.exports = {
         glass: "12px",
         "glass-lg": "24px",
       },
+      /*
+       * DS Figura Viva: profundidade NÃO vem de sombra. Os tokens legados
+       * de elevação foram neutralizados (none) para que as centenas de
+       * usos existentes de `shadow-soft-*` / `shadow-elev-*` / `shadow-premium`
+       * deixem de renderizar sombra sem exigir edição arquivo a arquivo.
+       * Hierarquia agora vem de: creme sobre areia + border névoa + espaço.
+       * Único token remanescente: `shadow-overlay`, sombra funcional mínima
+       * reservada a overlays flutuantes sobre conteúdo (dropdowns/toasts).
+       */
       boxShadow: {
-        "soft-sm":
-          "0 2px 8px -1px rgba(27, 33, 45, 0.04), 0 1px 2px -1px rgba(27, 33, 45, 0.02)",
-        "soft-md":
-          "0 8px 24px -4px rgba(27, 33, 45, 0.06), 0 4px 8px -2px rgba(27, 33, 45, 0.03)",
-        "soft-lg":
-          "0 20px 48px -8px rgba(27, 33, 45, 0.08), 0 8px 16px -4px rgba(27, 33, 45, 0.04)",
-        "soft-xl":
-          "0 32px 64px -12px rgba(27, 33, 45, 0.10), 0 16px 32px -8px rgba(27, 33, 45, 0.05)",
-        premium:
-          "0 0 0 1px rgba(27, 33, 45, 0.04), 0 4px 12px rgba(27, 33, 45, 0.06), 0 12px 32px rgba(27, 33, 45, 0.04)",
-        "elev-1": "0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1)",
-        "elev-2":
-          "0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03)",
-        "elev-3":
-          "0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.02)",
-        "glow-gold":
-          "0 0 20px rgba(212, 175, 55, 0.15), 0 8px 30px rgba(212, 175, 55, 0.1)",
-        "inner-light": "inset 0 2px 4px 0 rgba(255, 255, 255, 0.3)",
+        "soft-sm": "none",
+        "soft-md": "none",
+        "soft-lg": "none",
+        "soft-xl": "none",
+        premium: "none",
+        "elev-1": "none",
+        "elev-2": "none",
+        "elev-3": "none",
+        "glow-gold": "none",
+        "inner-light": "none",
+        overlay: "0 2px 12px -4px rgba(38, 43, 34, 0.16)",
       },
       borderRadius: {
         "organic-1": "60% 40% 30% 70% / 60% 30% 70% 40%",

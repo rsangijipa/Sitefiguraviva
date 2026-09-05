@@ -25,6 +25,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { getRedirectPathForRole } from "@/lib/auth/authService";
 import { cn } from "@/lib/utils";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -60,6 +61,24 @@ export default function Navbar() {
   // Contador global de locks — evita que o fechamento do menu libere o
   // scroll enquanto um modal de recurso ainda estiver aberto.
   useBodyScrollLock(mobileOpen);
+
+  // Focus trap + devolução de foco ao gatilho ao fechar.
+  const mobileMenuRef = useFocusTrap<HTMLDivElement>(mobileOpen);
+
+  // Fecha o menu com Escape.
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [mobileOpen]);
+
+  // Fecha o menu ao navegar para outra rota.
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     let lastScrollY = window.scrollY;
@@ -114,8 +133,8 @@ export default function Navbar() {
           "fixed z-50 transition-all duration-500 ease-in-out",
           hidden ? "-translate-y-full" : "translate-y-0",
           scrolled
-            ? "top-2 left-1/2 -translate-x-1/2 w-[95%] max-w-7xl bg-white/80 backdrop-blur-lg shadow-lg py-2 rounded-full border border-stone-200/50"
-            : "top-0 left-0 w-full bg-white/60 backdrop-blur-md shadow-sm py-5",
+            ? "top-2 left-1/2 -translate-x-1/2 w-[95%] max-w-7xl bg-[rgba(253,250,244,0.92)] backdrop-blur-lg py-2 rounded-full border border-fv-nevoa"
+            : "top-0 left-0 w-full bg-[rgba(253,250,244,0.85)] backdrop-blur-md py-5 border-b border-fv-nevoa/60",
         )}
       >
         <div className="container mx-auto px-6 flex items-center justify-between">
@@ -192,7 +211,7 @@ export default function Navbar() {
 
           {/* Mobile/Tablet Toggle */}
           <button
-            className="xl:hidden text-primary w-12 h-12 flex items-center justify-center hover:bg-black/5 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-primary"
+            className="xl:hidden text-primary w-12 h-12 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-fv-areia rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-primary"
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label={mobileOpen ? "Fechar menu" : "Abrir menu"}
             aria-expanded={mobileOpen}
@@ -215,14 +234,20 @@ export default function Navbar() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setMobileOpen(false)}
-              className="fixed inset-0 z-[60] bg-primary/20 backdrop-blur-sm xl:hidden"
+              className="fixed inset-0 z-[60] bg-[rgba(241,233,219,0.9)] backdrop-blur-sm xl:hidden"
+              aria-hidden="true"
             />
             <motion.div
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed top-2 right-2 bottom-2 left-2 z-[70] bg-white/95 backdrop-blur-2xl rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-white flex flex-col overflow-hidden xl:hidden"
+              className="fixed top-2 right-2 bottom-2 left-2 z-[70] bg-[rgba(253,250,244,0.96)] backdrop-blur-2xl rounded-[2rem] border border-fv-nevoa flex flex-col overflow-hidden xl:hidden"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Menu de navegação"
+              ref={mobileMenuRef}
+              tabIndex={-1}
             >
               {/* Mobile Header Inside Menu */}
               <div className="flex items-center justify-between px-8 py-6 border-b border-stone-100">
@@ -246,7 +271,7 @@ export default function Navbar() {
                 </Link>
                 <button
                   onClick={() => setMobileOpen(false)}
-                  className="w-10 h-10 flex items-center justify-center text-primary rounded-full bg-stone-50 hover:bg-stone-100 transition-colors"
+                  className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center text-primary rounded-full bg-fv-areia hover:bg-fv-creme border border-fv-nevoa transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fv-verde-raiz"
                   aria-label="Fechar menu"
                 >
                   <X size={20} />

@@ -3,52 +3,81 @@
 @tailwind utilities;
 
 :root {
-  /* Brand Colors - Figura Viva v1 */
-  --color-primary: #0e6330;
-  /* Verde Institucional */
-  --color-primary-dark: #0a4d25;
-  --color-primary-light: #158542;
+  /* ==========================================================================
+     DESIGN TOKENS — FIGURA VIVA (fonte única da verdade)
+     O DS não usa box-shadow/glow para profundidade. Profundidade vem de
+     contraste de superfícies (creme sobre areia), border 1px névoa e espaço.
+     ========================================================================== */
 
-  --color-secondary: #f0d418;
-  /* Ouro Figura Viva */
-  --color-accent: #0e6330;
-  --color-accent-light: #d4e7d9;
+  /* Cores institucionais */
+  --fv-verde-raiz: #005a1f; /* principal: títulos, CTA */
+  --fv-verde-igarape: #07614c; /* secundária institucional */
+  --fv-terra-barro: #96551f; /* acentos/etiquetas — nunca texto corrido */
 
-  /* Surface & Background */
-  --color-paper: #f8f7f0;
-  /* Fundo Papel Institucional */
-  --color-surface: #ffffff;
-  --color-text: #171717;
-  /* Neutral-900 */
-  --color-muted: #4b4b4b;
-  /* Slightly darker for better contrast on paper */
-  --color-muted-foreground: #4b4b4b;
-  --color-border: #e0e0e0;
+  /* Superfícies */
+  --fv-creme: #fdfaf4; /* background principal (substitui branco puro) */
+  --fv-areia: #f1e9db; /* background secundário / superfície de apoio */
+  --fv-nevoa: #d8cfbe; /* borders e divisores */
 
-  /* Highlights */
-  /* WCAG AA OK - Adjusted for better contrast */
-  --color-gold: #b08d55;
-  /* Gold Clássico (Escurecido de #D4AF37) */
-  --color-gold-dark: #8a6d0b;
-  /* Escuro suficiente para texto em branco */
-  /* WCAG AA OK */
-  --color-gold-light: #f9f1c0;
-  --color-beige: #f3e5d8;
+  /* Texto */
+  --fv-mata: #262b22; /* texto principal (nunca #000) */
+  --fv-pedra: #6b6b63; /* texto secundário/metadados (nunca opacity baixa) */
+
+  /* Acentos expressivos — SOMENTE ilustrações/gráficos, nunca texto */
+  --fv-aurora: #fe538b;
+  --fv-vazante: #fed701;
+  --fv-broto: #01c94d;
+
+  /* Escala de espaçamento */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 32px;
+  --space-6: 48px;
+  --space-7: 64px;
+  --space-8: 96px;
+
+  /* Raios */
+  --fv-radius-sm: 12px;
+  --fv-radius-md: 16px;
+  --fv-radius-lg: 24px;
+
+  /* --------------------------------------------------------------------
+     Aliases legados. Mantidos porque centenas de classes Tailwind já usam
+     bg-paper / text-primary / border-gold etc.; agora eles APONTAM para os
+     tokens --fv-*, de modo que toda a base herda a paleta oficial sem
+     precisar reescrever cada componente.
+     -------------------------------------------------------------------- */
+  --color-primary: var(--fv-verde-raiz);
+  --color-primary-dark: #00420f;
+  --color-primary-light: var(--fv-verde-igarape);
+
+  --color-secondary: var(--fv-vazante);
+  --color-accent: var(--fv-verde-igarape);
+  --color-accent-light: #dfe9e2;
+
+  /* Surface & Background — nunca branco puro */
+  --color-paper: var(--fv-areia);
+  --color-surface: var(--fv-creme);
+  --color-text: var(--fv-mata);
+  --color-muted: var(--fv-pedra);
+  --color-muted-foreground: var(--fv-pedra);
+  --color-border: var(--fv-nevoa);
+
+  /* Highlights (etiquetas/acentos — Terra Barro) */
+  --color-gold: var(--fv-terra-barro);
+  --color-gold-dark: #7a4416;
+  --color-gold-light: var(--fv-areia);
+  --color-beige: var(--fv-areia);
 
   /* Feedback & Status */
   --color-success: #10b981;
   --color-warning: #f59e0b;
   --color-error: #ef4444;
 
-  /* Spacing Scale */
+  /* Spacing legado: a escala oficial --space-1..8 está no topo do :root */
   --space-unit: 0.25rem;
-  /* 4px */
-  --space-1: calc(var(--space-unit) * 1);
-  --space-2: calc(var(--space-unit) * 2);
-  --space-3: calc(var(--space-unit) * 3);
-  --space-4: calc(var(--space-unit) * 4);
-  --space-6: calc(var(--space-unit) * 6);
-  --space-8: calc(var(--space-unit) * 8);
 
   /* Touch Targets */
   --min-touch-target: 44px;
@@ -83,29 +112,30 @@
 }
 
 @layer utilities {
+  /* DS Figura Viva: profundidade por superfície + border, sem box-shadow. */
   .card-hover {
-    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-lg;
+    @apply transition-[background-color,border-color,transform] duration-200 hover:-translate-y-0.5 hover:bg-fv-areia hover:border-fv-verde-raiz;
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center bg-primary text-white px-8 py-3.5 rounded-xl font-bold tracking-wide hover:opacity-90 transition-all active:scale-95 shadow-lg min-h-[44px] touch-manipulation;
+    @apply inline-flex items-center justify-center bg-primary text-fv-creme px-8 py-3.5 rounded-xl font-bold tracking-wide border border-transparent hover:bg-fv-verde-igarape transition-colors active:scale-95 min-h-[44px] touch-manipulation;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center border border-gray-300 text-text px-8 py-3.5 rounded-xl font-bold hover:bg-gray-50 transition-all active:scale-95 shadow-sm min-h-[44px] touch-manipulation;
+    @apply inline-flex items-center justify-center border border-fv-nevoa text-text px-8 py-3.5 rounded-xl font-bold hover:bg-fv-areia hover:border-fv-verde-raiz transition-colors active:scale-95 min-h-[44px] touch-manipulation;
   }
 
   .card-premium {
-    @apply bg-white rounded-2xl shadow-soft-sm border border-gray-100/50 transition-all duration-500 hover:shadow-soft-xl hover:-translate-y-1 hover:border-accent/20;
+    @apply bg-fv-creme rounded-2xl border border-fv-nevoa transition-[background-color,border-color,transform] duration-200 hover:-translate-y-0.5 hover:bg-fv-areia hover:border-fv-verde-raiz;
   }
 
-  /* Glassmorphism Variants */
+  /* Painéis translúcidos (sem sombra, sobre creme) */
   .glass-panel {
-    @apply bg-white/60 backdrop-blur-glass border border-white/40 shadow-soft-lg;
+    @apply bg-fv-creme/90 backdrop-blur-glass border border-fv-nevoa;
   }
 
   .glass-panel-dark {
-    @apply bg-black/30 backdrop-blur-glass border border-white/5 shadow-soft-lg;
+    @apply bg-fv-mata/80 backdrop-blur-glass border border-fv-nevoa/20;
   }
 
   .skip-to-content {
@@ -305,4 +335,290 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* ==========================================================================
+   FIGURA VIVA — RESOURCE EXPERIENCE SHELL
+   Janela padronizada para Recursos Interativos.
+   Sem box-shadow: profundidade vem de superfície + border + espaço.
+   ========================================================================== */
+
+.fv-resource-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  /* Fundo areia semi-opaco — nunca cinza translúcido nem preto */
+  background: rgba(241, 233, 219, 0.94);
+}
+
+.fv-resource-window {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  width: min(1180px, calc(100vw - 48px));
+  height: min(780px, calc(100dvh - 48px));
+  max-height: calc(100dvh - 32px);
+  background: var(--fv-creme);
+  border: 1px solid var(--fv-nevoa);
+  border-radius: var(--fv-radius-lg);
+  overflow: hidden;
+  box-shadow: none;
+}
+
+.fv-resource-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex: 0 0 auto;
+  min-height: 56px;
+  padding: var(--space-2) var(--space-3);
+  background: var(--fv-creme);
+  border-bottom: 1px solid var(--fv-nevoa);
+}
+
+@media (min-width: 768px) {
+  .fv-resource-header {
+    min-height: 64px;
+    padding: var(--space-2) var(--space-4);
+  }
+}
+
+.fv-resource-title {
+  font-family: var(--font-serif), Georgia, serif;
+  font-weight: 600;
+  color: var(--fv-verde-raiz);
+  font-size: 1rem;
+  line-height: 1.25;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fv-resource-breadcrumb {
+  color: var(--fv-pedra);
+  font-weight: 500;
+}
+
+/* Body: dono do scroll do conteúdo do recurso */
+.fv-resource-body {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+  background: var(--fv-creme);
+}
+
+.fv-resource-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 var(--space-2);
+  border-radius: var(--fv-radius-sm);
+  border: 1px solid var(--fv-nevoa);
+  background: var(--fv-creme);
+  color: var(--fv-verde-raiz);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.fv-resource-icon-btn:hover {
+  background: var(--fv-areia);
+  border-color: var(--fv-verde-raiz);
+}
+
+.fv-resource-icon-btn:focus-visible {
+  outline: 2px solid var(--fv-verde-raiz);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fv-resource-icon-btn {
+    transition: none;
+  }
+}
+
+/* Mobile: tela cheia, fundo creme sólido, safe areas */
+@media (max-width: 767px) {
+  .fv-resource-overlay {
+    padding: 0;
+    background: var(--fv-creme);
+  }
+
+  .fv-resource-window {
+    width: 100%;
+    height: 100dvh;
+    max-height: 100dvh;
+    border: 0;
+    border-radius: 0;
+    background: var(--fv-creme);
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* Estados de loading/erro do shell */
+.fv-resource-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  min-height: 320px;
+  height: 100%;
+  padding: var(--space-6) var(--space-4);
+  text-align: center;
+  background: var(--fv-creme);
+  color: var(--fv-mata);
+}
+
+.fv-resource-state__label {
+  font-family: var(--font-serif), Georgia, serif;
+  color: var(--fv-verde-raiz);
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.fv-resource-state__hint {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  color: var(--fv-pedra);
+  font-size: 0.9375rem;
+  max-width: 42ch;
+  margin: 0;
+}
+
+.fv-resource-spinner {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--fv-nevoa);
+  border-top-color: var(--fv-verde-raiz);
+  animation: fv-spin 900ms linear infinite;
+}
+
+@keyframes fv-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ==========================================================================
+   FIGURA VIVA — GRID/CARDS DE RECURSOS INTERATIVOS
+   ========================================================================== */
+
+.fv-resource-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-4);
+  align-items: stretch;
+}
+
+.fv-resource-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-3);
+  height: 100%;
+  padding: var(--space-5) var(--space-4);
+  background: var(--fv-creme);
+  border: 1px solid var(--fv-nevoa);
+  border-radius: var(--fv-radius-lg);
+  color: var(--fv-mata);
+  cursor: pointer;
+  box-shadow: none;
+  transition: background-color 200ms ease, border-color 200ms ease, transform 200ms ease;
+}
+
+.fv-resource-card:hover,
+.fv-resource-card:focus-visible {
+  background: var(--fv-areia);
+  border-color: var(--fv-verde-raiz);
+  transform: translateY(-2px);
+}
+
+.fv-resource-card:focus-visible {
+  outline: 2px solid var(--fv-verde-raiz);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fv-resource-card {
+    transition: none;
+  }
+
+  .fv-resource-card:hover,
+  .fv-resource-card:focus-visible {
+    transform: none;
+  }
+}
+
+.fv-resource-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--fv-radius-md);
+  background: var(--fv-areia);
+  border: 1px solid var(--fv-nevoa);
+  color: var(--fv-verde-raiz);
+  flex: 0 0 auto;
+}
+
+.fv-resource-card:hover .fv-resource-card__icon {
+  background: var(--fv-creme);
+}
+
+.fv-resource-card__title {
+  font-family: var(--font-serif), Georgia, serif;
+  font-weight: 600;
+  font-size: 1.125rem;
+  color: var(--fv-verde-raiz);
+  margin: 0;
+}
+
+.fv-resource-card__desc {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--fv-pedra);
+  flex: 1 1 auto;
+  margin: 0;
+}
+
+.fv-resource-card__cta {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--fv-terra-barro);
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+}
+
+.fv-resource-card:hover .fv-resource-card__cta {
+  color: var(--fv-verde-raiz);
 }

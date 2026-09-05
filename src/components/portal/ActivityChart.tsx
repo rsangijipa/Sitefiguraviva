@@ -48,7 +48,7 @@ export default function ActivityChart({ data }: ActivityChartProps) {
                   }}
                   className={`w-full max-w-[20px] rounded-t-sm transition-all duration-500 shadow-sm motion-safe:block ${
                     day.xp > 0
-                      ? "bg-agedGold/20 group-hover:bg-agedGold shadow-[0_0_15px_rgba(197,160,91,0.1)] group-hover:shadow-[0_0_20px_rgba(197,160,91,0.3)]"
+                      ? "bg-agedGold/20 group-hover:bg-agedGold"
                       : "bg-stone-50"
                   }`}
                 />

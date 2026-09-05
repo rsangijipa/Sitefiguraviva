@@ -1,19 +1,20 @@
 import { Metadata, Viewport } from "next";
 import Script from "next/script";
-import { Cormorant_Garamond, Lato } from "next/font/google";
+import { Fraunces, Karla } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
 
-const cormorant = Cormorant_Garamond({
+// Tipografia do DS Figura Viva: títulos em Fraunces, corpo/UI em Karla.
+const fraunces = Fraunces({
   subsets: ["latin"],
-  weight: ["300", "400", "600", "700"],
+  weight: ["400", "600", "700"],
   variable: "--font-serif",
   display: "swap",
 });
 
-const lato = Lato({
+const karla = Karla({
   subsets: ["latin"],
-  weight: ["300", "400", "700"],
+  weight: ["400", "500", "700"],
   variable: "--font-sans",
   display: "swap",
 });
@@ -81,7 +82,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport = {
-  themeColor: "#D4AF37",
+  themeColor: "#005A1F",
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
@@ -106,7 +107,7 @@ export default async function RootLayout({
   const isImpersonating = cookieStore.has("admin_session_backup");
 
   return (
-    <html lang="pt-BR" className={`${cormorant.variable} ${lato.variable}`}>
+    <html lang="pt-BR" className={`${fraunces.variable} ${karla.variable}`}>
       <body className="antialiased bg-paper text-text overflow-x-hidden">
         <a href="#main-content" className="skip-to-content">
           Pular para o conteúdo principal
