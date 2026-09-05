@@ -1,11 +1,11 @@
 "use client";
 
 import React from "react";
-import { FolderOpen } from "lucide-react";
+import { FolderOpen, type LucideIcon } from "lucide-react";
 import { EmptyState as CoreEmptyState } from "@/components/core/feedback";
 
 interface EmptyStateProps {
-  icon?: React.ElementType;
+  icon?: LucideIcon;
   title: string;
   description: string;
   action?: React.ReactNode;

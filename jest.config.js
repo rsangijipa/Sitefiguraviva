@@ -16,7 +16,6 @@ const customJestConfig = {
     "<rootDir>/.next-audit/",
     "<rootDir>/e2e/",
     "<rootDir>/tests/e2e/",
-    "<rootDir>/src/components/arvoredasemocoes/",
   ],
   moduleNameMapper: {
     // Handle module aliases (this will be automatically configured for you soon)
