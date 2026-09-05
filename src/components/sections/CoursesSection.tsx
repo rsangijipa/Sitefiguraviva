@@ -206,8 +206,8 @@ export default function CoursesSection({
         <div className="flex md:hidden items-center justify-center gap-6 mt-6 opacity-70 hover:opacity-100 transition-opacity">
           <button
             onClick={() => scroll("left")}
-            className="rounded-full border border-transparent p-3 text-muted transition-colors hover:border-border hover:bg-areia hover:text-primary"
-            aria-label="Scroll Left"
+            className="min-h-11 min-w-11 rounded-full border border-transparent p-3 text-muted transition-colors hover:border-border hover:bg-areia hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            aria-label="Formação anterior"
           >
             <ArrowLeft size={24} />
           </button>
@@ -218,8 +218,8 @@ export default function CoursesSection({
 
           <button
             onClick={() => scroll("right")}
-            className="rounded-full border border-transparent p-3 text-muted transition-colors hover:border-border hover:bg-areia hover:text-primary"
-            aria-label="Scroll Right"
+            className="min-h-11 min-w-11 rounded-full border border-transparent p-3 text-muted transition-colors hover:border-border hover:bg-areia hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            aria-label="Próxima formação"
           >
             <ArrowRight size={24} />
           </button>

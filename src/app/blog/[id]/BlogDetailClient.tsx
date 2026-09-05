@@ -13,7 +13,7 @@ export default function BlogDetailClient({ post }: { post: any }) {
   return (
     <div className="bg-paper min-h-screen">
       <Navbar />
-      <main className="pt-40 pb-20">
+      <div className="pt-40 pb-20">
         <article className="container mx-auto px-6 max-w-4xl">
           <button
             onClick={() => router.back()}
@@ -95,7 +95,7 @@ export default function BlogDetailClient({ post }: { post: any }) {
             </div>
           </footer>
         </article>
-      </main>
+      </div>
       <Footer />
     </div>
   );

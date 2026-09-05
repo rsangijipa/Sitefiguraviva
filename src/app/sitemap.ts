@@ -30,7 +30,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Static routes must remain indexable during builds or brief catalog outages.
   }
 
-  const routes = ["", "/public-library", "/public-gallery"].map((route) => ({
+  const routes = [
+    "",
+    "/instituto",
+    "/instituto/fundadora",
+    "/instituto/manifesto",
+    "/formacoes",
+    "/recursos",
+    "/recursos/arvore-da-awareness",
+    "/blog",
+    "/public-library",
+    "/public-gallery",
+  ].map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date(),
     changeFrequency: "daily" as const,

@@ -19,13 +19,13 @@ export async function generateMetadata({
     const docSnap = await getPostDoc(id);
     if (!docSnap.exists) {
       return {
-        title: "Artigo nao encontrado | Instituto Figura Viva",
+        title: "Artigo não encontrado",
         robots: { index: false, follow: false },
       };
     }
 
     const data: any = docSnap.data();
-    const title = data?.title || "Blog | Instituto Figura Viva";
+    const title = data?.title || "Blog";
     const description =
       data?.excerpt || data?.subtitle || "Conteudo do Instituto Figura Viva";
     const image = data?.image || "/og-default.jpg";
@@ -51,7 +51,7 @@ export async function generateMetadata({
     };
   } catch {
     return {
-      title: "Blog | Instituto Figura Viva",
+      title: "Blog",
     };
   }
 }

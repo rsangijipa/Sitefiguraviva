@@ -7,7 +7,11 @@ const createJestConfig = nextJest({
 
 // Add any custom config to be passed to Jest
 const customJestConfig = {
-  roots: ["<rootDir>/src", "<rootDir>/tests/performance"],
+  roots: [
+    "<rootDir>/src",
+    "<rootDir>/tests/performance",
+    "<rootDir>/tests/accessibility",
+  ],
   setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
   testEnvironment: "jest-environment-jsdom",
   testPathIgnorePatterns: [

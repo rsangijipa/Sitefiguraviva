@@ -5,7 +5,7 @@ import GalleryClient from "./GalleryClient";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Galeria de Momentos | Instituto Figura Viva",
+  title: "Galeria de Momentos",
   description:
     "Explore os registros fotográficos de nossos encontros, formações e eventos no Instituto Figura Viva.",
   keywords: [

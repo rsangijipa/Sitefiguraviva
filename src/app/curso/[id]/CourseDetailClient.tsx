@@ -65,7 +65,7 @@ export default function CourseDetailClient({ course }: { course: any }) {
   return (
     <div className="bg-paper min-h-screen">
       <Navbar />
-      <main className="pt-32 pb-20 md:pt-40">
+      <div className="pt-32 pb-20 md:pt-40">
         <div className="container mx-auto px-6 max-w-6xl relative">
           <button
             onClick={() => router.push("/#instituto")}
@@ -295,7 +295,7 @@ export default function CourseDetailClient({ course }: { course: any }) {
             </div>
           </div>
         </div>
-      </main>
+      </div>
       <Footer />
 
       <AnimatePresence>
