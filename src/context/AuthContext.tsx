@@ -2,7 +2,12 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
+import {
+  signInWithCustomToken,
+  signOut as signOutFirebase,
+} from "firebase/auth";
 import { createSupabaseBrowserClient } from "@/infrastructure/supabase/client";
+import { auth as firebaseAuth } from "@/lib/firebase/client";
 import { UserRole, UserStatus } from "@/types/user";
 import { useRouter } from "next/navigation";
 import { logger } from "@/lib/logger";
@@ -47,6 +52,23 @@ async function syncServerSession(accessToken: string): Promise<void> {
 
       if (response.ok) {
         lastSyncedToken = accessToken;
+
+        // Bridge into Firebase Auth so `request.auth` is populated for
+        // Firestore's client-side security rules. Best-effort: the Supabase
+        // session (set above) is the source of truth, so a failure here
+        // shouldn't block sign-in — it only degrades Firestore reads that
+        // still rely on the client SDK.
+        try {
+          const { firebaseToken } = await response.json();
+          if (firebaseToken) {
+            await signInWithCustomToken(firebaseAuth, firebaseToken);
+          }
+        } catch (firebaseError) {
+          logger.error(
+            "Failed to bridge Supabase session into Firebase Auth",
+            firebaseError,
+          );
+        }
       }
       // Leave lastSyncedToken untouched on failure so a later event retries.
     } catch {
@@ -238,6 +260,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       } else if (event === "SIGNED_OUT") {
         lastSyncedToken = null;
         void fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
+        void signOutFirebase(firebaseAuth).catch(() => {});
       }
     });
 
@@ -251,6 +274,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       await supabase.auth.signOut();
       lastSyncedToken = null;
       await fetch("/api/auth/logout", { method: "POST" });
+      await signOutFirebase(firebaseAuth).catch(() => {});
 
       setRole(null);
       setStatus(null);

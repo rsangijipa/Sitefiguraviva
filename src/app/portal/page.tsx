@@ -317,7 +317,7 @@ export default function PortalDashboard() {
             </div>
           ) : (
             <EmptyState
-              icon={Target}
+              icon={<Target />}
               title="Comece sua Jornada"
               description="Você ainda não iniciou nenhum curso. Explore nossa biblioteca de formações."
               action={

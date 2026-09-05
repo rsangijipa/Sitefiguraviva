@@ -71,7 +71,7 @@ export default function MaterialsPage() {
         </header>
         <div className="flex-1 flex items-center justify-center">
           <EmptyState
-            icon={BookOpen}
+            icon={<BookOpen />}
             title="Biblioteca Vazia"
             description="Seus cursos atuais não possuem materiais complementares disponíveis no momento."
           />

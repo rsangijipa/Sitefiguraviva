@@ -1,11 +1,10 @@
 "use client";
 
 import React from "react";
-import { FolderOpen, type LucideIcon } from "lucide-react";
 import { EmptyState as CoreEmptyState } from "@/components/core/feedback";
 
 interface EmptyStateProps {
-  icon?: LucideIcon;
+  icon?: React.ReactNode;
   title: string;
   description: string;
   action?: React.ReactNode;
@@ -13,7 +12,7 @@ interface EmptyStateProps {
 }
 
 export function EmptyState({
-  icon: Icon = FolderOpen,
+  icon,
   title,
   description,
   action,
@@ -21,7 +20,7 @@ export function EmptyState({
 }: EmptyStateProps) {
   return (
     <CoreEmptyState
-      icon={Icon}
+      icon={icon}
       title={title}
       description={description}
       action={action}

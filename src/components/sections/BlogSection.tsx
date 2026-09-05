@@ -201,7 +201,7 @@ export default function BlogSection({
             {blogPosts.length === 0 && (
               <div className="col-span-full">
                 <EmptyState
-                  icon={FileText}
+                  icon={<FileText />}
                   title="Nenhum artigo encontrado"
                   description="Nossa biblioteca está sendo atualizada. Volte em breve para novas reflexões."
                 />

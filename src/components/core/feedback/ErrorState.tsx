@@ -76,7 +76,7 @@ export function ErrorState({
       role="alert"
     >
       <EmptyState
-        icon={AlertCircle}
+        icon={<AlertCircle />}
         title={title}
         description={description}
         className="border-error/10 bg-white shadow-soft-xl shadow-error/5"

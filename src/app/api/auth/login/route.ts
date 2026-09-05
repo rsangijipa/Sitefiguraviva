@@ -6,6 +6,7 @@ import {
   getClientIdentifier,
 } from "@/lib/rateLimit";
 import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
+import { getAdminAuth } from "@/lib/firebase/admin";
 
 /** Fallback lifetime when the token carries no readable `exp` claim. */
 const DEFAULT_SESSION_SECONDS = 60 * 60;
@@ -88,7 +89,19 @@ export async function POST(request: Request) {
       sameSite: "lax",
     });
 
-    return NextResponse.json({ status: "success" });
+    // Firestore security rules gate reads on Firebase Auth (`request.auth`),
+    // but the app only authenticates through Supabase. Mint a Firebase custom
+    // token for the same uid so the client can sign into Firebase Auth too —
+    // without this, every direct client-side Firestore read is rejected with
+    // permission-denied regardless of the (valid) Supabase session.
+    let firebaseToken: string | null = null;
+    try {
+      firebaseToken = await getAdminAuth().createCustomToken(user.id);
+    } catch (tokenError) {
+      console.error("Firebase custom token minting failed:", tokenError);
+    }
+
+    return NextResponse.json({ status: "success", firebaseToken });
   } catch (error) {
     console.error("Session creation error:", error);
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

@@ -15,7 +15,7 @@ export function EmptyState({
 }: EmptyStateProps) {
   return (
     <CoreEmptyState
-      icon={FolderOpen}
+      icon={<FolderOpen />}
       title={title}
       description={message}
       action={action}

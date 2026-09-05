@@ -13,7 +13,7 @@ export default function SupportPage() {
       </header>
       <div className="flex-1 flex items-center justify-center">
         <EmptyState
-          icon={LifeBuoy}
+          icon={<LifeBuoy />}
           title="Precisa de Ajuda?"
           description="Nossa central de suporte está sendo finalizada. Enquanto isso, entre em contato diretamente pelo nosso email."
           action={

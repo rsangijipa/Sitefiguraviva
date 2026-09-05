@@ -172,7 +172,7 @@ export default function CommunityPage() {
           ))
         ) : (
           <EmptyState
-            icon={MessageCircle}
+            icon={<MessageCircle />}
             title="Comunidade Silenciosa"
             description="Seja o primeiro a iniciar uma discussão!"
           />

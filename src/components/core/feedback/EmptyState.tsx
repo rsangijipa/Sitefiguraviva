@@ -1,12 +1,17 @@
-import type { ReactNode } from "react";
-import { FolderOpen, type LucideIcon } from "lucide-react";
+import {
+  cloneElement,
+  isValidElement,
+  type ReactElement,
+  type ReactNode,
+} from "react";
+import { FolderOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type EmptyStateVariant = "surface" | "dashed" | "plain";
 type EmptyStateSize = "md" | "lg";
 
 export interface EmptyStateProps {
-  icon?: LucideIcon;
+  icon?: ReactNode;
   title: string;
   description: string;
   action?: ReactNode;
@@ -41,7 +46,7 @@ const iconSizes: Record<EmptyStateSize, number> = {
 };
 
 export function EmptyState({
-  icon: Icon = FolderOpen,
+  icon = <FolderOpen />,
   title,
   description,
   action,
@@ -51,6 +56,16 @@ export function EmptyState({
   variant = "surface",
   size = "lg",
 }: EmptyStateProps) {
+  const sizedIcon = isValidElement(icon)
+    ? cloneElement(
+        icon as ReactElement<{ size?: number; strokeWidth?: number }>,
+        {
+          size: iconSizes[size],
+          strokeWidth: 1.5,
+        },
+      )
+    : icon;
+
   return (
     <section
       className={cn(
@@ -69,7 +84,7 @@ export function EmptyState({
         )}
         aria-hidden="true"
       >
-        <Icon size={iconSizes[size]} strokeWidth={1.5} />
+        {sizedIcon}
       </div>
 
       <div className={cn("flex flex-col items-center", contentClassName)}>

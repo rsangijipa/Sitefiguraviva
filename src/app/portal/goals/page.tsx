@@ -14,7 +14,7 @@ export default function GoalsPage() {
       </header>
       <div className="flex-1 flex items-center justify-center">
         <EmptyState
-          icon={Trophy}
+          icon={<Trophy />}
           title="Jornada Personalizada"
           description="Em breve, você poderá criar trilhas de estudo personalizadas e acompanhar suas metas de aprendizado em tempo real."
         />
