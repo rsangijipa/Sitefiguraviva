@@ -16,16 +16,16 @@ import { LeafMessageCard } from "../../components/ui/LeafMessageCard";
 import { ThemeFilter } from "../../components/ui/ThemeFilter";
 import { themeLabel } from "../../data/labels";
 import { THEMES } from "../../data/themes";
-import { usePerformanceMode } from "@/hooks/usePerformanceMode";
-import { useReducedMotionPreference } from "@/hooks/useReducedMotionPreference";
-import { useSessionId } from "@/hooks/useSessionId";
-import { useSoundscape } from "@/hooks/useSoundscape";
+import { usePerformanceMode } from "../../hooks/usePerformanceMode";
+import { useReducedMotionPreference } from "../../hooks/useReducedMotionPreference";
+import { useSessionId } from "../../hooks/useSessionId";
+import { useSoundscape } from "../../hooks/useSoundscape";
 import {
   fetchFavorites,
   postFavorite,
   postInteraction,
-} from "@/lib/client/interactions-api";
-import { fetchQuotesByTheme } from "@/lib/client/quote-api";
+} from "../../lib/client/interactions-api";
+import { fetchQuotesByTheme } from "../../lib/client/quote-api";
 import {
   createTreeSeed,
   MESSAGE_LEAF_COUNT,
@@ -34,10 +34,13 @@ import {
   loadFavorites,
   mergeFavoriteIds,
   saveFavorites,
-} from "@/lib/utils/local-favorites";
-import { INTRO_STORAGE_KEY, migrateLegacyStorage } from "@/lib/utils/storage";
+} from "../../lib/utils/local-favorites";
+import {
+  INTRO_STORAGE_KEY,
+  migrateLegacyStorage,
+} from "../../lib/utils/storage";
 import type { TreeSceneApi } from "../../components/3d/TreeScene";
-import { useQuoteStore } from "@/store/useQuoteStore";
+import { useQuoteStore } from "../../store/useQuoteStore";
 import type { QualityProfile } from "../../types/performance";
 import type { Quote } from "../../types/quote";
 

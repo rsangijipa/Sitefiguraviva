@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect } from "react";
 
-import { soundscape } from "@/lib/audio/soundscape";
+import { soundscape } from "../lib/audio/soundscape";
 
 export function useSoundscape(enabled = true) {
   const audioEnabled = enabled && process.env.NEXT_PUBLIC_ENABLE_AUDIO === "1";
