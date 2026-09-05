@@ -3,8 +3,8 @@
 import { AnimatePresence, motion } from "motion/react";
 import { Heart, X } from "lucide-react";
 
-import { themeLabel } from "@/data/labels";
-import type { Quote } from "@/types/quote";
+import { themeLabel } from "../../data/labels";
+import type { Quote } from "../../types/quote";
 
 type FavoritesDrawerProps = {
   open: boolean;
@@ -13,7 +13,12 @@ type FavoritesDrawerProps = {
   onSelect: (quote: Quote) => void;
 };
 
-export function FavoritesDrawer({ open, quotes, onClose, onSelect }: FavoritesDrawerProps) {
+export function FavoritesDrawer({
+  open,
+  quotes,
+  onClose,
+  onSelect,
+}: FavoritesDrawerProps) {
   return (
     <AnimatePresence>
       {open && (
@@ -31,8 +36,12 @@ export function FavoritesDrawer({ open, quotes, onClose, onSelect }: FavoritesDr
             <div className="flex items-center gap-2">
               <Heart className="h-4 w-4 text-[#F3D08A]" />
               <div>
-                <p className="text-[11px] tracking-[0.18em] uppercase text-[#D5E1EF]">Favoritas</p>
-                <p className="text-[11px] text-[#AFC3D9]">Salvas neste dispositivo</p>
+                <p className="text-[11px] tracking-[0.18em] uppercase text-[#D5E1EF]">
+                  Favoritas
+                </p>
+                <p className="text-[11px] text-[#AFC3D9]">
+                  Salvas neste dispositivo
+                </p>
               </div>
             </div>
 
@@ -59,8 +68,12 @@ export function FavoritesDrawer({ open, quotes, onClose, onSelect }: FavoritesDr
                   onClick={() => onSelect(quote)}
                   className="hud-list-item w-full px-4 py-3 text-left transition"
                 >
-                  <p className="text-[10px] tracking-[0.18em] uppercase text-[#AFC3D9]">{themeLabel(quote.theme)}</p>
-                  <p className="mt-1 text-sm leading-relaxed text-[#F2F6FC]">{quote.text}</p>
+                  <p className="text-[10px] tracking-[0.18em] uppercase text-[#AFC3D9]">
+                    {themeLabel(quote.theme)}
+                  </p>
+                  <p className="mt-1 text-sm leading-relaxed text-[#F2F6FC]">
+                    {quote.text}
+                  </p>
                 </button>
               ))
             )}

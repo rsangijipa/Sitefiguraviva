@@ -2,8 +2,8 @@
 
 import { create } from "zustand";
 
-import type { QualityProfile } from "@/types/performance";
-import type { Quote, ThemeFilter } from "@/types/quote";
+import type { QualityProfile } from "../types/performance";
+import type { Quote, ThemeFilter } from "../types/quote";
 
 type QuoteState = {
   sessionId: string;

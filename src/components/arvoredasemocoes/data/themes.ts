@@ -1,4 +1,4 @@
-import type { ThemeOption } from "@/types/quote";
+import type { ThemeOption } from "../types/quote";
 
 export const THEMES: ThemeOption[] = [
   { slug: "calma", label: "Calma", color: "#6FAF7B" },

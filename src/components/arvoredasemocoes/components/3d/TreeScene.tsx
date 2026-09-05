@@ -2,24 +2,38 @@
 
 import { OrbitControls } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import * as THREE from "three";
 
-import { FlyingLeaf, type FlyingLeafPhase } from "@/components/3d/FlyingLeaf";
-import { Foliage } from "@/components/3d/Foliage";
-import { Panorama } from "@/components/3d/Panorama";
-import { TreeBark } from "@/components/3d/TreeBark";
-import { WindParticles } from "@/components/3d/WindParticles";
-import { GRASS_FAR_COLOR, GRASS_NEAR_COLOR, HORIZON_COLOR } from "@/lib/theme/panorama";
+import {
+  FlyingLeaf,
+  type FlyingLeafPhase,
+} from "../../components/3d/FlyingLeaf";
+import { Foliage } from "../../components/3d/Foliage";
+import { Panorama } from "../../components/3d/Panorama";
+import { TreeBark } from "../../components/3d/TreeBark";
+import { WindParticles } from "../../components/3d/WindParticles";
+import {
+  GRASS_FAR_COLOR,
+  GRASS_NEAR_COLOR,
+  HORIZON_COLOR,
+} from "../../lib/theme/panorama";
 import {
   MESSAGE_LEAF_COUNT,
   SCENE_QUALITY_CONFIGS,
   SUN_CAMERA_YAW,
   SUN_POSITION,
-} from "@/lib/theme/scene-tokens";
-import { generateTree } from "@/lib/tree/generateTree";
-import type { QualityConfig, QualityProfile } from "@/types/performance";
+} from "../../lib/theme/scene-tokens";
+import { generateTree } from "../../lib/tree/generateTree";
+import type { QualityConfig, QualityProfile } from "../../types/performance";
 
 export type TreeSceneProps = {
   seed: number;
@@ -144,7 +158,11 @@ function Ground({ receiveShadow }: { receiveShadow: boolean }) {
 
   return (
     <group>
-      <mesh geometry={geometry} rotation={[-Math.PI / 2, 0, 0]} receiveShadow={receiveShadow}>
+      <mesh
+        geometry={geometry}
+        rotation={[-Math.PI / 2, 0, 0]}
+        receiveShadow={receiveShadow}
+      >
         <meshStandardMaterial vertexColors roughness={1} metalness={0} />
       </mesh>
 
@@ -158,7 +176,12 @@ function Ground({ receiveShadow }: { receiveShadow: boolean }) {
       {receiveShadow ? null : (
         <mesh position={[0, 0.008, 0]} rotation={[-Math.PI / 2, 0, 0]}>
           <circleGeometry args={[1.6, 48]} />
-          <meshBasicMaterial color="#1B2A14" transparent opacity={0.26} depthWrite={false} />
+          <meshBasicMaterial
+            color="#1B2A14"
+            transparent
+            opacity={0.26}
+            depthWrite={false}
+          />
         </mesh>
       )}
     </group>
@@ -231,7 +254,8 @@ function SceneContent({
     const radius = Math.max(1.4, tree.crownRadius);
     // a arvore inteira precisa caber no quadro: com o fator antigo a copa
     // saia pelo topo assim que a semente gerava uma arvore alta
-    const distance = Math.max(height * 1.5, radius * 2.7) * (isMobile ? 1.34 : 1.12);
+    const distance =
+      Math.max(height * 1.5, radius * 2.7) * (isMobile ? 1.34 : 1.12);
 
     return {
       height,
@@ -345,7 +369,9 @@ function SceneContent({
 
   const handleReturned = useCallback(() => {
     setReadMessages((current) =>
-      activeMessage !== null && !current.includes(activeMessage) ? [...current, activeMessage] : current,
+      activeMessage !== null && !current.includes(activeMessage)
+        ? [...current, activeMessage]
+        : current,
     );
     setActiveMessage(null);
     setFlightPhase("idle");
@@ -405,15 +431,30 @@ function SceneContent({
     }
 
     if (introActive && introProgressRef.current < 1) {
-      introProgressRef.current = Math.min(1, introProgressRef.current + delta / (reduceMotion ? 0.6 : 2.6));
+      introProgressRef.current = Math.min(
+        1,
+        introProgressRef.current + delta / (reduceMotion ? 0.6 : 2.6),
+      );
       const t = easeOutCubic(introProgressRef.current);
 
-      const distance = THREE.MathUtils.lerp(framing.distance * 1.85, framing.distance, t);
+      const distance = THREE.MathUtils.lerp(
+        framing.distance * 1.85,
+        framing.distance,
+        t,
+      );
       const angle = -0.55 + t * 0.55;
       const y = THREE.MathUtils.lerp(framing.height * 0.08, framing.cameraY, t);
 
-      camera.position.set(Math.sin(angle) * distance, y, Math.cos(angle) * distance);
-      controls.target.set(0, THREE.MathUtils.lerp(framing.height * 0.18, framing.targetY, t), 0);
+      camera.position.set(
+        Math.sin(angle) * distance,
+        y,
+        Math.cos(angle) * distance,
+      );
+      controls.target.set(
+        0,
+        THREE.MathUtils.lerp(framing.height * 0.18, framing.targetY, t),
+        0,
+      );
       camera.lookAt(controls.target);
       controls.update();
       return;
@@ -426,7 +467,8 @@ function SceneContent({
     // aproxima a camera de leve quando uma mensagem esta em foco
     if (flightPhase !== "idle") {
       const desired = framing.targetY + 0.05;
-      controls.target.y += (desired - controls.target.y) * Math.min(1, delta * 2);
+      controls.target.y +=
+        (desired - controls.target.y) * Math.min(1, delta * 2);
     }
 
     void state;
@@ -435,7 +477,10 @@ function SceneContent({
   return (
     <>
       <Panorama resolution={quality.profile === "safe" ? 1024 : 2048} />
-      <fog attach="fog" args={[HORIZON_COLOR, framing.distance * 1.4, framing.distance * 5]} />
+      <fog
+        attach="fog"
+        args={[HORIZON_COLOR, framing.distance * 1.4, framing.distance * 5]}
+      />
 
       {/* ceu difuso + luz do solo refletida */}
       <hemisphereLight intensity={1.15} color="#CFE2F2" groundColor="#6B7C4A" />
@@ -463,7 +508,11 @@ function SceneContent({
       />
 
       {/* preenchimento frio do lado oposto, para a silhueta nao fechar em preto */}
-      <directionalLight position={[-6, 4.5, -5]} intensity={0.6} color="#9FBEDA" />
+      <directionalLight
+        position={[-6, 4.5, -5]}
+        intensity={0.6}
+        color="#9FBEDA"
+      />
 
       <group position={TREE_OFFSET}>
         <TreeBark
@@ -494,7 +543,11 @@ function SceneContent({
       </group>
 
       <FlyingLeaf
-        leaf={activeMessage === null ? null : (tree.messageLeaves[activeMessage] ?? null)}
+        leaf={
+          activeMessage === null
+            ? null
+            : (tree.messageLeaves[activeMessage] ?? null)
+        }
         leafIndex={activeMessage}
         treeOffset={TREE_OFFSET}
         phase={flightPhase}
@@ -531,7 +584,10 @@ function SceneContent({
         target={[0, framing.targetY, 0]}
       />
 
-      <AdaptiveQuality profile={quality.profile} onSuggestProfile={onSuggestProfile} />
+      <AdaptiveQuality
+        profile={quality.profile}
+        onSuggestProfile={onSuggestProfile}
+      />
     </>
   );
 }

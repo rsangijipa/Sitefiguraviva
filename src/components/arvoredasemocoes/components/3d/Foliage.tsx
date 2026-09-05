@@ -4,11 +4,17 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 
-import type { LeafNode } from "@/lib/tree/generateTree";
-import { createLeafDetailTexture, messageLeafTone } from "@/lib/tree/leafArtwork";
-import { createLeafVariants } from "@/lib/tree/leafGeometry";
-import { createLeafMaterial, updateSunDirection } from "@/lib/tree/leafMaterial";
-import { SUN_POSITION } from "@/lib/theme/scene-tokens";
+import type { LeafNode } from "../../lib/tree/generateTree";
+import {
+  createLeafDetailTexture,
+  messageLeafTone,
+} from "../../lib/tree/leafArtwork";
+import { createLeafVariants } from "../../lib/tree/leafGeometry";
+import {
+  createLeafMaterial,
+  updateSunDirection,
+} from "../../lib/tree/leafMaterial";
+import { SUN_POSITION } from "../../lib/theme/scene-tokens";
 
 type FoliageProps = {
   leaves: LeafNode[];
@@ -53,7 +59,10 @@ const AUTUMN_TONE = new THREE.Color("#C9A65A");
 function ensureVertexColors(geometry: THREE.BufferGeometry) {
   if (!geometry.attributes.color) {
     const count = geometry.attributes.position.count;
-    geometry.setAttribute("color", new THREE.Float32BufferAttribute(new Float32Array(count * 3).fill(1), 3));
+    geometry.setAttribute(
+      "color",
+      new THREE.Float32BufferAttribute(new Float32Array(count * 3).fill(1), 3),
+    );
   }
 
   return geometry;
@@ -64,7 +73,13 @@ function composeLeafMatrix(
   leaf: LeafNode,
   scaleMultiplier: number,
   target: THREE.Matrix4,
-  helpers: { x: THREE.Vector3; y: THREE.Vector3; z: THREE.Vector3; quaternion: THREE.Quaternion; rotation: THREE.Matrix4 },
+  helpers: {
+    x: THREE.Vector3;
+    y: THREE.Vector3;
+    z: THREE.Vector3;
+    quaternion: THREE.Quaternion;
+    rotation: THREE.Matrix4;
+  },
 ) {
   helpers.y.copy(leaf.direction).normalize();
   helpers.z.copy(leaf.normal);
@@ -84,7 +99,11 @@ function composeLeafMatrix(
   helpers.quaternion.setFromRotationMatrix(helpers.rotation);
 
   const scale = leaf.scale * scaleMultiplier;
-  target.compose(leaf.position, helpers.quaternion, new THREE.Vector3(scale, scale, scale));
+  target.compose(
+    leaf.position,
+    helpers.quaternion,
+    new THREE.Vector3(scale, scale, scale),
+  );
 }
 
 export function Foliage({
@@ -142,8 +161,14 @@ export function Foliage({
         stiffness[i] = leaf ? 0.6 + leaf.exposure * 0.8 : 1;
       }
 
-      geometry.setAttribute("aPhase", new THREE.InstancedBufferAttribute(phases, 1));
-      geometry.setAttribute("aStiffness", new THREE.InstancedBufferAttribute(stiffness, 1));
+      geometry.setAttribute(
+        "aPhase",
+        new THREE.InstancedBufferAttribute(phases, 1),
+      );
+      geometry.setAttribute(
+        "aStiffness",
+        new THREE.InstancedBufferAttribute(stiffness, 1),
+      );
       return geometry;
     });
   }, [groups, variantGeometries]);
@@ -159,8 +184,14 @@ export function Foliage({
       stiffness[i] = 0.55;
     }
 
-    geometry.setAttribute("aPhase", new THREE.InstancedBufferAttribute(phases, 1));
-    geometry.setAttribute("aStiffness", new THREE.InstancedBufferAttribute(stiffness, 1));
+    geometry.setAttribute(
+      "aPhase",
+      new THREE.InstancedBufferAttribute(phases, 1),
+    );
+    geometry.setAttribute(
+      "aStiffness",
+      new THREE.InstancedBufferAttribute(stiffness, 1),
+    );
     return geometry;
   }, [messageLeaves, variantGeometries]);
 
@@ -170,26 +201,26 @@ export function Foliage({
    * vento e sincronizada no loop, entao trocar de perfil nao recria o shader.
    */
   const [materials] = useState(() => ({
-      common: createLeafMaterial({
-        color: "#ffffff",
-        subsurfaceColor: "#9ED063",
-        subsurfaceIntensity: 0.9,
-        roughness: 0.72,
-        vertexColors: true,
-        windStrength,
-        cacheKey: "leaf-common-v2",
-      }),
-      message: createLeafMaterial({
-        color: "#ffffff",
-        subsurfaceColor: "#F0E39A",
-        subsurfaceIntensity: 1.25,
-        roughness: 0.58,
-        vertexColors: true,
-        windStrength: windStrength * 0.55,
-        cacheKey: "leaf-message-v2",
-        emissive: "#2A3410",
-        emissiveIntensity: 0.55,
-      }),
+    common: createLeafMaterial({
+      color: "#ffffff",
+      subsurfaceColor: "#9ED063",
+      subsurfaceIntensity: 0.9,
+      roughness: 0.72,
+      vertexColors: true,
+      windStrength,
+      cacheKey: "leaf-common-v2",
+    }),
+    message: createLeafMaterial({
+      color: "#ffffff",
+      subsurfaceColor: "#F0E39A",
+      subsurfaceIntensity: 1.25,
+      roughness: 0.58,
+      vertexColors: true,
+      windStrength: windStrength * 0.55,
+      cacheKey: "leaf-message-v2",
+      emissive: "#2A3410",
+      emissiveIntensity: 0.55,
+    }),
   }));
 
   const commonMaterial = materials.common;
@@ -225,21 +256,28 @@ export function Foliage({
 
     {
       const size = 128;
-    const canvas = document.createElement("canvas");
-    canvas.width = size;
-    canvas.height = size;
+      const canvas = document.createElement("canvas");
+      canvas.width = size;
+      canvas.height = size;
 
-    const context = canvas.getContext("2d");
-    if (!context) {
-      return null;
-    }
+      const context = canvas.getContext("2d");
+      if (!context) {
+        return null;
+      }
 
-    const gradient = context.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-    gradient.addColorStop(0, "rgba(255,232,182,0.88)");
-    gradient.addColorStop(0.35, "rgba(232,178,106,0.34)");
-    gradient.addColorStop(1, "rgba(232,178,106,0)");
-    context.fillStyle = gradient;
-    context.fillRect(0, 0, size, size);
+      const gradient = context.createRadialGradient(
+        size / 2,
+        size / 2,
+        0,
+        size / 2,
+        size / 2,
+        size / 2,
+      );
+      gradient.addColorStop(0, "rgba(255,232,182,0.88)");
+      gradient.addColorStop(0.35, "rgba(232,178,106,0.34)");
+      gradient.addColorStop(1, "rgba(232,178,106,0)");
+      context.fillStyle = gradient;
+      context.fillRect(0, 0, size, size);
 
       const texture = new THREE.CanvasTexture(canvas);
       texture.colorSpace = THREE.SRGBColorSpace;
@@ -267,15 +305,21 @@ export function Foliage({
         // verde interpolado continuamente: exposicao define o tom base e a fase
         // da folha adiciona a variacao individual
         const jitter = ((leaf.phase * 7.13) % 1) - 0.5;
-        const tone = THREE.MathUtils.clamp(leaf.exposure * 0.82 + 0.12 + jitter * 0.3, 0, 1);
+        const tone = THREE.MathUtils.clamp(
+          leaf.exposure * 0.82 + 0.12 + jitter * 0.3,
+          0,
+          1,
+        );
         const scaled = tone * (COMMON_TONES.length - 1);
         const lower = Math.floor(scaled);
         const upper = Math.min(COMMON_TONES.length - 1, lower + 1);
 
-        color.copy(COMMON_TONES[lower]).lerp(COMMON_TONES[upper], scaled - lower);
+        color
+          .copy(COMMON_TONES[lower])
+          .lerp(COMMON_TONES[upper], scaled - lower);
 
         // algumas folhas amarelam na borda ensolarada da copa
-        if (leaf.exposure > 0.78 && ((leaf.phase * 3.7) % 1) < 0.08) {
+        if (leaf.exposure > 0.78 && (leaf.phase * 3.7) % 1 < 0.08) {
           color.lerp(AUTUMN_TONE, 0.5);
         }
 
@@ -296,7 +340,9 @@ export function Foliage({
         "[folhas] vertexColors=%s | atributo color=%s | instanceColor=%s",
         commonMaterial.material.vertexColors,
         Boolean(sample?.geometry.attributes.color),
-        sample?.instanceColor ? Array.from(sample.instanceColor.array.slice(0, 3)) : null,
+        sample?.instanceColor
+          ? Array.from(sample.instanceColor.array.slice(0, 3))
+          : null,
       );
     }
   }, [commonMaterial, groups, matrixHelpers]);
@@ -317,7 +363,12 @@ export function Foliage({
       const isHidden = hiddenMessageIndex === index;
       const isHovered = hoveredMessageIndex === index;
 
-      composeLeafMatrix(leaf, isHidden ? 0 : isHovered ? 1.18 : 1, matrix, matrixHelpers);
+      composeLeafMatrix(
+        leaf,
+        isHidden ? 0 : isHovered ? 1.18 : 1,
+        matrix,
+        matrixHelpers,
+      );
       mesh.setMatrixAt(index, matrix);
 
       if (isHovered) {
@@ -337,7 +388,13 @@ export function Foliage({
       mesh.instanceColor.needsUpdate = true;
     }
     mesh.computeBoundingSphere();
-  }, [hiddenMessageIndex, hoveredMessageIndex, matrixHelpers, messageLeaves, readMessageIndices]);
+  }, [
+    hiddenMessageIndex,
+    hoveredMessageIndex,
+    matrixHelpers,
+    messageLeaves,
+    readMessageIndices,
+  ]);
 
   useEffect(() => {
     return () => {
@@ -368,8 +425,14 @@ export function Foliage({
     messageMaterial.uniforms.uTime.value = time;
     messageMaterial.uniforms.uWind.value = wind * 0.55;
 
-    updateSunDirection(commonMaterial.uniforms.uSunDirView.value, SUN_POSITION, camera);
-    messageMaterial.uniforms.uSunDirView.value.copy(commonMaterial.uniforms.uSunDirView.value);
+    updateSunDirection(
+      commonMaterial.uniforms.uSunDirView.value,
+      SUN_POSITION,
+      camera,
+    );
+    messageMaterial.uniforms.uSunDirView.value.copy(
+      commonMaterial.uniforms.uSunDirView.value,
+    );
 
     // halos pulsando devagar, como vaga-lumes
     for (let index = 0; index < haloRefs.current.length; index += 1) {
@@ -384,7 +447,9 @@ export function Foliage({
       const scale = hidden ? 0 : 0.42 * pulse * hover;
 
       sprite.scale.set(scale, scale, scale);
-      (sprite.material as THREE.SpriteMaterial).opacity = hidden ? 0 : 0.5 * pulse * hover;
+      (sprite.material as THREE.SpriteMaterial).opacity = hidden
+        ? 0
+        : 0.5 * pulse * hover;
     }
   });
 
@@ -402,7 +467,11 @@ export function Foliage({
               mesh.raycast = () => null;
             }
           }}
-          args={[commonGeometries[variant], commonMaterial.material, Math.max(1, group.length)]}
+          args={[
+            commonGeometries[variant],
+            commonMaterial.material,
+            Math.max(1, group.length),
+          ]}
           castShadow={castShadow}
           frustumCulled={false}
         />
@@ -415,7 +484,11 @@ export function Foliage({
             mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
           }
         }}
-        args={[messageGeometry, messageMaterial.material, Math.max(1, messageLeaves.length)]}
+        args={[
+          messageGeometry,
+          messageMaterial.material,
+          Math.max(1, messageLeaves.length),
+        ]}
         castShadow={castShadow}
         frustumCulled={false}
         onPointerOver={(event) => {

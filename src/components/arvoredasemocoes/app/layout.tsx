@@ -1,7 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Caveat, Cormorant_Garamond, Playfair_Display, Plus_Jakarta_Sans } from "next/font/google";
+import {
+  Caveat,
+  Cormorant_Garamond,
+  Playfair_Display,
+  Plus_Jakarta_Sans,
+} from "next/font/google";
 
-import { ServiceWorkerRegistration } from "@/components/pwa/ServiceWorkerRegistration";
+import { ServiceWorkerRegistration } from "../components/pwa/ServiceWorkerRegistration";
 
 import "./globals.css";
 

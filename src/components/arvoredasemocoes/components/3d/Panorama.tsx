@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import * as THREE from "three";
 
-import { HORIZON_COLOR, loadPanoramaTexture } from "@/lib/theme/panorama";
+import { HORIZON_COLOR, loadPanoramaTexture } from "../../lib/theme/panorama";
 
 type PanoramaProps = {
   resolution: 1024 | 2048;

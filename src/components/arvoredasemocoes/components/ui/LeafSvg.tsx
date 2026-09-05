@@ -16,7 +16,7 @@ import {
   LEAF_VEINS_UPPER,
   LEAF_VIEW_HEIGHT,
   LEAF_VIEW_WIDTH,
-} from "@/lib/tree/leafArtwork";
+} from "../../lib/tree/leafArtwork";
 
 /**
  * Folha vetorial de alta definicao.
@@ -64,7 +64,14 @@ export function LeafSvg({ id, className }: LeafSvgProps) {
       focusable="false"
     >
       <defs>
-        <linearGradient id={`${id}-blade`} x1="217" y1="120" x2="1505" y2="586" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id={`${id}-blade`}
+          x1="217"
+          y1="120"
+          x2="1505"
+          y2="586"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop offset="0" stopColor={palette.deep} />
           <stop offset="0.18" stopColor={palette.mid} />
           <stop offset="0.38" stopColor={palette.light} />
@@ -87,13 +94,27 @@ export function LeafSvg({ id, className }: LeafSvgProps) {
           <stop offset="1" stopColor={palette.deep} stopOpacity="0" />
         </radialGradient>
 
-        <linearGradient id={`${id}-edge`} x1="222" y1="147" x2="1477" y2="542" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id={`${id}-edge`}
+          x1="222"
+          y1="147"
+          x2="1477"
+          y2="542"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop offset="0" stopColor={palette.edge} />
           <stop offset="0.48" stopColor={palette.veinSoft} />
           <stop offset="1" stopColor={palette.edge} />
         </linearGradient>
 
-        <linearGradient id={`${id}-midrib`} x1="217" y1="361" x2="1529" y2="394" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id={`${id}-midrib`}
+          x1="217"
+          y1="361"
+          x2="1529"
+          y2="394"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop offset="0" stopColor={palette.stem} />
           <stop offset="0.25" stopColor={palette.veinSoft} />
           <stop offset="0.5" stopColor={palette.vein} />
@@ -101,18 +122,39 @@ export function LeafSvg({ id, className }: LeafSvgProps) {
           <stop offset="1" stopColor={palette.stem} />
         </linearGradient>
 
-        <linearGradient id={`${id}-vein`} x1="430" y1="160" x2="1455" y2="538" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id={`${id}-vein`}
+          x1="430"
+          y1="160"
+          x2="1455"
+          y2="538"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop offset="0" stopColor={palette.vein} stopOpacity="0.72" />
           <stop offset="0.55" stopColor={palette.veinSoft} stopOpacity="0.56" />
           <stop offset="1" stopColor={palette.vein} stopOpacity="0.32" />
         </linearGradient>
 
-        <linearGradient id={`${id}-veinlet`} x1="500" y1="190" x2="1380" y2="520" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id={`${id}-veinlet`}
+          x1="500"
+          y1="190"
+          x2="1380"
+          y2="520"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop offset="0" stopColor={palette.vein} stopOpacity="0.3" />
           <stop offset="1" stopColor={palette.veinSoft} stopOpacity="0.2" />
         </linearGradient>
 
-        <linearGradient id={`${id}-stem`} x1="80" y1="382" x2="236" y2="363" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id={`${id}-stem`}
+          x1="80"
+          y1="382"
+          x2="236"
+          y2="363"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop offset="0" stopColor={palette.stem} />
           <stop offset="0.52" stopColor={palette.veinSoft} />
           <stop offset="1" stopColor={palette.stem} />
@@ -126,12 +168,31 @@ export function LeafSvg({ id, className }: LeafSvgProps) {
         </radialGradient>
 
         <filter id={`${id}-shadow`} x="-8%" y="-24%" width="118%" height="156%">
-          <feDropShadow dx="0" dy="18" stdDeviation="20" floodColor="#0A1207" floodOpacity="0.42" />
+          <feDropShadow
+            dx="0"
+            dy="18"
+            stdDeviation="20"
+            floodColor="#0A1207"
+            floodOpacity="0.42"
+          />
         </filter>
 
         {/* grao: fractalNoise em soft-light da a lamina a aspereza do papel */}
-        <filter id={`${id}-grain`} x="166" y="79" width="1398" height="588" filterUnits="userSpaceOnUse">
-          <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="2" seed={seed % 100} result="noise" />
+        <filter
+          id={`${id}-grain`}
+          x="166"
+          y="79"
+          width="1398"
+          height="588"
+          filterUnits="userSpaceOnUse"
+        >
+          <feTurbulence
+            type="fractalNoise"
+            baseFrequency="0.75"
+            numOctaves="2"
+            seed={seed % 100}
+            result="noise"
+          />
           <feColorMatrix in="noise" type="saturate" values="0" result="mono" />
           <feComponentTransfer in="mono" result="softNoise">
             <feFuncA type="table" tableValues="0 0.07" />
@@ -154,10 +215,21 @@ export function LeafSvg({ id, className }: LeafSvgProps) {
       />
 
       <g filter={`url(#${id}-shadow)`}>
-        <path d={LEAF_OUTLINE} fill={`url(#${id}-blade)`} stroke={`url(#${id}-edge)`} strokeWidth="4.5" />
+        <path
+          d={LEAF_OUTLINE}
+          fill={`url(#${id}-blade)`}
+          stroke={`url(#${id}-edge)`}
+          strokeWidth="4.5"
+        />
 
         <g clipPath={`url(#${id}-clip)`} filter={`url(#${id}-grain)`}>
-          <rect x="166" y="79" width="1398" height="588" fill={`url(#${id}-inner)`} />
+          <rect
+            x="166"
+            y="79"
+            width="1398"
+            height="588"
+            fill={`url(#${id}-inner)`}
+          />
 
           {/* volume: a metade superior pega luz, a inferior recolhe */}
           <path
@@ -214,7 +286,12 @@ export function LeafSvg({ id, className }: LeafSvgProps) {
             ))}
           </g>
 
-          <g stroke={`url(#${id}-veinlet)`} strokeLinecap="round" fill="none" strokeWidth="1.7">
+          <g
+            stroke={`url(#${id}-veinlet)`}
+            strokeLinecap="round"
+            fill="none"
+            strokeWidth="1.7"
+          >
             {LEAF_VEINLETS_UPPER.map((path, index) => (
               <path key={`nu-${index}`} d={path} />
             ))}
@@ -223,7 +300,13 @@ export function LeafSvg({ id, className }: LeafSvgProps) {
             ))}
           </g>
 
-          <g stroke={palette.vein} strokeOpacity="0.2" strokeLinecap="round" fill="none" strokeWidth="1.1">
+          <g
+            stroke={palette.vein}
+            strokeOpacity="0.2"
+            strokeLinecap="round"
+            fill="none"
+            strokeWidth="1.1"
+          >
             {LEAF_VEIN_MESH.map((path, index) => (
               <path key={`mesh-${index}`} d={path} />
             ))}
@@ -234,7 +317,13 @@ export function LeafSvg({ id, className }: LeafSvgProps) {
             clareia por cima dela no miolo, entao o traco atravessa a folha
             inteira mas nao corta as linhas do texto ao meio.
           */}
-          <path d={LEAF_MIDRIB} stroke={`url(#${id}-midrib)`} strokeWidth="12" strokeLinecap="round" fill="none" />
+          <path
+            d={LEAF_MIDRIB}
+            stroke={`url(#${id}-midrib)`}
+            strokeWidth="12"
+            strokeLinecap="round"
+            fill="none"
+          />
           <path
             d={LEAF_MIDRIB_HIGHLIGHT}
             stroke={palette.glow}
@@ -245,8 +334,21 @@ export function LeafSvg({ id, className }: LeafSvgProps) {
           />
 
           {/* pagina da mensagem: clareia o centro sem apagar as nervuras */}
-          <ellipse cx="860" cy="368" rx="470" ry="185" fill={`url(#${id}-page)`} />
-          <ellipse cx="860" cy="368" rx="360" ry="120" fill={`url(#${id}-page)`} opacity="0.75" />
+          <ellipse
+            cx="860"
+            cy="368"
+            rx="470"
+            ry="185"
+            fill={`url(#${id}-page)`}
+          />
+          <ellipse
+            cx="860"
+            cy="368"
+            rx="360"
+            ry="120"
+            fill={`url(#${id}-page)`}
+            opacity="0.75"
+          />
         </g>
       </g>
     </svg>

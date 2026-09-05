@@ -1,5 +1,5 @@
-import { getSessionIdToken } from "@/lib/firebase/client";
-import type { FavoritePayload, InteractionPayload } from "@/types/quote";
+import { getSessionIdToken } from "../firebase/client";
+import type { FavoritePayload, InteractionPayload } from "../../types/quote";
 
 /**
  * As rotas exigem o ID token do Firebase quando ele esta configurado: o dono das
@@ -84,7 +84,9 @@ function attachLifecycleFlushListeners() {
   });
 }
 
-export async function postInteraction(payload: InteractionPayload): Promise<void> {
+export async function postInteraction(
+  payload: InteractionPayload,
+): Promise<void> {
   attachLifecycleFlushListeners();
   interactionQueue.push(payload);
 
@@ -106,10 +108,13 @@ export async function postFavorite(payload: FavoritePayload): Promise<void> {
 }
 
 export async function fetchFavorites(sessionId: string): Promise<string[]> {
-  const response = await fetch(`/api/favorites?sessionId=${encodeURIComponent(sessionId)}`, {
-    cache: "no-store",
-    headers: await authHeaders(),
-  });
+  const response = await fetch(
+    `/api/favorites?sessionId=${encodeURIComponent(sessionId)}`,
+    {
+      cache: "no-store",
+      headers: await authHeaders(),
+    },
+  );
 
   if (!response.ok) {
     throw new Error("Nao foi possivel recuperar favoritas");

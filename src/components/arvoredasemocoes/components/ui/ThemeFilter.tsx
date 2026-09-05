@@ -2,7 +2,7 @@
 
 import { motion } from "motion/react";
 
-import type { ThemeFilter, ThemeOption } from "@/types/quote";
+import type { ThemeFilter, ThemeOption } from "../../types/quote";
 
 type ThemeFilterProps = {
   themes: ThemeOption[];
@@ -59,7 +59,9 @@ function FilterChip({
         border: `1px solid ${active ? `${color}70` : "rgba(209, 220, 236, 0.14)"}`,
         background: active ? `${color}2E` : "rgba(255, 255, 255, 0.04)",
         color: active ? "#F8F4EA" : "#B6C4D6",
-        boxShadow: active ? `0 0 0 1px ${color}22, 0 4px 14px ${color}20` : "none",
+        boxShadow: active
+          ? `0 0 0 1px ${color}22, 0 4px 14px ${color}20`
+          : "none",
       }}
     >
       {/* ponto de cor: identifica o tema mesmo quando o chip esta inativo */}

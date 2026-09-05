@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-import { ExperienceRoot } from "@/components/experience/ExperienceRoot";
+import { ExperienceRoot } from "../../components/experience/ExperienceRoot";
 
 export default function ExperienceClient() {
   useEffect(() => {
@@ -16,8 +16,12 @@ export default function ExperienceClient() {
       const firstArg = String(args[0] ?? "");
 
       if (
-        firstArg.includes("THREE.THREE.Clock: This module has been deprecated") ||
-        firstArg.includes("THREE.WebGLShadowMap: PCFSoftShadowMap has been deprecated")
+        firstArg.includes(
+          "THREE.THREE.Clock: This module has been deprecated",
+        ) ||
+        firstArg.includes(
+          "THREE.WebGLShadowMap: PCFSoftShadowMap has been deprecated",
+        )
       ) {
         return;
       }

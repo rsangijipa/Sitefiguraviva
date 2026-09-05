@@ -1,5 +1,5 @@
-import { THEMES } from "@/data/themes";
-import type { ThemeSlug, Tone } from "@/types/quote";
+import { THEMES } from "../data/themes";
+import type { ThemeSlug, Tone } from "../types/quote";
 
 /**
  * Rotulos legiveis para os slugs do catalogo.

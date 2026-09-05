@@ -4,9 +4,9 @@ import { AnimatePresence, motion } from "motion/react";
 import { Heart, Shuffle, X } from "lucide-react";
 import { useMemo } from "react";
 
-import { LeafSvg, leafInkColor } from "@/components/ui/LeafSvg";
-import { themeLabel, toneLabel } from "@/data/labels";
-import type { Quote } from "@/types/quote";
+import { LeafSvg, leafInkColor } from "../../components/ui/LeafSvg";
+import { themeLabel, toneLabel } from "../../data/labels";
+import type { Quote } from "../../types/quote";
 
 type LeafMessageCardProps = {
   quote: Quote | null;
@@ -26,9 +26,24 @@ type LeafMessageCardProps = {
  * partir do id da frase: a mesma folha sempre traz a mesma caligrafia.
  */
 const MESSAGE_FONTS = [
-  { family: "var(--font-display), Georgia, serif", size: 1, tracking: "0em", weight: 600 },
-  { family: "var(--font-display-alt), Georgia, serif", size: 0.9, tracking: "0.005em", weight: 500 },
-  { family: "var(--font-hand), cursive", size: 1.16, tracking: "0.01em", weight: 600 },
+  {
+    family: "var(--font-display), Georgia, serif",
+    size: 1,
+    tracking: "0em",
+    weight: 600,
+  },
+  {
+    family: "var(--font-display-alt), Georgia, serif",
+    size: 0.9,
+    tracking: "0.005em",
+    weight: 500,
+  },
+  {
+    family: "var(--font-hand), cursive",
+    size: 1.16,
+    tracking: "0.01em",
+    weight: 600,
+  },
 ] as const;
 
 function hashText(value: string) {
@@ -52,7 +67,8 @@ export function LeafMessageCard({
   onClose,
   onOpenFavorites,
 }: LeafMessageCardProps) {
-  const font = MESSAGE_FONTS[quote ? hashText(quote.id) % MESSAGE_FONTS.length : 0];
+  const font =
+    MESSAGE_FONTS[quote ? hashText(quote.id) % MESSAGE_FONTS.length : 0];
   const leafId = quote ? `leaf-${quote.id}` : "leaf-empty";
 
   // a tinta acompanha o tom terroso sorteado para esta folha
@@ -76,7 +92,10 @@ export function LeafMessageCard({
           >
             <div
               className="relative flex items-center justify-center"
-              style={{ width: leafWidth, transform: isMobile ? "rotate(-90deg)" : undefined }}
+              style={{
+                width: leafWidth,
+                transform: isMobile ? "rotate(-90deg)" : undefined,
+              }}
             >
               {/*
                 O cartao entra do tamanho em que a malha 3D se dissolveu e
@@ -188,7 +207,12 @@ export function LeafMessageCard({
                   onClick={onFavorite}
                   ariaPressed={isFavorite}
                   active={isFavorite}
-                  icon={<Heart className={`h-4 w-4 ${isFavorite ? "fill-current" : ""}`} aria-hidden />}
+                  icon={
+                    <Heart
+                      className={`h-4 w-4 ${isFavorite ? "fill-current" : ""}`}
+                      aria-hidden
+                    />
+                  }
                   label={isFavorite ? "Guardada" : "Guardar"}
                 />
 

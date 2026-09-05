@@ -1,8 +1,11 @@
 import "server-only";
 
-import { QUOTES } from "@/data/quotes";
-import { THEMES } from "@/data/themes";
-import { getFirebaseAdminDb, isFirebaseAdminConfigured } from "@/lib/firebase/admin";
+import { QUOTES } from "../../data/quotes";
+import { THEMES } from "../../data/themes";
+import {
+  getFirebaseAdminDb,
+  isFirebaseAdminConfigured,
+} from "../firebase/admin";
 import type {
   FavoritePayload,
   InteractionPayload,
@@ -11,8 +14,8 @@ import type {
   ThemeFilter,
   ThemeOption,
   ThemeSlug,
-} from "@/types/quote";
-import { TONES } from "@/types/quote";
+} from "../../types/quote";
+import { TONES } from "../../types/quote";
 
 /**
  * Estado em memoria: fallback de MODO LOCAL, usado apenas quando o Firebase
@@ -67,7 +70,9 @@ function toThemeSlug(value: unknown): ThemeSlug | null {
     return null;
   }
 
-  return THEMES.some((theme) => theme.slug === value) ? (value as ThemeSlug) : null;
+  return THEMES.some((theme) => theme.slug === value)
+    ? (value as ThemeSlug)
+    : null;
 }
 
 function toTone(value: unknown): Tone | null {
@@ -78,7 +83,10 @@ function toTone(value: unknown): Tone | null {
   return TONES.includes(value as Tone) ? (value as Tone) : null;
 }
 
-function firestoreQuoteToDomain(docId: string, data: Record<string, unknown>): Quote | null {
+function firestoreQuoteToDomain(
+  docId: string,
+  data: Record<string, unknown>,
+): Quote | null {
   const theme = toThemeSlug(data.theme);
   const tone = toTone(data.tone);
 
@@ -93,13 +101,21 @@ function firestoreQuoteToDomain(docId: string, data: Record<string, unknown>): Q
     tone,
     author: typeof data.author === "string" ? data.author : undefined,
     active: typeof data.active === "boolean" ? data.active : true,
-    createdAt: typeof data.createdAt === "string" ? data.createdAt : new Date().toISOString(),
-    updatedAt: typeof data.updatedAt === "string" ? data.updatedAt : new Date().toISOString(),
+    createdAt:
+      typeof data.createdAt === "string"
+        ? data.createdAt
+        : new Date().toISOString(),
+    updatedAt:
+      typeof data.updatedAt === "string"
+        ? data.updatedAt
+        : new Date().toISOString(),
   };
 }
 
 function randomFromList(quotes: Quote[], excludeId?: string): Quote | null {
-  const eligible = excludeId ? quotes.filter((quote) => quote.id !== excludeId) : quotes;
+  const eligible = excludeId
+    ? quotes.filter((quote) => quote.id !== excludeId)
+    : quotes;
   if (eligible.length === 0) {
     return null;
   }
@@ -124,9 +140,17 @@ export async function listQuotes(theme: ThemeFilter): Promise<Quote[]> {
       if (cached && cached.expiresAt > now) {
         firestoreQuotes = cached.quotes;
       } else {
-        const snapshot = await db.collection("quotes").where("active", "==", true).get();
+        const snapshot = await db
+          .collection("quotes")
+          .where("active", "==", true)
+          .get();
         firestoreQuotes = snapshot.docs
-          .map((doc) => firestoreQuoteToDomain(doc.id, doc.data() as Record<string, unknown>))
+          .map((doc) =>
+            firestoreQuoteToDomain(
+              doc.id,
+              doc.data() as Record<string, unknown>,
+            ),
+          )
           .filter((quote): quote is Quote => Boolean(quote));
 
         firestoreQuotesCache = {
@@ -150,16 +174,23 @@ export async function listQuotes(theme: ThemeFilter): Promise<Quote[]> {
   return byTheme(theme);
 }
 
-export async function randomQuote(theme: ThemeFilter, excludeId?: string): Promise<Quote | null> {
+export async function randomQuote(
+  theme: ThemeFilter,
+  excludeId?: string,
+): Promise<Quote | null> {
   const quotes = await listQuotes(theme);
   return randomFromList(quotes, excludeId);
 }
 
-export async function registerInteraction(payload: InteractionPayload): Promise<void> {
+export async function registerInteraction(
+  payload: InteractionPayload,
+): Promise<void> {
   return registerInteractions([payload]);
 }
 
-export async function registerInteractions(payloads: InteractionPayload[]): Promise<void> {
+export async function registerInteractions(
+  payloads: InteractionPayload[],
+): Promise<void> {
   if (payloads.length === 0) {
     return;
   }
@@ -170,7 +201,11 @@ export async function registerInteractions(payloads: InteractionPayload[]): Prom
     try {
       // O batch do Firestore rejeita mais de 500 operacoes: recortamos em
       // blocos para que um lote grande nao derrube a rota inteira.
-      for (let start = 0; start < payloads.length; start += FIRESTORE_BATCH_LIMIT) {
+      for (
+        let start = 0;
+        start < payloads.length;
+        start += FIRESTORE_BATCH_LIMIT
+      ) {
         const chunk = payloads.slice(start, start + FIRESTORE_BATCH_LIMIT);
         const batch = db.batch();
 
@@ -214,9 +249,14 @@ export async function listFavorites(sessionId: string): Promise<string[]> {
 
   if (db) {
     try {
-      const snapshot = await db.collection("user_favorites").doc(sessionId).get();
+      const snapshot = await db
+        .collection("user_favorites")
+        .doc(sessionId)
+        .get();
       const quoteIds = snapshot.data()?.quoteIds;
-      return Array.isArray(quoteIds) ? quoteIds.filter((id): id is string => typeof id === "string") : [];
+      return Array.isArray(quoteIds)
+        ? quoteIds.filter((id): id is string => typeof id === "string")
+        : [];
     } catch {
       // Fallback local caso o Firestore nao esteja disponivel.
     }
@@ -226,7 +266,9 @@ export async function listFavorites(sessionId: string): Promise<string[]> {
   return [...(favoritesBySession.get(sessionId) ?? new Set<string>())];
 }
 
-export async function saveFavorite(payload: FavoritePayload): Promise<string[]> {
+export async function saveFavorite(
+  payload: FavoritePayload,
+): Promise<string[]> {
   const db = getFirebaseAdminDb();
 
   if (db) {
@@ -235,7 +277,9 @@ export async function saveFavorite(payload: FavoritePayload): Promise<string[]> 
     try {
       const snapshot = await ref.get();
       const existing = snapshot.data()?.quoteIds;
-      const current = Array.isArray(existing) ? existing.filter((id): id is string => typeof id === "string") : [];
+      const current = Array.isArray(existing)
+        ? existing.filter((id): id is string => typeof id === "string")
+        : [];
 
       const next = payload.isFavorite
         ? Array.from(new Set([...current, payload.quoteId]))
@@ -255,7 +299,8 @@ export async function saveFavorite(payload: FavoritePayload): Promise<string[]> 
     }
   }
 
-  const sessionFavorites = favoritesBySession.get(payload.sessionId) ?? new Set<string>();
+  const sessionFavorites =
+    favoritesBySession.get(payload.sessionId) ?? new Set<string>();
 
   if (payload.isFavorite) {
     sessionFavorites.add(payload.quoteId);

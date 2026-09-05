@@ -4,11 +4,18 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 
-import type { LeafNode } from "@/lib/tree/generateTree";
-import { createLeafDetailTexture, messageLeafTone } from "@/lib/tree/leafArtwork";
-import { createHeroLeafGeometry } from "@/lib/tree/leafGeometry";
-import { createLeafMaterial, updateSunDirection, type LeafMaterialResult } from "@/lib/tree/leafMaterial";
-import { SUN_POSITION } from "@/lib/theme/scene-tokens";
+import type { LeafNode } from "../../lib/tree/generateTree";
+import {
+  createLeafDetailTexture,
+  messageLeafTone,
+} from "../../lib/tree/leafArtwork";
+import { createHeroLeafGeometry } from "../../lib/tree/leafGeometry";
+import {
+  createLeafMaterial,
+  updateSunDirection,
+  type LeafMaterialResult,
+} from "../../lib/tree/leafMaterial";
+import { SUN_POSITION } from "../../lib/theme/scene-tokens";
 
 export type FlyingLeafPhase = "idle" | "flying" | "held" | "returning";
 
@@ -212,7 +219,11 @@ export function FlyingLeaf({
 
     const time = state.clock.elapsedTime;
     leafMaterial.uniforms.uTime.value = time;
-    updateSunDirection(leafMaterial.uniforms.uSunDirView.value, SUN_POSITION, camera);
+    updateSunDirection(
+      leafMaterial.uniforms.uSunDirView.value,
+      SUN_POSITION,
+      camera,
+    );
 
     // ---------------------------------------------- destino diante da camera
     const perspective = camera as THREE.PerspectiveCamera;
@@ -222,8 +233,10 @@ export function FlyingLeaf({
     scratch.right.set(1, 0, 0).applyQuaternion(camera.quaternion).normalize();
     scratch.up.set(0, 1, 0).applyQuaternion(camera.quaternion).normalize();
 
-    const visibleHeight = 2 * distance * Math.tan(THREE.MathUtils.degToRad(perspective.fov) * 0.5);
-    const visibleWidth = visibleHeight * (size.width / Math.max(1, size.height));
+    const visibleHeight =
+      2 * distance * Math.tan(THREE.MathUtils.degToRad(perspective.fov) * 0.5);
+    const visibleWidth =
+      visibleHeight * (size.width / Math.max(1, size.height));
 
     // no desktop a folha pousa deitada; no retrato ela pousa em pe, igual ao
     // cartao SVG que assume logo em seguida
@@ -236,7 +249,10 @@ export function FlyingLeaf({
       .copy(camera.position)
       .addScaledVector(scratch.forward, distance)
       // a lamina cresce em +Y a partir do peciolo, entao recentraliza
-      .addScaledVector(isMobile ? scratch.up : scratch.right, -targetSpan * 0.5);
+      .addScaledVector(
+        isMobile ? scratch.up : scratch.right,
+        -targetSpan * 0.5,
+      );
 
     scratch.landscape.setFromAxisAngle(
       new THREE.Vector3(0, 0, 1),
@@ -282,19 +298,29 @@ export function FlyingLeaf({
 
       // respiracao quando ja chegou
       if (phase === "held" && !reduceMotion) {
-        scratch.point.addScaledVector(scratch.up, Math.sin(time * 0.85) * 0.022);
-        scratch.point.addScaledVector(scratch.right, Math.sin(time * 0.6 + 1.2) * 0.014);
+        scratch.point.addScaledVector(
+          scratch.up,
+          Math.sin(time * 0.85) * 0.022,
+        );
+        scratch.point.addScaledVector(
+          scratch.right,
+          Math.sin(time * 0.6 + 1.2) * 0.014,
+        );
       }
 
       mesh.position.copy(scratch.point);
 
       // rotacao: rodopio que desacelera ate ficar de frente para a tela
       const rotationT = easeOutCubic(Math.min(1, t * 1.08));
-      mesh.quaternion.copy(origin.quaternion).slerp(scratch.endQuaternion, rotationT);
+      mesh.quaternion
+        .copy(origin.quaternion)
+        .slerp(scratch.endQuaternion, rotationT);
 
       if (!reduceMotion) {
         const tumbleDecay = Math.pow(1 - Math.min(1, t * 1.05), 1.6);
-        const spinAngle = origin.spin * Math.PI * 2.1 * tumbleDecay + Math.sin(t * 9) * 0.35 * tumbleDecay;
+        const spinAngle =
+          origin.spin * Math.PI * 2.1 * tumbleDecay +
+          Math.sin(t * 9) * 0.35 * tumbleDecay;
         scratch.tumble.setFromAxisAngle(new THREE.Vector3(0, 1, 0), spinAngle);
         mesh.quaternion.multiply(scratch.tumble);
 
@@ -308,12 +334,22 @@ export function FlyingLeaf({
       }
 
       // escala com leve estouro no final
-      const scaleT = reduceMotion ? easeOutCubic(t) : easeOutBack(Math.min(1, t * 1.02));
-      const scale = THREE.MathUtils.lerp(origin.scale, targetScale, THREE.MathUtils.clamp(scaleT, 0, 1.06));
+      const scaleT = reduceMotion
+        ? easeOutCubic(t)
+        : easeOutBack(Math.min(1, t * 1.02));
+      const scale = THREE.MathUtils.lerp(
+        origin.scale,
+        targetScale,
+        THREE.MathUtils.clamp(scaleT, 0, 1.06),
+      );
       mesh.scale.setScalar(scale);
 
       // a malha se dissolve enquanto o cartao vetorial cresce no lugar dela
-      handoffRef.current = THREE.MathUtils.clamp((t - HANDOFF_AT) / HANDOFF_FADE, 0, 1);
+      handoffRef.current = THREE.MathUtils.clamp(
+        (t - HANDOFF_AT) / HANDOFF_FADE,
+        0,
+        1,
+      );
 
       const fadeIn = THREE.MathUtils.clamp(t * 6, 0, 1);
       const fadeOut = 1 - easeOutCubic(handoffRef.current);
@@ -330,12 +366,18 @@ export function FlyingLeaf({
 
     // ------------------------------------------------------------ retorno
     if (phase === "returning") {
-      returnRef.current = Math.min(1, returnRef.current + delta / RETURN_DURATION);
+      returnRef.current = Math.min(
+        1,
+        returnRef.current + delta / RETURN_DURATION,
+      );
       const t = returnRef.current;
 
       // nunca aumenta a opacidade: se a folha ja tinha se dissolvido no handoff
       // para o cartao SVG, ela nao pode reaparecer aqui
-      leafMaterial.material.opacity = Math.min(leafMaterial.material.opacity, 1 - easeOutCubic(t));
+      leafMaterial.material.opacity = Math.min(
+        leafMaterial.material.opacity,
+        1 - easeOutCubic(t),
+      );
       mesh.visible = leafMaterial.material.opacity > 0.01;
       mesh.scale.multiplyScalar(1 - delta * 0.5);
       mesh.position.addScaledVector(scratch.up, delta * 0.22);

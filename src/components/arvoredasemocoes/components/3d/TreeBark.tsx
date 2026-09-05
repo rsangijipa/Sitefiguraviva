@@ -3,8 +3,8 @@
 import { useEffect, useMemo } from "react";
 import * as THREE from "three";
 
-import { buildBarkGeometry } from "@/lib/tree/barkGeometry";
-import type { BranchSegment } from "@/lib/tree/generateTree";
+import { buildBarkGeometry } from "../../lib/tree/barkGeometry";
+import type { BranchSegment } from "../../lib/tree/generateTree";
 
 type TreeBarkProps = {
   branches: BranchSegment[];
@@ -18,7 +18,12 @@ type TreeBarkProps = {
  * Antes eram dezenas de meshes separadas (e o tronco tinha uma animacao propria
  * que o descolava da copa). Uma malha so = 1 draw call e zero descolamento.
  */
-export function TreeBark({ branches, roots, detail, castShadow }: TreeBarkProps) {
+export function TreeBark({
+  branches,
+  roots,
+  detail,
+  castShadow,
+}: TreeBarkProps) {
   const geometry = useMemo(
     () => buildBarkGeometry([...branches, ...roots], { detail }),
     [branches, detail, roots],
@@ -47,6 +52,11 @@ export function TreeBark({ branches, roots, detail, castShadow }: TreeBarkProps)
   }
 
   return (
-    <mesh geometry={geometry} material={material} castShadow={castShadow} receiveShadow />
+    <mesh
+      geometry={geometry}
+      material={material}
+      castShadow={castShadow}
+      receiveShadow
+    />
   );
 }

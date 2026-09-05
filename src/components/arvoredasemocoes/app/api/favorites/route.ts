@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 
 import { verifySessionToken } from "../../../lib/firebase/admin";
-import { listFavorites, saveFavorite } from "@/lib/server/quote-repository";
+import {
+  listFavorites,
+  saveFavorite,
+} from "../../../lib/server/quote-repository";
 
 /**
  * Resolve de quem sao as favoritas desta requisicao.

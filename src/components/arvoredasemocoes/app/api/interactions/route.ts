@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 
 import { verifySessionToken } from "../../../lib/firebase/admin";
-import { registerInteractions } from "@/lib/server/quote-repository";
-import { INTERACTION_ACTIONS, THEME_SLUGS } from "@/types/quote";
+import { registerInteractions } from "../../../lib/server/quote-repository";
+import { INTERACTION_ACTIONS, THEME_SLUGS } from "../../../types/quote";
 import type {
   InteractionAction,
   InteractionPayload,
   ThemeFilter,
-} from "@/types/quote";
+} from "../../../types/quote";
 
 /** teto de itens aceitos por requisicao (o batch do Firestore para em 500) */
 const MAX_ITEMS = 200;

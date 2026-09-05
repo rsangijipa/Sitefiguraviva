@@ -2,7 +2,7 @@
 
 import { useCallback, useState, useSyncExternalStore } from "react";
 
-import type { QualityProfile } from "@/types/performance";
+import type { QualityProfile } from "../types/performance";
 
 function detectProfile(): QualityProfile {
   const browserNavigator = navigator as Navigator & { deviceMemory?: number };
@@ -50,7 +50,11 @@ function subscribe() {
  * idiomatica de expor um valor que so existe no cliente, sem setState em efeito.
  */
 export function usePerformanceMode() {
-  const detectedProfile = useSyncExternalStore(subscribe, getClientSnapshot, getServerSnapshot);
+  const detectedProfile = useSyncExternalStore(
+    subscribe,
+    getClientSnapshot,
+    getServerSnapshot,
+  );
 
   // rebaixamento manual (o observador de FPS pode sugerir um perfil menor)
   const [override, setOverride] = useState<QualityProfile | null>(null);

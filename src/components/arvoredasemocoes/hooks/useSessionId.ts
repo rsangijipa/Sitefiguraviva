@@ -2,9 +2,12 @@
 
 import { useEffect, useState } from "react";
 
-import { bindAnonymousSession } from "@/lib/firebase/client";
-import { migrateFavoritesBucket } from "@/lib/utils/local-favorites";
-import { migrateLegacyStorage, SESSION_STORAGE_KEY } from "@/lib/utils/storage";
+import { bindAnonymousSession } from "../lib/firebase/client";
+import { migrateFavoritesBucket } from "../lib/utils/local-favorites";
+import {
+  migrateLegacyStorage,
+  SESSION_STORAGE_KEY,
+} from "../lib/utils/storage";
 
 function getOrCreateSessionId(): string {
   if (typeof window === "undefined") {
@@ -35,7 +38,8 @@ export function useSessionId() {
         return;
       }
 
-      const previousSessionId = window.localStorage.getItem(SESSION_STORAGE_KEY);
+      const previousSessionId =
+        window.localStorage.getItem(SESSION_STORAGE_KEY);
       if (previousSessionId && previousSessionId !== uid) {
         migrateFavoritesBucket(previousSessionId, uid);
       }
