@@ -15,6 +15,12 @@ Plataforma institucional e educacional baseada em Next.js (App Router), com area
 npm install
 ```
 
+Para executar os testes de navegador pela primeira vez, instale o Chromium do Playwright:
+
+```bash
+npx playwright install chromium
+```
+
 2. Rode em desenvolvimento:
 
 ```bash
@@ -34,6 +40,7 @@ npm run dev
 - `npm run typecheck`: validacao TypeScript sem emitir artefatos.
 - `npm test`: testes Jest (unitarios/integracao).
 - `npm run test:e2e`: testes Playwright (executar separadamente).
+- `$env:NEXT_DIST_DIR='.next-audit'; npm run build`: build isolada para auditorias sem interromper um servidor local.
 - `npm run seed`: carga inicial de dados utilitarios.
 
 ## Estrutura de Pastas
@@ -60,8 +67,10 @@ npm test -- --runInBand
 Para E2E:
 
 ```bash
-npm run test:e2e
+$env:BASE_URL='http://localhost:3000'; npm run test:e2e -- --project=public
 ```
+
+Defina `BASE_URL` para validar uma instancia ja em execucao. Os testes Jest ignoram artefatos de build, cenarios E2E e o projeto legado isolado da Arvore das Emocoes.
 
 ## Padrao de Actions
 
