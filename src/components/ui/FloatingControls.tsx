@@ -30,7 +30,7 @@ export default function FloatingControls() {
   const { data: institute } = useInstituteSettings();
 
   const whatsappNumber =
-    config?.whatsappNumber || institute?.whatsapp || "556992481585";
+    config?.whatsappNumber || institute?.whatsapp || "5569992481585";
   const whatsappMessage =
     config?.whatsappMessage ||
     "Olá! Gostaria de saber mais sobre as formações do Instituto Figura Viva.";

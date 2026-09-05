@@ -219,6 +219,7 @@ export default function AdminEventsPage() {
               <a
                 href={item.joinUrl}
                 target="_blank"
+                rel="noopener noreferrer"
                 className="p-2 text-stone-400 hover:text-primary hover:bg-primary/5 rounded-xl transition-all"
                 title="Link da Reunião"
               >

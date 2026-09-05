@@ -282,7 +282,7 @@ export default function CourseDetailClient({ course }: { course: any }) {
                       Tem alguma dúvida?
                     </p>
                     <a
-                      href="https://wa.me/556992481585"
+                      href="https://wa.me/5569992481585"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="block w-full py-3 border border-green-200 bg-green-50 text-green-700 font-bold uppercase tracking-widest text-[10px] rounded-lg hover:bg-green-100 transition-colors"

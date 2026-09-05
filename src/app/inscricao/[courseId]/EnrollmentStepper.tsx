@@ -7,7 +7,10 @@ import { Check, Loader2, ArrowRight, User, Clock } from "lucide-react";
 import Link from "next/link";
 import { Input } from "@/components/ui/Input";
 import { useToast } from "@/context/ToastContext";
-import { createEnrollmentPending } from "@/app/actions/enrollment-pix";
+import {
+  createEnrollmentPending,
+  generatePixPayload,
+} from "@/app/actions/enrollment-pix";
 import QRCode from "qrcode";
 
 // --- AUTH HELPER (Robust P0 Fix) ---
@@ -72,6 +75,7 @@ export default function EnrollmentStepper({
   const [loading, setLoading] = useState(false);
   const [pixDataUrl, setPixDataUrl] = useState("");
   const [pixLoading, setPixLoading] = useState(false);
+  const [pixUnavailable, setPixUnavailable] = useState(false);
 
   // Sync state with prop changes (e.g. after router.refresh)
   useEffect(() => {
@@ -192,10 +196,21 @@ export default function EnrollmentStepper({
       const result = await createEnrollmentPending(courseId);
       if (!result.success && result.error) throw new Error(result.error);
 
-      // Random mock PIX Payload for visual purposes
-      const pixPayload = `00020101021226580014BR.GOV.BCB.PIX0136${Math.random().toString(36).substring(2)}520400005303986540510.005802BR5915INSTITUTO FIGURA VIVA6009SAO PAULO62140510FIGURA${courseId}6304`;
+      // The QR is built server-side from the operator's real PIX key
+      // (PIX_MERCHANT_KEY). If that key isn't configured, we show the
+      // request as pending and tell the student to contact the team instead
+      // of fabricating a code that doesn't point anywhere.
+      const pixResult = await generatePixPayload(courseId);
+      if (!pixResult.success) {
+        throw new Error(pixResult.error || "Erro ao gerar PIX");
+      }
 
-      const qrDataUrl = await QRCode.toDataURL(pixPayload, {
+      if (!pixResult.configured || !pixResult.payload) {
+        setPixUnavailable(true);
+        return;
+      }
+
+      const qrDataUrl = await QRCode.toDataURL(pixResult.payload, {
         width: 250,
         margin: 2,
       });
@@ -209,7 +224,9 @@ export default function EnrollmentStepper({
 
   // Derived Status Flags for Render
   const isPendingApproval =
-    enrollment?.status === "pending_approval" || pixDataUrl !== "";
+    enrollment?.status === "pending_approval" ||
+    pixDataUrl !== "" ||
+    pixUnavailable;
   const isCanceled = enrollment?.status === "canceled";
   const isRefunded = enrollment?.status === "refunded";
 
@@ -382,7 +399,18 @@ export default function EnrollmentStepper({
                   liberação será feita após a confirmação pela nossa equipe.
                 </p>
 
-                {!pixDataUrl ? (
+                {pixUnavailable ? (
+                  <div className="mx-auto flex max-w-md flex-col items-center gap-3 rounded-md border border-border bg-areia p-8">
+                    <p className="text-sm font-bold uppercase tracking-widest text-primary">
+                      Pagamento via PIX indisponível no momento
+                    </p>
+                    <p className="text-sm text-text/70 leading-relaxed">
+                      Sua solicitação de matrícula foi registrada. Nossa equipe
+                      entrará em contato com as instruções de pagamento para
+                      confirmar seu acesso.
+                    </p>
+                  </div>
+                ) : !pixDataUrl ? (
                   <button
                     onClick={handleGeneratePix}
                     disabled={pixLoading}

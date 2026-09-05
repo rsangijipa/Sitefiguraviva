@@ -106,7 +106,7 @@ export async function seedSiteSettingsAction() {
         enableParticles: true,
         visualMode: "modern",
         showAudioControl: true,
-        whatsappNumber: "556992481585",
+        whatsappNumber: "5569992481585",
         whatsappMessage:
           "Olá! Gostaria de saber mais sobre as formações do Instituto Figura Viva.",
       },

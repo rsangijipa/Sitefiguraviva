@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { logAudit } from "@/lib/audit";
 import { z } from "zod";
 import sharp from "sharp";
+import { logger } from "@/lib/logger";
 
 const MAX_SIZE_MB = 2; // User requested limit
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -160,7 +161,6 @@ export async function updateProfile(data: {
  * Uploads avatar image to Firebase Storage (Admin SDK) with strict sanitization (P1).
  */
 export async function uploadAvatar(formData: FormData) {
-  console.log("[SERVER DEBUG] uploadAvatar called");
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get("session")?.value;
   if (!sessionCookie) return { error: "Unauthorized", status: 401 };
@@ -182,19 +182,20 @@ export async function uploadAvatar(formData: FormData) {
 
     // 2. Multi-step Sanitization (P1)
     const rawBuffer = Buffer.from(await file.arrayBuffer());
-    console.log(
-      "[SERVER DEBUG] Initialized buffer. Buffer size:",
-      rawBuffer.length,
-    );
 
-    const BYPASS_SHARP = process.env.DEBUG_BYPASS_SHARP === "true";
+    // Sanitization must never be skippable in production: this flag exists
+    // only to speed up local development when Sharp's native binary isn't
+    // available, and is hard-disabled outside development regardless of the
+    // env value (see P1-04 in docs/RELATORIO_AUDITORIA_COMPLETA_2026-09-04.md).
+    const BYPASS_SHARP =
+      process.env.NODE_ENV !== "production" &&
+      process.env.DEBUG_BYPASS_SHARP === "true";
     let sanitizedBuffer: Buffer;
 
     if (BYPASS_SHARP) {
-      console.log("[SERVER DEBUG] BYPASSING SHARP SANITIZATION");
+      logger.warn("[uploadAvatar] Sharp sanitization bypassed (dev only)");
       sanitizedBuffer = rawBuffer;
     } else {
-      console.log("[SERVER DEBUG] starting sharp sanitization...");
       // Remove EXIF, resize to 512px, convert to WebP for optimization
       try {
         sanitizedBuffer = await sharp(rawBuffer)
@@ -204,17 +205,15 @@ export async function uploadAvatar(formData: FormData) {
           })
           .webp({ quality: 85 })
           .toBuffer();
-        console.log(
-          "[SERVER DEBUG] Sharp done. Sanitized size:",
-          sanitizedBuffer.length,
-        );
       } catch (sharpError: any) {
-        console.error("[SERVER DEBUG] Sharp FAILED:", sharpError.message);
+        logger.error("[uploadAvatar] Sharp sanitization failed", {
+          uid,
+          message: sharpError.message,
+        });
         return { error: "Falha no processamento da imagem." };
       }
     }
 
-    console.log("[SERVER DEBUG] Saving to bucket...");
     const fileName = `avatars/${uid}/avatar.webp`;
     const bucket = storage.bucket();
     const fileRef = bucket.file(fileName);
@@ -230,16 +229,15 @@ export async function uploadAvatar(formData: FormData) {
       },
     });
 
-    console.log("[SERVER DEBUG] Saved to bucket, making public...");
     try {
       await fileRef.makePublic();
     } catch (e) {
-      console.warn(
-        "[SERVER DEBUG] makePublic failed (likely Uniform Bucket Access), continuing...",
+      logger.warn(
+        "[uploadAvatar] makePublic failed (likely Uniform Bucket Access), continuing",
+        { uid },
       );
     }
     const publicUrl = fileRef.publicUrl();
-    console.log("[SERVER DEBUG] Public URL:", publicUrl);
 
     // 3. Update User Record & Auth
     await db.collection("users").doc(uid).set(
