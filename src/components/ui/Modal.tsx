@@ -17,9 +17,10 @@ export interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   children: React.ReactNode;
+  ariaLabel?: string;
 }
 
-export function Modal({ isOpen, onClose, children }: ModalProps) {
+export function Modal({ isOpen, onClose, children, ariaLabel }: ModalProps) {
   // Close on ESC
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
@@ -51,6 +52,7 @@ export function Modal({ isOpen, onClose, children }: ModalProps) {
             className="fixed inset-0 z-[100] flex items-center justify-center"
             role="dialog"
             aria-modal="true"
+            aria-label={ariaLabel}
           >
             {/* Backdrop */}
             <motion.div
