@@ -14,6 +14,7 @@ import {
   ShieldAlert,
   Flame,
   Star,
+  type LucideIcon,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
@@ -76,7 +77,7 @@ const UserGamificationSummary = () => {
 
 interface NavItemProps {
   href: string;
-  icon: React.ElementType;
+  icon: LucideIcon;
   label: string;
   isActive?: boolean;
   isHighlight?: boolean;
