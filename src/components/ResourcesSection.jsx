@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Wind,
@@ -12,43 +13,20 @@ import {
   ChevronRight,
 } from "lucide-react";
 import BreathingApp from "./resources/BreathingApp";
-import FeelingsTree from "./FeelingsTree";
 import MentalHealthQuiz from "./resources/MentalHealthQuiz";
 import SomaScan from "./somascan/App";
 import { Modal, ModalContent, ModalBody } from "./ui/Modal";
-import { useToast } from "@/context/ToastContext";
 
 export default function ResourcesSection() {
-  const [activeResource, setActiveResource] = useState(null); // 'breathing' | 'tree' | 'quiz' | 'somascan'
+  const [activeResource, setActiveResource] = useState(null);
   const scrollContainerRef = useRef(null);
-  const { addToast } = useToast();
-
-  // Gamification Local State MVPs
-  const [userXP, setUserXP] = useState(0);
-  const [userLevel, setUserLevel] = useState(1);
-  const [unlockedLeaves, setUnlockedLeaves] = useState(0);
-
-  const handleLeafDiscovered = (xpGained) => {
-    setUserXP((prev) => {
-      const nextXP = prev + xpGained;
-      if (nextXP >= userLevel * 50) {
-        setUserLevel((lvl) => lvl + 1);
-        setTimeout(
-          () =>
-            addToast(
-              `Parabéns! Você alcançou o Nível ${userLevel + 1} 🌟`,
-              "success",
-            ),
-          800,
-        );
-      }
-      return nextXP;
-    });
-    setUnlockedLeaves((prev) => prev + 1);
-    addToast(`+${xpGained} XP! Nova folha de sabedoria.`, "success");
-  };
+  const router = useRouter();
 
   const openResource = (resource) => {
+    if (resource === "tree") {
+      router.push("/recursos/arvore-da-awareness");
+      return;
+    }
     setActiveResource(resource);
   };
 
@@ -261,17 +239,6 @@ export default function ResourcesSection() {
           <ModalBody className="p-0">
             {activeResource === "breathing" && (
               <BreathingApp onClose={closeResource} />
-            )}
-
-            {activeResource === "tree" && (
-              <FeelingsTree
-                isModal={true}
-                onClose={closeResource}
-                userLevel={userLevel}
-                userXP={userXP}
-                unlockedLeavesCount={unlockedLeaves}
-                onLeafDiscovered={handleLeafDiscovered}
-              />
             )}
 
             {activeResource === "somascan" && (

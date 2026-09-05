@@ -4,17 +4,14 @@ import { Instagram, Mail, MapPin, Phone, ArrowRight } from "lucide-react";
 import CookiePreferencesButton from "@/components/system/CookiePreferencesButton";
 import Link from "next/link";
 import { useInstituteSettings } from "@/hooks/useSiteSettings";
+import { PUBLIC_NAV_ITEMS } from "@/features/public-site/content/navigation";
 
-const explorar = [
-  { label: "Formações", href: "/#instituto" },
-  { label: "Clínica", href: "/#clinica" },
-  { label: "Portal do Aluno", href: "/portal" },
-  { label: "Biblioteca", href: "/public-library" },
-];
+const explorar = PUBLIC_NAV_ITEMS.filter((item) => item.label !== "Instituto");
 
 const institucional = [
-  { label: "Instituto", href: "/#instituto-sobre" },
-  { label: "Fundadora", href: "/#fundadora" },
+  { label: "Instituto", href: "/instituto" },
+  { label: "Fundadora", href: "/instituto/fundadora" },
+  { label: "Manifesto", href: "/instituto/manifesto" },
   { label: "Privacidade", href: "/privacidade" },
   { label: "Termos", href: "/termos" },
 ];
@@ -61,12 +58,12 @@ export default function Footer() {
             <ul className="space-y-2 text-sm text-paper/75">
               {explorar.map((item) => (
                 <li key={item.href}>
-                  <a
+                  <Link
                     href={item.href}
                     className="flex min-h-[44px] items-center py-1 transition-soft hover:text-gold-light"
                   >
                     {item.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
