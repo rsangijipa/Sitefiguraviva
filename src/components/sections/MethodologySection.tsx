@@ -1,5 +1,3 @@
-"use client";
-
 import { Sparkles, Heart, Brain, ArrowRight } from "lucide-react";
 import { buttonVariants } from "../ui/Button";
 import Link from "next/link";

@@ -1,9 +1,6 @@
-"use client";
-
 import { Instagram, Mail, MapPin, Phone, ArrowRight } from "lucide-react";
 import CookiePreferencesButton from "@/components/system/CookiePreferencesButton";
 import Link from "next/link";
-import { useInstituteSettings } from "@/hooks/useSiteSettings";
 import { PUBLIC_NAV_ITEMS } from "@/features/public-site/content/navigation";
 
 const explorar = PUBLIC_NAV_ITEMS.filter((item) => item.label !== "Instituto");
@@ -17,8 +14,9 @@ const institucional = [
 ];
 
 export default function Footer() {
-  const { data } = useInstituteSettings();
-  const mapsHref = `https://maps.google.com/?q=${encodeURIComponent(data.address || "Instituto Figura Viva")}`;
+  const address = "Rua Santos Dumont, 156 - Ouro Preto D'Oeste - RO";
+  const phone = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "5569992481585";
+  const mapsHref = `https://maps.google.com/?q=${encodeURIComponent(address)}`;
 
   return (
     <footer className="fv-bg fv-bg-footer relative overflow-hidden bg-primary-solid pb-10 pt-16 text-paper md:pb-12 md:pt-24">
@@ -29,8 +27,8 @@ export default function Footer() {
               Figura <span className="font-light text-gold italic">Viva</span>
             </h3>
             <p className="mb-10 max-w-sm text-lg leading-relaxed text-paper/70">
-              {data.quote ||
-                "Habitando a fronteira do encontro, cultivando awareness e transformando vidas através da Gestalt-Terapia."}
+              Habitando a fronteira do encontro, cultivando awareness e
+              transformando vidas através da Gestalt-Terapia.
             </p>
             <div className="flex items-center gap-4 mb-6">
               <a
@@ -100,8 +98,7 @@ export default function Footer() {
             <div className="space-y-4 text-sm text-paper/75">
               <p className="flex items-start gap-3 whitespace-pre-line leading-relaxed">
                 <MapPin size={16} className="mt-1 shrink-0 text-gold-light" />
-                {data.address ||
-                  "Rua Santos Dumont, 156 - Ouro Preto D'Oeste - RO"}
+                {address}
               </p>
               <a
                 href="mailto:contato@figuraviva.com.br"
@@ -110,15 +107,15 @@ export default function Footer() {
                 <Mail size={16} className="shrink-0 text-gold-light" />
                 contato@figuraviva.com.br
               </a>
-              {data.phone && (
+              {phone && (
                 <a
-                  href={`https://wa.me/55${String(data.phone).replace(/\D/g, "")}`}
+                  href={`https://wa.me/${phone.replace(/\D/g, "")}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 transition-soft hover:text-gold-light"
                 >
                   <Phone size={16} className="shrink-0 text-gold-light" />
-                  {data.phone}
+                  WhatsApp do Instituto
                 </a>
               )}
               <a

@@ -103,8 +103,6 @@ import LenisProvider from "@/components/providers/LenisProvider";
 import JsonLd from "@/components/system/JsonLd";
 import GoogleAnalytics from "@/components/system/GoogleAnalytics";
 import CookieConsent from "@/components/system/CookieConsent";
-import PushNotificationManager from "@/components/system/PushNotificationManager";
-import FloatingAudioPlayer from "@/components/ui/FloatingAudioPlayer";
 import { themeInitScript } from "@/components/providers/ThemeProvider";
 
 export default async function RootLayout({
@@ -166,7 +164,6 @@ export default async function RootLayout({
           <WebVitalsReporter />
           <GoogleAnalytics />
           <CookieConsent />
-          <PushNotificationManager />
           <main
             id="main-content"
             className="flex-1 w-full outline-none"
@@ -174,7 +171,6 @@ export default async function RootLayout({
           >
             <LenisProvider>{children}</LenisProvider>
           </main>
-          <FloatingAudioPlayer />
           {isImpersonating && <ImpersonationBanner />}
         </Providers>
       </body>

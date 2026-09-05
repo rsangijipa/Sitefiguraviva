@@ -3,13 +3,10 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import {
   Menu,
   X,
   User as UserIcon,
-  LogOut,
-  LayoutDashboard,
   Sparkles,
   BookOpen,
   Image as ImageIcon,
@@ -20,10 +17,6 @@ import {
   ChevronRight,
   type LucideIcon,
 } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
-import { Button } from "./ui/Button";
-import { motion, AnimatePresence } from "framer-motion";
-import { getRedirectPathForRole } from "@/lib/auth/authService";
 import { cn } from "@/lib/utils";
 import { PUBLIC_NAV_ITEMS } from "@/features/public-site/content/navigation";
 
@@ -40,32 +33,6 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { user, role, signOut } = useAuth();
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
-  // Construct safe next URL
-  const getCurrentUrl = () => {
-    const params = searchParams.toString();
-    return `${pathname}${params ? `?${params}` : ""}`;
-  };
-
-  const handleLogin = () => {
-    const currentUrl = getCurrentUrl();
-    // Don't create redirect loops if already on auth page
-    if (pathname.startsWith("/auth")) return;
-
-    const nextParam =
-      currentUrl === "/" ? "" : `?next=${encodeURIComponent(currentUrl)}`;
-    router.push(`/auth${nextParam}`);
-  };
-
-  const handleDashboard = () => {
-    // If role is not yet loaded, default to portal
-    const target = getRedirectPathForRole(role || "student");
-    router.push(target);
-  };
 
   useEffect(() => {
     if (mobileOpen) {
@@ -167,39 +134,12 @@ export default function Navbar() {
 
             <div className="h-6 w-px bg-border mx-2" />
 
-            {user ? (
-              <div className="flex items-center gap-2">
-                <Button
-                  onClick={handleDashboard}
-                  variant={role === "admin" ? "outline" : "primary"}
-                  size="sm"
-                  className={cn(
-                    "shadow-sm flex items-center gap-2 transition-all duration-300",
-                    role === "admin" &&
-                      "border-gold text-gold hover:bg-gold hover:text-white",
-                  )}
-                >
-                  <LayoutDashboard size={14} />
-                  {role === "admin" ? "Administração" : "Área do Aluno"}
-                </Button>
-                <button
-                  onClick={() => signOut()}
-                  className="p-2 text-muted transition-colors hover:text-error"
-                  title="Sair"
-                >
-                  <LogOut size={16} />
-                </button>
-              </div>
-            ) : (
-              <Button
-                onClick={handleLogin}
-                variant="primary"
-                size="sm"
-                className="ml-2 shadow-none"
-              >
-                Entrar
-              </Button>
-            )}
+            <Link
+              href="/portal"
+              className="ml-2 inline-flex min-h-11 items-center rounded-md bg-primary px-5 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-white transition-colors hover:bg-primary-dark"
+            >
+              Área do aluno
+            </Link>
           </div>
 
           {/* Mobile/Tablet Toggle */}
@@ -219,21 +159,13 @@ export default function Navbar() {
       </nav>
 
       {/* Mobile Menu Overlay - Outside nav to avoid transform coordinate space issues */}
-      <AnimatePresence>
-        {mobileOpen && (
+      {mobileOpen && (
           <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+            <div
               onClick={() => setMobileOpen(false)}
               className="fixed inset-0 z-[60] bg-text/45 backdrop-blur-sm xl:hidden"
             />
-            <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            <div
               className="fixed top-2 right-2 bottom-2 left-2 z-[70] bg-paper/97 backdrop-blur-2xl rounded-md border border-border flex flex-col overflow-hidden xl:hidden"
             >
               {/* Mobile Header Inside Menu */}
@@ -273,13 +205,10 @@ export default function Navbar() {
                   <span className="mb-4 block px-4 text-[10px] font-bold uppercase tracking-[0.25em] text-muted">
                     Navegação principal
                   </span>
-                  {navItems.map((item, idx) => (
-                    <motion.a
+                  {navItems.map((item) => (
+                    <a
                       key={item.label}
                       href={item.href}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.1 + idx * 0.05 }}
                       onClick={() => setMobileOpen(false)}
                       className="group flex w-full items-center justify-between rounded-md px-6 py-4 transition-colors hover:bg-areia active:bg-nevoa"
                     >
@@ -295,7 +224,7 @@ export default function Navbar() {
                         size={16}
                         className="text-nevoa transition-all group-hover:translate-x-1 group-hover:text-primary"
                       />
-                    </motion.a>
+                    </a>
                   ))}
                 </div>
 
@@ -316,68 +245,14 @@ export default function Navbar() {
                   </div>
 
                   <div className="rounded-md border border-border bg-areia p-1">
-                    {user ? (
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-3 px-6 py-4">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-paper font-bold text-primary">
-                            {user.photoURL ? (
-                              <img
-                                src={user.photoURL}
-                                alt=""
-                                className="w-full h-full rounded-full object-cover"
-                              />
-                            ) : (
-                              user.displayName?.[0] || <UserIcon size={18} />
-                            )}
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-sm font-bold text-primary truncate">
-                              {user.displayName || "Aluno"}
-                            </p>
-                            <p className="text-[10px] uppercase tracking-tighter text-muted">
-                              Matrícula Ativa
-                            </p>
-                          </div>
-                        </div>
-
-                        <button
-                          onClick={() => {
-                            setMobileOpen(false);
-                            handleDashboard();
-                          }}
-                          className={cn(
-                            "flex w-full items-center justify-center gap-2 rounded-md py-5 text-[11px] font-bold uppercase tracking-[0.2em] transition-colors active:scale-[0.98]",
-                            role === "admin"
-                              ? "border border-gold-dark bg-paper text-gold-dark hover:bg-areia"
-                              : "bg-primary text-white hover:bg-primary-dark",
-                          )}
-                        >
-                          <LayoutDashboard size={14} />
-                          {role === "admin" ? "Administração" : "Área do Aluno"}
-                        </button>
-
-                        <button
-                          onClick={() => {
-                            signOut();
-                            setMobileOpen(false);
-                          }}
-                          className="flex w-full items-center justify-center gap-2 py-4 text-[10px] font-bold uppercase tracking-widest text-muted transition-colors hover:text-error"
-                        >
-                          <LogOut size={14} /> Sair da Conta
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => {
-                          setMobileOpen(false);
-                          handleLogin();
-                        }}
-                        className="flex w-full items-center justify-center gap-2 rounded-md bg-primary py-6 text-[11px] font-bold uppercase tracking-[0.2em] text-white transition-colors hover:bg-primary-dark active:scale-[0.98]"
-                      >
-                        <UserIcon size={14} />
-                        Acessar Plataforma
-                      </button>
-                    )}
+                    <Link
+                      href="/portal"
+                      onClick={() => setMobileOpen(false)}
+                      className="flex w-full items-center justify-center gap-2 rounded-md bg-primary py-6 text-[11px] font-bold uppercase tracking-[0.2em] text-white transition-colors hover:bg-primary-dark active:scale-[0.98]"
+                    >
+                      <UserIcon size={14} />
+                      Acessar plataforma
+                    </Link>
                   </div>
 
                   <p className="pb-2 text-center text-[9px] font-bold uppercase tracking-[0.3em] text-muted">
@@ -385,10 +260,9 @@ export default function Navbar() {
                   </p>
                 </div>
               </div>
-            </motion.div>
+            </div>
           </>
         )}
-      </AnimatePresence>
     </>
   );
 }

@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, BookOpen, CalendarDays } from "lucide-react";
 
-import AlertBar from "./AlertBar";
 import Footer from "./Footer";
 import Navbar from "./Navbar";
 import FloatingControls from "./ui/FloatingControls";
@@ -49,7 +48,6 @@ export default function HomeClient({ initialData }: HomeClientProps = {}) {
 
   return (
     <div className="min-h-screen overflow-hidden bg-paper font-sans text-text fx-grain">
-      <AlertBar />
       <Navbar />
 
       <div>
