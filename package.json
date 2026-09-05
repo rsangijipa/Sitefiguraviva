@@ -16,6 +16,7 @@
     "test:e2e": "playwright test",
     "test:watch": "jest --watch",
     "typecheck": "tsc --noEmit",
+    "audit:public-assets": "node scripts/check-public-budgets.mjs",
     "prepare": "husky"
   },
   "dependencies": {
