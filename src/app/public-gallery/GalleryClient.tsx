@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
@@ -9,10 +9,11 @@ import {
   Filter,
   ArrowRight,
 } from "lucide-react";
-import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { GalleryImage } from "@/features/public-site/gallery/GalleryImage";
+import { normalizeGalleryMedia } from "@/features/public-site/gallery/gallery-media";
 
 export default function GalleryClient({
   initialGallery,
@@ -26,9 +27,15 @@ export default function GalleryClient({
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(
     null,
   );
+  const lastTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const safeGallery = useMemo(
-    () => (Array.isArray(initialGallery) ? initialGallery : []),
+    () =>
+      (Array.isArray(initialGallery) ? initialGallery : []).map((photo) => ({
+        ...photo,
+        ...normalizeGalleryMedia(photo),
+      })),
     [initialGallery],
   );
 
@@ -94,8 +101,14 @@ export default function GalleryClient({
   }, [filter, search, sort, safeGallery]);
 
   // Lightbox Handlers
-  const openLightbox = (index: number) => setSelectedPhotoIndex(index);
-  const closeLightbox = () => setSelectedPhotoIndex(null);
+  const openLightbox = (index: number, trigger: HTMLButtonElement) => {
+    lastTriggerRef.current = trigger;
+    setSelectedPhotoIndex(index);
+  };
+  const closeLightbox = () => {
+    setSelectedPhotoIndex(null);
+    window.requestAnimationFrame(() => lastTriggerRef.current?.focus());
+  };
   const nextPhoto = () => {
     if (selectedPhotoIndex !== null) {
       setSelectedPhotoIndex((selectedPhotoIndex + 1) % filteredPhotos.length);
@@ -110,11 +123,27 @@ export default function GalleryClient({
     }
   };
 
+  useEffect(() => {
+    if (selectedPhotoIndex === null) {
+      return;
+    }
+
+    closeButtonRef.current?.focus();
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") closeLightbox();
+      if (event.key === "ArrowRight") nextPhoto();
+      if (event.key === "ArrowLeft") prevPhoto();
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  });
+
   return (
     <div className="fv-bg fv-bg-gallery flex min-h-screen flex-col bg-paper">
       <Navbar />
 
-      <main className="fv-container flex-1 pt-28">
+      <div className="fv-container flex-1 pt-28">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -174,6 +203,7 @@ export default function GalleryClient({
                 />
                 <input
                   type="text"
+                  aria-label="Buscar momentos"
                   placeholder="Buscar momentos..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
@@ -220,17 +250,21 @@ export default function GalleryClient({
           {/* GRID CONTENT */}
           <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
             {filteredPhotos.map((photo, index) => (
-              <motion.div
+              <motion.button
+                type="button"
                 key={photo.id}
                 layoutId={photo.id}
-                className="group relative cursor-pointer break-inside-avoid overflow-hidden rounded-md border border-border bg-areia transition-colors duration-500 hover:border-igarape"
-                onClick={() => openLightbox(index)}
+                aria-label={`Abrir imagem: ${photo.title}`}
+                className="group relative block w-full cursor-pointer break-inside-avoid overflow-hidden rounded-md border border-border bg-areia text-left transition-colors duration-500 hover:border-igarape focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                onClick={(event) => openLightbox(index, event.currentTarget)}
                 whileHover={{ y: -5 }}
               >
-                <img
+                <GalleryImage
                   src={photo.src}
                   alt={photo.title}
-                  className="w-full h-auto object-cover opacity-95 group-hover:opacity-100 transition-opacity"
+                  width={photo.width}
+                  height={photo.height}
+                  imageClassName="opacity-95 transition-opacity group-hover:opacity-100"
                 />
                 {/* Hover Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
@@ -258,7 +292,7 @@ export default function GalleryClient({
                       ))}
                   </div>
                 </div>
-              </motion.div>
+              </motion.button>
             ))}
 
             {filteredPhotos.length === 0 && (
@@ -273,7 +307,7 @@ export default function GalleryClient({
             )}
           </div>
         </motion.div>
-      </main>
+      </div>
 
       <Footer />
 
@@ -286,10 +320,16 @@ export default function GalleryClient({
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4"
             onClick={closeLightbox}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="gallery-dialog-title"
           >
             <button
+              ref={closeButtonRef}
+              type="button"
               onClick={closeLightbox}
-              className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors z-[110]"
+              aria-label="Fechar imagem ampliada"
+              className="absolute right-4 top-4 z-[110] inline-flex min-h-11 min-w-11 items-center justify-center rounded-full bg-black/30 text-white/70 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-white sm:right-6 sm:top-6"
             >
               <X size={32} />
             </button>
@@ -300,14 +340,20 @@ export default function GalleryClient({
             >
               {/* Image Container */}
               <div className="relative flex flex-1 items-center justify-center bg-areia p-4">
-                <img
+                <GalleryImage
                   src={filteredPhotos[selectedPhotoIndex].src}
                   alt={filteredPhotos[selectedPhotoIndex].title}
-                  className="max-h-[70vh] max-w-full rounded-md object-contain"
+                  width={filteredPhotos[selectedPhotoIndex].width}
+                  height={filteredPhotos[selectedPhotoIndex].height}
+                  fit="contain"
+                  sizes="(max-width: 1024px) 100vw, 70vw"
+                  className="max-h-[70vh] rounded-md"
                 />
 
                 {/* Nav Buttons */}
                 <button
+                  type="button"
+                  aria-label="Imagem anterior"
                   onClick={(e) => {
                     e.stopPropagation();
                     prevPhoto();
@@ -317,6 +363,8 @@ export default function GalleryClient({
                   <ArrowRight className="rotate-180" size={24} />
                 </button>
                 <button
+                  type="button"
+                  aria-label="Próxima imagem"
                   onClick={(e) => {
                     e.stopPropagation();
                     nextPhoto();
@@ -329,7 +377,10 @@ export default function GalleryClient({
 
               {/* Sidebar Info */}
               <div className="flex w-full flex-col overflow-y-auto border-l border-border bg-paper p-8 lg:w-80">
-                <h3 className="font-serif text-2xl text-primary mb-4 leading-tight">
+                <h3
+                  id="gallery-dialog-title"
+                  className="font-serif text-2xl text-primary mb-4 leading-tight"
+                >
                   {filteredPhotos[selectedPhotoIndex].title}
                 </h3>
                 <div className="mb-6 h-px w-10 bg-terra" aria-hidden></div>
