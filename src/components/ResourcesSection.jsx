@@ -12,9 +12,9 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import BreathingApp from "./resources/BreathingApp";
-import MentalHealthQuiz from "./resources/MentalHealthQuiz";
-import SomaScan from "./somascan/App";
+import BreathingApp from "./resources/apps/breathing/BreathingApp";
+import MentalHealthQuiz from "./resources/apps/mental-health-quiz/MentalHealthQuiz";
+import SomaScan from "./resources/apps/soma-scan/App";
 import { Modal, ModalContent, ModalBody } from "./ui/Modal";
 
 export default function ResourcesSection() {
@@ -56,9 +56,7 @@ export default function ResourcesSection() {
           viewport={{ once: true }}
           className="mb-12 text-center max-w-2xl mx-auto"
         >
-          <span className="fv-eyebrow mb-4">
-            Ferramentas de Cuidado
-          </span>
+          <span className="fv-eyebrow mb-4">Ferramentas de Cuidado</span>
           <h2 className="heading-section text-primary">
             Recursos{" "}
             <span className="italic text-accent font-light">Interativos</span>
