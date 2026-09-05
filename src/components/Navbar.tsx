@@ -24,6 +24,7 @@ import { Button } from "./ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
 import { getRedirectPathForRole } from "@/lib/auth/authService";
 import { cn } from "@/lib/utils";
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -56,16 +57,9 @@ export default function Navbar() {
     router.push(target);
   };
 
-  useEffect(() => {
-    if (mobileOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [mobileOpen]);
+  // Contador global de locks — evita que o fechamento do menu libere o
+  // scroll enquanto um modal de recurso ainda estiver aberto.
+  useBodyScrollLock(mobileOpen);
 
   useEffect(() => {
     let lastScrollY = window.scrollY;

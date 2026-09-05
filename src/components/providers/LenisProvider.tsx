@@ -28,32 +28,35 @@ export default function LenisProvider({
       touchMultiplier: 2,
     });
 
-    // v4: Scroll Lock Detection for Lenis
-    const observer = new MutationObserver(() => {
+    // Scroll Lock Detection: a classe `fv-scroll-locked` é aplicada pelo
+    // contador global em src/hooks/useBodyScrollLock.ts.
+    const syncLockState = () => {
       if (
-        document.body.classList.contains("lenis-stopped") ||
-        document.body.style.overflow === "hidden" ||
-        window.getComputedStyle(document.body).overflow === "hidden"
+        document.body.classList.contains("fv-scroll-locked") ||
+        document.body.classList.contains("lenis-stopped")
       ) {
         lenis.stop();
       } else {
         lenis.start();
       }
-    });
+    };
 
+    const observer = new MutationObserver(syncLockState);
     observer.observe(document.body, {
       attributes: true,
       attributeFilter: ["style", "class"],
     });
+    syncLockState();
 
+    let rafId = 0;
     function raf(time: number) {
       lenis.raf(time);
-      requestAnimationFrame(raf);
+      rafId = requestAnimationFrame(raf);
     }
-
-    requestAnimationFrame(raf);
+    rafId = requestAnimationFrame(raf);
 
     return () => {
+      cancelAnimationFrame(rafId);
       observer.disconnect();
       lenis.destroy();
     };
