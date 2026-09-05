@@ -25,7 +25,7 @@ export default defineConfig({
   /* Retry on CI only */
   retries: process.env.CI ? 1 : 0,
   /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,
+  workers: process.env.CI ? 1 : 4,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: process.env.CI
     ? [["html", { open: "never" }], ["list"], ["github"]]
@@ -36,9 +36,9 @@ export default defineConfig({
     baseURL: process.env.BASE_URL || "http://localhost:3000",
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: process.env.CI ? "on-first-retry" : "on",
+    trace: "retain-on-failure",
     screenshot: "only-on-failure",
-    video: "retain-on-failure",
+    video: "off",
   },
 
   /* Configure projects for major browsers */
@@ -49,14 +49,25 @@ export default defineConfig({
       name: "chromium",
       use: {
         ...devices["Desktop Chrome"],
+        channel: "chrome",
       },
       dependencies: ["setup"],
     },
     {
-      name: "public",
-      testMatch: /.*smoke\.spec\.ts/,
+      name: "public-desktop",
+      testMatch: /.*(smoke|public-visual-contracts)\.spec\.ts/,
       use: {
         ...devices["Desktop Chrome"],
+        channel: "chrome",
+      },
+    },
+    {
+      name: "public-mobile",
+      testMatch: /.*(smoke|public-visual-contracts)\.spec\.ts/,
+      use: {
+        ...devices["iPhone 13"],
+        channel: "chrome",
+        viewport: { width: 390, height: 844 },
       },
     },
   ],

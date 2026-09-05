@@ -24,7 +24,10 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     "playwright-report/**",
-    "test-results/**"
+    "test-results/**",
+    // Git worktrees check out a full copy of the repo (including their own
+    // build output) under this path; none of it is source this repo owns.
+    ".worktrees/**",
   ]),
 ]);
 

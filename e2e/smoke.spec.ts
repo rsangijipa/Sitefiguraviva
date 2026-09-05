@@ -11,17 +11,23 @@ test.describe("Smoke Tests - Core Routes", () => {
   test("smoke: public core routes are accessible", async ({ page }) => {
     const routes = [
       "/",
-      "/login",
-      "/signup",
+      "/instituto",
+      "/instituto/fundadora",
+      "/instituto/manifesto",
+      "/formacoes",
+      "/recursos",
+      "/recursos/arvore-da-awareness",
       "/blog",
       "/public-library",
       "/public-gallery",
+      "/auth",
     ];
 
     for (const route of routes) {
       const response = await page.goto(route);
-      // Assert that the page returns a success status (200 OK or 3xx Redirect)
-      expect(response?.ok()).toBeTruthy();
+      expect(response?.status(), `${route} should return 2xx`).toBeLessThan(
+        300,
+      );
     }
   });
 });

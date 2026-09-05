@@ -67,7 +67,7 @@ npm test -- --runInBand
 Para E2E:
 
 ```bash
-$env:BASE_URL='http://localhost:3000'; npm run test:e2e -- --project=public
+$env:BASE_URL='http://localhost:3000'; npm run test:e2e -- --project=public-desktop
 ```
 
 Defina `BASE_URL` para validar uma instancia ja em execucao. Os testes Jest ignoram artefatos de build e cenarios E2E do Playwright.
