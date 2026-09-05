@@ -72,17 +72,10 @@ function AuthContent() {
 
   const handleSuccess = async (user: any, preferredPath?: string) => {
     try {
-      // A. Sync Profile Cookie (Firebase legacy fallback)
-      if (user && typeof user.getIdToken === "function") {
-        const token = await user.getIdToken();
-        await fetch("/api/auth/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ idToken: token, accessToken: token }),
-        });
-      }
-
-      // B. Enforce Profile Sync (SSoT)
+      // The httpOnly session cookie is already synced by this point: signIn()
+      // (email/password) and finishGoogleSignIn() (OAuth) both await the
+      // Supabase-token POST to /api/auth/login before calling handleSuccess.
+      // Enforce Profile Sync (SSoT)
       const syncResult = await ensureUserProfileAction();
       if (!syncResult.success) {
         console.error("Profile Sync Failed:", syncResult.error);
@@ -245,7 +238,8 @@ function AuthContent() {
     });
 
     if (googleError) {
-      const msg = getFriendlyErrorMessage(googleError.code) || googleError.message;
+      const msg =
+        getFriendlyErrorMessage(googleError.code) || googleError.message;
       if (msg) setError(msg);
       setLoading(false);
     }

@@ -23,24 +23,43 @@ export interface User {
  */
 let lastSyncedToken: string | null = null;
 
-async function syncServerSession(accessToken: string) {
+// `signIn()` and the `onAuthStateChange` listener both call this with the
+// same freshly-minted token right after login. Without tracking the in-flight
+// request, the second caller would see `lastSyncedToken` already set (by the
+// first caller, synchronously, before its fetch even resolves) and return
+// immediately as if the cookie were already written — then `handleSuccess`
+// would call a server action that reads that cookie before it actually
+// exists, failing with "Unauthenticated". Concurrent callers now await the
+// same underlying request instead of racing past it.
+let pendingSync: { token: string; promise: Promise<void> } | null = null;
+
+async function syncServerSession(accessToken: string): Promise<void> {
   if (accessToken === lastSyncedToken) return;
-  lastSyncedToken = accessToken;
+  if (pendingSync?.token === accessToken) return pendingSync.promise;
 
-  try {
-    const response = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ accessToken }),
-    });
+  const promise = (async () => {
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ accessToken }),
+      });
 
-    if (!response.ok) {
-      // Allow a later event to retry rather than pinning a failed token.
-      lastSyncedToken = null;
+      if (response.ok) {
+        lastSyncedToken = accessToken;
+      }
+      // Leave lastSyncedToken untouched on failure so a later event retries.
+    } catch {
+      // Leave lastSyncedToken untouched so a later event retries.
+    } finally {
+      if (pendingSync?.token === accessToken) {
+        pendingSync = null;
+      }
     }
-  } catch {
-    lastSyncedToken = null;
-  }
+  })();
+
+  pendingSync = { token: accessToken, promise };
+  return promise;
 }
 
 interface AuthContextType {
