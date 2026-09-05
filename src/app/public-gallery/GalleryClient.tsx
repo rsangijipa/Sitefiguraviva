@@ -177,8 +177,8 @@ export default function GalleryClient({
                     onClick={() => setSort("curadoria")}
                     className={
                       sort === "curadoria"
-                        ? "text-primary underline decoration-2 underline-offset-4"
-                        : "hover:text-primary"
+                        ? "min-h-11 text-primary underline decoration-2 underline-offset-4"
+                        : "min-h-11 hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                     }
                   >
                     Recentes
@@ -187,8 +187,8 @@ export default function GalleryClient({
                     onClick={() => setSort("az")}
                     className={
                       sort === "az"
-                        ? "text-primary underline decoration-2 underline-offset-4"
-                        : "hover:text-primary"
+                        ? "min-h-11 text-primary underline decoration-2 underline-offset-4"
+                        : "min-h-11 hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                     }
                   >
                     A-Z
@@ -221,7 +221,7 @@ export default function GalleryClient({
                 <button
                   onClick={() => setFilter("Todos")}
                   aria-pressed={filter === "Todos"}
-                  className={`rounded-sm border px-4 py-2 text-[10px] font-bold uppercase tracking-wider transition-colors ${
+                  className={`min-h-11 rounded-sm border px-4 py-2 text-[10px] font-bold uppercase tracking-wider transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                     filter === "Todos"
                       ? "border-primary bg-primary text-white"
                       : "border-border bg-paper text-text/70 hover:border-igarape hover:bg-areia hover:text-primary"
@@ -234,7 +234,7 @@ export default function GalleryClient({
                     key={tag}
                     onClick={() => setFilter(tag)}
                     aria-pressed={filter === tag}
-                    className={`rounded-sm border px-4 py-2 text-[10px] font-bold uppercase tracking-wider transition-colors ${
+                    className={`min-h-11 rounded-sm border px-4 py-2 text-[10px] font-bold uppercase tracking-wider transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                       filter === tag
                         ? "border-primary bg-primary text-white"
                         : "border-border bg-paper text-text/70 hover:border-igarape hover:bg-areia hover:text-primary"
@@ -358,7 +358,7 @@ export default function GalleryClient({
                     e.stopPropagation();
                     prevPhoto();
                   }}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-paper/90 p-4 text-primary backdrop-blur transition-colors hover:bg-primary hover:text-white"
+                  className="absolute left-4 top-1/2 min-h-11 min-w-11 -translate-y-1/2 rounded-full bg-paper/90 p-4 text-primary backdrop-blur transition-colors hover:bg-primary hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
                 >
                   <ArrowRight className="rotate-180" size={24} />
                 </button>
@@ -369,7 +369,7 @@ export default function GalleryClient({
                     e.stopPropagation();
                     nextPhoto();
                   }}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-paper/90 p-4 text-primary backdrop-blur transition-colors hover:bg-primary hover:text-white"
+                  className="absolute right-4 top-1/2 min-h-11 min-w-11 -translate-y-1/2 rounded-full bg-paper/90 p-4 text-primary backdrop-blur transition-colors hover:bg-primary hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
                 >
                   <ArrowRight size={24} />
                 </button>

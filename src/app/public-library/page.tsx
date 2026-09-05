@@ -5,7 +5,7 @@ import LibraryClient from "./LibraryClient";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Biblioteca Pública | Instituto Figura Viva",
+  title: "Biblioteca Pública",
   description:
     "Acesse nosso acervo de artigos, livros e materiais sobre Gestalt-Terapia e Psicologia.",
   keywords: [

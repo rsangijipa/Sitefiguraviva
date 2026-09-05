@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 
 export default function LauraPerlsPage() {
   return (
-    <main className="fv-section--archive fv-bg fv-bg-laura-archive relative min-h-screen">
+    <div className="fv-section--archive fv-bg fv-bg-laura-archive relative min-h-screen">
       {/* Aged Paper Texture Overlay */}
       <div
         className="fixed inset-0 opacity-[0.04] pointer-events-none z-[9999]"
@@ -145,6 +145,6 @@ export default function LauraPerlsPage() {
 
       <BackToTop />
       <Footer />
-    </main>
+    </div>
   );
 }

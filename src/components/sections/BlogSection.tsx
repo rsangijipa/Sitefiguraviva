@@ -221,8 +221,8 @@ export default function BlogSection({
               });
             }
           }}
-          className="rounded-full border border-transparent p-3 text-muted transition-colors hover:border-border hover:bg-areia hover:text-primary"
-          aria-label="Scroll Left"
+          className="min-h-11 min-w-11 rounded-full border border-transparent p-3 text-muted transition-colors hover:border-border hover:bg-areia hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          aria-label="Artigo anterior"
         >
           <ArrowLeft size={24} />
         </button>
@@ -240,8 +240,8 @@ export default function BlogSection({
               });
             }
           }}
-          className="rounded-full border border-transparent p-3 text-muted transition-colors hover:border-border hover:bg-areia hover:text-primary"
-          aria-label="Scroll Right"
+          className="min-h-11 min-w-11 rounded-full border border-transparent p-3 text-muted transition-colors hover:border-border hover:bg-areia hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          aria-label="Próximo artigo"
         >
           <ArrowRight size={24} />
         </button>
