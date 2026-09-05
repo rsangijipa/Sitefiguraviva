@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { X, Calendar, User, Tag, ArrowLeft } from "lucide-react";
 import { Modal, ModalContent, ModalBody } from "./ui/Modal";
+import { SafeHtml } from "./SafeHtml";
 
 interface BlogPostModalProps {
   isOpen: boolean;
@@ -59,11 +60,9 @@ export default function BlogPostModal({
                   </h1>
 
                   <div className="prose prose-stone max-w-none prose-lg prose-serif prose-headings:font-serif prose-headings:text-primary prose-p:text-primary/80 prose-p:leading-relaxed prose-p:text-lg">
-                    <div
+                    <SafeHtml
                       className="font-light leading-relaxed whitespace-pre-line"
-                      dangerouslySetInnerHTML={{
-                        __html: post.content || post.excerpt,
-                      }}
+                      html={post.content || post.excerpt}
                     />
                   </div>
 

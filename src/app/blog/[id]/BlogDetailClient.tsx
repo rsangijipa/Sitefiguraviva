@@ -5,6 +5,7 @@ import { ArrowLeft, Clock, Share2, Heart } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { getImageSrc } from "@/lib/imageUtils";
+import { SafeHtml } from "@/components/SafeHtml";
 
 export default function BlogDetailClient({ post }: { post: any }) {
   const router = useRouter();
@@ -54,11 +55,10 @@ export default function BlogDetailClient({ post }: { post: any }) {
               </p>
             )}
 
-            <div
-              dangerouslySetInnerHTML={{
-                __html:
-                  post.content ||
-                  `
+            <SafeHtml
+              html={
+                post.content ||
+                `
                             <p>A Gestalt-Terapia nos convida a uma postura de curiosidade radical. Não se trata de explicar o fenômeno, mas de habitá-lo.
                             Quando removemos as camadas de interpretação pré-concebida, o que resta é o encontro puro, a fronteira de contato onde o 'eu' e o 'outro' se co-constroem.</p>
                             
@@ -70,8 +70,8 @@ export default function BlogDetailClient({ post }: { post: any }) {
                             
                             <p>Continuar este estudo exige uma disposição para o desaponto – o desaponto das certezas.
                             Somente no vazio fértil é que o novo pode emergir.</p>
-                        `,
-              }}
+                        `
+              }
             />
           </div>
 

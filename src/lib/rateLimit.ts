@@ -119,6 +119,7 @@ export const RateLimitPresets = {
   SESSION_SYNC: { maxRequests: 30, windowMs: 300000 },
   PASSWORD_RESET: { maxRequests: 3, windowMs: 600000 },
   CERTIFICATE_VERIFY: { maxRequests: 10, windowMs: 60000 }, // P1 addition
+  APPLICATION_SUBMIT: { maxRequests: 10, windowMs: 600000 }, // P1-03 addition
 } as const;
 
 /**

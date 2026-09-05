@@ -9,6 +9,7 @@ import { revalidatePath } from "next/cache";
 import { telemetry } from "@/lib/telemetry";
 import { trackFunnelEvent } from "@/actions/analytics";
 import { writeEnrollmentMirror } from "@/lib/auth/enrollment-service";
+import { buildPixPayload, getPixConfig } from "@/lib/pix";
 
 /**
  * Aluno solicita acesso via PIX.
@@ -62,6 +63,31 @@ export async function createEnrollmentPending(courseId: string) {
     });
     return { success: false, error: error.message };
   }
+}
+
+/**
+ * Gera um payload PIX ("copia e cola") real, a partir da chave PIX do
+ * operador configurada em `PIX_MERCHANT_KEY`. Antes, o código exibido era
+ * gerado com `Math.random()` e não apontava para nenhuma conta real — um
+ * QR Code que parecia um pagamento de verdade, mas nunca foi (ver
+ * docs/RELATORIO_AUDITORIA_COMPLETA_2026-09-04.md). Sem a chave configurada,
+ * retornamos `configured: false` e a UI deve deixar isso explícito ao aluno
+ * em vez de fabricar um código falso.
+ */
+export async function generatePixPayload(courseId: string) {
+  const session = await verifySession();
+  if (!session) return { success: false, error: "Unauthorized" as const };
+
+  const config = getPixConfig();
+  if (!config) {
+    return { success: true, configured: false as const, payload: null };
+  }
+
+  const payload = buildPixPayload(config, {
+    txId: `${session.uid}${courseId}`.slice(0, 25),
+  });
+
+  return { success: true, configured: true as const, payload };
 }
 
 /**

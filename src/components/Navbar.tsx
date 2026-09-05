@@ -303,6 +303,7 @@ export default function Navbar() {
                     <a
                       href="https://instagram.com/institutofiguraviva"
                       target="_blank"
+                      rel="noopener noreferrer"
                       className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-muted transition-colors hover:text-primary"
                     >
                       <div className="rounded-md bg-areia p-2">

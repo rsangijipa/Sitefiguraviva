@@ -34,12 +34,15 @@ export async function POST(req: NextRequest) {
       process.env.STRIPE_WEBHOOK_SECRET!,
     );
   } catch (err: any) {
+    // Never log the raw payload here: it's attacker-controlled on an
+    // unverified request and may carry customer/payment data (P1-04 in
+    // docs/RELATORIO_AUDITORIA_COMPLETA_2026-09-04.md).
     const errorMsg = `Webhook signature verification failed: ${err.message}`;
     console.error(errorMsg);
     await logSystemError("webhook", errorMsg, {
-      bodySnippet: body.substring(0, 200),
+      bodyLength: body.length,
     });
-    return NextResponse.json({ error: err.message }, { status: 400 });
+    return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
   const eventId = event.id;
