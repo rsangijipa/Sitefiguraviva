@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import Container from "./Container";
 
 interface SectionShellProps extends React.HTMLAttributes<HTMLElement> {
-  as?: React.ElementType;
+  as?: "section" | "div" | "main" | "article";
   container?: boolean;
   containerClassName?: string;
   /**

@@ -57,8 +57,12 @@ export default function LibraryClient({
   const livros = initialItems
     .filter((item) => {
       const tipo = String(item.type || "").toLowerCase();
-      const tags = (item.tags || []).map((t: string) => String(t).toLowerCase());
-      return tipo === "livro" || tags.includes("livro") || tags.includes("livros");
+      const tags = (item.tags || []).map((t: string) =>
+        String(t).toLowerCase(),
+      );
+      return (
+        tipo === "livro" || tags.includes("livro") || tags.includes("livros")
+      );
     })
     .map((item) => ({
       id: item.id,
@@ -76,7 +80,7 @@ export default function LibraryClient({
     <div className="fv-bg fv-bg-library flex min-h-screen flex-col bg-paper">
       <Navbar />
 
-      <main className="fv-container flex-1 pt-28">
+      <div className="fv-container flex-1 pt-28">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -106,6 +110,7 @@ export default function LibraryClient({
               />
               <input
                 type="text"
+                aria-label="Buscar na biblioteca"
                 placeholder="Buscar na biblioteca..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -119,7 +124,7 @@ export default function LibraryClient({
                   key={cat}
                   onClick={() => setFilter(cat)}
                   aria-pressed={filter === cat}
-                  className={`rounded-sm border px-4 py-2 text-[10px] font-bold uppercase tracking-wider transition-colors ${
+                  className={`min-h-11 rounded-sm border px-4 py-2 text-[10px] font-bold uppercase tracking-wider transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                     filter === cat
                       ? "border-primary bg-primary text-white"
                       : "border-border bg-paper text-text/70 hover:border-igarape hover:bg-areia hover:text-primary"
@@ -153,7 +158,7 @@ export default function LibraryClient({
 
                 <button
                   onClick={() => handleOpenItem(item)}
-                  className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-primary hover:text-gold transition-colors group/btn"
+                  className="inline-flex min-h-11 items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-primary transition-colors hover:text-gold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary group/btn"
                 >
                   Ler Agora{" "}
                   <ArrowRight
@@ -176,7 +181,7 @@ export default function LibraryClient({
             )}
           </div>
         </motion.div>
-      </main>
+      </div>
 
       <BookshelfSection livros={livros} />
 

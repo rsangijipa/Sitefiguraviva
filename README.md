@@ -15,6 +15,12 @@ Plataforma institucional e educacional baseada em Next.js (App Router), com area
 npm install
 ```
 
+Para executar os testes de navegador pela primeira vez, instale o Chromium do Playwright:
+
+```bash
+npx playwright install chromium
+```
+
 2. Rode em desenvolvimento:
 
 ```bash
@@ -34,6 +40,7 @@ npm run dev
 - `npm run typecheck`: validacao TypeScript sem emitir artefatos.
 - `npm test`: testes Jest (unitarios/integracao).
 - `npm run test:e2e`: testes Playwright (executar separadamente).
+- `$env:NEXT_DIST_DIR='.next-audit'; npm run build`: build isolada para auditorias sem interromper um servidor local.
 - `npm run seed`: carga inicial de dados utilitarios.
 
 ## Estrutura de Pastas
@@ -60,8 +67,10 @@ npm test -- --runInBand
 Para E2E:
 
 ```bash
-npm run test:e2e
+$env:BASE_URL='http://localhost:3000'; npm run test:e2e -- --project=public
 ```
+
+Defina `BASE_URL` para validar uma instancia ja em execucao. Os testes Jest ignoram artefatos de build e cenarios E2E do Playwright.
 
 ## Padrao de Actions
 
@@ -69,7 +78,6 @@ npm run test:e2e
 - `src/app/actions/*` existe para compatibilidade e nao deve duplicar regra de negocio.
 - Para progresso de aula, use `@/app/actions/progress` (ou `@/actions/progress` como alias de compatibilidade).
 
-## Credenciais de Admin (ambiente local/demo)
+## Acesso de Admin em ambiente local
 
-- Usuario: `admin`
-- Senha: `admin`
+Credenciais de demonstracao sao opcionais e devem existir apenas na carga local. Configure `DEMO_ADMIN_EMAIL` e `DEMO_ADMIN_PASSWORD` no seu arquivo `.env.local`; os valores precisam corresponder a uma conta criada pelo processo de seed. Nunca reutilize essa senha em producao.

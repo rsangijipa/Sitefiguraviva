@@ -1,6 +1,3 @@
-"use client";
-
-import { motion } from "framer-motion";
 import { Quote, Star } from "lucide-react";
 
 export default function TestimonialsSection() {
@@ -32,33 +29,16 @@ export default function TestimonialsSection() {
     <section className="fv-section fv-section--sand fv-bg fv-bg-testimonials">
       <div className="fv-container">
         <div className="text-center mb-16">
-          <motion.span
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            className="fv-eyebrow mb-4"
-          >
-            Vozes que Florescem
-          </motion.span>
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            className="heading-section"
-          >
+          <span className="fv-eyebrow mb-4">Vozes que Florescem</span>
+          <h2 className="heading-section">
             O impacto da nossa <br />
             <span className="italic font-light">Comunidade</span>
-          </motion.h2>
+          </h2>
         </div>
 
         <div className="grid gap-8 md:grid-cols-2">
-          {testimonials.map((t, i) => (
-            <motion.div
-              key={t.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-              viewport={{ once: true }}
-              className="fv-card group relative p-10"
-            >
+          {testimonials.map((t) => (
+            <div key={t.id} className="fv-card group relative p-10">
               <div className="absolute right-8 top-8 rotate-180 text-terra/15 transition-colors group-hover:text-terra/25">
                 <Quote size={48} />
               </div>
@@ -84,7 +64,7 @@ export default function TestimonialsSection() {
                   </p>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>

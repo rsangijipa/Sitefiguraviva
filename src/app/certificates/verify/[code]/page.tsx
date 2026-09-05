@@ -12,7 +12,7 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps) {
   const { code } = await params;
   return {
-    title: `Verificação de Certificado: ${code} | Instituto Figura Viva`,
+    title: `Verificação de Certificado: ${code}`,
     description:
       "Valide a autenticidade deste certificado emitido pelo Instituto Figura Viva.",
   };

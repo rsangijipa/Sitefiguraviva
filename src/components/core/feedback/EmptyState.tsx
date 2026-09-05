@@ -1,12 +1,12 @@
-import type { ElementType, ReactNode } from "react";
-import { FolderOpen } from "lucide-react";
+import type { ReactNode } from "react";
+import { FolderOpen, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type EmptyStateVariant = "surface" | "dashed" | "plain";
 type EmptyStateSize = "md" | "lg";
 
 export interface EmptyStateProps {
-  icon?: ElementType;
+  icon?: LucideIcon;
   title: string;
   description: string;
   action?: ReactNode;

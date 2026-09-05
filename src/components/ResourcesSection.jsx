@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Wind,
@@ -12,43 +13,20 @@ import {
   ChevronRight,
 } from "lucide-react";
 import BreathingApp from "./resources/BreathingApp";
-import FeelingsTree from "./FeelingsTree";
 import MentalHealthQuiz from "./resources/MentalHealthQuiz";
 import SomaScan from "./somascan/App";
 import { Modal, ModalContent, ModalBody } from "./ui/Modal";
-import { useToast } from "@/context/ToastContext";
 
 export default function ResourcesSection() {
-  const [activeResource, setActiveResource] = useState(null); // 'breathing' | 'tree' | 'quiz' | 'somascan'
+  const [activeResource, setActiveResource] = useState(null);
   const scrollContainerRef = useRef(null);
-  const { addToast } = useToast();
-
-  // Gamification Local State MVPs
-  const [userXP, setUserXP] = useState(0);
-  const [userLevel, setUserLevel] = useState(1);
-  const [unlockedLeaves, setUnlockedLeaves] = useState(0);
-
-  const handleLeafDiscovered = (xpGained) => {
-    setUserXP((prev) => {
-      const nextXP = prev + xpGained;
-      if (nextXP >= userLevel * 50) {
-        setUserLevel((lvl) => lvl + 1);
-        setTimeout(
-          () =>
-            addToast(
-              `Parabéns! Você alcançou o Nível ${userLevel + 1} 🌟`,
-              "success",
-            ),
-          800,
-        );
-      }
-      return nextXP;
-    });
-    setUnlockedLeaves((prev) => prev + 1);
-    addToast(`+${xpGained} XP! Nova folha de sabedoria.`, "success");
-  };
+  const router = useRouter();
 
   const openResource = (resource) => {
+    if (resource === "tree") {
+      router.push("/recursos/arvore-da-awareness");
+      return;
+    }
     setActiveResource(resource);
   };
 
@@ -78,9 +56,7 @@ export default function ResourcesSection() {
           viewport={{ once: true }}
           className="mb-12 text-center max-w-2xl mx-auto"
         >
-          <span className="fv-eyebrow mb-4">
-            Ferramentas de Cuidado
-          </span>
+          <span className="fv-eyebrow mb-4">Ferramentas de Cuidado</span>
           <h2 className="heading-section text-primary">
             Recursos{" "}
             <span className="italic text-accent font-light">Interativos</span>
@@ -103,11 +79,12 @@ export default function ResourcesSection() {
             style={{ scrollBehavior: "smooth" }}
           >
             {/* Breathing App Card */}
-            <motion.div
+            <motion.button
+              type="button"
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="fv-card group relative w-80 shrink-0 cursor-pointer snap-center items-center overflow-hidden p-8 text-center md:w-auto"
+              className="fv-card group relative w-80 shrink-0 cursor-pointer snap-center items-center overflow-hidden p-8 text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary md:w-auto"
               onClick={() => openResource("breathing")}
             >
               <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-md bg-accent/10 text-accent transition-transform group-hover:scale-105">
@@ -123,15 +100,16 @@ export default function ResourcesSection() {
               <span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-accent group-hover:text-primary transition-colors">
                 Iniciar Prática
               </span>
-            </motion.div>
+            </motion.button>
 
             {/* Feelings Tree Card */}
-            <motion.div
+            <motion.button
+              type="button"
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="fv-card group relative w-80 shrink-0 cursor-pointer snap-center items-center overflow-hidden p-8 text-center md:w-auto"
+              className="fv-card group relative w-80 shrink-0 cursor-pointer snap-center items-center overflow-hidden p-8 text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary md:w-auto"
               onClick={() => openResource("tree")}
             >
               <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-md bg-gold/15 text-gold-dark transition-transform group-hover:scale-105">
@@ -147,15 +125,16 @@ export default function ResourcesSection() {
               <span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-gold group-hover:text-primary transition-colors">
                 Acessar Árvore
               </span>
-            </motion.div>
+            </motion.button>
 
             {/* SomaScan Card (NEW) */}
-            <motion.div
+            <motion.button
+              type="button"
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
-              className="fv-card group relative w-80 shrink-0 cursor-pointer snap-center items-center overflow-hidden p-8 text-center md:w-auto"
+              className="fv-card group relative w-80 shrink-0 cursor-pointer snap-center items-center overflow-hidden p-8 text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary md:w-auto"
               onClick={() => openResource("somascan")}
             >
               <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-md bg-terra/10 text-terra transition-transform group-hover:scale-105">
@@ -170,15 +149,16 @@ export default function ResourcesSection() {
               <span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-terra transition-colors group-hover:text-primary">
                 Iniciar Scan
               </span>
-            </motion.div>
+            </motion.button>
 
             {/* Mental Health Quiz Card */}
-            <motion.div
+            <motion.button
+              type="button"
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.3 }}
-              className="fv-card group relative w-80 shrink-0 cursor-pointer snap-center items-center overflow-hidden p-8 text-center md:w-auto"
+              className="fv-card group relative w-80 shrink-0 cursor-pointer snap-center items-center overflow-hidden p-8 text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary md:w-auto"
               onClick={() => openResource("quiz")}
             >
               <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-md bg-sage/10 text-sage transition-transform group-hover:scale-105">
@@ -194,15 +174,15 @@ export default function ResourcesSection() {
               <span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-sage group-hover:text-primary transition-colors">
                 Fazer Check-in
               </span>
-            </motion.div>
+            </motion.button>
           </div>
 
           {/* Visual Scroll Controls */}
           <div className="flex md:hidden items-center justify-center gap-6 mt-4 opacity-70 hover:opacity-100 transition-opacity pb-4">
             <button
               onClick={() => scroll("left")}
-              className="rounded-full border border-transparent p-3 text-muted transition-colors hover:border-border hover:bg-areia hover:text-primary"
-              aria-label="Scroll Left"
+              className="min-h-11 min-w-11 rounded-full border border-transparent p-3 text-muted transition-colors hover:border-border hover:bg-areia hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              aria-label="Recurso anterior"
             >
               <ChevronLeft size={24} />
             </button>
@@ -221,8 +201,8 @@ export default function ResourcesSection() {
 
             <button
               onClick={() => scroll("right")}
-              className="rounded-full border border-transparent p-3 text-muted transition-colors hover:border-border hover:bg-areia hover:text-primary"
-              aria-label="Scroll Right"
+              className="min-h-11 min-w-11 rounded-full border border-transparent p-3 text-muted transition-colors hover:border-border hover:bg-areia hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              aria-label="Próximo recurso"
             >
               <ChevronRight size={24} />
             </button>
@@ -261,17 +241,6 @@ export default function ResourcesSection() {
           <ModalBody className="p-0">
             {activeResource === "breathing" && (
               <BreathingApp onClose={closeResource} />
-            )}
-
-            {activeResource === "tree" && (
-              <FeelingsTree
-                isModal={true}
-                onClose={closeResource}
-                userLevel={userLevel}
-                userXP={userXP}
-                unlockedLeavesCount={unlockedLeaves}
-                onLeafDiscovered={handleLeafDiscovered}
-              />
             )}
 
             {activeResource === "somascan" && (

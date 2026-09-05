@@ -1,5 +1,3 @@
-"use client";
-
 import { Sparkles, Heart, Brain, ArrowRight } from "lucide-react";
 import { buttonVariants } from "../ui/Button";
 import Link from "next/link";
@@ -79,7 +77,7 @@ export default function MethodologySection() {
 
       <div className="mt-14">
         <Link
-          href="#cursos"
+          href="/formacoes"
           className={cn(
             buttonVariants({ variant: "primary", size: "lg" }),
             "w-full sm:w-auto uppercase tracking-widest text-xs font-bold px-8",

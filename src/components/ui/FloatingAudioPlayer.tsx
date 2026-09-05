@@ -96,6 +96,7 @@ export default function FloatingAudioPlayer() {
 
   return (
     <div
+      data-secondary-floating-control="true"
       className={cn(
         "fixed bottom-6 right-6 z-[100] transition-all duration-500 ease-out animate-in slide-in-from-bottom-10",
         isMinimized ? "w-16 h-16" : "w-80 md:w-96",

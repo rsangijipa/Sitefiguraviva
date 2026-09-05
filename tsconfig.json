@@ -1,17 +1,24 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "plugins": [{ "name": "next" }]
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
   "include": [
-    "next-env.d.ts",
-    ".next/types/**/*.ts",
     "**/*.mts",
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "next-env.d.ts",
+    ".next-audit/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
+    ".worktrees",
+    ".next-audit",
     "src/**/__tests__",
     "src/**/*.test.ts",
     "src/**/*.test.tsx"

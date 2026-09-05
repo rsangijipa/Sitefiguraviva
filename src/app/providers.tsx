@@ -1,13 +1,9 @@
 "use client";
 
 import { ToastProvider } from "@/context/ToastContext";
-import { AuthProvider } from "@/context/AuthContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 
-import { UIProvider } from "@/context/UIContext";
-import { GamificationProvider } from "@/context/GamificationContext";
-import { AudioProvider } from "@/context/AudioContext";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
@@ -30,15 +26,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <AuthProvider>
-          <UIProvider>
-            <GamificationProvider>
-              <AudioProvider>
-                <ToastProvider>{children}</ToastProvider>
-              </AudioProvider>
-            </GamificationProvider>
-          </UIProvider>
-        </AuthProvider>
+        <ToastProvider>{children}</ToastProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );

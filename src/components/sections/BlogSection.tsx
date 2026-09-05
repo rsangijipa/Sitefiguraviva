@@ -58,9 +58,7 @@ export default function BlogSection({
     >
       <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
         <div className="max-w-xl">
-          <span className="fv-eyebrow mb-4">
-            Reflexões & Saberes
-          </span>
+          <span className="fv-eyebrow mb-4">Reflexões & Saberes</span>
           <h2 className="heading-section text-primary">Blog Figura Viva</h2>
           <p className="fv-lead mt-4">
             Artigos, ensaios e pílulas de awareness sobre a clínica, a vida e o
@@ -175,7 +173,10 @@ export default function BlogSection({
                               <span className="text-[10px] font-bold tracking-widest uppercase text-gold">
                                 {post.category || "Gestalt-Terapia"}
                               </span>
-                              <span className="h-1 w-1 rounded-full bg-nevoa" aria-hidden></span>
+                              <span
+                                className="h-1 w-1 rounded-full bg-nevoa"
+                                aria-hidden
+                              ></span>
                               <span className="text-[10px] font-bold uppercase tracking-widest text-terra">
                                 {post.date}
                               </span>
@@ -221,8 +222,8 @@ export default function BlogSection({
               });
             }
           }}
-          className="rounded-full border border-transparent p-3 text-muted transition-colors hover:border-border hover:bg-areia hover:text-primary"
-          aria-label="Scroll Left"
+          className="min-h-11 min-w-11 rounded-full border border-transparent p-3 text-muted transition-colors hover:border-border hover:bg-areia hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          aria-label="Artigo anterior"
         >
           <ArrowLeft size={24} />
         </button>
@@ -240,8 +241,8 @@ export default function BlogSection({
               });
             }
           }}
-          className="rounded-full border border-transparent p-3 text-muted transition-colors hover:border-border hover:bg-areia hover:text-primary"
-          aria-label="Scroll Right"
+          className="min-h-11 min-w-11 rounded-full border border-transparent p-3 text-muted transition-colors hover:border-border hover:bg-areia hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          aria-label="Próximo artigo"
         >
           <ArrowRight size={24} />
         </button>

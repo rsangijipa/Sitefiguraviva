@@ -1,10 +1,16 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { withSentryConfig } from "@sentry/nextjs/config";
+
 /** @type {import('next').NextConfig} */
 const isProd = process.env.NODE_ENV === "production";
+const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 
 const nextConfig = {
     // Lets a throwaway build (audits, CSP checks) go somewhere other than
     // .next, so it cannot disturb a dev server running from the same folder.
     distDir: process.env.NEXT_DIST_DIR || '.next',
+    outputFileTracingRoot: projectRoot,
     images: {
         remotePatterns: [
             { protocol: 'https', hostname: '*.supabase.co' },
@@ -89,8 +95,6 @@ const nextConfig = {
         ],
     },
 };
-
-import { withSentryConfig } from '@sentry/nextjs';
 
 export default withSentryConfig(nextConfig, {
     // For all available options, see:

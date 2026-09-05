@@ -15,6 +15,26 @@ import { CONSENT_EVENT, CONSENT_STORAGE_KEY } from "./consent.constants";
 export type ConsentState = "granted" | "denied";
 
 const STORAGE_KEY = CONSENT_STORAGE_KEY;
+const FLOATING_CONTROL_SELECTOR =
+  "[data-secondary-floating-control], [data-floating-whatsapp]";
+
+function coordinateConsentSurface(
+  consent: ConsentState | null,
+  ready: boolean,
+) {
+  if (!ready || typeof document === "undefined") return;
+
+  const pending = consent === null;
+  document.documentElement.dataset.cookieConsent = pending
+    ? "pending"
+    : "resolved";
+
+  document
+    .querySelectorAll<HTMLElement>(FLOATING_CONTROL_SELECTOR)
+    .forEach((control) => {
+      control.hidden = pending;
+    });
+}
 
 export function readConsent(): ConsentState | null {
   if (typeof window === "undefined") return null;
@@ -71,6 +91,10 @@ export function useCookieConsent() {
       window.removeEventListener("storage", sync);
     };
   }, []);
+
+  useEffect(() => {
+    coordinateConsentSurface(consent, ready);
+  }, [consent, ready]);
 
   const grant = useCallback(() => setConsent("granted"), []);
   const deny = useCallback(() => setConsent("denied"), []);
