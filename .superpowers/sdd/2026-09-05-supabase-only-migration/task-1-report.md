@@ -55,3 +55,21 @@ pre-existing unstaged changes remain untouched.
   syntax. Existing dynamic use is also covered by related configuration/import
   references, but a future hardening pass may add an explicit dynamic-import
   pattern if desired.
+
+## Round 1 fix evidence
+
+- Added Firebase service-host detection for Firebase Storage, Firestore,
+  Identity Toolkit, Secure Token, Firebase Realtime Database, Firebase Storage
+  app, and Firebase app hostnames. These rules apply to the already-scoped
+  production source, public files, and configuration inputs.
+- Added detection for the Firebase CLI in `package.json` scripts.
+- Updated the architecture test to require both categories in the current
+  baseline: a `next.config.mjs` hostname violation and
+  `package.json:script test:rules`.
+- Red: after adding those expectations, the focused test failed because neither
+  category was reported.
+- Green: `npm test -- --runInBand tests/architecture/no-firebase-runtime.test.ts`
+  passed (1 suite, 1 test). `npm run audit:no-firebase` exited 1 as expected and
+  reported 308 violations, including `next.config.mjs` lines 17, 18, 51, 52,
+  and 54 plus `package.json:script test:rules`. The audit output reports no
+  secret values.

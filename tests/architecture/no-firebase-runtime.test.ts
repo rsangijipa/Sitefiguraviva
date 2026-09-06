@@ -28,6 +28,8 @@ describe("Firebase runtime architecture", () => {
       expect.arrayContaining([
         expect.stringContaining("src/"),
         expect.stringContaining("package.json"),
+        expect.stringContaining("next.config.mjs"),
+        expect.stringContaining("package.json:script test:rules"),
       ]),
     );
   });
