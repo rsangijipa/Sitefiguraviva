@@ -1,18 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { db } from "@/lib/firebase/client";
-import {
-  collection,
-  query,
-  orderBy,
-  onSnapshot,
-  doc,
-  updateDoc,
-  serverTimestamp,
-  getDoc,
-  deleteDoc,
-} from "firebase/firestore";
+import { createSupabaseBrowserClient } from "@/infrastructure/supabase/client";
 import {
   User,
   Clock,
@@ -43,43 +32,60 @@ export default function ApplicationsPage() {
   const { addToast } = useToast();
 
   useEffect(() => {
-    const q = query(
-      collection(db, "applications"),
-      orderBy("createdAt", "desc"),
-    );
-
-    const unsubscribe = onSnapshot(q, async (snapshot) => {
-      const apps = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
-
-      // Fetch course titles if missing
-      const newCourseIds = apps
-        .map((a: any) => a.courseId)
-        .filter((id) => id && !courses[id]);
-
-      if (newCourseIds.length > 0) {
-        const courseData = { ...courses };
-        await Promise.all(
-          newCourseIds.map(async (id) => {
-            const snap = await getDoc(doc(db, "courses", id));
-            if (snap.exists()) courseData[id] = snap.data();
-          }),
-        );
-        setCourses(courseData);
+    let active = true;
+    const load = async () => {
+      const supabase = createSupabaseBrowserClient();
+      const { data, error } = await supabase
+        .from("applications")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      const apps = (data ?? []).map((app) => ({
+        ...app,
+        courseId: app.course_id,
+        userEmail: (app.answers as any)?.email || "",
+        userName: (app.answers as any)?.fullName || "",
+        createdAt: app.created_at,
+      }));
+      const ids = [...new Set(apps.map((app) => app.courseId).filter(Boolean))];
+      if (ids.length) {
+        const { data: courseRows } = await supabase
+          .from("courses")
+          .select("id,title")
+          .in("id", ids);
+        if (active)
+          setCourses(
+            Object.fromEntries(
+              (courseRows ?? []).map((course) => [course.id, course]),
+            ),
+          );
       }
-
-      setApplications(apps);
-      setLoading(false);
+      if (active) {
+        setApplications(apps);
+        setLoading(false);
+      }
+    };
+    load().catch((error) => {
+      console.error(error);
+      if (active) setLoading(false);
     });
-
-    return () => unsubscribe();
-  }, [courses]);
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const handleUpdateStatus = async (appId: string, newStatus: string) => {
     try {
-      await updateDoc(doc(db, "applications", appId), {
-        status: newStatus,
-        updatedAt: serverTimestamp(),
-      });
+      const { error } = await createSupabaseBrowserClient()
+        .from("applications")
+        .update({ status: newStatus, updated_at: new Date().toISOString() })
+        .eq("id", appId);
+      if (error) throw error;
+      setApplications((current) =>
+        current.map((app) =>
+          app.id === appId ? { ...app, status: newStatus } : app,
+        ),
+      );
       addToast(`Status atualizado para ${newStatus}`, "success");
     } catch (error) {
       console.error(error);
@@ -133,7 +139,12 @@ export default function ApplicationsPage() {
 
     setDeletingId(appId);
     try {
-      await deleteDoc(doc(db, "applications", appId));
+      const { error } = await createSupabaseBrowserClient()
+        .from("applications")
+        .delete()
+        .eq("id", appId);
+      if (error) throw error;
+      setApplications((current) => current.filter((app) => app.id !== appId));
       addToast("Interesse excluído com sucesso", "success");
     } catch (error) {
       console.error(error);
@@ -218,7 +229,7 @@ export default function ApplicationsPage() {
       key: "createdAt",
       label: "Data",
       render: (app) => {
-        const date = app.createdAt?.toDate?.();
+        const date = app.createdAt ? new Date(app.createdAt) : null;
         return (
           <div className="text-xs text-stone-500">
             <div className="font-medium text-stone-700">
