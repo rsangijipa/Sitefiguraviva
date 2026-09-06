@@ -20,8 +20,7 @@ import { deleteEvent, updateEventStatus } from "@/actions/event";
 import { useToast } from "@/context/ToastContext";
 import { Badge } from "@/components/ui/Badge";
 import { cn } from "@/lib/utils";
-import { db } from "@/lib/firebase/client";
-import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
+import { createSupabaseBrowserClient } from "@/infrastructure/supabase/client";
 
 export default function AdminEventsPage() {
   const [events, setEvents] = useState<LiveEvent[]>([]);
@@ -30,19 +29,38 @@ export default function AdminEventsPage() {
   const { addToast } = useToast();
 
   useEffect(() => {
-    const q = query(collection(db, "events"), orderBy("startsAt", "desc"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const items = snapshot.docs.map(
-        (doc) =>
-          ({
-            id: doc.id,
-            ...doc.data(),
-          }) as LiveEvent,
-      );
-      setEvents(items);
+    let mounted = true;
+    (async () => {
+      const supabase = createSupabaseBrowserClient();
+      const { data, error } = await supabase
+        .from("events")
+        .select("*")
+        .order("starts_at", { ascending: false });
+      if (!mounted) return;
+      if (error) {
+        console.error("Error fetching events:", error);
+        addToast("Erro ao carregar eventos.", "error");
+        setEvents([]);
+      } else {
+        setEvents(
+          (data ?? []).map((row: any) => ({
+            id: row.id,
+            title: row.title,
+            description: row.description,
+            startsAt: row.starts_at,
+            endsAt: row.ends_at,
+            status: row.status,
+            type: row.type,
+            joinUrl: row.join_url,
+            location: row.location,
+          })) as LiveEvent[],
+        );
+      }
       setLoading(false);
-    });
-    return () => unsubscribe();
+    })();
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const handleDelete = async (id: string, title: string) => {
