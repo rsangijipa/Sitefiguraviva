@@ -462,10 +462,95 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["audit_logs"]["Row"]>;
         Relationships: [];
       };
+      public_pages: {
+        Row: {
+          key: string;
+          content: Json;
+          is_published: boolean;
+          published_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["public_pages"]["Row"]> & {
+          key: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["public_pages"]["Row"]>;
+        Relationships: [];
+      };
+      posts: {
+        Row: {
+          id: string;
+          title: string;
+          slug: string | null;
+          subtitle: string | null;
+          excerpt: string | null;
+          content: string;
+          type: string;
+          image_url: string | null;
+          external_url: string | null;
+          pdf_url: string | null;
+          tags: string[];
+          is_published: boolean;
+          published_at: string | null;
+          legacy_payload: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["posts"]["Row"]> & {
+          id: string;
+          title: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["posts"]["Row"]>;
+        Relationships: [];
+      };
+      gallery_items: {
+        Row: {
+          id: string;
+          image_url: string;
+          title: string | null;
+          caption: string | null;
+          tags: string[];
+          width: number | null;
+          height: number | null;
+          is_published: boolean;
+          legacy_payload: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<
+          Database["public"]["Tables"]["gallery_items"]["Row"]
+        > & {
+          id: string;
+          image_url: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["gallery_items"]["Row"]>;
+        Relationships: [];
+      };
+      team_members: {
+        Row: {
+          id: string;
+          name: string;
+          role: string | null;
+          bio: string | null;
+          image_url: string | null;
+          sort_order: number;
+          is_published: boolean;
+          legacy_payload: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["team_members"]["Row"]> & {
+          id: string;
+          name: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["team_members"]["Row"]>;
+        Relationships: [];
+      };
       site_content: {
         Row: {
           key: string;
           content: Json;
+          is_published: boolean;
           created_at: string;
           updated_at: string;
         };
