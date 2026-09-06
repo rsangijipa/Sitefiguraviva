@@ -114,33 +114,7 @@ export default async function LessonPage({
 
   const activeLesson = allLessons[currentIndex];
 
-  // FETCH CONTENT (Blocks)
-  // We must fetch the subcollection 'blocks' for this lesson to show content
-  if (activeLesson) {
-    try {
-      const blocksSnap = await db
-        .collection("courses")
-        .doc(courseId)
-        .collection("modules")
-        .doc(activeLesson.moduleId)
-        .collection("lessons")
-        .doc(activeLesson.id)
-        .collection("blocks")
-        .orderBy("order", "asc")
-        .get();
-
-      const blocks = blocksSnap.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-        isPublished: doc.data().isPublished !== false,
-      }));
-
-      // @ts-ignore - injecting blocks into the lesson object for the player
-      activeLesson.blocks = blocks;
-    } catch (e) {
-      console.error("Error fetching lesson blocks:", e);
-    }
-  }
+  // Lesson blocks are provided by the Supabase lesson adapter.
 
   const prevLessonId =
     currentIndex > 0 ? allLessons[currentIndex - 1].id : undefined;
