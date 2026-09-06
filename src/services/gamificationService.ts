@@ -1,6 +1,13 @@
-import { db } from "@/lib/firebase/client";
-import { doc, getDoc, setDoc, Timestamp } from "firebase/firestore";
-import { UserGamificationProfile, XpTransaction } from "@/types/gamification";
+import {
+  awardBadge,
+  awardXp,
+  getProfile as getProfileFromRepo,
+  listProfiles,
+  updateStreak as updateStreakFromRepo,
+  type GamificationProfileRecord,
+} from "@/features/gamification/infrastructure/supabaseGamificationRepository.server";
+import { Timestamp } from "firebase/firestore";
+import type { UserGamificationProfile } from "@/types/gamification";
 import { logger } from "@/lib/logger";
 import { processGamificationEvent } from "@/actions/gamification";
 
@@ -12,25 +19,18 @@ export const gamificationService = {
     if (!userId) return null;
 
     try {
-      const docRef = doc(db, "gamification_profiles", userId);
-      const snap = await getDoc(docRef);
-
-      if (snap.exists()) {
-        return snap.data() as UserGamificationProfile;
-      }
-
-      // Initialize default profile structure in memory
-      // We don't write here because client writes are disabled.
-      // The server action will create it if needed, or we rely on sign-up triggers.
+      const profile = await getProfileFromRepo(userId);
       return {
-        uid: userId,
-        totalXp: 0,
-        level: 1,
-        currentStreak: 0,
-        longestStreak: 0,
-        lastActivityDate: null,
-        badges: [],
-        updatedAt: Timestamp.now(),
+        uid: profile.userId,
+        totalXp: profile.totalXp,
+        level: profile.level,
+        currentStreak: profile.currentStreak,
+        longestStreak: profile.longestStreak,
+        lastActivityDate: profile.lastActivityDate
+          ? Timestamp.fromDate(new Date(profile.lastActivityDate))
+          : null,
+        badges: profile.badges,
+        updatedAt: Timestamp.fromDate(new Date(profile.updatedAt)),
       };
     } catch (error) {
       logger.error("Error fetching gamification profile", error, { userId });
