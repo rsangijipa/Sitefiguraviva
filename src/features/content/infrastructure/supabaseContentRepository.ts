@@ -42,6 +42,13 @@ function mapCourse(row: TableRow<"courses">): ContentRecord {
     row.thumbnail_url ??
     legacyImage ??
     null;
+  const legacyImages = Array.isArray(legacy.images)
+    ? legacy.images.filter(
+        (candidate): candidate is string =>
+          typeof candidate === "string" && candidate.length > 0,
+      )
+    : [];
+  const images = [...new Set(image ? [image, ...legacyImages] : legacyImages)];
 
   return {
     ...legacy,
@@ -55,7 +62,7 @@ function mapCourse(row: TableRow<"courses">): ContentRecord {
     thumbnailUrl: row.thumbnail_url,
     image,
     coverImage: row.cover_image_url ?? legacyImage ?? image,
-    images: legacy.images ?? (image ? [image] : []),
+    images,
     instructorName: row.instructor_name,
     instructorTitle: row.instructor_title,
     workloadMinutes: row.workload_minutes,
