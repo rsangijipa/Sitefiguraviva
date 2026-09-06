@@ -4,7 +4,10 @@ import { AnimatePresence, motion } from "motion/react";
 import { Heart, Shuffle, X } from "lucide-react";
 import { useMemo } from "react";
 
-import { LeafSvg, leafInkColor } from "@/features/awareness-tree/components/ui/LeafSvg";
+import {
+  LeafSvg,
+  leafInkColor,
+} from "@/features/awareness-tree/components/ui/LeafSvg";
 import { themeLabel, toneLabel } from "@/features/awareness-tree/data/labels";
 import type { Quote } from "@/features/awareness-tree/types/quote";
 
@@ -26,9 +29,24 @@ type LeafMessageCardProps = {
  * partir do id da frase: a mesma folha sempre traz a mesma caligrafia.
  */
 const MESSAGE_FONTS = [
-  { family: "var(--font-display), Georgia, serif", size: 1, tracking: "0em", weight: 600 },
-  { family: "var(--font-display-alt), Georgia, serif", size: 0.9, tracking: "0.005em", weight: 500 },
-  { family: "var(--font-hand), cursive", size: 1.16, tracking: "0.01em", weight: 600 },
+  {
+    family: "var(--font-display), Georgia, serif",
+    size: 1,
+    tracking: "0em",
+    weight: 600,
+  },
+  {
+    family: "var(--font-display-alt), Georgia, serif",
+    size: 0.9,
+    tracking: "0.005em",
+    weight: 500,
+  },
+  {
+    family: "var(--font-hand), cursive",
+    size: 1.16,
+    tracking: "0.01em",
+    weight: 600,
+  },
 ] as const;
 
 function hashText(value: string) {
@@ -52,7 +70,8 @@ export function LeafMessageCard({
   onClose,
   onOpenFavorites,
 }: LeafMessageCardProps) {
-  const font = MESSAGE_FONTS[quote ? hashText(quote.id) % MESSAGE_FONTS.length : 0];
+  const font =
+    MESSAGE_FONTS[quote ? hashText(quote.id) % MESSAGE_FONTS.length : 0];
   const leafId = quote ? `leaf-${quote.id}` : "leaf-empty";
 
   // a tinta acompanha o tom terroso sorteado para esta folha
@@ -76,7 +95,10 @@ export function LeafMessageCard({
           >
             <div
               className="relative flex items-center justify-center"
-              style={{ width: leafWidth, transform: isMobile ? "rotate(-90deg)" : undefined }}
+              style={{
+                width: leafWidth,
+                transform: isMobile ? "rotate(-90deg)" : undefined,
+              }}
             >
               {/*
                 O cartao entra do tamanho em que a malha 3D se dissolveu e
@@ -112,7 +134,7 @@ export function LeafMessageCard({
               }}
             >
               <figcaption
-                className="mb-3 text-[10px] font-bold tracking-[0.3em] uppercase"
+                className="mb-3 font-sans text-[10px] font-bold tracking-[0.3em] uppercase"
                 style={{ color: ink, opacity: 0.55 }}
               >
                 Mensagem encontrada
@@ -134,7 +156,7 @@ export function LeafMessageCard({
                 {quote.text}
               </blockquote>
 
-              <div className="mt-5 flex flex-wrap items-center justify-center gap-1.5 text-[9px] font-semibold tracking-[0.18em] uppercase">
+              <div className="mt-5 flex flex-wrap items-center justify-center gap-1.5 font-sans text-[9px] font-semibold tracking-[0.18em] uppercase">
                 {[themeLabel(quote.theme), toneLabel(quote.tone), quote.author]
                   .filter((label): label is string => Boolean(label))
                   .map((label) => (
@@ -169,7 +191,7 @@ export function LeafMessageCard({
                       initial={{ opacity: 0, y: 6 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 4 }}
-                      className="rounded-full border border-white/12 bg-black/55 px-3 py-1 text-[11px] text-[#F0DFB4] backdrop-blur-md"
+                      className="rounded-full border border-white/15 bg-black/60 px-4 py-1.5 font-sans text-[11px] font-medium text-white/80 backdrop-blur-md"
                     >
                       {favoriteFeedback}
                     </motion.p>
@@ -178,17 +200,20 @@ export function LeafMessageCard({
               </div>
 
               {/*
-                Barra unica: as tres acoes moram no mesmo objeto, com a acao
-                principal (guardar) destacada e a de saida discreta. Antes eram
-                tres pilulas soltas de peso visual identico — o usuario tinha
-                que ler as tres para achar a que queria.
+                Barra única: as três ações moram no mesmo objeto, com a ação
+                principal (guardar) destacada e a de saída discreta.
               */}
-              <div className="flex items-center gap-1 rounded-full border border-white/14 bg-black/55 p-1 shadow-[0_10px_34px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+              <div className="flex items-center gap-1 rounded-full border border-white/12 bg-black/60 p-1 shadow-[0_12px_40px_rgba(0,0,0,0.5)] backdrop-blur-xl">
                 <ControlButton
                   onClick={onFavorite}
                   ariaPressed={isFavorite}
                   active={isFavorite}
-                  icon={<Heart className={`h-4 w-4 ${isFavorite ? "fill-current" : ""}`} aria-hidden />}
+                  icon={
+                    <Heart
+                      className={`h-4 w-4 ${isFavorite ? "fill-current" : ""}`}
+                      aria-hidden
+                    />
+                  }
                   label={isFavorite ? "Guardada" : "Guardar"}
                 />
 
@@ -211,7 +236,7 @@ export function LeafMessageCard({
               <button
                 type="button"
                 onClick={onOpenFavorites}
-                className="rounded-full px-3 py-1 text-[10px] font-semibold tracking-[0.18em] uppercase text-white/50 transition hover:bg-white/10 hover:text-white/90"
+                className="rounded-full px-3 py-1.5 font-sans text-[10px] font-semibold tracking-[0.16em] uppercase text-white/45 transition hover:bg-white/10 hover:text-white/80"
               >
                 Favoritas ({favoriteCount})
               </button>
@@ -245,12 +270,12 @@ function ControlButton({
       onClick={onClick}
       aria-pressed={ariaPressed}
       aria-label={label}
-      className={`flex h-11 items-center gap-2 rounded-full px-4 text-[11px] font-bold tracking-[0.1em] uppercase transition ${
+      className={`flex h-11 items-center gap-2 rounded-full px-4 font-sans text-[11px] font-bold tracking-wide uppercase transition ${
         active
-          ? "bg-[#E6C978] text-[#241B08]"
+          ? "bg-[var(--hud-gold,#d8bd79)] text-[var(--hud-gold-text,#1e1608)]"
           : compact
-            ? "text-white/60 hover:bg-white/10 hover:text-white"
-            : "text-white/85 hover:bg-white/12 hover:text-white"
+            ? "text-white/55 hover:bg-white/10 hover:text-white"
+            : "text-white/80 hover:bg-white/12 hover:text-white"
       }`}
     >
       {icon}

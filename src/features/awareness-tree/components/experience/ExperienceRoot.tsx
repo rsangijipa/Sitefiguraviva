@@ -2,7 +2,13 @@
 
 import dynamic from "next/dynamic";
 import { AnimatePresence, motion } from "motion/react";
-import { ChevronRight, Heart, RefreshCw, SlidersHorizontal, Sparkles } from "lucide-react";
+import {
+  ChevronRight,
+  Heart,
+  RefreshCw,
+  SlidersHorizontal,
+  Sparkles,
+} from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { FavoritesDrawer } from "@/features/awareness-tree/components/ui/FavoritesDrawer";
@@ -14,11 +20,25 @@ import { usePerformanceMode } from "@/features/awareness-tree/hooks/usePerforman
 import { useReducedMotionPreference } from "@/features/awareness-tree/hooks/useReducedMotionPreference";
 import { useSessionId } from "@/features/awareness-tree/hooks/useSessionId";
 import { useSoundscape } from "@/features/awareness-tree/hooks/useSoundscape";
-import { fetchFavorites, postFavorite, postInteraction } from "@/features/awareness-tree/lib/client/interactions-api";
+import {
+  fetchFavorites,
+  postFavorite,
+  postInteraction,
+} from "@/features/awareness-tree/lib/client/interactions-api";
 import { fetchQuotesByTheme } from "@/features/awareness-tree/lib/client/quote-api";
-import { createTreeSeed, MESSAGE_LEAF_COUNT } from "@/features/awareness-tree/lib/theme/scene-tokens";
-import { loadFavorites, mergeFavoriteIds, saveFavorites } from "@/features/awareness-tree/lib/utils/local-favorites";
-import { INTRO_STORAGE_KEY, migrateLegacyStorage } from "@/features/awareness-tree/lib/utils/storage";
+import {
+  createTreeSeed,
+  MESSAGE_LEAF_COUNT,
+} from "@/features/awareness-tree/lib/theme/scene-tokens";
+import {
+  loadFavorites,
+  mergeFavoriteIds,
+  saveFavorites,
+} from "@/features/awareness-tree/lib/utils/local-favorites";
+import {
+  INTRO_STORAGE_KEY,
+  migrateLegacyStorage,
+} from "@/features/awareness-tree/lib/utils/storage";
 import type { TreeSceneApi } from "@/features/awareness-tree/components/3d/TreeScene";
 import { useQuoteStore } from "@/features/awareness-tree/store/useQuoteStore";
 import type { QualityProfile } from "@/features/awareness-tree/types/performance";
@@ -27,22 +47,26 @@ import type { Quote } from "@/features/awareness-tree/types/quote";
 const TreeScene = dynamic(
   () => import("@/features/awareness-tree/components/3d/TreeScene"),
   {
-  ssr: false,
-  loading: () => (
-    <div className="flex h-full w-full items-center justify-center text-xs tracking-[0.2em] uppercase text-[#DCE8F5]">
-      Carregando atmosfera...
-    </div>
-  ),
+    ssr: false,
+    loading: () => (
+      <div className="flex h-full w-full items-center justify-center text-xs tracking-[0.2em] uppercase text-[#DCE8F5]">
+        Carregando atmosfera...
+      </div>
+    ),
   },
 );
 
 /** distribui as frases entre as folhas-mensagem de forma estável por semente */
-function buildLeafQuoteMap(quotes: Quote[], seed: number, slots: number): (Quote | null)[] {
+function buildLeafQuoteMap(
+  quotes: Quote[],
+  seed: number,
+  slots: number,
+): (Quote | null)[] {
   if (quotes.length === 0) {
     return Array.from({ length: slots }, () => null);
   }
 
-  let state = (seed | 0) || 1;
+  let state = seed | 0 || 1;
   const nextRandom = () => {
     state = (Math.imul(1664525, state) + 1013904223) | 0;
     return (state >>> 0) / 4294967296;
@@ -56,7 +80,10 @@ function buildLeafQuoteMap(quotes: Quote[], seed: number, slots: number): (Quote
     order[swap] = current;
   }
 
-  return Array.from({ length: slots }, (_, index) => quotes[order[index % order.length]] ?? null);
+  return Array.from(
+    { length: slots },
+    (_, index) => quotes[order[index % order.length]] ?? null,
+  );
 }
 
 export function ExperienceRoot() {
@@ -85,7 +112,8 @@ export function ExperienceRoot() {
   const hoverSoundCooldownRef = useRef(0);
   const hudAutoCollapseDoneRef = useRef(false);
 
-  const { playFavorite, playHover, playRandom, playClick } = useSoundscape(true);
+  const { playFavorite, playHover, playRandom, playClick } =
+    useSoundscape(true);
 
   const quotes = useQuoteStore((state) => state.quotes);
   const activeQuote = useQuoteStore((state) => state.activeQuote);
@@ -134,7 +162,10 @@ export function ExperienceRoot() {
       return;
     }
 
-    const timeout = window.setTimeout(() => setIntroLocked(false), reduceMotion ? 400 : 2600);
+    const timeout = window.setTimeout(
+      () => setIntroLocked(false),
+      reduceMotion ? 400 : 2600,
+    );
     return () => window.clearTimeout(timeout);
   }, [reduceMotion, sceneReady]);
 
@@ -175,11 +206,16 @@ export function ExperienceRoot() {
           return;
         }
 
-        const mergedFavorites = mergeFavoriteIds(localFavorites, cloudFavorites);
+        const mergedFavorites = mergeFavoriteIds(
+          localFavorites,
+          cloudFavorites,
+        );
         setFavorites(mergedFavorites);
         saveFavorites(sessionId, mergedFavorites);
 
-        const missingInCloud = mergedFavorites.filter((quoteId) => !cloudFavorites.includes(quoteId));
+        const missingInCloud = mergedFavorites.filter(
+          (quoteId) => !cloudFavorites.includes(quoteId),
+        );
         for (const quoteId of missingInCloud) {
           void postFavorite({ sessionId, quoteId, isFavorite: true });
         }
@@ -236,7 +272,10 @@ export function ExperienceRoot() {
   }, [activeQuote, quotes]);
 
   const favoriteQuotes = useMemo(
-    () => favorites.map((quoteId) => quoteById.get(quoteId)).filter((quote): quote is Quote => Boolean(quote)),
+    () =>
+      favorites
+        .map((quoteId) => quoteById.get(quoteId))
+        .filter((quote): quote is Quote => Boolean(quote)),
     [favorites, quoteById],
   );
 
@@ -245,10 +284,16 @@ export function ExperienceRoot() {
       return "Exploração livre";
     }
 
-    return THEMES.find((theme) => theme.slug === themeFilter)?.label ?? "Exploração livre";
+    return (
+      THEMES.find((theme) => theme.slug === themeFilter)?.label ??
+      "Exploração livre"
+    );
   }, [themeFilter]);
 
-  const primaryActionLabel = themeFilter === "all" ? "Receber mensagem" : `Receber ${themeContextLabel.toLowerCase()}`;
+  const primaryActionLabel =
+    themeFilter === "all"
+      ? "Receber mensagem"
+      : `Receber ${themeContextLabel.toLowerCase()}`;
   const floatingHintLabel =
     themeFilter === "all"
       ? "Toque uma folha luminosa"
@@ -272,7 +317,10 @@ export function ExperienceRoot() {
       window.clearTimeout(favoriteFeedbackTimeout.current);
     }
 
-    favoriteFeedbackTimeout.current = window.setTimeout(() => setFavoriteFeedback(null), 1800);
+    favoriteFeedbackTimeout.current = window.setTimeout(
+      () => setFavoriteFeedback(null),
+      1800,
+    );
   }, []);
 
   useEffect(() => {
@@ -319,7 +367,14 @@ export function ExperienceRoot() {
         });
       }
     },
-    [dismissIntro, leafQuotes, playClick, sessionId, themeFilter, visibleQuotes],
+    [
+      dismissIntro,
+      leafQuotes,
+      playClick,
+      sessionId,
+      themeFilter,
+      visibleQuotes,
+    ],
   );
 
   /** a folha pousou diante da câmera: agora sim mostramos a mensagem */
@@ -346,7 +401,11 @@ export function ExperienceRoot() {
 
     saveFavorites(sessionId, nextFavorites);
     playFavorite();
-    void postFavorite({ sessionId, quoteId: activeQuote.id, isFavorite: isNowFavorite });
+    void postFavorite({
+      sessionId,
+      quoteId: activeQuote.id,
+      isFavorite: isNowFavorite,
+    });
     void postInteraction({
       sessionId,
       actionType: "favorite",
@@ -354,8 +413,17 @@ export function ExperienceRoot() {
       theme: themeFilter,
     });
 
-    showFavoriteMessage(isNowFavorite ? "Guardada neste dispositivo." : "Removida das favoritas.");
-  }, [activeQuote, playFavorite, sessionId, showFavoriteMessage, themeFilter, toggleFavorite]);
+    showFavoriteMessage(
+      isNowFavorite ? "Guardada neste dispositivo." : "Removida das favoritas.",
+    );
+  }, [
+    activeQuote,
+    playFavorite,
+    sessionId,
+    showFavoriteMessage,
+    themeFilter,
+    toggleFavorite,
+  ]);
 
   const handleQualitySuggestion = useCallback(
     (nextProfile: QualityProfile) => {
@@ -393,7 +461,11 @@ export function ExperienceRoot() {
       dismissIntro();
 
       if (sessionId) {
-        void postInteraction({ sessionId, actionType: "theme_filter", theme: nextTheme });
+        void postInteraction({
+          sessionId,
+          actionType: "theme_filter",
+          theme: nextTheme,
+        });
       }
     },
     [dismissIntro, playClick, sessionId, setThemeFilter, themeFilter],
@@ -437,7 +509,8 @@ export function ExperienceRoot() {
     setShowHint(true);
   }, [setActiveQuote, setPanelOpen]);
 
-  const loadingOverlayVisible = loadingQuotes || !sceneReady || treeSeed === null;
+  const loadingOverlayVisible =
+    loadingQuotes || !sceneReady || treeSeed === null;
 
   return (
     <section
@@ -448,9 +521,10 @@ export function ExperienceRoot() {
         Árvore da Consciência
       </h1>
       <p className="sr-only" aria-live="polite">
-        Cada árvore é gerada do zero ao abrir a página. As folhas maiores e luminosas guardam
-        mensagens: toque uma delas, ou use o botão de receber mensagem para abrir uma frase sem
-        navegar na cena 3D. Escape fecha os painéis abertos.
+        Cada árvore é gerada do zero ao abrir a página. As folhas maiores e
+        luminosas guardam mensagens: toque uma delas, ou use o botão de receber
+        mensagem para abrir uma frase sem navegar na cena 3D. Escape fecha os
+        painéis abertos.
       </p>
 
       {/*
@@ -462,9 +536,14 @@ export function ExperienceRoot() {
         <ul>
           {Array.from({ length: MESSAGE_LEAF_COUNT }, (_, index) => (
             <li key={`leaf-shortcut-${index}`}>
-              <button type="button" onClick={() => handleKeyboardLeafPick(index)}>
+              <button
+                type="button"
+                onClick={() => handleKeyboardLeafPick(index)}
+              >
                 Colher a folha {index + 1} de {MESSAGE_LEAF_COUNT}
-                {leafQuotes[index] ? ` — tema ${themeLabel(leafQuotes[index]!.theme)}` : ""}
+                {leafQuotes[index]
+                  ? ` — tema ${themeLabel(leafQuotes[index]!.theme)}`
+                  : ""}
               </button>
             </li>
           ))}
@@ -543,10 +622,12 @@ export function ExperienceRoot() {
                     onClick={() => setHudExpanded(true)}
                     aria-label="Abrir controles"
                     aria-expanded={false}
-                    className="hud-pill pointer-events-auto inline-flex h-10 items-center gap-2 px-3 text-[11px] font-semibold text-[#D6E2F0] backdrop-blur-md transition hover:text-white"
+                    className="hud-pill pointer-events-auto inline-flex h-10 items-center gap-2 px-3.5 font-sans text-[11px] font-semibold tracking-wide text-white/80 backdrop-blur-md transition hover:text-white"
                   >
                     <SlidersHorizontal className="h-4 w-4" aria-hidden />
-                    <span className="max-w-[16ch] truncate">{themeContextLabel}</span>
+                    <span className="max-w-[16ch] truncate">
+                      {themeContextLabel}
+                    </span>
                   </motion.button>
                 )}
               </AnimatePresence>
@@ -563,11 +644,12 @@ export function ExperienceRoot() {
                   >
                     <header className="flex items-start justify-between gap-3 px-4 pt-4">
                       <div>
-                        <p className="text-[9px] font-semibold tracking-[0.26em] uppercase text-[#8FA6BD]">
+                        <p className="font-serif text-[11px] font-semibold tracking-[0.18em] uppercase text-white/50">
                           Árvore das Emoções
                         </p>
                         <p className="mt-1.5 max-w-[30ch] text-[13px] leading-snug text-[#E7EEF7]">
-                          Uma árvore nova a cada visita. As folhas maiores guardam mensagens.
+                          Uma árvore nova a cada visita. As folhas maiores
+                          guardam mensagens.
                         </p>
                       </div>
 
@@ -575,7 +657,7 @@ export function ExperienceRoot() {
                         type="button"
                         onClick={() => setHudExpanded(false)}
                         aria-label="Recolher painel"
-                        className="-mr-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[#93A8BE] transition hover:bg-white/10 hover:text-white"
+                        className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-white/40 transition hover:bg-white/10 hover:text-white/90"
                       >
                         <ChevronRight className="h-4 w-4" />
                       </button>
@@ -587,7 +669,7 @@ export function ExperienceRoot() {
                       <button
                         type="button"
                         onClick={requestRandomLeaf}
-                        className="inline-flex h-9 items-center gap-2 rounded-full bg-[#F2EFE8] px-4 text-[11px] font-bold tracking-[0.04em] text-[#1C1A17] shadow-[0_4px_16px_rgba(0,0,0,0.3)] transition hover:bg-white"
+                        className="hud-btn-primary inline-flex h-10 items-center gap-2 px-5 font-sans text-[12px] font-bold tracking-wide shadow-lg transition"
                       >
                         <Sparkles className="h-3.5 w-3.5" aria-hidden />
                         {primaryActionLabel}
@@ -597,7 +679,7 @@ export function ExperienceRoot() {
                         <button
                           type="button"
                           onClick={dismissIntro}
-                          className="h-9 rounded-full border border-white/15 px-3.5 text-[11px] font-medium text-white/75 transition hover:bg-white/10 hover:text-white"
+                          className="hud-btn-ghost h-10 px-4 font-sans text-[12px] font-semibold transition"
                         >
                           Explorar
                         </button>
@@ -606,8 +688,14 @@ export function ExperienceRoot() {
 
                     {showIntro ? (
                       <ol className="mt-3.5 ml-4 space-y-1.5 px-4 text-[11px] leading-relaxed text-[#C7D6E6]/85">
-                        <li>Procure as {MESSAGE_LEAF_COUNT} folhas maiores, com brilho dourado.</li>
-                        <li>Toque em uma delas: ela se solta e traz a mensagem até você.</li>
+                        <li>
+                          Procure as {MESSAGE_LEAF_COUNT} folhas maiores, com
+                          brilho dourado.
+                        </li>
+                        <li>
+                          Toque em uma delas: ela se solta e traz a mensagem até
+                          você.
+                        </li>
                         <li>Guarde as frases que quiser revisitar depois.</li>
                       </ol>
                     ) : null}
@@ -616,12 +704,18 @@ export function ExperienceRoot() {
 
                     <section className="px-4 pt-3">
                       <div className="mb-2 flex items-baseline justify-between gap-2">
-                        <span className="text-[9px] font-semibold tracking-[0.22em] uppercase text-[#8FA6BD]">
+                        <span className="font-sans text-[10px] font-semibold tracking-[0.18em] uppercase text-white/40">
                           Tema
                         </span>
-                        <span className="truncate text-[11px] text-white/55">{themeContextLabel}</span>
+                        <span className="truncate text-[11px] text-white/55">
+                          {themeContextLabel}
+                        </span>
                       </div>
-                      <ThemeFilter themes={THEMES} value={themeFilter} onChange={handleThemeChange} />
+                      <ThemeFilter
+                        themes={THEMES}
+                        value={themeFilter}
+                        onChange={handleThemeChange}
+                      />
                     </section>
 
                     <div className="hud-divider mx-4 mt-3.5" />
@@ -630,18 +724,18 @@ export function ExperienceRoot() {
                       <button
                         type="button"
                         onClick={() => setFavoritesOpen((current) => !current)}
-                        className="inline-flex h-8 items-center gap-2 rounded-full px-2.5 text-[11px] font-medium text-[#C7D6E6] transition hover:bg-white/10 hover:text-white"
+                        className="inline-flex h-9 items-center gap-2 rounded-full px-3 font-sans text-[12px] font-semibold text-white/65 transition hover:bg-white/10 hover:text-white"
                       >
                         <Heart className="h-3.5 w-3.5" aria-hidden />
                         Favoritas
                         {favorites.length > 0 ? (
-                          <span className="rounded-full bg-white/12 px-1.5 py-px text-[10px] font-bold tabular-nums">
+                          <span className="rounded-full bg-white/15 px-1.5 py-px font-sans text-[10px] font-bold tabular-nums">
                             {favorites.length}
                           </span>
                         ) : null}
                       </button>
 
-                      <span className="text-[10px] tracking-[0.12em] text-white/35">
+                      <span className="font-sans text-[10px] tracking-[0.12em] text-white/30">
                         {MESSAGE_LEAF_COUNT} folhas com mensagem
                       </span>
                     </footer>
@@ -658,7 +752,7 @@ export function ExperienceRoot() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 6 }}
                 transition={{ duration: 0.3 }}
-                className="hud-badge pointer-events-none absolute bottom-24 left-1/2 -translate-x-1/2 px-4 py-2 text-[11px] tracking-[0.14em] uppercase text-[#DAE6F4]"
+                className="hud-badge pointer-events-none absolute bottom-24 left-1/2 -translate-x-1/2 px-5 py-2.5 font-sans text-[11px] font-semibold tracking-[0.14em] uppercase"
               >
                 {floatingHintLabel}
               </motion.div>
@@ -676,7 +770,9 @@ export function ExperienceRoot() {
             className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center bg-[rgba(8,12,20,0.62)]"
           >
             <p className="text-xs tracking-[0.24em] uppercase text-[#D8E5F4]">
-              {loadingQuotes ? "Carregando mensagens..." : "Plantando a árvore..."}
+              {loadingQuotes
+                ? "Carregando mensagens..."
+                : "Plantando a árvore..."}
             </p>
           </motion.div>
         ) : null}
@@ -722,7 +818,7 @@ export function ExperienceRoot() {
           type="button"
           onClick={regenerateTree}
           aria-label="Gerar uma nova árvore"
-          className="hud-pill pointer-events-auto absolute top-4 right-4 z-30 flex h-10 items-center gap-2 px-3 text-[11px] font-semibold text-[#D6E2F0] backdrop-blur-md transition hover:text-white sm:top-6 sm:right-6"
+          className="hud-pill pointer-events-auto absolute top-4 right-4 z-30 flex h-10 items-center gap-2 px-3.5 font-sans text-[11px] font-semibold tracking-wide text-white/75 backdrop-blur-md transition hover:text-white sm:top-6 sm:right-6"
         >
           <RefreshCw className="h-3.5 w-3.5" aria-hidden />
           <span className="hidden sm:inline">Nova árvore</span>
@@ -741,7 +837,7 @@ export function ExperienceRoot() {
           whileTap={{ scale: 0.97 }}
           type="button"
           onClick={requestRandomLeaf}
-          className="pointer-events-auto fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-30 flex h-12 -translate-x-1/2 items-center gap-2 rounded-full bg-[#F2EFE8] px-5 text-[12px] font-bold text-[#1C1A17] shadow-[0_10px_30px_rgba(0,0,0,0.45)]"
+          className="hud-btn-primary pointer-events-auto fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-30 flex h-12 -translate-x-1/2 items-center gap-2.5 px-6 font-sans text-[13px] font-bold shadow-[0_10px_32px_rgba(0,90,31,0.4)] transition"
         >
           <Sparkles className="h-4 w-4" aria-hidden />
           {primaryActionLabel}
