@@ -1,6 +1,6 @@
 import { ArrowRight, ArrowUpRight, Sparkles } from "lucide-react";
-import Image from "next/image";
 import WaveLines from "../ui/WaveLines";
+import FiguraVivaTree from "../visual/FiguraVivaTree";
 
 export default function HeroSection({ initialData }: { initialData?: any }) {
   const data = initialData ?? {};
@@ -12,13 +12,9 @@ export default function HeroSection({ initialData }: { initialData?: any }) {
         className="pointer-events-none absolute inset-y-12 right-[-12%] z-0 w-[88%] opacity-25 sm:right-[-5%] sm:w-[70%] sm:opacity-35 lg:inset-y-5 lg:right-[1%] lg:w-[52%] lg:opacity-90"
         aria-hidden="true"
       >
-        <Image
-          src="/assets/fv/hero-tree-lite.svg"
-          alt=""
-          fill
-          priority
-          sizes="(max-width: 640px) 88vw, (max-width: 1024px) 70vw, 52vw"
-          className="object-contain object-right-bottom"
+        <FiguraVivaTree
+          style={{ width: "100%", height: "100%" }}
+          interactive={false}
         />
       </div>
 
