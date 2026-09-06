@@ -170,8 +170,12 @@ export const adminCourseService = {
     return updateMaterialAction(courseId, materialId, data);
   },
 
-  async deleteMaterial(courseId: string, materialId: string): Promise<void> {
-    return deleteMaterialAction(courseId, materialId);
+  async deleteMaterial(
+    courseId: string,
+    materialId: string,
+    filePath?: string,
+  ): Promise<void> {
+    return deleteMaterialAction(courseId, materialId, filePath);
   },
 
   // --- UTILS ---

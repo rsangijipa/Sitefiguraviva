@@ -84,10 +84,10 @@ export default function CourseMaterialsTab({ courseId }: { courseId: string }) {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string, filePath?: string) => {
     if (!confirm("Excluir material?")) return;
     try {
-      await adminCourseService.deleteMaterial(courseId, id);
+      await adminCourseService.deleteMaterial(courseId, id, filePath);
       addToast("Material removido", "success");
       loadMaterials();
     } catch (e) {
@@ -285,7 +285,7 @@ export default function CourseMaterialsTab({ courseId }: { courseId: string }) {
                 </span>
               </div>
               <button
-                onClick={() => handleDelete(item.id)}
+                onClick={() => handleDelete(item.id, item.filePath)}
                 className="p-2 text-stone-300 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
               >
                 <Trash2 size={16} />
