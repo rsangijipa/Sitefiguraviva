@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export type Timestamp = Date | { toDate(): Date };
+import type { Timestamp } from "firebase/firestore";
 
 // --- PRIMITIVES ---
 
