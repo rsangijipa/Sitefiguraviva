@@ -1,33 +1,14 @@
-import { db } from "@/lib/firebase/admin";
 import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { Calendar, ArrowRight, BookOpen } from "lucide-react";
+import { listPublishedCourses } from "@/features/content/infrastructure/supabaseContentRepository";
 
 // Revalidate every hour
 export const revalidate = 3600;
 
 async function getCourses(): Promise<any[]> {
   try {
-    const snap = await db.collection("courses").get();
-
-    return snap.docs
-      .map((doc) => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          ...data,
-          isPublished: data.isPublished !== false,
-          createdAt: data.createdAt?.toDate
-            ? data.createdAt.toDate().toISOString()
-            : null,
-        } as any;
-      })
-      .filter((c) => c.isPublished !== false || c.status === "open")
-      .sort((a, b) => {
-        const dateA = new Date(a.createdAt || 0).getTime();
-        const dateB = new Date(b.createdAt || 0).getTime();
-        return dateB - dateA;
-      });
+    return await listPublishedCourses();
   } catch (error) {
     console.error("Error fetching courses:", error);
     return [];

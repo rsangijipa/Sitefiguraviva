@@ -7,15 +7,12 @@ import { deepSafeSerialize } from "@/lib/utils";
 
 async function CourseContent({ id }: { id: string }) {
   try {
-    console.log(`🔍 Buscando detalhes do curso ID: ${id}`);
-    const course = await getCourseById(id, true);
+    const course = await getCourseById(id);
 
     if (!course) {
-      console.warn(`⚠️ Curso não encontrado ou acesso negado para o ID: ${id}`);
       notFound();
     }
 
-    console.log(`✅ Detalhes carregados para: ${course.title}`);
     return <CourseDetailClient course={deepSafeSerialize(course)} />;
   } catch (error) {
     console.error("❌ Course Fetch Error:", error);
