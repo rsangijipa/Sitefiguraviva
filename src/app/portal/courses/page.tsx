@@ -1,14 +1,13 @@
 import { redirect } from "next/navigation";
-import { db } from "@/lib/firebase/admin";
 import Link from "next/link";
 import Image from "next/image";
-import { FieldPath } from "firebase-admin/firestore";
 import { BookOpen, Library } from "lucide-react";
-import { cn, deepSafeSerialize } from "@/lib/utils";
-import { Timestamp } from "firebase-admin/firestore";
+import { cn } from "@/lib/utils";
 import { EmptyState } from "@/components/ui/EmptyState";
 import Button from "@/components/ui/Button";
 import { requireSession } from "@/lib/auth/server";
+import { listUserEnrollments } from "@/features/enrollments/infrastructure/supabaseEnrollmentRepository.server";
+import { listAdminCourses } from "@/features/courses/infrastructure/supabaseAdminCourseRepository.server";
 
 // --- Reusable Course Card (Inline for now, extract later) ---
 const CourseCard = ({
@@ -25,9 +24,11 @@ const CourseCard = ({
   const isActive = status === "active" || status === "completed";
   const isPendingApproval = status === "pending_approval";
   const progress = enrollment?.progressSummary?.percent || 0;
-  const lastAccess = enrollment?.lastAccessedAt
-    ?.toDate?.()
-    .toLocaleDateString();
+  const lastAccessValue =
+    enrollment?.lastAccessAt ?? enrollment?.lastAccessedAt;
+  const lastAccess = lastAccessValue
+    ? new Date(String(lastAccessValue)).toLocaleDateString()
+    : undefined;
 
   const detailsHref = isCatalog
     ? `/curso/${course.slug || course.id}`
@@ -183,51 +184,28 @@ export default async function MyCoursesPage() {
   const uid = session.uid;
 
   // 1. Fetch User Enrollments
-  const enrollmentsSnap = await db
-    .collection("enrollments")
-    .where("uid", "==", uid)
-    .get();
-  const enrollments = enrollmentsSnap.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  }));
+  const enrollments = await listUserEnrollments(uid);
 
   // 2. Resolve Enrolled Courses
   let enrolledCourses: any[] = [];
   let enrolledCourseIds = new Set<string>();
 
   if (enrollments.length > 0) {
-    const courseIds = enrollments.map((e: any) => e.courseId);
+    const courseIds = enrollments.map((e) => e.courseId);
     enrolledCourseIds = new Set(courseIds);
-
-    // Batch fetch (simplified for MVP)
-    // Split into chunks of 10
-    const chunks = [];
-    for (let i = 0; i < courseIds.length; i += 10) {
-      chunks.push(courseIds.slice(i, i + 10));
-    }
-
-    for (const chunk of chunks) {
-      if (chunk.length > 0) {
-        const snap = await db
-          .collection("courses")
-          .where(FieldPath.documentId(), "in", chunk)
-          .get();
-        const chunkCourses = snap.docs
-          .map((doc) => {
-            const enrollment = enrollments.find(
-              (e: any) => e.courseId === doc.id,
-            );
-            return { id: doc.id, ...doc.data(), enrollment };
-          })
-          .filter((c: any) => c.isPublished !== false); // Filter out unpublished courses from "My Courses"
-        enrolledCourses.push(...chunkCourses);
-      }
-    }
+    const courses = await listAdminCourses();
+    enrolledCourses = courses
+      .filter(
+        (course) =>
+          course.isPublished !== false && enrolledCourseIds.has(course.id),
+      )
+      .map((course) => ({
+        ...course,
+        enrollment: enrollments.find(
+          (enrollment) => enrollment.courseId === course.id,
+        ),
+      }));
   }
-
-  // Ensure serialization
-  enrolledCourses = deepSafeSerialize(enrolledCourses);
   const activeEnrolledCourses = enrolledCourses.filter((course: any) =>
     ["active", "completed"].includes(course?.enrollment?.status),
   );
@@ -239,17 +217,11 @@ export default async function MyCoursesPage() {
   // 3. Fetch Catalog (Published & Open, limit 10 for MVP)
   // Exclude enrolled? Ideally yes, but Firestore "not-in" has limits.
   // We will fetch widely and filter in memory for this page since catalog size is likely small (<100) for now.
-  const catalogSnap = await db
-    .collection("courses")
-    .where("status", "==", "open")
-    .limit(20)
-    .get();
-
-  const catalogCourses = deepSafeSerialize(
-    (catalogSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as any[])
-      .filter((c) => c.isPublished !== false) // Filter in memory for isPublished !== false
-      .filter((c) => !enrolledCourseIds.has(c.id)),
-  );
+  const catalogCourses = (await listAdminCourses())
+    .filter(
+      (course) => course.status === "open" && course.isPublished !== false,
+    )
+    .filter((course) => !enrolledCourseIds.has(course.id));
 
   return (
     <div className="space-y-12 pb-12">
