@@ -200,7 +200,7 @@ function AuthContent() {
           <button
             onClick={handleGoogleAuth}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-3 bg-white border border-stone-200 text-stone-700 font-bold py-3.5 rounded-xl hover:bg-stone-50 transition-all shadow-sm active:scale-[0.98] mb-6"
+            className="w-full min-h-[44px] flex items-center justify-center gap-3 bg-fv-creme border border-fv-nevoa text-fv-mata font-bold py-3.5 rounded-xl hover:bg-fv-areia hover:border-fv-verde-raiz transition-colors active:scale-[0.98] mb-6 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fv-verde-raiz"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path
@@ -276,7 +276,7 @@ function AuthContent() {
                           name="course-interest"
                           value={selectedCourse}
                           onChange={(e) => setSelectedCourse(e.target.value)}
-                          className="w-full h-12 px-4 rounded-xl border border-stone-200 bg-stone-50 text-sm focus:ring-2 focus:ring-primary/20 outline-none appearance-none"
+                          className="w-full h-12 min-h-[44px] px-4 rounded-xl border border-fv-nevoa bg-fv-creme text-sm focus-visible:ring-2 focus-visible:ring-fv-verde-raiz focus-visible:border-fv-verde-raiz outline-none appearance-none"
                         >
                           <option value="">Selecione um curso...</option>
                           {courses.map((c: any) => (
@@ -324,7 +324,7 @@ function AuthContent() {
                 <div className="text-right">
                   <Link
                     href="/auth/reset-password"
-                    className="text-[10px] uppercase font-bold text-primary/60 hover:text-primary"
+                    className="inline-flex min-h-[44px] items-center text-[11px] uppercase font-bold text-fv-verde-igarape hover:text-fv-verde-raiz underline underline-offset-4"
                   >
                     Esqueceu a senha?
                   </Link>
@@ -341,7 +341,7 @@ function AuthContent() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full h-12 bg-primary text-white font-bold rounded-xl shadow-lg hover:shadow-primary/30 hover:bg-primary/90 transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-xs"
+              className="w-full h-12 min-h-[44px] bg-fv-verde-raiz text-fv-creme font-bold rounded-xl hover:bg-fv-verde-igarape transition-colors flex items-center justify-center gap-2 uppercase tracking-widest text-xs focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fv-verde-raiz"
             >
               {loading ? (
                 <Loader2 className="animate-spin" size={18} />

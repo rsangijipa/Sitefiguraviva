@@ -218,19 +218,27 @@ export default function GalleryClient({
           </section>
 
           {/* GRID CONTENT */}
-          <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
+          <div className="grid gap-6 [grid-template-columns:repeat(auto-fill,minmax(260px,1fr))]">
             {filteredPhotos.map((photo, index) => (
               <motion.div
                 key={photo.id}
                 layoutId={photo.id}
-                className="break-inside-avoid relative group cursor-pointer rounded-2xl overflow-hidden bg-stone-100 shadow-sm hover:shadow-xl transition-all duration-500"
+                className="relative group cursor-pointer rounded-2xl overflow-hidden bg-fv-areia border border-fv-nevoa hover:border-fv-verde-raiz transition-colors duration-300"
                 onClick={() => openLightbox(index)}
-                whileHover={{ y: -5 }}
+                whileHover={{ y: -2 }}
               >
                 <img
                   src={photo.src}
-                  alt={photo.title}
-                  className="w-full h-auto object-cover opacity-95 group-hover:opacity-100 transition-opacity"
+                  alt={
+                    photo.title ||
+                    "Fotografia da galeria do Instituto Figura Viva"
+                  }
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full aspect-[4/3] object-cover opacity-95 group-hover:opacity-100 transition-opacity"
+                  onError={(e) => {
+                    e.currentTarget.style.visibility = "hidden";
+                  }}
                 />
                 {/* Hover Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">

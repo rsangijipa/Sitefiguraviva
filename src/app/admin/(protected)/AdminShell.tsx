@@ -108,7 +108,7 @@ export default function AdminShell({
       {/* Mobile Toggle */}
       <button
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className="lg:hidden fixed bottom-6 right-6 z-50 p-4 bg-primary text-white rounded-full shadow-2xl transition-transform active:scale-90"
+        className="lg:hidden fixed bottom-6 right-6 z-50 min-h-[44px] min-w-[44px] p-4 bg-fv-verde-raiz text-fv-creme rounded-full border border-fv-verde-igarape transition-transform active:scale-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fv-verde-raiz"
       >
         {isSidebarOpen ? <X size={24} /> : <LayoutDashboard size={24} />}
       </button>
@@ -151,19 +151,24 @@ export default function AdminShell({
                 key={item.path}
                 href={item.path}
                 onClick={() => setIsSidebarOpen(false)}
-                className={`flex items-center gap-4 px-6 py-4 rounded-xl transition-all duration-300 group ${
+                aria-current={isActive ? "page" : undefined}
+                className={`relative flex min-h-[44px] items-center gap-4 rounded-xl border py-4 pl-6 pr-4 transition-colors duration-200 group ${
                   isActive
-                    ? "bg-primary text-white shadow-lg shadow-primary/20 translate-x-2"
-                    : "text-stone-500 hover:text-primary hover:bg-stone-100/80 hover:translate-x-1"
+                    ? "border-fv-verde-raiz bg-fv-verde-raiz text-fv-creme"
+                    : "border-transparent text-fv-pedra hover:border-fv-nevoa hover:bg-fv-areia hover:text-fv-verde-raiz"
                 }`}
               >
+                {/* Indicador adicional ao verde: barra lateral, para nao
+                    depender apenas de cor na identificacao do item ativo. */}
+                <span
+                  aria-hidden="true"
+                  className={`absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full ${isActive ? "bg-fv-vazante" : "bg-transparent"}`}
+                />
                 <item.icon
                   size={18}
-                  className={`transition-transform duration-300 ${isActive ? "text-gold-light" : "group-hover:scale-110 group-hover:text-gold"}`}
+                  className={`transition-transform duration-300 ${isActive ? "text-fv-creme" : "group-hover:scale-110 group-hover:text-fv-terra-barro"}`}
                 />
-                <span
-                  className={`text-[11px] font-bold uppercase tracking-widest ${isActive ? "opacity-100" : "opacity-80"}`}
-                >
+                <span className="text-[11px] font-bold uppercase tracking-widest">
                   {item.label}
                 </span>
               </Link>

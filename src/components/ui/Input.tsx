@@ -4,12 +4,12 @@ import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
 
 const inputVariants = cva(
-  "flex h-12 w-full rounded-xl border-2 px-4 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300",
+  "flex h-12 min-h-[44px] w-full rounded-xl border px-4 py-2 text-base md:text-sm text-fv-mata ring-offset-fv-creme file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-fv-pedra focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors duration-200",
   {
     variants: {
       variant: {
         default:
-          "border-primary/10 bg-white/50 focus-visible:ring-primary/20 focus-visible:border-primary hover:border-primary/30 hover:bg-white",
+          "border-fv-nevoa bg-fv-creme focus-visible:ring-fv-verde-raiz focus-visible:border-fv-verde-raiz hover:border-fv-verde-igarape",
         glass:
           "bg-white/10 border-white/20 text-white placeholder:text-white/60 focus-visible:ring-white/30 focus-visible:border-white/50 hover:bg-white/20",
         error:
