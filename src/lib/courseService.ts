@@ -1,6 +1,5 @@
 import { Lesson, Block } from "@/types/lms";
-import { FieldValue } from "firebase-admin/firestore";
-import { db } from "@/lib/firebase/admin";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import { deepSafeSerialize } from "./utils";
 
 import { toCourseFullDTO } from "@/lib/presenters/mappers";
@@ -117,63 +116,31 @@ export async function saveLessonContent(
   lessonId: string,
   blocks: Block[],
 ) {
-  const lessonRef = db
-    .collection("courses")
-    .doc(courseId)
-    .collection("modules")
-    .doc(moduleId)
-    .collection("lessons")
-    .doc(lessonId);
-  const blocksRef = lessonRef.collection("blocks");
-
-  // Batch write for atomicity
-  const batch = db.batch();
-
-  // 1. Delete existing blocks (simple replacement strategy for MVP)
-  // In a real optimized app, we would diff changes.
-  const existingBlocksSnap = await blocksRef.get();
-  existingBlocksSnap.docs.forEach((doc) => {
-    batch.delete(doc.ref);
-  });
-
-  // 2. Normalize and add new blocks
+  const supabase = createSupabaseServiceClient();
   const safeBlocks = (blocks || []).map((b: any, idx: number) => ({
     ...b,
     // Default ordering and publish state (legacy data may omit these fields)
     order: typeof b?.order === "number" ? b.order : idx + 1,
     isPublished: b?.isPublished !== false,
   })) as Block[];
+  const { error: lessonError } = await supabase
+    .from("lessons")
+    .update({ blocks: safeBlocks as any })
+    .eq("id", lessonId)
+    .eq("course_id", courseId)
+    .eq("module_id", moduleId);
+  if (lessonError) throw lessonError;
 
-  safeBlocks.forEach((block: any) => {
-    const docRef = blocksRef.doc(block.id);
-    const { id, ...raw } = block;
+  const { data: course, error: courseReadError } = await supabase
+    .from("courses")
+    .select("content_revision")
+    .eq("id", courseId)
+    .single();
+  if (courseReadError) throw courseReadError;
 
-    batch.set(docRef, {
-      ...raw,
-      order: typeof raw?.order === "number" ? raw.order : 0,
-      isPublished: raw?.isPublished !== false,
-      updatedAt: new Date(),
-      createdAt: raw?.createdAt || new Date(),
-    });
-  });
-
-  // 3. Update lesson timestamp/count (use set+merge for safety)
-  batch.set(
-    lessonRef,
-    {
-      updatedAt: FieldValue.serverTimestamp(),
-      publishedBlocksCount: safeBlocks.filter(
-        (b: any) => b?.isPublished !== false,
-      ).length,
-    },
-    { merge: true },
-  );
-
-  // 4. Increment course content revision (Structural Integrity)
-  batch.update(db.collection("courses").doc(courseId), {
-    contentRevision: FieldValue.increment(1),
-    updatedAt: FieldValue.serverTimestamp(),
-  });
-
-  return batch.commit();
+  const { error: courseError } = await supabase
+    .from("courses")
+    .update({ content_revision: (course.content_revision ?? 0) + 1 })
+    .eq("id", courseId);
+  if (courseError) throw courseError;
 }
