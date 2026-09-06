@@ -58,14 +58,14 @@ export default async function ExamPage({
     id: assessmentRow.id,
     ...assessmentRow,
     courseId: assessmentRow.course_id,
-  } as AssessmentDoc;
+  } as unknown as AssessmentDoc;
 
   // Check if already completed
   if (submissionRows?.length) {
     const submission = {
       id: submissionRows[0].id,
       ...submissionRows[0],
-    } as AssessmentSubmissionDoc;
+    } as unknown as AssessmentSubmissionDoc;
     const passed = submission.passed;
 
     return (
