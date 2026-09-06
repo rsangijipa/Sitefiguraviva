@@ -131,7 +131,7 @@ describe("PHQ-9 Scoring", () => {
       q5: 3,
       q6: 2,
       q7: 1,
-      q8: 1,
+      q8: 2,
       q9: 0,
     });
     expect(result.rawScore).toBe(20);
