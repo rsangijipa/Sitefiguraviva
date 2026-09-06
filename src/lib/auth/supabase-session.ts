@@ -18,9 +18,9 @@ function normalizeRole(role: unknown): string {
 }
 
 /**
- * Verifies a Supabase access token and maps its profile into the claims that
- * legacy Firebase-backed services consume. The token is always verified by
- * Supabase; its decoded payload is never trusted on its own.
+ * Verifies a Supabase access token and maps its profile into the claims used
+ * by server-side authorization. The token is always verified by Supabase; its
+ * decoded payload is never trusted on its own.
  */
 export async function getSupabaseSessionClaims(
   accessToken: string | null | undefined,

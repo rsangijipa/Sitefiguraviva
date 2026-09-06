@@ -46,7 +46,7 @@ export async function middleware(request: NextRequest) {
       url.searchParams.set("next", pathname);
       return NextResponse.redirect(url);
     }
-    // Deep JWT signature verification happens in layouts and server actions using firebase-admin
+    // Deep session verification happens in layouts and server actions through Supabase.
   }
 
   return response;
