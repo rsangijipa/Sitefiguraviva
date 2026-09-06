@@ -1,0 +1,124 @@
+﻿.answer-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: 14px var(--space-md);
+  background-color: var(--fv-creme-papel);
+  border: 1.5px solid var(--fv-nevoa);
+  border-radius: var(--radius-md);
+  text-align: left;
+  cursor: pointer;
+  /* Touch target confortável */
+  min-height: 52px;
+  /* Transição só nas propriedades visuais — não em transform
+     para que o :active seja imediato */
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast);
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--fv-mata);
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  /* Separação visual entre opções */
+  position: relative;
+}
+
+/* Hover — apenas em dispositivos com ponteiro fino */
+@media (hover: hover) and (pointer: fine) {
+  .answer-option:hover:not(.answer-option--selected) {
+    background-color: var(--fv-areia);
+    border-color: var(--fv-verde-raiz);
+  }
+}
+
+/* Active — feedback instantâneo no toque */
+.answer-option:active:not(.answer-option--selected) {
+  background-color: var(--fv-areia);
+  border-color: var(--fv-verde-raiz);
+  transform: scale(0.985);
+}
+
+.answer-option:focus-visible {
+  outline: 3px solid var(--fv-verde-raiz);
+  outline-offset: 2px;
+}
+
+/* Estado selecionado */
+.answer-option--selected {
+  background-color: var(--fv-areia);
+  border: 2px solid var(--fv-verde-raiz);
+}
+
+.answer-option--selected:active {
+  transform: scale(0.985);
+}
+
+/* ── Radio ── */
+.answer-option__radio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Maior em mobile para toque preciso */
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--fv-nevoa);
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition:
+    border-color var(--transition-fast),
+    background-color var(--transition-fast);
+}
+
+.answer-option--selected .answer-option__radio {
+  border-color: var(--fv-verde-raiz);
+  background-color: var(--fv-verde-raiz);
+}
+
+.answer-option__radio-check {
+  width: 7px;
+  height: 7px;
+  background-color: var(--fv-creme-papel);
+  border-radius: 50%;
+}
+
+/* ── Label ── */
+.answer-option__label {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--fv-mata);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.answer-option--selected .answer-option__label {
+  color: var(--fv-verde-raiz);
+  font-weight: 700;
+}
+
+/* ── Mobile ── */
+@media (max-width: 640px) {
+  .answer-option {
+    padding: 15px var(--space-md);
+    min-height: 56px;
+    border-radius: var(--radius-md);
+    font-size: 15px;
+  }
+
+  .answer-option__label {
+    font-size: 15px;
+  }
+
+  .answer-option__radio {
+    width: 22px;
+    height: 22px;
+  }
+
+  .answer-option__radio-check {
+    width: 8px;
+    height: 8px;
+  }
+}

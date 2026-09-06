@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import BreathingApp from "./resources/BreathingApp";
 import FeelingsTree from "./FeelingsTree";
-import MentalHealthQuiz from "./resources/MentalHealthQuiz";
+import { App as QuizBank } from "./Quiz/App";
 import SomaScan from "./somascan/App";
 import { Modal, ModalContent, ModalBody } from "./ui/Modal";
 import { useToast } from "@/context/ToastContext";
@@ -189,14 +189,14 @@ export default function ResourcesSection() {
                 <Sparkles size={32} />
               </div>
               <h3 className="text-xl font-serif text-primary font-bold mb-2">
-                Quiz de Saúde Mental
+                Banco de Quizzes
               </h3>
               <p className="text-text/60 text-sm mb-6 flex-grow">
-                Mindful Roots: Um check-in rápido de 14 dias para sua saúde
-                emocional.
+                MenteQuiz: questionários e reflexões sobre saúde mental,
+                comportamento e autoconhecimento.
               </p>
               <span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-sage group-hover:text-primary transition-colors">
-                Fazer Check-in
+                Explorar Quizzes
               </span>
             </motion.div>
           </div>
@@ -285,7 +285,9 @@ export default function ResourcesSection() {
             )}
 
             {activeResource === "quiz" && (
-              <MentalHealthQuiz onClose={closeResource} />
+              <div className="w-full h-full relative min-h-[80vh] overflow-y-auto">
+                <QuizBank />
+              </div>
             )}
           </ModalBody>
         </ModalContent>

@@ -1,0 +1,112 @@
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: rgba(253, 250, 244, 0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--fv-nevoa);
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  /* Safe area para notch lateral (landscape) */
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+.app-header__inner {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--header-height);
+  gap: var(--space-sm);
+}
+
+.app-header__left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  min-width: 0; /* impede overflow do logo */
+}
+
+/* ── Botão back com área de toque generosa ── */
+.app-header__back-btn {
+  background: none;
+  border: none;
+  /* Área mínima WCAG 44×44 */
+  min-width: var(--touch-min);
+  min-height: var(--touch-min);
+  padding: 0 10px;
+  cursor: pointer;
+  color: var(--fv-pedra);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast);
+  /* Evita zoom em duplo-toque no iOS */
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  /* Margem negativa para compensar padding visual */
+  margin-left: -10px;
+}
+
+.app-header__back-btn:hover {
+  background-color: var(--fv-areia);
+  color: var(--fv-verde-raiz);
+}
+
+.app-header__back-btn:active {
+  background-color: var(--fv-areia-escura);
+  color: var(--fv-verde-raiz);
+}
+
+.app-header__back-btn:focus-visible {
+  outline: 3px solid var(--fv-verde-raiz);
+  outline-offset: 2px;
+}
+
+/* ── Logo ── */
+.app-header__logo {
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  white-space: nowrap;
+}
+
+.app-header__logo-mente {
+  color: var(--fv-verde-raiz);
+}
+
+.app-header__logo-quiz {
+  color: var(--fv-terra-barro);
+}
+
+/* ── Subtítulo direita ── */
+.app-header__right {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--fv-pedra);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Mobile ── */
+@media (max-width: 640px) {
+  :root { --header-height: 52px; }
+
+  .app-header__logo {
+    font-size: 17px;
+  }
+
+  .app-header__right {
+    display: none;
+  }
+}
