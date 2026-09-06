@@ -1,4 +1,4 @@
-import { db } from "@/lib/firebase/admin";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import { Certificate } from "@/types/certificate";
 import { CertificateCardWrapper } from "@/components/portal/certificates/CertificateCardWrapper"; // Client wrapper for clicks
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -9,28 +9,19 @@ export default async function CertificatesPage() {
   const session = await requireSession("/auth");
   const uid = session.uid;
 
-  // Fetch Certificates (Removed orderBy to avoid index requirement)
-  const certsSnap = await db
-    .collection("certificates")
-    .where("userId", "==", uid)
-    .get();
-
-  let certificates = certsSnap.docs.map((doc) => {
-    const data = doc.data();
+  const { data: rows, error } = await createSupabaseServiceClient()
+    .from("certificates")
+    .select("*")
+    .eq("user_id", uid)
+    .order("issued_at", { ascending: false });
+  if (error) throw error;
+  const certificates = (rows ?? []).map((data: any) => {
     return {
-      id: doc.id,
-      ...data,
-      // Serialize Timestamp to ISO string for Client Component
-      issuedAt:
-        data.issuedAt?.toDate().toISOString() || new Date().toISOString(),
+      id: data.id,
+      ...(data.metadata || {}),
+      code: data.code,
+      issuedAt: data.issued_at || new Date().toISOString(),
     } as Certificate;
-  });
-
-  // Sort in memory (Newest first)
-  certificates.sort((a, b) => {
-    const dateA = new Date(a.issuedAt).getTime();
-    const dateB = new Date(b.issuedAt).getTime();
-    return dateB - dateA;
   });
 
   return (
