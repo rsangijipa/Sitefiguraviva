@@ -2,13 +2,11 @@
 
 import { useState } from "react";
 import { useToast } from "@/context/ToastContext";
-import { Save, Loader2, Upload, FileText, X } from "lucide-react";
+import { Save, Loader2 } from "lucide-react";
 import ImageUpload from "@/components/admin/ImageUpload";
-import { storage } from "@/lib/firebase/client";
+import FileUpload from "@/components/admin/FileUpload";
 import { saveBlogPostAction } from "@/app/actions/blog";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import Button from "@/components/ui/Button";
-import { cn } from "@/lib/utils";
 
 interface BlogPostFormProps {
   post?: any;
@@ -19,7 +17,6 @@ interface BlogPostFormProps {
 export function BlogPostForm({ post, onSuccess, onCancel }: BlogPostFormProps) {
   const { addToast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [uploadingPdf, setUploadingPdf] = useState(false);
 
   const initialForm = {
     title: post?.title || "",
@@ -34,36 +31,6 @@ export function BlogPostForm({ post, onSuccess, onCancel }: BlogPostFormProps) {
   };
 
   const [formData, setFormData] = useState(initialForm);
-
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || file.type !== "application/pdf") {
-      addToast("Por favor, selecione um arquivo PDF.", "error");
-      return;
-    }
-
-    setUploadingPdf(true);
-    try {
-      const cleanName = file.name
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^a-z0-9.]/g, "_")
-        .replace(/_{2,}/g, "_");
-
-      const storageRef = ref(storage, `library/${Date.now()}_${cleanName}`);
-      const snapshot = await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(snapshot.ref);
-
-      setFormData((prev) => ({ ...prev, pdf_url: downloadURL }));
-      addToast("PDF enviado com sucesso!", "success");
-    } catch (error) {
-      console.error("PDF Upload failed", error);
-      addToast("Falha ao enviar PDF.", "error");
-    } finally {
-      setUploadingPdf(false);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -227,48 +194,14 @@ export function BlogPostForm({ post, onSuccess, onCancel }: BlogPostFormProps) {
             <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400 ml-1">
               Arquivo PDF
             </label>
-            <div className="relative group overflow-hidden">
-              <div
-                className={cn(
-                  "w-full h-32 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center transition-all",
-                  formData.pdf_url
-                    ? "bg-green-50 border-green-200"
-                    : "bg-stone-50 border-stone-200 group-hover:bg-primary/5 group-hover:border-primary/30",
-                )}
-              >
-                {formData.pdf_url ? (
-                  <div className="text-center p-4">
-                    <FileText
-                      className="text-green-500 mx-auto mb-2"
-                      size={24}
-                    />
-                    <p className="text-xs font-bold text-green-700">
-                      PDF Anexado
-                    </p>
-                    <p className="text-[10px] text-green-600/50 truncate max-w-[200px] mt-1">
-                      {formData.pdf_url}
-                    </p>
-                  </div>
-                ) : (
-                  <div className="text-center">
-                    <Upload
-                      className="text-stone-300 group-hover:text-primary transition-colors mx-auto mb-2"
-                      size={24}
-                    />
-                    <p className="text-xs font-bold text-stone-400 group-hover:text-primary transition-colors">
-                      Arraste ou clique para enviar PDF
-                    </p>
-                  </div>
-                )}
-                <input
-                  type="file"
-                  accept="application/pdf"
-                  onChange={handleFileUpload}
-                  className="absolute inset-0 opacity-0 cursor-pointer"
-                  disabled={uploadingPdf}
-                />
-              </div>
-            </div>
+            <FileUpload
+              folder="uploads/admin/library"
+              defaultFile={formData.pdf_url}
+              defaultName={post?.title || "Arquivo PDF"}
+              onUpload={(data) =>
+                setFormData((prev) => ({ ...prev, pdf_url: data.url }))
+              }
+            />
           </div>
         )}
       </div>
