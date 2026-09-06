@@ -44,10 +44,7 @@ export default function BlogManager() {
     startTransition(async () => {
       try {
         const supabase = createSupabaseBrowserClient();
-        const { error } = await supabase
-          .from("public_pages")
-          .delete()
-          .eq("id", id);
+        const { error } = await supabase.from("posts").delete().eq("id", id);
         if (error) throw error;
         addToast("Publicação excluída.", "success");
         refetch();
