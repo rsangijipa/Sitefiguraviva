@@ -51,6 +51,26 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["profiles"]["Row"]>;
         Relationships: [];
       };
+      applications: {
+        Row: {
+          id: string;
+          user_id: string;
+          course_id: string;
+          answers: Json;
+          consent: Json;
+          status: string;
+          source: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["applications"]["Row"]> & {
+          id: string;
+          user_id: string;
+          course_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["applications"]["Row"]>;
+        Relationships: [];
+      };
       courses: {
         Row: {
           id: string;

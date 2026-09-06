@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { adminDb } from "@/lib/firebase/admin";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import { getBearerSupabaseSessionClaims } from "@/lib/auth/supabase-session";
-import { FieldValue } from "firebase-admin/firestore";
 import {
   rateLimit,
   RateLimitPresets,
@@ -68,23 +67,23 @@ export async function POST(req: NextRequest) {
 
     const { courseId, answers, consent } = parsed.data;
     const applicationId = `${uid}_${courseId}`;
-    const applicationRef = adminDb
-      .collection("applications")
-      .doc(applicationId);
+    const { error } = await createSupabaseServiceClient()
+      .from("applications")
+      .upsert(
+        {
+          id: applicationId,
+          user_id: uid,
+          course_id: courseId,
+          answers,
+          consent,
+          status: "submitted",
+          source: "internal",
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "id" },
+      );
 
-    await applicationRef.set(
-      {
-        uid,
-        courseId,
-        answers,
-        consent,
-        status: "submitted",
-        source: "internal",
-        createdAt: FieldValue.serverTimestamp(),
-        updatedAt: FieldValue.serverTimestamp(),
-      },
-      { merge: true },
-    );
+    if (error) throw error;
 
     return NextResponse.json({ success: true, applicationId });
   } catch (error: any) {

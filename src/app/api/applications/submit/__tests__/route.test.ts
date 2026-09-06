@@ -1,13 +1,11 @@
 /** @jest-environment node */
 
-const set = jest.fn().mockResolvedValue(undefined);
+const upsert = jest.fn().mockResolvedValue({ error: null });
 
-jest.mock("@/lib/firebase/admin", () => ({
-  adminDb: {
-    collection: jest.fn(() => ({
-      doc: jest.fn(() => ({ set })),
-    })),
-  },
+jest.mock("@/infrastructure/supabase/server", () => ({
+  createSupabaseServiceClient: jest.fn(() => ({
+    from: jest.fn(() => ({ upsert })),
+  })),
 }));
 
 jest.mock("@/lib/auth/supabase-session", () => ({
@@ -23,15 +21,11 @@ jest.mock("@/lib/rateLimit", () => ({
   getClientIdentifier: jest.fn(),
 }));
 
-jest.mock("firebase-admin/firestore", () => ({
-  FieldValue: { serverTimestamp: jest.fn(() => "timestamp") },
-}));
-
 import { POST } from "../route";
 
 describe("POST /api/applications/submit", () => {
   beforeEach(() => {
-    set.mockClear();
+    upsert.mockClear();
   });
 
   it("accepts the enrollment form payload with LGPD consent timestamp", async () => {
@@ -49,11 +43,16 @@ describe("POST /api/applications/submit", () => {
     } as any);
 
     expect(response.status).toBe(200);
-    expect(set).toHaveBeenCalledWith(
+    expect(upsert).toHaveBeenCalledWith(
       expect.objectContaining({
+        id: "user-1_co-visar",
+        user_id: "user-1",
+        course_id: "co-visar",
         consent: { lgpd: true, acceptedAt: "2026-09-05T00:00:00.000Z" },
+        status: "submitted",
+        source: "internal",
       }),
-      { merge: true },
+      { onConflict: "id" },
     );
   });
 });
