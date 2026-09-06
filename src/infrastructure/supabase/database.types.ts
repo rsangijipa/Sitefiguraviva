@@ -277,6 +277,170 @@ export interface Database {
         >;
         Relationships: [];
       };
+      community_replies: {
+        Row: {
+          id: string;
+          thread_id: string;
+          author_id: string | null;
+          legacy_author_firebase_uid: string | null;
+          content: string;
+          author_name: string;
+          author_avatar_url: string | null;
+          like_count: number;
+          is_deleted: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<
+          Database["public"]["Tables"]["community_replies"]["Row"]
+        > & {
+          thread_id: string;
+          content: string;
+          author_name: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["community_replies"]["Row"]
+        >;
+        Relationships: [];
+      };
+      events: {
+        Row: {
+          id: string;
+          title: string;
+          description: string | null;
+          starts_at: string;
+          ends_at: string | null;
+          status: "scheduled" | "live" | "ended" | "cancelled";
+          is_public: boolean;
+          course_id: string | null;
+          type: "webinar" | "in_person" | "hybrid";
+          join_url: string | null;
+          location: string | null;
+          cover_image: string | null;
+          check_in_code: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["events"]["Row"]> & {
+          title: string;
+          starts_at: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["events"]["Row"]>;
+        Relationships: [];
+      };
+      event_attendance: {
+        Row: {
+          id: string;
+          event_id: string;
+          user_id: string | null;
+          timestamp: string;
+          method: string;
+        };
+        Insert: Partial<
+          Database["public"]["Tables"]["event_attendance"]["Row"]
+        > & {
+          event_id: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["event_attendance"]["Row"]
+        >;
+        Relationships: [];
+      };
+      notifications: {
+        Row: {
+          id: string;
+          user_id: string;
+          type: string;
+          title: string;
+          body: string | null;
+          link: string;
+          is_read: boolean;
+          read_at: string | null;
+          metadata: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<
+          Database["public"]["Tables"]["notifications"]["Row"]
+        > & {
+          user_id: string;
+          type: string;
+          title: string;
+          link: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["notifications"]["Row"]>;
+        Relationships: [];
+      };
+      gamification_profiles: {
+        Row: {
+          user_id: string;
+          total_xp: number;
+          level: number;
+          current_streak: number;
+          longest_streak: number;
+          last_activity_date: string | null;
+          badges: string[];
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<
+          Database["public"]["Tables"]["gamification_profiles"]["Row"]
+        > & {
+          user_id: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["gamification_profiles"]["Row"]
+        >;
+        Relationships: [];
+      };
+      xp_transactions: {
+        Row: {
+          id: string;
+          user_id: string;
+          amount: number;
+          reason:
+            | "lesson_completed"
+            | "quiz_passed"
+            | "course_completed"
+            | "daily_login"
+            | "bonus"
+            | "admin_reward";
+          metadata: Json;
+          timestamp: string;
+        };
+        Insert: Partial<
+          Database["public"]["Tables"]["xp_transactions"]["Row"]
+        > & {
+          user_id: string;
+          amount: number;
+          reason:
+            | "lesson_completed"
+            | "quiz_passed"
+            | "course_completed"
+            | "daily_login"
+            | "bonus"
+            | "admin_reward";
+        };
+        Update: Partial<Database["public"]["Tables"]["xp_transactions"]["Row"]>;
+        Relationships: [];
+      };
+      earned_badges: {
+        Row: {
+          id: string;
+          user_id: string;
+          badge_id: string;
+          course_id: string | null;
+          earned_at: string;
+        };
+        Insert: Partial<
+          Database["public"]["Tables"]["earned_badges"]["Row"]
+        > & {
+          user_id: string;
+          badge_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["earned_badges"]["Row"]>;
+        Relationships: [];
+      };
       audit_logs: {
         Row: {
           id: string;
