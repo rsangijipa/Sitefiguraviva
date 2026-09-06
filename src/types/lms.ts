@@ -188,8 +188,8 @@ export interface AnnouncementDoc {
   content: string; // Markdown
   authorId: string;
   isPinned: boolean;
-  publishAt: Timestamp;
-  createdAt: Timestamp;
+  publishAt: Timestamp | Date | string;
+  createdAt: Timestamp | Date | string;
 }
 
 export interface NotificationDoc {
