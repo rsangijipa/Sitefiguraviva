@@ -4,6 +4,8 @@ import { access, readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { updateCourseCover } from "./upload-course-covers-lib.mjs";
+
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(scriptDirectory, "..");
 
@@ -16,7 +18,7 @@ const unknownArguments = process.argv
   .filter((arg) => arg !== "--dry-run");
 
 if (unknownArguments.length > 0) {
-  console.error(`Unsupported arguments: ${unknownArguments.join(", ")}`);
+  console.error("Unsupported command-line arguments.");
   process.exit(1);
 }
 
@@ -116,18 +118,7 @@ async function uploadCover(cover, course) {
   }
 
   const publicUrl = storage.getPublicUrl(cover.objectPath).data.publicUrl;
-  const { error: updateError } = await supabase
-    .from("courses")
-    .update({
-      cover_image_url: publicUrl,
-      image_url: publicUrl,
-      thumbnail_url: publicUrl,
-    })
-    .eq("id", course.id);
-
-  if (updateError) {
-    throw updateError;
-  }
+  await updateCourseCover({ supabase, courseId: course.id, publicUrl });
 
   return publicUrl;
 }
