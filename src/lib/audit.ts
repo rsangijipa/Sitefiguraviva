@@ -57,9 +57,8 @@ export async function logAudit(entry: AuditLogEntry) {
  * Logs within an existing Firestore transaction.
  */
 export function logAuditInTransaction(_tx: unknown, entry: AuditLogEntry) {
-  // Transactional callers are migrated independently; keep this compatibility
-  // seam until their transaction adapters target Supabase RPCs.
-  void entry;
+  // Preserve events while legacy callers move to Supabase RPCs.
+  void logAudit(entry);
 }
 
 // Global Alias for smooth migration from auditService
