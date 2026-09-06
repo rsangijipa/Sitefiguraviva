@@ -9,20 +9,14 @@ import Footer from "./Footer";
 import AlertBar from "./AlertBar";
 import HeroSection from "./sections/HeroSection";
 import CoursesSection from "./sections/CoursesSection";
-import FounderSection from "./sections/FounderSection";
 import FloatingControls from "./ui/FloatingControls";
 import { useUI } from "@/context/UIContext";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Image as ImageIcon } from "lucide-react";
 import Image from "next/image";
-import MethodologySection from "./sections/MethodologySection";
-import { MemoryMiniFooter } from "./sections/MemoryMiniFooter";
-import SectionShell from "./ui/SectionShell";
 
 const BlogSection = dynamic(() => import("./sections/BlogSection"));
-const ResourcesSection = dynamic(() => import("./ResourcesSection"));
 const InstagramSection = dynamic(() => import("./InstagramSection"));
-const InstituteSection = dynamic(() => import("./sections/InstituteSection"));
 const TestimonialsSection = dynamic(
   () => import("./sections/TestimonialsSection"),
 );
@@ -145,21 +139,8 @@ export default function HomeClient({ initialData }: HomeClientProps = {}) {
         <HeroSection initialData={initialData?.institute} />
 
         <Reveal variant="medium">
-          <FounderSection initialData={initialData?.founder} />
-        </Reveal>
-
-        {/* Laura Perls Tribute - Placed below Curator/Founder */}
-        <Reveal variant="soft">
-          <MemoryMiniFooter />
-        </Reveal>
-
-        <Reveal variant="medium">
-          <MethodologySection />
-        </Reveal>
-
-        <Reveal variant="medium">
           <CoursesSection
-            courses={courses}
+            courses={courses.slice(0, 3)}
             onOpenCalendar={() => openModal("calendar")}
             onSelectCourse={selectCourse}
           />
@@ -167,19 +148,6 @@ export default function HomeClient({ initialData }: HomeClientProps = {}) {
 
         <Reveal variant="soft">
           <TestimonialsSection />
-        </Reveal>
-
-        <Reveal variant="medium">
-          <InstituteSection
-            gallery={gallery}
-            initialData={initialData?.institute}
-            initialFounderData={initialData?.founder}
-            initialTeamData={initialData?.team}
-          />
-        </Reveal>
-
-        <Reveal variant="soft">
-          <ResourcesSection />
         </Reveal>
 
         <Reveal variant="medium">

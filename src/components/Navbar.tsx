@@ -10,12 +10,6 @@ import {
   User as UserIcon,
   LogOut,
   LayoutDashboard,
-  Sparkles,
-  BookOpen,
-  Image as ImageIcon,
-  PenTool,
-  Award,
-  Users,
   Instagram,
   ChevronRight,
 } from "lucide-react";
@@ -24,6 +18,7 @@ import { Button } from "./ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
 import { getRedirectPathForRole } from "@/lib/auth/authService";
 import { cn } from "@/lib/utils";
+import { PUBLIC_NAV_ITEMS } from "@/features/public-site/content/navigation";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -98,20 +93,6 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const navItems = [
-    { label: "Instituto", href: "/#instituto-sobre", icon: Users },
-    { label: "Fundadora", href: "/#fundadora", icon: Award },
-    {
-      label: "Formações",
-      href: "/#instituto",
-      display: "Formações",
-      icon: Sparkles,
-    },
-    { label: "Biblioteca", href: "/public-library", icon: BookOpen },
-    { label: "Galeria", href: "/public-gallery", icon: ImageIcon },
-    { label: "Blog", href: "/#blog", icon: PenTool },
-  ];
-
   return (
     <>
       <nav
@@ -149,13 +130,13 @@ export default function Navbar() {
 
           {/* Desktop Menu */}
           <div className="hidden xl:flex items-center gap-1 font-sans text-[11px] 2xl:text-xs font-bold tracking-[0.18em] uppercase text-text/80">
-            {navItems.map((item) => (
+            {PUBLIC_NAV_ITEMS.map((item) => (
               <a
                 key={item.label}
                 href={item.href}
                 className="hover:text-primary transition-all duration-200 hover:bg-primary/5 px-4 py-2 rounded-xl min-h-[44px] flex items-center focus-visible:ring-2 focus-visible:ring-primary"
               >
-                {item.display || item.label}
+                {item.label}
               </a>
             ))}
 
@@ -267,7 +248,7 @@ export default function Navbar() {
                   <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-primary/30 px-4 mb-4 block">
                     Navegação principal
                   </span>
-                  {navItems.map((item, idx) => (
+                  {PUBLIC_NAV_ITEMS.map((item, idx) => (
                     <motion.a
                       key={item.label}
                       href={item.href}
@@ -282,7 +263,7 @@ export default function Navbar() {
                           <item.icon size={18} />
                         </div>
                         <span className="text-xl font-serif text-primary">
-                          {item.display || item.label}
+                          {item.label}
                         </span>
                       </div>
                       <ChevronRight
