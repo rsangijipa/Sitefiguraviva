@@ -1,4 +1,4 @@
-import { db } from "@/lib/firebase/admin";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import { AssessmentDoc, AssessmentSubmissionDoc } from "@/types/assessment";
 import { ExamExitWrapper } from "@/components/assessment/ExamExitWrapper"; // Ensure this path is correct
 import { CheckCircle, AlertTriangle } from "lucide-react";
@@ -20,18 +20,24 @@ export default async function ExamPage({
   // For MVP, we effectively used ID like `${uid}_${assessmentId}_draft` for drafts and timestamped for finals.
   // We need to check if there is ANY 'submitted'/'graded' submission first to block retakes.
 
-  const [assessmentDoc, submissionsSnap] = await Promise.all([
-    db.collection("assessments").doc(examId).get(),
-    db
-      .collection("submissions")
-      .where("assessmentId", "==", examId)
-      .where("userId", "==", uid)
-      .where("status", "in", ["submitted", "graded"])
-      .limit(1)
-      .get(),
+  const supabase = createSupabaseServiceClient();
+  const [
+    { data: assessmentRow, error: assessmentError },
+    { data: submissionRows, error: submissionsError },
+  ] = await Promise.all([
+    supabase.from("assessments").select("*").eq("id", examId).maybeSingle(),
+    supabase
+      .from("assessment_submissions")
+      .select("*")
+      .eq("assessment_id", examId)
+      .eq("user_id", uid)
+      .in("status", ["submitted", "graded"])
+      .limit(1),
   ]);
+  if (assessmentError || submissionsError)
+    throw assessmentError || submissionsError;
 
-  if (!assessmentDoc.exists) {
+  if (!assessmentRow) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
         <AlertTriangle size={48} className="text-red-500 mb-4" />
@@ -49,15 +55,16 @@ export default async function ExamPage({
   }
 
   const assessment = {
-    id: assessmentDoc.id,
-    ...assessmentDoc.data(),
+    id: assessmentRow.id,
+    ...assessmentRow,
+    courseId: assessmentRow.course_id,
   } as AssessmentDoc;
 
   // Check if already completed
-  if (!submissionsSnap.empty) {
+  if (submissionRows?.length) {
     const submission = {
-      id: submissionsSnap.docs[0].id,
-      ...submissionsSnap.docs[0].data(),
+      id: submissionRows[0].id,
+      ...submissionRows[0],
     } as AssessmentSubmissionDoc;
     const passed = submission.passed;
 
@@ -88,12 +95,18 @@ export default async function ExamPage({
   }
 
   // Check for Draft
-  const draftDoc = await db
-    .collection("submissions")
-    .doc(`${uid}_${examId}_draft`)
-    .get();
-  const existingSubmission = draftDoc.exists
-    ? ({ id: draftDoc.id, ...draftDoc.data() } as AssessmentSubmissionDoc)
+  const { data: draftRow } = await supabase
+    .from("assessment_submissions")
+    .select("*")
+    .eq("id", `${uid}_${examId}_draft`)
+    .maybeSingle();
+  const existingSubmission = draftRow
+    ? ({
+        id: draftRow.id,
+        ...draftRow,
+        assessmentId: draftRow.assessment_id,
+        userId: draftRow.user_id,
+      } as unknown as AssessmentSubmissionDoc)
     : undefined;
 
   return (
