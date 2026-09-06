@@ -56,11 +56,11 @@ describe("AQ-10 Total Scoring", () => {
       q2: 4, // +1 (disagree)
       q3: 4, // +1 (disagree)
       q4: 4, // +1 (disagree)
-      q5: 4, // +1 (disagree)
+      q5: 1, // +0 (agree when should disagree)
       q6: 1, // +0 (agree when should disagree)
       q7: 1, // +1 (agree)
       q8: 4, // +1 (disagree)
-      q9: 4, // +0 (disagree)
+      q9: 1, // +0 (agree when should disagree)
       q10: 4, // +0 (disagree)
     });
     expect(result.rawScore).toBe(5);
@@ -75,11 +75,11 @@ describe("AQ-10 Total Scoring", () => {
       q3: 4, // +1
       q4: 4, // +1
       q5: 4, // +1
-      q6: 4, // +1
+      q6: 1, // +0
       q7: 1, // +1
-      q8: 1, // +0
+      q8: 4, // +0
       q9: 1, // +0
-      q10: 1, // +0
+      q10: 4, // +0
     });
     expect(result.rawScore).toBe(6);
     expect(result.classification).toBe("Faixa de rastreio positivo");
@@ -96,7 +96,7 @@ describe("AQ-10 Total Scoring", () => {
       q5: 4, // +1 (disagree)
       q6: 4, // +1 (disagree)
       q7: 1, // +1 (agree)
-      q8: 4, // +1 (disagree)
+      q8: 1, // +1 (agree)
       q9: 4, // +1 (disagree)
       q10: 1, // +1 (agree)
     });

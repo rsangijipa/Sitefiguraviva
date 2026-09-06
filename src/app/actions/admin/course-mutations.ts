@@ -21,6 +21,7 @@ import {
   listMaterials,
   listModules,
 } from "@/lib/repositories/courseRepository.server";
+import { touchCourseRevision } from "@/lib/course-content/revision";
 
 type MutablePayload = Record<string, any>;
 
@@ -118,7 +119,7 @@ export async function updateCourseAction(
   courseId: string,
   data: Partial<CourseDoc>,
 ): Promise<void> {
-  await requireAdmin();
+  const actor = await requireAdmin();
   const docRef = adminDb.collection("courses").doc(courseId);
   const payload = sanitizeRecord(data, "course update");
 
@@ -128,10 +129,16 @@ export async function updateCourseAction(
     updatedAt: FieldValue.serverTimestamp(),
   });
 
+  delete updatePayload.status;
+  delete updatePayload.isPublished;
+  delete updatePayload.publishedAt;
+  delete updatePayload.contentRevision;
+
   if (payload.coverImage) updatePayload.image = payload.coverImage;
   if (payload.image) updatePayload.coverImage = payload.image;
 
   await docRef.update(updatePayload);
+  await touchCourseRevision(courseId, "course-updated", actor);
   revalidatePath("/admin/courses");
   revalidatePath(`/admin/courses/${courseId}`);
 }
@@ -181,7 +188,7 @@ export async function createModuleAction(
   title: string,
   order: number,
 ): Promise<string> {
-  await requireAdmin();
+  const actor = await requireAdmin();
   const docRef = await adminDb
     .collection("courses")
     .doc(courseId)
@@ -193,6 +200,7 @@ export async function createModuleAction(
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
     });
+  await touchCourseRevision(courseId, "module-created", actor);
   return docRef.id;
 }
 
@@ -201,7 +209,7 @@ export async function updateModuleAction(
   moduleId: string,
   data: Partial<ModuleDoc>,
 ): Promise<void> {
-  await requireAdmin();
+  const actor = await requireAdmin();
   const payload = sanitizeRecord(data, "module update");
   const docRef = adminDb
     .collection("courses")
@@ -215,6 +223,7 @@ export async function updateModuleAction(
   });
 
   await docRef.update(updatePayload);
+  await touchCourseRevision(courseId, "module-updated", actor);
 
   if (payload.isPublished !== undefined) {
     await syncLessonsCountAction(courseId);
@@ -225,7 +234,7 @@ export async function deleteModuleAction(
   courseId: string,
   moduleId: string,
 ): Promise<void> {
-  await requireAdmin();
+  const actor = await requireAdmin();
 
   const batch = adminDb.batch();
   const lessonsRef = adminDb
@@ -254,6 +263,7 @@ export async function deleteModuleAction(
   }
 
   await batch.commit();
+  await touchCourseRevision(courseId, "module-deleted", actor);
 }
 
 // --- LESSONS ---
@@ -264,7 +274,7 @@ export async function createLessonAction(
   title: string,
   order: number,
 ): Promise<string> {
-  await requireAdmin();
+  const actor = await requireAdmin();
   const lessonsCol = adminDb
     .collection("courses")
     .doc(courseId)
@@ -285,6 +295,8 @@ export async function createLessonAction(
     updatedAt: FieldValue.serverTimestamp(),
   });
 
+  await touchCourseRevision(courseId, "lesson-created", actor);
+
   return newLessonRef.id;
 }
 
@@ -294,7 +306,7 @@ export async function updateLessonAction(
   lessonId: string,
   data: Partial<LessonDoc>,
 ): Promise<void> {
-  await requireAdmin();
+  const actor = await requireAdmin();
   const payload = sanitizeRecord(data, "lesson update");
   const docRef = adminDb
     .collection("courses")
@@ -310,6 +322,7 @@ export async function updateLessonAction(
   });
 
   await docRef.update(updatePayload);
+  await touchCourseRevision(courseId, "lesson-updated", actor);
 
   if (payload.isPublished !== undefined) {
     await syncLessonsCountAction(courseId);
@@ -321,7 +334,7 @@ export async function deleteLessonAction(
   moduleId: string,
   lessonId: string,
 ): Promise<void> {
-  await requireAdmin();
+  const actor = await requireAdmin();
   const lessonRef = adminDb
     .collection("courses")
     .doc(courseId)
@@ -334,6 +347,7 @@ export async function deleteLessonAction(
   const wasPublished = snap.exists && snap.data()?.isPublished === true;
 
   await lessonRef.delete();
+  await touchCourseRevision(courseId, "lesson-deleted", actor);
 
   if (wasPublished) {
     await syncLessonsCountAction(courseId);

@@ -43,6 +43,7 @@
   ],
   "exclude": [
     "node_modules",
+    "src/components/arvoredasemocoes",
     "src/**/__tests__",
     "src/**/*.test.ts",
     "src/**/*.test.tsx"

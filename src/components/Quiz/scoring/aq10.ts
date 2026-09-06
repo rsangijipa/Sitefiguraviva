@@ -116,7 +116,7 @@ export const calculateAQ10 = (
   // Interpretação
   const baseInterpretation =
     screenStatus === "positive"
-      ? "Seu resultado atingiu o ponto de referência utilizado por diretrizes clínicas para considerar uma avaliação mais abrangente de características do espectro autista. O AQ-10 não estabelece diagnóstico isoladamente."
+      ? "Seu resultado atingiu o ponto de referência recomendado pela NICE para considerar uma avaliação mais abrangente de características do espectro autista. O AQ-10 não estabelece diagnóstico isoladamente."
       : "Seu resultado ficou abaixo do ponto de referência deste instrumento. Isso não exclui a possibilidade de autismo quando existem características relevantes, histórico compatível ou preocupação clínica.";
 
   const contextualNote =

@@ -31,6 +31,13 @@ service firebase.storage {
       return request.resource.size < limit * 1024 * 1024;
     }
 
+    function isAcademicContentType() {
+      return request.resource.contentType == 'application/pdf' ||
+             request.resource.contentType.matches('video/.*') ||
+             request.resource.contentType.matches('audio/.*') ||
+             request.resource.contentType.matches('image/.*');
+    }
+
     // --- Public Assets ---
 
     match /public-library/{allPaths=**} {
@@ -77,17 +84,17 @@ service firebase.storage {
 
     match /lesson-files/{courseId}/{lessonId}/{allPaths=**} {
       allow read: if isAdmin() || isEnrolledActive(courseId);
-      allow write: if isAdmin();
+      allow write: if isAdmin() && isAcademicContentType() && isBelowMaxSize(50);
     }
 
     match /course-assets/{courseId}/{allPaths=**} {
       allow read: if isAdmin() || isEnrolledActive(courseId);
-      allow write: if isAdmin();
+      allow write: if isAdmin() && isAcademicContentType() && isBelowMaxSize(50);
     }
 
     match /courses/{courseId}/materials/{allPaths=**} {
       allow read: if isStaff() || (request.auth != null && isEnrolledActive(courseId));
-      allow write: if isStaff() && isBelowMaxSize(50);
+      allow write: if isStaff() && isAcademicContentType() && isBelowMaxSize(50);
     }
 
     // General User Uploads

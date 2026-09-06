@@ -96,10 +96,9 @@ describe("WHO-5 Scoring", () => {
     ];
 
     testCases.forEach(({ raw, expected }) => {
-      const values = Array(raw)
-        .fill(0)
-        .map((_, i) => (i < raw ? 1 : 0))
-        .slice(0, 5);
+      const values = Array.from({ length: 5 }, (_, index) =>
+        Math.min(5, Math.max(0, raw - index * 5)),
+      );
 
       const result = calculateWHO5({
         q1: values[0] || 0,

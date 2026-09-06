@@ -94,7 +94,7 @@ describe("CBI Scoring", () => {
     });
 
     const workDomain = result.domains[1];
-    expect(workDomain.score).toBe(15); // Média com WB7 = 100
+    expect(workDomain.score).toBe(14); // Média arredondada de 100 / 7
   });
 
   test("client domain skipped when workWithClients = false", () => {
