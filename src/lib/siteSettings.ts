@@ -1,5 +1,4 @@
-import { db } from "@/lib/firebase/client";
-import { doc, getDoc } from "firebase/firestore";
+import { createSupabaseBrowserClient } from "@/infrastructure/supabase/client";
 
 // --- Types ---
 
@@ -125,11 +124,16 @@ export async function getSiteSettings<T>(
   fallback: T,
 ): Promise<T> {
   try {
-    const snap = await getDoc(doc(db, "siteSettings", key));
-    if (snap.exists()) {
-      return { ...fallback, ...snap.data() } as T;
-    }
-    return fallback;
+    const { data, error } = await createSupabaseBrowserClient()
+      .from("public_pages")
+      .select("content")
+      .eq("key", key)
+      .eq("is_published", true)
+      .maybeSingle();
+    if (error) throw error;
+    return data?.content
+      ? ({ ...fallback, ...(data.content as object) } as T)
+      : fallback;
   } catch (error) {
     console.error(`Error fetching siteSettings/${key}:`, error);
     return fallback;
