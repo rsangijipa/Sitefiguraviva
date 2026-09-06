@@ -18,6 +18,7 @@
     "typecheck": "tsc --noEmit",
     "audit:public-assets": "node scripts/check-public-budgets.mjs",
     "audit:no-firebase": "node scripts/check-no-firebase.mjs",
+    "migrate:course-covers": "node scripts/upload-course-covers.mjs",
     "prepare": "husky"
   },
   "dependencies": {
