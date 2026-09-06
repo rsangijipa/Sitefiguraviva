@@ -2,13 +2,17 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import HomeClient from "@/components/HomeClient";
-import { db } from "@/lib/firebase/admin";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import { deepSafeSerialize } from "@/lib/utils";
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
-    const seoSnap = await db.collection("siteSettings").doc("seo").get();
-    const seo = seoSnap.data();
+    const { data } = await createSupabaseServiceClient()
+      .from("public_pages")
+      .select("content")
+      .eq("key", "seo")
+      .maybeSingle();
+    const seo = data?.content as any;
 
     return {
       title: seo?.defaultTitle || "Instituto Figura Viva | Gestalt-Terapia",
@@ -44,26 +48,31 @@ function toISO(value: any): string | null {
 
 async function getHomeData() {
   try {
-    const [coursesSnap, postsSnap, instituteSnap] = await Promise.all([
-      db
-        .collection("courses")
-        .where("isPublished", "==", true)
-        .where("status", "==", "open")
-        .limit(3)
-        .get(),
-      db
-        .collection("posts")
-        .where("isPublished", "==", true)
-        .orderBy("created_at", "desc")
-        .limit(3)
-        .get(),
-      db.collection("siteSettings").doc("institute").get(),
-    ]);
+    const supabase = createSupabaseServiceClient();
+    const [{ data: courseRows }, { data: postRows }, { data: instituteRow }] =
+      await Promise.all([
+        supabase
+          .from("courses")
+          .select("*")
+          .eq("is_published", true)
+          .eq("status", "open")
+          .limit(3),
+        supabase
+          .from("posts")
+          .select("*")
+          .eq("is_published", true)
+          .order("created_at", { ascending: false })
+          .limit(3),
+        supabase
+          .from("public_pages")
+          .select("content")
+          .eq("key", "institute")
+          .maybeSingle(),
+      ]);
 
-    const courses = coursesSnap.docs.map((doc) => {
-      const data = doc.data();
+    const courses = (courseRows ?? []).map((data: any) => {
       return deepSafeSerialize({
-        id: doc.id,
+        id: data.id,
         title: data.title || "",
         subtitle: data.subtitle || "",
         description: data.description || "",
@@ -72,10 +81,9 @@ async function getHomeData() {
       });
     });
 
-    const posts = postsSnap.docs.map((doc) => {
-      const data = doc.data();
+    const posts = (postRows ?? []).map((data: any) => {
       return deepSafeSerialize({
-        id: doc.id,
+        id: data.id,
         title: data.title || "",
         excerpt: data.excerpt || "",
         image: data.image || null,
@@ -87,8 +95,8 @@ async function getHomeData() {
       courses,
       posts,
       gallery: [],
-      institute: instituteSnap.exists
-        ? deepSafeSerialize(instituteSnap.data())
+      institute: instituteRow?.content
+        ? deepSafeSerialize(instituteRow.content)
         : undefined,
     };
   } catch (error) {
