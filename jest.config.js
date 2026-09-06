@@ -9,6 +9,7 @@ const createJestConfig = nextJest({
 const customJestConfig = {
   roots: [
     "<rootDir>/src",
+    "<rootDir>/tests/architecture",
     "<rootDir>/tests/performance",
     "<rootDir>/tests/accessibility",
   ],
