@@ -86,6 +86,56 @@ describe("Supabase public content repository", () => {
     expect(coursesQuery.eq).toHaveBeenNthCalledWith(2, "status", "open");
   });
 
+  it("puts the normalized cover first and de-duplicates legacy gallery images", async () => {
+    const normalizedCover =
+      "https://project.supabase.co/storage/v1/object/public/course-assets/courses/co-visar/capa.jpeg";
+    const coursesQuery = queryResult([
+      {
+        id: "co-visar",
+        title: "Supervisão Clínica: CO-VISAR",
+        subtitle: null,
+        slug: "co-visar",
+        description: "Supervisão clínica",
+        cover_image_url: normalizedCover,
+        image_url: normalizedCover,
+        thumbnail_url: normalizedCover,
+        instructor_name: null,
+        instructor_title: null,
+        workload_minutes: null,
+        duration_label: null,
+        level: null,
+        category: "Curso",
+        is_published: true,
+        status: "open",
+        content_revision: 1,
+        billing_type: "free",
+        stripe_price_id: null,
+        stripe_product_id: null,
+        tags: [],
+        details: {},
+        team: {},
+        stats: {},
+        community_enabled: false,
+        certificate_rules: {},
+        legacy_payload: {
+          images: ["/legacy-gallery.jpg", normalizedCover],
+        },
+        created_at: "2026-01-01T00:00:00.000Z",
+        updated_at: "2026-01-01T00:00:00.000Z",
+      },
+    ]);
+    mockedCreateSupabaseBrowserClient.mockReturnValue({
+      from: jest.fn().mockReturnValue(coursesQuery),
+    } as unknown as ReturnType<typeof createSupabaseBrowserClient>);
+
+    await expect(listPublishedCourses()).resolves.toEqual([
+      expect.objectContaining({
+        image: normalizedCover,
+        images: [normalizedCover, "/legacy-gallery.jpg"],
+      }),
+    ]);
+  });
+
   it("returns the published page payload without CMS metadata", async () => {
     const pageQuery = queryResult({
       content: { heroTitle: "Figura Viva" },
