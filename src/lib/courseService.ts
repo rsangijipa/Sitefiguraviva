@@ -123,24 +123,11 @@ export async function saveLessonContent(
     order: typeof b?.order === "number" ? b.order : idx + 1,
     isPublished: b?.isPublished !== false,
   })) as Block[];
-  const { error: lessonError } = await supabase
-    .from("lessons")
-    .update({ blocks: safeBlocks as any })
-    .eq("id", lessonId)
-    .eq("course_id", courseId)
-    .eq("module_id", moduleId);
-  if (lessonError) throw lessonError;
-
-  const { data: course, error: courseReadError } = await supabase
-    .from("courses")
-    .select("content_revision")
-    .eq("id", courseId)
-    .single();
-  if (courseReadError) throw courseReadError;
-
-  const { error: courseError } = await supabase
-    .from("courses")
-    .update({ content_revision: (course.content_revision ?? 0) + 1 })
-    .eq("id", courseId);
-  if (courseError) throw courseError;
+  const { error } = await supabase.rpc("save_lesson_content", {
+    p_course_id: courseId,
+    p_module_id: moduleId,
+    p_lesson_id: lessonId,
+    p_blocks: safeBlocks as any,
+  });
+  if (error) throw error;
 }

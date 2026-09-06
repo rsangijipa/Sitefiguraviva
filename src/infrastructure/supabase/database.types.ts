@@ -684,7 +684,17 @@ export interface Database {
       };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      save_lesson_content: {
+        Args: {
+          p_course_id: string;
+          p_module_id: string;
+          p_lesson_id: string;
+          p_blocks: Json;
+        };
+        Returns: undefined;
+      };
+    };
     Enums: {
       app_role: AppRole;
       course_status: CourseStatus;
