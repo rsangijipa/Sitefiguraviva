@@ -1,4 +1,4 @@
-import { db } from "@/lib/firebase/admin";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import { DEFAULT_LEGAL, type LegalSettings } from "./legal";
 
 /**
@@ -8,10 +8,14 @@ import { DEFAULT_LEGAL, type LegalSettings } from "./legal";
  */
 export async function getLegalSettings(): Promise<LegalSettings> {
   try {
-    const snap = await db.collection("siteSettings").doc("legal").get();
-    if (!snap.exists) return DEFAULT_LEGAL;
-
-    const data = (snap.data() || {}) as Partial<LegalSettings>;
+    const { data: row, error } = await createSupabaseServiceClient()
+      .from("public_pages")
+      .select("content")
+      .eq("key", "legal")
+      .maybeSingle();
+    if (error) throw error;
+    if (!row?.content) return DEFAULT_LEGAL;
+    const data = row.content as Partial<LegalSettings>;
 
     return {
       privacy: data.privacy?.content?.length
