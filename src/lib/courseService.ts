@@ -89,42 +89,20 @@ export async function getLessonContent(
   moduleId: string,
   lessonId: string,
 ) {
-  // Fetch specific lesson and its blocks
-  const lessonRef = db
-    .collection("courses")
-    .doc(courseId)
-    .collection("modules")
-    .doc(moduleId)
-    .collection("lessons")
-    .doc(lessonId);
+  const lessons = await listAdminLessons(courseId, moduleId);
+  const lesson = lessons.find((item) => item.id === lessonId) as
+    | Lesson
+    | undefined;
+  if (!lesson) return null;
 
-  const lessonDoc = await lessonRef.get();
-  if (!lessonDoc.exists) return null;
-
-  let blocksSnap;
-  try {
-    blocksSnap = await lessonRef
-      .collection("blocks")
-      .orderBy("order", "asc")
-      .get();
-  } catch (error) {
-    // Legacy blocks might not have an 'order' field; fallback without ordering
-    blocksSnap = await lessonRef.collection("blocks").get();
-  }
-
-  const lesson = { id: lessonDoc.id, ...lessonDoc.data() } as Lesson;
-
-  const blocks = blocksSnap.docs
-    .map((doc) => {
-      const data: any = doc.data();
-      return {
-        id: doc.id,
-        ...data,
-        // Default: visible unless explicitly disabled
-        isPublished: data?.isPublished !== false,
-      };
-    })
-    .filter((b: any) => b.isPublished !== false) as Block[];
+  const blocks = ((lesson as any).blocks || [])
+    .map((block: any, index: number) => ({
+      id: block.id || `${lessonId}-block-${index + 1}`,
+      ...block,
+      order: typeof block.order === "number" ? block.order : index + 1,
+      isPublished: block.isPublished !== false,
+    }))
+    .filter((block: any) => block.isPublished !== false) as Block[];
 
   return deepSafeSerialize({
     lesson,
