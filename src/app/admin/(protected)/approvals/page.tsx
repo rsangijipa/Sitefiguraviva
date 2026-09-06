@@ -1,77 +1,42 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { db } from "@/lib/firebase/client";
-import {
-  collection,
-  query,
-  where,
-  onSnapshot,
-  doc,
-  getDoc,
-} from "firebase/firestore";
 import {
   Check,
   X,
   Clock,
   User,
-  ExternalLink,
   ShieldCheck,
-  Mail,
-  Info,
   CreditCard,
-  AlertTriangle,
+  Info,
 } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
 import { Card } from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
-import { approveEnrollment, rejectEnrollment } from "./actions";
+import {
+  approveEnrollment,
+  rejectEnrollment,
+  getPendingEnrollmentsAction,
+} from "./actions";
 
 export default function ApprovalsPage() {
   const [pendingEnrollments, setPendingEnrollments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [courses, setCourses] = useState<Record<string, any>>({});
   const { addToast } = useToast();
   const [processingId, setProcessingId] = useState<string | null>(null);
 
-  // 1. Fetch enrollments waiting manual admin approval.
+  const fetchPending = async () => {
+    setLoading(true);
+    const result = await getPendingEnrollmentsAction();
+    if (result.success) {
+      setPendingEnrollments(result.enrollments);
+    }
+    setLoading(false);
+  };
 
   useEffect(() => {
-    const q = query(
-      collection(db, "enrollments"),
-      where("status", "==", "pending_approval"),
-    );
-
-    const unsub = onSnapshot(q, async (snapshot) => {
-      const enrollments = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
-
-      const readyToApprove = enrollments;
-
-      // Fetch missing course details
-      const newCourseIds = readyToApprove
-        .map((e: any) => e.courseId)
-        .filter((id) => !courses[id]);
-
-      if (newCourseIds.length > 0) {
-        const courseData: Record<string, any> = { ...courses };
-        await Promise.all(
-          newCourseIds.map(async (id) => {
-            const snap = await getDoc(doc(db, "courses", id));
-            if (snap.exists()) courseData[id] = snap.data();
-          }),
-        );
-        setCourses(courseData);
-      }
-
-      setPendingEnrollments(readyToApprove);
-      setLoading(false);
-    });
-
-    return () => unsub();
-  }, [courses]);
-
-  // Use server-side logic in client? computeAccessStatus is pure function, ok to use.
-  // BUT we need to replicate the same update logic.
+    fetchPending();
+  }, []);
 
   const handleApprove = async (enrollment: any) => {
     if (!confirm(`Confirmar aprovação para ${enrollment.uid}?`)) return;
@@ -86,6 +51,7 @@ export default function ApprovalsPage() {
 
       if (result.success) {
         addToast("Aprovado com sucesso!", "success");
+        await fetchPending();
       } else {
         addToast(result.error || "Erro ao aprovar.", "error");
       }
@@ -113,6 +79,7 @@ export default function ApprovalsPage() {
 
       if (result.success) {
         addToast("Matrícula rejeitada.", "info");
+        await fetchPending();
       } else {
         addToast(result.error || "Erro ao rejeitar.", "error");
       }
@@ -172,7 +139,7 @@ export default function ApprovalsPage() {
                       Curso Solicitado
                     </p>
                     <p className="font-serif text-primary text-lg">
-                      {courses[en.courseId]?.title || en.courseId}
+                      {en.courseTitle || en.courseId}
                     </p>
                   </div>
                 </div>
@@ -186,26 +153,8 @@ export default function ApprovalsPage() {
                       </p>
                       <div className="flex items-center gap-2 text-green-600 font-bold bg-green-50 px-2 py-1 rounded w-fit">
                         <ShieldCheck size={14} />
-                        <span className="text-xs">CONFIRMADO</span>
+                        <span className="text-xs">PENDENTE APROVAÇÃO</span>
                       </div>
-                      <p className="text-[10px] text-stone-400 mt-1">
-                        Sub: {en["stripe.subscriptionStatus"]}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-stone-400 uppercase tracking-widest font-bold mb-1">
-                        Detalhes
-                      </p>
-                      <p className="text-xs text-stone-500">
-                        <CreditCard size={12} className="inline mr-1" />
-                        Fatura: ...{en["stripe.latestInvoiceId"]?.slice(-6)}
-                      </p>
-                      {en.applicationId && (
-                        <p className="text-xs text-stone-500 mt-1">
-                          <Info size={12} className="inline mr-1" />
-                          App ID: ...{en.applicationId.slice(0, 8)}
-                        </p>
-                      )}
                     </div>
                   </div>
 

@@ -3,13 +3,10 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import {
   Menu,
   X,
   User as UserIcon,
-  LogOut,
-  LayoutDashboard,
   Sparkles,
   BookOpen,
   Image as ImageIcon,
@@ -18,43 +15,24 @@ import {
   Users,
   Instagram,
   ChevronRight,
+  type LucideIcon,
 } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
-import { Button } from "./ui/Button";
-import { motion, AnimatePresence } from "framer-motion";
-import { getRedirectPathForRole } from "@/lib/auth/authService";
 import { cn } from "@/lib/utils";
+import { PUBLIC_NAV_ITEMS } from "@/features/public-site/content/navigation";
+
+const NAV_ICONS: Record<string, LucideIcon> = {
+  Instituto: Users,
+  Formações: Award,
+  Recursos: Sparkles,
+  Biblioteca: BookOpen,
+  Galeria: ImageIcon,
+  Blog: PenTool,
+};
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { user, role, signOut } = useAuth();
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
-  // Construct safe next URL
-  const getCurrentUrl = () => {
-    const params = searchParams.toString();
-    return `${pathname}${params ? `?${params}` : ""}`;
-  };
-
-  const handleLogin = () => {
-    const currentUrl = getCurrentUrl();
-    // Don't create redirect loops if already on auth page
-    if (pathname.startsWith("/auth")) return;
-
-    const nextParam =
-      currentUrl === "/" ? "" : `?next=${encodeURIComponent(currentUrl)}`;
-    router.push(`/auth${nextParam}`);
-  };
-
-  const handleDashboard = () => {
-    // If role is not yet loaded, default to portal
-    const target = getRedirectPathForRole(role || "student");
-    router.push(target);
-  };
 
   useEffect(() => {
     if (mobileOpen) {
@@ -98,33 +76,28 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const navItems = [
-    { label: "Instituto", href: "/#instituto-sobre", icon: Users },
-    { label: "Fundadora", href: "/#fundadora", icon: Award },
-    {
-      label: "Formações",
-      href: "/#instituto",
-      display: "Formações",
-      icon: Sparkles,
-    },
-    { label: "Biblioteca", href: "/public-library", icon: BookOpen },
-    { label: "Galeria", href: "/public-gallery", icon: ImageIcon },
-    { label: "Blog", href: "/#blog", icon: PenTool },
-  ];
+  const navItems = PUBLIC_NAV_ITEMS.map((item) => ({
+    ...item,
+    icon: NAV_ICONS[item.label] || ChevronRight,
+  }));
 
   return (
     <>
       <nav
         aria-label="Navegação principal"
         className={cn(
-          "fixed z-50 transition-all duration-500 ease-in-out",
+          // Faixa inteira, sempre no topo. A pílula flutuante que existia aqui
+          // era um objeto de aplicativo: recortava o cabeçalho do papel e
+          // trocava o traço Névoa por uma sombra. O cabeçalho institucional do
+          // Design System é horizontal, apoiado no Creme e separado por linha.
+          "fixed top-0 left-0 w-full z-50 border-b transition-all duration-500 ease-in-out",
+          "bg-paper/90 backdrop-blur-md border-border/70 supports-[backdrop-filter]:bg-paper/75",
           hidden ? "-translate-y-full" : "translate-y-0",
-          scrolled
-            ? "top-2 left-1/2 -translate-x-1/2 w-[95%] max-w-7xl bg-white/80 backdrop-blur-lg shadow-lg py-2 rounded-full border border-stone-200/50"
-            : "top-0 left-0 w-full bg-white/60 backdrop-blur-md shadow-sm py-5",
+          // Único efeito de rolagem: a faixa se contrai. Sem troca de forma.
+          scrolled ? "py-3" : "py-5",
         )}
       >
-        <div className="container mx-auto px-6 flex items-center justify-between">
+        <div className="mx-auto w-full max-w-7xl px-6 md:px-12 flex items-center justify-between">
           {/* Logo */}
           <Link
             href="/"
@@ -153,47 +126,20 @@ export default function Navbar() {
               <a
                 key={item.label}
                 href={item.href}
-                className="hover:text-primary transition-all duration-200 hover:bg-primary/5 px-4 py-2 rounded-xl min-h-[44px] flex items-center focus-visible:ring-2 focus-visible:ring-primary"
+                className="hover:text-primary transition-colors duration-200 hover:bg-areia px-4 py-2 rounded-md min-h-[44px] flex items-center focus-visible:ring-2 focus-visible:ring-primary"
               >
-                {item.display || item.label}
+                {item.label}
               </a>
             ))}
 
-            <div className="h-6 w-[1px] bg-gray-200 mx-2" />
+            <div className="h-6 w-px bg-border mx-2" />
 
-            {user ? (
-              <div className="flex items-center gap-2">
-                <Button
-                  onClick={handleDashboard}
-                  variant={role === "admin" ? "outline" : "primary"}
-                  size="sm"
-                  className={cn(
-                    "shadow-sm flex items-center gap-2 transition-all duration-300",
-                    role === "admin" &&
-                      "border-gold text-gold hover:bg-gold hover:text-white",
-                  )}
-                >
-                  <LayoutDashboard size={14} />
-                  {role === "admin" ? "Administração" : "Área do Aluno"}
-                </Button>
-                <button
-                  onClick={() => signOut()}
-                  className="p-2 text-stone-400 hover:text-red-500 transition-colors"
-                  title="Sair"
-                >
-                  <LogOut size={16} />
-                </button>
-              </div>
-            ) : (
-              <Button
-                onClick={handleLogin}
-                variant="primary"
-                size="sm"
-                className="shadow-sm ml-2"
-              >
-                Entrar
-              </Button>
-            )}
+            <Link
+              href="/portal"
+              className="ml-2 inline-flex min-h-11 items-center rounded-md bg-primary px-5 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-white transition-colors hover:bg-primary-dark"
+            >
+              Área do aluno
+            </Link>
           </div>
 
           {/* Mobile/Tablet Toggle */}
@@ -213,25 +159,17 @@ export default function Navbar() {
       </nav>
 
       {/* Mobile Menu Overlay - Outside nav to avoid transform coordinate space issues */}
-      <AnimatePresence>
-        {mobileOpen && (
+      {mobileOpen && (
           <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+            <div
               onClick={() => setMobileOpen(false)}
-              className="fixed inset-0 z-[60] bg-primary/20 backdrop-blur-sm xl:hidden"
+              className="fixed inset-0 z-[60] bg-text/45 backdrop-blur-sm xl:hidden"
             />
-            <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed top-2 right-2 bottom-2 left-2 z-[70] bg-white/95 backdrop-blur-2xl rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-white flex flex-col overflow-hidden xl:hidden"
+            <div
+              className="fixed top-2 right-2 bottom-2 left-2 z-[70] bg-paper/97 backdrop-blur-2xl rounded-md border border-border flex flex-col overflow-hidden xl:hidden"
             >
               {/* Mobile Header Inside Menu */}
-              <div className="flex items-center justify-between px-8 py-6 border-b border-stone-100">
+              <div className="flex items-center justify-between px-8 py-6 border-b border-border/70">
                 <Link
                   href="/"
                   className="flex items-center gap-2"
@@ -252,7 +190,7 @@ export default function Navbar() {
                 </Link>
                 <button
                   onClick={() => setMobileOpen(false)}
-                  className="w-10 h-10 flex items-center justify-center text-primary rounded-full bg-stone-50 hover:bg-stone-100 transition-colors"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-areia text-primary transition-colors hover:bg-nevoa"
                   aria-label="Fechar menu"
                 >
                   <X size={20} />
@@ -264,32 +202,29 @@ export default function Navbar() {
                 data-lenis-prevent
               >
                 <div className="space-y-1 mb-8">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-primary/30 px-4 mb-4 block">
+                  <span className="mb-4 block px-4 text-[10px] font-bold uppercase tracking-[0.25em] text-muted">
                     Navegação principal
                   </span>
-                  {navItems.map((item, idx) => (
-                    <motion.a
+                  {navItems.map((item) => (
+                    <a
                       key={item.label}
                       href={item.href}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.1 + idx * 0.05 }}
                       onClick={() => setMobileOpen(false)}
-                      className="flex items-center justify-between w-full px-6 py-4 rounded-2xl hover:bg-primary/5 active:bg-primary/10 transition-all group"
+                      className="group flex w-full items-center justify-between rounded-md px-6 py-4 transition-colors hover:bg-areia active:bg-nevoa"
                     >
                       <div className="flex items-center gap-4">
-                        <div className="p-2.5 rounded-xl bg-primary/5 text-primary group-hover:bg-gold group-hover:text-white transition-all">
+                        <div className="rounded-md bg-areia p-2.5 text-primary transition-colors group-hover:bg-primary group-hover:text-white">
                           <item.icon size={18} />
                         </div>
                         <span className="text-xl font-serif text-primary">
-                          {item.display || item.label}
+                          {item.label}
                         </span>
                       </div>
                       <ChevronRight
                         size={16}
-                        className="text-stone-300 group-hover:text-gold group-hover:translate-x-1 transition-all"
+                        className="text-nevoa transition-all group-hover:translate-x-1 group-hover:text-primary"
                       />
-                    </motion.a>
+                    </a>
                   ))}
                 </div>
 
@@ -299,89 +234,35 @@ export default function Navbar() {
                     <a
                       href="https://instagram.com/institutofiguraviva"
                       target="_blank"
-                      className="flex items-center gap-3 text-stone-400 hover:text-primary transition-colors font-bold text-[10px] uppercase tracking-widest"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-muted transition-colors hover:text-primary"
                     >
-                      <div className="p-2 bg-stone-50 rounded-lg">
+                      <div className="rounded-md bg-areia p-2">
                         <Instagram size={14} />
                       </div>
                       Siga o Instituto
                     </a>
                   </div>
 
-                  <div className="p-1 bg-stone-50 rounded-[2rem] border border-stone-100">
-                    {user ? (
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-3 px-6 py-4">
-                          <div className="w-10 h-10 rounded-full bg-primary/5 flex items-center justify-center text-primary font-bold border border-primary/10">
-                            {user.photoURL ? (
-                              <img
-                                src={user.photoURL}
-                                alt=""
-                                className="w-full h-full rounded-full object-cover"
-                              />
-                            ) : (
-                              user.displayName?.[0] || <UserIcon size={18} />
-                            )}
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-sm font-bold text-primary truncate">
-                              {user.displayName || "Aluno"}
-                            </p>
-                            <p className="text-[10px] text-stone-400 uppercase tracking-tighter">
-                              Matrícula Ativa
-                            </p>
-                          </div>
-                        </div>
-
-                        <button
-                          onClick={() => {
-                            setMobileOpen(false);
-                            handleDashboard();
-                          }}
-                          className={cn(
-                            "w-full py-5 text-[11px] font-bold uppercase tracking-[0.2em] rounded-[1.8rem] flex items-center justify-center gap-2 transition-all shadow-lg active:scale-95",
-                            role === "admin"
-                              ? "bg-white border border-gold text-gold shadow-gold/5"
-                              : "bg-primary text-white shadow-primary/20",
-                          )}
-                        >
-                          <LayoutDashboard size={14} />
-                          {role === "admin" ? "Administração" : "Área do Aluno"}
-                        </button>
-
-                        <button
-                          onClick={() => {
-                            signOut();
-                            setMobileOpen(false);
-                          }}
-                          className="w-full py-4 text-[10px] font-bold uppercase tracking-widest text-stone-400 hover:text-red-500 transition-colors flex items-center justify-center gap-2"
-                        >
-                          <LogOut size={14} /> Sair da Conta
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => {
-                          setMobileOpen(false);
-                          handleLogin();
-                        }}
-                        className="w-full py-6 text-[11px] font-bold uppercase tracking-[0.2em] bg-primary text-white rounded-[1.8rem] shadow-xl shadow-primary/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                      >
-                        <UserIcon size={14} />
-                        Acessar Plataforma
-                      </button>
-                    )}
+                  <div className="rounded-md border border-border bg-areia p-1">
+                    <Link
+                      href="/portal"
+                      onClick={() => setMobileOpen(false)}
+                      className="flex w-full items-center justify-center gap-2 rounded-md bg-primary py-6 text-[11px] font-bold uppercase tracking-[0.2em] text-white transition-colors hover:bg-primary-dark active:scale-[0.98]"
+                    >
+                      <UserIcon size={14} />
+                      Acessar plataforma
+                    </Link>
                   </div>
 
-                  <p className="text-center text-[9px] text-stone-300 font-bold tracking-[0.3em] uppercase pb-2">
-                    © 2024 Figura Viva
+                  <p className="pb-2 text-center text-[9px] font-bold uppercase tracking-[0.3em] text-muted">
+                    &copy; {new Date().getFullYear()} Figura Viva
                   </p>
                 </div>
               </div>
-            </motion.div>
+            </div>
           </>
         )}
-      </AnimatePresence>
     </>
   );
 }

@@ -23,6 +23,151 @@ async function requireUserClaims() {
   return auth.verifySessionCookie(sessionCookie, true);
 }
 
+async function requireAdminClaims() {
+  const claims = await requireUserClaims();
+
+  if (claims.role !== "admin" && claims.admin !== true) {
+    throw new Error("Forbidden: Admins only");
+  }
+
+  return claims;
+}
+
+/**
+ * Server Actions can only return values that React can serialize. Firestore
+ * timestamps are class instances, so normalize them before returning admin
+ * data to client components.
+ */
+function serializeFirestoreValue(value: unknown): unknown {
+  if (value instanceof Timestamp) {
+    return value.toDate().toISOString();
+  }
+
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+
+  if (Array.isArray(value)) {
+    return value.map(serializeFirestoreValue);
+  }
+
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([key, item]) => [
+        key,
+        serializeFirestoreValue(item),
+      ]),
+    );
+  }
+
+  return value;
+}
+
+function serializeFirestoreDocument<T>(id: string, data: unknown): T {
+  return { id, ...(serializeFirestoreValue(data) as object) } as T;
+}
+
+/**
+ * Read assessment management data through the server. The browser does not
+ * authenticate with Firebase, so client-side Firestore reads would otherwise
+ * be rejected by the Firestore rules for Supabase-authenticated admins.
+ */
+export async function getAdminAssessments(): Promise<AssessmentDoc[]> {
+  await requireAdminClaims();
+
+  const snapshot = await adminDb
+    .collection("assessments")
+    .orderBy("title")
+    .get();
+
+  return snapshot.docs.map((doc) =>
+    serializeFirestoreDocument<AssessmentDoc>(doc.id, doc.data()),
+  );
+}
+
+export async function getAdminSubmissionMetrics(): Promise<{
+  total: number;
+  pending: number;
+}> {
+  await requireAdminClaims();
+
+  const submissions = adminDb.collection("assessmentSubmissions");
+  const [total, pending] = await Promise.all([
+    submissions.count().get(),
+    submissions.where("status", "==", "submitted").count().get(),
+  ]);
+
+  return {
+    total: total.data().count,
+    pending: pending.data().count,
+  };
+}
+
+export async function getAdminSubmissionsPage({
+  status,
+  pageSize = 20,
+  cursorId,
+}: {
+  status?: string;
+  pageSize?: number;
+  cursorId?: string;
+}): Promise<{
+  submissions: AssessmentSubmissionDoc[];
+  users: Record<string, UserData>;
+  lastVisible?: string;
+  hasMore: boolean;
+}> {
+  await requireAdminClaims();
+
+  const normalizedPageSize = Math.min(Math.max(Math.floor(pageSize), 1), 100);
+  let submissionsQuery = adminDb
+    .collection("assessmentSubmissions")
+    .orderBy("submittedAt", "desc")
+    .limit(normalizedPageSize);
+
+  if (cursorId) {
+    const cursor = await adminDb
+      .collection("assessmentSubmissions")
+      .doc(cursorId)
+      .get();
+
+    if (cursor.exists) {
+      submissionsQuery = submissionsQuery.startAfter(cursor);
+    }
+  }
+
+  const snapshot = await submissionsQuery.get();
+  let submissions = snapshot.docs.map((doc) =>
+    serializeFirestoreDocument<AssessmentSubmissionDoc>(doc.id, doc.data()),
+  );
+
+  // Status filtering remains in memory to avoid requiring an additional
+  // Firestore composite index. The current screen does not filter by status.
+  if (status) {
+    submissions = submissions.filter((submission) => submission.status === status);
+  }
+
+  const uniqueUserIds = [...new Set(submissions.map((submission) => submission.userId))];
+  const userSnapshots = await Promise.all(
+    uniqueUserIds.map((uid) => adminDb.collection("users").doc(uid).get()),
+  );
+  const users = Object.fromEntries(
+    userSnapshots
+      .filter((snapshot) => snapshot.exists)
+      .map((snapshot) => [
+        snapshot.id,
+        serializeFirestoreDocument<UserData>(snapshot.id, snapshot.data()),
+      ]),
+  ) as Record<string, UserData>;
+
+  return {
+    submissions,
+    users,
+    lastVisible: snapshot.docs.at(-1)?.id,
+    hasMore: snapshot.docs.length === normalizedPageSize,
+  };
+}
+
 /**
  * Start a new assessment attempt in a server-authoritative way.
  */

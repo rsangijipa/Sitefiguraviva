@@ -7,49 +7,26 @@ import { Check, Loader2, ArrowRight, User, Clock } from "lucide-react";
 import Link from "next/link";
 import { Input } from "@/components/ui/Input";
 import { useToast } from "@/context/ToastContext";
-import { createEnrollmentPending } from "@/app/actions/enrollment-pix";
+import {
+  createEnrollmentPending,
+  generatePixPayload,
+} from "@/app/actions/enrollment-pix";
 import QRCode from "qrcode";
 
 // --- AUTH HELPER (Robust P0 Fix) ---
 const getIdToken = async (): Promise<string> => {
-  const { auth } = await import("@/lib/firebase/client");
-  if (auth.currentUser) return auth.currentUser.getIdToken();
-
-  return new Promise((resolve, reject) => {
-    let settled = false;
-
-    const cleanup = () => {
-      settled = true;
-      clearTimeout(timeoutId);
-      unsubscribe();
-    };
-
-    const timeoutId = setTimeout(() => {
-      if (settled) return;
-      cleanup();
-      reject(new Error("Timeout de autenticação"));
-    }, 5000);
-
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      if (settled) return;
-
-      if (user) {
-        // Ensure we clean up immediately to prevent race conditions
-        cleanup();
-        try {
-          const token = await user.getIdToken();
-          resolve(token);
-        } catch (e) {
-          reject(e);
-        }
-      } else {
-        // Determine if we should wait or reject immediately.
-        // Standard: wait for initial load. If null comes after load, then reject.
-        // But onAuthStateChanged fires immediately. If null, we might want to wait.
-        // However, without logic to know "auth initialized", we rely on timeout for "not logged in" case.
-      }
-    });
-  });
+  try {
+    const { createSupabaseBrowserClient } =
+      await import("@/infrastructure/supabase/client");
+    const supabase = createSupabaseBrowserClient();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (session?.access_token) return session.access_token;
+  } catch (e) {
+    // Ignore
+  }
+  return "";
 };
 
 export default function EnrollmentStepper({
@@ -98,6 +75,7 @@ export default function EnrollmentStepper({
   const [loading, setLoading] = useState(false);
   const [pixDataUrl, setPixDataUrl] = useState("");
   const [pixLoading, setPixLoading] = useState(false);
+  const [pixUnavailable, setPixUnavailable] = useState(false);
 
   // Sync state with prop changes (e.g. after router.refresh)
   useEffect(() => {
@@ -218,10 +196,21 @@ export default function EnrollmentStepper({
       const result = await createEnrollmentPending(courseId);
       if (!result.success && result.error) throw new Error(result.error);
 
-      // Random mock PIX Payload for visual purposes
-      const pixPayload = `00020101021226580014BR.GOV.BCB.PIX0136${Math.random().toString(36).substring(2)}520400005303986540510.005802BR5915INSTITUTO FIGURA VIVA6009SAO PAULO62140510FIGURA${courseId}6304`;
+      // The QR is built server-side from the operator's real PIX key
+      // (PIX_MERCHANT_KEY). If that key isn't configured, we show the
+      // request as pending and tell the student to contact the team instead
+      // of fabricating a code that doesn't point anywhere.
+      const pixResult = await generatePixPayload(courseId);
+      if (!pixResult.success) {
+        throw new Error(pixResult.error || "Erro ao gerar PIX");
+      }
 
-      const qrDataUrl = await QRCode.toDataURL(pixPayload, {
+      if (!pixResult.configured || !pixResult.payload) {
+        setPixUnavailable(true);
+        return;
+      }
+
+      const qrDataUrl = await QRCode.toDataURL(pixResult.payload, {
         width: 250,
         margin: 2,
       });
@@ -235,17 +224,19 @@ export default function EnrollmentStepper({
 
   // Derived Status Flags for Render
   const isPendingApproval =
-    enrollment?.status === "pending_approval" || pixDataUrl !== "";
+    enrollment?.status === "pending_approval" ||
+    pixDataUrl !== "" ||
+    pixUnavailable;
   const isCanceled = enrollment?.status === "canceled";
   const isRefunded = enrollment?.status === "refunded";
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="fv-bg fv-bg-enrollment mx-auto max-w-3xl">
       {/* Header */}
       <div className="mb-12 text-center">
         <Link
           href="/"
-          className="text-primary/80 text-xs font-bold uppercase tracking-widest hover:text-primary mb-4 block transition-colors"
+          className="mb-4 block text-xs font-bold uppercase tracking-widest text-primary transition-colors hover:underline"
           aria-label="Voltar"
         >
           &larr; Voltar para Home
@@ -253,30 +244,47 @@ export default function EnrollmentStepper({
         <h1 className="font-serif text-3xl md:text-4xl text-primary mb-4">
           {course.courseTitle || course.title}
         </h1>
-        <p className="text-stone-500">
+        <p className="text-text/75">
           Complete sua inscrição para garantir sua vaga.
         </p>
       </div>
 
       {/* Steps Indicator */}
-      <div className="flex items-center justify-between mb-12 relative px-4">
-        <div className="absolute left-0 top-1/2 w-full h-0.5 bg-stone-200 -z-10" />
+      <ol
+        aria-label="Etapas da inscrição"
+        className="relative mb-12 flex items-center justify-between px-4"
+      >
+        <div
+          className="absolute left-0 top-1/2 -z-10 h-px w-full bg-border"
+          aria-hidden
+        />
         {[1, 2, 3, 4].map((step) => (
-          <div
+          <li
             key={step}
-            className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-colors border-4 border-[#FDFCF9] ${
+            aria-current={step === currentStep ? "step" : undefined}
+            className={`flex h-10 w-10 items-center justify-center rounded-full border-4 border-paper text-sm font-bold transition-colors ${
               step <= currentStep
                 ? "bg-primary text-white"
-                : "bg-stone-200 text-stone-400"
+                : "bg-areia text-muted"
             }`}
           >
-            {step < currentStep ? <Check size={16} /> : step}
-          </div>
+            <span className="sr-only">
+              Etapa {step} de 4
+              {step < currentStep
+                ? " (concluída)"
+                : step === currentStep
+                  ? " (atual)"
+                  : ""}
+            </span>
+            <span aria-hidden>
+              {step < currentStep ? <Check size={16} /> : step}
+            </span>
+          </li>
         ))}
-      </div>
+      </ol>
 
       {/* Content Card */}
-      <div className="bg-white/80 backdrop-blur-xl rounded-[2.5rem] p-8 md:p-12 shadow-soft-xl border border-white/60">
+      <div className="rounded-md border border-border bg-paper p-8 md:p-12">
         <AnimatePresence mode="wait">
           {/* STEP 1: LOGIN */}
           {currentStep === 1 && (
@@ -287,26 +295,26 @@ export default function EnrollmentStepper({
               exit={{ opacity: 0 }}
             >
               <div className="text-center">
-                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-6 text-primary shadow-soft-md border border-stone-100">
+                <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-border bg-areia text-primary">
                   <User size={32} />
                 </div>
                 <h2 className="font-serif text-3xl text-primary mb-4">
                   Primeiro, identifique-se
                 </h2>
-                <p className="text-stone-500 mb-10 max-w-md mx-auto leading-relaxed">
+                <p className="text-text/75 mb-10 max-w-md mx-auto leading-relaxed">
                   Para se inscrever, você precisa entrar com sua conta ou criar
                   uma nova.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <button
                     onClick={handleLogin}
-                    className="px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg hover:bg-primary/90 transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-xs"
+                    className="flex items-center justify-center gap-2 rounded-md bg-primary px-8 py-4 text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-primary-dark"
                   >
                     Já possuo conta <ArrowRight size={16} />
                   </button>
                   <button
                     onClick={handleSignup}
-                    className="px-8 py-4 bg-white border border-stone-200 text-stone-600 font-bold rounded-xl hover:border-primary hover:text-primary transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-xs"
+                    className="flex items-center justify-center gap-2 rounded-md border border-border bg-paper px-8 py-4 text-xs font-bold uppercase tracking-widest text-text transition-colors hover:border-igarape hover:bg-areia hover:text-primary"
                   >
                     Criar nova conta <User size={16} />
                   </button>
@@ -335,7 +343,6 @@ export default function EnrollmentStepper({
                     onChange={(e) =>
                       setFormData({ ...formData, fullName: e.target.value })
                     }
-                    className="bg-white/50"
                   />
                   <Input
                     label="Telefone / WhatsApp"
@@ -345,7 +352,6 @@ export default function EnrollmentStepper({
                     onChange={(e) =>
                       setFormData({ ...formData, phone: e.target.value })
                     }
-                    className="bg-white/50"
                   />
                 </div>
                 <Input
@@ -355,14 +361,13 @@ export default function EnrollmentStepper({
                   onChange={(e) =>
                     setFormData({ ...formData, profession: e.target.value })
                   }
-                  className="bg-white/50"
                 />
 
-                <div className="pt-8 border-t border-stone-200/50 flex justify-end">
+                <div className="flex justify-end border-t border-border pt-8">
                   <button
                     type="submit"
                     disabled={loading}
-                    className="px-8 py-4 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-all flex items-center gap-2 shadow-lg shadow-primary/20 uppercase tracking-widest text-xs"
+                    className="flex items-center gap-2 rounded-md bg-primary px-8 py-4 text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-primary-dark"
                   >
                     {loading ? (
                       <Loader2 className="animate-spin" size={18} />
@@ -389,16 +394,27 @@ export default function EnrollmentStepper({
                 <h2 className="font-serif text-3xl text-primary mb-4">
                   Pagamento via PIX
                 </h2>
-                <p className="text-stone-500 mb-8 max-w-md mx-auto leading-relaxed">
+                <p className="text-text/75 mb-8 max-w-md mx-auto leading-relaxed">
                   Escaneie o QR Code abaixo para confirmar a sua matrícula. A
                   liberação será feita após a confirmação pela nossa equipe.
                 </p>
 
-                {!pixDataUrl ? (
+                {pixUnavailable ? (
+                  <div className="mx-auto flex max-w-md flex-col items-center gap-3 rounded-md border border-border bg-areia p-8">
+                    <p className="text-sm font-bold uppercase tracking-widest text-primary">
+                      Pagamento via PIX indisponível no momento
+                    </p>
+                    <p className="text-sm text-text/70 leading-relaxed">
+                      Sua solicitação de matrícula foi registrada. Nossa equipe
+                      entrará em contato com as instruções de pagamento para
+                      confirmar seu acesso.
+                    </p>
+                  </div>
+                ) : !pixDataUrl ? (
                   <button
                     onClick={handleGeneratePix}
                     disabled={pixLoading}
-                    className="px-8 py-4 bg-green-600 text-white font-bold rounded-xl shadow-lg hover:bg-green-700 transition-all flex items-center justify-center gap-2 max-w-sm mx-auto uppercase tracking-widest text-sm"
+                    className="mx-auto flex max-w-sm items-center justify-center gap-2 rounded-md bg-primary px-8 py-4 text-sm font-bold uppercase tracking-widest text-white transition-colors hover:bg-primary-dark"
                   >
                     {pixLoading ? (
                       <Loader2 className="animate-spin" />
@@ -410,14 +426,14 @@ export default function EnrollmentStepper({
                   <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="flex flex-col items-center bg-stone-50 p-8 rounded-2xl border border-stone-200 shadow-inner max-w-md mx-auto"
+                    className="mx-auto flex max-w-md flex-col items-center rounded-md border border-border bg-areia p-8"
                   >
                     <img
                       src={pixDataUrl}
                       alt="PIX QR Code"
-                      className="w-56 h-56 rounded-lg shadow-sm mb-4"
+                      className="mb-4 h-56 w-56 rounded-md border border-border bg-paper"
                     />
-                    <p className="text-xs text-stone-400 mb-6 px-4">
+                    <p className="mb-6 px-4 text-xs text-text/70">
                       Utilize o aplicativo do seu banco para ler o QR Code ou
                       copie o código Pix Copia e Cola.
                     </p>
@@ -426,7 +442,7 @@ export default function EnrollmentStepper({
                         setCurrentStep(4);
                         router.refresh();
                       }}
-                      className="w-full px-6 py-4 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-all uppercase tracking-widest text-xs"
+                      className="w-full rounded-md bg-primary px-6 py-4 text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-primary-dark"
                     >
                       Já realizei o pagamento
                     </button>
@@ -447,57 +463,57 @@ export default function EnrollmentStepper({
               <div className="text-center">
                 {isPendingApproval ? (
                   <>
-                    <div className="w-16 h-16 bg-gold/10 rounded-full flex items-center justify-center mx-auto mb-6 text-gold">
+                    <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-gold/15 text-gold-dark">
                       <Clock size={32} />
                     </div>
                     <h2 className="font-serif text-2xl text-primary mb-4">
                       Inscrição em Análise
                     </h2>
-                    <p className="text-stone-500 mb-8">
+                    <p className="text-text/75 mb-8">
                       Pagamento confirmado! Nossa equipe está revisando sua
                       inscrição.
                     </p>
                     <Link
                       href="/portal"
-                      className="px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg hover:bg-primary/90 transition-all inline-flex items-center gap-2"
+                      className="inline-flex items-center gap-2 rounded-md bg-primary px-8 py-4 font-bold text-white transition-colors hover:bg-primary-dark"
                     >
                       Ir para o Portal <ArrowRight size={18} />
                     </Link>
                   </>
                 ) : isCanceled || isRefunded ? (
                   <>
-                    <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6 text-red-600">
+                    <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-error/10 text-error">
                       <Clock size={32} />
                     </div>
                     <h2 className="font-serif text-2xl text-primary mb-4">
                       Inscrição não ativa
                     </h2>
-                    <p className="text-stone-500 mb-8">
+                    <p className="text-text/75 mb-8">
                       {isRefunded
                         ? "Sua matrícula foi reembolsada."
                         : "Sua matrícula foi cancelada."}
                     </p>
                     <Link
                       href={`/curso/${courseId}`}
-                      className="px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg hover:bg-primary/90 transition-all inline-flex items-center gap-2"
+                      className="inline-flex items-center gap-2 rounded-md bg-primary px-8 py-4 font-bold text-white transition-colors hover:bg-primary-dark"
                     >
                       Ver curso <ArrowRight size={18} />
                     </Link>
                   </>
                 ) : (
                   <>
-                    <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600">
+                    <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-success/10 text-success">
                       <Check size={32} />
                     </div>
                     <h2 className="font-serif text-2xl text-primary mb-4">
                       Inscrição Confirmada!
                     </h2>
-                    <p className="text-stone-500 mb-8">
+                    <p className="text-text/75 mb-8">
                       Sua assinatura está ativa e o acesso liberado.
                     </p>
                     <Link
                       href={`/portal/course/${courseId}`}
-                      className="px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg hover:bg-primary/90 transition-all inline-flex items-center gap-2"
+                      className="inline-flex items-center gap-2 rounded-md bg-primary px-8 py-4 font-bold text-white transition-colors hover:bg-primary-dark"
                     >
                       Acessar Curso <ArrowRight size={18} />
                     </Link>

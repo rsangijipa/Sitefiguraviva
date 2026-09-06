@@ -1,10 +1,11 @@
 "use client";
 
 import React from "react";
-import { FolderOpen } from "lucide-react";
+import { FolderOpen, type LucideIcon } from "lucide-react";
+import { EmptyState as CoreEmptyState } from "@/components/core/feedback";
 
 interface EmptyStateProps {
-  icon?: React.ElementType;
+  icon?: LucideIcon;
   title: string;
   description: string;
   action?: React.ReactNode;
@@ -19,17 +20,14 @@ export function EmptyState({
   className,
 }: EmptyStateProps) {
   return (
-    <div
-      className={`flex flex-col items-center justify-center py-16 px-6 bg-white rounded-2xl border border-stone-100 shadow-sm text-center ${className || ""}`}
-    >
-      <div className="w-20 h-20 bg-stone-50 text-stone-300 flex items-center justify-center rounded-3xl mb-6 shadow-inner">
-        <Icon size={40} strokeWidth={1.5} />
-      </div>
-      <h3 className="text-xl font-serif font-bold text-stone-800 mb-2">
-        {title}
-      </h3>
-      <p className="text-stone-500 max-w-md mb-8">{description}</p>
-      {action && <div>{action}</div>}
-    </div>
+    <CoreEmptyState
+      icon={Icon}
+      title={title}
+      description={description}
+      action={action}
+      className={className}
+      variant="surface"
+      size="lg"
+    />
   );
 }

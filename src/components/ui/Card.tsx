@@ -8,7 +8,11 @@ const Card = React.forwardRef<
     <div
         ref={ref}
         className={cn(
-            "rounded-2xl border border-primary/5 bg-white text-primary shadow-soft-sm hover:shadow-soft-md transition-all duration-300",
+            // Cartão editorial: Creme sobre traço Névoa, e no ponteiro a troca
+            // é de superfície (Creme -> Areia) com o traço virando Igarapé.
+            // A sombra saiu: era ela que fazia cada bloco parecer um objeto
+            // solto sobre a tela em vez de um campo impresso na página.
+            "rounded-md border border-border bg-paper text-primary transition-colors duration-300 hover:border-igarape hover:bg-areia",
             className
         )}
         {...props}

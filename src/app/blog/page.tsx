@@ -4,6 +4,8 @@ import { Card } from "@/components/ui/Card";
 import { Calendar, ArrowRight } from "lucide-react";
 import Image from "next/image";
 import type { Metadata } from "next";
+import { PublicPageHero } from "@/features/public-site/components/PublicPageHero";
+import { PublicSiteFrame } from "@/features/public-site/components/PublicSiteFrame";
 
 export const metadata: Metadata = {
   title: "Blog",
@@ -60,18 +62,14 @@ export default async function BlogPage() {
   const posts = await getPosts();
 
   return (
-    <div className="min-h-screen bg-[#FDFCF9] pb-20 pt-32">
-      <div className="max-w-7xl mx-auto px-6 md:px-12">
-        <header className="mb-16 text-center">
-          <h1 className="font-serif text-4xl md:text-5xl text-primary mb-4">
-            Diário Visual
-          </h1>
-          <p className="text-stone-500 font-light max-w-2xl mx-auto text-lg">
-            Reflexões, artigos e poesias sobre a Gestalt-Terapia e o viver
-            humano.
-          </p>
-        </header>
-
+    <PublicSiteFrame>
+      <PublicPageHero
+        eyebrow="Reflexões & saberes"
+        title="Diário Figura Viva"
+        description="Artigos, ensaios e poesias sobre Gestalt-terapia, clínica e os movimentos do viver humano."
+      />
+      <section className="bg-paper py-20 md:py-28">
+        <div className="max-w-7xl mx-auto px-6 md:px-12">
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {posts.map((post) => (
             <Link
@@ -122,7 +120,8 @@ export default async function BlogPage() {
             </p>
           </div>
         )}
-      </div>
-    </div>
+        </div>
+      </section>
+    </PublicSiteFrame>
   );
 }

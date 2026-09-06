@@ -21,6 +21,32 @@ import {
   listMaterials,
   listModules,
 } from "@/lib/repositories/courseRepository.server";
+import { SERVER_FEATURES } from "@/lib/server-feature-flags";
+import {
+  addAdminMaterial,
+  createAdminCourse,
+  createAdminLesson,
+  createAdminModule,
+  deleteAdminCourse,
+  deleteAdminLesson,
+  deleteAdminMaterial,
+  deleteAdminModule,
+  deleteAdminThread,
+  getAdminCourse,
+  listAdminCourseEnrollments,
+  listAdminCourseThreads,
+  listAdminCourses,
+  listAdminLessons,
+  listAdminMaterials,
+  listAdminModules,
+  syncAdminLessonsCount,
+  toggleAdminEnrollmentStatus,
+  updateAdminCourse,
+  updateAdminLesson,
+  updateAdminMaterial,
+  updateAdminModule,
+  updateAdminThread,
+} from "@/features/courses/infrastructure/supabaseAdminCourseRepository.server";
 
 type MutablePayload = Record<string, any>;
 
@@ -47,6 +73,9 @@ function getStringField(payload: MutablePayload, key: string): string {
 
 export async function getAllCoursesAction(): Promise<CourseDoc[]> {
   await requireAdmin();
+  if (SERVER_FEATURES.supabaseAdminCourses) {
+    return listAdminCourses();
+  }
   return listCourses();
 }
 
@@ -54,11 +83,17 @@ export async function getCourseAction(
   courseId: string,
 ): Promise<CourseDoc | null> {
   await requireAdmin();
+  if (SERVER_FEATURES.supabaseAdminCourses) {
+    return getAdminCourse(courseId);
+  }
   return getCourse(courseId);
 }
 
 export async function getModulesAction(courseId: string): Promise<ModuleDoc[]> {
   await requireAdmin();
+  if (SERVER_FEATURES.supabaseAdminCourses) {
+    return listAdminModules(courseId);
+  }
   return listModules(courseId);
 }
 
@@ -67,6 +102,9 @@ export async function getLessonsAction(
   moduleId: string,
 ): Promise<LessonDoc[]> {
   await requireAdmin();
+  if (SERVER_FEATURES.supabaseAdminCourses) {
+    return listAdminLessons(courseId, moduleId);
+  }
   return listLessons(courseId, moduleId);
 }
 
@@ -74,6 +112,9 @@ export async function getCourseEnrollmentsAction(
   courseId: string,
 ): Promise<Array<EnrollmentDoc & { id: string }>> {
   await requireAdmin();
+  if (SERVER_FEATURES.supabaseAdminCourses) {
+    return listAdminCourseEnrollments(courseId);
+  }
   return listCourseEnrollments(courseId);
 }
 
@@ -81,6 +122,9 @@ export async function getCourseThreadsAction(
   courseId: string,
 ): Promise<CommunityThreadDoc[]> {
   await requireAdmin();
+  if (SERVER_FEATURES.supabaseAdminCourses) {
+    return listAdminCourseThreads(courseId);
+  }
   return listCourseThreads(courseId);
 }
 
@@ -88,6 +132,9 @@ export async function getMaterialsAction(
   courseId: string,
 ): Promise<MaterialDoc[]> {
   await requireAdmin();
+  if (SERVER_FEATURES.supabaseAdminCourses) {
+    return listAdminMaterials(courseId);
+  }
   return listMaterials(courseId);
 }
 
@@ -97,6 +144,12 @@ export async function createCourseAction(
   data: Partial<CourseDoc>,
 ): Promise<string> {
   await requireAdmin();
+  if (SERVER_FEATURES.supabaseAdminCourses) {
+    const courseId = await createAdminCourse(data);
+    revalidatePath("/admin/courses");
+    return courseId;
+  }
+
   const payload = sanitizeRecord(data, "course");
   const coverImage =
     getStringField(payload, "coverImage") || getStringField(payload, "image");
@@ -119,6 +172,13 @@ export async function updateCourseAction(
   data: Partial<CourseDoc>,
 ): Promise<void> {
   await requireAdmin();
+  if (SERVER_FEATURES.supabaseAdminCourses) {
+    await updateAdminCourse(courseId, data);
+    revalidatePath("/admin/courses");
+    revalidatePath(`/admin/courses/${courseId}`);
+    return;
+  }
+
   const docRef = adminDb.collection("courses").doc(courseId);
   const payload = sanitizeRecord(data, "course update");
 
@@ -138,6 +198,11 @@ export async function updateCourseAction(
 
 export async function deleteCourseAction(courseId: string): Promise<void> {
   await requireAdmin();
+  if (SERVER_FEATURES.supabaseAdminCourses) {
+    await deleteAdminCourse(courseId);
+    revalidatePath("/admin/courses");
+    return;
+  }
 
   const modulesRef = adminDb
     .collection("courses")
@@ -182,6 +247,10 @@ export async function createModuleAction(
   order: number,
 ): Promise<string> {
   await requireAdmin();
+  if (SERVER_FEATURES.supabaseAdminCourses) {
+    return createAdminModule(courseId, title, order);
+  }
+
   const docRef = await adminDb
     .collection("courses")
     .doc(courseId)
@@ -202,6 +271,14 @@ export async function updateModuleAction(
   data: Partial<ModuleDoc>,
 ): Promise<void> {
   await requireAdmin();
+  if (SERVER_FEATURES.supabaseAdminCourses) {
+    await updateAdminModule(moduleId, data);
+    if (data.isPublished !== undefined) {
+      await syncLessonsCountAction(courseId);
+    }
+    return;
+  }
+
   const payload = sanitizeRecord(data, "module update");
   const docRef = adminDb
     .collection("courses")
@@ -226,6 +303,11 @@ export async function deleteModuleAction(
   moduleId: string,
 ): Promise<void> {
   await requireAdmin();
+  if (SERVER_FEATURES.supabaseAdminCourses) {
+    await deleteAdminModule(moduleId);
+    await syncLessonsCountAction(courseId);
+    return;
+  }
 
   const batch = adminDb.batch();
   const lessonsRef = adminDb
@@ -265,6 +347,10 @@ export async function createLessonAction(
   order: number,
 ): Promise<string> {
   await requireAdmin();
+  if (SERVER_FEATURES.supabaseAdminCourses) {
+    return createAdminLesson(courseId, moduleId, title, order);
+  }
+
   const lessonsCol = adminDb
     .collection("courses")
     .doc(courseId)
@@ -295,6 +381,14 @@ export async function updateLessonAction(
   data: Partial<LessonDoc>,
 ): Promise<void> {
   await requireAdmin();
+  if (SERVER_FEATURES.supabaseAdminCourses) {
+    await updateAdminLesson(lessonId, data);
+    if (data.isPublished !== undefined) {
+      await syncLessonsCountAction(courseId);
+    }
+    return;
+  }
+
   const payload = sanitizeRecord(data, "lesson update");
   const docRef = adminDb
     .collection("courses")
@@ -322,6 +416,12 @@ export async function deleteLessonAction(
   lessonId: string,
 ): Promise<void> {
   await requireAdmin();
+  if (SERVER_FEATURES.supabaseAdminCourses) {
+    await deleteAdminLesson(lessonId);
+    await syncLessonsCountAction(courseId);
+    return;
+  }
+
   const lessonRef = adminDb
     .collection("courses")
     .doc(courseId)
@@ -347,6 +447,11 @@ export async function toggleEnrollmentStatusAction(
   currentStatus: string,
 ): Promise<void> {
   await requireAdmin();
+  if (SERVER_FEATURES.supabaseAdminCourses) {
+    await toggleAdminEnrollmentStatus(enrollmentId, currentStatus);
+    return;
+  }
+
   const newStatus = currentStatus === "active" ? "cancelled" : "active";
   await adminDb
     .collection("enrollments")
@@ -360,6 +465,11 @@ export async function updateThreadAction(
   updates: Record<string, unknown>,
 ): Promise<void> {
   await requireAdmin();
+  if (SERVER_FEATURES.supabaseAdminCourses) {
+    await updateAdminThread(threadId, updates);
+    return;
+  }
+
   const payload = stripImmutableFields(
     sanitizeRecord(updates, "thread update"),
   );
@@ -376,6 +486,11 @@ export async function deleteThreadAction(
   threadId: string,
 ): Promise<void> {
   await requireAdmin();
+  if (SERVER_FEATURES.supabaseAdminCourses) {
+    await deleteAdminThread(threadId);
+    return;
+  }
+
   await adminDb
     .collection("courses")
     .doc(courseId)
@@ -389,6 +504,11 @@ export async function addMaterialAction(
   data: Record<string, unknown>,
 ): Promise<void> {
   await requireAdmin();
+  if (SERVER_FEATURES.supabaseAdminCourses) {
+    await addAdminMaterial(courseId, data);
+    return;
+  }
+
   const payload = sanitizeRecord(data, "material");
   await adminDb
     .collection("courses")
@@ -408,6 +528,11 @@ export async function updateMaterialAction(
   updates: Record<string, unknown>,
 ): Promise<void> {
   await requireAdmin();
+  if (SERVER_FEATURES.supabaseAdminCourses) {
+    await updateAdminMaterial(materialId, updates);
+    return;
+  }
+
   const payload = stripImmutableFields(
     sanitizeRecord(updates, "material update"),
   );
@@ -424,6 +549,11 @@ export async function deleteMaterialAction(
   materialId: string,
 ): Promise<void> {
   await requireAdmin();
+  if (SERVER_FEATURES.supabaseAdminCourses) {
+    await deleteAdminMaterial(materialId);
+    return;
+  }
+
   await adminDb
     .collection("courses")
     .doc(courseId)
@@ -436,6 +566,10 @@ export async function syncLessonsCountAction(
   courseId: string,
 ): Promise<number> {
   await requireAdmin();
+  if (SERVER_FEATURES.supabaseAdminCourses) {
+    return syncAdminLessonsCount(courseId);
+  }
+
   const modulesSnap = await adminDb
     .collection("courses")
     .doc(courseId)

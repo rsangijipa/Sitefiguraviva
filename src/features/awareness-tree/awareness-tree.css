@@ -1,0 +1,184 @@
+.awareness-tree {
+  --hud-border: rgba(255, 255, 255, 0.14);
+  --hud-border-strong: rgba(255, 255, 255, 0.2);
+  --hud-surface: rgba(12, 20, 33, 0.78);
+  --hud-surface-soft: rgba(255, 255, 255, 0.08);
+  --hud-text: #e6eef8;
+  --hud-primary-bg: #f2efe8;
+  --hud-primary-text: #1c1a17;
+  color-scheme: dark;
+}
+
+.awareness-tree .hud-scroller {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  mask-image: linear-gradient(to right, transparent 0, #000 12px, #000 calc(100% - 22px), transparent 100%);
+}
+
+.awareness-tree .hud-scroller::-webkit-scrollbar { display: none; }
+
+.awareness-tree .hud-panel {
+  border: 1px solid var(--hud-border);
+  background: linear-gradient(180deg, rgba(17, 26, 42, 0.9), rgba(10, 16, 27, 0.92));
+  border-radius: 1.25rem;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(14px);
+}
+
+.awareness-tree .hud-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+}
+
+.awareness-tree .hud-pill,
+.awareness-tree .hud-btn-primary,
+.awareness-tree .hud-btn-secondary,
+.awareness-tree .hud-btn-ghost,
+.awareness-tree .hud-badge {
+  border-radius: 9999px;
+}
+
+.awareness-tree .hud-pill {
+  border: 1px solid var(--hud-border);
+  background: var(--hud-surface-soft);
+  color: var(--hud-text);
+}
+
+.awareness-tree .hud-card,
+.awareness-tree .hud-sheet {
+  border: 1px solid var(--hud-border);
+  background: var(--hud-surface);
+}
+
+.awareness-tree .hud-card { border-radius: 1rem; }
+
+.awareness-tree .hud-btn-primary {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: var(--hud-primary-bg);
+  color: var(--hud-primary-text);
+}
+
+.awareness-tree .hud-btn-secondary {
+  border: 1px solid var(--hud-border);
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--hud-text);
+}
+
+.awareness-tree .hud-btn-ghost {
+  border: 1px solid var(--hud-border);
+  background: transparent;
+  color: var(--hud-text);
+}
+
+.awareness-tree .hud-badge {
+  border: 1px solid var(--hud-border-strong);
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--hud-text);
+}
+
+.awareness-tree .hud-list-item {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 1rem;
+  color: var(--hud-text);
+}
+
+.awareness-tree-fallback {
+  position: relative;
+  display: grid;
+  min-height: 100dvh;
+  place-items: center;
+  overflow: hidden;
+  padding: 6rem 1.25rem 3rem;
+  color: #edf5ee;
+  background: radial-gradient(circle at 50% 22%, #1b5139 0, #112c23 38%, #091813 100%);
+}
+
+.awareness-tree-fallback__glow {
+  position: absolute;
+  inset: 14% 50% auto;
+  width: 22rem;
+  height: 22rem;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: rgba(205, 177, 111, 0.12);
+  filter: blur(50px);
+}
+
+.awareness-tree-fallback__content {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 50rem);
+  text-align: center;
+}
+
+.awareness-tree-fallback__eyebrow {
+  margin-bottom: 0.75rem;
+  color: #d8bd79;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.awareness-tree-fallback h1 {
+  font-family: var(--font-serif), serif;
+  font-size: clamp(2.5rem, 8vw, 5.5rem);
+  line-height: 0.98;
+}
+
+.awareness-tree-fallback__status {
+  max-width: 40rem;
+  margin: 1.25rem auto 0;
+  color: rgba(237, 245, 238, 0.72);
+  line-height: 1.7;
+}
+
+.awareness-tree-fallback__themes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.625rem;
+  margin-top: 2rem;
+}
+
+.awareness-tree-fallback__themes button {
+  min-height: 44px;
+  padding: 0.65rem 1rem;
+  border: 1px solid rgba(237, 245, 238, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: inherit;
+}
+
+.awareness-tree-fallback__themes button[aria-pressed="true"] {
+  border-color: #d8bd79;
+  color: #17231c;
+  background: #d8bd79;
+}
+
+.awareness-tree-fallback blockquote {
+  max-width: 38rem;
+  margin: 2rem auto 0;
+  padding: 1.75rem;
+  border: 1px solid rgba(216, 189, 121, 0.24);
+  border-radius: 1.5rem;
+  background: rgba(8, 23, 17, 0.64);
+  backdrop-filter: blur(14px);
+}
+
+.awareness-tree-fallback blockquote p {
+  font-family: var(--font-serif), serif;
+  font-size: clamp(1.35rem, 3vw, 2rem);
+  line-height: 1.35;
+}
+
+.awareness-tree-fallback blockquote footer {
+  margin-top: 1rem;
+  color: #d8bd79;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}

@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test';
-import { loginAsAdmin } from './helpers';
+import { loginAsAdmin, HAS_ADMIN_CREDENTIALS, MISSING_ADMIN_CREDENTIALS } from './helpers';
 
 test.describe('Admin Content Management', () => {
+    test.skip(!HAS_ADMIN_CREDENTIALS, MISSING_ADMIN_CREDENTIALS);
+
 
     test('should load admin dashboard with stats @smoke', async ({ page }) => {
         await loginAsAdmin(page);

@@ -14,7 +14,7 @@ import { ensureUserProfileAction } from "@/app/actions/auth";
 
 export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
-  const { user, isAdmin, loading: authLoading, signOut } = useAuth();
+  const { user, isAdmin, loading: authLoading, signOut, signIn } = useAuth();
   const { addToast } = useToast();
   const router = useRouter();
 
@@ -39,40 +39,21 @@ export default function AdminLogin() {
 
     setLoading(true);
     try {
-      // 1. Client-side Auth
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password,
-      );
-      const idToken = await userCredential.user.getIdToken();
+      // 1. Supabase Auth via AuthContext
+      const { error } = await signIn(email, password);
 
-      // 2. Server-side Session Creation
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ idToken }),
-      });
-
-      if (response.ok) {
-        // Ensure users/{uid} exists + sync role/claims (SSoT)
+      if (error) {
+        addToast(`Falha no login: ${error.message || error}`, "error");
+      } else {
+        // Ensure profile sync
         const sync = await ensureUserProfileAction();
         if (!sync.success) {
           console.error("Admin profile sync failed:", sync.error);
         }
 
-        // Force refresh token to pick up updated claims
-        await userCredential.user.getIdToken(true);
-
         addToast("Login realizado com sucesso!", "success");
-        // Force router refresh to ensure cookies are seen by Server Components
         router.refresh();
         router.push("/admin");
-      } else {
-        addToast("Falha ao criar sessão segura.", "error");
-        console.error("Session creation failed");
       }
     } catch (error: any) {
       console.error("Login failed", error);

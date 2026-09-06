@@ -1,12 +1,39 @@
 "use server";
 
 import { requireAdmin } from "@/lib/auth/server";
-import { adminDb } from "@/lib/firebase/admin";
-import { Timestamp } from "firebase-admin/firestore";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import { revalidatePath } from "next/cache";
-import { logAudit } from "@/lib/audit";
 
-// --- Actions ---
+export async function getPendingEnrollmentsAction() {
+  try {
+    await requireAdmin();
+    const supabase = createSupabaseServiceClient();
+
+    const { data: enrollments, error } = await supabase
+      .from("enrollments")
+      .select("*, courses(title)")
+      .eq("status", "pending_approval");
+
+    if (error) {
+      console.error("getPendingEnrollmentsAction Error:", error);
+      return { success: false, enrollments: [] };
+    }
+
+    const formatted = (enrollments || []).map((e: any) => ({
+      id: e.id,
+      uid: e.user_id,
+      courseId: e.course_id,
+      courseTitle: e.courses?.title || e.course_id,
+      status: e.status,
+      createdAt: e.created_at,
+    }));
+
+    return { success: true, enrollments: formatted };
+  } catch (error: any) {
+    console.error("getPendingEnrollmentsAction Error:", error);
+    return { success: false, enrollments: [] };
+  }
+}
 
 export async function approveEnrollment(
   enrollmentId: string,
@@ -14,53 +41,19 @@ export async function approveEnrollment(
   courseId: string,
 ) {
   try {
-    const adminClaims = await requireAdmin(); // Throws if not admin
-    const actorUid = adminClaims.uid;
+    const adminUser = await requireAdmin();
+    const actorUid = adminUser.uid;
+    const supabase = createSupabaseServiceClient();
 
-    // Recalculate status to ensure consistency
-    // Note: We use the data passed from client (currentData) or fetch fresh?
-    // Ideally fetch fresh to be safe.
-    const enrollmentRef = adminDb.collection("enrollments").doc(enrollmentId);
-    const enrollmentSnap = await enrollmentRef.get();
-    if (!enrollmentSnap.exists) {
-      throw new Error("Matrícula não encontrada.");
-    }
-    // For manual admin approvals, always set status to 'active'
-    // regardless of Stripe subscription status
-    const newStatus = "active";
+    const { error } = await supabase
+      .from("enrollments")
+      .update({
+        status: "active",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", enrollmentId);
 
-    const updateData = {
-      status: newStatus,
-      approvalStatus: "approved",
-      approvedAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
-      approvedBy: actorUid,
-    };
-
-    const batch = adminDb.batch();
-    batch.update(enrollmentRef, updateData);
-
-    // Also update the user's sub-collection copy
-    const userEnrollmentRef = adminDb
-      .collection("users")
-      .doc(uid)
-      .collection("enrollments")
-      .doc(courseId);
-    batch.set(userEnrollmentRef, updateData, { merge: true });
-
-    await batch.commit();
-
-    // Audit Log
-    await logAudit({
-      actor: { uid: actorUid, role: "admin" },
-      action: "enrollment.approved",
-      target: {
-        collection: "enrollments",
-        id: enrollmentId,
-        summary: `Approved access for user ${uid} to course ${courseId}`,
-      },
-      metadata: { courseId, uid, newStatus },
-    });
+    if (error) throw error;
 
     revalidatePath("/admin/approvals");
     return { success: true };
@@ -80,51 +73,20 @@ export async function rejectEnrollment(
   reason: string,
 ) {
   try {
-    const adminClaims = await requireAdmin();
-    const actorUid = adminClaims.uid;
-
+    await requireAdmin();
     if (!reason) throw new Error("Motivo da rejeição é obrigatório.");
 
-    const enrollmentRef = adminDb.collection("enrollments").doc(enrollmentId);
-    const enrollmentSnap = await enrollmentRef.get();
-    if (!enrollmentSnap.exists) {
-      throw new Error("Matrícula não encontrada.");
-    }
-    const newStatus = "canceled";
+    const supabase = createSupabaseServiceClient();
 
-    const updateData = {
-      status: newStatus,
-      approvalStatus: "rejected",
-      rejectionReason: reason,
-      rejectedAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
-      rejectedBy: actorUid,
-    };
+    const { error } = await supabase
+      .from("enrollments")
+      .update({
+        status: "canceled",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", enrollmentId);
 
-    const batch = adminDb.batch();
-    batch.update(enrollmentRef, updateData);
-    batch.set(
-      adminDb
-        .collection("users")
-        .doc(uid)
-        .collection("enrollments")
-        .doc(courseId),
-      updateData,
-      { merge: true },
-    );
-
-    await batch.commit();
-
-    await logAudit({
-      actor: { uid: actorUid, role: "admin" },
-      action: "enrollment.rejected",
-      target: {
-        collection: "enrollments",
-        id: enrollmentId,
-        summary: `Rejected access for user ${uid} to course ${courseId}`,
-      },
-      metadata: { courseId, uid, reason },
-    });
+    if (error) throw error;
 
     revalidatePath("/admin/approvals");
     return { success: true };

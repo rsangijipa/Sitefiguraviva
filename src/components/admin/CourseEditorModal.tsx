@@ -14,7 +14,6 @@ import {
 import Button from "@/components/ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
 import ImageUpload from "@/components/admin/ImageUpload";
-import { createCourseAction } from "@/app/actions/create-course";
 import { adminCourseService } from "@/services/adminCourseService";
 import { useToast } from "@/context/ToastContext";
 
@@ -104,26 +103,13 @@ export default function CourseEditorModal({
         addToast("Curso atualizado com sucesso!", "success");
         onSuccess?.(editingCourse.id);
       } else {
-        // Create new course
-        const result = await createCourseAction({
+        const newCourseId = await adminCourseService.createCourse({
           title: formData.title,
           subtitle: formData.subtitle,
           instructor: formData.instructor,
           category: formData.category,
           duration: formData.duration,
           level: formData.level,
-        });
-
-        if (!result || !result.success) {
-          const errorMessage =
-            (result as any)?.error || "Erro desconhecido ao criar curso";
-          throw new Error(errorMessage);
-        }
-
-        const newCourseId = (result as any).id;
-
-        // Update with additional fields
-        await adminCourseService.updateCourse(newCourseId, {
           description: formData.description,
           coverImage: formData.coverImage,
           image: formData.coverImage,

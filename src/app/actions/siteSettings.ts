@@ -77,7 +77,7 @@ export async function seedSiteSettingsAction() {
         defaultTitle: "Instituto Figura Viva | Gestalt-Terapia",
         defaultDescription:
           "O Instituto Figura Viva é um espaço de excelência em formação, clínica e pesquisa em Gestalt-terapia.",
-        ogImage: "/assets/og-image.jpg",
+        ogImage: "",
         keywords: ["Gestalt", "Psicologia", "Formação", "Terapia", "Rondônia"],
       },
       legal: {
@@ -106,7 +106,7 @@ export async function seedSiteSettingsAction() {
         enableParticles: true,
         visualMode: "modern",
         showAudioControl: true,
-        whatsappNumber: "556992481585",
+        whatsappNumber: "5569992481585",
         whatsappMessage:
           "Olá! Gostaria de saber mais sobre as formações do Instituto Figura Viva.",
       },

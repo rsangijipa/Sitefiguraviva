@@ -14,9 +14,12 @@
 /playwright-report/
 /blob-report/
 /playwright/.auth/
+/.worktrees/
 
 # Next.js
 /.next/
+# Throwaway builds produced with NEXT_DIST_DIR (audits, CSP checks)
+/.next-*/
 /out/
 
 # Production
@@ -75,7 +78,9 @@ Desktop.ini
 # Logs and Debug Files
 /docs/debug/
 *.log
-*.txt
+/*.txt
+/report.json
+/report_utf8.json
 debug_cert*
 test_*
 tsc_errors.txt
@@ -86,7 +91,10 @@ test_failure*
 test_smoke*
 
 # Scripts
-/scripts/
+# Only local debug helpers are ignored. Operational scripts (LGPD export,
+# subscription expiry, progress reconciliation) must stay in version control —
+# they are part of how the platform is run, not throwaway tooling.
+/scripts/debug-*
 /*.js
 !/next.config.mjs
 !/eslint.config.mjs
@@ -94,9 +102,6 @@ test_smoke*
 !/jest.setup.js
 !/postcss.config.js
 !/tailwind.config.js
-!/debug-courses.js
-!/fix-env.js
-!/test-admin.js
 
 # System Map
 /system_map.md

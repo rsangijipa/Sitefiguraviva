@@ -179,6 +179,7 @@ export default function BlogManager() {
               <a
                 href={row.pdf_url}
                 target="_blank"
+                rel="noopener noreferrer"
                 className="p-2 text-stone-400 hover:text-primary hover:bg-primary/5 rounded-xl transition-all"
                 title="Ver PDF"
               >

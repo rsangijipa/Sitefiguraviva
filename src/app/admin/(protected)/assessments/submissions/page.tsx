@@ -8,10 +8,7 @@ import {
 import { AdminPageShell } from "@/components/admin/AdminPageShell";
 import { DataTable, Column } from "@/components/admin/DataTable";
 import { Badge } from "@/components/ui/Badge";
-import { useState, useEffect } from "react";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase/client";
-import { UserData } from "@/types/user";
+import { useState } from "react";
 import {
   ClipboardList,
   CheckCircle,
@@ -21,70 +18,27 @@ import {
   User as UserIcon,
   ArrowRight,
 } from "lucide-react";
-import { useToast } from "@/context/ToastContext";
 import { cn } from "@/lib/utils";
-import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
 import Link from "next/link";
 
 export default function SubmissionsPage() {
   const [pageSize] = useState(20);
-  const [pageStack, setPageStack] = useState<any[]>([]);
+  const [pageStack, setPageStack] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const lastDoc =
+  const lastCursor =
     pageStack.length > 0 ? pageStack[pageStack.length - 1] : undefined;
 
   const { data: submissionsData, isLoading: submissionsLoading } =
-    useAdminSubmissionsPaginated(undefined, pageSize, lastDoc);
+    useAdminSubmissionsPaginated(undefined, pageSize, lastCursor);
   const { data: metrics, isLoading: metricsLoading } = useSubmissionsMetrics();
   const { data: assessments, isLoading: assessmentsLoading } =
     useAdminAssessments();
 
-  // Local user cache for displayed submissions
-  const [usersMap, setUsersMap] = useState<Record<string, UserData>>({});
-  const [usersLoadingState, setUsersLoadingState] = useState(false);
-
-  const { addToast } = useToast();
-  const router = useRouter();
-
   const submissions = submissionsData?.submissions || [];
+  const usersMap = submissionsData?.users || {};
   const hasMore = submissionsData?.hasMore || false;
-  const isLoading =
-    submissionsLoading || assessmentsLoading || usersLoadingState;
-
-  // Fetch users for visible submissions
-  useEffect(() => {
-    async function fetchUsers() {
-      if (!submissions.length) return;
-
-      const userIds = Array.from(new Set(submissions.map((s) => s.userId)));
-      const missingIds = userIds.filter((id) => !usersMap[id]);
-
-      if (missingIds.length === 0) return;
-
-      setUsersLoadingState(true);
-      try {
-        // Fetch in batches or Promise.all
-        const newUsers: Record<string, UserData> = {};
-        await Promise.all(
-          missingIds.map(async (uid) => {
-            try {
-              const snap = await getDoc(doc(db, "users", uid));
-              if (snap.exists()) {
-                newUsers[uid] = { uid: snap.id, ...snap.data() } as UserData;
-              }
-            } catch (e) {
-              console.error(`Error fetching user ${uid}`, e);
-            }
-          }),
-        );
-        setUsersMap((prev) => ({ ...prev, ...newUsers }));
-      } finally {
-        setUsersLoadingState(false);
-      }
-    }
-    fetchUsers();
-  }, [submissions]);
+  const isLoading = submissionsLoading || assessmentsLoading;
 
   const handleNextPage = () => {
     if (submissionsData?.lastVisible) {

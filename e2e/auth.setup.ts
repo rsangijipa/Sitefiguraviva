@@ -5,9 +5,10 @@ import fs from "fs";
 const authDir = path.join(__dirname, "../playwright/.auth");
 
 setup("authenticate student", async ({ page }) => {
-  if (!process.env.STUDENT_EMAIL || !process.env.STUDENT_PASSWORD) {
-    throw new Error("STUDENT_EMAIL or STUDENT_PASSWORD not set");
-  }
+  setup.skip(
+    !process.env.STUDENT_EMAIL || !process.env.STUDENT_PASSWORD,
+    "Set STUDENT_EMAIL and STUDENT_PASSWORD to run the student journeys.",
+  );
 
   if (!fs.existsSync(authDir)) {
     fs.mkdirSync(authDir, { recursive: true });
@@ -57,13 +58,43 @@ setup("authenticate student", async ({ page }) => {
         .locator('div:has(label:has-text("Senha")) input')
         .fill(process.env.STUDENT_PASSWORD);
 
+      // Accounts are now bound to a course: the submit button stays disabled
+      // until one is picked, so the old flow clicked a dead button and timed
+      // out. Pick the first real option.
+      const courseSelect = page.locator("#course-interest");
+      if ((await courseSelect.count()) === 0) {
+        throw new Error(
+          "No open course to sign up for, so a student account cannot be created " +
+            "through the public form. Create the STUDENT_EMAIL account manually.",
+        );
+      }
+
+      const firstCourseValue = await courseSelect
+        .locator("option:not([value=''])")
+        .first()
+        .getAttribute("value");
+
+      if (!firstCourseValue) {
+        throw new Error(
+          "The course selector has no published course, so sign-up cannot complete. " +
+            "Publish a course or create the STUDENT_EMAIL account manually.",
+        );
+      }
+
+      await courseSelect.selectOption(firstCourseValue);
+
       // Click "Criar Conta"
       await page.click('button:has-text("Criar Conta")');
 
-      // Wait for portal redirect - longer timeout for new user provisioning
-      await page.waitForURL((url) => url.pathname.startsWith("/portal"), {
-        timeout: 40000,
-      });
+      // Sign-up continues into the enrollment it was made for, so the landing
+      // page is /inscricao/<courseId>; a returning session still lands on
+      // /portal. Either one means the account exists and is signed in.
+      await page.waitForURL(
+        (url) =>
+          url.pathname.startsWith("/portal") ||
+          url.pathname.startsWith("/inscricao"),
+        { timeout: 40000 },
+      );
     } else {
       throw new Error(
         `Login failed and no auto-signup possible. Error: ${errorText?.trim() || "Unknown"}`,
@@ -77,9 +108,10 @@ setup("authenticate student", async ({ page }) => {
 });
 
 setup("authenticate admin", async ({ page }) => {
-  if (!process.env.ADMIN_EMAIL || !process.env.ADMIN_PASSWORD) {
-    throw new Error("ADMIN_EMAIL or ADMIN_PASSWORD not set");
-  }
+  setup.skip(
+    !process.env.ADMIN_EMAIL || !process.env.ADMIN_PASSWORD,
+    "Set ADMIN_EMAIL and ADMIN_PASSWORD to run the admin journeys.",
+  );
 
   if (!fs.existsSync(authDir)) {
     fs.mkdirSync(authDir, { recursive: true });
