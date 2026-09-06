@@ -1,6 +1,6 @@
+import { Lesson, Block } from "@/types/lms";
 import { FieldValue } from "firebase-admin/firestore";
 import { db } from "@/lib/firebase/admin";
-import { Lesson, Block } from "@/types/lms";
 import { deepSafeSerialize } from "./utils";
 
 import { toCourseFullDTO } from "@/lib/presenters/mappers";
@@ -8,11 +8,12 @@ import { toCourseFullDTO } from "@/lib/presenters/mappers";
 import { assertCanAccessCourse } from "./auth/access-gate";
 import { AccessError, AccessErrorCode } from "./auth/access-types";
 import {
-  getCourseSnapshot,
-  getLessonsSnapshot,
-  getModulesSnapshot,
-} from "@/lib/repositories/courseRepository.server";
-import { findEnrollmentForCourse } from "@/lib/repositories/enrollmentRepository.server";
+  getAdminCourse,
+  listAdminLessons,
+  listAdminModules,
+} from "@/features/courses/infrastructure/supabaseAdminCourseRepository.server";
+import { findEnrollmentBySupabaseUser } from "@/features/enrollments/infrastructure/supabaseEnrollmentRepository.server";
+import { listProgressBySupabaseUser } from "@/features/progress/infrastructure/supabaseProgressRepository.server";
 
 export async function getCourseData(
   courseId: string,
@@ -38,51 +39,46 @@ export async function getCourseData(
     }
   }
 
-  const courseSnap = await getCourseSnapshot(courseId);
-  if (!courseSnap.exists) return null;
+  const course = await getAdminCourse(courseId);
+  if (!course) return null;
 
   const enrollmentResult = accessContext?.isAdminOverride
     ? null
-    : await findEnrollmentForCourse(userId, courseId);
-  const enrollmentDoc = enrollmentResult?.snapshot || null;
+    : await findEnrollmentBySupabaseUser(userId, courseId);
 
   // 2. Fetch Progress (ATOMIC)
-  const progressSnap = await db
-    .collection("progress")
-    .where("userId", "==", userId)
-    .where("courseId", "==", courseId)
-    .get();
-
   const progressMap = new Map<string, any>();
-  progressSnap.docs.forEach((doc) => {
-    const data = doc.data();
-    if (data.lessonId) {
-      progressMap.set(data.lessonId, data);
+  const progressRows = await listProgressBySupabaseUser(userId, courseId);
+  progressRows.forEach((row) => {
+    if (row.lessonId) {
+      progressMap.set(row.lessonId, {
+        ...row,
+        lessonId: row.lessonId,
+      });
     }
   });
 
   // 3. Fetch Modules
-  const modulesSnap = await getModulesSnapshot(courseId);
+  const modules = await listAdminModules(courseId);
 
   // 4. Fetch All Lessons (Optimized Parallel)
   // We create a map of ModuleID -> LessonDocs[]
   const lessonsMap = new Map<string, any[]>();
 
   await Promise.all(
-    modulesSnap.docs.map(async (mDoc) => {
-      const lessonsSnap = await getLessonsSnapshot(courseId, mDoc.id);
-
-      lessonsMap.set(mDoc.id, lessonsSnap.docs);
+    modules.map(async (module) => {
+      const lessons = await listAdminLessons(courseId, module.id);
+      lessonsMap.set(module.id, lessons);
     }),
   );
 
   // 5. Map to DTO
   return toCourseFullDTO(
-    courseSnap,
-    modulesSnap.docs,
+    course,
+    modules,
     lessonsMap,
     progressMap,
-    enrollmentDoc?.exists ? enrollmentDoc : null,
+    enrollmentResult,
     isAdmin,
     isAccessDenied,
   );
