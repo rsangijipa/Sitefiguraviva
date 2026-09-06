@@ -1,10 +1,14 @@
-jest.mock("@/lib/firebase/admin", () => ({
-  db: {
-    collection: jest.fn(() => {
-      throw new Error("Firebase unavailable");
-    }),
-  },
-}));
+jest.mock(
+  "@/features/content/infrastructure/supabaseContentRepository",
+  () => ({
+    listPublishedCourses: jest
+      .fn()
+      .mockRejectedValue(new Error("Supabase unavailable")),
+    listPublishedContent: jest
+      .fn()
+      .mockRejectedValue(new Error("Supabase unavailable")),
+  }),
+);
 
 import sitemap from "../sitemap";
 

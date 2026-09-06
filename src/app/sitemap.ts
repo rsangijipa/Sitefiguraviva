@@ -1,5 +1,8 @@
 import { MetadataRoute } from "next";
-import { db } from "@/lib/firebase/admin";
+import {
+  listPublishedContent,
+  listPublishedCourses,
+} from "@/features/content/infrastructure/supabaseContentRepository";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://figuraviva.com.br";
@@ -8,20 +11,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let posts: MetadataRoute.Sitemap = [];
 
   try {
-    const [coursesSnap, postsSnap] = await Promise.all([
-      db.collection("courses").where("isPublished", "==", true).get(),
-      db.collection("posts").where("isPublished", "==", true).get(),
+    const [coursesData, postsData] = await Promise.all([
+      listPublishedCourses(),
+      listPublishedContent("posts"),
     ]);
 
-    courses = coursesSnap.docs.map((doc) => ({
-      url: `${baseUrl}/curso/${doc.id}`,
+    courses = coursesData.map((course) => ({
+      url: `${baseUrl}/curso/${course.slug || course.id}`,
       lastModified: new Date(),
       changeFrequency: "weekly" as const,
       priority: 0.8,
     }));
 
-    posts = postsSnap.docs.map((doc) => ({
-      url: `${baseUrl}/blog/${doc.id}`,
+    posts = postsData.map((post) => ({
+      url: `${baseUrl}/blog/${post.slug || post.id}`,
       lastModified: new Date(),
       changeFrequency: "monthly" as const,
       priority: 0.6,
