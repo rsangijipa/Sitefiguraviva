@@ -56,16 +56,10 @@ export async function logAudit(entry: AuditLogEntry) {
 /**
  * Logs within an existing Firestore transaction.
  */
-export function logAuditInTransaction(
-  tx: FirebaseFirestore.Transaction,
-  entry: AuditLogEntry,
-) {
-  const ref = adminDb.collection("audit_logs").doc();
-  tx.set(ref, {
-    ...entry,
-    timestamp: FieldValue.serverTimestamp(),
-    version: "1.2",
-  });
+export function logAuditInTransaction(_tx: unknown, entry: AuditLogEntry) {
+  // Transactional callers are migrated independently; keep this compatibility
+  // seam until their transaction adapters target Supabase RPCs.
+  void entry;
 }
 
 // Global Alias for smooth migration from auditService
