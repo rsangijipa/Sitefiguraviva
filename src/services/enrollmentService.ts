@@ -70,7 +70,7 @@ export const enrollmentService = {
           courseId: data.course_id,
           enrolledAt: data.enrolled_at || data.created_at,
           progressSummary: data.progress_summary,
-        } as Enrollment)
+        } as unknown as Enrollment)
       : null;
   },
 
