@@ -62,6 +62,7 @@ export default function MaterialsManager({ courseId }: MaterialsManagerProps) {
         type: "pdf",
         url: formData.file_url,
         description: formData.file_size,
+        filePath: formData.file_path,
         isPublished: true,
       });
 
@@ -77,10 +78,10 @@ export default function MaterialsManager({ courseId }: MaterialsManagerProps) {
     }
   };
 
-  const handleDelete = async (materialId: string) => {
+  const handleDelete = async (materialId: string, filePath?: string) => {
     if (!confirm("Excluir este material?")) return;
     try {
-      await deleteMaterialAction(courseId, materialId);
+      await deleteMaterialAction(courseId, materialId, filePath);
       await loadMaterials();
       addToast("Material excluído.", "success");
     } catch (error) {
@@ -178,7 +179,7 @@ export default function MaterialsManager({ courseId }: MaterialsManagerProps) {
                 <Download size={16} />
               </a>
               <button
-                onClick={() => handleDelete(item.id)}
+                onClick={() => handleDelete(item.id, item.filePath)}
                 className="p-2 text-red-200 hover:text-red-500 transition-colors"
               >
                 <Trash2 size={16} />

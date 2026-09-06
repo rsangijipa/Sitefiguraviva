@@ -3,7 +3,10 @@ jest.mock("../server", () => ({
 }));
 
 import { createSupabaseServiceClient } from "../server";
-import { uploadPublicCourseAsset } from "../storage.server";
+import {
+  deleteStorageObject,
+  uploadPublicCourseAsset,
+} from "../storage.server";
 
 const mockedCreateSupabaseServiceClient = jest.mocked(
   createSupabaseServiceClient,
@@ -71,5 +74,24 @@ describe("uploadPublicCourseAsset", () => {
       }),
     ).rejects.toBe(storageError);
     expect(getPublicUrl).not.toHaveBeenCalled();
+  });
+
+  it("deletes a stored object from the configured bucket", async () => {
+    const remove = jest.fn().mockResolvedValue({ error: null });
+    const from = jest.fn().mockReturnValue({ remove });
+
+    mockedCreateSupabaseServiceClient.mockReturnValue({
+      storage: { from },
+    } as unknown as ReturnType<typeof createSupabaseServiceClient>);
+
+    await expect(
+      deleteStorageObject({
+        bucket: "uploads",
+        path: "uploads/admin/uuid-guide.pdf",
+      }),
+    ).resolves.toBeUndefined();
+
+    expect(from).toHaveBeenCalledWith("uploads");
+    expect(remove).toHaveBeenCalledWith(["uploads/admin/uuid-guide.pdf"]);
   });
 });

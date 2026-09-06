@@ -2,6 +2,7 @@ import "server-only";
 
 import { randomUUID } from "crypto";
 import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
+import { deleteStorageObject } from "@/infrastructure/supabase/storage.server";
 import type {
   CourseStatus,
   EnrollmentStatus,
@@ -158,6 +159,14 @@ function mapLessonRow(row: LessonRow): LessonDoc {
 }
 
 function mapMaterialRow(row: MaterialRow): MaterialDoc {
+  const legacyPayload = row.legacy_payload as Record<string, unknown>;
+  const filePath =
+    typeof legacyPayload?.filePath === "string"
+      ? legacyPayload.filePath
+      : typeof legacyPayload?.file_path === "string"
+        ? legacyPayload.file_path
+        : undefined;
+
   return {
     id: row.id,
     courseId: row.course_id,
@@ -167,6 +176,7 @@ function mapMaterialRow(row: MaterialRow): MaterialDoc {
     description: row.description || undefined,
     isPublished: row.is_published,
     downloadCount: row.download_count,
+    filePath,
     createdAt: timestampFromIso(row.created_at) as MaterialDoc["createdAt"],
   };
 }
@@ -572,8 +582,33 @@ export async function updateAdminMaterial(
   if (error) throw error;
 }
 
-export async function deleteAdminMaterial(materialId: string): Promise<void> {
+export async function deleteAdminMaterial(
+  materialId: string,
+  filePath?: string,
+): Promise<void> {
   const supabase = createSupabaseServiceClient();
+  let resolvedFilePath = filePath;
+
+  if (!resolvedFilePath) {
+    const { data } = await supabase
+      .from("lesson_materials")
+      .select("legacy_payload")
+      .eq("id", materialId)
+      .maybeSingle();
+
+    const legacyPayload = data?.legacy_payload as Record<string, unknown>;
+    resolvedFilePath =
+      typeof legacyPayload?.filePath === "string"
+        ? legacyPayload.filePath
+        : typeof legacyPayload?.file_path === "string"
+          ? legacyPayload.file_path
+          : undefined;
+  }
+
+  if (resolvedFilePath) {
+    await deleteStorageObject({ bucket: "uploads", path: resolvedFilePath });
+  }
+
   const { error } = await supabase
     .from("lesson_materials")
     .delete()
