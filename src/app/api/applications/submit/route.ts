@@ -23,9 +23,9 @@ const applicationSchema = z.object({
     .optional()
     .default({}),
   consent: z
-    .record(z.string().max(200), z.boolean())
-    .refine((obj) => Object.keys(obj).length <= 20, {
-      message: "Too many consent fields",
+    .object({
+      lgpd: z.boolean().optional(),
+      acceptedAt: z.string().datetime().optional(),
     })
     .optional()
     .default({}),
