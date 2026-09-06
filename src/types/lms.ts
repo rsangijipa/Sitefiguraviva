@@ -176,6 +176,7 @@ export interface MaterialDoc {
   description?: string;
   isPublished: boolean;
   downloadCount?: number;
+  filePath?: string;
   createdAt: Timestamp;
 }
 

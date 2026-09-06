@@ -76,7 +76,14 @@ function validateUploadFile(
 function buildStoragePath(folder: string, fileName: string) {
   const cleanFolder = folder.replace(/^\/+|\/+$/g, "");
   const cleanName = sanitizeFileName(fileName);
-  return cleanFolder ? `${cleanFolder}/${cleanName}` : cleanName;
+  const uniquePrefix =
+    typeof globalThis.crypto?.randomUUID === "function"
+      ? globalThis.crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+
+  return cleanFolder
+    ? `${cleanFolder}/${uniquePrefix}-${cleanName}`
+    : `${uniquePrefix}-${cleanName}`;
 }
 
 export async function uploadAdminAsset(

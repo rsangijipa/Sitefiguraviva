@@ -547,10 +547,11 @@ export async function updateMaterialAction(
 export async function deleteMaterialAction(
   courseId: string,
   materialId: string,
+  filePath?: string,
 ): Promise<void> {
   await requireAdmin();
   if (SERVER_FEATURES.supabaseAdminCourses) {
-    await deleteAdminMaterial(materialId);
+    await deleteAdminMaterial(materialId, filePath);
     return;
   }
 
