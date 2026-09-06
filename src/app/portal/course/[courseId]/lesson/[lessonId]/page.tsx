@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { db } from "@/lib/firebase/admin";
+import { getCourseOutlineById } from "@/features/courses/infrastructure/supabaseCourseRepository.server";
 import { LessonPlayerWrapper } from "@/components/portal/LessonPlayerWrapper";
 import { Lesson, Module } from "@/types/lms";
 import { deepSafeSerialize } from "@/lib/utils";
@@ -11,6 +12,16 @@ export const dynamic = "force-dynamic";
 
 // Helper to fetch full course structure
 async function getCourseData(courseId: string) {
+  const outline = await getCourseOutlineById(courseId);
+  if (outline) {
+    return deepSafeSerialize({
+      id: outline.course.id,
+      ...outline.course,
+      modules: outline.modules,
+    } as any);
+  }
+  return null;
+  /* Legacy Firestore fallback retained until progress/content migration completes.
   const courseDoc = await db.collection("courses").doc(courseId).get();
   if (!courseDoc.exists) return null;
 
@@ -40,6 +51,7 @@ async function getCourseData(courseId: string) {
     ...courseDoc.data(),
     modules,
   } as any);
+  */
 }
 
 export default async function LessonPage({
