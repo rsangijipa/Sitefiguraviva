@@ -1,36 +1,38 @@
-
-import { db } from '@/lib/firebase/client';
-import { doc, getDoc, setDoc, increment, updateDoc } from 'firebase/firestore';
+import { createSupabaseBrowserClient } from "@/infrastructure/supabase/client";
 
 export const interactionService = {
-    async getTreeCount(): Promise<number> {
-        try {
-            const docRef = doc(db, 'stats', 'tree');
-            const docSnap = await getDoc(docRef);
-
-            if (docSnap.exists()) {
-                return docSnap.data().count || 0;
-            } else {
-                return 1243; // Default/Fallback
-            }
-        } catch (error) {
-            console.error("Error fetching tree count:", error);
-            return 1243;
-        }
-    },
-
-    async incrementTreeCount(): Promise<void> {
-        try {
-            const docRef = doc(db, 'stats', 'tree');
-            // Use setDoc with merge to ensure doc exists, or update if it does.
-            // Actually setDoc with merge doesn't support increment atomically on create well without prep?
-            // Safer to Update if exists, Set if not.
-            // Or just set with merge: true for initial, but increment needs update.
-
-            // Simple approach:
-            await setDoc(docRef, { count: increment(1) }, { merge: true });
-        } catch (error) {
-            console.error("Error incrementing tree count:", error);
-        }
+  async getTreeCount(): Promise<number> {
+    try {
+      const supabase: any = createSupabaseBrowserClient();
+      const { data, error } = await supabase
+        .from("interaction_stats")
+        .select("count")
+        .eq("key", "tree")
+        .maybeSingle();
+      if (error) throw error;
+      return Number(data?.count ?? 1243);
+    } catch (error) {
+      console.error("Error fetching tree count:", error);
+      return 1243;
     }
+  },
+
+  async incrementTreeCount(): Promise<void> {
+    try {
+      const supabase: any = createSupabaseBrowserClient();
+      const { data } = await supabase
+        .from("interaction_stats")
+        .select("count")
+        .eq("key", "tree")
+        .maybeSingle();
+      await supabase
+        .from("interaction_stats")
+        .upsert(
+          { key: "tree", count: Number(data?.count ?? 0) + 1 },
+          { onConflict: "key" },
+        );
+    } catch (error) {
+      console.error("Error incrementing tree count:", error);
+    }
+  },
 };
