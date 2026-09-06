@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { db } from "@/lib/firebase/admin";
 import { getCourseOutlineById } from "@/features/courses/infrastructure/supabaseCourseRepository.server";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import { LessonPlayerWrapper } from "@/components/portal/LessonPlayerWrapper";
 import { Lesson, Module } from "@/types/lms";
 import { deepSafeSerialize } from "@/lib/utils";
@@ -79,15 +80,21 @@ export default async function LessonPage({
   if (!courseData) redirect("/portal");
 
   // 4. FETCH PROGRESS (Numerador) - FIX: Sincronismo (Audit PRG-01)
-  const progressSnap = await db
-    .collection("progress")
-    .where("userId", "==", uid)
-    .where("courseId", "==", courseId)
-    .get();
+  const { data: progressRows, error: progressError } =
+    await createSupabaseServiceClient()
+      .from("lesson_progress")
+      .select("*")
+      .eq("user_id", uid)
+      .eq("course_id", courseId);
+  if (progressError) throw progressError;
 
   const progressMap: Record<string, any> = {};
-  progressSnap.docs.forEach((doc) => {
-    progressMap[doc.data().lessonId] = doc.data();
+  (progressRows ?? []).forEach((row: any) => {
+    progressMap[row.lesson_id] = {
+      ...row,
+      lessonId: row.lesson_id,
+      maxWatchedSecond: row.max_watched_second,
+    };
   });
 
   const allLessons: Lesson[] = courseData.modules.flatMap((m: any) =>
