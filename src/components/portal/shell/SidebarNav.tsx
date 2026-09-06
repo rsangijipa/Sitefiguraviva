@@ -21,12 +21,14 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 import { ROUTES } from "@/lib/routes";
 import { gamificationService } from "@/services/gamificationService";
-import { UserGamificationProfile } from "@/types/gamification";
+import type { ClientGamificationProfile } from "@/services/gamificationService";
 import { motion } from "framer-motion";
 
 const UserGamificationSummary = () => {
   const { user } = useAuth();
-  const [profile, setProfile] = useState<UserGamificationProfile | null>(null);
+  const [profile, setProfile] = useState<ClientGamificationProfile | null>(
+    null,
+  );
 
   useEffect(() => {
     if (user?.uid) {
