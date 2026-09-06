@@ -41,7 +41,7 @@ export const enrollmentService = {
         courseId: row.course_id,
         enrolledAt: row.enrolled_at || row.created_at,
         progressSummary: row.progress_summary,
-      })) as Enrollment[];
+      })) as unknown as Enrollment[];
     } catch (error) {
       console.error("Error fetching enrollments:", error);
       throw error;
