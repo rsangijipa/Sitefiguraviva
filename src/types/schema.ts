@@ -1,4 +1,4 @@
-import { Timestamp } from "firebase/firestore";
+type Timestamp = Date | { toDate(): Date };
 
 // Allow flexible timestamp types (client or admin SDK)
 type FlexibleTimestamp =

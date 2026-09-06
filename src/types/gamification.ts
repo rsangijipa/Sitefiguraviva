@@ -1,4 +1,4 @@
-import { Timestamp } from "firebase/firestore";
+type Timestamp = Date | { toDate(): Date };
 
 export type BadgeCategory = "learning" | "social" | "achievement" | "special";
 

@@ -1,4 +1,4 @@
-import { Timestamp } from "firebase/firestore";
+type Timestamp = Date | { toDate(): Date };
 
 export type UserRole = "admin" | "tutor" | "student";
 export type UserStatus = "active" | "disabled";
