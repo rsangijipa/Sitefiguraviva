@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import { db } from "@/lib/firebase/admin";
 import { getCourseOutlineById } from "@/features/courses/infrastructure/supabaseCourseRepository.server";
 import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import { LessonPlayerWrapper } from "@/components/portal/LessonPlayerWrapper";
@@ -78,14 +77,14 @@ export default async function LessonPage({
 
   const courseData = await getCourseData(courseId);
   if (!courseData) redirect("/portal");
+  const supabase = createSupabaseServiceClient();
 
   // 4. FETCH PROGRESS (Numerador) - FIX: Sincronismo (Audit PRG-01)
-  const { data: progressRows, error: progressError } =
-    await createSupabaseServiceClient()
-      .from("lesson_progress")
-      .select("*")
-      .eq("user_id", uid)
-      .eq("course_id", courseId);
+  const { data: progressRows, error: progressError } = await supabase
+    .from("lesson_progress")
+    .select("*")
+    .eq("user_id", uid)
+    .eq("course_id", courseId);
   if (progressError) throw progressError;
 
   const progressMap: Record<string, any> = {};
@@ -141,34 +140,26 @@ export default async function LessonPage({
 
   if (activeLesson.type === "quiz") {
     try {
-      const assessmentSnap = await db
-        .collection("assessments")
-        .where("lessonId", "==", activeLesson.id)
-        .where("status", "==", "published")
+      const { data: assessmentRow, error: assessmentError } = await supabase
+        .from("assessments")
+        .select("*")
+        .eq("lesson_id", activeLesson.id)
+        .eq("status", "published")
         .limit(1)
-        .get();
+        .maybeSingle();
 
-      if (!assessmentSnap.empty) {
-        assessment = {
-          id: assessmentSnap.docs[0].id,
-          ...assessmentSnap.docs[0].data(),
-        };
-
-        // Also fetch user's last submission
-        const submissionSnap = await db
-          .collection("assessmentSubmissions")
-          .where("userId", "==", uid)
-          .where("assessmentId", "==", assessment.id)
-          .orderBy("startedAt", "desc")
+      if (assessmentError) throw assessmentError;
+      if (assessmentRow) {
+        assessment = assessmentRow;
+        const { data: submissionRow } = await supabase
+          .from("assessment_submissions")
+          .select("*")
+          .eq("user_id", uid)
+          .eq("assessment_id", assessmentRow.id)
+          .order("started_at", { ascending: false })
           .limit(1)
-          .get();
-
-        if (!submissionSnap.empty) {
-          submission = {
-            id: submissionSnap.docs[0].id,
-            ...submissionSnap.docs[0].data(),
-          };
-        }
+          .maybeSingle();
+        submission = submissionRow;
       }
     } catch (e) {
       console.error("Error fetching assessment:", e);
