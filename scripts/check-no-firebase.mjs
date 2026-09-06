@@ -11,6 +11,12 @@ const forbidden = [
   /NEXT_PUBLIC_FIREBASE_/,
   /FIREBASE_/,
 ];
+const firebaseRuntimeHosts = [
+  /(?:firebase(?:storage)?|firestore|identitytoolkit|securetoken)\.googleapis\.com/i,
+  /\.firebaseio\.com/i,
+  /\.firebasestorage\.app/i,
+  /\.firebaseapp\.com/i,
+];
 
 const sourceExtensions = new Set([".js", ".jsx", ".mjs", ".ts", ".tsx"]);
 const publicExtensions = new Set([".js", ".mjs", ".json"]);
@@ -69,12 +75,18 @@ function packageScriptFiles(packageJson) {
 
 function matchingLines(contents) {
   return contents.split(/\r?\n/).flatMap((line, index) => {
-    const match = forbidden.find((pattern) => {
+    const match = [...forbidden, ...firebaseRuntimeHosts].find((pattern) => {
       pattern.lastIndex = 0;
       return pattern.test(line);
     });
     return match ? [`${index + 1} (${match})`] : [];
   });
+}
+
+function packageScriptViolations(packageJson) {
+  return Object.entries(packageJson.scripts ?? {})
+    .filter(([, command]) => /\bfirebase(?:\s|$)/i.test(command))
+    .map(([name]) => `package.json:script ${name} (firebase CLI)`);
 }
 
 function scanFiles(files) {
@@ -119,7 +131,15 @@ export function runNoFirebaseAudit() {
     ...packageScriptFiles(packageJson),
   ];
 
-  return { violations: [...new Set([...scanFiles(files), ...dependencyViolations(packageJson)])].sort() };
+  return {
+    violations: [
+      ...new Set([
+        ...scanFiles(files),
+        ...packageScriptViolations(packageJson),
+        ...dependencyViolations(packageJson),
+      ]),
+    ].sort(),
+  };
 }
 
 const invokedAsScript = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
