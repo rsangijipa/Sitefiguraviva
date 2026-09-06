@@ -1,12 +1,4 @@
-import { db } from "@/lib/firebase/client";
-import {
-  doc,
-  setDoc,
-  serverTimestamp,
-  getDoc,
-  updateDoc,
-  increment,
-} from "firebase/firestore";
+import { createSupabaseBrowserClient } from "@/infrastructure/supabase/client";
 import { trackEvent } from "@/lib/telemetry/events";
 
 export const analyticsService = {
@@ -14,16 +6,16 @@ export const analyticsService = {
    * Tracks when a user starts or continues a lesson.
    */
   async trackLessonStart(userId: string, courseId: string, lessonId: string) {
-    const progressRef = doc(db, "users", userId, "courseProgress", courseId);
-    await setDoc(
-      progressRef,
-      {
-        lastLessonId: lessonId,
-        updatedAt: serverTimestamp(),
-        [`lessons.${lessonId}.startedAt`]: serverTimestamp(),
-      },
-      { merge: true },
-    );
+    const supabase: any = createSupabaseBrowserClient();
+    await supabase
+      .from("lesson_progress")
+      .upsert({
+        user_id: userId,
+        course_id: courseId,
+        lesson_id: lessonId,
+        status: "in_progress",
+        updated_at: new Date().toISOString(),
+      });
 
     trackEvent("lesson_started", { courseId, lessonId });
   },
@@ -36,12 +28,18 @@ export const analyticsService = {
     courseId: string,
     lessonId: string,
   ) {
-    const progressRef = doc(db, "users", userId, "courseProgress", courseId);
-    await updateDoc(progressRef, {
-      [`lessons.${lessonId}.completedAt`]: serverTimestamp(),
-      completedLessonsCount: increment(1),
-      lastUpdated: serverTimestamp(),
-    });
+    const supabase: any = createSupabaseBrowserClient();
+    await supabase
+      .from("lesson_progress")
+      .upsert({
+        user_id: userId,
+        course_id: courseId,
+        lesson_id: lessonId,
+        status: "completed",
+        percent: 100,
+        completed_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
 
     trackEvent("lesson_completed", { courseId, lessonId });
   },
