@@ -195,7 +195,7 @@ export default function PortalDashboard() {
   const maxActivityValue = Math.max(...activityPoints.map((p) => p.value), 1);
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="panel-surface -m-4 min-h-screen space-y-8 p-4 animate-fade-in md:-m-6 md:p-6 lg:-m-8 lg:p-8">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
@@ -272,7 +272,7 @@ export default function PortalDashboard() {
         {/* Hero Card: Resume (Col-8) */}
         <div className="lg:col-span-8">
           {lastCourse ? (
-            <div className="bg-white rounded-2xl p-6 border border-stone-100 shadow-lg relative overflow-hidden group h-full flex flex-col justify-center transition-all hover:border-agedGold/20">
+            <div className="editorial-card relative flex h-full flex-col justify-center overflow-hidden p-6 group">
               <div className="absolute top-0 right-0 w-64 h-64 bg-agedGold/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
 
               <div className="relative z-10 flex flex-col md:flex-row gap-6 items-start md:items-center">
@@ -440,7 +440,7 @@ export default function PortalDashboard() {
       {/* Row 2: Journey & Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* My Journey (Visão Macro) */}
-        <div className="lg:col-span-12 bg-white rounded-xl border border-stone-100 p-6">
+          <div className="editorial-card lg:col-span-12 p-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
               <TrendingUp size={20} className="text-primary" />
@@ -495,7 +495,7 @@ export default function PortalDashboard() {
         </div>
 
         {/* Certificates / Achievements */}
-        <div className="lg:col-span-8 bg-white rounded-xl border border-stone-100 p-6 flex flex-col">
+        <div className="editorial-card lg:col-span-8 flex flex-col p-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="font-bold text-stone-800">Conquistas Recentes</h3>
             <Link
@@ -541,7 +541,7 @@ export default function PortalDashboard() {
         </div>
 
         {/* Agenda Viva (Live Events) */}
-        <div className="lg:col-span-4 bg-white rounded-xl border border-stone-100 p-6 flex flex-col">
+        <div className="editorial-card lg:col-span-4 flex flex-col p-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
               <Calendar size={20} className="text-gold" />

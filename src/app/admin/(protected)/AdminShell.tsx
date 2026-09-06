@@ -214,7 +214,7 @@ export default function AdminShell({
       </AnimatePresence>
 
       {/* Main Content */}
-      <main className="flex-1 lg:ml-80 p-4 md:p-6 lg:p-8 min-h-screen relative overflow-y-auto custom-scrollbar">
+      <main className="panel-surface flex-1 lg:ml-80 p-4 md:p-6 lg:p-8 min-h-screen relative overflow-y-auto custom-scrollbar">
         {/* Sticky Mobile Tracker/Header background */}
         <div className="lg:hidden sticky top-0 z-30 bg-paper/80 backdrop-blur-md -mx-4 px-4 py-2 mb-4 border-b border-stone-100 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -241,7 +241,7 @@ export default function AdminShell({
           <header className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div className="flex items-center gap-4">
               <div className="hidden sm:block">
-                <h2 className="font-serif text-xl md:text-2xl text-primary mb-0.5 tracking-tight">
+                <h2 className="font-serif text-2xl md:text-3xl text-primary mb-0.5 tracking-tight">
                   Painel de Controle
                 </h2>
                 <p className="text-stone-400 text-[9px] md:text-[10px] font-bold uppercase tracking-[0.15em]">

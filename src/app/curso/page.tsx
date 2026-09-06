@@ -1,7 +1,8 @@
 import { db } from "@/lib/firebase/admin";
 import Link from "next/link";
 import { Card } from "@/components/ui/Card";
-import { Calendar, ArrowRight, BookOpen } from "lucide-react";
+import { Calendar, ArrowRight } from "lucide-react";
+import { CourseCover } from "@/components/courses/CourseCover";
 
 // Revalidate every hour
 export const revalidate = 3600;
@@ -58,17 +59,7 @@ export default async function CoursesPage() {
             >
               <Card className="h-full border border-stone-100 hover:border-gold/50 transition-all duration-300 overflow-hidden flex flex-col">
                 <div className="h-64 overflow-hidden relative bg-stone-100">
-                  {course.image ? (
-                    <img
-                      src={course.image}
-                      alt={course.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-stone-200 flex items-center justify-center text-stone-300 opacity-30">
-                      <BookOpen size={48} />
-                    </div>
-                  )}
+                  <CourseCover src={course.image} alt={course.title} />
                   {course.enrollmentOpen && (
                     <div className="absolute top-4 left-4 bg-green-500 text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg">
                       Matrículas Abertas

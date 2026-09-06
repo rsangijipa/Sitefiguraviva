@@ -95,7 +95,7 @@
     @apply inline-flex items-center justify-center border border-gray-300 text-text px-8 py-3.5 rounded-xl font-bold hover:bg-gray-50 transition-all active:scale-95 shadow-sm min-h-[44px] touch-manipulation;
   }
 
-  .card-premium {
+.card-premium {
     @apply bg-white rounded-2xl shadow-soft-sm border border-gray-100/50 transition-all duration-500 hover:shadow-soft-xl hover:-translate-y-1 hover:border-accent/20;
   }
 
@@ -268,6 +268,17 @@
     navigation: auto;
   }
 }
+
+.editorial-card {
+  border: 1px solid color-mix(in srgb, var(--color-gold) 16%, white);
+  border-radius: 1.25rem;
+  background: color-mix(in srgb, white 92%, var(--color-beige));
+  box-shadow: 0 12px 32px rgb(14 99 48 / 0.06);
+  transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+}
+.editorial-card:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--color-gold) 38%, white); box-shadow: 0 18px 40px rgb(14 99 48 / 0.1); }
+.panel-surface { background: radial-gradient(circle at 90% 0%, rgb(240 212 24 / 0.1), transparent 28%), var(--color-paper); }
+@media (prefers-reduced-motion: reduce) { .editorial-card { transition: none; } .editorial-card:hover { transform: none; } }
 
 /* View Transition Cross-Fade Refinement */
 ::view-transition-old(root),

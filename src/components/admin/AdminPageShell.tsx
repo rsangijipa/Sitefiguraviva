@@ -37,12 +37,12 @@ export function AdminPageShell({
   return (
     <div
       className={cn(
-        "min-h-screen flex flex-col bg-stone-50 animate-fade-in",
+        "panel-surface min-h-screen flex flex-col animate-fade-in",
         className,
       )}
     >
       {/* Top Bar / Breadcrumb Area */}
-      <div className="bg-white border-b border-stone-100 shrink-0">
+      <div className="border-b border-gold/10 bg-white/80 backdrop-blur-xl shrink-0">
         <div
           className={cn(
             "mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between",
@@ -104,7 +104,7 @@ export function AdminPageShell({
                 Voltar
               </Link>
             )}
-            <h1 className="text-2xl font-serif font-bold text-stone-800">
+            <h1 className="font-serif text-3xl font-semibold tracking-tight text-primary">
               {title}
             </h1>
             {description && (
