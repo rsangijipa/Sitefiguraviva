@@ -1,90 +1,199 @@
+/*
+ * awareness-tree.css
+ *
+ * Sistema de classes HUD para a Árvore da Awareness.
+ * Mantém o contexto imersivo dark/translúcido da cena 3D, mas alinha
+ * fontes, raios, e tokens de cor ao Design System do site (--fv-*).
+ */
+
 .awareness-tree {
-  --hud-border: rgba(255, 255, 255, 0.14);
-  --hud-border-strong: rgba(255, 255, 255, 0.2);
-  --hud-surface: rgba(12, 20, 33, 0.78);
-  --hud-surface-soft: rgba(255, 255, 255, 0.08);
-  --hud-text: #e6eef8;
-  --hud-primary-bg: #f2efe8;
-  --hud-primary-text: #1c1a17;
+  /* ── Superfícies translúcidas ── */
+  --hud-border:        rgba(255, 255, 255, 0.14);
+  --hud-border-strong: rgba(255, 255, 255, 0.22);
+  --hud-surface:       rgba(10, 16, 26, 0.82);
+  --hud-surface-soft:  rgba(255, 255, 255, 0.07);
+
+  /* ── Texto ── */
+  --hud-text:          #e8f0f8;
+  --hud-text-muted:    #9fb8d0;
+  --hud-text-faint:    #6e8da6;
+
+  /* ── Botão primário — verde raiz do DS sobre fundo escuro ── */
+  --hud-primary-bg:    var(--fv-verde-raiz, #005a1f);
+  --hud-primary-text:  var(--fv-creme-papel, #fdfaf4);
+  --hud-primary-hover: var(--fv-verde-igarape, #07614c);
+
+  /* ── Acento dourado (favoritar ativo) ── */
+  --hud-gold:          #d8bd79;
+  --hud-gold-text:     #1e1608;
+
+  /* ── Tipografia do DS ── */
+  --hud-font-display:  var(--font-serif, Georgia, serif);
+  --hud-font-body:     var(--font-sans, system-ui, sans-serif);
+
+  /* ── Raios ── */
+  --hud-radius-pill:   9999px;
+  --hud-radius-panel:  18px;
+  --hud-radius-card:   16px;
+  --hud-radius-item:   12px;
+
   color-scheme: dark;
 }
 
+/* ── Scroll horizontal sem scrollbar + fade nas bordas ── */
 .awareness-tree .hud-scroller {
   scrollbar-width: none;
   -ms-overflow-style: none;
   overflow-x: auto;
   overscroll-behavior-x: contain;
-  mask-image: linear-gradient(to right, transparent 0, #000 12px, #000 calc(100% - 22px), transparent 100%);
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 12px,
+    #000 calc(100% - 22px),
+    transparent 100%
+  );
 }
-
 .awareness-tree .hud-scroller::-webkit-scrollbar { display: none; }
 
+/* ── Painel principal (corner HUD expandido) ── */
 .awareness-tree .hud-panel {
   border: 1px solid var(--hud-border);
-  background: linear-gradient(180deg, rgba(17, 26, 42, 0.9), rgba(10, 16, 27, 0.92));
-  border-radius: 1.25rem;
-  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(14px);
+  background: var(--hud-surface);
+  border-radius: var(--hud-radius-panel);
+  box-shadow: 0 20px 56px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.04);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  font-family: var(--hud-font-body);
 }
 
+/* ── Divisor ── */
 .awareness-tree .hud-divider {
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.10),
+    transparent
+  );
 }
 
+/* ── Base compartilhada: pills, badges, botões ── */
 .awareness-tree .hud-pill,
 .awareness-tree .hud-btn-primary,
 .awareness-tree .hud-btn-secondary,
 .awareness-tree .hud-btn-ghost,
 .awareness-tree .hud-badge {
-  border-radius: 9999px;
+  border-radius: var(--hud-radius-pill);
+  font-family: var(--hud-font-body);
+  font-weight: 600;
+  transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease;
+  cursor: pointer;
 }
 
+/* ── Pill — estado recolhido do HUD ── */
 .awareness-tree .hud-pill {
   border: 1px solid var(--hud-border);
   background: var(--hud-surface-soft);
   color: var(--hud-text);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.awareness-tree .hud-pill:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
 }
 
+/* ── Card / Sheet ── */
 .awareness-tree .hud-card,
 .awareness-tree .hud-sheet {
   border: 1px solid var(--hud-border);
   background: var(--hud-surface);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
 }
+.awareness-tree .hud-card  { border-radius: var(--hud-radius-card); }
+.awareness-tree .hud-sheet { border-radius: var(--hud-radius-panel); }
 
-.awareness-tree .hud-card { border-radius: 1rem; }
-
+/* ── Botão primário — verde DS ── */
 .awareness-tree .hud-btn-primary {
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 18px;
+  min-height: 40px;
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
   background: var(--hud-primary-bg);
   color: var(--hud-primary-text);
+  letter-spacing: 0.03em;
+  box-shadow: 0 4px 18px rgba(0, 90, 31, 0.35);
+}
+.awareness-tree .hud-btn-primary:hover {
+  background: var(--hud-primary-hover);
+  box-shadow: 0 6px 22px rgba(0, 90, 31, 0.45);
 }
 
+/* ── Botão secundário ── */
 .awareness-tree .hud-btn-secondary {
-  border: 1px solid var(--hud-border);
-  background: rgba(255, 255, 255, 0.1);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px;
+  min-height: 36px;
+  border: 1px solid var(--hud-border-strong);
+  background: rgba(255, 255, 255, 0.08);
   color: var(--hud-text);
 }
+.awareness-tree .hud-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
 
+/* ── Botão ghost ── */
 .awareness-tree .hud-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 14px;
+  min-height: 36px;
   border: 1px solid var(--hud-border);
   background: transparent;
+  color: var(--hud-text-muted);
+}
+.awareness-tree .hud-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.08);
   color: var(--hud-text);
 }
 
+/* ── Badge flutuante (hint "Toque uma folha") ── */
 .awareness-tree .hud-badge {
   border: 1px solid var(--hud-border-strong);
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(6, 12, 22, 0.72);
   color: var(--hud-text);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  font-family: var(--hud-font-body);
+  letter-spacing: 0.12em;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
 }
 
+/* ── Item de lista (favoritas) ── */
 .awareness-tree .hud-list-item {
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: var(--hud-radius-item);
   color: var(--hud-text);
+  font-family: var(--hud-font-body);
+  transition: background-color 140ms ease, border-color 140ms ease;
+}
+.awareness-tree .hud-list-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.16);
 }
 
+/* ════════════════════════════════════════════════════════════════
+   FALLBACK (sem WebGL)
+   ════════════════════════════════════════════════════════════════ */
 .awareness-tree-fallback {
   position: relative;
   display: grid;
@@ -121,6 +230,7 @@
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
+  font-family: var(--hud-font-body, system-ui);
 }
 
 .awareness-tree-fallback h1 {
@@ -134,6 +244,7 @@
   margin: 1.25rem auto 0;
   color: rgba(237, 245, 238, 0.72);
   line-height: 1.7;
+  font-family: var(--hud-font-body, system-ui);
 }
 
 .awareness-tree-fallback__themes {
@@ -151,6 +262,7 @@
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.06);
   color: inherit;
+  font-family: var(--hud-font-body, system-ui);
 }
 
 .awareness-tree-fallback__themes button[aria-pressed="true"] {
@@ -181,4 +293,5 @@
   font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  font-family: var(--hud-font-body, system-ui);
 }

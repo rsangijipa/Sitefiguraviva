@@ -23,7 +23,7 @@ Verification:
 
 Commit:
 
-- `4f6d5b6` — `feat: remove firebase timestamps from gamification service`
+- `e80cad2` — `feat: remove firebase timestamps from gamification service`
 
 Concerns:
 

@@ -41,3 +41,23 @@ the later data migration and the final uploader run.
 
 Task 2: complete (commits 8c0d607..16a5fc5, review clean; live-upload follow-up
 deferred to Task 3 data migration)
+
+Task 3: fix round 1/5 (1 addressed, 0 open — normalized Supabase cover now
+precedes deduplicated legacy gallery images; commits 88cad70..2b6717a)
+
+Task 3: complete (commits 16a5fc5..2b6717a, review clean; applying migrations
+and the live cover upload remain external deployment prerequisites)
+
+Ruling: Keep `src/lib/firebase/client.ts` and `src/lib/firebase/admin.ts`
+until Tasks 5–7 migrate their remaining consumers; Task 4 brief explicitly
+makes deletion conditional on no remaining imports, and deleting them now
+would break application routes — cost if wrong: Firebase modules remain in the
+tree for later tasks and the final audit must catch them.
+
+Task 4: complete (commit 028b8f1; review finding parked by the conditional
+deletion ruling; Supabase Auth bridge removed)
+
+Task 5: fix round 1/5 (2 addressed, 0 open — removed gamification Timestamp
+dependency and corrected final report hash; commits 4fd687a..e80cad2)
+
+Task 5: complete (commits 028b8f1..e80cad2, review clean)
