@@ -42,8 +42,9 @@
 ## Commit
 
 The first scoped commit attempt was rejected by the repository commit-message
-hook because the subject contained an uppercase `Firebase`. A second attempt
-uses the repository-required lowercase subject. Only Task 1 files are staged;
+hook because the subject contained an uppercase `Firebase`. The corrected,
+repository-compliant Task 1 implementation commit is `29743b0`
+(`test: add firebase removal safety gate`). Only Task 1 files were staged;
 pre-existing unstaged changes remain untouched.
 
 ## Concerns
