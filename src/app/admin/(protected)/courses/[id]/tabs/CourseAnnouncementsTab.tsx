@@ -7,6 +7,7 @@ import { useToast } from "@/context/ToastContext";
 import { AnnouncementDoc } from "@/types/lms";
 import { announcementService } from "@/services/announcementService";
 import { cn } from "@/lib/utils";
+import { Timestamp } from "firebase/firestore";
 
 export default function CourseAnnouncementsTab({
   courseId,
@@ -42,12 +43,12 @@ export default function CourseAnnouncementsTab({
     e.preventDefault();
 
     // Parse date/time
-    let publishAt = new Date();
+    let publishAt = Timestamp.now();
     if (formData.publishAtDate && formData.publishAtTime) {
       const date = new Date(
         `${formData.publishAtDate}T${formData.publishAtTime}`,
       );
-      publishAt = date;
+      publishAt = Timestamp.fromDate(date);
     }
 
     try {
