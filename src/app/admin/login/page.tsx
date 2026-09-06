@@ -7,8 +7,6 @@ import { motion } from "framer-motion";
 import { useToast } from "@/context/ToastContext";
 import { ArrowLeft } from "lucide-react";
 
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/lib/firebase/client";
 import { useAuth } from "@/context/AuthContext";
 import { ensureUserProfileAction } from "@/app/actions/auth";
 
