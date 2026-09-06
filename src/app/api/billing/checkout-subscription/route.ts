@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
-import { adminDb } from "@/lib/firebase/admin";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import { getBearerSupabaseSessionClaims } from "@/lib/auth/supabase-session";
-import { FieldValue } from "firebase-admin/firestore";
 import { env } from "@/config/env";
 
 export async function POST(req: NextRequest) {
@@ -28,17 +27,19 @@ export async function POST(req: NextRequest) {
 
     // 1. Fetch Course details
     const normalizedCourseId = courseId.trim();
-    const courseDoc = await adminDb
-      .collection("courses")
-      .doc(normalizedCourseId)
-      .get();
-    if (!courseDoc.exists) {
+    const supabase = createSupabaseServiceClient();
+    const { data: courseData, error: courseError } = await supabase
+      .from("courses")
+      .select("*")
+      .eq("id", normalizedCourseId)
+      .maybeSingle();
+    if (courseError) throw courseError;
+    if (!courseData) {
       return NextResponse.json({ error: "Course not found" }, { status: 404 });
     }
 
-    const courseData: any = courseDoc.data();
     const isAvailable =
-      courseData?.status === "open" || courseData?.isPublished === true;
+      courseData.status === "open" || courseData.is_published === true;
     if (!isAvailable) {
       return NextResponse.json(
         { error: "Course is not available" },
@@ -46,7 +47,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const priceId = courseData.billing?.priceIdMonthly;
+    const billing = ((courseData.legacy_payload as any)?.billing ?? {}) as any;
+    const priceId = billing.priceIdMonthly;
     if (!priceId) {
       return NextResponse.json(
         { error: "Course billing is not configured" },
@@ -85,36 +87,28 @@ export async function POST(req: NextRequest) {
     // 3. Create Pending Enrollment (Idempotent key use ideally, but here simple set)
     const enrollmentId = `${uid}_${normalizedCourseId}`;
     const enrollmentData = {
-      uid,
-      courseId: normalizedCourseId,
-      status: "pending_approval",
-      paymentStatus: "pending",
-      approvalStatus: "pending_review",
-      courseVersionAtEnrollment: courseData.contentRevision || 1, // Capture starting version
-      createdAt: FieldValue.serverTimestamp(),
-      updatedAt: FieldValue.serverTimestamp(),
-      stripe: {
-        checkoutSessionId: session.id,
-      },
+      status: "pending_approval" as const,
+      payment_status: "pending" as const,
+      course_version_at_enrollment: courseData.content_revision || 1,
+      payment_method: "stripe",
+      subscription_id: session.subscription as string | null,
+      source_ref: session.id,
+      user_id: uid,
+      course_id: normalizedCourseId,
     };
-
-    // Write to User's subcollection (Portal Access)
-    await adminDb
-      .collection("users")
-      .doc(uid)
-      .collection("enrollments")
-      .doc(normalizedCourseId)
-      .set(enrollmentData, { merge: true });
-
-    // Write to Global Ledger
-    await adminDb
-      .collection("enrollments")
-      .doc(enrollmentId)
-      .set(enrollmentData, { merge: true });
+    const { error: enrollmentError } = await supabase
+      .from("enrollments")
+      .upsert({ id: enrollmentId, ...enrollmentData } as any, {
+        onConflict: "id",
+      });
+    if (enrollmentError) throw enrollmentError;
 
     return NextResponse.json({ url: session.url });
   } catch (error: any) {
     console.error("Checkout error:", error);
-    return NextResponse.json({ error: "Unable to create checkout" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Unable to create checkout" },
+      { status: 500 },
+    );
   }
 }
