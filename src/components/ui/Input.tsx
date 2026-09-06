@@ -7,7 +7,7 @@ import { LucideIcon } from "lucide-react";
 // anterior engrossava o campo ate ele competir com o botao ao lado, e o fundo
 // `bg-white/50` era branco literal: no tema escuro virava um veu claro.
 const inputVariants = cva(
-  "flex h-12 w-full rounded-md border px-4 py-2 text-sm ring-offset-paper file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors duration-200",
+  "flex h-12 min-h-[44px] w-full rounded-md border px-4 py-2 text-base md:text-sm ring-offset-paper file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors duration-200",
   {
     variants: {
       variant: {

@@ -79,6 +79,16 @@ module.exports = {
         aurora: token("aurora"),
         vazante: token("vazante"),
         broto: token("broto"),
+        // Aliases hex do Resource Experience Shell (ver globals.css :root)
+        fv: {
+          "verde-raiz": "var(--fv-verde-raiz)",
+          "terra-barro": "var(--fv-terra-barro)",
+          creme: "var(--fv-creme)",
+          areia: "var(--fv-areia)",
+          nevoa: "var(--fv-nevoa)",
+          mata: "var(--fv-mata)",
+          pedra: "var(--fv-pedra)",
+        },
       },
       fontFamily: {
         serif: ["var(--font-serif)", "serif"],

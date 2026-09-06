@@ -1,48 +1,88 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  Wind,
-  Sprout,
-  Sparkles,
-  Fingerprint,
-  ArrowLeft,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
-import BreathingApp from "./resources/BreathingApp";
-import MentalHealthQuiz from "./resources/MentalHealthQuiz";
-import SomaScan from "./somascan/App";
-import { Modal, ModalContent, ModalBody } from "./ui/Modal";
+import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
+import { Wind, Sprout, Sparkles, Fingerprint } from "lucide-react";
+import ResourceExperienceShell from "./resources/ResourceExperienceShell";
+import { ResourceLoader } from "./resources/ResourceStates";
+
+/*
+ * Code splitting: cada recurso interativo (Three.js, canvas, áudio, IA)
+ * só entra no bundle quando o usuário realmente o abre.
+ */
+const BreathingApp = dynamic(() => import("./resources/BreathingApp"), {
+  ssr: false,
+  loading: () => <ResourceLoader message="Preparando o Guia de Respiração…" />,
+});
+const MentalHealthQuiz = dynamic(() => import("./resources/MentalHealthQuiz"), {
+  ssr: false,
+  loading: () => (
+    <ResourceLoader message="Preparando o Quiz de Saúde Mental…" />
+  ),
+});
+const SomaScan = dynamic(() => import("./somascan/App"), {
+  ssr: false,
+  loading: () => <ResourceLoader message="Preparando o SomaScan…" />,
+});
+
+const RESOURCES = [
+  {
+    id: "breathing",
+    icon: Wind,
+    title: "Guia de Respiração",
+    description:
+      "Uma pausa guiada para reduzir a ansiedade e reconectar com o agora.",
+    cta: "Iniciar prática",
+    loadingMessage: "Preparando o Guia de Respiração…",
+  },
+  {
+    id: "tree",
+    icon: Sprout,
+    title: "Árvore da Awareness",
+    description:
+      "Visualize e nomeie suas emoções em uma experiência interativa 3D.",
+    cta: "Acessar árvore",
+    // A Árvore da Awareness é uma experiência imersiva própria (tema escuro,
+    // canvas Three.js dedicado) e vive na própria rota, não dentro do shell.
+    href: "/recursos/arvore-da-awareness",
+  },
+  {
+    id: "somascan",
+    icon: Fingerprint,
+    title: "SomaScan",
+    description:
+      "Mapeamento corporal consciente para escutar o que o corpo diz.",
+    cta: "Iniciar scan",
+    loadingMessage: "Preparando o SomaScan…",
+  },
+  {
+    id: "quiz",
+    icon: Sparkles,
+    title: "Quiz de Saúde Mental",
+    description:
+      "Mindful Roots: um check-in rápido de 14 dias para sua saúde emocional.",
+    cta: "Fazer check-in",
+    loadingMessage: "Preparando o Quiz de Saúde Mental…",
+  },
+];
 
 export default function ResourcesSection() {
   const [activeResource, setActiveResource] = useState(null);
-  const scrollContainerRef = useRef(null);
   const router = useRouter();
 
   const openResource = (resource) => {
-    if (resource === "tree") {
-      router.push("/recursos/arvore-da-awareness");
+    if (resource.href) {
+      router.push(resource.href);
       return;
     }
-    setActiveResource(resource);
+    setActiveResource(resource.id);
   };
 
-  const closeResource = () => {
-    setActiveResource(null);
-  };
+  const closeResource = () => setActiveResource(null);
 
-  const scroll = (direction) => {
-    if (scrollContainerRef.current) {
-      const scrollAmount = direction === "left" ? -350 : 350;
-      scrollContainerRef.current.scrollBy({
-        left: scrollAmount,
-        behavior: "smooth",
-      });
-    }
-  };
+  const active = RESOURCES.find((r) => r.id === activeResource) ?? null;
 
   return (
     <section
@@ -59,202 +99,65 @@ export default function ResourcesSection() {
           <span className="fv-eyebrow mb-4">Ferramentas de Cuidado</span>
           <h2 className="heading-section text-primary">
             Recursos{" "}
-            <span className="italic text-accent font-light">Interativos</span>
+            <span className="italic text-fv-verde-igarape font-light">
+              Interativos
+            </span>
           </h2>
-          <p className="text-lg text-text/80 mt-4">
+          <p className="text-lg text-fv-pedra mt-4">
             Espaços digitais desenhados para cultivar a presença e a awareness
             no seu dia a dia.
           </p>
         </motion.div>
 
-        {/* Horizontal Scroll Container */}
-        <div className="relative w-full">
-          {/* Fade Edges */}
-          <div className="absolute left-0 top-0 bottom-12 w-12 bg-gradient-to-r from-paper to-transparent z-10 pointer-events-none" />
-          <div className="absolute right-0 top-0 bottom-12 w-12 bg-gradient-to-l from-paper to-transparent z-10 pointer-events-none" />
-
-          <div
-            ref={scrollContainerRef}
-            className="flex md:grid md:grid-cols-2 lg:grid-cols-4 overflow-x-auto md:overflow-visible snap-x snap-mandatory gap-6 pb-12 px-6 md:px-0 scrollbar-hide"
-            style={{ scrollBehavior: "smooth" }}
-          >
-            {/* Breathing App Card */}
-            <motion.button
-              type="button"
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="fv-card group relative w-80 shrink-0 cursor-pointer snap-center items-center overflow-hidden p-8 text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary md:w-auto"
-              onClick={() => openResource("breathing")}
-            >
-              <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-md bg-accent/10 text-accent transition-transform group-hover:scale-105">
-                <Wind size={32} />
-              </div>
-              <h3 className="text-xl font-serif text-primary font-bold mb-2">
-                Guia de Respiração
-              </h3>
-              <p className="mb-6 flex-grow text-sm text-text/75">
-                Uma pausa guiada para reduzir a ansiedade e reconectar com o
-                agora.
-              </p>
-              <span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-accent group-hover:text-primary transition-colors">
-                Iniciar Prática
-              </span>
-            </motion.button>
-
-            {/* Feelings Tree Card */}
-            <motion.button
-              type="button"
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              className="fv-card group relative w-80 shrink-0 cursor-pointer snap-center items-center overflow-hidden p-8 text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary md:w-auto"
-              onClick={() => openResource("tree")}
-            >
-              <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-md bg-gold/15 text-gold-dark transition-transform group-hover:scale-105">
-                <Sprout size={32} />
-              </div>
-              <h3 className="text-xl font-serif text-primary font-bold mb-2">
-                Árvore da Awareness
-              </h3>
-              <p className="mb-6 flex-grow text-sm text-text/75">
-                Visualize e nomeie suas emoções em uma experiência interativa
-                3D.
-              </p>
-              <span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-gold group-hover:text-primary transition-colors">
-                Acessar Árvore
-              </span>
-            </motion.button>
-
-            {/* SomaScan Card (NEW) */}
-            <motion.button
-              type="button"
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-              className="fv-card group relative w-80 shrink-0 cursor-pointer snap-center items-center overflow-hidden p-8 text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary md:w-auto"
-              onClick={() => openResource("somascan")}
-            >
-              <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-md bg-terra/10 text-terra transition-transform group-hover:scale-105">
-                <Fingerprint size={32} />
-              </div>
-              <h3 className="text-xl font-serif text-primary font-bold mb-2">
-                SomaScan
-              </h3>
-              <p className="mb-6 flex-grow text-sm text-text/75">
-                Mapeamento corporal consciente para escutar o que o corpo diz.
-              </p>
-              <span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-terra transition-colors group-hover:text-primary">
-                Iniciar Scan
-              </span>
-            </motion.button>
-
-            {/* Mental Health Quiz Card */}
-            <motion.button
-              type="button"
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3 }}
-              className="fv-card group relative w-80 shrink-0 cursor-pointer snap-center items-center overflow-hidden p-8 text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary md:w-auto"
-              onClick={() => openResource("quiz")}
-            >
-              <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-md bg-sage/10 text-sage transition-transform group-hover:scale-105">
-                <Sparkles size={32} />
-              </div>
-              <h3 className="text-xl font-serif text-primary font-bold mb-2">
-                Quiz de Saúde Mental
-              </h3>
-              <p className="mb-6 flex-grow text-sm text-text/75">
-                Mindful Roots: Um check-in rápido de 14 dias para sua saúde
-                emocional.
-              </p>
-              <span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-sage group-hover:text-primary transition-colors">
-                Fazer Check-in
-              </span>
-            </motion.button>
-          </div>
-
-          {/* Visual Scroll Controls */}
-          <div className="flex md:hidden items-center justify-center gap-6 mt-4 opacity-70 hover:opacity-100 transition-opacity pb-4">
-            <button
-              onClick={() => scroll("left")}
-              className="min-h-11 min-w-11 rounded-full border border-transparent p-3 text-muted transition-colors hover:border-border hover:bg-areia hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-              aria-label="Recurso anterior"
-            >
-              <ChevronLeft size={24} />
-            </button>
-
-            <div className="h-1.5 w-32 overflow-hidden rounded-full bg-areia">
-              <motion.div
-                className="h-full w-1/3 rounded-full bg-nevoa"
-                animate={{ x: [0, 80, 0] }}
-                transition={{
-                  repeat: Infinity,
-                  duration: 4,
-                  ease: "easeInOut",
-                }}
-              />
-            </div>
-
-            <button
-              onClick={() => scroll("right")}
-              className="min-h-11 min-w-11 rounded-full border border-transparent p-3 text-muted transition-colors hover:border-border hover:bg-areia hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-              aria-label="Próximo recurso"
-            >
-              <ChevronRight size={24} />
-            </button>
-          </div>
-        </div>
+        {/*
+         * Grid único auto-fit minmax(240px, 1fr): mesma altura, padding,
+         * posição de ícone/título/descrição/CTA em todos os cards, sem
+         * carrossel horizontal e sem larguras fixas que deixavam buracos.
+         */}
+        <ul className="fv-resource-grid list-none p-0 m-0">
+          {RESOURCES.map((resource) => {
+            const { id, icon: Icon, title, description, cta } = resource;
+            return (
+              <li key={id} className="contents">
+                <button
+                  type="button"
+                  className="fv-resource-card"
+                  onClick={() => openResource(resource)}
+                  aria-haspopup={resource.href ? undefined : "dialog"}
+                >
+                  <span className="fv-resource-card__icon" aria-hidden="true">
+                    <Icon size={28} />
+                  </span>
+                  <h3 className="fv-resource-card__title">{title}</h3>
+                  <p className="fv-resource-card__desc">{description}</p>
+                  <span className="fv-resource-card__cta">{cta}</span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
       </div>
 
-      {/* Full Screen Transition Overlay */}
-      {/* Full Screen Transition Overlay */}
-      <Modal isOpen={!!activeResource} onClose={closeResource}>
-        <ModalContent size="xl" className="bg-paper p-0">
-          {/* Wrapper Exit Button (Global for all resources) */}
-          <div className="absolute top-6 left-6 z-50">
-            <button
-              onClick={closeResource}
-              className="flex items-center gap-2 rounded-md border border-border bg-paper/90 px-4 py-2 text-xs font-bold uppercase tracking-wider text-text backdrop-blur transition-colors hover:border-igarape hover:bg-areia hover:text-primary active:scale-[0.98]"
-            >
-              <ArrowLeft size={16} />
-              <span className="hidden md:inline">Voltar</span>
-            </button>
+      <ResourceExperienceShell
+        isOpen={!!active}
+        onClose={closeResource}
+        title={active?.title ?? ""}
+        loadingMessage={active?.loadingMessage}
+      >
+        {activeResource === "breathing" && (
+          <BreathingApp onClose={closeResource} />
+        )}
+
+        {activeResource === "somascan" && (
+          <div className="w-full min-h-full bg-fv-creme">
+            <SomaScan />
           </div>
+        )}
 
-          {/* Premium Close Button (Top Right) */}
-          <button
-            onClick={closeResource}
-            className="group absolute right-6 top-6 z-50 flex items-center gap-2 rounded-md border border-border bg-paper/90 py-2 pl-3 pr-2 text-primary backdrop-blur transition-colors hover:bg-primary hover:text-white focus:outline-none focus:ring-2 focus:ring-primary"
-          >
-            <span className="text-[10px] font-bold uppercase tracking-widest opacity-0 w-0 group-hover:w-auto group-hover:opacity-100 transition-all duration-300 overflow-hidden whitespace-nowrap">
-              Fechar
-            </span>
-            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-areia transition-colors group-hover:bg-white/20">
-              <span className="text-xl leading-none -mt-1">×</span>
-            </div>
-          </button>
-
-          <ModalBody className="p-0">
-            {activeResource === "breathing" && (
-              <BreathingApp onClose={closeResource} />
-            )}
-
-            {activeResource === "somascan" && (
-              <div className="relative h-full min-h-[80vh] w-full bg-paper">
-                <SomaScan />
-              </div>
-            )}
-
-            {activeResource === "quiz" && (
-              <MentalHealthQuiz onClose={closeResource} />
-            )}
-          </ModalBody>
-        </ModalContent>
-      </Modal>
+        {activeResource === "quiz" && (
+          <MentalHealthQuiz onClose={closeResource} />
+        )}
+      </ResourceExperienceShell>
     </section>
   );
 }

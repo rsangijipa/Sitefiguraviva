@@ -189,7 +189,7 @@ export default function CourseDetailClient({ course }: { course: any }) {
               className="relative cursor-pointer group"
               onClick={() => openLightbox(0)}
             >
-              <div className="aspect-[4/5] rounded-[3rem] overflow-hidden shadow-[0_40px_80px_-20px_rgba(0,0,0,0.1)] border-8 border-white bg-white">
+              <div className="aspect-[4/5] rounded-[3rem] overflow-hidden border-8 border-white bg-white">
                 <img
                   src={getCoverImage()}
                   alt={course.title}

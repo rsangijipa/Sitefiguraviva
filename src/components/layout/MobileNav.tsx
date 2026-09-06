@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "@/components/icons";
 import { cn } from "@/lib/utils";
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 
 interface MobileNavProps {
   links: {
@@ -24,17 +25,8 @@ export default function MobileNav({ links, userSection }: MobileNavProps) {
     setIsOpen(false);
   }, [pathname]);
 
-  // Prevent scroll when open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [isOpen]);
+  // Prevent scroll when open (contador global de locks)
+  useBodyScrollLock(isOpen);
 
   return (
     <>

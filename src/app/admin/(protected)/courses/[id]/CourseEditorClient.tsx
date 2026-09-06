@@ -174,7 +174,7 @@ export default function CourseEditorClient({
         initial={{ opacity: 0, scale: 0.98, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.98, y: 10 }}
-        className="bg-white/95 backdrop-blur-md rounded-[2.5rem] shadow-[0_0_50px_rgba(0,0,0,0.1)] w-[98vw] h-[96vh] flex flex-col overflow-hidden border border-white pointer-events-auto"
+        className="bg-white/95 backdrop-blur-md rounded-[2.5rem] w-[98vw] h-[96vh] flex flex-col overflow-hidden border border-white pointer-events-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <AdminPageShell

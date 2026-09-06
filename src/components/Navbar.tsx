@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -19,6 +20,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PUBLIC_NAV_ITEMS } from "@/features/public-site/content/navigation";
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 const NAV_ICONS: Record<string, LucideIcon> = {
   Instituto: Users,
@@ -33,17 +36,29 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const pathname = usePathname();
 
+  // Contador global de locks — evita que o fechamento do menu libere o
+  // scroll enquanto um modal de recurso ainda estiver aberto.
+  useBodyScrollLock(mobileOpen);
+
+  // Focus trap + devolução de foco ao gatilho ao fechar.
+  const mobileMenuRef = useFocusTrap<HTMLDivElement>(mobileOpen);
+
+  // Fecha o menu com Escape.
   useEffect(() => {
-    if (mobileOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-    return () => {
-      document.body.style.overflow = "unset";
+    if (!mobileOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileOpen(false);
     };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
   }, [mobileOpen]);
+
+  // Fecha o menu ao navegar para outra rota.
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     let lastScrollY = window.scrollY;
@@ -144,7 +159,7 @@ export default function Navbar() {
 
           {/* Mobile/Tablet Toggle */}
           <button
-            className="xl:hidden text-primary w-12 h-12 flex items-center justify-center hover:bg-black/5 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-primary"
+            className="xl:hidden text-primary w-12 h-12 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-fv-areia rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-primary"
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label={mobileOpen ? "Fechar menu" : "Abrir menu"}
             aria-expanded={mobileOpen}
@@ -163,9 +178,17 @@ export default function Navbar() {
         <>
           <div
             onClick={() => setMobileOpen(false)}
-            className="fixed inset-0 z-[60] bg-text/45 backdrop-blur-sm xl:hidden"
+            className="fixed inset-0 z-[60] bg-[rgba(241,233,219,0.9)] backdrop-blur-sm xl:hidden"
+            aria-hidden="true"
           />
-          <div className="fixed top-2 right-2 bottom-2 left-2 z-[70] bg-paper/97 backdrop-blur-2xl rounded-md border border-border flex flex-col overflow-hidden xl:hidden">
+          <div
+            className="fixed top-2 right-2 bottom-2 left-2 z-[70] bg-[rgba(253,250,244,0.96)] backdrop-blur-2xl rounded-[2rem] border border-fv-nevoa flex flex-col overflow-hidden xl:hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Menu de navegação"
+            ref={mobileMenuRef}
+            tabIndex={-1}
+          >
             {/* Mobile Header Inside Menu */}
             <div className="flex items-center justify-between px-8 py-6 border-b border-border/70">
               <Link
@@ -188,7 +211,7 @@ export default function Navbar() {
               </Link>
               <button
                 onClick={() => setMobileOpen(false)}
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-areia text-primary transition-colors hover:bg-nevoa"
+                className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center text-primary rounded-full bg-areia hover:bg-nevoa/40 border border-border transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                 aria-label="Fechar menu"
               >
                 <X size={20} />

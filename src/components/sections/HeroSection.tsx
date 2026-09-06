@@ -99,7 +99,7 @@ export default function HeroSection({ initialData }: { initialData?: any }) {
                   </div>
                 </div>
               </div>
-              <h4 className="text-sm font-bold text-primary uppercase tracking-widest mb-1 italic">
+              <h4 className="text-sm font-bold text-fv-verde-raiz uppercase tracking-widest mb-1">
                 Vagas Abertas
               </h4>
               <p className="text-xs leading-tight text-text/65">
@@ -109,7 +109,11 @@ export default function HeroSection({ initialData }: { initialData?: any }) {
                 <span className="text-[10px] font-bold text-gold uppercase tracking-[0.2em]">
                   Próximas turmas
                 </span>
-                <ArrowUpRight size={14} className="text-gold" />
+                <ArrowUpRight
+                  size={14}
+                  className="text-fv-terra-barro"
+                  aria-hidden="true"
+                />
               </div>
             </div>
           </div>

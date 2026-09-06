@@ -248,16 +248,16 @@ export default function GalleryClient({
           </section>
 
           {/* GRID CONTENT */}
-          <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
+          <div className="grid gap-6 [grid-template-columns:repeat(auto-fill,minmax(260px,1fr))]">
             {filteredPhotos.map((photo, index) => (
               <motion.button
                 type="button"
                 key={photo.id}
                 layoutId={photo.id}
                 aria-label={`Abrir imagem: ${photo.title}`}
-                className="group relative block w-full cursor-pointer break-inside-avoid overflow-hidden rounded-md border border-border bg-areia text-left transition-colors duration-500 hover:border-igarape focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                className="group relative block w-full cursor-pointer break-inside-avoid overflow-hidden rounded-2xl border border-fv-nevoa bg-fv-areia text-left transition-colors duration-300 hover:border-fv-verde-raiz focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                 onClick={(event) => openLightbox(index, event.currentTarget)}
-                whileHover={{ y: -5 }}
+                whileHover={{ y: -2 }}
               >
                 <GalleryImage
                   src={photo.src}

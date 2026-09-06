@@ -435,7 +435,13 @@ export default function FeelingsTree({
 
   return (
     <section
-      className={`${isModal ? "h-full w-full bg-[#f2f0e9]" : "py-24 relative overflow-hidden bg-[#f2f0e9]"}`}
+      className={`${
+        isModal
+          ? // Dentro do ResourceExperienceShell: preenche a área do body
+            // (que já tem altura definida) e mantém um piso para o canvas.
+            "relative h-full min-h-[520px] w-full overflow-hidden bg-fv-creme"
+          : "py-24 relative overflow-hidden bg-fv-creme"
+      }`}
     >
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 left-0 w-full h-full opacity-40 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] mix-blend-overlay" />

@@ -5,6 +5,7 @@ import { motion, AnimatePresence, HTMLMotionProps } from "framer-motion";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createPortal } from "react-dom";
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 
 /* --- CONTEXT --- */
 interface ModalContextProps {
@@ -29,17 +30,8 @@ export function Modal({ isOpen, onClose, children }: ModalProps) {
     return () => window.removeEventListener("keydown", handleEsc);
   }, [isOpen, onClose]);
 
-  // Lock body scroll
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [isOpen]);
+  // Lock body scroll (contador global — ver src/hooks/useBodyScrollLock.ts)
+  useBodyScrollLock(isOpen);
 
   if (typeof document === "undefined") return null;
 

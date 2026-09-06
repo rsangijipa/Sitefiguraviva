@@ -103,10 +103,23 @@ html[data-cookie-consent="pending"] [data-floating-whatsapp] {
   --space-2: calc(var(--space-unit) * 2);
   --space-3: calc(var(--space-unit) * 3);
   --space-4: calc(var(--space-unit) * 4);
+  --space-5: calc(var(--space-unit) * 5);
   --space-6: calc(var(--space-unit) * 6);
   --space-8: calc(var(--space-unit) * 8);
 
   --min-touch-target: 44px;
+
+  /* Aliases hex do Resource Experience Shell — a janela de recursos é sempre
+     clara (nunca inverte no escuro), então usa os hex literais da marca em vez
+     das triplas RGB tematizáveis usadas pelo resto do site. */
+  --fv-verde-raiz: #005a1f;
+  --fv-terra-barro: #96551f;
+  --fv-creme: #fdfaf4;
+  --fv-areia: #f1e9db;
+  --fv-nevoa: #d8cfbe;
+  --fv-mata: #262b22;
+  --fv-pedra: #6b6b63;
+  --fv-radius-lg: 24px;
 }
 
 /* ---------------------------------------------------------------------------
@@ -208,6 +221,7 @@ html[data-cookie-consent="pending"] [data-floating-whatsapp] {
 }
 
 @layer utilities {
+  /* DS Figura Viva: profundidade por superfície + border, sem box-shadow. */
   .card-hover {
     @apply hover:shadow-soft-lg;
     transition:
@@ -1153,4 +1167,290 @@ html[data-cookie-consent="pending"] [data-floating-whatsapp] {
 .fv-admin [role="dialog"],
 .fv-admin [role="menu"] {
   border: 1px solid rgb(var(--color-border));
+}
+
+/* ==========================================================================
+   FIGURA VIVA — RESOURCE EXPERIENCE SHELL
+   Janela padronizada para Recursos Interativos.
+   Sem box-shadow: profundidade vem de superfície + border + espaço.
+   ========================================================================== */
+
+.fv-resource-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  /* Fundo areia semi-opaco — nunca cinza translúcido nem preto */
+  background: rgba(241, 233, 219, 0.94);
+}
+
+.fv-resource-window {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  width: min(1180px, calc(100vw - 48px));
+  height: min(780px, calc(100dvh - 48px));
+  max-height: calc(100dvh - 32px);
+  background: var(--fv-creme);
+  border: 1px solid var(--fv-nevoa);
+  border-radius: var(--fv-radius-lg);
+  overflow: hidden;
+  box-shadow: none;
+}
+
+.fv-resource-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex: 0 0 auto;
+  min-height: 56px;
+  padding: var(--space-2) var(--space-3);
+  background: var(--fv-creme);
+  border-bottom: 1px solid var(--fv-nevoa);
+}
+
+@media (min-width: 768px) {
+  .fv-resource-header {
+    min-height: 64px;
+    padding: var(--space-2) var(--space-4);
+  }
+}
+
+.fv-resource-title {
+  font-family: var(--font-serif), Georgia, serif;
+  font-weight: 600;
+  color: var(--fv-verde-raiz);
+  font-size: 1rem;
+  line-height: 1.25;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fv-resource-breadcrumb {
+  color: var(--fv-pedra);
+  font-weight: 500;
+}
+
+/* Body: dono do scroll do conteúdo do recurso */
+.fv-resource-body {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+  background: var(--fv-creme);
+}
+
+.fv-resource-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 var(--space-2);
+  border-radius: var(--fv-radius-sm);
+  border: 1px solid var(--fv-nevoa);
+  background: var(--fv-creme);
+  color: var(--fv-verde-raiz);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.fv-resource-icon-btn:hover {
+  background: var(--fv-areia);
+  border-color: var(--fv-verde-raiz);
+}
+
+.fv-resource-icon-btn:focus-visible {
+  outline: 2px solid var(--fv-verde-raiz);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fv-resource-icon-btn {
+    transition: none;
+  }
+}
+
+/* Mobile: tela cheia, fundo creme sólido, safe areas */
+@media (max-width: 767px) {
+  .fv-resource-overlay {
+    padding: 0;
+    background: var(--fv-creme);
+  }
+
+  .fv-resource-window {
+    width: 100%;
+    height: 100dvh;
+    max-height: 100dvh;
+    border: 0;
+    border-radius: 0;
+    background: var(--fv-creme);
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* Estados de loading/erro do shell */
+.fv-resource-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  min-height: 320px;
+  height: 100%;
+  padding: var(--space-6) var(--space-4);
+  text-align: center;
+  background: var(--fv-creme);
+  color: var(--fv-mata);
+}
+
+.fv-resource-state__label {
+  font-family: var(--font-serif), Georgia, serif;
+  color: var(--fv-verde-raiz);
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.fv-resource-state__hint {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  color: var(--fv-pedra);
+  font-size: 0.9375rem;
+  max-width: 42ch;
+  margin: 0;
+}
+
+.fv-resource-spinner {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--fv-nevoa);
+  border-top-color: var(--fv-verde-raiz);
+  animation: fv-spin 900ms linear infinite;
+}
+
+@keyframes fv-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ==========================================================================
+   FIGURA VIVA — GRID/CARDS DE RECURSOS INTERATIVOS
+   ========================================================================== */
+
+.fv-resource-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-4);
+  align-items: stretch;
+}
+
+.fv-resource-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-3);
+  height: 100%;
+  padding: var(--space-5) var(--space-4);
+  background: var(--fv-creme);
+  border: 1px solid var(--fv-nevoa);
+  border-radius: var(--fv-radius-lg);
+  color: var(--fv-mata);
+  cursor: pointer;
+  box-shadow: none;
+  transition: background-color 200ms ease, border-color 200ms ease, transform 200ms ease;
+}
+
+.fv-resource-card:hover,
+.fv-resource-card:focus-visible {
+  background: var(--fv-areia);
+  border-color: var(--fv-verde-raiz);
+  transform: translateY(-2px);
+}
+
+.fv-resource-card:focus-visible {
+  outline: 2px solid var(--fv-verde-raiz);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fv-resource-card {
+    transition: none;
+  }
+
+  .fv-resource-card:hover,
+  .fv-resource-card:focus-visible {
+    transform: none;
+  }
+}
+
+.fv-resource-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--fv-radius-md);
+  background: var(--fv-areia);
+  border: 1px solid var(--fv-nevoa);
+  color: var(--fv-verde-raiz);
+  flex: 0 0 auto;
+}
+
+.fv-resource-card:hover .fv-resource-card__icon {
+  background: var(--fv-creme);
+}
+
+.fv-resource-card__title {
+  font-family: var(--font-serif), Georgia, serif;
+  font-weight: 600;
+  font-size: 1.125rem;
+  color: var(--fv-verde-raiz);
+  margin: 0;
+}
+
+.fv-resource-card__desc {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--fv-pedra);
+  flex: 1 1 auto;
+  margin: 0;
+}
+
+.fv-resource-card__cta {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--fv-terra-barro);
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+}
+
+.fv-resource-card:hover .fv-resource-card__cta {
+  color: var(--fv-verde-raiz);
 }

@@ -84,11 +84,9 @@ const ToastItem = ({
   };
 
   const variants = {
-    success:
-      "border-green-500/30 bg-green-50/80 shadow-[0_4px_20px_-4px_rgba(34,197,94,0.1)]",
-    error:
-      "border-red-500/30 bg-red-50/80 shadow-[0_4px_20px_-4px_rgba(239,68,68,0.1)]",
-    info: "border-blue-500/30 bg-blue-50/80 shadow-[0_4px_20px_-4px_rgba(59,130,246,0.1)]",
+    success: "border-green-500/30 bg-green-50/80",
+    error: "border-red-500/30 bg-red-50/80",
+    info: "border-blue-500/30 bg-blue-50/80",
   };
 
   return (

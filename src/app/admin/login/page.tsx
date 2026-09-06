@@ -83,7 +83,7 @@ export default function AdminLogin() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
-        className="bg-white/40 backdrop-blur-3xl p-8 md:p-16 rounded-[2rem] md:rounded-[3rem] shadow-[0_80px_150px_-30px_rgba(38,58,58,0.15)] w-full max-w-md relative z-10 border border-white/60 text-center mx-4"
+        className="bg-white/40 backdrop-blur-3xl p-8 md:p-16 rounded-[2rem] md:rounded-[3rem] w-full max-w-md relative z-10 border border-white/60 text-center mx-4"
       >
         {authLoading ? (
           <div className="flex flex-col items-center justify-center py-12 animate-pulse">
