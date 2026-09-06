@@ -50,6 +50,20 @@ export async function findEnrollmentBySupabaseUser(
   return data ? mapEnrollment(data) : null;
 }
 
+export async function listUserEnrollments(
+  userId: string,
+): Promise<EnrollmentRecord[]> {
+  const supabase = createSupabaseServiceClient();
+  const { data, error } = await supabase
+    .from("enrollments")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return (data ?? []).map(mapEnrollment);
+}
+
 export async function findEnrollmentByLegacyFirebaseUid(
   legacyFirebaseUid: string,
   courseId: string,
