@@ -2,17 +2,18 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 interface ContainerProps extends React.HTMLAttributes<HTMLDivElement> {
-    as?: React.ElementType;
+    as?: React.ElementType<any>;
     clean?: boolean;
 }
 
 export default function Container({
     children,
     className,
-    as: Component = 'div',
+    as: ComponentProp = 'div',
     clean = false,
     ...props
 }: ContainerProps) {
+    const Component: any = ComponentProp;
     return (
         <Component
             className={cn(

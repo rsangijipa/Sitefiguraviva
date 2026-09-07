@@ -7,47 +7,18 @@ import {
   Sprout,
   Sparkles,
   Fingerprint,
-  ArrowLeft,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
 import BreathingApp from "./resources/BreathingApp";
-import FeelingsTree from "./FeelingsTree";
 import { App as QuizBank } from "./Quiz/App";
 import SomaScan from "./somascan/App";
-import { Modal, ModalContent, ModalBody } from "./ui/Modal";
-import { useToast } from "@/context/ToastContext";
+import ResourceModalShell from "./resources/ResourceModalShell";
+import { EmotionTreeApp } from "./resources/apps/emotion-tree/EmotionTreeApp";
 
 export default function ResourcesSection() {
-  const [activeResource, setActiveResource] = useState(null); // 'breathing' | 'tree' | 'quiz' | 'somascan'
+  const [activeResource, setActiveResource] = useState(null); // 'breathing' | 'emotion-tree' | 'quiz' | 'somascan'
   const scrollContainerRef = useRef(null);
-  const { addToast } = useToast();
-
-  // Gamification Local State MVPs
-  const [userXP, setUserXP] = useState(0);
-  const [userLevel, setUserLevel] = useState(1);
-  const [unlockedLeaves, setUnlockedLeaves] = useState(0);
-
-  const handleLeafDiscovered = (xpGained) => {
-    setUserXP((prev) => {
-      const nextXP = prev + xpGained;
-      if (nextXP >= userLevel * 50) {
-        setUserLevel((lvl) => lvl + 1);
-        setTimeout(
-          () =>
-            addToast(
-              `Parabéns! Você alcançou o Nível ${userLevel + 1} 🌟`,
-              "success",
-            ),
-          800,
-        );
-      }
-      return nextXP;
-    });
-    setUnlockedLeaves((prev) => prev + 1);
-    addToast(`+${xpGained} XP! Nova folha de sabedoria.`, "success");
-  };
-
   const openResource = (resource) => {
     setActiveResource(resource);
   };
@@ -134,7 +105,7 @@ export default function ResourcesSection() {
               transition={{ delay: 0.1 }}
               whileHover={{ y: -5 }}
               className="flex-shrink-0 w-80 md:w-auto snap-center group relative bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col items-center text-center"
-              onClick={() => openResource("tree")}
+              onClick={() => openResource("emotion-tree")}
             >
               <div className="w-16 h-16 rounded-2xl bg-gold/10 flex items-center justify-center text-gold mb-6 group-hover:scale-110 transition-transform">
                 <Sprout size={32} />
@@ -234,64 +205,33 @@ export default function ResourcesSection() {
         </div>
       </div>
 
-      {/* Full Screen Transition Overlay */}
-      {/* Full Screen Transition Overlay */}
-      <Modal isOpen={!!activeResource} onClose={closeResource}>
-        <ModalContent size="xl" className="bg-paper p-0">
-          {/* Wrapper Exit Button (Global for all resources) */}
-          <div className="absolute top-6 left-6 z-50">
-            <button
-              onClick={closeResource}
-              className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 backdrop-blur border border-stone-200 text-stone-600 hover:text-primary hover:border-gold/50 font-bold text-xs uppercase tracking-wider shadow-sm hover:shadow-md transition-all active:scale-95"
-            >
-              <ArrowLeft size={16} />
-              <span className="hidden md:inline">Voltar</span>
-            </button>
-          </div>
-
-          {/* Premium Close Button (Top Right) */}
-          <button
-            onClick={closeResource}
-            className="absolute top-6 right-6 z-50 group flex items-center gap-2 bg-white/80 backdrop-blur border border-stone-200 pl-3 pr-2 py-2 rounded-full text-primary hover:bg-gold hover:text-white transition-all focus:outline-none focus:ring-2 focus:ring-primary shadow-sm hover:translate-y-[-1px]"
-          >
-            <span className="text-[10px] font-bold uppercase tracking-widest opacity-0 w-0 group-hover:w-auto group-hover:opacity-100 transition-all duration-300 overflow-hidden whitespace-nowrap">
-              Fechar
-            </span>
-            <div className="w-6 h-6 flex items-center justify-center rounded-full bg-stone-100 group-hover:bg-white/20 transition-colors">
-              <span className="text-xl leading-none -mt-1">×</span>
-            </div>
-          </button>
-
-          <ModalBody className="p-0">
-            {activeResource === "breathing" && (
-              <BreathingApp onClose={closeResource} />
-            )}
-
-            {activeResource === "tree" && (
-              <FeelingsTree
-                isModal={true}
-                onClose={closeResource}
-                userLevel={userLevel}
-                userXP={userXP}
-                unlockedLeavesCount={unlockedLeaves}
-                onLeafDiscovered={handleLeafDiscovered}
-              />
-            )}
-
-            {activeResource === "somascan" && (
-              <div className="w-full h-full relative min-h-[80vh] bg-[#faf9f6]">
-                <SomaScan />
-              </div>
-            )}
-
-            {activeResource === "quiz" && (
-              <div className="w-full h-full relative min-h-[80vh] overflow-y-auto">
-                <QuizBank />
-              </div>
-            )}
-          </ModalBody>
-        </ModalContent>
-      </Modal>
+      <ResourceModalShell
+        open={!!activeResource}
+        title={
+          activeResource === "emotion-tree"
+            ? "Árvore das Emoções"
+            : activeResource === "breathing"
+              ? "Guia de Respiração"
+              : activeResource === "somascan"
+                ? "SomaScan"
+                : "Banco de Quizzes"
+        }
+        onClose={closeResource}
+        className={activeResource === "emotion-tree" ? "bg-[#0f1727]" : ""}
+      >
+        {activeResource === "breathing" && (
+          <div className="resource-app resource-app--light"><BreathingApp onClose={closeResource} /></div>
+        )}
+        {activeResource === "emotion-tree" && (
+          <div className="resource-app resource-app--tree"><EmotionTreeApp /></div>
+        )}
+        {activeResource === "somascan" && (
+          <div className="resource-app resource-app--light"><SomaScan /></div>
+        )}
+        {activeResource === "quiz" && (
+          <div className="resource-app resource-app--light"><QuizBank /></div>
+        )}
+      </ResourceModalShell>
     </section>
   );
 }

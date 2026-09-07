@@ -1,0 +1,195 @@
+
+
+.emotion-tree-app {
+  --background: #12382c;
+  --foreground: #f8f1e5;
+  --focus-ring: #d4af37;
+  --hud-border: rgba(248, 241, 229, 0.22);
+  --hud-border-strong: rgba(212, 175, 55, 0.5);
+  --hud-surface: rgba(20, 47, 38, 0.9);
+  --hud-surface-soft: rgba(248, 241, 229, 0.1);
+  --hud-text: #f8f1e5;
+  --hud-text-muted: rgba(248, 241, 229, 0.7);
+  --hud-primary-bg: #d4af37;
+  --hud-primary-text: #2f261b;
+}
+
+
+
+.emotion-tree-app {
+  container-type: size;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), "Segoe UI", sans-serif;
+}
+
+.emotion-tree-app button {
+  cursor: pointer;
+}
+
+.emotion-tree-app button:focus-visible,
+.emotion-tree-app [role="button"]:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.emotion-tree-app * {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(220, 232, 246, 0.4) rgba(14, 20, 34, 0.5);
+}
+
+/*
+  Trilho horizontal de chips.
+
+  A regra `*` acima e nao-camada, entao ela vence qualquer utilitario do
+  Tailwind (que vive em @layer): esconder a barra precisa acontecer aqui, no
+  mesmo nivel. A mascara avisa que ha mais conteudo alem da borda — funcao que
+  a barra de rolagem fazia, so que sem o traco cinza sobre a cena.
+.emotion-tree-app */
+.emotion-tree-app .hud-scroller {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  mask-image: linear-gradient(to right, transparent 0, #000 12px, #000 calc(100% - 22px), transparent 100%);
+}
+
+.emotion-tree-app .hud-scroller::-webkit-scrollbar {
+  display: none;
+}
+
+.emotion-tree-app .hud-panel {
+  border: 1px solid var(--hud-border);
+  background: linear-gradient(180deg, rgba(24, 69, 52, 0.94) 0%, rgba(12, 45, 34, 0.96) 100%);
+  border-radius: 1.25rem;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(14px);
+}
+
+.emotion-tree-app .hud-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+}
+
+.emotion-tree-app .hud-pill {
+  border: 1px solid var(--hud-border);
+  background: var(--hud-surface-soft);
+  border-radius: 9999px;
+  color: var(--hud-text);
+}
+
+.emotion-tree-app .hud-pill--primary {
+  border-color: transparent;
+  background: var(--hud-primary-bg);
+  color: var(--hud-primary-text);
+  box-shadow: 0 0.35rem 1.2rem rgba(10, 24, 18, 0.22);
+}
+
+.emotion-tree-app .hud-pill--primary:hover {
+  border-color: transparent;
+  background: #e3c35b;
+  color: #2f261b;
+}
+
+.emotion-tree-app .hud-card {
+  border: 1px solid var(--hud-border);
+  background: var(--hud-surface);
+  border-radius: 1rem;
+}
+
+.emotion-tree-app .hud-sheet {
+  border: 1px solid var(--hud-border);
+  background: rgba(18, 56, 44, 0.94);
+}
+
+.emotion-tree-app .hud-btn-primary {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: var(--hud-primary-bg);
+  color: var(--hud-primary-text);
+  border-radius: 9999px;
+}
+
+.emotion-tree-app .hud-btn-secondary {
+  border: 1px solid var(--hud-border);
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--hud-text);
+  border-radius: 9999px;
+}
+
+.emotion-tree-app .hud-btn-ghost {
+  border: 1px solid var(--hud-border);
+  background: transparent;
+  color: var(--hud-text);
+  border-radius: 9999px;
+}
+
+.emotion-tree-app .hud-btn-primary:hover {
+  background: #f0cf67;
+}
+
+.emotion-tree-app .hud-btn-secondary:hover,
+.emotion-tree-app .hud-btn-ghost:hover,
+.emotion-tree-app .hud-pill:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.emotion-tree-app .hud-badge {
+  border: 1px solid var(--hud-border-strong);
+  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--hud-text);
+}
+
+.emotion-tree-app .hud-list-item {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 1rem;
+  color: var(--hud-text);
+}
+
+.emotion-tree-app .hud-list-item:hover {
+  border-color: rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.emotion-tree-app .hud-panel,
+.emotion-tree-app .hud-pill,
+.emotion-tree-app .hud-card,
+.emotion-tree-app .hud-sheet,
+.emotion-tree-app .hud-btn-primary,
+.emotion-tree-app .hud-btn-secondary,
+.emotion-tree-app .hud-btn-ghost,
+.emotion-tree-app .hud-list-item {
+  border-radius: 1rem;
+}
+
+.emotion-tree-app .hud-pill,
+.emotion-tree-app .hud-btn-secondary,
+.emotion-tree-app .hud-btn-ghost {
+  color: var(--hud-text);
+}
+
+.emotion-tree-app .hud-btn-primary {
+  border-color: rgba(212, 175, 55, 0.55);
+  box-shadow: 0 6px 18px rgba(12, 34, 25, 0.32);
+}
+
+.emotion-tree-app .hud-scroller {
+  padding-block: 0.15rem;
+}
+
+.resource-app--tree {
+  height: min(82vh, 820px);
+  min-height: 31rem;
+  overflow: hidden;
+  border-radius: 2rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .emotion-tree-app * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

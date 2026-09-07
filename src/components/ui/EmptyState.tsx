@@ -4,7 +4,7 @@ import React from "react";
 import { FolderOpen } from "lucide-react";
 
 interface EmptyStateProps {
-  icon?: React.ElementType;
+  icon?: React.ComponentType<any>;
   title: string;
   description: string;
   action?: React.ReactNode;

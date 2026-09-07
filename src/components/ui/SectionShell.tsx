@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import Container from "./Container";
 
 interface SectionShellProps extends React.HTMLAttributes<HTMLElement> {
-  as?: React.ElementType;
+  as?: React.ElementType<any>;
   container?: boolean;
   containerClassName?: string;
   /**
@@ -23,9 +23,10 @@ export default function SectionShell({
   container = true,
   containerClassName,
   noPadding = false,
-  as: Component = "section",
+  as: ComponentProp = "section",
   ...props
 }: SectionShellProps) {
+  const Component: any = ComponentProp;
   return (
     <Component
       className={cn(
