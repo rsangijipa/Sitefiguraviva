@@ -436,6 +436,7 @@ export async function updateMaterialAction(
 export async function deleteMaterialAction(
   courseId: string,
   materialId: string,
+  _filePath?: string,
 ): Promise<void> {
   await requireAdmin();
   await adminDb
