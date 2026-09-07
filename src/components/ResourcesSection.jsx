@@ -10,9 +10,9 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import BreathingApp from "./resources/BreathingApp";
+import BreathingApp from "./resources/apps/breathing/BreathingApp";
 import { App as QuizBank } from "./Quiz/App";
-import SomaScan from "./somascan/App";
+import SomaScan from "./resources/apps/soma-scan/App";
 import ResourceModalShell from "./resources/ResourceModalShell";
 import ResourceAppFrame from "./resources/ResourceAppFrame";
 import { EmotionTreeApp } from "./resources/apps/emotion-tree/EmotionTreeApp";

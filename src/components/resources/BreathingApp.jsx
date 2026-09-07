@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
-import { PaperCard } from "./PaperCard";
-import { TECHNIQUES, SESSION_DURATION_SECONDS } from "./constants";
-import { BreathingAnimation } from "./BreathingAnimation";
+import { PaperCard } from "./apps/breathing/PaperCard";
+import {
+  TECHNIQUES,
+  SESSION_DURATION_SECONDS,
+} from "./apps/breathing/constants";
+import { BreathingAnimation } from "./apps/breathing/BreathingAnimation";
 import {
   Play,
   ArrowLeft,
