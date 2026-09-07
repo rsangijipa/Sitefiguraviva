@@ -280,6 +280,19 @@
 .panel-surface { background: radial-gradient(circle at 90% 0%, rgb(240 212 24 / 0.1), transparent 28%), var(--color-paper); }
 @media (prefers-reduced-motion: reduce) { .editorial-card { transition: none; } .editorial-card:hover { transform: none; } }
 
+/* Public resource applications share the same compact modal canvas. */
+.resource-app {
+  width: 100%;
+  min-width: 0;
+}
+.resource-app--light {
+  min-height: min(60vh, 560px);
+  max-height: min(78vh, 720px);
+  overflow: auto;
+  border-radius: 1.25rem;
+  background: #fdfcf9;
+}
+
 /* View Transition Cross-Fade Refinement */
 ::view-transition-old(root),
 ::view-transition-new(root) {

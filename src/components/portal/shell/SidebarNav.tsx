@@ -76,7 +76,7 @@ const UserGamificationSummary = () => {
 
 interface NavItemProps {
   href: string;
-  icon: React.ElementType;
+  icon: React.ComponentType<any>;
   label: string;
   isActive?: boolean;
   isHighlight?: boolean;

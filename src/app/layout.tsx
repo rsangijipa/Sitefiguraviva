@@ -2,6 +2,7 @@ import { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { Cormorant_Garamond, Lato } from "next/font/google";
 import "./globals.css";
+import "@/components/resources/apps/emotion-tree/emotion-tree.css";
 import Providers from "./providers";
 
 const cormorant = Cormorant_Garamond({

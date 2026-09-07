@@ -17,6 +17,7 @@
 
 # Next.js
 /.next/
+/.next-resources-verification/
 /out/
 
 # Production
