@@ -1,12 +1,13 @@
 # Relatorio de consolidacao de branches
 
-Data da analise: 2026-09-06  
-Branch de integracao: `integration/best-version` (branch local `rsangijipa-integration/best-version`)  
-Base preservada: `main` (`5e3754c`)
+Data da analise: 2026-09-06
+Branch de integracao: `integration/best-version`
+Worktree isolado: `C:\Users\aless\plugins\copilot-worktrees\Sitefiguraviva\rsangijipa-vigilant-garbanzo`
+Base preservada: `main` (`71fc842`)
 
 ## Criterio
 
-Todas as referencias locais foram enumeradas, incluindo os aliases `origin/*`. As branches de produto foram comparadas com `main` por commits exclusivos, merge-base, diff de arquivos e escopo funcional. Branches Dependabot foram classificadas como atualizacoes mecanicas de dependencias e nao foram incorporadas automaticamente, pois exigem validacao isolada de cada PR.
+Todas as referencias locais e remotas foram enumeradas, incluindo os aliases `origin/*`. As branches de produto foram comparadas com `main` por commits exclusivos, merge-base, diff de arquivos e escopo funcional. Branches Dependabot foram classificadas como atualizacoes mecanicas de dependencias e nao foram incorporadas automaticamente, pois exigem validacao isolada de cada PR. A branch de integracao ja existia sob outro nome; ela foi renomeada para o nome solicitado sem alterar seu conteudo e auditada como candidata.
 
 ## Branches analisadas
 
@@ -17,7 +18,7 @@ Todas as referencias locais foram enumeradas, incluindo os aliases `origin/*`. A
 - **Arquivos principais:** toda a aplicacao Next.js, actions, componentes LMS/portal, Firebase, Stripe e regras Firestore.
 - **Recomendacao:** PRESERVAR como base; nao foi alterada.
 
-### `codex/modernizacao-aplicacao`
+### `codex/modernizacao-aplicacao` e `origin/feat/pre-launch-hardening`
 
 - **Proposito:** hardening de producao, fundacao Supabase, modernizacao da area publica, acessibilidade e arvore de awareness.
 - **Commits exclusivos:** `95d16a1..f7d2787`, incluindo `48993b5` (auth/API Supabase), `42ea8d6` (CSP), `0fcda9a` (fundacao Supabase), `24cdc66` (arvore isolada), `97e8958` (arquitetura publica), `5100007` (performance) e `f7d2787` (acessibilidade/conteudo).
@@ -26,7 +27,7 @@ Todas as referencias locais foram enumeradas, incluindo os aliases `origin/*`. A
 - **Melhorias:** CSP sem `unsafe-eval` em producao, imagens e bundle publico menores, contratos de acessibilidade, validacao de entradas e remocao de credenciais hard-coded.
 - **Riscos:** migracao hibrida Firebase/Supabase, exigencia de variaveis Supabase no build e mudancas amplas em regras de acesso.
 - **Conflitos:** `main` adicionou quiz bank; a integracao preservou o recurso e resolveu apenas imports/estilos.
-- **Recomendacao:** MERGE. Foi integrada como primeira etapa por ter fronteiras coerentes e testes de regressao.
+- **Recomendacao:** MERGE para `codex/modernizacao-aplicacao`; `origin/feat/pre-launch-hardening` e `feat/pre-launch-hardening` sao duplicatas/ancestrais funcionais e devem ser DESCARTADAS como fonte adicional.
 
 ### `codex/care-tools-standardization`
 
@@ -50,7 +51,7 @@ Todas as referencias locais foram enumeradas, incluindo os aliases `origin/*`. A
 - **Conflitos:** historico compartilhado; fazer merge novamente duplicaria mudancas.
 - **Recomendacao:** DESCARTAR como fonte de integracao adicional; seu conteudo relevante ja entrou via `codex/modernizacao-aplicacao`.
 
-### `feat/modernize-frontend`
+### `feat/modernize-frontend` e `origin/feat/modernize-frontend`
 
 - **Proposito:** migracao Supabase-only de dominios de conteudo, engajamento, storage e telemetria, alem de refinamento visual.
 - **Commits exclusivos:** `8ce76da..c76b1be`, incluindo `028b8f1`, `4fd687a`, `1e7bb20`, `ff7165c`, `5206c2b` e `cb9291e`.
@@ -59,7 +60,7 @@ Todas as referencias locais foram enumeradas, incluindo os aliases `origin/*`. A
 - **Melhorias:** separacao por repositorio, tipagem de banco, telemetria/storage fora do Firebase, hardening de caminhos de material.
 - **Riscos:** diff de 194 arquivos, remocoes amplas de Firebase, migrations dependentes do ambiente e artefatos `dist` gerados; merge integral teria alto risco de regressao.
 - **Conflitos:** `package.json`, `next.config.mjs`, `ResourcesSection`, arvore, perfil, upload e servicos.
-- **Recomendacao:** CHERRY-PICK seletivo. Foram incorporados `4fd687a`, `1e7bb20`, `e80cad2`, `ff7165c`, `5206c2b` e `cb9291e`; o restante foi descartado/reimplementado por escopo excessivo. Artefatos `src/components/Quiz/dist/*` foram removidos por nao serem referenciados.
+- **Recomendacao:** CHERRY-PICK seletivo. Foram incorporados os equivalentes funcionais de storage, telemetria, materiais, repositorios e hardening; o restante foi descartado/reimplementado por escopo excessivo. Artefatos `src/components/Quiz/dist/*` foram removidos por nao serem referenciados. A ref `origin/feat/modernize-frontend` e o mesmo fluxo publicado, nao uma implementacao independente.
 
 ### `versao-de-teste`
 
@@ -77,15 +78,23 @@ Todas as referencias locais foram enumeradas, incluindo os aliases `origin/*`. A
 - **Funcionalidades novas:** tokens FV, shell de recursos, focus trap e hook de scroll lock.
 - **Melhorias:** consistencia visual, UX mobile, acessibilidade de foco e bloqueio de scroll com contador.
 - **Riscos:** grandes reescritas de componentes visuais e sobreposicao com a modernizacao publica.
-- **Recomendacao:** REIMPLEMENTAR seletivamente. Os conceitos foram absorvidos onde ja existia implementacao superior; nao foi feito merge integral.
+- **Recomendacao:** REIMPLEMENTAR seletivamente. O conceito de tokens e contratos de acessibilidade foi absorvido onde ja existia implementacao superior; nao foi feito merge integral das reescritas concorrentes.
 
-### `codex/care-tools-standardization` e `codex/modernizacao-aplicacao` remotas
+### `codex/care-tools-standardization` remota e refs publicadas
 
-Os refs `origin/feat/*` correspondem aos ancestrais publicados das branches locais e nao adicionam uma linha funcional independente. Foram usados como referencia de auditoria, nao como merges duplicados.
+Os refs `origin/feat/*` correspondem aos ancestrais publicados das branches locais e nao adicionam uma linha funcional independente. Foram usados como referencia de auditoria, nao como merges duplicados. `origin/versao-de-teste` tambem nao tem commits exclusivos contra `main`.
 
 ### Branches `origin/dependabot/*`
 
-Sao atualizacoes isoladas de GitHub Actions, Next, Firebase, React, Stripe, Playwright, Tailwind, TypeScript e TanStack Query. **Recomendacao:** DESCARTAR nesta consolidacao e avaliar cada PR com CI/security separado; nao misturar atualizacoes de dependencias com a migracao arquitetural.
+Sao atualizacoes isoladas de GitHub Actions, Next, Firebase, React, Stripe, Playwright, Tailwind, TypeScript e TanStack Query. **Recomendacao:** DESCARTAR nesta consolidacao e avaliar cada PR com CI/security separado; nao misturar atualizacoes de dependencias com a migracao arquitetural. Em particular, `next@16`, `tailwind@4` e `firebase@12.9` alteram superficies de compatibilidade e nao foram validados nesta integracao.
+
+### `integration/best-version`
+
+- **Proposito:** consolidacao candidata ja existente, contendo o historico combinado dos fluxos de modernizacao, care tools e migracao Supabase.
+- **Commits exclusivos:** 120 contra `main`; os commits sao derivados dos fluxos listados acima e foram reclassificados neste relatorio por funcao, em vez de reaplicados cegamente.
+- **Arquivos principais:** `src/app`, `src/features`, `src/infrastructure/supabase`, `src/components/resources`, `src/services`, `src/actions`, `supabase/migrations`, `tests` e `e2e`.
+- **Riscos:** a branch ainda exige configuracao Firebase + Supabase no build, possui referencias Firebase remanescentes e carrega 11 vulnerabilidades npm reportadas.
+- **Recomendacao:** manter como alvo da consolidacao; validar e corrigir apenas gaps comprovados.
 
 ## Duplicidades, superioridade e decisoes
 
@@ -98,26 +107,26 @@ Sao atualizacoes isoladas de GitHub Actions, Next, Firebase, React, Stripe, Play
 | Quiz | artefato `dist` gerado versus quiz React existente/quiz bank de `main` | Manter codigo fonte e quiz bank; descartar `dist` nao referenciado |
 | UI Figura Viva | tokens e reescritas grandes versus componentes publicos modernizados | Incorporar apenas melhorias compatíveis, sem substituir componentes funcionais por diff massivo |
 
-## Ordem de integracao executada
+## Ordem de integracao registrada no historico da candidata
 
-1. Merge de `codex/modernizacao-aplicacao` sobre `main`.
+1. Merge de `codex/modernizacao-aplicacao` sobre a base derivada de `main`.
 2. Cherry-pick dos quatro commits de `codex/care-tools-standardization`, resolvendo imports.
 3. Cherry-pick de `4fd687a` para repositorios Supabase de engajamento.
 4. Cherry-pick de storage, telemetria e materiais (`1e7bb20`, `e80cad2`, `ff7165c`, `5206c2b`, `cb9291e`), resolvendo storage server e HUD.
 5. Remocao dos artefatos `src/components/Quiz/dist/*` sem referencias.
-6. Registro deste relatorio.
+6. Registro deste relatorio; nesta auditoria o historico foi revalidado, nao reaplicado.
 
 ## Resultado da consolidacao
 
-- **Branches analisadas:** `main`, `codex/modernizacao-aplicacao`, `codex/care-tools-standardization`, `feat/pre-launch-hardening`, `feat/modernize-frontend`, `versao-de-teste`, `worktree-agent-aafb1dad0ae0cfbc3` e refs remotos relacionados.
+- **Branches analisadas:** `main`, `codex/modernizacao-aplicacao`, `codex/care-tools-standardization`, `feat/pre-launch-hardening`, `feat/modernize-frontend`, `versao-de-teste`, `worktree-agent-aafb1dad0ae0cfbc3`, `integration/best-version`, `origin/feat/*`, `origin/versao-de-teste` e as 20 refs `origin/dependabot/*`.
 - **Recursos encontrados:** hardening Supabase, auth/API, arvore interativa, IA publica, recursos de cuidado, certificados, gamificacao, storage/material, telemetria, PWA e acessibilidade.
 - **Recursos incorporados:** modernizacao publica, CSP/auth hardening, arvore isolada, janelas de recursos, apps reorganizados, repositorios de engajamento Supabase, storage/material Supabase, limpeza e contratos de teste.
 - **Recursos descartados:** merge integral de `feat/modernize-frontend`, duplicatas de `feat/pre-launch-hardening`, historico ancestral de `versao-de-teste`, artefatos Quiz `dist` e branches Dependabot.
 - **Conflitos resolvidos:** imports de apps, storage server, texto/cores do HUD da arvore e arquivos de progresso de migration.
 - **Arquivos refatorados:** `src/components/ResourcesSection.jsx`, `src/features/awareness-tree/*`, `src/infrastructure/supabase/*`, services de engajamento, upload/material e `next.config.mjs`.
-- **Regressoes encontradas:** build sem ambiente configurado falha por variaveis obrigatorias; a migracao exige configuracao Supabase real. Nao foram observadas falhas nos testes unitarios/integracao executados.
+- **Regressoes encontradas:** o build compilou, mas falhou na coleta de paginas por variaveis obrigatorias ausentes (`NEXT_PUBLIC_FIREBASE_*` e `NEXT_PUBLIC_SUPABASE_URL`); testes emitiram warnings de `act(...)` em `CourseMaterialsTab`, sem falha. Nao foram observadas falhas nos testes unitarios/integracao.
 - **Divida tecnica restante:** migracao ainda hibrida Firebase/Supabase, 11 vulnerabilidades reportadas por `npm install`, migrations precisam ser aplicadas no ambiente real, E2E depende de credenciais/servicos e branches Dependabot continuam pendentes.
-- **Testes executados por etapa:** `npm install`, `npm run build`, `npm run lint`, `npm test -- --runInBand` e `npx tsc --noEmit`. Na validacao final: build/lint/typecheck OK e 26 suites passaram (1 suite/7 testes ignorados).
+- **Testes executados na onda 0 desta auditoria:** `npm install` (exit 0), `npm run build` (exit 1 por ambiente), `npm run lint` (exit 0), `npm test -- --runInBand` (exit 0: 45 suites/145 testes aprovados; 1 suite/7 testes ignorados) e `npx tsc --noEmit` (exit 0). Nao foi declarado build verde sem as variaveis de producao.
 
 ## Estrutura final
 
@@ -140,3 +149,15 @@ Sao atualizacoes isoladas de GitHub Actions, Next, Firebase, React, Stripe, Play
 | Dados | Firestore/Firebase para a maior parte dos dominios | migracao gradual de engajamento/storage/material, sem remover o restante sem justificativa |
 | Qualidade | cobertura existente | novos contratos para recursos, storage, repositorios, materiais, acessibilidade e performance |
 | Operacao | build exige configuracao Firebase | build exige Firebase legado + Supabase durante a transicao; ambiente real ainda precisa ser configurado |
+
+## Conflitos previsiveis e criterio de resolucao
+
+- `src/components/ResourcesSection.jsx`, `src/components/resources/*`: preferir o shell compartilhado e os imports `resources/apps/*`; manter o quiz bank de `main`.
+- `src/features/awareness-tree/*` versus `src/components/arvoredasemocoes/*`: preferir a feature isolada, fallback acessivel e contratos testados; nao reintroduzir a arvore legada.
+- `src/app/globals.css`, `tailwind.config.js`, `Navbar`, `HeroSection` e `CourseDetailClient`: combinar tokens e acessibilidade sem aceitar reescritas visuais massivas sem teste.
+- `package.json`, `package-lock.json`, `next.config.mjs`: manter a matriz de dependencias validada pela branch candidata; avaliar Dependabot separadamente.
+- `supabase/migrations/*`, `firestore.rules`, `src/config/env.ts`: preservar compatibilidade durante a migracao hibrida e nao remover Firebase sem auditoria limpa.
+
+## Lista completa de refs Dependabot auditadas
+
+`actions/checkout-6`, `actions/setup-node-6`, `actions/upload-artifact-6`, `actions/upload-artifact-7`, `github/codeql-action-4`, `google-github-actions/auth-3`, `google-github-actions/setup-gcloud-3`, `eslint-config-next-16.1.6`, `firebase-12.9.0`, `multi-b17e1175da`, `next-16.1.6`, `playwright/test-1.58.2`, `react-dom-19.2.4`, `stripe-20.3.1`, `tailwindcss-4.1.18`, `tanstack/react-query-5.90.20`, `tanstack/react-query-5.90.21`, `types/node-25.2.1` e `types/node-25.2.3`.
