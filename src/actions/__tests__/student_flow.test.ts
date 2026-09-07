@@ -5,6 +5,7 @@ import { db, auth, storage, adminAuth } from "@/lib/firebase/admin";
 import { progressService } from "@/lib/progress/progressService";
 import { gamificationService } from "@/lib/gamification/gamificationService";
 import { assertCanAccessCourse } from "@/lib/auth/access-gate";
+import { verifySession } from "@/lib/auth/server";
 import { CertificateIssuer } from "@/lib/certificates/issuer";
 
 jest.mock("next/headers", () => ({
@@ -44,6 +45,10 @@ jest.mock("sharp", () => {
   }));
   return mockSharp;
 });
+
+jest.mock("@/lib/auth/server", () => ({
+  verifySession: jest.fn(),
+}));
 
 jest.mock("@/lib/auth/access-gate", () => ({
   assertCanAccessCourse: jest.fn(),
@@ -135,6 +140,14 @@ describe("Student Flow Smoke", () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    (verifySession as jest.Mock).mockResolvedValue({
+      uid: "student1",
+      email: "student@test.com",
+      role: "student",
+      isAdmin: false,
+      isStaff: false,
+      isActive: true,
+    });
     (auth.verifySessionCookie as jest.Mock).mockResolvedValue({
       uid: "student1",
       email: "student@test.com",

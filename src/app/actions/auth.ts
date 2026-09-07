@@ -1,7 +1,7 @@
 "use server";
 
-import { adminAuth, adminDb } from "@/lib/firebase/admin";
-import { Timestamp } from "firebase-admin/firestore";
+import { verifySession } from "@/lib/auth/server";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 
 interface UserProfile {
   uid: string;
@@ -17,94 +17,47 @@ export async function ensureUserProfileAction(): Promise<{
   error?: string;
 }> {
   try {
-    // 1. Verify Session / Auth (Implicitly trusted if called after client login, but strictly we should verify token if passed,
-    // or relies on session cookie.
-    // Since this is called right after login on client, the session cookie might not be set yet if we use client SDK.
-    // EXCEPT: The user demands "Server Action... Exige usuário autenticado (pegar UID/email...)"
-    // If we uses client SDK login, we don't have a session cookie yet.
-    // We probably need to pass the ID Token or rely on the fact that this might be called AFTER session creation?
-    // Wait, the prompt says "Após login... chama ensureUserProfileAction".
-    // Standard pattern: Client Login -> Get ID Token -> Set Cookie -> Call Action.
-    // OR: Client Login -> Call Action (passing nothing?) -> Action checks logic.
-    // BUT: Server Actions can't see Client SDK auth state directly.
-    // So we either need a session cookie OR pass the ID token.
-    // The prompt implies a standard flow. Let's assume the session cookie is set OR we verify the ID token passed as arg?
-    // "Exige usuário autenticado" - usually implies verifying the session cookie.
-    // Let's assume the client sets the cookie first (which the legacy login page did).
-    // The new auth page must do the same: Login -> /api/auth/login (cookie) -> ensureUserProfileAction.
+    const session = await verifySession();
 
-    // However, to be robust, let's accept an ID Token optionally, OR check cookie.
-    // Actually, looking at the previous login page, it did: `await fetch('/api/auth/login', ...)`
-    // So the cookie is set. Then we can use `cookies()` to get it.
-
-    // Let's import headers/cookies
-    const { cookies } = await import("next/headers");
-    const sessionCookie = (await cookies()).get("session")?.value;
-
-    if (!sessionCookie) {
+    if (!session) {
       return { success: false, error: "Unauthenticated" };
     }
 
-    const decodedToken = await adminAuth.verifySessionCookie(
-      sessionCookie,
-      true,
-    );
-    const { uid, email, name, picture } = decodedToken;
+    const { uid, email, role = "student" } = session;
 
     if (!email) return { success: false, error: "No email provided" };
 
-    const userRef = adminDb.collection("users").doc(uid);
-    const userDoc = await userRef.get();
+    const supabase = createSupabaseServiceClient();
 
-    let role = "student";
-    let isActive = true;
+    // Fetch or create profile in Supabase PostgreSQL
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", uid)
+      .maybeSingle();
 
-    if (userDoc.exists) {
-      const data = userDoc.data();
-      role = data?.role || "student";
-      isActive = data?.isActive !== false;
+    let finalRole = role;
+    let displayName: string | null = null;
+    let photoURL: string | null = null;
 
-      // Keep governance fields stable: never auto-reactivate a disabled account.
-      await userRef.set(
-        {
-          uid,
-          email, // Ensure email is in sync
-          displayName: name || data?.displayName || null, // Prefer token name (Google) or keep existing
-          photoURL: picture || data?.photoURL || null,
-          updatedAt: Timestamp.now(),
-          lastSyncedAt: Timestamp.now(),
-          role, // Force updated role
-          isActive: data?.isActive ?? true,
-          createdAt: data?.createdAt ?? Timestamp.now(),
-        },
-        { merge: true },
-      );
+    if (profile) {
+      finalRole = profile.role || role;
+      displayName = profile.display_name || null;
+      photoURL = profile.photo_url || null;
 
-      // Sync Custom Claims (Critical for Firestore Rules)
-      await adminAuth.setCustomUserClaims(uid, {
-        role,
-        admin: role === "admin" && isActive,
-        isActive,
-      });
+      await supabase
+        .from("profiles")
+        .update({
+          last_login_at: new Date().toISOString(),
+        })
+        .eq("id", uid);
     } else {
-      // Create new
-      await userRef.set({
-        uid,
+      await supabase.from("profiles").upsert({
+        id: uid,
         email,
-        displayName: name || null,
-        photoURL: picture || null,
-        role,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
-        lastSyncedAt: Timestamp.now(),
-        isActive: true, // robust default
-      });
-
-      // Sync Custom Claims
-      await adminAuth.setCustomUserClaims(uid, {
-        role,
-        admin: role === "admin",
-        isActive: true,
+        role: "student",
+        is_active: true,
+        last_login_at: new Date().toISOString(),
       });
     }
 
@@ -113,9 +66,9 @@ export async function ensureUserProfileAction(): Promise<{
       user: {
         uid,
         email,
-        displayName: name || null,
-        photoURL: picture || null,
-        role,
+        displayName,
+        photoURL,
+        role: finalRole,
       },
     };
   } catch (error: any) {

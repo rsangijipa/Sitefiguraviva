@@ -1,20 +1,48 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/firebase/admin";
 import { cookies } from "next/headers";
 import {
   rateLimit,
   RateLimitPresets,
   getClientIdentifier,
 } from "@/lib/rateLimit";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
+
+/** Fallback lifetime when the token carries no readable `exp` claim. */
+const DEFAULT_SESSION_SECONDS = 60 * 60;
+
+/**
+ * Reads the `exp` claim without trusting it for authorization — the token is
+ * verified separately by Supabase. This only decides how long to keep the
+ * cookie, so it never outlives the token it holds.
+ */
+function readTokenExpirySeconds(accessToken: string): number | null {
+  try {
+    const payload = accessToken.split(".")[1];
+    if (!payload) return null;
+
+    const decoded = JSON.parse(
+      Buffer.from(
+        payload.replace(/-/g, "+").replace(/_/g, "/"),
+        "base64",
+      ).toString("utf8"),
+    );
+
+    if (typeof decoded?.exp !== "number") return null;
+
+    const seconds = decoded.exp - Math.floor(Date.now() / 1000);
+    return seconds > 0 ? seconds : null;
+  } catch {
+    return null;
+  }
+}
 
 export async function POST(request: Request) {
   try {
-    // 0. Rate Limiting
     const ip = getClientIdentifier(request);
     const rl = await rateLimit(
       ip,
-      "LOGIN_ATTEMPT",
-      RateLimitPresets.LOGIN_ATTEMPT,
+      "session_sync",
+      RateLimitPresets.SESSION_SYNC,
     );
 
     if (!rl.allowed) {
@@ -25,22 +53,35 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { idToken } = body;
+    const { accessToken } = body;
 
-    if (!idToken) {
-      return NextResponse.json({ error: "Missing ID Token" }, { status: 400 });
+    if (!accessToken || typeof accessToken !== "string") {
+      return NextResponse.json(
+        { error: "Missing Access Token" },
+        { status: 400 },
+      );
     }
 
-    // Create session cookie (valid for 5 days)
-    const expiresIn = 60 * 60 * 24 * 5 * 1000;
-    const sessionCookie = await auth.createSessionCookie(idToken, {
-      expiresIn,
-    });
+    // Never mint a session cookie from an unverified string.
+    const supabase = createSupabaseServiceClient();
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser(accessToken);
+
+    if (error || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // The cookie must not outlive the token inside it: Supabase access tokens
+    // expire in about an hour, and a 7-day cookie left the middleware waving
+    // through requests that every server-side check then rejected.
+    const maxAge =
+      readTokenExpirySeconds(accessToken) ?? DEFAULT_SESSION_SECONDS;
 
     const cookieStore = await cookies();
-
-    cookieStore.set("session", sessionCookie, {
-      maxAge: Math.floor(expiresIn / 1000), // Use seconds for cookie max-age
+    cookieStore.set("session", accessToken, {
+      maxAge,
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       path: "/",

@@ -1,6 +1,5 @@
-import { FieldValue } from "firebase-admin/firestore";
-import { db } from "@/lib/firebase/admin";
 import { Lesson, Block } from "@/types/lms";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import { deepSafeSerialize } from "./utils";
 
 import { toCourseFullDTO } from "@/lib/presenters/mappers";
@@ -8,11 +7,12 @@ import { toCourseFullDTO } from "@/lib/presenters/mappers";
 import { assertCanAccessCourse } from "./auth/access-gate";
 import { AccessError, AccessErrorCode } from "./auth/access-types";
 import {
-  getCourseSnapshot,
-  getLessonsSnapshot,
-  getModulesSnapshot,
-} from "@/lib/repositories/courseRepository.server";
-import { findEnrollmentForCourse } from "@/lib/repositories/enrollmentRepository.server";
+  getAdminCourse,
+  listAdminLessons,
+  listAdminModules,
+} from "@/features/courses/infrastructure/supabaseAdminCourseRepository.server";
+import { findEnrollmentBySupabaseUser } from "@/features/enrollments/infrastructure/supabaseEnrollmentRepository.server";
+import { listProgressBySupabaseUser } from "@/features/progress/infrastructure/supabaseProgressRepository.server";
 
 export async function getCourseData(
   courseId: string,
@@ -38,51 +38,46 @@ export async function getCourseData(
     }
   }
 
-  const courseSnap = await getCourseSnapshot(courseId);
-  if (!courseSnap.exists) return null;
+  const course = await getAdminCourse(courseId);
+  if (!course) return null;
 
   const enrollmentResult = accessContext?.isAdminOverride
     ? null
-    : await findEnrollmentForCourse(userId, courseId);
-  const enrollmentDoc = enrollmentResult?.snapshot || null;
+    : await findEnrollmentBySupabaseUser(userId, courseId);
 
   // 2. Fetch Progress (ATOMIC)
-  const progressSnap = await db
-    .collection("progress")
-    .where("userId", "==", userId)
-    .where("courseId", "==", courseId)
-    .get();
-
   const progressMap = new Map<string, any>();
-  progressSnap.docs.forEach((doc) => {
-    const data = doc.data();
-    if (data.lessonId) {
-      progressMap.set(data.lessonId, data);
+  const progressRows = await listProgressBySupabaseUser(userId, courseId);
+  progressRows.forEach((row) => {
+    if (row.lessonId) {
+      progressMap.set(row.lessonId, {
+        ...row,
+        lessonId: row.lessonId,
+      });
     }
   });
 
   // 3. Fetch Modules
-  const modulesSnap = await getModulesSnapshot(courseId);
+  const modules = await listAdminModules(courseId);
 
   // 4. Fetch All Lessons (Optimized Parallel)
   // We create a map of ModuleID -> LessonDocs[]
   const lessonsMap = new Map<string, any[]>();
 
   await Promise.all(
-    modulesSnap.docs.map(async (mDoc) => {
-      const lessonsSnap = await getLessonsSnapshot(courseId, mDoc.id);
-
-      lessonsMap.set(mDoc.id, lessonsSnap.docs);
+    modules.map(async (module) => {
+      const lessons = await listAdminLessons(courseId, module.id);
+      lessonsMap.set(module.id, lessons);
     }),
   );
 
   // 5. Map to DTO
   return toCourseFullDTO(
-    courseSnap,
-    modulesSnap.docs,
+    course,
+    modules,
     lessonsMap,
     progressMap,
-    enrollmentDoc?.exists ? enrollmentDoc : null,
+    enrollmentResult,
     isAdmin,
     isAccessDenied,
   );
@@ -93,42 +88,20 @@ export async function getLessonContent(
   moduleId: string,
   lessonId: string,
 ) {
-  // Fetch specific lesson and its blocks
-  const lessonRef = db
-    .collection("courses")
-    .doc(courseId)
-    .collection("modules")
-    .doc(moduleId)
-    .collection("lessons")
-    .doc(lessonId);
+  const lessons = await listAdminLessons(courseId, moduleId);
+  const lesson = lessons.find((item) => item.id === lessonId) as
+    | Lesson
+    | undefined;
+  if (!lesson) return null;
 
-  const lessonDoc = await lessonRef.get();
-  if (!lessonDoc.exists) return null;
-
-  let blocksSnap;
-  try {
-    blocksSnap = await lessonRef
-      .collection("blocks")
-      .orderBy("order", "asc")
-      .get();
-  } catch (error) {
-    // Legacy blocks might not have an 'order' field; fallback without ordering
-    blocksSnap = await lessonRef.collection("blocks").get();
-  }
-
-  const lesson = { id: lessonDoc.id, ...lessonDoc.data() } as Lesson;
-
-  const blocks = blocksSnap.docs
-    .map((doc) => {
-      const data: any = doc.data();
-      return {
-        id: doc.id,
-        ...data,
-        // Default: visible unless explicitly disabled
-        isPublished: data?.isPublished !== false,
-      };
-    })
-    .filter((b: any) => b.isPublished !== false) as Block[];
+  const blocks = ((lesson as any).blocks || [])
+    .map((block: any, index: number) => ({
+      id: block.id || `${lessonId}-block-${index + 1}`,
+      ...block,
+      order: typeof block.order === "number" ? block.order : index + 1,
+      isPublished: block.isPublished !== false,
+    }))
+    .filter((block: any) => block.isPublished !== false) as Block[];
 
   return deepSafeSerialize({
     lesson,
@@ -143,63 +116,18 @@ export async function saveLessonContent(
   lessonId: string,
   blocks: Block[],
 ) {
-  const lessonRef = db
-    .collection("courses")
-    .doc(courseId)
-    .collection("modules")
-    .doc(moduleId)
-    .collection("lessons")
-    .doc(lessonId);
-  const blocksRef = lessonRef.collection("blocks");
-
-  // Batch write for atomicity
-  const batch = db.batch();
-
-  // 1. Delete existing blocks (simple replacement strategy for MVP)
-  // In a real optimized app, we would diff changes.
-  const existingBlocksSnap = await blocksRef.get();
-  existingBlocksSnap.docs.forEach((doc) => {
-    batch.delete(doc.ref);
-  });
-
-  // 2. Normalize and add new blocks
+  const supabase = createSupabaseServiceClient();
   const safeBlocks = (blocks || []).map((b: any, idx: number) => ({
     ...b,
     // Default ordering and publish state (legacy data may omit these fields)
     order: typeof b?.order === "number" ? b.order : idx + 1,
     isPublished: b?.isPublished !== false,
   })) as Block[];
-
-  safeBlocks.forEach((block: any) => {
-    const docRef = blocksRef.doc(block.id);
-    const { id, ...raw } = block;
-
-    batch.set(docRef, {
-      ...raw,
-      order: typeof raw?.order === "number" ? raw.order : 0,
-      isPublished: raw?.isPublished !== false,
-      updatedAt: new Date(),
-      createdAt: raw?.createdAt || new Date(),
-    });
+  const { error } = await supabase.rpc("save_lesson_content", {
+    p_course_id: courseId,
+    p_module_id: moduleId,
+    p_lesson_id: lessonId,
+    p_blocks: safeBlocks as any,
   });
-
-  // 3. Update lesson timestamp/count (use set+merge for safety)
-  batch.set(
-    lessonRef,
-    {
-      updatedAt: FieldValue.serverTimestamp(),
-      publishedBlocksCount: safeBlocks.filter(
-        (b: any) => b?.isPublished !== false,
-      ).length,
-    },
-    { merge: true },
-  );
-
-  // 4. Increment course content revision (Structural Integrity)
-  batch.update(db.collection("courses").doc(courseId), {
-    contentRevision: FieldValue.increment(1),
-    updatedAt: FieldValue.serverTimestamp(),
-  });
-
-  return batch.commit();
+  if (error) throw error;
 }

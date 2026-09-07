@@ -1,5 +1,4 @@
-import { adminDb } from "@/lib/firebase/admin";
-import { FieldValue } from "firebase-admin/firestore";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 
 export async function logSystemError(
   source: string,
@@ -8,18 +7,19 @@ export async function logSystemError(
   severity: "info" | "warning" | "error" | "critical" = "error",
 ) {
   try {
-    await adminDb.collection("system_logs").add({
-      source,
-      message,
-      context,
-      severity,
-      createdAt: FieldValue.serverTimestamp(),
-      resolved: false,
-    });
-    console.error(`[${source}] ${message}`, context);
+    const { error } = await createSupabaseServiceClient()
+      .from("audit_logs")
+      .insert({
+        event_type: `system.${severity}`,
+        actor_user_id: null,
+        actor_email: "system",
+        target_collection: source,
+        target_id: "system",
+        payload: { message, context, resolved: false },
+      });
+    if (error) throw error;
   } catch (err) {
-    // Fallback to console if Firestore fails
-    console.error("FAILED TO LOG TO FIRESTORE:", err);
+    console.error("FAILED TO LOG TO SUPABASE:", err);
     console.error(`[${source}] ${message}`, context);
   }
 }
@@ -30,12 +30,16 @@ export async function logServerEvent(
   userId?: string,
 ) {
   try {
-    await adminDb.collection("server_events").add({
-      eventName,
-      payload,
-      userId: userId || null,
-      timestamp: FieldValue.serverTimestamp(),
-    });
+    const { error } = await createSupabaseServiceClient()
+      .from("audit_logs")
+      .insert({
+        event_type: eventName,
+        actor_user_id: userId || null,
+        target_collection: "server_events",
+        target_id: eventName,
+        payload,
+      });
+    if (error) throw error;
   } catch (err) {
     console.error("FAILED TO LOG EVENT:", err);
   }

@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { db } from "@/lib/firebase/client";
-import { collection, query, onSnapshot, where } from "firebase/firestore";
+import { createSupabaseBrowserClient } from "@/infrastructure/supabase/client";
 import { Search, User, Plus, GraduationCap, X, Layers } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
 import { useCourses } from "@/hooks/useContent";
@@ -58,30 +57,44 @@ export default function EnrollmentsManager() {
       u.displayName?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-  // Fetch Enrollments for Selected User (From ROOT collection)
+  // Fetch enrollments for the selected user from Supabase.
   useEffect(() => {
+    let mounted = true;
     if (!selectedUser) {
       setEnrollments([]);
       return;
     }
-    // New Schema: Root collection 'enrollments'
-    // New Schema: Root collection 'enrollments'
-    const q = query(
-      collection(db, "enrollments"),
-      where("uid", "==", selectedUser.id),
-    );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const docs = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
-      // Sort in memory (Newest first)
-      docs.sort((a: any, b: any) => {
-        const tA = a.createdAt?.seconds || 0;
-        const tB = b.createdAt?.seconds || 0;
-        return tB - tA;
-      });
-      setEnrollments(docs);
-    });
-    return () => unsubscribe();
+    (async () => {
+      const supabase = createSupabaseBrowserClient();
+      const { data, error } = await supabase
+        .from("enrollments")
+        .select("*")
+        .eq("user_id", selectedUser.id)
+        .order("created_at", { ascending: false });
+
+      if (!mounted) return;
+      if (error) {
+        console.error("Error fetching enrollments:", error);
+        addToast("Erro ao carregar matrículas.", "error");
+        setEnrollments([]);
+        return;
+      }
+
+      setEnrollments(
+        (data ?? []).map((row: any) => ({
+          ...row,
+          userId: row.user_id,
+          courseId: row.course_id,
+          enrolledAt: row.enrolled_at || row.created_at,
+          progressSummary: row.progress_summary,
+        })),
+      );
+    })();
+
+    return () => {
+      mounted = false;
+    };
   }, [selectedUser]);
 
   const handleEnroll = async () => {

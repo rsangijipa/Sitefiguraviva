@@ -1251,7 +1251,7 @@ export default function AdminContentPage() {
                 </label>
                 <input
                   className="w-full p-4 bg-stone-50 border border-stone-100 rounded-xl outline-none focus:bg-white focus:border-gold transition-all"
-                  placeholder="Ex: 556992481585"
+                  placeholder="Ex: 5569992481585"
                   value={configForm.whatsappNumber || ""}
                   onChange={(e) =>
                     setConfigForm({

@@ -132,15 +132,19 @@ export default function NotificationBell() {
                         )}
                         <div className="flex items-center gap-2 mt-2">
                           <span className="text-[10px] text-stone-300 font-bold uppercase tracking-tight">
-                            {notif.createdAt?.toDate
-                              ? notif.createdAt
-                                  .toDate()
-                                  .toLocaleDateString("pt-BR", {
-                                    day: "2-digit",
-                                    month: "short",
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  })
+                            {notif.createdAt
+                              ? new Date(
+                                  typeof notif.createdAt === "string"
+                                    ? notif.createdAt
+                                    : (notif.createdAt as any)?.toDate
+                                      ? (notif.createdAt as any).toDate()
+                                      : (notif.createdAt as any),
+                                ).toLocaleDateString("pt-BR", {
+                                  day: "2-digit",
+                                  month: "short",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })
                               : ""}
                           </span>
                         </div>

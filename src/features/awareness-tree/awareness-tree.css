@@ -1,0 +1,297 @@
+/*
+ * awareness-tree.css
+ *
+ * Sistema de classes HUD para a Árvore da Awareness.
+ * Mantém o contexto imersivo dark/translúcido da cena 3D, mas alinha
+ * fontes, raios, e tokens de cor ao Design System do site (--fv-*).
+ */
+
+.awareness-tree {
+  /* ── Superfícies translúcidas ── */
+  --hud-border:        rgba(255, 255, 255, 0.14);
+  --hud-border-strong: rgba(255, 255, 255, 0.22);
+  --hud-surface:       rgba(10, 16, 26, 0.82);
+  --hud-surface-soft:  rgba(255, 255, 255, 0.07);
+
+  /* ── Texto ── */
+  --hud-text:          #e8f0f8;
+  --hud-text-muted:    #9fb8d0;
+  --hud-text-faint:    #6e8da6;
+
+  /* ── Botão primário — verde raiz do DS sobre fundo escuro ── */
+  --hud-primary-bg:    var(--fv-verde-raiz, #005a1f);
+  --hud-primary-text:  var(--fv-creme-papel, #fdfaf4);
+  --hud-primary-hover: var(--fv-verde-igarape, #07614c);
+
+  /* ── Acento dourado (favoritar ativo) ── */
+  --hud-gold:          #d8bd79;
+  --hud-gold-text:     #1e1608;
+
+  /* ── Tipografia do DS ── */
+  --hud-font-display:  var(--font-serif, Georgia, serif);
+  --hud-font-body:     var(--font-sans, system-ui, sans-serif);
+
+  /* ── Raios ── */
+  --hud-radius-pill:   9999px;
+  --hud-radius-panel:  18px;
+  --hud-radius-card:   16px;
+  --hud-radius-item:   12px;
+
+  color-scheme: dark;
+}
+
+/* ── Scroll horizontal sem scrollbar + fade nas bordas ── */
+.awareness-tree .hud-scroller {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 12px,
+    #000 calc(100% - 22px),
+    transparent 100%
+  );
+}
+.awareness-tree .hud-scroller::-webkit-scrollbar { display: none; }
+
+/* ── Painel principal (corner HUD expandido) ── */
+.awareness-tree .hud-panel {
+  border: 1px solid var(--hud-border);
+  background: var(--hud-surface);
+  border-radius: var(--hud-radius-panel);
+  box-shadow: 0 20px 56px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.04);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  font-family: var(--hud-font-body);
+}
+
+/* ── Divisor ── */
+.awareness-tree .hud-divider {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.10),
+    transparent
+  );
+}
+
+/* ── Base compartilhada: pills, badges, botões ── */
+.awareness-tree .hud-pill,
+.awareness-tree .hud-btn-primary,
+.awareness-tree .hud-btn-secondary,
+.awareness-tree .hud-btn-ghost,
+.awareness-tree .hud-badge {
+  border-radius: var(--hud-radius-pill);
+  font-family: var(--hud-font-body);
+  font-weight: 600;
+  transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease;
+  cursor: pointer;
+}
+
+/* ── Pill — estado recolhido do HUD ── */
+.awareness-tree .hud-pill {
+  border: 1px solid var(--hud-border);
+  background: var(--hud-surface-soft);
+  color: var(--hud-text);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.awareness-tree .hud-pill:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+/* ── Card / Sheet ── */
+.awareness-tree .hud-card,
+.awareness-tree .hud-sheet {
+  border: 1px solid var(--hud-border);
+  background: var(--hud-surface);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+.awareness-tree .hud-card  { border-radius: var(--hud-radius-card); }
+.awareness-tree .hud-sheet { border-radius: var(--hud-radius-panel); }
+
+/* ── Botão primário — verde DS ── */
+.awareness-tree .hud-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 18px;
+  min-height: 40px;
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  background: var(--hud-primary-bg);
+  color: var(--hud-primary-text);
+  letter-spacing: 0.03em;
+  box-shadow: 0 4px 18px rgba(0, 90, 31, 0.35);
+}
+.awareness-tree .hud-btn-primary:hover {
+  background: var(--hud-primary-hover);
+  box-shadow: 0 6px 22px rgba(0, 90, 31, 0.45);
+}
+
+/* ── Botão secundário ── */
+.awareness-tree .hud-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px;
+  min-height: 36px;
+  border: 1px solid var(--hud-border-strong);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--hud-text);
+}
+.awareness-tree .hud-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+
+/* ── Botão ghost ── */
+.awareness-tree .hud-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 14px;
+  min-height: 36px;
+  border: 1px solid var(--hud-border);
+  background: transparent;
+  color: var(--hud-text-muted);
+}
+.awareness-tree .hud-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--hud-text);
+}
+
+/* ── Badge flutuante (hint "Toque uma folha") ── */
+.awareness-tree .hud-badge {
+  border: 1px solid var(--hud-border-strong);
+  background: rgba(6, 12, 22, 0.72);
+  color: var(--hud-text);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  font-family: var(--hud-font-body);
+  letter-spacing: 0.12em;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+/* ── Item de lista (favoritas) ── */
+.awareness-tree .hud-list-item {
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: var(--hud-radius-item);
+  color: var(--hud-text);
+  font-family: var(--hud-font-body);
+  transition: background-color 140ms ease, border-color 140ms ease;
+}
+.awareness-tree .hud-list-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   FALLBACK (sem WebGL)
+   ════════════════════════════════════════════════════════════════ */
+.awareness-tree-fallback {
+  position: relative;
+  display: grid;
+  min-height: 100dvh;
+  place-items: center;
+  overflow: hidden;
+  padding: 6rem 1.25rem 3rem;
+  color: #edf5ee;
+  background: radial-gradient(circle at 50% 22%, #1b5139 0, #112c23 38%, #091813 100%);
+}
+
+.awareness-tree-fallback__glow {
+  position: absolute;
+  inset: 14% 50% auto;
+  width: 22rem;
+  height: 22rem;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: rgba(205, 177, 111, 0.12);
+  filter: blur(50px);
+}
+
+.awareness-tree-fallback__content {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 50rem);
+  text-align: center;
+}
+
+.awareness-tree-fallback__eyebrow {
+  margin-bottom: 0.75rem;
+  color: #d8bd79;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-family: var(--hud-font-body, system-ui);
+}
+
+.awareness-tree-fallback h1 {
+  font-family: var(--font-serif), serif;
+  font-size: clamp(2.5rem, 8vw, 5.5rem);
+  line-height: 0.98;
+}
+
+.awareness-tree-fallback__status {
+  max-width: 40rem;
+  margin: 1.25rem auto 0;
+  color: rgba(237, 245, 238, 0.72);
+  line-height: 1.7;
+  font-family: var(--hud-font-body, system-ui);
+}
+
+.awareness-tree-fallback__themes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.625rem;
+  margin-top: 2rem;
+}
+
+.awareness-tree-fallback__themes button {
+  min-height: 44px;
+  padding: 0.65rem 1rem;
+  border: 1px solid rgba(237, 245, 238, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: inherit;
+  font-family: var(--hud-font-body, system-ui);
+}
+
+.awareness-tree-fallback__themes button[aria-pressed="true"] {
+  border-color: #d8bd79;
+  color: #17231c;
+  background: #d8bd79;
+}
+
+.awareness-tree-fallback blockquote {
+  max-width: 38rem;
+  margin: 2rem auto 0;
+  padding: 1.75rem;
+  border: 1px solid rgba(216, 189, 121, 0.24);
+  border-radius: 1.5rem;
+  background: rgba(8, 23, 17, 0.64);
+  backdrop-filter: blur(14px);
+}
+
+.awareness-tree-fallback blockquote p {
+  font-family: var(--font-serif), serif;
+  font-size: clamp(1.35rem, 3vw, 2rem);
+  line-height: 1.35;
+}
+
+.awareness-tree-fallback blockquote footer {
+  margin-top: 1rem;
+  color: #d8bd79;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: var(--hud-font-body, system-ui);
+}

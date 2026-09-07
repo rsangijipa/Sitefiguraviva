@@ -1,14 +1,4 @@
-import { db } from "@/lib/firebase/client";
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  orderBy,
-  limit,
-  doc,
-  getDoc,
-} from "firebase/firestore";
+import { createSupabaseBrowserClient } from "@/infrastructure/supabase/client";
 
 export interface Enrollment {
   id: string;
@@ -38,24 +28,20 @@ export const enrollmentService = {
     if (!userId) return [];
 
     try {
-      // Query ROOT collection 'enrollments'
-      // We removed orderBy to avoid index requirement
-      const q = query(
-        collection(db, "enrollments"),
-        where("uid", "==", userId),
-      );
-
-      const snapshot = await getDocs(q);
-      const enrollments = snapshot.docs.map(
-        (doc) => ({ id: doc.id, ...doc.data() }) as Enrollment,
-      );
-
-      // Sort in memory (Newest first)
-      return enrollments.sort((a, b) => {
-        const tA = a.enrolledAt?.seconds || 0;
-        const tB = b.enrolledAt?.seconds || 0;
-        return tB - tA;
-      });
+      const { data, error } = await createSupabaseBrowserClient()
+        .from("enrollments")
+        .select("*")
+        .eq("user_id", userId)
+        .order("enrolled_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []).map((row: any) => ({
+        id: row.id,
+        ...row,
+        uid: row.user_id,
+        courseId: row.course_id,
+        enrolledAt: row.enrolled_at || row.created_at,
+        progressSummary: row.progress_summary,
+      })) as unknown as Enrollment[];
     } catch (error) {
       console.error("Error fetching enrollments:", error);
       throw error;
@@ -69,11 +55,22 @@ export const enrollmentService = {
   ): Promise<Enrollment | null> {
     if (!userId || !courseId) return null;
 
-    const docRef = doc(db, "enrollments", `${userId}_${courseId}`);
-    const snap = await getDoc(docRef);
-
-    return snap.exists()
-      ? ({ id: snap.id, ...snap.data() } as Enrollment)
+    const { data, error } = await createSupabaseBrowserClient()
+      .from("enrollments")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("course_id", courseId)
+      .maybeSingle();
+    if (error) throw error;
+    return data
+      ? ({
+          id: data.id,
+          ...data,
+          uid: data.user_id,
+          courseId: data.course_id,
+          enrolledAt: data.enrolled_at || data.created_at,
+          progressSummary: data.progress_summary,
+        } as unknown as Enrollment)
       : null;
   },
 

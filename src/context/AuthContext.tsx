@@ -1,32 +1,83 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import {
-  User,
-  onAuthStateChanged,
-  signOut as firebaseSignOut,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  sendPasswordResetEmail,
-  updateProfile as firebaseUpdateProfile,
-  UserCredential,
-} from "firebase/auth";
-import { auth, db } from "@/lib/firebase/client";
-import { doc, getDoc } from "firebase/firestore";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
+import { createSupabaseBrowserClient } from "@/infrastructure/supabase/client";
 import { UserRole, UserStatus } from "@/types/user";
 import { useRouter } from "next/navigation";
 import { logger } from "@/lib/logger";
+
+export interface User {
+  uid: string;
+  id: string;
+  email?: string;
+  displayName?: string | null;
+  photoURL?: string | null;
+  user_metadata?: Record<string, any>;
+}
+
+/**
+ * Module scope so the value survives re-renders and route changes: the cookie
+ * only needs rewriting when the access token itself changed, not on every
+ * auth-state notification.
+ */
+let lastSyncedToken: string | null = null;
+
+// `signIn()` and the `onAuthStateChange` listener both call this with the
+// same freshly-minted token right after login. Without tracking the in-flight
+// request, the second caller would see `lastSyncedToken` already set (by the
+// first caller, synchronously, before its fetch even resolves) and return
+// immediately as if the cookie were already written — then `handleSuccess`
+// would call a server action that reads that cookie before it actually
+// exists, failing with "Unauthenticated". Concurrent callers now await the
+// same underlying request instead of racing past it.
+let pendingSync: { token: string; promise: Promise<void> } | null = null;
+
+async function syncServerSession(accessToken: string): Promise<void> {
+  if (accessToken === lastSyncedToken) return;
+  if (pendingSync?.token === accessToken) return pendingSync.promise;
+
+  const promise = (async () => {
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ accessToken }),
+      });
+
+      if (response.ok) {
+        lastSyncedToken = accessToken;
+      }
+      // Leave lastSyncedToken untouched on failure so a later event retries.
+    } catch {
+      // Leave lastSyncedToken untouched so a later event retries.
+    } finally {
+      if (pendingSync?.token === accessToken) {
+        pendingSync = null;
+      }
+    }
+  })();
+
+  pendingSync = { token: accessToken, promise };
+  return promise;
+}
 
 interface AuthContextType {
   user: User | null;
   role: UserRole | null;
   status: UserStatus | null;
-  tenantId: string | null; // v3 Multi-tenancy
+  tenantId: string | null;
   isAdmin: boolean;
   loading: boolean;
   signOut: (redirectPath?: string) => Promise<void>;
-  signIn: (email: string, password: string) => Promise<UserCredential>;
-  signUp: (email: string, password: string) => Promise<UserCredential>;
+  signIn: (
+    email: string,
+    password: string,
+  ) => Promise<{ user: User | null; error: any }>;
+  signUp: (
+    email: string,
+    password: string,
+  ) => Promise<{ user: User | null; error: any }>;
   updateProfile: (profile: {
     displayName?: string;
     photoURL?: string;
@@ -38,10 +89,10 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   role: null,
   status: null,
-  tenantId: null, // v3 Multi-tenancy
+  tenantId: null,
   isAdmin: false,
   loading: true,
-  signOut: async (path?: string) => {},
+  signOut: async () => {},
   signIn: async () => {
     throw new Error("Not implemented");
   },
@@ -56,6 +107,26 @@ const AuthContext = createContext<AuthContextType>({
   },
 });
 
+function mapSupabaseUser(
+  sbUser: SupabaseUser | null,
+  profile?: { display_name?: string | null; photo_url?: string | null } | null,
+): User | null {
+  if (!sbUser) return null;
+  return {
+    uid: sbUser.id,
+    id: sbUser.id,
+    email: sbUser.email,
+    displayName:
+      profile?.display_name ||
+      sbUser.user_metadata?.display_name ||
+      sbUser.user_metadata?.full_name ||
+      sbUser.email?.split("@")[0] ||
+      "Usuário",
+    photoURL: profile?.photo_url || sbUser.user_metadata?.avatar_url || null,
+    user_metadata: sbUser.user_metadata,
+  };
+}
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [role, setRole] = useState<UserRole | null>(null);
@@ -65,96 +136,76 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   const router = useRouter();
+  const supabase = createSupabaseBrowserClient();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-
+    const fetchProfileAndSetState = async (
+      currentUser: SupabaseUser | null,
+    ) => {
       if (currentUser) {
         try {
           logger.info("[AuthContext] User logged in:", currentUser.email);
 
-          // 1. Check Custom Claims (Fastest, good for initial check)
-          const token = await currentUser.getIdTokenResult(true);
-          const claimAdmin = !!token.claims.admin;
-          logger.info("[AuthContext] Custom Claims:", {
-            admin: token.claims.admin,
-            role: token.claims.role,
-          });
+          // Fetch profile from Supabase
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("role, is_active, display_name, photo_url")
+            .eq("id", currentUser.id)
+            .maybeSingle();
 
-          // 2. Fetch Role/Status from Firestore (Source of Truth)
-          const userDocRef = doc(db, "users", currentUser.uid);
-          const userSnapshot = await getDoc(userDocRef);
+          const mappedUser = mapSupabaseUser(currentUser, profile);
+          setUser(mappedUser);
 
-          let userRole: UserRole = "student"; // Default
-          let userStatus: UserStatus = "active"; // Default
+          let userRole: UserRole = "student";
           let isActive = true;
 
-          if (userSnapshot.exists()) {
-            const data = userSnapshot.data();
-            logger.info("[AuthContext] Firestore user data:", {
-              role: data.role,
-              status: data.status,
-              isActive: data.isActive,
-            });
-
-            // Role Mapping
-            if (data.role) {
-              userRole = data.role as UserRole;
-            } else if (claimAdmin) {
-              userRole = "admin";
+          if (profile) {
+            if (profile.role) {
+              userRole = profile.role as UserRole;
             }
-
-            // Account status (SSoT uses isActive boolean; keep legacy status for compatibility)
-            isActive = data.isActive !== false;
-            const legacyDisabled = data.status === "disabled";
-            userStatus = !isActive || legacyDisabled ? "disabled" : "active";
-          } else {
-            logger.warn("[AuthContext] No Firestore document found for user");
-            // Fallback: Use Custom Claims if no Firestore document
-            if (claimAdmin || token.claims.role === "admin") {
-              userRole = "admin";
-            }
+            isActive = profile.is_active !== false;
           }
 
-          // 3. SECURITY GUARD: Force Logout if Disabled
+          const userStatus: UserStatus = !isActive ? "disabled" : "active";
+
+          // SECURITY GUARD: Force Logout if Disabled
           if (userStatus === "disabled") {
             logger.warn("Account disabled. Forcing logout.");
-            await firebaseSignOut(auth);
+            await supabase.auth.signOut();
             setUser(null);
             setRole(null);
             setStatus(null);
             setIsAdmin(false);
             setLoading(false);
-            // Redirect to login with error (or specific disabled page)
             router.push("/admin/login?error=disabled");
             return;
           }
 
-          // 4. Extract Tenant Context
-          const userData = userSnapshot.exists() ? userSnapshot.data() : null;
-          let resolvedTenant =
-            userData?.tenantId || (token.claims.tenantId as string) || "viva";
+          const resolvedTenant =
+            (currentUser.user_metadata?.tenantId as string) || "viva";
           setTenantId(resolvedTenant);
 
           const normalizedRole = userRole.toLowerCase().trim();
           setRole(userRole);
           setStatus(userStatus);
-          setIsAdmin(normalizedRole === "admin" || claimAdmin);
+          setIsAdmin(normalizedRole === "admin");
+
           logger.info("[AuthContext] Final state:", {
             role: userRole,
             status: userStatus,
             tenantId: resolvedTenant,
-            isAdmin: normalizedRole === "admin" || claimAdmin,
+            isAdmin: normalizedRole === "admin",
           });
         } catch (error) {
           logger.error("Error fetching user data:", error);
+          setUser(mapSupabaseUser(currentUser));
           setRole("student");
           setStatus("active");
-          setTenantId("viva"); // Safety fallback
+          setTenantId("viva");
           setIsAdmin(false);
         }
       } else {
+        setUser(null);
         setRole(null);
         setStatus(null);
         setTenantId(null);
@@ -162,53 +213,112 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       setLoading(false);
+    };
+
+    // Initialize session check
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      fetchProfileAndSetState(session?.user ?? null);
+      if (session?.access_token) {
+        void syncServerSession(session.access_token);
+      }
     });
 
-    return () => unsubscribe();
-  }, [router]);
+    // Listen for auth state changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      fetchProfileAndSetState(session?.user ?? null);
+
+      // Keep the httpOnly cookie in step with the client session. Supabase
+      // refreshes the access token in the background; without this the cookie
+      // kept the token minted at sign-in, so every server-side check started
+      // failing about an hour later while the client still looked signed in.
+      if (session?.access_token) {
+        void syncServerSession(session.access_token);
+      } else if (event === "SIGNED_OUT") {
+        lastSyncedToken = null;
+        void fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [router, supabase]);
 
   const signOut = async (redirectPath: string = "/") => {
     try {
-      // 1. Firebase Client SignOut
-      await firebaseSignOut(auth);
-
-      // 2. Clear Server Session Cookie
+      await supabase.auth.signOut();
+      lastSyncedToken = null;
       await fetch("/api/auth/logout", { method: "POST" });
 
-      // 3. Reset Local State
       setRole(null);
       setStatus(null);
       setIsAdmin(false);
       setUser(null);
 
-      // 4. Force Clean Slate & Redirect
-      router.refresh(); // Clear server-side router cache
-      router.push(redirectPath); // Redirect to specified path (default to home)
+      router.refresh();
+      router.push(redirectPath);
     } catch (error) {
       logger.error("Error signing out:", error);
     }
   };
 
-  const signIn = (email: string, password: string) => {
-    return signInWithEmailAndPassword(auth, email, password);
+  const signIn = async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (!error && data.session) {
+      await syncServerSession(data.session.access_token);
+    }
+
+    return { user: mapSupabaseUser(data.user), error };
   };
 
-  const signUp = (email: string, password: string) => {
-    return createUserWithEmailAndPassword(auth, email, password);
+  const signUp = async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+    return { user: mapSupabaseUser(data.user), error };
   };
 
   const updateProfile = async (profile: {
     displayName?: string;
     photoURL?: string;
   }) => {
-    if (auth.currentUser) {
-      await firebaseUpdateProfile(auth.currentUser, profile);
-      setUser({ ...auth.currentUser });
+    if (user) {
+      await supabase.auth.updateUser({
+        data: {
+          display_name: profile.displayName,
+          avatar_url: profile.photoURL,
+        },
+      });
+
+      await supabase
+        .from("profiles")
+        .update({
+          display_name: profile.displayName,
+          photo_url: profile.photoURL,
+        })
+        .eq("id", user.id);
+
+      setUser((prev) =>
+        prev
+          ? {
+              ...prev,
+              displayName: profile.displayName ?? prev.displayName,
+              photoURL: profile.photoURL ?? prev.photoURL,
+            }
+          : null,
+      );
     }
   };
 
-  const resetPassword = (email: string) => {
-    return sendPasswordResetEmail(auth, email);
+  const resetPassword = async (email: string) => {
+    await supabase.auth.resetPasswordForEmail(email);
   };
 
   return (

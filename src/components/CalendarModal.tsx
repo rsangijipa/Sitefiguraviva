@@ -226,7 +226,7 @@ export default function CalendarModal({
         </ModalBody>
         <ModalFooter className="bg-stone-50 border-t border-stone-100 text-center">
           <a
-            href="https://wa.me/556992481585"
+            href="https://wa.me/5569992481585"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary hover:text-gold transition-colors"

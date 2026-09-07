@@ -1,7 +1,6 @@
 "use server";
 
-import { adminDb } from "@/lib/firebase/admin";
-import { FieldValue, Timestamp } from "firebase-admin/firestore";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import { EnrollmentDoc, EnrollmentStatus } from "@/types/lms";
 import { logAudit } from "@/lib/audit";
 
@@ -28,37 +27,37 @@ export async function writeEnrollmentMirror({
   enrollmentDoc: Partial<EnrollmentDoc>;
 }) {
   const enrollmentId = `${uid}_${courseId}`;
-  const rootRef = adminDb.collection("enrollments").doc(enrollmentId);
-  const userRef = adminDb
-    .collection("users")
-    .doc(uid)
-    .collection("enrollments")
-    .doc(courseId);
-
-  const batch = adminDb.batch();
-
-  const dataToSet = {
-    ...enrollmentDoc,
-    updatedAt: FieldValue.serverTimestamp(),
+  const supabase = createSupabaseServiceClient();
+  const dataToSet: any = {
+    id: enrollmentId,
+    user_id: uid,
+    course_id: courseId,
+    status: enrollmentDoc.status,
+    payment_status:
+      (enrollmentDoc as any).payment_status ?? enrollmentDoc.paymentStatus,
+    payment_method:
+      (enrollmentDoc as any).payment_method ?? enrollmentDoc.paymentMethod,
+    source_ref: (enrollmentDoc as any).source_ref ?? enrollmentDoc.sourceRef,
+    access_until:
+      (enrollmentDoc as any).access_until ??
+      (enrollmentDoc.accessUntil instanceof Date
+        ? enrollmentDoc.accessUntil.toISOString()
+        : enrollmentDoc.accessUntil),
+    progress_summary:
+      (enrollmentDoc as any).progress_summary ?? enrollmentDoc.progressSummary,
+    course_version_at_enrollment:
+      (enrollmentDoc as any).course_version_at_enrollment ??
+      enrollmentDoc.courseVersionAtEnrollment,
+    paid_at:
+      (enrollmentDoc as any).paid_at ??
+      (enrollmentDoc.paidAt instanceof Date
+        ? enrollmentDoc.paidAt.toISOString()
+        : enrollmentDoc.paidAt),
   };
-
-  batch.set(rootRef, dataToSet, { merge: true });
-  batch.set(userRef, dataToSet, { merge: true });
-
-  if (enrollmentDoc.status === "active") {
-    batch.update(adminDb.collection("users").doc(uid), {
-      enrolledCourseIds: FieldValue.arrayUnion(courseId),
-    });
-  } else if (
-    enrollmentDoc.status === "canceled" ||
-    enrollmentDoc.status === "refunded"
-  ) {
-    batch.update(adminDb.collection("users").doc(uid), {
-      enrolledCourseIds: FieldValue.arrayRemove(courseId),
-    });
-  }
-
-  await batch.commit();
+  const { error } = await supabase
+    .from("enrollments")
+    .upsert(dataToSet, { onConflict: "id" });
+  if (error) throw error;
 }
 
 /**
@@ -77,45 +76,51 @@ export async function activateEnrollmentFromStripe(
     paymentStatus = "paid",
   } = payload;
   const enrollmentId = `${uid}_${courseId}`;
-  const enrollmentRef = adminDb.collection("enrollments").doc(enrollmentId);
-
-  // Fetch course for snapshotting and stats
-  const courseSnap = await adminDb.collection("courses").doc(courseId).get();
-  const courseData = courseSnap.data();
-  const contentRevision = courseData?.contentRevision || 1;
-  const totalLessons = courseData?.stats?.lessonsCount || 0;
-
-  const snap = await enrollmentRef.get();
-  const existing = snap.exists ? (snap.data() as EnrollmentDoc) : null;
+  const supabase = createSupabaseServiceClient();
+  const { data: courseData } = await supabase
+    .from("courses")
+    .select("content_revision,legacy_payload")
+    .eq("id", courseId)
+    .maybeSingle();
+  const contentRevision = courseData?.content_revision || 1;
+  const totalLessons =
+    (courseData?.legacy_payload as any)?.stats?.lessonsCount || 0;
+  const { data: existingRow } = await supabase
+    .from("enrollments")
+    .select("*")
+    .eq("id", enrollmentId)
+    .maybeSingle();
+  const existing = existingRow as any;
 
   // Idempotency: If sourceRef is the same and already active, skip
-  if (existing?.sourceRef === sessionId && existing?.status === "active") {
+  if (
+    (existing?.source_ref ?? existing?.sourceRef) === sessionId &&
+    existing?.status === "active"
+  ) {
     return;
   }
 
-  const updateData: Partial<EnrollmentDoc> = {
-    uid: uid,
-    userId: uid,
-    courseId: courseId,
+  const updateData: any = {
+    user_id: uid,
+    course_id: courseId,
     status: "active",
-    paymentMethod: isSubscription ? "subscription" : "stripe",
-    sourceRef: sessionId,
-    paidAt: FieldValue.serverTimestamp() as any,
+    payment_method: isSubscription ? "subscription" : "stripe",
+    source_ref: sessionId,
+    paid_at: new Date().toISOString(),
   };
 
   if (isSubscription && accessUntil) {
-    updateData.accessUntil = Timestamp.fromDate(accessUntil) as any;
+    updateData.access_until = accessUntil.toISOString();
   }
 
   // Initialize progress if new or missing
   if (!existing || !existing.progressSummary) {
-    updateData.progressSummary = {
+    updateData.progress_summary = {
       completedLessonsCount: 0,
       totalLessons: totalLessons,
       percent: 0,
     };
-    updateData.courseVersionAtEnrollment = contentRevision;
-    updateData.createdAt = FieldValue.serverTimestamp() as any;
+    updateData.course_version_at_enrollment = contentRevision;
   }
 
   await writeEnrollmentMirror({ uid, courseId, enrollmentDoc: updateData });

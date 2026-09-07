@@ -1,18 +1,19 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
-import { useState, Suspense, useEffect } from "react";
+import { useState, Suspense, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { Eye, EyeOff, Loader2, ArrowRight, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCourses } from "@/hooks/useContent";
 import { Input } from "@/components/ui/Input";
 import PageShell from "@/components/ui/PageShell";
-import { signInWithGoogle } from "@/lib/firebase/client";
+import { createSupabaseBrowserClient } from "@/infrastructure/supabase/client";
 import { ensureUserProfileAction } from "@/app/actions/auth";
+import { registerForCourseAction } from "@/app/actions/signup";
 import { getRedirectPathForRole } from "@/lib/auth/authService";
+import { getAuthIntent, getSafeNextPath } from "@/features/auth/auth-intent";
 
 // Error mapping
 const getFriendlyErrorMessage = (code: string) => {
@@ -39,7 +40,7 @@ const getFriendlyErrorMessage = (code: string) => {
 };
 
 function AuthContent() {
-  const { signIn, signUp } = useAuth();
+  const { signIn, user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   // Helper hook for content (if used)
@@ -47,8 +48,9 @@ function AuthContent() {
 
   const mode = searchParams.get("mode");
   const next = searchParams.get("next") || "";
-  const intent = searchParams.get("intent");
   const courseId = searchParams.get("courseId");
+  const authIntent = getAuthIntent(searchParams);
+  const isAdminIntent = authIntent === "admin";
 
   // 1. Initial State
   const [isSignup, setIsSignup] = useState(mode === "signup");
@@ -62,6 +64,7 @@ function AuthContent() {
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [selectedCourse, setSelectedCourse] = useState(courseId || "");
+  const completedOAuthRedirect = useRef(false);
 
   // Toggle Mode
   useEffect(() => {
@@ -69,17 +72,12 @@ function AuthContent() {
     setError("");
   }, [mode]);
 
-  const handleSuccess = async (user: any) => {
+  const handleSuccess = async (preferredPath?: string) => {
     try {
-      // A. Sync Profile
-      const token = await user.getIdToken();
-      await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idToken: token }),
-      });
-
-      // B. Enforce Profile Sync (SSoT)
+      // The httpOnly session cookie is already synced by this point: signIn()
+      // (email/password) and finishGoogleSignIn() (OAuth) both await the
+      // Supabase-token POST to /api/auth/login before calling handleSuccess.
+      // Enforce Profile Sync (SSoT)
       const syncResult = await ensureUserProfileAction();
       if (!syncResult.success) {
         console.error("Profile Sync Failed:", syncResult.error);
@@ -89,22 +87,15 @@ function AuthContent() {
       const userRole = syncResult.user?.role || "student";
 
       // D. Redirect Logic
-      // Priority 1: Use role-based redirect as default
-      let targetPath = getRedirectPathForRole(userRole);
-
-      // Priority 2: If we have an explicit 'next' param (not the default /portal), check if it's safe
-      const hasExplicitNext = searchParams.has("next") && next !== "/portal";
-      if (hasExplicitNext && next.startsWith("/") && !next.startsWith("//")) {
-        // Security: Only admin can go to /admin
-        if (next.startsWith("/admin") && userRole !== "admin") {
-          console.warn(
-            `Redirect blocked: User ${user.uid} (role: ${userRole}) tried to access ${next}`,
-          );
-          // Keep role-based targetPath
-        } else {
-          targetPath = next;
-        }
+      // Priority 0: Continue the enrollment the account was created for.
+      if (preferredPath) {
+        router.push(preferredPath);
+        return;
       }
+
+      const targetPath = searchParams.has("next")
+        ? getSafeNextPath(next, userRole)
+        : getRedirectPathForRole(userRole);
 
       router.push(targetPath);
     } catch (err) {
@@ -114,20 +105,86 @@ function AuthContent() {
     }
   };
 
+  useEffect(() => {
+    if (
+      searchParams.get("oauth") !== "google" ||
+      !user ||
+      completedOAuthRedirect.current
+    ) {
+      return;
+    }
+
+    completedOAuthRedirect.current = true;
+
+    const finishGoogleSignIn = async () => {
+      setLoading(true);
+      try {
+        // OAuth returns to the browser with a Supabase session, but server
+        // actions need its httpOnly mirror before we create/sync the profile.
+        const supabase = createSupabaseBrowserClient();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        if (!session?.access_token) {
+          throw new Error("Sessão Google não encontrada.");
+        }
+
+        const response = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ accessToken: session.access_token }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Não foi possível concluir a autenticação.");
+        }
+
+        await handleSuccess(
+          isSignup && selectedCourse
+            ? `/inscricao/${selectedCourse}`
+            : undefined,
+        );
+      } catch (err) {
+        console.error("Google sign-in completion failed", err);
+        setError("Não foi possível concluir a autenticação com Google.");
+        setLoading(false);
+      }
+    };
+
+    void finishGoogleSignIn();
+  }, [isSignup, searchParams, selectedCourse, user]);
+
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      let userCredential;
       if (isSignup) {
-        userCredential = await signUp(email, password);
-        // Update basic profile logic if needed (e.g. displayName)
-      } else {
-        userCredential = await signIn(email, password);
+        // Accounts are created server-side and only in the context of a
+        // course, so name/phone are persisted and the request is rate limited.
+        const result = await registerForCourseAction({
+          fullName,
+          phone,
+          email,
+          password,
+          courseId: selectedCourse,
+        });
+
+        if (!result.success) {
+          setError(result.error || "Não foi possível concluir o cadastro.");
+          setLoading(false);
+          return;
+        }
+
+        await signIn(email, password);
+        await handleSuccess(`/inscricao/${result.courseId || selectedCourse}`);
+        return;
       }
-      await handleSuccess(userCredential.user);
+
+      await signIn(email, password);
+      await handleSuccess();
     } catch (err: any) {
       console.error(err);
       const msg = getFriendlyErrorMessage(err.code);
@@ -138,19 +195,37 @@ function AuthContent() {
 
   const handleGoogleAuth = async () => {
     setError("");
-    setLoading(true);
-    const { user, error: googleError } = await signInWithGoogle();
 
-    if (googleError) {
-      const msg = getFriendlyErrorMessage(googleError) || googleError;
-      if (msg) setError(msg);
-      setLoading(false);
+    // Same rule as the e-mail form: new accounts exist because of a course.
+    if (isSignup && !selectedCourse) {
+      setError("Selecione o curso que deseja cursar para criar sua conta.");
       return;
     }
 
-    if (user) {
-      await handleSuccess(user);
-    } else {
+    setLoading(true);
+    const callbackUrl = new URL("/auth", window.location.origin);
+    callbackUrl.searchParams.set("oauth", "google");
+    if (isSignup) {
+      callbackUrl.searchParams.set("mode", "signup");
+      callbackUrl.searchParams.set("courseId", selectedCourse);
+    }
+    if (next.startsWith("/") && !next.startsWith("//")) {
+      callbackUrl.searchParams.set("next", next);
+    }
+
+    const supabase = createSupabaseBrowserClient();
+    const { error: googleError } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: callbackUrl.toString(),
+        queryParams: { prompt: "select_account" },
+      },
+    });
+
+    if (googleError) {
+      const msg =
+        getFriendlyErrorMessage(googleError.code) || googleError.message;
+      if (msg) setError(msg);
       setLoading(false);
     }
   };
@@ -159,30 +234,36 @@ function AuthContent() {
     <PageShell variant="auth" className="p-4 md:p-8 min-h-screen">
       <Link
         href="/"
-        className="absolute top-8 left-8 z-50 flex items-center gap-2 text-primary/40 hover:text-primary transition-colors font-bold uppercase tracking-widest text-xs"
+        className="absolute left-8 top-8 z-50 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-text/70 transition-colors hover:text-primary"
       >
         <ArrowRight className="rotate-180" size={16} /> Voltar ao Início
       </Link>
 
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <Image
-          src="/assets/auth-bg.jpg"
-          alt="Background"
-          fill
-          className="object-cover blur-[3px] opacity-90"
-          priority
-        />
-        <div className="absolute inset-0 bg-white/20 mix-blend-overlay" />
-      </div>
+      <div className="relative z-10 mx-auto grid min-h-[calc(100vh-6rem)] w-full max-w-6xl items-center gap-12 py-20 lg:grid-cols-[1fr_480px] lg:gap-20">
+        {/* Coluna editorial. Vem depois do formulario na ordem do documento,
+            para que no telefone o campo de e-mail seja a primeira coisa sob o
+            polegar; no desktop `lg:order-first` a devolve para a esquerda. */}
+        <aside className="fv-bg fv-bg-login hidden rounded-md lg:order-first lg:block lg:p-12">
+          <span className="fv-eyebrow mb-6">Instituto Figura Viva</span>
+          <p className="font-serif text-4xl font-semibold leading-[1.15] text-primary xl:text-5xl">
+            {isAdminIntent && !isSignup
+              ? "Gestão cuidadosa para uma experiência que permanece humana."
+              : "Um espaço de estudo dedicado à profundidade da relação."}
+          </p>
+          <p className="fv-lead mt-8">
+            {isAdminIntent && !isSignup
+              ? "Entre com a conta autorizada para acompanhar conteúdos, turmas e operações do Instituto."
+              : "Sua área de aluno reúne as formações em andamento, o material de cada encontro, os certificados e a comunidade do Instituto."}
+          </p>
+        </aside>
 
-      <div className="w-full min-h-[calc(100vh-6rem)] flex items-center justify-center relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white/80 backdrop-blur-xl p-8 md:p-12 rounded-[2rem] shadow-2xl w-full max-w-[480px] relative z-10 border border-white/60"
+          className="relative z-10 w-full rounded-md border border-border bg-paper p-8 md:p-12"
         >
           <div className="flex flex-col items-center mb-8">
-            <div className="w-20 h-20 rounded-full mb-6 flex items-center justify-center p-1 border border-primary/10 bg-white shadow-soft-md">
+            <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full border border-border bg-paper p-1">
               <img
                 src="/assets/logo.jpeg"
                 alt="Logo"
@@ -190,17 +271,23 @@ function AuthContent() {
               />
             </div>
             <h1 className="font-serif text-3xl text-primary font-bold mb-1">
-              {isSignup ? "Criar Conta" : "Bem-vindo(a)"}
+              {isSignup
+                ? "Criar Conta"
+                : isAdminIntent
+                  ? "Acesso administrativo"
+                  : "Bem-vindo(a)"}
             </h1>
-            <p className="text-stone-500 text-xs uppercase tracking-widest font-semibold">
-              Instituto Figura Viva
+            <p className="text-xs font-semibold uppercase tracking-widest text-text/70">
+              {isAdminIntent && !isSignup
+                ? "Painel de gestão"
+                : "Instituto Figura Viva"}
             </p>
           </div>
 
           <button
             onClick={handleGoogleAuth}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-3 bg-white border border-stone-200 text-stone-700 font-bold py-3.5 rounded-xl hover:bg-stone-50 transition-all shadow-sm active:scale-[0.98] mb-6"
+            className="mb-6 flex w-full items-center justify-center gap-3 rounded-md border border-border bg-paper py-3.5 font-bold text-text transition-colors hover:border-igarape hover:bg-areia active:scale-[0.98]"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path
@@ -225,10 +312,10 @@ function AuthContent() {
 
           <div className="relative mb-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-stone-200"></div>
+              <div className="w-full border-t border-border"></div>
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white px-2 text-stone-400">Ou</span>
+              <span className="bg-paper px-2 text-muted">Ou</span>
             </div>
           </div>
 
@@ -262,36 +349,47 @@ function AuthContent() {
                     placeholder="(00) 00000-0000"
                     autoComplete="tel"
                   />
-                  {courses.length > 0 && (
-                    <div className="space-y-1">
-                      <label
-                        htmlFor="course-interest"
-                        className="text-[10px] uppercase font-bold text-stone-500 ml-1"
-                      >
-                        Interesse
-                      </label>
-                      <div className="relative">
-                        <select
-                          id="course-interest"
-                          name="course-interest"
-                          value={selectedCourse}
-                          onChange={(e) => setSelectedCourse(e.target.value)}
-                          className="w-full h-12 px-4 rounded-xl border border-stone-200 bg-stone-50 text-sm focus:ring-2 focus:ring-primary/20 outline-none appearance-none"
-                        >
-                          <option value="">Selecione um curso...</option>
-                          {courses.map((c: any) => (
-                            <option key={c.id} value={c.id}>
-                              {c.title}
-                            </option>
-                          ))}
-                        </select>
-                        <ChevronDown
-                          size={16}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
-                        />
-                      </div>
-                    </div>
-                  )}
+                  <div className="space-y-1">
+                    <label
+                      htmlFor="course-interest"
+                      className="ml-1 text-[10px] font-bold uppercase text-text/80"
+                    >
+                      Curso desejado
+                    </label>
+                    {courses.length > 0 ? (
+                      <>
+                        <div className="relative">
+                          <select
+                            id="course-interest"
+                            name="course-interest"
+                            value={selectedCourse}
+                            onChange={(e) => setSelectedCourse(e.target.value)}
+                            required
+                            className="h-12 w-full appearance-none rounded-md border border-border bg-paper px-4 text-sm text-text outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/15"
+                          >
+                            <option value="">Selecione um curso...</option>
+                            {courses.map((c: any) => (
+                              <option key={c.id} value={c.id}>
+                                {c.title}
+                              </option>
+                            ))}
+                          </select>
+                          <ChevronDown
+                            size={16}
+                            className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-muted"
+                          />
+                        </div>
+                        <p className="ml-1 pt-1 text-[10px] text-muted">
+                          A conta é criada junto com a sua inscrição no curso.
+                        </p>
+                      </>
+                    ) : (
+                      <p className="rounded-md border border-border bg-areia p-3 text-xs text-text/80">
+                        Não há turmas abertas no momento. Assim que uma nova
+                        turma for anunciada, a inscrição ficará disponível aqui.
+                      </p>
+                    )}
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -324,7 +422,7 @@ function AuthContent() {
                 <div className="text-right">
                   <Link
                     href="/auth/reset-password"
-                    className="text-[10px] uppercase font-bold text-primary/60 hover:text-primary"
+                    className="text-[10px] font-bold uppercase text-primary underline-offset-4 hover:underline"
                   >
                     Esqueceu a senha?
                   </Link>
@@ -333,15 +431,18 @@ function AuthContent() {
             </div>
 
             {error && (
-              <div className="p-3 rounded-lg bg-red-50 text-red-600 text-xs font-medium text-center border border-red-100">
+              <div
+                role="alert"
+                className="rounded-md border border-terra/40 bg-terra/5 p-3 text-center text-xs font-medium text-terra"
+              >
                 {error}
               </div>
             )}
 
             <button
               type="submit"
-              disabled={loading}
-              className="w-full h-12 bg-primary text-white font-bold rounded-xl shadow-lg hover:shadow-primary/30 hover:bg-primary/90 transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-xs"
+              disabled={loading || (isSignup && !selectedCourse)}
+              className="flex h-12 w-full items-center justify-center gap-2 rounded-md bg-primary text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loading ? (
                 <Loader2 className="animate-spin" size={18} />
@@ -353,12 +454,12 @@ function AuthContent() {
             </button>
           </form>
 
-          <div className="mt-8 text-center border-t border-stone-100 pt-6">
+          <div className="mt-8 border-t border-border/70 pt-6 text-center">
             <button
               onClick={() =>
                 router.push(isSignup ? "/auth" : "/auth?mode=signup")
               }
-              className="text-stone-500 hover:text-primary transition-colors text-sm"
+              className="text-sm text-text/80 transition-colors hover:text-primary"
             >
               {isSignup ? (
                 <>
@@ -376,10 +477,10 @@ function AuthContent() {
 
           <div className="mt-8 text-center">
             <Link
-              href="/admin"
-              className="text-[10px] text-stone-400/50 hover:text-stone-500 transition-all uppercase tracking-widest font-medium"
+              href={isAdminIntent ? "/auth" : "/auth?next=%2Fadmin"}
+              className="text-[10px] font-medium uppercase tracking-widest text-muted transition-colors hover:text-text"
             >
-              Admin
+              {isAdminIntent ? "Acesso de aluno" : "Acesso administrativo"}
             </Link>
           </div>
         </motion.div>
@@ -392,7 +493,7 @@ export default function AuthPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-[#FDFCF9]">
+        <div className="flex min-h-screen items-center justify-center bg-paper">
           <Loader2 className="animate-spin text-primary" />
         </div>
       }

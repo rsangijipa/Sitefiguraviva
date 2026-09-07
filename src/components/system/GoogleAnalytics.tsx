@@ -1,13 +1,14 @@
 "use client";
 
 import Script from "next/script";
-import { useSEOSettings } from "@/hooks/useSiteSettings";
+import { useCookieConsent } from "@/lib/consent";
 
 export default function GoogleAnalytics() {
-  const { data: seo } = useSEOSettings();
-  const gaId = seo?.googleAnalyticsId;
+  const { consent } = useCookieConsent();
+  const gaId = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID;
 
-  if (!gaId) return null;
+  // LGPD: audience measurement only runs after explicit opt-in.
+  if (!gaId || consent !== "granted") return null;
 
   return (
     <>

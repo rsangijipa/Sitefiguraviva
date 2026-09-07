@@ -1,62 +1,62 @@
-import { db } from "@/lib/firebase/client";
-import {
-  doc,
-  setDoc,
-  serverTimestamp,
-  onSnapshot,
-  collection,
-  query,
-  where,
-  deleteDoc,
-  Timestamp,
-} from "firebase/firestore";
+import { createSupabaseBrowserClient } from "@/infrastructure/supabase/client";
 
 export const presenceService = {
-  /**
-   * Updates user presence in a specific course/thread context.
-   */
   async updatePresence(
     userId: string,
     contextId: string,
     data: { name: string; avatar?: string; isTyping?: boolean },
   ) {
-    const presenceRef = doc(db, "presence", `${userId}_${contextId}`);
-    await setDoc(
-      presenceRef,
+    const supabase: any = createSupabaseBrowserClient();
+    const { error } = await supabase.from("presence").upsert(
       {
-        userId,
-        contextId,
-        ...data,
-        lastSeen: serverTimestamp(),
+        id: `${userId}_${contextId}`,
+        user_id: userId,
+        context_id: contextId,
+        name: data.name,
+        avatar: data.avatar || null,
+        is_typing: data.isTyping ?? false,
+        last_seen: new Date().toISOString(),
       },
-      { merge: true },
+      { onConflict: "id" },
     );
+    if (error) throw error;
   },
 
-  /**
-   * Subscribes to active users in a context.
-   * Note: This depends on a cleanup function or TTL.
-   */
   subscribeToPresence(contextId: string, callback: (users: any[]) => void) {
-    // Show users seen in the last 2 minutes
-    const threshold = new Date(Date.now() - 2 * 60 * 1000);
-    const q = query(
-      collection(db, "presence"),
-      where("contextId", "==", contextId),
-      where("lastSeen", ">=", threshold),
-    );
-
-    return onSnapshot(q, (snapshot) => {
-      const users = snapshot.docs.map((doc) => doc.data());
-      callback(users);
-    });
+    const supabase: any = createSupabaseBrowserClient();
+    const load = async () => {
+      const threshold = new Date(Date.now() - 2 * 60 * 1000).toISOString();
+      const { data } = await supabase
+        .from("presence")
+        .select("*")
+        .eq("context_id", contextId)
+        .gte("last_seen", threshold);
+      callback(data ?? []);
+    };
+    void load();
+    const channel = supabase
+      .channel(`presence:${contextId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "presence",
+          filter: `context_id=eq.${contextId}`,
+        },
+        load,
+      )
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(channel);
+    };
   },
 
   async clearPresence(userId: string, contextId: string) {
-    try {
-      await deleteDoc(doc(db, "presence", `${userId}_${contextId}`));
-    } catch (e) {
-      // Ignore errors on logout/tab close
-    }
+    const { error } = await (createSupabaseBrowserClient() as any)
+      .from("presence")
+      .delete()
+      .eq("id", `${userId}_${contextId}`);
+    if (error) console.warn("Presence cleanup failed", error);
   },
 };

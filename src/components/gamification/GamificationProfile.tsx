@@ -5,12 +5,14 @@ import { useAuth } from "@/context/AuthContext";
 import { gamificationService } from "@/services/gamificationService";
 import BadgeDisplay from "./BadgeDisplay";
 import { Loader2, Trophy, Flame } from "lucide-react";
-import { UserGamificationProfile } from "@/types/gamification";
+import type { ClientGamificationProfile } from "@/services/gamificationService";
 import { motion } from "framer-motion";
 
 export default function GamificationProfile() {
   const { user } = useAuth();
-  const [profile, setProfile] = useState<UserGamificationProfile | null>(null);
+  const [profile, setProfile] = useState<ClientGamificationProfile | null>(
+    null,
+  );
   const [badges, setBadges] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 

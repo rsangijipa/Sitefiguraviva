@@ -59,8 +59,11 @@ export default function AnnouncementList({ courseId }: { courseId: string }) {
                 {announcement.content}
               </div>
               <div className="mt-2 text-[10px] text-blue-400 font-mono">
-                {announcement.publishAt?.toDate
-                  ? announcement.publishAt.toDate().toLocaleDateString()
+                {announcement.publishAt
+                  ? ((announcement.publishAt as any).toDate
+                      ? (announcement.publishAt as any).toDate()
+                      : new Date(announcement.publishAt as any)
+                    ).toLocaleDateString()
                   : ""}
               </div>
             </div>

@@ -1,4 +1,4 @@
-import { db } from "@/lib/firebase/admin";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import { VerificationBadge } from "@/components/certificate/VerificationBadge";
 import Link from "next/link";
 
@@ -12,7 +12,7 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps) {
   const { code } = await params;
   return {
-    title: `Verificação de Certificado: ${code} | Instituto Figura Viva`,
+    title: `Verificação de Certificado: ${code}`,
     description:
       "Valide a autenticidade deste certificado emitido pelo Instituto Figura Viva.",
   };
@@ -22,13 +22,13 @@ export default async function CertificateVerifyPage({ params }: PageProps) {
   const { code } = await params;
 
   // 1. Query by 'code'
-  const snapshot = await db
-    .collection("certificates")
-    .where("code", "==", code)
-    .limit(1)
-    .get();
+  const { data, error } = await createSupabaseServiceClient()
+    .from("certificates")
+    .select("*")
+    .eq("code", code)
+    .maybeSingle();
 
-  if (snapshot.empty) {
+  if (error || !data) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-stone-50 p-4">
         <VerificationBadge
@@ -39,25 +39,22 @@ export default async function CertificateVerifyPage({ params }: PageProps) {
     );
   }
 
-  const doc = snapshot.docs[0];
-  const data = doc.data();
-
   // Serialize Dates safely
   let issuedAtIso = new Date().toISOString();
-  if (data.issuedAt) {
-    if (typeof data.issuedAt.toDate === "function") {
-      issuedAtIso = data.issuedAt.toDate().toISOString();
-    } else {
-      issuedAtIso = new Date(data.issuedAt).toISOString();
-    }
+  if (data.issued_at) {
+    issuedAtIso = new Date(data.issued_at).toISOString();
   }
 
   const badgeData = {
-    studentName: data.userName || data.studentName || "Nome não Informado",
-    courseTitle: data.courseTitle || "Curso não Identificado",
+    studentName:
+      (data.metadata as any)?.userName ||
+      (data.metadata as any)?.studentName ||
+      "Nome não Informado",
+    courseTitle:
+      (data.metadata as any)?.courseTitle || "Curso não Identificado",
     code: data.code || code,
     issuedAt: issuedAtIso,
-    hours: data.metadata?.hours || data.hours || 0,
+    hours: (data.metadata as any)?.hours || 0,
   };
 
   return (

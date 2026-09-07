@@ -1,37 +1,49 @@
-import { db } from "@/lib/firebase/client";
-import { doc, getDoc, setDoc, Timestamp } from "firebase/firestore";
-import { UserGamificationProfile, XpTransaction } from "@/types/gamification";
+import {
+  awardBadge,
+  awardXp,
+  getProfile as getProfileFromRepo,
+  listProfiles,
+  updateStreak as updateStreakFromRepo,
+  type GamificationProfileRecord,
+} from "@/features/gamification/infrastructure/supabaseGamificationRepository.server";
 import { logger } from "@/lib/logger";
-import { processGamificationEvent } from "@/actions/gamification";
+
+export interface ClientGamificationProfile {
+  uid: string;
+  totalXp: number;
+  level: number;
+  currentStreak: number;
+  longestStreak: number;
+  lastActivityDate: string | null;
+  badges: string[];
+  updatedAt: string;
+}
+
+export function mapGamificationProfileToClient(
+  profile: GamificationProfileRecord,
+): ClientGamificationProfile {
+  return {
+    uid: profile.userId,
+    totalXp: profile.totalXp,
+    level: profile.level,
+    currentStreak: profile.currentStreak,
+    longestStreak: profile.longestStreak,
+    lastActivityDate: profile.lastActivityDate,
+    badges: profile.badges,
+    updatedAt: profile.updatedAt,
+  };
+}
 
 export const gamificationService = {
   /**
    * Get or initialize a user's gamification profile.
    */
-  async getProfile(userId: string): Promise<UserGamificationProfile | null> {
+  async getProfile(userId: string): Promise<ClientGamificationProfile | null> {
     if (!userId) return null;
 
     try {
-      const docRef = doc(db, "gamification_profiles", userId);
-      const snap = await getDoc(docRef);
-
-      if (snap.exists()) {
-        return snap.data() as UserGamificationProfile;
-      }
-
-      // Initialize default profile structure in memory
-      // We don't write here because client writes are disabled.
-      // The server action will create it if needed, or we rely on sign-up triggers.
-      return {
-        uid: userId,
-        totalXp: 0,
-        level: 1,
-        currentStreak: 0,
-        longestStreak: 0,
-        lastActivityDate: null,
-        badges: [],
-        updatedAt: Timestamp.now(),
-      };
+      const profile = await getProfileFromRepo(userId);
+      return mapGamificationProfileToClient(profile);
     } catch (error) {
       logger.error("Error fetching gamification profile", error, { userId });
       return null;
@@ -45,6 +57,8 @@ export const gamificationService = {
     if (!userId) return null;
 
     try {
+      const { processGamificationEvent } =
+        await import("@/actions/gamification");
       const result = await processGamificationEvent({
         actionType: "daily_login",
         metadata: { source: "client_service" },
@@ -84,6 +98,8 @@ export const gamificationService = {
     courseTitle: string,
   ) {
     try {
+      const { processGamificationEvent } =
+        await import("@/actions/gamification");
       const result = await processGamificationEvent({
         actionType: "course_complete",
         courseId,
@@ -105,6 +121,8 @@ export const gamificationService = {
    */
   async onLessonCompletion(userId: string, courseId: string, lessonId: string) {
     try {
+      const { processGamificationEvent } =
+        await import("@/actions/gamification");
       const result = await processGamificationEvent({
         actionType: "lesson_complete",
         courseId,
