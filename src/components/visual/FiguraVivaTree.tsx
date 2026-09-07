@@ -416,7 +416,12 @@ function FiguraVivaTree({
     const layer = follow.current;
     if (!element || !layer) return;
     const media = (query: string) =>
-      window.matchMedia?.(query) ?? ({ matches: false, addEventListener() {}, removeEventListener() {} } as MediaQueryList);
+      window.matchMedia?.(query) ??
+      ({
+        matches: false,
+        addEventListener() {},
+        removeEventListener() {},
+      } as unknown as MediaQueryList);
     const reduced = media("(prefers-reduced-motion: reduce)");
     const fine = media("(hover: hover) and (pointer: fine)");
     let visible = true;
