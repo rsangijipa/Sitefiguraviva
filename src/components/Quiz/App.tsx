@@ -49,7 +49,7 @@ export function App() {
   };
 
   return (
-    <div className="quiz-bank min-h-screen">
+    <div className="quiz-bank min-h-full">
       {screen === "home" && (
         <Home
           onSelectQuestionnaire={handleSelectQuestionnaire}

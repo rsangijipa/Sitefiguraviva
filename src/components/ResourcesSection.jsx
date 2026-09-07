@@ -14,6 +14,7 @@ import BreathingApp from "./resources/BreathingApp";
 import { App as QuizBank } from "./Quiz/App";
 import SomaScan from "./somascan/App";
 import ResourceModalShell from "./resources/ResourceModalShell";
+import ResourceAppFrame from "./resources/ResourceAppFrame";
 import { EmotionTreeApp } from "./resources/apps/emotion-tree/EmotionTreeApp";
 
 export default function ResourcesSection() {
@@ -220,16 +221,32 @@ export default function ResourcesSection() {
         className={activeResource === "emotion-tree" ? "bg-[#0f1727]" : ""}
       >
         {activeResource === "breathing" && (
-          <div className="resource-app resource-app--light"><BreathingApp onClose={closeResource} /></div>
+          <ResourceAppFrame title="Guia de Respiração">
+            <div className="resource-app resource-app--light">
+              <BreathingApp onClose={closeResource} />
+            </div>
+          </ResourceAppFrame>
         )}
         {activeResource === "emotion-tree" && (
-          <div className="resource-app resource-app--tree"><EmotionTreeApp /></div>
+          <ResourceAppFrame title="Árvore das Emoções">
+            <div className="resource-app resource-app--tree">
+              <EmotionTreeApp />
+            </div>
+          </ResourceAppFrame>
         )}
         {activeResource === "somascan" && (
-          <div className="resource-app resource-app--light"><SomaScan /></div>
+          <ResourceAppFrame title="SomaScan">
+            <div className="resource-app resource-app--light">
+              <SomaScan />
+            </div>
+          </ResourceAppFrame>
         )}
         {activeResource === "quiz" && (
-          <div className="resource-app resource-app--light"><QuizBank /></div>
+          <ResourceAppFrame title="Banco de Quizzes">
+            <div className="resource-app resource-app--light">
+              <QuizBank />
+            </div>
+          </ResourceAppFrame>
         )}
       </ResourceModalShell>
     </section>
