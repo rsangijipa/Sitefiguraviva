@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth, storage } from "@/lib/firebase/admin";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
+import { getSupabaseSessionClaims } from "@/lib/auth/supabase-session";
 
 /**
  * File Upload API
@@ -18,7 +19,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const claims = await auth.verifySessionCookie(sessionCookie, true);
+    const claims = await getSupabaseSessionClaims(sessionCookie);
+    if (!claims || !claims.isActive) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     // P1-02: Rate Limit Uploads
     const { rateLimit, getClientIdentifier } = await import("@/lib/rateLimit");
@@ -94,36 +98,28 @@ export async function POST(request: NextRequest) {
     const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
     const filename = `${claims.uid}_${timestamp}_${sanitizedName}`;
 
-    // Save to Firebase Storage instead of local filesystem
-    const bucket = storage.bucket();
     const filepath = `uploads/${claims.uid}/assessments/${filename}`;
-    const fileRef = bucket.file(filepath);
 
     // Convert File to Buffer
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Write file
-    await fileRef.save(buffer, {
-      metadata: {
-        contentType: file.type,
-        metadata: {
-          originalName: file.name,
-          uid: claims.uid,
-        },
-      },
-    });
+    const supabase = createSupabaseServiceClient();
+    const { error: uploadError } = await supabase.storage
+      .from("course-assets")
+      .upload(filepath, buffer, { contentType: file.type, upsert: false });
+    if (uploadError) throw uploadError;
 
     // Generate a long-lived signed URL for downloading (or standard public URL)
     // We use a 7-day signed URL as a secure default for private uploads.
-    const [fileUrl] = await fileRef.getSignedUrl({
-      action: "read",
-      expires: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
+    const { data: signed, error: signedError } = await supabase.storage
+      .from("course-assets")
+      .createSignedUrl(filepath, 7 * 24 * 60 * 60);
+    if (signedError) throw signedError;
 
     return NextResponse.json({
       success: true,
-      fileUrl,
+      fileUrl: signed.signedUrl,
       filename,
       size: file.size,
     });

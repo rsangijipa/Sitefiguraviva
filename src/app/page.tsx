@@ -1,151 +1,107 @@
-import { Suspense } from "react";
-import HomeClient from "../components/HomeClient";
-import { db } from "@/lib/firebase/admin";
-import { deepSafeSerialize } from "@/lib/utils";
 import type { Metadata } from "next";
+import { Suspense } from "react";
+
+import HomeClient from "@/components/HomeClient";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
+import { deepSafeSerialize } from "@/lib/utils";
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
-    const seoSnap = await db.collection("siteSettings").doc("seo").get();
-    const seo = seoSnap.data();
-
-    if (!seo) return { alternates: { canonical: "/" } };
+    const { data } = await createSupabaseServiceClient()
+      .from("public_pages")
+      .select("content")
+      .eq("key", "seo")
+      .maybeSingle();
+    const seo = data?.content as any;
 
     return {
-      title: seo.defaultTitle || "Instituto Figura Viva | Gestalt-Terapia",
+      title: seo?.defaultTitle || "Instituto Figura Viva | Gestalt-Terapia",
       description:
-        seo.defaultDescription ||
+        seo?.defaultDescription ||
         "Um espaço vivo de acolhimento clínico e formação profissional.",
-      keywords: seo.keywords || [],
-      alternates: {
-        canonical: "/",
-      },
-      openGraph: {
-        images: seo.ogImage ? [{ url: seo.ogImage }] : [],
-      },
+      keywords: seo?.keywords || [],
+      alternates: { canonical: "/" },
+      ...(seo?.ogImage
+        ? { openGraph: { images: [{ url: seo.ogImage }] } }
+        : {}),
     };
-  } catch (e) {
+  } catch {
     return { alternates: { canonical: "/" } };
   }
 }
 
-// Revalidate every hour
 export const revalidate = 3600;
+
+function toISO(value: any): string | null {
+  if (!value) return null;
+  if (typeof value.toDate === "function") return value.toDate().toISOString();
+  if (value instanceof Date) return value.toISOString();
+  if (typeof value === "string") {
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date.toISOString();
+  }
+  if (value._seconds !== undefined) {
+    return new Date(value._seconds * 1000).toISOString();
+  }
+  return null;
+}
 
 async function getHomeData() {
   try {
-    // Parallel fetching of all collections
-    const [
-      coursesSnap,
-      postsSnap,
-      publicGallerySnap,
-      legacyGallerySnap,
-      founderSnap,
-      instituteSnap,
-      seoSnap,
-      teamSnap,
-    ] = await Promise.all([
-      db
-        .collection("courses")
-        .where("isPublished", "==", true)
-        .where("status", "==", "open")
-        .limit(10)
-        .get(),
-      db
-        .collection("posts")
-        .where("isPublished", "==", true)
-        .orderBy("created_at", "desc")
-        .limit(4)
-        .get(),
-      db.collection("publicGallery").orderBy("created_at", "desc").get(),
-      db.collection("gallery").orderBy("created_at", "desc").get(),
-      db.collection("siteSettings").doc("founder").get(),
-      db.collection("siteSettings").doc("institute").get(),
-      db.collection("siteSettings").doc("seo").get(),
-      db.collection("siteSettings").doc("team").get(),
-    ]);
+    const supabase = createSupabaseServiceClient();
+    const [{ data: courseRows }, { data: postRows }, { data: instituteRow }] =
+      await Promise.all([
+        supabase
+          .from("courses")
+          .select("*")
+          .eq("is_published", true)
+          .eq("status", "open")
+          .limit(3),
+        supabase
+          .from("posts")
+          .select("*")
+          .eq("is_published", true)
+          .order("created_at", { ascending: false })
+          .limit(3),
+        supabase
+          .from("public_pages")
+          .select("content")
+          .eq("key", "institute")
+          .maybeSingle(),
+      ]);
 
-    const toISO = (val: any) => {
-      if (!val) return null;
-      if (typeof val.toDate === "function") return val.toDate().toISOString();
-      if (val instanceof Date) return val.toISOString();
-      if (typeof val === "string") return new Date(val).toISOString();
-      if (val._seconds !== undefined)
-        return new Date(val._seconds * 1000).toISOString();
-      return null;
-    };
-
-    // Course Merge & Deduplication Strategy - Visibility Guard: Published AND Open only
-    const courses = coursesSnap.docs.map((doc) => {
-      const data = doc.data();
+    const courses = (courseRows ?? []).map((data: any) => {
       return deepSafeSerialize({
-        id: doc.id,
+        id: data.id,
         title: data.title || "",
         subtitle: data.subtitle || "",
         description: data.description || "",
-        image: data.image && data.image.trim() !== "" ? data.image : null,
+        image: data.image || null,
         coverImage: data.coverImage || "",
-        status: data.status || "",
-        details: data.details || {},
-        isPublished: data.isPublished === true,
-        created_at: toISO(data.created_at || data.createdAt),
-        updated_at: toISO(data.updated_at || data.updatedAt),
       });
     });
 
-    const posts = postsSnap.docs.map((doc) => {
-      const data = doc.data();
+    const posts = (postRows ?? []).map((data: any) => {
       return deepSafeSerialize({
-        id: doc.id,
+        id: data.id,
         title: data.title || "",
         excerpt: data.excerpt || "",
-        content: data.content || "",
-        type: data.type || "blog",
-        image: data.image || "",
-        created_at: toISO(data.created_at),
-        updated_at: toISO(data.updated_at),
+        image: data.image || null,
+        created_at: toISO(data.created_at || data.createdAt),
       });
     });
 
-    const gallerySource = !publicGallerySnap.empty
-      ? publicGallerySnap
-      : legacyGallerySnap;
-
-    const gallery = gallerySource.docs.map((doc) => {
-      const data = doc.data();
-      return deepSafeSerialize({
-        id: doc.id,
-        src: data.src || data.url || "",
-        url: data.url || data.src || "",
-        title: data.title || "",
-        caption: data.caption || data.description || "",
-        tags: data.tags || [],
-        created_at: toISO(data.created_at),
-        updated_at: toISO(data.updated_at),
-      });
-    });
-
-    const founder = founderSnap.exists
-      ? deepSafeSerialize(founderSnap.data())
-      : null;
-    const institute = instituteSnap.exists
-      ? deepSafeSerialize(instituteSnap.data())
-      : null;
-    const seo = seoSnap.exists ? deepSafeSerialize(seoSnap.data()) : null;
-    const team = teamSnap.exists ? deepSafeSerialize(teamSnap.data()) : null;
-
-    return { courses, posts, gallery, founder, institute, seo, team };
+    return {
+      courses,
+      posts,
+      gallery: [],
+      institute: instituteRow?.content
+        ? deepSafeSerialize(instituteRow.content)
+        : undefined,
+    };
   } catch (error) {
     console.error("Error fetching home data:", error);
-    return {
-      courses: [],
-      posts: [],
-      gallery: [],
-      founder: null,
-      institute: null,
-      seo: null,
-      team: null,
-    };
+    return { courses: [], posts: [], gallery: [], institute: undefined };
   }
 }
 
@@ -155,13 +111,11 @@ export default async function Home() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-paper">
-          <div className="flex flex-col items-center gap-4">
-            <div className="w-12 h-12 border-4 border-gold border-t-transparent rounded-full animate-spin" />
-            <p className="text-primary/60 font-serif animate-pulse">
-              Carregando...
-            </p>
-          </div>
+        <div
+          className="flex min-h-screen items-center justify-center bg-paper text-primary"
+          role="status"
+        >
+          Preparando o Instituto Figura Viva…
         </div>
       }
     >

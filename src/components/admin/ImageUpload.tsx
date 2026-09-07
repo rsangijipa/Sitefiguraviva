@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { storage } from "@/lib/firebase/client";
 import { Loader2, UploadCloud, X } from "lucide-react";
 import Image from "next/image";
+import { uploadAdminAsset } from "@/infrastructure/supabase/storage.client";
 
 interface ImageUploadProps {
   onUpload: (url: string) => void;
@@ -15,7 +14,7 @@ interface ImageUploadProps {
 
 export default function ImageUpload({
   onUpload,
-  folder = "uploads",
+  folder = "uploads/admin",
   defaultImage,
   className = "",
 }: ImageUploadProps) {
@@ -49,11 +48,15 @@ export default function ImageUpload({
     setPreview(objectUrl);
 
     try {
-      const storageRef = ref(storage, `${folder}/${Date.now()}_${file.name}`);
-      const snapshot = await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(snapshot.ref);
+      const result = await uploadAdminAsset(file, {
+        folder,
+        kind: "image",
+        maxBytes: 5 * 1024 * 1024,
+        mimeTypes: ["image/png", "image/jpeg", "image/webp"],
+      });
 
-      onUpload(downloadURL);
+      setPreview(result.url);
+      onUpload(result.url);
     } catch (err: any) {
       console.error("Upload failed", err);
       setError("Falha no upload. Tente novamente.");

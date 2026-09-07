@@ -7,6 +7,13 @@ import {
   getModulesSnapshot,
 } from "@/lib/repositories/courseRepository.server";
 import { findEnrollmentForCourse } from "@/lib/repositories/enrollmentRepository.server";
+import {
+  getAdminCourse,
+  listAdminModules,
+  listAdminLessons,
+} from "@/features/courses/infrastructure/supabaseAdminCourseRepository.server";
+import { findEnrollmentBySupabaseUser } from "@/features/enrollments/infrastructure/supabaseEnrollmentRepository.server";
+import { listProgressBySupabaseUser } from "@/features/progress/infrastructure/supabaseProgressRepository.server";
 
 jest.mock("@/lib/auth/access-gate", () => ({
   assertCanAccessCourse: jest.fn(),
@@ -21,6 +28,27 @@ jest.mock("@/lib/repositories/courseRepository.server", () => ({
 jest.mock("@/lib/repositories/enrollmentRepository.server", () => ({
   findEnrollmentForCourse: jest.fn(),
 }));
+
+jest.mock(
+  "@/features/courses/infrastructure/supabaseAdminCourseRepository.server",
+  () => ({
+    getAdminCourse: jest.fn(),
+    listAdminModules: jest.fn(),
+    listAdminLessons: jest.fn(),
+  }),
+);
+jest.mock(
+  "@/features/enrollments/infrastructure/supabaseEnrollmentRepository.server",
+  () => ({
+    findEnrollmentBySupabaseUser: jest.fn(),
+  }),
+);
+jest.mock(
+  "@/features/progress/infrastructure/supabaseProgressRepository.server",
+  () => ({
+    listProgressBySupabaseUser: jest.fn(),
+  }),
+);
 
 jest.mock("@/lib/firebase/admin", () => {
   const progressQuery = {
@@ -117,6 +145,38 @@ describe("getCourseData", () => {
         createdAt: { seconds: 1 },
       }),
     });
+    (getAdminCourse as jest.Mock).mockResolvedValue({
+      id: courseId,
+      title: "Curso P0",
+      isPublished: true,
+      status: "open",
+      createdAt: { seconds: 1 },
+      updatedAt: { seconds: 2 },
+    });
+    (listAdminModules as jest.Mock).mockResolvedValue([
+      { id: "module-1", title: "Modulo 1", order: 1 },
+    ]);
+    (listAdminLessons as jest.Mock).mockResolvedValue([
+      {
+        id: "lesson-1",
+        moduleId: "module-1",
+        courseId,
+        title: "Aula 1",
+        order: 1,
+        type: "video",
+      },
+    ]);
+    (findEnrollmentBySupabaseUser as jest.Mock).mockResolvedValue({
+      id: `${uid}_${courseId}`,
+      userId: uid,
+      courseId,
+      status: "active",
+      paymentMethod: "pix",
+      createdAt: "1970-01-01T00:00:01.000Z",
+    });
+    (listProgressBySupabaseUser as jest.Mock).mockResolvedValue([
+      { lessonId: "lesson-1", status: "completed", percent: 100 },
+    ]);
   });
 
   it("returns the same course DTO shape for an enrolled student", async () => {
@@ -159,7 +219,7 @@ describe("getCourseData", () => {
 
     expect(data?.isAccessDenied).toBe(false);
     expect(data?.enrollment).toBeUndefined();
-    expect(findEnrollmentForCourse).not.toHaveBeenCalled();
+    expect(findEnrollmentBySupabaseUser).not.toHaveBeenCalled();
   });
 
   it("keeps course metadata with access denied flag for pending enrollment", async () => {
@@ -174,9 +234,7 @@ describe("getCourseData", () => {
   });
 
   it("returns null when course document is missing", async () => {
-    (getCourseSnapshot as jest.Mock).mockResolvedValue(
-      missingDocSnapshot(courseId),
-    );
+    (getAdminCourse as jest.Mock).mockResolvedValue(null);
 
     await expect(getCourseData(courseId, uid, false)).resolves.toBeNull();
   });

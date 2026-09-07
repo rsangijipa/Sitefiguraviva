@@ -1,19 +1,22 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import type { DecodedIdToken } from "firebase-admin/auth";
-import { adminAuth } from "@/lib/firebase/admin";
+import { getSupabaseSessionClaims } from "@/lib/auth/supabase-session";
 import { logger } from "@/lib/logger";
-import { getUserByUid } from "@/lib/repositories/userRepository.server";
 
-export type ServerAuthContext = DecodedIdToken & {
+export type ServerAuthContext = {
+  uid: string;
+  email?: string;
   role?: string;
   isAdmin: boolean;
   isStaff: boolean;
   isActive: boolean;
+  [key: string]: any;
 };
 
 function normalizeRole(role: unknown): string {
-  return String(role || "").trim().toLowerCase();
+  return String(role || "")
+    .trim()
+    .toLowerCase();
 }
 
 function isAdminRole(role: unknown): boolean {
@@ -26,24 +29,6 @@ function isStaffRole(role: unknown): boolean {
   return isAdminRole(normalized) || normalized === "tutor";
 }
 
-function normalizeClaims(
-  claims: DecodedIdToken,
-  userData?: { role?: unknown; isActive?: unknown } | null,
-): ServerAuthContext {
-  const role = normalizeRole(userData?.role || claims.role);
-  const isActive = userData?.isActive !== false && claims.isActive !== false;
-
-  return {
-    ...claims,
-    role: role || (claims.role as string | undefined),
-    isAdmin: isActive && (claims.admin === true || isAdminRole(role)),
-    isStaff:
-      isActive &&
-      (claims.admin === true || isAdminRole(role) || isStaffRole(role)),
-    isActive,
-  };
-}
-
 export async function verifySession(): Promise<ServerAuthContext | null> {
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get("session")?.value;
@@ -53,11 +38,17 @@ export async function verifySession(): Promise<ServerAuthContext | null> {
   }
 
   try {
-    const decodedClaims = await adminAuth.verifySessionCookie(
-      sessionCookie,
-      true,
-    );
-    return normalizeClaims(decodedClaims);
+    const claims = await getSupabaseSessionClaims(sessionCookie);
+    if (!claims) return null;
+
+    return {
+      uid: claims.uid,
+      email: claims.email,
+      role: claims.role,
+      isAdmin: claims.admin,
+      isStaff: claims.admin || claims.tutor,
+      isActive: claims.isActive,
+    };
   } catch (error) {
     logger.warn("Session verification failed:", error);
     return null;
@@ -76,18 +67,8 @@ export async function requireSession(
   return claims;
 }
 
-async function hydrateAuthorizationContext(
-  claims: ServerAuthContext,
-): Promise<ServerAuthContext> {
-  if (!claims.uid) return claims;
-
-  const user = await getUserByUid(claims.uid);
-  return normalizeClaims(claims, user);
-}
-
 export async function requireAdmin(): Promise<ServerAuthContext> {
-  const claims = await requireSession("/auth?next=/admin");
-  const context = await hydrateAuthorizationContext(claims);
+  const context = await requireSession("/auth?next=/admin");
 
   if (context.isAdmin) {
     return context;
@@ -104,8 +85,7 @@ export async function requireAdmin(): Promise<ServerAuthContext> {
 }
 
 export async function requireStaff(): Promise<ServerAuthContext> {
-  const claims = await requireSession("/auth?next=/admin");
-  const context = await hydrateAuthorizationContext(claims);
+  const context = await requireSession("/auth?next=/admin");
 
   if (context.isStaff) {
     return context;

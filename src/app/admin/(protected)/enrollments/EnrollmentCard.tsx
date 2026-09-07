@@ -1,8 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { db } from "@/lib/firebase/client";
-import { doc, onSnapshot, deleteDoc } from "firebase/firestore";
+import { useState } from "react";
 import {
   Trash2,
   TrendingUp,
@@ -31,27 +29,8 @@ export function EnrollmentCard({
   course,
   userId,
 }: EnrollmentCardProps) {
-  const [progress, setProgress] = useState<any>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const { addToast } = useToast();
-
-  // Fetch Progress realtime
-  useEffect(() => {
-    if (!enrollment.courseId || !userId) return;
-
-    const unsub = onSnapshot(
-      doc(db, "progress", `${userId}_${enrollment.courseId}`),
-      (doc) => {
-        if (doc.exists()) {
-          setProgress(doc.data());
-        } else {
-          setProgress(null);
-        }
-      },
-    );
-
-    return () => unsub();
-  }, [enrollment.courseId, userId]);
 
   const handleApprove = async () => {
     setIsUpdating(true);
@@ -95,9 +74,9 @@ export function EnrollmentCard({
     }
   };
 
-  const lastAccessDate = progress?.lastAccessedAt
-    ?.toDate?.()
-    ?.toLocaleDateString();
+  const lastAccessDate = enrollment.lastAccessedAt
+    ? new Date(enrollment.lastAccessedAt).toLocaleDateString()
+    : undefined;
 
   const summary = enrollment.progressSummary || {};
   const percent = summary.percent || 0;

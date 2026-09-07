@@ -260,9 +260,12 @@ service cloud.firestore {
     }
 
     // APPLICATIONS / INTERESTS
+    // Public submissions go through /api/applications/submit, which writes with
+    // the Admin SDK and bypasses these rules. No client path creates one, so
+    // the previous `allow create: if true` only left an unauthenticated write
+    // open to spam.
     match /applications/{appId} {
       allow read, write: if isAdmin();
-      allow create: if true; // Public can submit interest
     }
 
     // GAMIFICATION

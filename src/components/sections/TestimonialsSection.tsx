@@ -1,6 +1,3 @@
-"use client";
-
-import { motion } from "framer-motion";
 import { Quote, Star } from "lucide-react";
 
 export default function TestimonialsSection() {
@@ -29,37 +26,20 @@ export default function TestimonialsSection() {
   ];
 
   return (
-    <section className="section-padding bg-white relative">
-      <div className="container mx-auto max-w-7xl">
+    <section className="fv-section fv-section--sand fv-bg fv-bg-testimonials">
+      <div className="fv-container">
         <div className="text-center mb-16">
-          <motion.span
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            className="text-xs font-bold tracking-[0.2em] uppercase text-gold mb-4 block"
-          >
-            Vozes que Florescem
-          </motion.span>
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            className="heading-section"
-          >
+          <span className="fv-eyebrow mb-4">Vozes que Florescem</span>
+          <h2 className="heading-section">
             O impacto da nossa <br />
             <span className="italic font-light">Comunidade</span>
-          </motion.h2>
+          </h2>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
-          {testimonials.map((t, i) => (
-            <motion.div
-              key={t.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-              viewport={{ once: true }}
-              className="bg-paper p-8 rounded-2xl border border-stone-100 shadow-soft-sm relative group hover:shadow-soft-xl transition-all duration-500 hover:-translate-y-1"
-            >
-              <div className="absolute top-8 right-8 text-gold/10 rotate-180 group-hover:text-gold/20 transition-colors">
+        <div className="grid gap-8 md:grid-cols-2">
+          {testimonials.map((t) => (
+            <div key={t.id} className="fv-card group relative p-10">
+              <div className="absolute right-8 top-8 rotate-180 text-terra/15 transition-colors group-hover:text-terra/25">
                 <Quote size={48} />
               </div>
 
@@ -69,12 +49,12 @@ export default function TestimonialsSection() {
                 ))}
               </div>
 
-              <p className="text-primary/80 leading-relaxed font-serif text-lg mb-8 relative z-10">
+              <p className="relative z-10 mb-8 font-serif text-xl leading-relaxed text-text">
                 "{t.text}"
               </p>
 
-              <div className="flex items-center gap-4 border-t border-primary/5 pt-6 mt-auto">
-                <div className="w-10 h-10 rounded-full bg-gold/20 flex items-center justify-center text-primary font-bold text-sm">
+              <div className="mt-auto flex items-center gap-4 border-t border-border/70 pt-6">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-areia text-sm font-bold text-primary">
                   {t.author[0]}
                 </div>
                 <div>
@@ -84,7 +64,7 @@ export default function TestimonialsSection() {
                   </p>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>

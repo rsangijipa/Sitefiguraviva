@@ -1,11 +1,13 @@
 import { Suspense } from "react";
-import { db } from "@/lib/firebase/admin";
 import { notFound } from "next/navigation";
 import BlogDetailClient from "./BlogDetailClient";
 import type { Metadata } from "next";
+import { listPublishedContent } from "@/features/content/infrastructure/supabaseContentRepository";
 
 async function getPostDoc(id: string) {
-  return db.collection("posts").doc(id).get();
+  const posts = await listPublishedContent("posts");
+  const post = posts.find((item) => item.id === id || item.slug === id);
+  return post ?? null;
 }
 
 export async function generateMetadata({
@@ -17,15 +19,15 @@ export async function generateMetadata({
 
   try {
     const docSnap = await getPostDoc(id);
-    if (!docSnap.exists) {
+    if (!docSnap) {
       return {
-        title: "Artigo nao encontrado | Instituto Figura Viva",
+        title: "Artigo não encontrado",
         robots: { index: false, follow: false },
       };
     }
 
-    const data: any = docSnap.data();
-    const title = data?.title || "Blog | Instituto Figura Viva";
+    const data: any = docSnap;
+    const title = data?.title || "Blog";
     const description =
       data?.excerpt || data?.subtitle || "Conteudo do Instituto Figura Viva";
     const image = data?.image || "/og-default.jpg";
@@ -51,7 +53,7 @@ export async function generateMetadata({
     };
   } catch {
     return {
-      title: "Blog | Instituto Figura Viva",
+      title: "Blog",
     };
   }
 }
@@ -60,18 +62,11 @@ async function BlogContent({ id }: { id: string }) {
   try {
     const docSnap = await getPostDoc(id);
 
-    if (!docSnap.exists) {
+    if (!docSnap) {
       notFound();
     }
 
-    const data = docSnap.data();
-    const toISO = (val: any) => {
-      if (!val) return null;
-      if (typeof val.toDate === "function") return val.toDate().toISOString();
-      if (val instanceof Date) return val.toISOString();
-      if (typeof val === "string") return new Date(val).toISOString();
-      return null;
-    };
+    const data = docSnap;
 
     const post: any = {
       id: docSnap.id,
@@ -79,8 +74,8 @@ async function BlogContent({ id }: { id: string }) {
       content: data?.content || "",
       image: data?.image || "",
       author: data?.author || "",
-      created_at: toISO(data?.created_at),
-      updated_at: toISO(data?.updated_at),
+      created_at: data?.created_at ?? null,
+      updated_at: data?.updated_at ?? null,
     };
 
     return <BlogDetailClient post={post} />;

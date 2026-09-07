@@ -17,8 +17,7 @@ import {
 import { AdminPageShell } from "@/components/admin/AdminPageShell";
 import { DataTable, Column } from "@/components/admin/DataTable";
 import { Badge } from "@/components/ui/Badge";
-import { db } from "@/lib/firebase/client";
-import { deleteDoc, doc } from "firebase/firestore";
+import { createSupabaseBrowserClient } from "@/infrastructure/supabase/client";
 import {
   Modal,
   ModalContent,
@@ -44,7 +43,9 @@ export default function BlogManager() {
 
     startTransition(async () => {
       try {
-        await deleteDoc(doc(db, "posts", id));
+        const supabase = createSupabaseBrowserClient();
+        const { error } = await supabase.from("posts").delete().eq("id", id);
+        if (error) throw error;
         addToast("Publicação excluída.", "success");
         refetch();
       } catch (error) {
@@ -179,6 +180,7 @@ export default function BlogManager() {
               <a
                 href={row.pdf_url}
                 target="_blank"
+                rel="noopener noreferrer"
                 className="p-2 text-stone-400 hover:text-primary hover:bg-primary/5 rounded-xl transition-all"
                 title="Ver PDF"
               >

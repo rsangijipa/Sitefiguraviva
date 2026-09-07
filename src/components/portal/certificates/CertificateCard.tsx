@@ -3,7 +3,6 @@
 import { Certificate } from "@/types/certificate";
 import { Award, Download, Share2, Calendar } from "lucide-react";
 import Button from "@/components/ui/Button";
-import { Timestamp } from "firebase/firestore";
 
 interface CertificateCardProps {
   certificate: Certificate;
@@ -17,8 +16,9 @@ export const CertificateCard = ({
   const date =
     typeof certificate.issuedAt === "string"
       ? new Date(certificate.issuedAt)
-      : certificate.issuedAt instanceof Timestamp
-        ? certificate.issuedAt.toDate()
+      : certificate.issuedAt &&
+          typeof (certificate.issuedAt as any).toDate === "function"
+        ? (certificate.issuedAt as any).toDate()
         : new Date();
 
   return (

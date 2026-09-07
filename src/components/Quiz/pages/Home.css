@@ -107,8 +107,16 @@
 /* Grid fluido: 3 col > 2 col > 1 col */
 .home__quiz-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: 1fr;
   gap: var(--space-md);
+}
+
+.home__category-section {
+  padding: var(--space-lg);
+  border: 1px solid var(--fv-nevoa);
+  border-radius: var(--radius-lg);
+  background: var(--fv-creme-papel);
+  box-shadow: 0 12px 28px rgba(38, 43, 34, 0.08);
 }
 
 /* ══ RODAPÉ EDUCATIVO ═══════════════════════════════════════════ */

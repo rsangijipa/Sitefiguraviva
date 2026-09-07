@@ -13,6 +13,7 @@ import { LessonSidebar } from "./LessonSidebar";
 import { Lesson, Module } from "@/types/lms";
 import Button from "../ui/Button";
 import { cn } from "@/lib/utils";
+import { SafeHtml } from "../SafeHtml";
 import { useProgress } from "@/hooks/useProgress";
 import { trackEvent } from "@/actions/analytics";
 import { EmptyState } from "../ui/EmptyState";
@@ -268,11 +269,7 @@ export const CoursePlayer = ({
                   {/* Description */}
                   <div className="prose prose-stone max-w-none">
                     {(activeLesson as any).description ? (
-                      <div
-                        dangerouslySetInnerHTML={{
-                          __html: (activeLesson as any).description,
-                        }}
-                      />
+                      <SafeHtml html={(activeLesson as any).description} />
                     ) : (
                       <p className="text-stone-400 italic">
                         Sem descrição para esta aula.

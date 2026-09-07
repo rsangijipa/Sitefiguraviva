@@ -2,56 +2,181 @@
 @tailwind components;
 @tailwind utilities;
 
+html[data-cookie-consent="pending"] [data-secondary-floating-control],
+html[data-cookie-consent="pending"] [data-floating-whatsapp] {
+  display: none !important;
+}
+
+/* ---------------------------------------------------------------------------
+   Tokens da marca — Figura Viva Design System v1
+   Os valores são triplas RGB, não hex: é o formato que o Tailwind precisa para
+   aplicar modificadores de opacidade (`text-primary/40`, `bg-gold/10`). Com hex
+   o utilitário com barra era emitido como cor inválida e simplesmente sumia.
+   O tema escuro reescreve as mesmas variáveis — nenhum componente precisa de
+   variante `dark:` para os tokens da marca.
+--------------------------------------------------------------------------- */
 :root {
-  /* Brand Colors - Figura Viva v1 */
-  --color-primary: #0e6330;
-  /* Verde Institucional */
-  --color-primary-dark: #0a4d25;
-  --color-primary-light: #158542;
+  color-scheme: light;
 
-  --color-secondary: #f0d418;
-  /* Ouro Figura Viva */
-  --color-accent: #0e6330;
-  --color-accent-light: #d4e7d9;
+  /* Núcleo */
+  --color-primary: 0 90 31;
+  /* Verde Raiz #005A1F */
+  --color-primary-solid: 0 90 31;
+  /* fundo sólido sob texto claro */
+  --color-primary-dark: 0 63 22;
+  --color-primary-light: 14 122 47;
+  --color-igarape: 7 97 76;
+  /* Verde Igarapé #07614C */
+  --color-terra: 150 85 31;
+  /* Terra Barro #96551F */
 
-  /* Surface & Background */
-  --color-paper: #f8f7f0;
-  /* Fundo Papel Institucional */
-  --color-surface: #ffffff;
-  --color-text: #171717;
-  /* Neutral-900 */
-  --color-muted: #4b4b4b;
-  /* Slightly darker for better contrast on paper */
-  --color-muted-foreground: #4b4b4b;
-  --color-border: #e0e0e0;
+  --color-secondary: 240 212 24;
+  /* Ouro Figura Viva #F0D418 */
+  --color-accent: 0 90 31;
+  --color-accent-light: 217 231 220;
 
-  /* Highlights */
-  /* WCAG AA OK - Adjusted for better contrast */
-  --color-gold: #b08d55;
-  /* Gold Clássico (Escurecido de #D4AF37) */
-  --color-gold-dark: #8a6d0b;
-  /* Escuro suficiente para texto em branco */
-  /* WCAG AA OK */
-  --color-gold-light: #f9f1c0;
-  --color-beige: #f3e5d8;
+  /* Superfícies */
+  --color-paper: 253 250 244;
+  /* Creme Papel #FDFAF4 */
+  --color-surface: 255 255 255;
+  --color-surface-raised: 255 255 255;
+  --color-areia: 241 233 219;
+  /* Areia #F1E9DB */
+  --color-beige: 243 229 216;
 
-  /* Feedback & Status */
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-error: #ef4444;
+  /* Texto e traço */
+  --color-text: 38 43 34;
+  /* Mata #262B22 — nunca preto puro */
+  --color-muted: 107 107 99;
+  /* Pedra #6B6B63 */
+  --color-muted-foreground: 107 107 99;
+  --color-border: 216 207 190;
+  /* Névoa #D8CFBE */
 
-  /* Spacing Scale */
+  /* Acentos quentes */
+  --color-gold: 176 141 85;
+  --color-gold-dark: 138 109 11;
+  --color-gold-light: 249 241 192;
+
+  /* Confluência — só em elemento gráfico, nunca em texto */
+  --color-aurora: 254 83 139;
+  --color-vazante: 254 215 1;
+  --color-broto: 1 201 77;
+
+  /* Feedback */
+  --color-success: 15 138 95;
+  --color-warning: 180 83 9;
+  --color-error: 194 49 43;
+
+  /* Escala neutra: `stone` e `gray` do Tailwind apontam para cá, então as
+     ~2.000 classes `text-stone-600`, `bg-stone-50`, `border-stone-200` já
+     espalhadas pelo código trocam de tema sozinhas. */
+  --n-50: 250 250 249;
+  --n-100: 245 245 244;
+  --n-200: 231 229 228;
+  --n-300: 214 211 209;
+  --n-400: 168 162 158;
+  --n-500: 120 113 108;
+  --n-600: 87 83 78;
+  --n-700: 68 64 60;
+  --n-800: 41 37 36;
+  --n-900: 28 25 23;
+  --n-950: 12 10 9;
+
+  /* Sombra: uma cor e um multiplicador de força. No escuro a sombra precisa
+     ser mais preta e mais forte para existir sobre fundo já escuro. */
+  --shadow-color: 27 33 45;
+  --shadow-strength: 1;
+
+  /* Curvas de animação — uma linguagem de movimento só */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-fast: 160ms;
+  --dur-base: 280ms;
+  --dur-slow: 520ms;
+
+  /* Espaçamento — base 8 do design system */
   --space-unit: 0.25rem;
-  /* 4px */
   --space-1: calc(var(--space-unit) * 1);
   --space-2: calc(var(--space-unit) * 2);
   --space-3: calc(var(--space-unit) * 3);
   --space-4: calc(var(--space-unit) * 4);
+  --space-5: calc(var(--space-unit) * 5);
   --space-6: calc(var(--space-unit) * 6);
   --space-8: calc(var(--space-unit) * 8);
 
-  /* Touch Targets */
   --min-touch-target: 44px;
+
+  /* Aliases hex do Resource Experience Shell — a janela de recursos é sempre
+     clara (nunca inverte no escuro), então usa os hex literais da marca em vez
+     das triplas RGB tematizáveis usadas pelo resto do site. */
+  --fv-verde-raiz: #005a1f;
+  --fv-terra-barro: #96551f;
+  --fv-creme: #fdfaf4;
+  --fv-areia: #f1e9db;
+  --fv-nevoa: #d8cfbe;
+  --fv-mata: #262b22;
+  --fv-pedra: #6b6b63;
+  --fv-radius-lg: 24px;
+}
+
+/* ---------------------------------------------------------------------------
+   Tema escuro. A regra vale para `.dark` em qualquer nó, então um bloco pode
+   ser forçado a claro/escuro isoladamente (ex.: um preview de peça impressa).
+--------------------------------------------------------------------------- */
+.dark {
+  color-scheme: dark;
+
+  --color-primary: 124 200 148;
+  /* verde claro: legível como TEXTO sobre fundo Mata */
+  --color-primary-solid: 22 122 61;
+  /* verde médio: fundo de botão sob texto branco (5,4:1) */
+  --color-primary-dark: 14 92 44;
+  --color-primary-light: 166 221 182;
+  --color-igarape: 87 183 158;
+  --color-terra: 217 153 90;
+
+  --color-secondary: 232 210 87;
+  --color-accent: 124 200 148;
+  --color-accent-light: 36 64 46;
+
+  --color-paper: 18 22 15;
+  /* Mata profunda — preto esverdeado, nunca preto puro */
+  --color-surface: 27 33 26;
+  --color-surface-raised: 34 41 33;
+  --color-areia: 35 42 33;
+  --color-beige: 38 32 25;
+
+  --color-text: 237 240 233;
+  --color-muted: 154 163 150;
+  --color-muted-foreground: 154 163 150;
+  --color-border: 55 63 53;
+
+  --color-gold: 216 178 106;
+  --color-gold-dark: 176 141 85;
+  --color-gold-light: 58 49 23;
+
+  --color-success: 74 222 128;
+  --color-warning: 251 191 36;
+  --color-error: 248 113 113;
+
+  /* Escala neutra invertida e puxada para o verde da marca */
+  --n-50: 26 31 24;
+  --n-100: 32 38 30;
+  --n-200: 43 50 42;
+  --n-300: 58 66 58;
+  --n-400: 109 116 105;
+  --n-500: 143 151 140;
+  --n-600: 179 186 176;
+  --n-700: 204 210 201;
+  --n-800: 226 231 224;
+  --n-900: 242 245 240;
+  --n-950: 251 253 250;
+
+  --shadow-color: 0 0 0;
+  --shadow-strength: 4;
 }
 
 @layer base {
@@ -79,37 +204,88 @@
   h5,
   h6 {
     @apply font-serif font-semibold;
+    /* Fraunces é variável: deixar o eixo óptico seguir o tamanho é o que faz o
+       título grande afinar o contraste e o pequeno engrossar. */
+    font-optical-sizing: auto;
+    text-wrap: balance;
+  }
+
+  /* `text-wrap: pretty` evita viúva no fim do parágrafo — a regra "sem viúvas"
+     da seção 3.2 do Design System, aplicada pelo navegador.
+     O alinhamento NÃO é forçado aqui de propósito: várias seções centralizam o
+     texto pelo contêiner, e um `text-align` no elemento apagaria isso. */
+  p,
+  li {
+    text-wrap: pretty;
   }
 }
 
 @layer utilities {
+  /* DS Figura Viva: profundidade por superfície + border, sem box-shadow. */
   .card-hover {
-    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-lg;
+    @apply hover:shadow-soft-lg;
+    transition:
+      transform var(--dur-base) var(--ease-out-soft),
+      box-shadow var(--dur-base) var(--ease-out-soft),
+      border-color var(--dur-base) var(--ease-out-soft);
   }
 
+  .card-hover:hover {
+    transform: translateY(-4px);
+  }
+
+  /* Botão: a reação ao toque é elevação + sombra da mesma família, não queda
+     de opacidade — opacidade sobre fundo temável dilui o contraste do texto. */
   .btn-primary {
-    @apply inline-flex items-center justify-center bg-primary text-white px-8 py-3.5 rounded-xl font-bold tracking-wide hover:opacity-90 transition-all active:scale-95 shadow-lg min-h-[44px] touch-manipulation;
+    @apply inline-flex items-center justify-center bg-primary text-white px-8 py-3.5 rounded-xl font-bold tracking-wide shadow-soft-md hover:shadow-glow-primary hover:-translate-y-0.5 active:scale-[0.97] min-h-[44px] touch-manipulation;
+    transition:
+      transform var(--dur-base) var(--ease-out-soft),
+      box-shadow var(--dur-base) var(--ease-out-soft),
+      background-color var(--dur-base) var(--ease-out-soft);
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center border border-gray-300 text-text px-8 py-3.5 rounded-xl font-bold hover:bg-gray-50 transition-all active:scale-95 shadow-sm min-h-[44px] touch-manipulation;
+    @apply active:scale-[0.97] inline-flex items-center justify-center border border-border text-text px-8 py-3.5 rounded-xl font-bold bg-surface/60 hover:bg-surface hover:border-primary/40 shadow-soft-sm hover:shadow-soft-md hover:-translate-y-0.5 min-h-[44px] touch-manipulation;
+    transition:
+      transform var(--dur-base) var(--ease-out-soft),
+      box-shadow var(--dur-base) var(--ease-out-soft),
+      background-color var(--dur-base) var(--ease-out-soft),
+      border-color var(--dur-base) var(--ease-out-soft);
   }
 
-.card-premium {
-    @apply bg-white rounded-2xl shadow-soft-sm border border-gray-100/50 transition-all duration-500 hover:shadow-soft-xl hover:-translate-y-1 hover:border-accent/20;
+  .card-premium {
+    @apply bg-surface rounded-2xl shadow-soft-sm border border-border/60 hover:shadow-soft-xl hover:border-accent/30;
+    transition:
+      transform var(--dur-slow) var(--ease-out-soft),
+      box-shadow var(--dur-slow) var(--ease-out-soft),
+      border-color var(--dur-slow) var(--ease-out-soft);
   }
 
-  /* Glassmorphism Variants */
+  .card-premium:hover {
+    transform: translateY(-4px);
+  }
+
+  /* Vidro: a cor vem do token de superfície, então o painel escurece junto com
+     o tema em vez de virar uma placa branca acesa no modo escuro. */
   .glass-panel {
-    @apply bg-white/60 backdrop-blur-glass border border-white/40 shadow-soft-lg;
+    @apply backdrop-blur-glass shadow-soft-lg;
+    background-color: rgb(var(--color-surface) / 0.62);
+    border: 1px solid rgb(var(--color-surface) / 0.42);
+  }
+
+  .dark .glass-panel {
+    background-color: rgb(var(--color-surface) / 0.7);
+    border-color: rgb(var(--color-border) / 0.8);
   }
 
   .glass-panel-dark {
-    @apply bg-black/30 backdrop-blur-glass border border-white/5 shadow-soft-lg;
+    @apply backdrop-blur-glass shadow-soft-lg;
+    background-color: rgb(0 0 0 / 0.3);
+    border: 1px solid rgb(255 255 255 / 0.08);
   }
 
   .skip-to-content {
-    @apply sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-white focus:text-primary focus:px-4 focus:py-2 focus:rounded-md focus:shadow-lg focus:font-bold;
+    @apply sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-surface focus:text-primary focus:px-4 focus:py-2 focus:rounded-md focus:shadow-soft-lg focus:font-bold;
   }
 
   /* Typography Utilities */
@@ -191,58 +367,24 @@
     background-color: #8c7044 !important;
   }
 
-  @keyframes float-slow {
-
-    0%,
-    100% {
-      transform: translateY(0);
-    }
-
-    50% {
-      transform: translateY(-20px);
-    }
-  }
-
-  .animate-float-slow {
-    animation: float-slow 8s ease-in-out infinite;
-  }
-
-  /* Magic Reflection Effect */
-  .magic-reflection {
-    position: relative;
-    -webkit-box-reflect: below 2px linear-gradient(transparent 70%, rgba(255, 255, 255, 0.1));
-  }
-
-  /* Shimmer Glow Animation */
-  @keyframes magic-shimmer {
-    0% {
-      transform: translateX(-150%) skewX(-20deg);
-      opacity: 0;
-    }
-
-    20% {
-      opacity: 0.6;
-    }
-
-    100% {
-      transform: translateX(150%) skewX(-20deg);
-      opacity: 0;
-    }
-  }
-
-  .animate-magic-shimmer {
-    animation: magic-shimmer 5s ease-in-out infinite;
-  }
-
   /* Premium Effects */
   .fx-grain {
     position: relative;
   }
 
+  /* O data-URI anterior estava corrompido (`%3BaseFilter`), então o SVG nunca
+     decodificava e a textura simplesmente não existia. */
   .fx-grain::after {
     content: "";
-    @apply fixed inset-0 z-[99] pointer-events-none opacity-[0.03];
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3BaseFilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grain)'/%3E%3C/svg%3E");
+    @apply fixed inset-0 z-[99] pointer-events-none;
+    opacity: 0.028;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .dark .fx-grain::after {
+    opacity: 0.05;
+    mix-blend-mode: overlay;
   }
 
   .fx-watercolor {
@@ -253,9 +395,9 @@
   .fx-aurora {
     @apply absolute inset-0 -z-10 overflow-hidden;
     background: linear-gradient(135deg,
-        rgba(14, 99, 48, 0.05) 0%,
-        rgba(240, 212, 24, 0.05) 50%,
-        rgba(176, 141, 85, 0.05) 100%);
+        rgb(var(--color-primary) / 0.06) 0%,
+        rgb(var(--color-secondary) / 0.05) 50%,
+        rgb(var(--color-gold) / 0.06) 100%);
     filter: blur(80px);
   }
 
@@ -267,30 +409,6 @@
   @view-transition {
     navigation: auto;
   }
-}
-
-.editorial-card {
-  border: 1px solid color-mix(in srgb, var(--color-gold) 16%, white);
-  border-radius: 1.25rem;
-  background: color-mix(in srgb, white 92%, var(--color-beige));
-  box-shadow: 0 12px 32px rgb(14 99 48 / 0.06);
-  transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
-}
-.editorial-card:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--color-gold) 38%, white); box-shadow: 0 18px 40px rgb(14 99 48 / 0.1); }
-.panel-surface { background: radial-gradient(circle at 90% 0%, rgb(240 212 24 / 0.1), transparent 28%), var(--color-paper); }
-@media (prefers-reduced-motion: reduce) { .editorial-card { transition: none; } .editorial-card:hover { transform: none; } }
-
-/* Public resource applications share the same compact modal canvas. */
-.resource-app {
-  width: 100%;
-  min-width: 0;
-}
-.resource-app--light {
-  min-height: min(60vh, 560px);
-  max-height: min(78vh, 720px);
-  overflow: auto;
-  border-radius: 1.25rem;
-  background: #fdfcf9;
 }
 
 /* View Transition Cross-Fade Refinement */
@@ -329,4 +447,1010 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+/* Árvore da marca (RainbowTree)
+   O balanço geral fica aqui, na div que embrulha o SVG: um elemento HTML
+   ganha camada de composição, então a rotação roda na GPU. Aplicar o mesmo
+   giro dentro do SVG obrigaria os ~3 mil nós da copa a repintar por quadro. */
+@keyframes fv-tree-sway {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  30% {
+    transform: rotate(0.25deg);
+  }
+
+  62% {
+    transform: rotate(-0.18deg);
+  }
+}
+
+.fv-tree-layer {
+  contain: paint;
+  transform-origin: 50% 100%;
+  will-change: transform;
+  animation: fv-tree-sway 12s ease-in-out infinite;
+  /* Desfoque de profundidade de campo. A árvore é fundo: tirando-a do plano
+     focal, ela pode ficar opaca sem competir com o texto por atenção.
+     Um valor só governa o efeito nos dois temas — suba `--fv-tree-blur` para
+     afastar mais, zere para voltar ao vetor cru. */
+  --fv-tree-blur: 2px;
+  filter: blur(var(--fv-tree-blur));
+}
+
+@media (min-width: 1024px) {
+  .fv-tree-layer {
+    --fv-tree-blur: 4px;
+  }
+}
+
+/* Só a borda esquerda é apagada: a copa entra por trás do texto do hero em
+   degradê em vez de bater nele com uma aresta. Em telas estreitas a árvore é
+   fundo inteiro e a máscara vertical evita que ela encoste no rodapé da seção. */
+.fv-tree-mask {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    rgb(0 0 0 / 0.35) 16%,
+    #000 42%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    rgb(0 0 0 / 0.35) 16%,
+    #000 42%
+  );
+}
+
+@media (max-width: 1023px) {
+  .fv-tree-mask {
+    -webkit-mask-image: linear-gradient(to top, transparent 2%, #000 32%);
+    mask-image: linear-gradient(to top, transparent 2%, #000 32%);
+  }
+}
+
+/* No escuro a copa arco-íris fica clara demais sobre o fundo Mata: um leve
+   recuo de brilho e saturação devolve a árvore ao papel de fundo. */
+.dark .fv-tree-layer {
+  filter: blur(var(--fv-tree-blur)) brightness(0.82) saturate(0.88);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fv-tree-layer {
+    animation: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Camada de compatibilidade do tema escuro
+   O código herdado usa branco literal (`bg-white`, `bg-white/60`) como cor de
+   superfície em ~430 lugares. Em vez de reescrever cada componente, a classe
+   é reapontada para o token de superfície dentro de `.dark` — o branco continua
+   branco no tema claro e vira Mata no escuro. `text-white` NÃO é redirecionado:
+   ele sempre está sobre cor sólida ou foto, e lá o branco continua correto.
+--------------------------------------------------------------------------- */
+.dark .bg-white {
+  background-color: rgb(var(--color-surface));
+}
+
+/* O seletor é ancorado em espaço (ou início do atributo) de propósito: assim
+   pega `bg-white/60` mas não `hover:bg-white/20`, que é destaque de estado e
+   deve continuar sendo um véu claro por cima da superfície. */
+.dark [class^="bg-white/"],
+.dark [class*=" bg-white/"] {
+  background-color: rgb(var(--color-surface) / 0.72);
+}
+
+.dark .hover\:bg-white:hover,
+.dark .focus\:bg-white:focus,
+.dark .focus-within\:bg-white:focus-within,
+.dark .group:hover .group-hover\:bg-white {
+  background-color: rgb(var(--color-surface-raised));
+}
+
+.dark .border-white,
+.dark [class^="border-white/"],
+.dark [class*=" border-white/"] {
+  border-color: rgb(var(--color-border) / 0.9);
+}
+
+.dark .divide-white > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgb(var(--color-border));
+}
+
+/* Fundo sólido de botão: no escuro o token `primary` é claro (para servir de
+   texto), então a superfície usa o verde médio que sustenta texto branco. */
+.dark .bg-primary,
+.dark .hover\:bg-primary:hover {
+  background-color: rgb(var(--color-primary-solid));
+}
+
+/* Véus e gradientes que assumiam papel branco */
+.dark .from-white {
+  --tw-gradient-from: rgb(var(--color-surface)) var(--tw-gradient-from-position);
+}
+
+.dark .to-white {
+  --tw-gradient-to: rgb(var(--color-surface)) var(--tw-gradient-to-position);
+}
+
+.dark .via-white {
+  --tw-gradient-to: rgb(var(--color-surface) / 0);
+  --tw-gradient-stops:
+    var(--tw-gradient-from), rgb(var(--color-surface))
+      var(--tw-gradient-via-position), var(--tw-gradient-to);
+}
+
+/* Barras de rolagem seguem o tema */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgb(var(--color-paper));
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--color-border));
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--color-gold));
+}
+
+.custom-scrollbar {
+  scrollbar-color: rgb(var(--color-gold)) rgb(var(--color-border) / 0.3);
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgb(var(--color-border) / 0.25);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgb(var(--color-gold)) !important;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(var(--color-gold-dark)) !important;
+}
+
+::selection {
+  background: rgb(var(--color-primary) / 0.18);
+  color: rgb(var(--color-text));
+}
+
+/* ---------------------------------------------------------------------------
+   Movimento — vocabulário único
+   Duas curvas resolvem quase tudo: `--ease-out-expo` para entrada de conteúdo
+   e `--ease-out-soft` para reação a toque. Elevação no hover é sempre
+   translateY + sombra da mesma família, nunca escala do bloco inteiro.
+--------------------------------------------------------------------------- */
+@layer utilities {
+  .lift {
+    transition:
+      transform var(--dur-base) var(--ease-out-soft),
+      box-shadow var(--dur-base) var(--ease-out-soft),
+      border-color var(--dur-base) var(--ease-out-soft);
+  }
+
+  .lift:hover {
+    transform: translateY(-4px);
+  }
+
+  .press {
+    transition: transform var(--dur-fast) var(--ease-out-soft);
+  }
+
+  .press:active {
+    transform: scale(0.97);
+  }
+
+  /* Contorno vivo: aparece no hover sem deslocar o layout */
+  .ring-soft {
+    box-shadow: 0 0 0 0 rgb(var(--color-primary) / 0);
+    transition: box-shadow var(--dur-base) var(--ease-out-soft);
+  }
+
+  .ring-soft:hover {
+    box-shadow: 0 0 0 4px rgb(var(--color-primary) / 0.12);
+  }
+
+  /* Entrada de seção — ver src/components/motion/Reveal.tsx.
+     O estado padrão é visível; `data-reveal` só existe quando o JavaScript
+     assumiu o controle, então conteúdo nunca fica preso invisível. */
+  .reveal {
+    transition:
+      opacity 420ms var(--ease-out-expo),
+      transform 420ms var(--ease-out-expo);
+  }
+
+  .reveal[data-reveal="oculto"] {
+    opacity: 0;
+    transform: translateY(var(--reveal-y, 14px));
+  }
+
+  .reveal[data-reveal="revelado"] {
+    opacity: 1;
+    transform: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal {
+      transition: none;
+    }
+
+    .reveal[data-reveal="oculto"] {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* `transition-soft` aparece em 12 posições de classe (rodapé, navegação,
+     cartões), mas o Tailwind nomeia a curva de `transitionTimingFunction`
+     como `ease-soft`: `transition-soft` nunca foi gerado e aqueles doze
+     elementos trocavam de cor sem transição nenhuma. Em vez de reescrever as
+     doze chamadas, a classe passa a existir com o sentido que elas esperavam:
+     a curva suave aplicada às propriedades que de fato mudam no hover. */
+  .transition-soft {
+    transition-property: color, background-color, border-color, fill, stroke,
+      opacity, box-shadow, transform;
+    transition-duration: var(--dur-base);
+    transition-timing-function: var(--ease-out-soft);
+  }
+
+  /* Superfície padrão de card, já temável */
+  .surface {
+    background-color: rgb(var(--color-surface));
+    border: 1px solid rgb(var(--color-border) / 0.7);
+  }
+
+  .surface-raised {
+    background-color: rgb(var(--color-surface-raised));
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Restos de cor literal
+   Fundos de página escritos como valor arbitrário (`bg-[#FDFCF9]`) e os painéis
+   de aviso em âmbar do Tailwind não passam pelos tokens. Enquanto não migram
+   para `bg-paper` / `bg-warning`, esta camada os traz para o tema escuro.
+   A regra abaixo é o inventário fechado — se aparecer um hex novo no código,
+   ele deve virar token, não ganhar mais uma linha aqui.
+--------------------------------------------------------------------------- */
+.dark .bg-\[\#FDFCF9\],
+.dark .bg-\[\#fafaf9\],
+.dark .bg-\[\#faf9f6\],
+.dark .bg-\[\#f5f5f4\],
+.dark .bg-\[\#f5f2eb\],
+.dark .bg-\[\#f2f0e9\] {
+  background-color: rgb(var(--color-paper));
+}
+
+.dark .bg-amber-50 {
+  background-color: rgb(69 46 8 / 0.55);
+}
+
+.dark .bg-amber-100 {
+  background-color: rgb(84 55 8 / 0.7);
+}
+
+.dark .border-amber-200,
+.dark .border-amber-100 {
+  border-color: rgb(120 78 12);
+}
+
+.dark .text-amber-900,
+.dark .text-amber-800,
+.dark .text-amber-700 {
+  color: rgb(252 211 77);
+}
+
+.dark .bg-\[\#f0fdf4\] {
+  background-color: rgb(var(--color-accent-light));
+}
+
+.dark .bg-\[\#fff7ed\] {
+  background-color: rgb(var(--color-beige));
+}
+
+/* ---------------------------------------------------------------------------
+   Camada editorial `fv-*`
+   Vocabulário de composição do plano de reformulação visual, montado POR CIMA
+   dos tokens do Design System v1 que já existem acima — nada aqui redefine cor
+   da marca. Repetir os hex (`--fv-verde-raiz: #005A1F`) criaria um segundo
+   sistema de cor que não inverte no tema escuro: os `--color-*` já carregam
+   exatamente esses valores e já têm contrapartida em `.dark`.
+   O que faltava de fato — e está aqui — é escala de espaçamento nomeada,
+   largura de contêiner, raio e um léxico de seção/tipografia editorial.
+--------------------------------------------------------------------------- */
+:root {
+  /* Espaçamento editorial — base 8 do Design System, em passos nomeados.
+     Convive com `--space-*` (base 4, usada por componente); estes são os
+     saltos de composição de página: respiro entre bloco, seção e faixa. */
+  --fv-space-1: 4px;
+  --fv-space-2: 8px;
+  --fv-space-3: 16px;
+  --fv-space-4: 24px;
+  --fv-space-5: 32px;
+  --fv-space-6: 48px;
+  --fv-space-7: 64px;
+  --fv-space-8: 96px;
+
+  /* 1280px — o mesmo valor de `max-w-7xl` que o Container.tsx já aplica.
+     Existe como variável para que CSS puro (fundos, máscaras) possa alinhar
+     ao mesmo eixo sem repetir o número. */
+  --fv-container: 1280px;
+  --fv-radius-sm: 4px;
+  --fv-radius-md: 8px;
+}
+
+@layer utilities {
+  /* Faixa de página. O respiro é fluido porque a mesma seção precisa caber em
+     um notebook de 768px de altura e respirar em um monitor de 1440. */
+  .fv-section {
+    position: relative;
+    overflow: hidden;
+    padding-top: clamp(var(--fv-space-7), 8vh, var(--fv-space-8));
+    padding-bottom: clamp(var(--fv-space-7), 8vh, var(--fv-space-8));
+  }
+
+  /* Profundidade por alternância de superfície, não por sombra — a regra do
+     Design System para separar seções sem elevar caixa. */
+  .fv-section--cream {
+    background-color: rgb(var(--color-paper));
+  }
+
+  .fv-section--sand {
+    background-color: rgb(var(--color-areia));
+  }
+
+  /* Memoria Viva Laura Perls.
+     A pagina e um tema fechado, como o Portal do aluno: 435 valores sepia
+     escritos a mao em 14 arquivos desenham um acervo museologico coerente, e
+     reescrever todos seria trocar um risco estetico por um risco de regressao.
+     O que esta classe faz e nomear a superficie desse tema e ancora-la nos
+     tokens da marca, para que a pagina pare de ser um bloco de hex solto: o
+     papel envelhecido e Areia, o traco e Nevoa, o acento e Terra Barro.
+     A pagina permanece clara nos dois temas, de proposito - acervo historico
+     nao inverte. */
+  .fv-section--archive {
+    --fv-arq-papel: 233 228 219;
+    --fv-arq-fundo: var(--color-areia);
+    --fv-arq-traco: var(--color-border);
+    --fv-arq-acento: var(--color-terra);
+
+    background-color: rgb(var(--fv-arq-fundo));
+    color: rgb(var(--color-text));
+  }
+
+  .fv-container {
+    width: 100%;
+    max-width: var(--fv-container);
+    margin-inline: auto;
+    padding-inline: var(--fv-space-4);
+  }
+
+  @media (min-width: 768px) {
+    .fv-container {
+      padding-inline: var(--fv-space-6);
+    }
+  }
+
+  /* Rótulo acima do título. Codifica o padrão já espalhado pelas seções
+     (`text-xs font-bold tracking-[0.2em] uppercase`) em um nome só. */
+  .fv-eyebrow {
+    display: block;
+    font-family: var(--font-sans), sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    /* Igarapé sólido. Verde Raiz a 60% — o valor que as seções usavam — cai
+       para ~2,9:1 sobre Areia, abaixo do mínimo AA para corpo pequeno; sólido
+       sobe para ~9:1 e o rótulo continua mais quieto que o título. */
+    color: rgb(var(--color-igarape));
+  }
+
+  .fv-display {
+    font-family: var(--font-serif), serif;
+    font-weight: 600;
+    font-optical-sizing: auto;
+    font-size: clamp(2.25rem, 5.4vw, 3.75rem);
+    line-height: 1.06;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    color: rgb(var(--color-primary));
+  }
+
+  .fv-lead {
+    font-family: var(--font-sans), sans-serif;
+    font-size: clamp(1.0625rem, 1.5vw, 1.1875rem);
+    line-height: 1.7;
+    max-width: 58ch;
+    color: rgb(var(--color-text) / 0.78);
+    text-wrap: pretty;
+  }
+
+  /* Card editorial: borda Névoa e troca de superfície no hover. Sem sombra —
+     a elevação de caixa é o que faz o site parecer aplicativo em vez de
+     impresso. O `card-premium` continua existindo para onde sombra é desejada. */
+  .fv-card {
+    display: flex;
+    flex-direction: column;
+    background-color: rgb(var(--color-paper));
+    border: 1px solid rgb(var(--color-border));
+    border-radius: var(--fv-radius-md);
+    transition:
+      background-color var(--dur-base) var(--ease-out-soft),
+      border-color var(--dur-base) var(--ease-out-soft);
+  }
+
+  .fv-card:hover {
+    background-color: rgb(var(--color-areia));
+    border-color: rgb(var(--color-igarape));
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Fundos decorativos `fv-bg-*`
+   Os arquivos vivem em /public/assets/fv/backgrounds/ e ainda não existem —
+   as classes já estão de pé para que soltar o .avif/.webp na pasta acenda a
+   seção sem tocar em componente nenhum.
+
+   Três decisões que valem a explicação:
+
+   1. A imagem entra por `::before`, não como `background-image` da seção.
+      Assim a cor de superfície do token continua sendo o fundo real e a arte
+      é uma camada por cima, com opacidade governável. Uma arte em Creme Papel
+      aplicada direto na seção acenderia uma placa clara no tema escuro.
+   2. `image-set()` resolve AVIF→WebP em uma declaração. A linha `url(.webp)`
+      logo acima é a queda para navegador sem `image-set` — a cascata descarta
+      a declaração inválida e fica com a anterior.
+   3. Nada de `<img alt="">`. Fundo é decoração: fora da árvore de acessibilidade.
+--------------------------------------------------------------------------- */
+@layer utilities {
+  .fv-bg {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .fv-bg::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-repeat: no-repeat;
+    background-position: var(--fv-bg-position, center);
+    background-size: var(--fv-bg-size, cover);
+    opacity: var(--fv-bg-strength, 1);
+  }
+
+  /* No escuro a arte é quase toda feita de Creme e Areia: sem este recuo ela
+     vira uma mancha acesa sobre o fundo Mata. */
+  .dark .fv-bg::before {
+    opacity: var(--fv-bg-strength-dark, 0.2);
+    filter: saturate(0.72);
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    .fv-bg::before {
+      display: none;
+    }
+  }
+}
+
+@layer utilities {
+  .fv-bg-hero::before {
+    background-image: url("/assets/fv/backgrounds/hero.webp");
+    background-image: image-set(
+      url("/assets/fv/backgrounds/hero.avif") type("image/avif"),
+      url("/assets/fv/backgrounds/hero.webp") type("image/webp")
+    );
+  }
+
+  .fv-bg-explore::before {
+    background-image: url("/assets/fv/backgrounds/explore.webp");
+    background-image: image-set(
+      url("/assets/fv/backgrounds/explore.avif") type("image/avif"),
+      url("/assets/fv/backgrounds/explore.webp") type("image/webp")
+    );
+  }
+
+  .fv-bg-formations::before {
+    background-image: url("/assets/fv/backgrounds/formations.webp");
+    background-image: image-set(
+      url("/assets/fv/backgrounds/formations.avif") type("image/avif"),
+      url("/assets/fv/backgrounds/formations.webp") type("image/webp")
+    );
+  }
+
+  .fv-bg-enrollment::before {
+    background-image: url("/assets/fv/backgrounds/enrollment.webp");
+    background-image: image-set(
+      url("/assets/fv/backgrounds/enrollment.avif") type("image/avif"),
+      url("/assets/fv/backgrounds/enrollment.webp") type("image/webp")
+    );
+  }
+
+  .fv-bg-manifesto::before {
+    background-image: url("/assets/fv/backgrounds/manifesto.webp");
+    background-image: image-set(
+      url("/assets/fv/backgrounds/manifesto.avif") type("image/avif"),
+      url("/assets/fv/backgrounds/manifesto.webp") type("image/webp")
+    );
+  }
+
+  .fv-bg-laura-archive::before {
+    background-image: url("/assets/fv/backgrounds/laura-archive.webp");
+    background-image: image-set(
+      url("/assets/fv/backgrounds/laura-archive.avif") type("image/avif"),
+      url("/assets/fv/backgrounds/laura-archive.webp") type("image/webp")
+    );
+  }
+
+  .fv-bg-library::before {
+    background-image: url("/assets/fv/backgrounds/library.webp");
+    background-image: image-set(
+      url("/assets/fv/backgrounds/library.avif") type("image/avif"),
+      url("/assets/fv/backgrounds/library.webp") type("image/webp")
+    );
+  }
+
+  .fv-bg-bookshelf::before {
+    background-image: url("/assets/fv/backgrounds/bookshelf.webp");
+    background-image: image-set(
+      url("/assets/fv/backgrounds/bookshelf.avif") type("image/avif"),
+      url("/assets/fv/backgrounds/bookshelf.webp") type("image/webp")
+    );
+  }
+
+  .fv-bg-articles::before {
+    background-image: url("/assets/fv/backgrounds/articles.webp");
+    background-image: image-set(
+      url("/assets/fv/backgrounds/articles.avif") type("image/avif"),
+      url("/assets/fv/backgrounds/articles.webp") type("image/webp")
+    );
+  }
+
+  .fv-bg-resources::before {
+    background-image: url("/assets/fv/backgrounds/resources.webp");
+    background-image: image-set(
+      url("/assets/fv/backgrounds/resources.avif") type("image/avif"),
+      url("/assets/fv/backgrounds/resources.webp") type("image/webp")
+    );
+  }
+
+  .fv-bg-gallery::before {
+    background-image: url("/assets/fv/backgrounds/gallery.webp");
+    background-image: image-set(
+      url("/assets/fv/backgrounds/gallery.avif") type("image/avif"),
+      url("/assets/fv/backgrounds/gallery.webp") type("image/webp")
+    );
+  }
+
+  .fv-bg-testimonials::before {
+    background-image: url("/assets/fv/backgrounds/testimonials.webp");
+    background-image: image-set(
+      url("/assets/fv/backgrounds/testimonials.avif") type("image/avif"),
+      url("/assets/fv/backgrounds/testimonials.webp") type("image/webp")
+    );
+  }
+
+  .fv-bg-faq::before {
+    background-image: url("/assets/fv/backgrounds/faq.webp");
+    background-image: image-set(
+      url("/assets/fv/backgrounds/faq.avif") type("image/avif"),
+      url("/assets/fv/backgrounds/faq.webp") type("image/webp")
+    );
+  }
+
+  .fv-bg-cta::before {
+    background-image: url("/assets/fv/backgrounds/cta.webp");
+    background-image: image-set(
+      url("/assets/fv/backgrounds/cta.avif") type("image/avif"),
+      url("/assets/fv/backgrounds/cta.webp") type("image/webp")
+    );
+  }
+
+  .fv-bg-footer::before {
+    background-image: url("/assets/fv/backgrounds/footer.webp");
+    background-image: image-set(
+      url("/assets/fv/backgrounds/footer.avif") type("image/avif"),
+      url("/assets/fv/backgrounds/footer.webp") type("image/webp")
+    );
+  }
+
+  .fv-bg-login::before {
+    background-image: url("/assets/fv/backgrounds/login.webp");
+    background-image: image-set(
+      url("/assets/fv/backgrounds/login.avif") type("image/avif"),
+      url("/assets/fv/backgrounds/login.webp") type("image/webp")
+    );
+  }
+
+  .fv-bg-admin::before {
+    background-image: url("/assets/fv/backgrounds/admin.webp");
+    background-image: image-set(
+      url("/assets/fv/backgrounds/admin.avif") type("image/avif"),
+      url("/assets/fv/backgrounds/admin.webp") type("image/webp")
+    );
+  }
+
+  /* Variantes reduzidas para telas estreitas. Só declare aqui o fundo que
+     realmente ganhou um arquivo `-mobile`: apontar para um arquivo ausente
+     custa um 404 por seção. */
+  @media (max-width: 768px) {
+    .fv-bg-hero::before {
+      background-image: url("/assets/fv/backgrounds/hero-mobile.webp");
+      background-image: image-set(
+        url("/assets/fv/backgrounds/hero-mobile.avif") type("image/avif"),
+        url("/assets/fv/backgrounds/hero-mobile.webp") type("image/webp")
+      );
+    }
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Painel administrativo — item 19 do plano
+   O admin usa branco literal, cinza do Tailwind e raio de 16px em 25 arquivos.
+   Converter os 25 na mão trocaria um problema estético por risco de regressão
+   numa ferramenta que a equipe usa todo dia, então a estratégia é a mesma que
+   este arquivo já emprega para o tema escuro: uma camada com escopo, ancorada
+   em `.fv-admin` na raiz do shell. Nenhuma lógica é tocada e nada disso vaza
+   para o site público.
+
+   O admin é ferramenta, não peça editorial: sem fundo ilustrado, sem aquarela.
+   Só papel, traço e o mesmo raio de 8px do resto do sistema.
+
+   A sombra é anulada pelas variáveis do próprio Tailwind, e não por
+   `box-shadow: none`. Os utilitários `ring-*` compõem no mesmo `box-shadow`:
+   zerar a propriedade apagaria junto o anel de foco do teclado.
+--------------------------------------------------------------------------- */
+.fv-admin .bg-white,
+.fv-admin .bg-stone-50,
+.fv-admin .bg-stone-100\/50,
+.fv-admin .bg-stone-50\/50 {
+  background-color: rgb(var(--color-paper));
+}
+
+.fv-admin .border-stone-100,
+.fv-admin .border-stone-200,
+.fv-admin [class*="border-stone-100/"],
+.fv-admin [class*="border-stone-200/"] {
+  border-color: rgb(var(--color-border));
+}
+
+.fv-admin .divide-stone-50 > :not([hidden]) ~ :not([hidden]),
+.fv-admin .divide-stone-100 > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgb(var(--color-border) / 0.7);
+}
+
+/* Cabeçalho de tabela e faixas de agrupamento em Areia: é a alternância de
+   superfície que separa a linha do cabeçalho, no lugar de uma borda dupla. */
+.fv-admin thead .bg-stone-50,
+.fv-admin thead .bg-stone-50\/50,
+.fv-admin th {
+  background-color: rgb(var(--color-areia));
+}
+
+.fv-admin .rounded-2xl,
+.fv-admin .rounded-xl,
+.fv-admin .rounded-3xl {
+  border-radius: var(--fv-radius-md);
+}
+
+.fv-admin .shadow-sm,
+.fv-admin .shadow,
+.fv-admin .shadow-md,
+.fv-admin .shadow-lg,
+.fv-admin .shadow-xl,
+.fv-admin .shadow-2xl,
+.fv-admin .shadow-soft-sm,
+.fv-admin .shadow-soft-md,
+.fv-admin .shadow-soft-lg,
+.fv-admin .shadow-soft-xl {
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+  box-shadow:
+    var(--tw-ring-offset-shadow, 0 0 #0000),
+    var(--tw-ring-shadow, 0 0 #0000),
+    var(--tw-shadow);
+}
+
+/* Modal e menu suspenso continuam precisando se destacar do que está atrás.
+   Ali a separação passa a ser o traço Névoa, não a sombra. */
+.fv-admin [role="dialog"],
+.fv-admin [role="menu"] {
+  border: 1px solid rgb(var(--color-border));
+}
+
+/* ==========================================================================
+   FIGURA VIVA — RESOURCE EXPERIENCE SHELL
+   Janela padronizada para Recursos Interativos.
+   Sem box-shadow: profundidade vem de superfície + border + espaço.
+   ========================================================================== */
+
+.fv-resource-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  /* Fundo areia semi-opaco — nunca cinza translúcido nem preto */
+  background: rgba(241, 233, 219, 0.94);
+}
+
+.fv-resource-window {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  width: min(1180px, calc(100vw - 48px));
+  height: min(780px, calc(100dvh - 48px));
+  max-height: calc(100dvh - 32px);
+  background: var(--fv-creme);
+  border: 1px solid var(--fv-nevoa);
+  border-radius: var(--fv-radius-lg);
+  overflow: hidden;
+  box-shadow: none;
+}
+
+.fv-resource-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex: 0 0 auto;
+  min-height: 56px;
+  padding: var(--space-2) var(--space-3);
+  background: var(--fv-creme);
+  border-bottom: 1px solid var(--fv-nevoa);
+}
+
+@media (min-width: 768px) {
+  .fv-resource-header {
+    min-height: 64px;
+    padding: var(--space-2) var(--space-4);
+  }
+}
+
+.fv-resource-title {
+  font-family: var(--font-serif), Georgia, serif;
+  font-weight: 600;
+  color: var(--fv-verde-raiz);
+  font-size: 1rem;
+  line-height: 1.25;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fv-resource-breadcrumb {
+  color: var(--fv-pedra);
+  font-weight: 500;
+}
+
+/* Body: dono do scroll do conteúdo do recurso */
+.fv-resource-body {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+  background: var(--fv-creme);
+}
+
+.fv-resource-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 var(--space-2);
+  border-radius: var(--fv-radius-sm);
+  border: 1px solid var(--fv-nevoa);
+  background: var(--fv-creme);
+  color: var(--fv-verde-raiz);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.fv-resource-icon-btn:hover {
+  background: var(--fv-areia);
+  border-color: var(--fv-verde-raiz);
+}
+
+.fv-resource-icon-btn:focus-visible {
+  outline: 2px solid var(--fv-verde-raiz);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fv-resource-icon-btn {
+    transition: none;
+  }
+}
+
+/* Mobile: tela cheia, fundo creme sólido, safe areas */
+@media (max-width: 767px) {
+  .fv-resource-overlay {
+    padding: 0;
+    background: var(--fv-creme);
+  }
+
+  .fv-resource-window {
+    width: 100%;
+    height: 100dvh;
+    max-height: 100dvh;
+    border: 0;
+    border-radius: 0;
+    background: var(--fv-creme);
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* Estados de loading/erro do shell */
+.fv-resource-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  min-height: 320px;
+  height: 100%;
+  padding: var(--space-6) var(--space-4);
+  text-align: center;
+  background: var(--fv-creme);
+  color: var(--fv-mata);
+}
+
+.fv-resource-state__label {
+  font-family: var(--font-serif), Georgia, serif;
+  color: var(--fv-verde-raiz);
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.fv-resource-state__hint {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  color: var(--fv-pedra);
+  font-size: 0.9375rem;
+  max-width: 42ch;
+  margin: 0;
+}
+
+.fv-resource-spinner {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--fv-nevoa);
+  border-top-color: var(--fv-verde-raiz);
+  animation: fv-spin 900ms linear infinite;
+}
+
+@keyframes fv-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ==========================================================================
+   FIGURA VIVA — GRID/CARDS DE RECURSOS INTERATIVOS
+   ========================================================================== */
+
+.fv-resource-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-4);
+  align-items: stretch;
+}
+
+.fv-resource-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-3);
+  height: 100%;
+  padding: var(--space-5) var(--space-4);
+  background: var(--fv-creme);
+  border: 1px solid var(--fv-nevoa);
+  border-radius: var(--fv-radius-lg);
+  color: var(--fv-mata);
+  cursor: pointer;
+  box-shadow: none;
+  transition: background-color 200ms ease, border-color 200ms ease, transform 200ms ease;
+}
+
+.fv-resource-card:hover,
+.fv-resource-card:focus-visible {
+  background: var(--fv-areia);
+  border-color: var(--fv-verde-raiz);
+  transform: translateY(-2px);
+}
+
+.fv-resource-card:focus-visible {
+  outline: 2px solid var(--fv-verde-raiz);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fv-resource-card {
+    transition: none;
+  }
+
+  .fv-resource-card:hover,
+  .fv-resource-card:focus-visible {
+    transform: none;
+  }
+}
+
+.fv-resource-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--fv-radius-md);
+  background: var(--fv-areia);
+  border: 1px solid var(--fv-nevoa);
+  color: var(--fv-verde-raiz);
+  flex: 0 0 auto;
+}
+
+.fv-resource-card:hover .fv-resource-card__icon {
+  background: var(--fv-creme);
+}
+
+.fv-resource-card__title {
+  font-family: var(--font-serif), Georgia, serif;
+  font-weight: 600;
+  font-size: 1.125rem;
+  color: var(--fv-verde-raiz);
+  margin: 0;
+}
+
+.fv-resource-card__desc {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--fv-pedra);
+  flex: 1 1 auto;
+  margin: 0;
+}
+
+.fv-resource-card__cta {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--fv-terra-barro);
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+}
+
+.fv-resource-card:hover .fv-resource-card__cta {
+  color: var(--fv-verde-raiz);
 }

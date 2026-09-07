@@ -1,128 +1,100 @@
-import { db } from "@/lib/firebase/client";
-import {
-  collection,
-  query,
-  where,
-  orderBy,
-  getDocs,
-  Timestamp,
-  addDoc,
-  doc,
-  updateDoc,
-  deleteDoc,
-  onSnapshot,
-} from "firebase/firestore";
+import { createSupabaseBrowserClient } from "@/infrastructure/supabase/client";
 import { AnnouncementDoc } from "@/types/lms";
+
+const map = (row: any): AnnouncementDoc => ({
+  id: row.id,
+  courseId: row.course_id || "",
+  title: row.title,
+  content: row.content,
+  authorId: row.author_id || "",
+  isPinned: row.is_pinned,
+  publishAt: row.created_at as any,
+  createdAt: row.created_at as any,
+});
 
 export const announcementService = {
   async getCourseAnnouncements(courseId: string): Promise<AnnouncementDoc[]> {
-    const q = query(
-      collection(db, "courses", courseId, "announcements"),
-      orderBy("publishAt", "desc"),
-      orderBy("isPinned", "desc"),
-    );
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(
-      (doc) => ({ id: doc.id, ...doc.data() }) as AnnouncementDoc,
-    );
+    const { data, error } = await (createSupabaseBrowserClient() as any)
+      .from("announcements")
+      .select("*")
+      .eq("course_id", courseId)
+      .order("is_pinned", { ascending: false })
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    return (data ?? []).map(map);
   },
-
   async getPublishedAnnouncements(
     courseId: string,
-    tenantId?: string,
+    _tenantId?: string,
   ): Promise<AnnouncementDoc[]> {
-    const now = Timestamp.now();
-    let q = query(
-      collection(db, "courses", courseId, "announcements"),
-      where("publishAt", "<=", now),
-      orderBy("publishAt", "desc"),
-    );
-
-    if (tenantId) {
-      q = query(q, where("tenantId", "==", tenantId));
-    }
-
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(
-      (doc) => ({ id: doc.id, ...doc.data() }) as AnnouncementDoc,
-    );
+    return this.getCourseAnnouncements(courseId);
   },
-
-  /**
-   * Real-time subscription for published announcements
-   */
   subscribeToPublishedAnnouncements(
     courseId: string,
-    callback: (announcements: AnnouncementDoc[]) => void,
-    tenantId?: string,
+    callback: (items: AnnouncementDoc[]) => void,
+    _tenantId?: string,
   ) {
-    const now = Timestamp.now();
-    let q = query(
-      collection(db, "courses", courseId, "announcements"),
-      where("publishAt", "<=", now),
-      orderBy("publishAt", "desc"),
-    );
-
-    if (tenantId) {
-      q = query(q, where("tenantId", "==", tenantId));
-    }
-
-    return onSnapshot(
-      q,
-      (snapshot) => {
-        const announcements = snapshot.docs.map(
-          (doc) => ({ id: doc.id, ...doc.data() }) as AnnouncementDoc,
-        );
-        callback(announcements);
-      },
-      (error) => {
-        console.error("Announcements sub error:", error);
-      },
-    );
+    const supabase: any = createSupabaseBrowserClient();
+    const load = async () =>
+      callback(await this.getCourseAnnouncements(courseId));
+    void load();
+    const channel = supabase
+      .channel(`announcements:${courseId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "announcements",
+          filter: `course_id=eq.${courseId}`,
+        },
+        load,
+      )
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(channel);
+    };
   },
-
   async createAnnouncement(
     courseId: string,
     data: Omit<AnnouncementDoc, "id" | "createdAt">,
   ): Promise<string> {
-    const docData = {
-      ...data,
-      courseId,
-      createdAt: Timestamp.now(),
-    };
-    const docRef = await addDoc(
-      collection(db, "courses", courseId, "announcements"),
-      docData,
-    );
-    return docRef.id;
+    const { data: row, error } = await (createSupabaseBrowserClient() as any)
+      .from("announcements")
+      .insert({
+        course_id: courseId,
+        title: data.title,
+        content: data.content,
+        author_id: data.authorId,
+        is_pinned: data.isPinned,
+      })
+      .select("id")
+      .single();
+    if (error) throw error;
+    return row.id;
   },
-
   async updateAnnouncement(
     courseId: string,
-    announcementId: string,
+    id: string,
     data: Partial<AnnouncementDoc>,
-  ): Promise<void> {
-    const docRef = doc(
-      db,
-      "courses",
-      courseId,
-      "announcements",
-      announcementId,
-    );
-    await updateDoc(docRef, data);
+  ) {
+    const { error } = await (createSupabaseBrowserClient() as any)
+      .from("announcements")
+      .update({
+        title: data.title,
+        content: data.content,
+        is_pinned: data.isPinned,
+      })
+      .eq("id", id)
+      .eq("course_id", courseId);
+    if (error) throw error;
   },
-
-  async deleteAnnouncement(
-    courseId: string,
-    announcementId: string,
-  ): Promise<void> {
-    const docRef = doc(
-      db,
-      "courses",
-      courseId,
-      "announcements",
-      announcementId,
-    );
-    await deleteDoc(docRef);
+  async deleteAnnouncement(courseId: string, id: string) {
+    const { error } = await (createSupabaseBrowserClient() as any)
+      .from("announcements")
+      .delete()
+      .eq("id", id)
+      .eq("course_id", courseId);
+    if (error) throw error;
   },
 };

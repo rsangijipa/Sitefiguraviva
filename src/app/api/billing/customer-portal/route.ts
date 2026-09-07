@@ -1,38 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
-import { adminAuth, adminDb } from "@/lib/firebase/admin";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
+import { getBearerSupabaseSessionClaims } from "@/lib/auth/supabase-session";
 import { env } from "@/config/env";
 
 export async function POST(req: NextRequest) {
   try {
     const stripe = getStripe();
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
+    const claims = await getBearerSupabaseSessionClaims(req);
+    if (!claims || !claims.isActive) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const token = authHeader.split("Bearer ")[1];
-    const decodedToken = await adminAuth.verifyIdToken(token);
-    const uid = decodedToken.uid;
+    const uid = claims.uid;
 
-    // Find customer ID from user's enrollments
-    // We look for any enrollment that has a customerId
-    const enrollmentsSnapshot = await adminDb
-      .collection("users")
-      .doc(uid)
-      .collection("enrollments")
-      .where("stripe.customerId", "!=", null)
-      .limit(1)
-      .get();
-
-    if (enrollmentsSnapshot.empty) {
+    const { data: profile, error } = await createSupabaseServiceClient()
+      .from("profiles")
+      .select("stripe_customer_id")
+      .eq("id", uid)
+      .maybeSingle();
+    if (error) throw error;
+    const customerId = profile?.stripe_customer_id;
+    if (typeof customerId !== "string" || !customerId) {
       return NextResponse.json(
         { error: "No billing account found" },
         { status: 404 },
       );
     }
-
-    const customerId = enrollmentsSnapshot.docs[0].data().stripe.customerId;
 
     const session = await stripe.billingPortal.sessions.create({
       customer: customerId,
@@ -42,6 +36,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ url: session.url });
   } catch (error: any) {
     console.error("Customer Portal error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: "Unable to create billing portal" },
+      { status: 500 },
+    );
   }
 }

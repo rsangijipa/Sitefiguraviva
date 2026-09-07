@@ -15,7 +15,6 @@ import { ConceptsDeepDive } from "@/components/laura/ConceptsDeepDive";
 import { LegacyTree } from "@/components/laura/LegacyTree";
 import { Quiz } from "@/components/laura/Quiz";
 import { Testimonials } from "@/components/laura/Testimonials";
-import { LauraChat } from "@/components/laura/LauraChat";
 
 export const metadata: Metadata = {
   title: lauraPerlsContent.meta.title,
@@ -30,7 +29,7 @@ export const metadata: Metadata = {
 
 export default function LauraPerlsPage() {
   return (
-    <main className="min-h-screen bg-[#d9d4c9] relative">
+    <div className="fv-section--archive fv-bg fv-bg-laura-archive relative min-h-screen">
       {/* Aged Paper Texture Overlay */}
       <div
         className="fixed inset-0 opacity-[0.04] pointer-events-none z-[9999]"
@@ -78,7 +77,7 @@ export default function LauraPerlsPage() {
         <Quiz />
 
         {/* Readings Section */}
-        <section className="py-24 bg-[#d9d4c9] border-t border-[#b8ad96] relative overflow-hidden">
+        <section className="fv-section--archive relative overflow-hidden border-t border-[#b8ad96] py-24">
           {/* Decorative Lines */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-20 bg-gradient-to-b from-[#a88a4d]/50 to-transparent" />
 
@@ -144,9 +143,8 @@ export default function LauraPerlsPage() {
         <LauraGallery />
       </div>
 
-      <LauraChat />
       <BackToTop />
       <Footer />
-    </main>
+    </div>
   );
 }

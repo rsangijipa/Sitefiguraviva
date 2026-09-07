@@ -1,121 +1,594 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import type { PointerEvent } from "react";
+import { memo, useEffect, useId, useRef, type CSSProperties } from "react";
 
-interface FiguraVivaTreeProps {
+/**
+ * Figura Viva — árvore vetorial para a hero.
+ * Uso: <FiguraVivaTree style={{ maxWidth: 580 }} />
+ * React é a única dependência. Fundo transparente; sem imagens externas.
+ * Releitura vetorial com cores amostradas da marca, não reprodução pixel a pixel.
+ * Não precisa de BackgroundEngine, ParticlesLayer, Tailwind ou Motion.
+ */
+export interface FiguraVivaTreeProps {
   className?: string;
+  style?: CSSProperties;
   title?: string;
   interactive?: boolean;
+  /** Desliga vento e interação. Também respeita prefers-reduced-motion. */
+  animated?: boolean;
 }
+type Petal = readonly [number, number, number, number, string];
+const PETALS: readonly Petal[] = [
+  [236.5, 34.8, 36.6, 0.94, "#02858c"],
+  [251.4, 36.0, 69.1, 1.05, "#04db9f"],
+  [263.4, 31.2, 78.8, 1.2, "#02775d"],
+  [284.2, 30.0, -84.1, 0.78, "#01d28c"],
+  [298.0, 40.8, 75.9, 0.89, "#00bc5d"],
+  [314.4, 39.8, 20.5, 1.17, "#019142"],
+  [140.8, 55.4, 28.0, 0.76, "#ff457a"],
+  [149.5, 53.7, -52.9, 0.93, "#ff204d"],
+  [167.1, 46.0, 58.1, 1.16, "#fe7bb7"],
+  [181.9, 46.3, -41.3, 1.08, "#bf4e7f"],
+  [198.1, 54.4, 70.0, 0.77, "#fe5f9b"],
+  [221.7, 53.8, 20.5, 1.05, "#c07ba3"],
+  [258.8, 46.6, 70.4, 1.12, "#02775d"],
+  [268.5, 50.8, -36.1, 0.84, "#01d28c"],
+  [291.3, 45.1, -49.8, 1.21, "#01cf79"],
+  [302.0, 52.2, 20.1, 1.06, "#009e53"],
+  [325.8, 55.2, -36.1, 0.89, "#01cf79"],
+  [116.6, 73.3, -73.9, 0.85, "#ff3566"],
+  [140.2, 67.0, 0.6, 1.07, "#fe6daa"],
+  [149.5, 61.8, 56.8, 0.83, "#fe538b"],
+  [173.5, 68.9, 4.6, 1.21, "#fe6daa"],
+  [183.0, 71.7, -48.3, 1.12, "#fe5f9b"],
+  [199.1, 73.1, -10.9, 1.15, "#fe7bb7"],
+  [233.7, 74.8, -9.7, 0.76, "#03757e"],
+  [249.5, 67.0, -16.4, 1.02, "#02949c"],
+  [272.6, 62.6, -74.1, 0.83, "#01b991"],
+  [293.4, 64.0, 45.4, 1.08, "#2fd782"],
+  [302.0, 73.8, 56.9, 1.14, "#00bb76"],
+  [107.0, 83.7, 2.0, 0.75, "#ff204d"],
+  [122.8, 85.1, 12.4, 1.11, "#fe6daa"],
+  [137.5, 78.2, 65.7, 1.13, "#ff8bc7"],
+  [154.1, 90.2, 78.6, 0.87, "#fe7bb7"],
+  [172.8, 83.9, 64.8, 1.04, "#fe6daa"],
+  [187.3, 87.9, -49.6, 0.86, "#df528b"],
+  [198.2, 80.4, -29.8, 1.13, "#fe538b"],
+  [216.0, 81.3, 34.8, 1.05, "#df84b7"],
+  [233.4, 91.3, 43.3, 0.98, "#02949c"],
+  [292.3, 82.0, -66.2, 1.0, "#68c897"],
+  [308.1, 78.6, 50.4, 1.18, "#00ac5f"],
+  [327.0, 81.0, -84.8, 1.05, "#04cf5e"],
+  [336.8, 90.0, -55.4, 1.09, "#019142"],
+  [67.8, 108.5, -45.5, 1.21, "#ff867d"],
+  [87.8, 105.0, 60.1, 1.14, "#ff3566"],
+  [98.4, 101.2, 82.4, 0.78, "#fe6daa"],
+  [111.2, 104.9, 3.6, 0.86, "#ff0d30"],
+  [128.7, 97.8, 33.6, 1.01, "#ff204d"],
+  [151.2, 104.2, 60.3, 0.74, "#fe5f9b"],
+  [172.9, 96.0, -45.3, 1.14, "#ff457a"],
+  [178.9, 98.4, 4.5, 1.19, "#fe6daa"],
+  [208.1, 108.1, 5.8, 1.16, "#4d889a"],
+  [219.7, 102.3, 9.5, 0.9, "#02858c"],
+  [237.5, 95.9, -13.9, 1.07, "#02858c"],
+  [254.6, 98.9, 36.1, 0.84, "#03757e"],
+  [270.0, 107.5, 42.6, 0.9, "#03757e"],
+  [298.8, 105.5, 24.4, 0.98, "#01b991"],
+  [323.3, 98.6, 77.4, 1.09, "#01c94d"],
+  [341.1, 100.6, -38.8, 0.84, "#019142"],
+  [357.9, 104.4, 75.0, 1.03, "#00bd43"],
+  [61.4, 120.7, -71.3, 1.05, "#ff457a"],
+  [77.4, 114.5, -57.1, 0.85, "#ff3566"],
+  [104.8, 124.7, -0.6, 1.1, "#ff3566"],
+  [121.3, 120.5, 57.0, 1.16, "#ff0d30"],
+  [136.1, 118.8, 24.1, 0.94, "#fe538b"],
+  [149.0, 122.7, -37.3, 0.89, "#ff8bc7"],
+  [165.9, 117.7, 79.5, 1.07, "#bf4e7f"],
+  [235.7, 118.7, -61.0, 1.2, "#02858c"],
+  [249.6, 121.8, -18.1, 1.11, "#03a2af"],
+  [286.5, 114.3, 46.0, 1.09, "#019971"],
+  [306.6, 121.3, -70.6, 1.15, "#019971"],
+  [318.7, 120.2, 25.4, 0.78, "#00a97c"],
+  [337.4, 118.6, -61.0, 0.9, "#009e53"],
+  [358.1, 116.8, 24.8, 0.74, "#00bd43"],
+  [371.7, 117.2, 80.7, 0.79, "#01c94d"],
+  [68.5, 131.5, 50.2, 0.84, "#ff0d30"],
+  [79.1, 138.3, -46.1, 0.87, "#ff457a"],
+  [99.3, 132.4, 26.0, 1.02, "#fe7bb7"],
+  [120.9, 129.4, -14.0, 1.12, "#ff3566"],
+  [129.9, 137.7, 47.0, 0.73, "#fe7bb7"],
+  [157.8, 140.3, -65.2, 0.8, "#fea2d7"],
+  [163.5, 136.3, -70.4, 1.06, "#fea2d7"],
+  [184.7, 131.7, 73.0, 0.93, "#e3699f"],
+  [212.2, 138.7, 63.8, 1.13, "#a0765b"],
+  [240.8, 130.6, 24.3, 0.82, "#07b5c5"],
+  [282.9, 142.6, 76.6, 0.8, "#00bb76"],
+  [301.8, 139.0, 50.1, 0.96, "#009e53"],
+  [316.9, 140.0, 75.1, 0.77, "#007b45"],
+  [336.8, 141.2, -50.9, 0.74, "#00bc5d"],
+  [359.1, 132.9, -27.3, 0.98, "#00bd43"],
+  [373.3, 140.5, 66.6, 1.0, "#30d363"],
+  [386.6, 138.9, 1.3, 1.08, "#34cf49"],
+  [46.8, 155.5, 70.7, 1.05, "#ffaa8e"],
+  [65.4, 159.5, -6.3, 0.98, "#ff867d"],
+  [83.7, 152.3, 47.5, 1.07, "#fe6daa"],
+  [103.5, 150.6, -57.3, 0.88, "#ff867d"],
+  [116.7, 149.3, -35.0, 0.9, "#d94814"],
+  [170.7, 151.0, 9.6, 1.09, "#ff8bc7"],
+  [186.9, 147.1, -43.2, 0.9, "#ff9099"],
+  [200.4, 150.7, -78.1, 1.2, "#c3927b"],
+  [216.4, 146.9, 21.7, 1.06, "#a0765b"],
+  [269.2, 148.2, -39.7, 0.93, "#5edf91"],
+  [290.3, 153.3, -17.1, 1.08, "#00ac5f"],
+  [299.3, 153.9, -4.0, 0.76, "#00ac5f"],
+  [319.9, 158.9, 37.6, 1.13, "#00bc5d"],
+  [336.6, 159.1, -84.1, 0.85, "#009e53"],
+  [354.2, 155.3, 50.2, 0.98, "#01c94d"],
+  [377.9, 156.3, -54.5, 0.87, "#30d363"],
+  [384.7, 155.5, -19.9, 1.11, "#51d65a"],
+  [42.6, 174.1, 15.9, 1.01, "#ff8b5c"],
+  [67.3, 170.9, 53.5, 0.78, "#ff867d"],
+  [89.2, 173.6, 1.9, 1.09, "#fe7294"],
+  [104.8, 173.4, 44.0, 0.8, "#ff9099"],
+  [117.3, 175.5, -70.2, 0.92, "#ffb777"],
+  [139.2, 171.7, -1.2, 0.81, "#f4b7af"],
+  [170.9, 164.9, -14.7, 1.11, "#f2ccc3"],
+  [187.8, 168.5, -48.2, 0.92, "#b88e5e"],
+  [197.9, 169.1, -54.4, 1.11, "#a9b207"],
+  [224.6, 164.7, -65.4, 0.98, "#98882d"],
+  [241.9, 164.3, -67.7, 0.85, "#7e9a48"],
+  [252.1, 173.1, 23.0, 0.74, "#7e9a48"],
+  [292.0, 164.6, -42.4, 0.86, "#00a97c"],
+  [304.8, 172.2, -57.2, 0.87, "#49db8b"],
+  [318.1, 173.4, -41.8, 1.06, "#63db7c"],
+  [334.0, 168.5, -3.7, 0.96, "#00bc5d"],
+  [350.2, 165.4, -3.7, 1.05, "#00bc5d"],
+  [369.7, 170.6, -49.8, 1.08, "#30d363"],
+  [392.9, 163.8, -42.2, 0.84, "#49d773"],
+  [410.6, 176.2, 50.1, 0.77, "#49db8b"],
+  [35.4, 182.3, -15.5, 0.99, "#ffb777"],
+  [48.3, 183.0, 55.0, 0.84, "#ff9d6d"],
+  [63.9, 183.1, -28.5, 1.09, "#ff8b5c"],
+  [88.6, 182.8, 36.0, 1.02, "#ff9099"],
+  [101.1, 185.5, 39.5, 0.8, "#ffaa8e"],
+  [121.4, 181.2, -8.5, 1.04, "#febe34"],
+  [132.5, 185.2, -54.9, 0.75, "#febe34"],
+  [152.6, 181.8, -41.0, 0.78, "#fcf8ba"],
+  [162.9, 181.5, 37.2, 0.74, "#e1cfa1"],
+  [178.1, 184.4, -13.1, 0.97, "#d2b570"],
+  [198.2, 184.2, -4.1, 0.73, "#e1bd01"],
+  [215.1, 186.7, 51.1, 0.72, "#a9b207"],
+  [236.5, 180.1, 79.0, 0.98, "#a9b207"],
+  [253.4, 190.2, -35.4, 1.16, "#92bb3f"],
+  [273.7, 189.8, -14.3, 0.83, "#6fd75c"],
+  [292.9, 182.0, -46.6, 1.15, "#68c897"],
+  [307.2, 184.9, 41.8, 0.92, "#51d65a"],
+  [327.5, 185.8, 42.2, 0.82, "#34cf49"],
+  [337.0, 181.2, 83.9, 0.93, "#00bd43"],
+  [351.0, 191.5, 27.8, 1.2, "#51d65a"],
+  [368.8, 193.7, 75.7, 1.16, "#01c94d"],
+  [395.0, 180.5, 74.8, 0.91, "#04cf5e"],
+  [401.5, 193.3, -24.2, 0.97, "#2fd782"],
+  [42.9, 202.7, 42.3, 0.94, "#ffa956"],
+  [68.1, 206.2, -3.1, 1.0, "#ffb777"],
+  [80.1, 208.9, -33.3, 0.73, "#fdf087"],
+  [100.9, 197.0, -54.0, 0.92, "#ffaa8e"],
+  [122.3, 197.5, -1.7, 0.96, "#febe34"],
+  [133.7, 203.0, 37.2, 1.05, "#ffcb02"],
+  [145.2, 204.8, 48.6, 0.97, "#ffcb02"],
+  [162.0, 200.2, -43.3, 0.84, "#b67c35"],
+  [180.1, 202.0, -13.0, 0.79, "#fdd93b"],
+  [205.4, 198.5, 58.3, 0.78, "#e5d700"],
+  [225.4, 207.3, 46.8, 0.75, "#a96f08"],
+  [233.4, 200.7, -38.4, 1.01, "#be8509"],
+  [257.6, 208.1, 54.9, 1.13, "#bccd2a"],
+  [271.6, 199.6, 3.5, 0.76, "#66bf46"],
+  [292.9, 201.7, 44.1, 0.91, "#88db67"],
+  [306.3, 199.8, 30.4, 0.92, "#66bf46"],
+  [325.5, 206.6, 19.2, 0.73, "#9de274"],
+  [337.2, 198.1, 60.1, 1.13, "#9de274"],
+  [351.7, 209.6, 37.4, 1.12, "#9de274"],
+  [375.0, 197.2, 44.2, 0.86, "#30d363"],
+  [389.9, 208.1, -9.6, 0.81, "#04cf5e"],
+  [408.4, 200.7, 70.3, 0.83, "#5edf91"],
+  [53.3, 221.8, 83.3, 0.94, "#fb5e0d"],
+  [72.7, 217.4, 11.5, 0.83, "#fdf087"],
+  [83.4, 217.8, 16.9, 1.04, "#ffc25a"],
+  [105.8, 218.4, 30.9, 1.03, "#febe34"],
+  [111.8, 219.9, 84.5, 0.92, "#fca403"],
+  [140.3, 223.1, 44.4, 1.04, "#fca403"],
+  [149.5, 215.6, 68.5, 0.78, "#feb204"],
+  [170.4, 220.7, -14.4, 1.18, "#ffe104"],
+  [191.4, 219.3, 60.2, 1.12, "#f1cb02"],
+  [196.6, 221.5, -65.2, 0.94, "#fed701"],
+  [220.1, 223.1, -12.1, 0.96, "#be8509"],
+  [237.0, 224.5, 15.5, 1.13, "#e1bd01"],
+  [250.4, 221.3, -71.2, 1.08, "#d3d103"],
+  [273.2, 219.2, -52.5, 0.85, "#baca02"],
+  [286.7, 226.6, 8.7, 0.81, "#bccd2a"],
+  [301.8, 224.9, 41.0, 0.85, "#cce667"],
+  [316.3, 216.1, -79.5, 0.98, "#9de274"],
+  [331.7, 225.9, -11.3, 0.83, "#c1e87e"],
+  [351.8, 219.1, -19.2, 0.94, "#ace783"],
+  [375.0, 224.3, -50.0, 1.12, "#9ae389"],
+  [382.4, 217.9, -21.9, 1.2, "#84df86"],
+  [412.7, 214.1, 43.6, 0.77, "#5edf91"],
+  [45.7, 235.0, -58.4, 1.15, "#ffde6e"],
+  [72.6, 233.8, -22.0, 0.97, "#fded74"],
+  [76.4, 241.5, 80.8, 0.93, "#febe34"],
+  [101.6, 238.3, 80.5, 0.87, "#fd9306"],
+  [116.5, 235.7, -8.5, 0.79, "#ffcb02"],
+  [133.0, 239.1, 21.5, 1.15, "#fd9306"],
+  [144.6, 234.5, -63.5, 1.03, "#fed701"],
+  [175.0, 241.5, -48.7, 0.9, "#ffcb02"],
+  [188.6, 244.7, -26.1, 1.13, "#e7a804"],
+  [203.0, 237.9, -77.4, 1.18, "#fed701"],
+  [219.3, 231.4, -33.2, 0.79, "#e1bd01"],
+  [232.4, 236.1, 56.3, 0.75, "#e1bd01"],
+  [250.3, 234.3, -0.7, 1.06, "#d3d103"],
+  [271.3, 239.1, 31.5, 1.15, "#d3d103"],
+  [287.9, 244.4, 56.0, 1.14, "#dde34a"],
+  [306.2, 234.3, 32.5, 0.8, "#c7db4d"],
+  [327.3, 236.7, 45.5, 1.01, "#d6ed7d"],
+  [332.0, 235.7, -7.3, 1.2, "#b7e167"],
+  [348.4, 233.6, 72.6, 0.91, "#c1e87e"],
+  [370.9, 234.0, -49.0, 0.89, "#ace783"],
+  [384.4, 238.1, -38.1, 1.11, "#84df86"],
+  [411.7, 231.4, 68.1, 0.9, "#49db8b"],
+  [54.0, 260.1, -54.8, 0.76, "#fed957"],
+  [71.8, 256.6, 72.4, 0.94, "#febe34"],
+  [78.9, 248.4, 69.2, 1.15, "#fed957"],
+  [103.5, 258.1, -48.6, 1.2, "#fca403"],
+  [115.1, 260.4, -9.9, 1.0, "#feb204"],
+  [129.5, 254.8, 37.6, 0.83, "#fed024"],
+  [169.4, 250.3, 70.6, 1.17, "#ffe104"],
+  [188.3, 260.4, 28.3, 1.02, "#ffcb02"],
+  [206.0, 252.3, 71.9, 0.86, "#d17004"],
+  [213.6, 256.3, 15.5, 0.79, "#e37e05"],
+  [230.0, 255.7, 70.0, 1.13, "#fed701"],
+  [258.6, 259.0, -77.9, 0.83, "#d3d103"],
+  [263.6, 258.8, -82.6, 1.09, "#e5d700"],
+  [282.8, 257.0, 53.9, 0.73, "#f4e850"],
+  [310.3, 255.8, -66.1, 0.91, "#dde34a"],
+  [320.4, 259.7, 26.9, 1.0, "#dfe860"],
+  [343.4, 249.8, -72.2, 0.98, "#d6ed7d"],
+  [352.8, 259.7, 1.8, 0.76, "#cce667"],
+  [373.1, 261.5, 72.0, 0.87, "#ace783"],
+  [385.9, 258.2, -75.1, 0.74, "#84df86"],
+  [401.0, 260.2, 57.9, 1.1, "#5edf91"],
+  [64.2, 271.5, 52.3, 0.74, "#fdd93b"],
+  [80.0, 274.7, 9.3, 0.77, "#fca834"],
+  [99.0, 278.2, 41.5, 1.03, "#fed701"],
+  [119.1, 278.6, 56.0, 1.05, "#fed701"],
+  [135.3, 276.6, -68.1, 0.85, "#ed9204"],
+  [147.6, 265.7, -15.8, 1.04, "#ed9204"],
+  [169.6, 276.7, -65.1, 1.05, "#ffe104"],
+  [180.9, 278.2, 79.1, 0.9, "#ffe104"],
+  [200.9, 275.9, -28.5, 0.84, "#feb204"],
+  [213.6, 277.3, -13.0, 0.81, "#e37e05"],
+  [238.4, 275.8, 39.5, 1.15, "#f1cb02"],
+  [258.5, 267.4, 7.3, 1.11, "#d3d103"],
+  [269.2, 265.9, -13.1, 1.05, "#e5d700"],
+  [284.4, 267.2, -25.7, 0.9, "#fdd93b"],
+  [303.2, 268.9, 52.8, 1.14, "#ebd742"],
+  [327.5, 271.2, 14.6, 1.01, "#ebd742"],
+  [334.1, 267.8, 16.7, 0.76, "#e1bc38"],
+  [361.5, 272.5, -10.3, 1.18, "#cce667"],
+  [376.6, 275.8, -38.3, 0.96, "#beed8f"],
+  [386.3, 276.1, 70.6, 0.75, "#9ae389"],
+  [399.3, 267.9, -35.7, 1.18, "#70e08f"],
+  [66.1, 287.9, -43.1, 1.15, "#fded74"],
+  [78.0, 288.5, 50.8, 1.17, "#fdeb5e"],
+  [102.4, 287.3, 80.9, 1.2, "#febe06"],
+  [121.4, 285.9, 83.0, 1.16, "#fd9306"],
+  [129.9, 286.1, -25.6, 1.06, "#feb204"],
+  [149.9, 289.9, -79.3, 0.88, "#d94814"],
+  [170.1, 286.4, -22.9, 0.78, "#fed701"],
+  [188.3, 295.5, -16.9, 1.15, "#ffe429"],
+  [203.5, 291.3, -38.0, 0.87, "#fd9306"],
+  [215.9, 283.7, -38.8, 0.91, "#bb5309"],
+  [230.0, 295.1, -76.4, 0.79, "#fca403"],
+  [254.7, 283.0, 13.4, 0.95, "#cea603"],
+  [267.0, 284.8, -43.1, 1.18, "#ffe104"],
+  [284.8, 288.9, -71.6, 1.06, "#fdd93b"],
+  [299.8, 289.3, 74.2, 0.98, "#ebd742"],
+  [326.4, 287.0, 59.5, 1.15, "#f4e850"],
+  [339.4, 284.0, -30.1, 1.06, "#f2eb69"],
+  [358.1, 289.4, -32.9, 0.93, "#dfe860"],
+  [367.4, 284.6, -46.0, 1.03, "#c1e87e"],
+  [387.0, 295.5, -74.5, 0.74, "#ade898"],
+  [79.4, 303.1, -36.3, 0.88, "#fdeb5e"],
+  [103.0, 299.1, -6.0, 0.93, "#ffe429"],
+  [116.9, 309.6, 70.3, 1.0, "#fde846"],
+  [136.3, 307.5, -53.7, 1.16, "#ffe104"],
+  [171.8, 309.6, -68.0, 1.01, "#c47229"],
+  [184.3, 305.8, 68.6, 0.79, "#fed701"],
+  [201.4, 300.9, 1.4, 1.0, "#ed9204"],
+  [214.6, 304.7, -13.9, 0.82, "#ffcb02"],
+  [237.1, 310.6, -7.6, 1.15, "#ffe104"],
+  [246.7, 303.1, -57.6, 1.02, "#fed701"],
+  [264.5, 312.3, 8.1, 0.72, "#cc8c31"],
+  [306.5, 312.2, 82.5, 0.89, "#fdeb5e"],
+  [318.0, 302.8, 77.3, 0.86, "#fde846"],
+  [331.8, 312.5, -60.8, 1.21, "#fdeb5e"],
+  [352.8, 300.6, 82.4, 1.22, "#b09a3d"],
+  [366.4, 299.2, -32.5, 0.75, "#d2ef92"],
+  [384.8, 312.6, -25.2, 1.09, "#ade898"],
+  [407.7, 305.7, -34.3, 0.73, "#7fe499"],
+  [100.7, 319.4, 53.8, 0.79, "#ffde6e"],
+  [117.7, 322.0, 11.3, 1.09, "#fde846"],
+  [133.3, 318.7, 12.1, 0.94, "#ffe104"],
+  [155.1, 327.4, 1.7, 1.18, "#fde846"],
+  [172.1, 325.6, -77.3, 0.77, "#9f5525"],
+  [186.9, 324.1, 48.1, 0.83, "#fb5e0d"],
+  [222.7, 320.8, 23.0, 0.89, "#fca403"],
+  [232.6, 323.9, -55.6, 1.17, "#e7a804"],
+  [253.6, 324.2, 68.5, 0.87, "#cc8c31"],
+  [264.6, 323.2, 73.4, 1.22, "#fdd93b"],
+  [291.7, 316.5, -79.9, 0.94, "#fdd93b"],
+  [302.5, 321.6, 19.7, 0.85, "#fdeb5e"],
+  [322.9, 318.5, 11.5, 0.95, "#f4e850"],
+  [342.1, 329.8, -57.3, 1.07, "#f2e77d"],
+  [355.9, 316.2, 47.5, 0.99, "#f2eb69"],
+  [365.2, 321.2, -72.7, 1.16, "#e4d57c"],
+  [386.8, 328.5, 19.5, 1.06, "#c8eda8"],
+  [117.8, 335.5, -15.5, 1.22, "#fdeb5e"],
+  [127.3, 343.3, 1.5, 1.01, "#fded74"],
+  [146.0, 338.9, -10.0, 1.01, "#fde846"],
+  [178.8, 339.5, -5.3, 0.92, "#cc8c31"],
+  [203.4, 338.0, 19.6, 0.79, "#d17004"],
+  [216.6, 337.0, -54.3, 0.92, "#be8509"],
+  [276.6, 343.9, 73.3, 1.22, "#fdeb5e"],
+  [291.4, 345.3, 65.6, 0.87, "#fde846"],
+  [303.1, 337.3, -61.8, 0.94, "#e1bc38"],
+  [316.1, 337.7, -57.7, 0.74, "#b56124"],
+  [341.1, 338.0, 46.4, 1.04, "#f2eb69"],
+  [354.7, 345.7, -28.2, 0.99, "#dfc855"],
+  [173.5, 350.7, 48.3, 1.12, "#b67c35"],
+  [205.2, 362.6, 25.8, 1.05, "#996232"],
+  [249.9, 355.8, -53.7, 1.16, "#fdf087"],
+  [271.4, 362.7, -10.7, 0.95, "#fdf087"],
+  [289.7, 354.0, -14.5, 0.91, "#fde846"],
+  [310.3, 356.4, -12.0, 1.07, "#fdeb5e"],
+  [326.3, 362.1, 36.5, 0.9, "#fded74"],
+  [340.7, 350.2, 61.4, 0.72, "#fdf087"],
+  [357.6, 351.1, 10.3, 0.85, "#f2e77d"],
+  [259.6, 377.9, -69.0, 0.9, "#fcf8ba"],
+  [274.7, 380.0, -25.2, 0.97, "#fcf49d"],
+  [291.2, 379.6, -57.8, 0.99, "#fdf087"],
+  [297.6, 377.4, -57.5, 1.04, "#fcf49d"],
+  [314.8, 368.5, -9.9, 1.08, "#fded74"],
+  [341.7, 375.2, -50.6, 1.17, "#fcf8ba"],
+];
+const GROUPS = Array.from({ length: 6 }, (_, group) =>
+  PETALS.filter((_, index) => index % 6 === group),
+);
+const BRANCHES: readonly [string, number][] = [
+  ["M194 472 C185 424 194 383 188 346 C186 325 179 307 173 294", 22],
+  ["M192 388 C198 355 221 334 252 319 C282 308 307 290 330 269", 13],
+  ["M190 359 C174 320 153 301 127 292 C99 286 79 276 64 264", 10],
+  ["M181 334 C163 302 155 268 163 236 C171 207 165 185 154 160", 8],
+  ["M191 347 C203 310 218 282 216 254 C212 223 226 196 241 169", 9],
+  ["M215 271 C241 245 260 218 269 188 C279 156 308 140 329 125", 5],
+  ["M239 176 C251 141 252 119 249 91 C248 70 255 52 269 40", 4],
+  ["M250 139 C229 119 216 93 215 64", 2.5],
+  ["M262 150 C281 123 310 109 331 105", 3],
+  ["M273 187 C302 169 323 166 349 151", 3],
+  ["M269 213 C289 206 312 204 325 190", 2],
+  ["M162 236 C145 216 128 198 105 187 C86 178 69 163 65 148", 4],
+  ["M157 174 C143 152 142 127 146 107", 3],
+  ["M145 156 C119 147 103 132 93 114", 2],
+  ["M129 292 C122 267 104 252 84 239", 4],
+  ["M112 283 C84 277 60 249 50 230", 2],
+  ["M251 319 C283 329 316 326 339 318 C356 309 370 307 385 311", 5],
+  ["M296 326 C318 305 335 292 359 287", 3],
+  ["M305 294 C309 272 325 259 341 248", 3],
+  ["M215 311 C231 288 251 278 275 272", 4],
+  ["M128 291 C114 277 111 260 113 247", 2],
+  ["M218 253 C198 233 187 220 183 198", 3],
+];
+const CSS = `
+.fvt-root{position:relative;width:100%;aspect-ratio:454/523;isolation:isolate}
+.fvt-root svg{display:block;width:100%;height:100%;overflow:visible}
+.fvt-follow{transform-origin:194px 478px;transition:transform 700ms cubic-bezier(.2,.7,.25,1)}
+.fvt-breeze{transform-origin:194px 478px;animation:fvt-breathe 9s ease-in-out infinite alternate}
+.fvt-petals{transform-origin:210px 300px;animation:fvt-leaves 7s ease-in-out infinite alternate}
+.fvt-root[data-paused="true"] .fvt-breeze,.fvt-root[data-paused="true"] .fvt-petals{animation-play-state:paused}
+.fvt-root[data-static="true"] .fvt-breeze,.fvt-root[data-static="true"] .fvt-petals{animation:none}
+@keyframes fvt-breathe{from{transform:rotate(-.35deg)}to{transform:rotate(.45deg)}}
+@keyframes fvt-leaves{from{transform:translate(-.8px,1px) rotate(-.35deg)}to{transform:translate(1.3px,-1.2px) rotate(.5deg)}}
+@media(prefers-reduced-motion:reduce){.fvt-root .fvt-breeze,.fvt-root .fvt-petals{animation:none}.fvt-root .fvt-follow{transform:none!important;transition:none}}
+`;
 
-const leaves = [
-  [86, 126, "#D4AF37"],
-  [123, 92, "#B9C66B"],
-  [158, 72, "#8EA65A"],
-  [198, 62, "#D4AF37"],
-  [236, 78, "#A4B85F"],
-  [274, 105, "#D4AF37"],
-  [314, 132, "#8EA65A"],
-  [102, 168, "#B9C66B"],
-  [145, 142, "#D4AF37"],
-  [190, 128, "#8EA65A"],
-  [236, 143, "#B9C66B"],
-  [283, 165, "#D4AF37"],
-] as const;
-
-export default function FiguraVivaTree({
+function FiguraVivaTree({
   className = "",
+  style,
   title,
   interactive = true,
+  animated = true,
 }: FiguraVivaTreeProps) {
-  const rootRef = useRef<HTMLDivElement>(null);
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
-  const [reducedMotion, setReducedMotion] = useState(false);
+  const id = useId().replace(/:/g, "");
+  const root = useRef<HTMLDivElement>(null);
+  const follow = useRef<SVGGElement>(null);
 
   useEffect(() => {
-    const media = window.matchMedia?.("(prefers-reduced-motion: reduce)");
-    if (!media) return;
-    const update = () => setReducedMotion(media.matches);
-    update();
-    media.addEventListener("change", update);
-    return () => media.removeEventListener("change", update);
-  }, []);
-
-  const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
-    if (!interactive || reducedMotion || event.pointerType === "touch") return;
-    const bounds = rootRef.current?.getBoundingClientRect();
-    if (!bounds) return;
-    const x = ((event.clientX - bounds.left) / bounds.width - 0.5) * 8;
-    const y = ((event.clientY - bounds.top) / bounds.height - 0.5) * 5;
-    setOffset({ x, y });
-  };
+    const element = root.current;
+    const layer = follow.current;
+    if (!element || !layer) return;
+    const media = (query: string) =>
+      window.matchMedia?.(query) ?? ({ matches: false, addEventListener() {}, removeEventListener() {} } as MediaQueryList);
+    const reduced = media("(prefers-reduced-motion: reduce)");
+    const fine = media("(hover: hover) and (pointer: fine)");
+    let visible = true;
+    let frame = 0;
+    let x = 0;
+    let y = 0;
+    const reset = () => {
+      cancelAnimationFrame(frame);
+      frame = 0;
+      layer.style.transform = "";
+    };
+    const sync = () => {
+      element.dataset.paused = String(
+        !visible || document.hidden || reduced.matches || !animated,
+      );
+      if (
+        !visible ||
+        document.hidden ||
+        reduced.matches ||
+        !fine.matches ||
+        !animated ||
+        !interactive
+      )
+        reset();
+    };
+    const move = (event: PointerEvent) => {
+      if (
+        !interactive ||
+        !animated ||
+        !visible ||
+        document.hidden ||
+        reduced.matches ||
+        !fine.matches ||
+        event.pointerType === "touch"
+      )
+        return;
+      const box = element.getBoundingClientRect();
+      x = Math.max(
+        -1,
+        Math.min(1, ((event.clientX - box.left) / box.width - 0.5) * 2),
+      );
+      y = Math.max(
+        -1,
+        Math.min(1, ((event.clientY - box.top) / box.height - 0.5) * 2),
+      );
+      if (!frame)
+        frame = requestAnimationFrame(() => {
+          layer.style.transform = `translate(${x * 3}px,${y * 1.5}px) rotate(${x * 1.4}deg)`;
+          frame = 0;
+        });
+    };
+    const observer =
+      typeof IntersectionObserver !== "undefined"
+        ? new IntersectionObserver(
+            ([entry]) => {
+              visible = entry.isIntersecting;
+              sync();
+            },
+            { threshold: 0 },
+          )
+        : null;
+    observer?.observe(element);
+    element.addEventListener("pointermove", move, { passive: true });
+    element.addEventListener("pointerleave", reset);
+    document.addEventListener("visibilitychange", sync);
+    reduced.addEventListener("change", sync);
+    fine.addEventListener("change", sync);
+    sync();
+    return () => {
+      reset();
+      observer?.disconnect();
+      element.removeEventListener("pointermove", move);
+      element.removeEventListener("pointerleave", reset);
+      document.removeEventListener("visibilitychange", sync);
+      reduced.removeEventListener("change", sync);
+      fine.removeEventListener("change", sync);
+    };
+  }, [interactive, animated]);
 
   return (
     <div
-      ref={rootRef}
-      className={`w-full max-w-[460px] ${className}`}
-      onPointerMove={handlePointerMove}
-      onPointerLeave={() => setOffset({ x: 0, y: 0 })}
-      data-testid="figura-viva-tree"
+      ref={root}
+      className={`fvt-root ${className}`}
+      style={style}
+      data-static={!animated}
     >
+      <style>{CSS}</style>
       <svg
-        viewBox="0 0 400 420"
-        className="h-auto w-full opacity-50"
-        style={{
-          transform: `translate(${reducedMotion ? 0 : offset.x}px, ${
-            reducedMotion ? 0 : offset.y
-          }px)`,
-          transition: "transform 700ms cubic-bezier(.2,.7,.25,1)",
-        }}
+        viewBox="0 0 454 523"
+        preserveAspectRatio="xMidYMax meet"
         role={title ? "img" : undefined}
+        aria-labelledby={title ? `${id}-title` : undefined}
         aria-hidden={title ? undefined : true}
-        aria-label={title}
+        focusable="false"
       >
+        {title && <title id={`${id}-title`}>{title}</title>}
         <defs>
-          <linearGradient id="figura-tree-wash" x1="0" y1="0" x2="1" y2="1">
-            <stop stopColor="#D4AF37" stopOpacity=".25" />
-            <stop offset="1" stopColor="#78916A" stopOpacity=".1" />
+          <path
+            id={`${id}-petal`}
+            d="M0 22C-15 9-19-7-9-20C-2-28 7-25 12-16C21 0 9 14 0 22Z"
+          />
+          <linearGradient id={`${id}-wood`} x1="0" x2="1">
+            <stop stopColor="#512C19" />
+            <stop offset=".45" stopColor="#96551F" />
+            <stop offset=".7" stopColor="#B77A39" />
+            <stop offset="1" stopColor="#69391F" />
+          </linearGradient>
+          <linearGradient id={`${id}-wash`} x1=".12" y1=".15" x2=".8" y2=".8">
+            <stop stopColor="#FE538B" />
+            <stop offset=".32" stopColor="#FED701" />
+            <stop offset=".7" stopColor="#FED701" />
+            <stop offset="1" stopColor="#01C94D" />
           </linearGradient>
         </defs>
-        <path
-          d="M48 196C70 92 157 32 244 58c70 20 112 82 108 148-5 82-77 115-143 90-70-27-143-4-161-100Z"
-          fill="url(#figura-tree-wash)"
-        />
-        <g
-          fill="none"
-          stroke="#60422D"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path
-            d="M197 400C190 328 198 255 200 179C201 123 194 82 177 47"
-            strokeWidth="11"
-          />
-          <path
-            d="M199 221C164 183 132 157 86 143M198 190C230 153 266 132 314 127M199 267C157 244 121 230 76 234M199 252C244 218 281 205 336 210"
-            strokeWidth="6"
-          />
-          <path
-            d="M179 146C151 117 133 88 124 60M229 157C255 115 271 88 277 54M150 246C122 267 100 292 89 320M252 229C284 248 306 270 319 301"
-            strokeWidth="3"
-          />
-        </g>
-        <g>
-          {leaves.map(([cx, cy, fill], index) => (
-            <ellipse
-              key={`${cx}-${cy}-${index}`}
-              cx={cx}
-              cy={cy}
-              rx="17"
-              ry="9"
-              fill={fill}
-              opacity=".72"
-              transform={`rotate(${index % 2 ? -28 : 28} ${cx} ${cy})`}
+        <g ref={follow} className="fvt-follow">
+          <g className="fvt-breeze">
+            <path
+              d="M34 203C21 177 42 129 76 99C106 65 145 46 193 46C232 30 260 20 288 39C333 45 340 83 365 108C406 146 429 188 418 238C408 277 415 310 378 337L355 383C321 399 283 375 252 356C229 345 214 349 193 343C169 330 126 354 105 321C82 300 61 285 49 252Z"
+              fill={`url(#${id}-wash)`}
+              opacity=".22"
             />
-          ))}
+            <g
+              fill="none"
+              stroke={`url(#${id}-wood)`}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              {BRANCHES.map(([d, width], i) => (
+                <path key={i} d={d} strokeWidth={width} />
+              ))}
+            </g>
+            <path
+              d="M190 470C183 432 199 399 187 358M194 381C209 348 230 338 251 324M177 329C163 302 158 271 163 248"
+              fill="none"
+              stroke="#DFAC62"
+              strokeWidth="2"
+              opacity=".7"
+            />
+            <path
+              d="M198 466C194 440 199 419 194 397M184 431L187 415M185 386L188 366"
+              fill="none"
+              stroke="#4B2A1C"
+              strokeWidth="2.3"
+              opacity=".65"
+            />
+            {GROUPS.map((petals, group) => (
+              <g
+                key={group}
+                className="fvt-petals"
+                style={{
+                  animationDelay: `${group * -1.3}s`,
+                  animationDuration: `${7 + group * 0.6}s`,
+                }}
+              >
+                {petals.map(([x, y, angle, scale, color], index) => (
+                  <use
+                    key={index}
+                    href={`#${id}-petal`}
+                    transform={`translate(${x} ${y}) rotate(${angle}) scale(${scale * 0.78} ${scale})`}
+                    fill={color}
+                    fillOpacity={0.52}
+                    stroke={color}
+                    strokeOpacity=".22"
+                    strokeWidth=".65"
+                  />
+                ))}
+              </g>
+            ))}
+          </g>
         </g>
       </svg>
     </div>
   );
 }
+export default memo(FiguraVivaTree);

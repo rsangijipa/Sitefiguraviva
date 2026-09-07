@@ -37,17 +37,7 @@ export async function middleware(request: NextRequest) {
   const response = NextResponse.next();
   response.headers.set("x-tenant-id", tenantId);
 
-  // 4. RBAC Check for Marketplace Admin
-  if (pathname.startsWith("/marketplace/admin")) {
-    const session = request.cookies.get("session");
-    if (!session) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/auth";
-      return NextResponse.redirect(url);
-    }
-  }
-
-  // 5. Protected Routes Guard (Edge filtering)
+  // 4. Protected Routes Guard (Edge filtering)
   if (pathname.startsWith("/portal") || pathname.startsWith("/admin")) {
     const session = request.cookies.get("session")?.value;
     if (!session) {
@@ -56,7 +46,7 @@ export async function middleware(request: NextRequest) {
       url.searchParams.set("next", pathname);
       return NextResponse.redirect(url);
     }
-    // Deep JWT signature verification happens in layouts and server actions using firebase-admin
+    // Deep session verification happens in layouts and server actions through Supabase.
   }
 
   return response;

@@ -1,15 +1,21 @@
 import { assertCanAccessCourse } from "../access-gate";
 import { AccessErrorCode } from "../access-types";
-import { getCourseSnapshot } from "@/lib/repositories/courseRepository.server";
-import { findEnrollmentForCourse } from "@/lib/repositories/enrollmentRepository.server";
+import { getAdminCourse } from "@/features/courses/infrastructure/supabaseAdminCourseRepository.server";
+import { findEnrollmentBySupabaseUser } from "@/features/enrollments/infrastructure/supabaseEnrollmentRepository.server";
 
-jest.mock("@/lib/repositories/courseRepository.server", () => ({
-  getCourseSnapshot: jest.fn(),
-}));
+jest.mock(
+  "@/features/courses/infrastructure/supabaseAdminCourseRepository.server",
+  () => ({
+    getAdminCourse: jest.fn(),
+  }),
+);
 
-jest.mock("@/lib/repositories/enrollmentRepository.server", () => ({
-  findEnrollmentForCourse: jest.fn(),
-}));
+jest.mock(
+  "@/features/enrollments/infrastructure/supabaseEnrollmentRepository.server",
+  () => ({
+    findEnrollmentBySupabaseUser: jest.fn(),
+  }),
+);
 
 jest.mock("@/lib/logger", () => ({
   logger: {
@@ -22,26 +28,20 @@ describe("assertCanAccessCourse", () => {
   const uid = "user_123";
   const courseId = "course_456";
 
-  const mockSnapshot = (data: any = null, id = "doc_id") => ({
-    exists: !!data,
-    data: () => data,
-    id,
-  });
-
-  const mockEnrollment = (data: any, id = `${uid}_${courseId}`) => ({
-    id,
-    data,
-    snapshot: mockSnapshot(data, id),
-  });
-
   beforeEach(() => {
     jest.clearAllMocks();
-    (getCourseSnapshot as jest.Mock).mockResolvedValue(
-      mockSnapshot({ isPublished: true, status: "open" }, courseId),
-    );
-    (findEnrollmentForCourse as jest.Mock).mockResolvedValue(
-      mockEnrollment({ status: "active", paymentMethod: "pix" }),
-    );
+    (getAdminCourse as jest.Mock).mockResolvedValue({
+      isPublished: true,
+      status: "open",
+      id: courseId,
+    });
+    (findEnrollmentBySupabaseUser as jest.Mock).mockResolvedValue({
+      id: `${uid}_${courseId}`,
+      status: "active",
+      paymentMethod: "pix",
+      courseId,
+      userId: uid,
+    });
   });
 
   it("allows admin override without course or enrollment reads", async () => {
@@ -51,14 +51,16 @@ describe("assertCanAccessCourse", () => {
 
     expect(result.isAdminOverride).toBe(true);
     expect(result.paymentMethod).toBe("admin");
-    expect(getCourseSnapshot).not.toHaveBeenCalled();
-    expect(findEnrollmentForCourse).not.toHaveBeenCalled();
+    expect(getAdminCourse).not.toHaveBeenCalled();
+    expect(findEnrollmentBySupabaseUser).not.toHaveBeenCalled();
   });
 
   it("denies draft courses", async () => {
-    (getCourseSnapshot as jest.Mock).mockResolvedValue(
-      mockSnapshot({ isPublished: false, status: "draft" }, courseId),
-    );
+    (getAdminCourse as jest.Mock).mockResolvedValue({
+      isPublished: false,
+      status: "draft",
+      id: courseId,
+    });
 
     await expect(assertCanAccessCourse(uid, courseId)).rejects.toThrow(
       expect.objectContaining({ code: AccessErrorCode.COURSE_NOT_PUBLISHED }),
@@ -66,9 +68,11 @@ describe("assertCanAccessCourse", () => {
   });
 
   it("denies archived courses", async () => {
-    (getCourseSnapshot as jest.Mock).mockResolvedValue(
-      mockSnapshot({ isPublished: true, status: "archived" }, courseId),
-    );
+    (getAdminCourse as jest.Mock).mockResolvedValue({
+      isPublished: true,
+      status: "archived",
+      id: courseId,
+    });
 
     await expect(assertCanAccessCourse(uid, courseId)).rejects.toThrow(
       expect.objectContaining({ code: AccessErrorCode.COURSE_ARCHIVED }),
@@ -76,9 +80,11 @@ describe("assertCanAccessCourse", () => {
   });
 
   it("allows closed courses for active enrollment", async () => {
-    (getCourseSnapshot as jest.Mock).mockResolvedValue(
-      mockSnapshot({ isPublished: true, status: "closed" }, courseId),
-    );
+    (getAdminCourse as jest.Mock).mockResolvedValue({
+      isPublished: true,
+      status: "closed",
+      id: courseId,
+    });
 
     const result = await assertCanAccessCourse(uid, courseId);
 
@@ -87,9 +93,13 @@ describe("assertCanAccessCourse", () => {
   });
 
   it("allows completed enrollment", async () => {
-    (findEnrollmentForCourse as jest.Mock).mockResolvedValue(
-      mockEnrollment({ status: "completed", paymentMethod: "free" }),
-    );
+    (findEnrollmentBySupabaseUser as jest.Mock).mockResolvedValue({
+      id: `${uid}_${courseId}`,
+      status: "completed",
+      paymentMethod: "free",
+      courseId,
+      userId: uid,
+    });
 
     const result = await assertCanAccessCourse(uid, courseId);
 
@@ -97,7 +107,7 @@ describe("assertCanAccessCourse", () => {
   });
 
   it("denies missing enrollment", async () => {
-    (findEnrollmentForCourse as jest.Mock).mockResolvedValue(null);
+    (findEnrollmentBySupabaseUser as jest.Mock).mockResolvedValue(null);
 
     await expect(assertCanAccessCourse(uid, courseId)).rejects.toThrow(
       expect.objectContaining({ code: AccessErrorCode.ENROLLMENT_NOT_FOUND }),
@@ -105,9 +115,12 @@ describe("assertCanAccessCourse", () => {
   });
 
   it("denies pending enrollment", async () => {
-    (findEnrollmentForCourse as jest.Mock).mockResolvedValue(
-      mockEnrollment({ status: "pending" }),
-    );
+    (findEnrollmentBySupabaseUser as jest.Mock).mockResolvedValue({
+      id: `${uid}_${courseId}`,
+      status: "pending",
+      courseId,
+      userId: uid,
+    });
 
     await expect(assertCanAccessCourse(uid, courseId)).rejects.toThrow(
       expect.objectContaining({ code: AccessErrorCode.ENROLLMENT_PENDING }),
@@ -115,9 +128,12 @@ describe("assertCanAccessCourse", () => {
   });
 
   it("denies inactive enrollment status", async () => {
-    (findEnrollmentForCourse as jest.Mock).mockResolvedValue(
-      mockEnrollment({ status: "expired" }),
-    );
+    (findEnrollmentBySupabaseUser as jest.Mock).mockResolvedValue({
+      id: `${uid}_${courseId}`,
+      status: "expired",
+      courseId,
+      userId: uid,
+    });
 
     await expect(assertCanAccessCourse(uid, courseId)).rejects.toThrow(
       expect.objectContaining({
@@ -127,16 +143,14 @@ describe("assertCanAccessCourse", () => {
   });
 
   it("denies expired subscriptions", async () => {
-    (findEnrollmentForCourse as jest.Mock).mockResolvedValue(
-      mockEnrollment({
-        status: "active",
-        paymentMethod: "subscription",
-        accessUntil: {
-          toMillis: () => Date.now() - 1000,
-          toDate: () => new Date(Date.now() - 1000),
-        },
-      }),
-    );
+    (findEnrollmentBySupabaseUser as jest.Mock).mockResolvedValue({
+      status: "active",
+      paymentMethod: "subscription",
+      accessUntil: {
+        toMillis: () => Date.now() - 1000,
+        toDate: () => new Date(Date.now() - 1000),
+      },
+    });
 
     await expect(assertCanAccessCourse(uid, courseId)).rejects.toThrow(
       expect.objectContaining({ code: AccessErrorCode.ENROLLMENT_EXPIRED }),

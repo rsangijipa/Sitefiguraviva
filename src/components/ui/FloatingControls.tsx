@@ -1,191 +1,158 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
-  MessageCircle,
   ArrowUp,
+  MessageCircle,
+  MonitorSmartphone,
   Moon,
-  Sun,
-  Play,
-  Pause,
   Music,
+  Pause,
   Plus,
+  Sun,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import Tooltip from "./Tooltip";
-import {
-  useConfigSettings,
-  useInstituteSettings,
-} from "@/hooks/useSiteSettings";
+
+import { useTheme } from "@/components/providers/ThemeProvider";
+
+const whatsappNumber =
+  process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "5569992481585";
+const whatsappMessage =
+  process.env.NEXT_PUBLIC_WHATSAPP_MESSAGE ||
+  "Olá! Gostaria de saber mais sobre as formações do Instituto Figura Viva.";
 
 export default function FloatingControls() {
   const [showScrollTop, setShowScrollTop] = useState(false);
-  const [theme, setTheme] = useState<"light" | "dark">("light");
   const [isPlaying, setIsPlaying] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const { theme, preference, setPreference, mounted } = useTheme();
 
-  const { data: config } = useConfigSettings();
-  const { data: institute } = useInstituteSettings();
-
-  const whatsappNumber =
-    config?.whatsappNumber || institute?.whatsapp || "556992481585";
-  const whatsappMessage =
-    config?.whatsappMessage ||
-    "Olá! Gostaria de saber mais sobre as formações do Instituto Figura Viva.";
-  const whatsappUrl = `https://wa.me/${whatsappNumber.replace(/\D/g, "")}?text=${encodeURIComponent(whatsappMessage)}`;
-
-  // Música meditativa local
-  const meditationMusic = "/assets/audio/meditation.mp3";
-
-  // Theme Logic
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme") as "light" | "dark" | null;
-    if (savedTheme) {
-      setTheme(savedTheme);
-      document.documentElement.classList.toggle("dark", savedTheme === "dark");
-    } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      setTheme("dark");
-      document.documentElement.classList.add("dark");
-    }
-
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const handleChange = (e: MediaQueryListEvent) => {
-      if (!localStorage.getItem("theme")) {
-        const newSystemTheme = e.matches ? "dark" : "light";
-        setTheme(newSystemTheme);
-        document.documentElement.classList.toggle("dark", e.matches);
-      }
-    };
-
-    mediaQuery.addEventListener("change", handleChange);
-    return () => mediaQuery.removeEventListener("change", handleChange);
-  }, []);
-
-  const toggleTheme = () => {
-    const newTheme = theme === "light" ? "dark" : "light";
-    setTheme(newTheme);
-    localStorage.setItem("theme", newTheme);
-    document.documentElement.classList.toggle("dark", newTheme === "dark");
-  };
-
-  // Scroll Logic
   useEffect(() => {
     const handleScroll = () => setShowScrollTop(window.scrollY > 400);
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
+  const themeLabel =
+    preference === "system"
+      ? "Tema: seguindo o sistema"
+      : preference === "dark"
+        ? "Tema escuro"
+        : "Tema claro";
 
-  // Audio Logic
-  const toggleAudio = () => {
-    if (!audioRef.current) return;
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current
-        .play()
-        .catch((e) => console.log("Audio autoplay blocked", e));
-    }
-    setIsPlaying(!isPlaying);
+  const cyclePreference = () => {
+    setPreference(
+      preference === "light"
+        ? "dark"
+        : preference === "dark"
+          ? "system"
+          : "light",
+    );
   };
 
+  const toggleAudio = async () => {
+    if (!audioRef.current) return;
+    if (isPlaying) audioRef.current.pause();
+    else await audioRef.current.play().catch(() => undefined);
+    setIsPlaying((current) => !current);
+  };
+
+  const whatsappUrl = `https://wa.me/${whatsappNumber.replace(/\D/g, "")}?text=${encodeURIComponent(whatsappMessage)}`;
+  const controlClass =
+    "flex h-11 w-11 items-center justify-center rounded-full border border-border bg-surface text-primary shadow-soft-sm transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
+
   return (
-    <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end pointer-events-none">
-      <audio ref={audioRef} src={meditationMusic} loop />
-
-      <div className="flex flex-col items-end gap-3 pointer-events-auto">
-        {/* 1. WhatsApp (Static - Top) */}
-        <Tooltip content="Falar no WhatsApp">
-          <motion.a
-            href={whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            className="w-12 h-12 rounded-full bg-[#25D366] text-white shadow-xl flex items-center justify-center pointer-events-auto"
-          >
-            <MessageCircle size={24} />
-          </motion.a>
-        </Tooltip>
-
-        {/* 2. Secondary Expanded Actions (Theme, Music) */}
-        <AnimatePresence>
-          {expanded && (
-            <motion.div
-              initial={{ opacity: 0, y: 10, scale: 0.9 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 10, scale: 0.9 }}
-              className="flex flex-col items-center gap-3"
-            >
-              {/* Theme Toggle */}
-              <Tooltip
-                content={theme === "light" ? "Modo Escuro" : "Modo Claro"}
-              >
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={toggleTheme}
-                  className="w-10 h-10 rounded-full bg-white border border-stone-200 text-primary shadow-md flex items-center justify-center transition-colors"
-                >
-                  {theme === "light" ? <Sun size={18} /> : <Moon size={18} />}
-                </motion.button>
-              </Tooltip>
-
-              {/* Audio Toggle */}
-              {config?.showAudioControl !== false && (
-                <Tooltip
-                  content={isPlaying ? "Pausar Som" : "Tocar Som Ambiente"}
-                >
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={toggleAudio}
-                    className={`w-10 h-10 rounded-full shadow-md flex items-center justify-center transition-all border ${
-                      isPlaying
-                        ? "bg-gold border-gold text-white"
-                        : "bg-white border-stone-200 text-primary"
-                    }`}
-                  >
-                    {isPlaying ? <Pause size={18} /> : <Music size={18} />}
-                  </motion.button>
-                </Tooltip>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* 3. Main Expand Toggle */}
-        <motion.button
-          onClick={() => setExpanded(!expanded)}
-          animate={{ rotate: expanded ? 45 : 0 }}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-          className="w-10 h-10 rounded-full bg-primary text-white shadow-lg flex items-center justify-center hover:bg-gold transition-colors z-10"
-          aria-label="Mais opções"
+    <div className="pointer-events-none fixed bottom-6 right-6 z-[100] flex flex-col items-end">
+      <audio
+        ref={audioRef}
+        src="/assets/audio/meditation.mp3"
+        preload="metadata"
+        loop
+      />
+      <div className="pointer-events-auto flex flex-col items-end gap-3">
+        <a
+          data-floating-whatsapp="true"
+          href={whatsappUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Falar com o Instituto no WhatsApp"
+          title="Falar no WhatsApp"
+          className="flex h-12 w-12 items-center justify-center rounded-full bg-[#25D366] text-white shadow-xl transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
-          <Plus size={24} />
-        </motion.button>
+          <MessageCircle size={24} aria-hidden="true" />
+        </a>
 
-        {/* 4. Scroll To Top (Always at the bottom according to user request) */}
-        <AnimatePresence>
-          {showScrollTop && (
-            <Tooltip content="Voltar ao Topo">
-              <motion.button
-                initial={{ opacity: 0, y: 10, scale: 0.5 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.5 }}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={scrollToTop}
-                className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/10 text-primary shadow-lg flex items-center justify-center transition-all hover:bg-gold hover:text-white"
-              >
-                <ArrowUp size={20} />
-              </motion.button>
-            </Tooltip>
-          )}
-        </AnimatePresence>
+        {expanded && (
+          <div
+            data-secondary-floating-control="true"
+            className="flex flex-col items-center gap-3"
+          >
+            <button
+              type="button"
+              onClick={cyclePreference}
+              aria-label={themeLabel}
+              title={themeLabel}
+              className={controlClass}
+            >
+              {!mounted ? (
+                <Sun size={18} aria-hidden="true" />
+              ) : preference === "system" ? (
+                <MonitorSmartphone size={18} aria-hidden="true" />
+              ) : theme === "dark" ? (
+                <Moon size={18} aria-hidden="true" />
+              ) : (
+                <Sun size={18} aria-hidden="true" />
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={toggleAudio}
+              aria-label={
+                isPlaying ? "Pausar som ambiente" : "Tocar som ambiente"
+              }
+              title={isPlaying ? "Pausar som ambiente" : "Tocar som ambiente"}
+              className={controlClass}
+            >
+              {isPlaying ? (
+                <Pause size={18} aria-hidden="true" />
+              ) : (
+                <Music size={18} aria-hidden="true" />
+              )}
+            </button>
+          </div>
+        )}
+
+        <button
+          type="button"
+          data-secondary-floating-control="true"
+          onClick={() => setExpanded((current) => !current)}
+          aria-label={expanded ? "Fechar opções" : "Mais opções"}
+          aria-expanded={expanded}
+          className="z-10 flex h-11 w-11 items-center justify-center rounded-full bg-primary text-white shadow-lg transition-transform hover:scale-105 hover:bg-gold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        >
+          <Plus
+            size={24}
+            aria-hidden="true"
+            className={
+              expanded
+                ? "rotate-45 transition-transform"
+                : "transition-transform"
+            }
+          />
+        </button>
+
+        {showScrollTop && (
+          <button
+            type="button"
+            data-secondary-floating-control="true"
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            aria-label="Voltar ao topo"
+            title="Voltar ao topo"
+            className={controlClass}
+          >
+            <ArrowUp size={20} aria-hidden="true" />
+          </button>
+        )}
       </div>
     </div>
   );

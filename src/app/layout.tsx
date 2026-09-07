@@ -1,20 +1,31 @@
 import { Metadata, Viewport } from "next";
 import Script from "next/script";
-import { Cormorant_Garamond, Lato } from "next/font/google";
+import { Fraunces, Karla } from "next/font/google";
 import "./globals.css";
 import "@/components/resources/apps/emotion-tree/emotion-tree.css";
 import Providers from "./providers";
 
-const cormorant = Cormorant_Garamond({
+/**
+ * As duas famílias do Design System v1 (seção 3.2).
+ *
+ * Fraunces é serifa humanista variável: o eixo `opsz` acerta o contraste do
+ * desenho para cada tamanho, e `SOFT`/`WONK` permitem que o mesmo tipo se
+ * comporte de modo sóbrio no registro Institucional e expressivo no
+ * Confluência. Substitui a Cormorant Garamond, que tinha eixo único e um
+ * traço fino demais para corpo de título.
+ *
+ * Karla é grotesca humanista ligeiramente estreita — economiza largura em
+ * card sem perder legibilidade em corpo pequeno. Substitui a Lato.
+ */
+const fraunces = Fraunces({
   subsets: ["latin"],
-  weight: ["300", "400", "600", "700"],
+  axes: ["SOFT", "WONK", "opsz"],
   variable: "--font-serif",
   display: "swap",
 });
 
-const lato = Lato({
+const karla = Karla({
   subsets: ["latin"],
-  weight: ["300", "400", "700"],
   variable: "--font-sans",
   display: "swap",
 });
@@ -45,20 +56,12 @@ export const metadata: Metadata = {
     description:
       "Acolhimento clínico e formação profissional em Gestalt-Terapia. Encontros que transformam vidas.",
     siteName: "Instituto Figura Viva",
-    images: [
-      {
-        url: "/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Instituto Figura Viva",
-      },
-    ],
+    // Social card comes from src/app/opengraph-image.tsx (file convention).
   },
   twitter: {
     card: "summary_large_image",
     title: "Instituto Figura Viva",
     description: "Gestalt-Terapia & Formação Clínica em Rondônia.",
-    images: ["/og-image.jpg"],
   },
   robots: {
     index: true,
@@ -82,7 +85,12 @@ export const metadata: Metadata = {
 };
 
 export const viewport = {
-  themeColor: "#D4AF37",
+  // Sobrescrito em tempo de execução pelo ThemeProvider; estes são os padrões
+  // que o navegador usa antes do JS, por preferência do sistema.
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#FDFAF4" },
+    { media: "(prefers-color-scheme: dark)", color: "#12160F" },
+  ],
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
@@ -95,8 +103,8 @@ import { WebVitalsReporter } from "@/components/system/WebVitalsReporter";
 import LenisProvider from "@/components/providers/LenisProvider";
 import JsonLd from "@/components/system/JsonLd";
 import GoogleAnalytics from "@/components/system/GoogleAnalytics";
-import PushNotificationManager from "@/components/system/PushNotificationManager";
-import FloatingAudioPlayer from "@/components/ui/FloatingAudioPlayer";
+import CookieConsent from "@/components/system/CookieConsent";
+import { themeInitScript } from "@/components/providers/ThemeProvider";
 
 export default async function RootLayout({
   children,
@@ -107,7 +115,16 @@ export default async function RootLayout({
   const isImpersonating = cookieStore.has("admin_session_backup");
 
   return (
-    <html lang="pt-BR" className={`${cormorant.variable} ${lato.variable}`}>
+    <html
+      lang="pt-BR"
+      className={`${fraunces.variable} ${karla.variable}`}
+      suppressHydrationWarning
+    >
+      <head>
+        {/* Antes da primeira pintura: sem isto o tema escuro aparece só depois
+            da hidratação e a pessoa leva um flash de tela clara na cara. */}
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body className="antialiased bg-paper text-text overflow-x-hidden">
         <a href="#main-content" className="skip-to-content">
           Pular para o conteúdo principal
@@ -135,7 +152,7 @@ export default async function RootLayout({
               "@type": "Organization",
               name: "Instituto Figura Viva",
               url: "https://figuraviva.com.br",
-              logo: "https://figuraviva.com.br/logo.png",
+              logo: "https://figuraviva.com.br/icon-512x512.png",
               sameAs: ["https://www.instagram.com/institutofiguraviva/"],
               address: {
                 "@type": "PostalAddress",
@@ -147,7 +164,7 @@ export default async function RootLayout({
           />
           <WebVitalsReporter />
           <GoogleAnalytics />
-          <PushNotificationManager />
+          <CookieConsent />
           <main
             id="main-content"
             className="flex-1 w-full outline-none"
@@ -155,7 +172,6 @@ export default async function RootLayout({
           >
             <LenisProvider>{children}</LenisProvider>
           </main>
-          <FloatingAudioPlayer />
           {isImpersonating && <ImpersonationBanner />}
         </Providers>
       </body>

@@ -140,13 +140,7 @@ export function EmotionTreeApp() {
       return;
     }
 
-    setHudExpanded(true);
-    const timeout = window.setTimeout(() => {
-      setHudExpanded(false);
-      hudAutoCollapseDoneRef.current = true;
-    }, 3600);
-
-    return () => window.clearTimeout(timeout);
+    hudAutoCollapseDoneRef.current = true;
   }, [introLocked]);
 
   useEffect(() => {

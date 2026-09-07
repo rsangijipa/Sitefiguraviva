@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
-import { db } from "@/lib/firebase/admin";
+import { getCourseOutlineById } from "@/features/courses/infrastructure/supabaseCourseRepository.server";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import { LessonPlayerWrapper } from "@/components/portal/LessonPlayerWrapper";
 import { Lesson, Module } from "@/types/lms";
 import { deepSafeSerialize } from "@/lib/utils";
@@ -11,6 +12,16 @@ export const dynamic = "force-dynamic";
 
 // Helper to fetch full course structure
 async function getCourseData(courseId: string) {
+  const outline = await getCourseOutlineById(courseId);
+  if (outline) {
+    return deepSafeSerialize({
+      id: outline.course.id,
+      ...outline.course,
+      modules: outline.modules,
+    } as any);
+  }
+  return null;
+  /* Legacy Firestore fallback retained until progress/content migration completes.
   const courseDoc = await db.collection("courses").doc(courseId).get();
   if (!courseDoc.exists) return null;
 
@@ -40,6 +51,7 @@ async function getCourseData(courseId: string) {
     ...courseDoc.data(),
     modules,
   } as any);
+  */
 }
 
 export default async function LessonPage({
@@ -65,17 +77,23 @@ export default async function LessonPage({
 
   const courseData = await getCourseData(courseId);
   if (!courseData) redirect("/portal");
+  const supabase = createSupabaseServiceClient();
 
   // 4. FETCH PROGRESS (Numerador) - FIX: Sincronismo (Audit PRG-01)
-  const progressSnap = await db
-    .collection("progress")
-    .where("userId", "==", uid)
-    .where("courseId", "==", courseId)
-    .get();
+  const { data: progressRows, error: progressError } = await supabase
+    .from("lesson_progress")
+    .select("*")
+    .eq("user_id", uid)
+    .eq("course_id", courseId);
+  if (progressError) throw progressError;
 
   const progressMap: Record<string, any> = {};
-  progressSnap.docs.forEach((doc) => {
-    progressMap[doc.data().lessonId] = doc.data();
+  (progressRows ?? []).forEach((row: any) => {
+    progressMap[row.lesson_id] = {
+      ...row,
+      lessonId: row.lesson_id,
+      maxWatchedSecond: row.max_watched_second,
+    };
   });
 
   const allLessons: Lesson[] = courseData.modules.flatMap((m: any) =>
@@ -95,33 +113,7 @@ export default async function LessonPage({
 
   const activeLesson = allLessons[currentIndex];
 
-  // FETCH CONTENT (Blocks)
-  // We must fetch the subcollection 'blocks' for this lesson to show content
-  if (activeLesson) {
-    try {
-      const blocksSnap = await db
-        .collection("courses")
-        .doc(courseId)
-        .collection("modules")
-        .doc(activeLesson.moduleId)
-        .collection("lessons")
-        .doc(activeLesson.id)
-        .collection("blocks")
-        .orderBy("order", "asc")
-        .get();
-
-      const blocks = blocksSnap.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-        isPublished: doc.data().isPublished !== false,
-      }));
-
-      // @ts-ignore - injecting blocks into the lesson object for the player
-      activeLesson.blocks = blocks;
-    } catch (e) {
-      console.error("Error fetching lesson blocks:", e);
-    }
-  }
+  // Lesson blocks are provided by the Supabase lesson adapter.
 
   const prevLessonId =
     currentIndex > 0 ? allLessons[currentIndex - 1].id : undefined;
@@ -148,34 +140,26 @@ export default async function LessonPage({
 
   if (activeLesson.type === "quiz") {
     try {
-      const assessmentSnap = await db
-        .collection("assessments")
-        .where("lessonId", "==", activeLesson.id)
-        .where("status", "==", "published")
+      const { data: assessmentRow, error: assessmentError } = await supabase
+        .from("assessments")
+        .select("*")
+        .eq("lesson_id", activeLesson.id)
+        .eq("status", "published")
         .limit(1)
-        .get();
+        .maybeSingle();
 
-      if (!assessmentSnap.empty) {
-        assessment = {
-          id: assessmentSnap.docs[0].id,
-          ...assessmentSnap.docs[0].data(),
-        };
-
-        // Also fetch user's last submission
-        const submissionSnap = await db
-          .collection("assessmentSubmissions")
-          .where("userId", "==", uid)
-          .where("assessmentId", "==", assessment.id)
-          .orderBy("startedAt", "desc")
+      if (assessmentError) throw assessmentError;
+      if (assessmentRow) {
+        assessment = assessmentRow;
+        const { data: submissionRow } = await supabase
+          .from("assessment_submissions")
+          .select("*")
+          .eq("user_id", uid)
+          .eq("assessment_id", assessmentRow.id)
+          .order("started_at", { ascending: false })
           .limit(1)
-          .get();
-
-        if (!submissionSnap.empty) {
-          submission = {
-            id: submissionSnap.docs[0].id,
-            ...submissionSnap.docs[0].data(),
-          };
-        }
+          .maybeSingle();
+        submission = submissionRow;
       }
     } catch (e) {
       console.error("Error fetching assessment:", e);

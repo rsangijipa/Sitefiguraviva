@@ -22,7 +22,7 @@ export class Soundscape {
 
   private ensureLoaded() {
     if (!this.ambient) {
-      this.ambient = createSound(["/audio/ambient-loop.mp3"], 0.16, true);
+      this.ambient = createSound(["/assets/audio/meditation.mp3"], 0.12, true);
     }
 
     if (!this.sounds) {

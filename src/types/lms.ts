@@ -1,5 +1,6 @@
-import { Timestamp } from "firebase/firestore";
 import { z } from "zod";
+
+import type { Timestamp } from "firebase/firestore";
 
 // --- PRIMITIVES ---
 
@@ -176,6 +177,7 @@ export interface MaterialDoc {
   description?: string;
   isPublished: boolean;
   downloadCount?: number;
+  filePath?: string;
   createdAt: Timestamp;
 }
 

@@ -1,5 +1,4 @@
 import { ArrowLeft } from "lucide-react";
-import { APP_CONFIG } from "../config";
 import "./AppHeader.css";
 
 interface AppHeaderProps {
@@ -23,13 +22,10 @@ export function AppHeader({ showBack = false, onBack }: AppHeaderProps) {
                 <ArrowLeft size={20} strokeWidth={2} />
               </button>
             )}
-            <div className="app-header__logo">
-              <span className="app-header__logo-mente">Mente</span>
-              <span className="app-header__logo-quiz">Quiz</span>
-            </div>
+            <div className="app-header__logo" aria-hidden="true" />
           </div>
           <div className="app-header__right">
-            <span className="app-header__subtitle">um recurso Figura Viva</span>
+            <span className="app-header__subtitle">Autoconhecimento</span>
           </div>
         </div>
       </div>

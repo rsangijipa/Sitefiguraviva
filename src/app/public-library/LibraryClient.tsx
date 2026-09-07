@@ -16,6 +16,7 @@ import PDFReader from "@/components/PDFReader";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useAuth } from "@/context/AuthContext";
 import { processGamificationEvent } from "@/actions/gamification";
+import BookshelfSection from "@/components/sections/BookshelfSection";
 
 export default function LibraryClient({
   initialItems,
@@ -51,16 +52,35 @@ export default function LibraryClient({
     return matchesSearch && matchesFilter;
   });
 
+  // Itens do acervo que sao livro, nao artigo. Vao para a estante em vez da
+  // grade de leitura - a Biblioteca abre PDF, a estante aponta referencia.
+  const livros = initialItems
+    .filter((item) => {
+      const tipo = String(item.type || "").toLowerCase();
+      const tags = (item.tags || []).map((t: string) =>
+        String(t).toLowerCase(),
+      );
+      return (
+        tipo === "livro" || tags.includes("livro") || tags.includes("livros")
+      );
+    })
+    .map((item) => ({
+      id: item.id,
+      title: item.title,
+      subtitle: item.subtitle,
+      url: item.externalUrl || undefined,
+    }));
+
   const categories = [
     "Todos",
     ...Array.from(new Set(initialItems.flatMap((i) => i.tags || []))),
   ].sort();
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="fv-bg fv-bg-library flex min-h-screen flex-col bg-paper">
       <Navbar />
 
-      <main className="flex-1 container mx-auto px-6 max-w-7xl pt-16">
+      <div className="fv-container flex-1 pt-28">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -68,32 +88,33 @@ export default function LibraryClient({
         >
           {/* HEADER */}
           <header className="text-center pt-10">
-            <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-gold/10 text-gold mb-6">
+            <div className="mb-6 inline-flex items-center justify-center rounded-md bg-gold/15 p-3 text-gold-dark">
               <BookOpen size={32} />
             </div>
             <h1 className="font-serif text-4xl md:text-6xl text-primary font-bold mb-4">
               Biblioteca{" "}
               <span className="italic text-gold font-light">Viva</span>
             </h1>
-            <p className="text-text/60 text-lg font-light max-w-2xl mx-auto">
+            <p className="fv-lead mx-auto text-center">
               Uma curadoria de textos, artigos e recursos para aprofundar seu
               conhecimento em Gestalt-Terapia e awareness.
             </p>
           </header>
 
           {/* CONTROLS */}
-          <section className="bg-white p-6 rounded-[2rem] shadow-sm border border-stone-100 flex flex-col md:flex-row gap-6 justify-between items-center">
+          <section className="flex flex-col items-center justify-between gap-6 border-y border-border py-6 md:flex-row">
             <div className="relative group w-full max-w-md">
               <Search
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-text/30 group-focus-within:text-gold transition-colors"
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-muted transition-colors group-focus-within:text-primary"
                 size={18}
               />
               <input
                 type="text"
+                aria-label="Buscar na biblioteca"
                 placeholder="Buscar na biblioteca..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 rounded-xl outline-none bg-stone-50 border border-stone-200 focus:border-gold/50 text-primary placeholder-text/30 transition-all font-light"
+                className="h-12 w-full rounded-md border border-border bg-paper pl-12 pr-4 text-primary outline-none transition-colors placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/15"
               />
             </div>
 
@@ -102,12 +123,12 @@ export default function LibraryClient({
                 <button
                   key={cat}
                   onClick={() => setFilter(cat)}
-                  className={`px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all border
-                                    ${
-                                      filter === cat
-                                        ? "bg-primary border-primary text-white shadow-lg"
-                                        : "bg-white border-stone-200 text-text/60 hover:border-gold hover:text-gold"
-                                    }`}
+                  aria-pressed={filter === cat}
+                  className={`min-h-11 rounded-sm border px-4 py-2 text-[10px] font-bold uppercase tracking-wider transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+                    filter === cat
+                      ? "border-primary bg-primary text-white"
+                      : "border-border bg-paper text-text/70 hover:border-igarape hover:bg-areia hover:text-primary"
+                  }`}
                 >
                   {cat}
                 </button>
@@ -123,21 +144,21 @@ export default function LibraryClient({
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.1 }}
-                className="group bg-white rounded-[2rem] p-8 border border-stone-100 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col"
+                className="fv-card group p-8"
               >
-                <div className="w-12 h-12 rounded-2xl bg-stone-50 text-gold flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-md bg-gold/15 text-gold-dark transition-transform group-hover:scale-105">
                   <FileText size={24} />
                 </div>
                 <h3 className="font-serif text-2xl text-primary mb-3 leading-tight group-hover:text-gold transition-colors">
                   {item.title}
                 </h3>
-                <p className="text-text/60 text-sm font-light mb-8 flex-1 line-clamp-3">
+                <p className="mb-8 line-clamp-3 flex-1 text-sm leading-relaxed text-text/75">
                   {item.subtitle}
                 </p>
 
                 <button
                   onClick={() => handleOpenItem(item)}
-                  className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-primary hover:text-gold transition-colors group/btn"
+                  className="inline-flex min-h-11 items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-primary transition-colors hover:text-gold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary group/btn"
                 >
                   Ler Agora{" "}
                   <ArrowRight
@@ -149,7 +170,7 @@ export default function LibraryClient({
             ))}
 
             {filteredItems.length === 0 && (
-              <div className="col-span-full py-20 bg-stone-50/50 rounded-[2rem] border border-dashed border-stone-200">
+              <div className="col-span-full rounded-md border border-dashed border-border bg-areia/50 py-20">
                 <EmptyState
                   icon={Search}
                   title="Nenhum Recurso Encontrado"
@@ -160,7 +181,9 @@ export default function LibraryClient({
             )}
           </div>
         </motion.div>
-      </main>
+      </div>
+
+      <BookshelfSection livros={livros} />
 
       <Footer />
 

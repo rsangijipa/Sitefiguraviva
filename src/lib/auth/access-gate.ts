@@ -10,8 +10,8 @@ import {
 } from "./access-types";
 import { isCourseGloballyBlocked, isEnrollmentAllowed } from "./access-policy";
 import { logger } from "@/lib/logger";
-import { getCourseSnapshot } from "@/lib/repositories/courseRepository.server";
-import { findEnrollmentForCourse } from "@/lib/repositories/enrollmentRepository.server";
+import { getAdminCourse } from "@/features/courses/infrastructure/supabaseAdminCourseRepository.server";
+import { findEnrollmentBySupabaseUser } from "@/features/enrollments/infrastructure/supabaseEnrollmentRepository.server";
 
 /**
  * Canonical Server-Side Access Guard.
@@ -38,11 +38,10 @@ export async function assertCanAccessCourse(
   }
 
   // 1. Course Level Visibility Check (Fetch FIRST to verify existence)
-  const courseSnap = await getCourseSnapshot(courseId);
-  if (!courseSnap.exists) {
+  const course = await getAdminCourse(courseId);
+  if (!course) {
     throw new NotFoundError("Course");
   }
-  const course = courseSnap.data() as CourseDoc;
 
   // Policy: draft or archived block
   if (isCourseGloballyBlocked(course)) {
@@ -66,8 +65,7 @@ export async function assertCanAccessCourse(
   }
 
   // 2. Enrollment Lookup (deterministic ID + compatibility fallback)
-  const enrollmentResult = await findEnrollmentForCourse(uid, courseId);
-  const enrollment = enrollmentResult?.data || null;
+  const enrollment = await findEnrollmentBySupabaseUser(uid, courseId);
 
   if (!enrollment) {
     logger.warn("Access Denied: No Enrollment", { courseId, uid });
@@ -78,7 +76,7 @@ export async function assertCanAccessCourse(
   }
 
   // 3. Enrollment Level Status Check (Policy: active or completed)
-  if (!isEnrollmentAllowed(enrollment)) {
+  if (!isEnrollmentAllowed(enrollment as any)) {
     const reason =
       enrollment.status === "pending" ||
       enrollment.status === "pending_approval" ||
@@ -107,7 +105,12 @@ export async function assertCanAccessCourse(
     }
 
     const now = Date.now();
-    const expiry = enrollment.accessUntil.toMillis();
+    const expiry =
+      typeof enrollment.accessUntil === "string"
+        ? new Date(enrollment.accessUntil).getTime()
+        : ((
+            enrollment.accessUntil as unknown as { toMillis?: () => number }
+          )?.toMillis?.() ?? Number.NaN);
 
     if (now >= expiry) {
       logger.warn("Access Denied: Subscription Expired", {
@@ -125,9 +128,9 @@ export async function assertCanAccessCourse(
   return {
     uid,
     courseId,
-    enrollmentId: enrollmentResult?.id || `profile_${uid}_${courseId}`,
+    enrollmentId: enrollment.id || `profile_${uid}_${courseId}`,
     paymentMethod: enrollment.paymentMethod || "free",
     courseVersion: enrollment.courseVersionAtEnrollment,
-    accessUntil: enrollment.accessUntil?.toDate().toISOString(),
+    accessUntil: enrollment.accessUntil || undefined,
   };
 }

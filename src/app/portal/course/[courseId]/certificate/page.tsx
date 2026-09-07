@@ -1,4 +1,4 @@
-import { db } from "@/lib/firebase/admin";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import { assertCanAccessCourse } from "@/lib/auth/access-gate";
 import { issueCertificate } from "@/actions/certificate";
@@ -25,14 +25,17 @@ export default async function CertificatePage({ params }: PageProps) {
   }
 
   // 2. Check Enrollment Progress (Fast Fail)
-  const enrollmentDoc = await db
-    .collection("enrollments")
-    .doc(`${uid}_${courseId}`)
-    .get();
-  if (!enrollmentDoc.exists) notFound();
+  const { data: enrollment, error: enrollmentError } =
+    await createSupabaseServiceClient()
+      .from("enrollments")
+      .select("progress_summary")
+      .eq("user_id", uid)
+      .eq("course_id", courseId)
+      .maybeSingle();
+  if (enrollmentError) throw enrollmentError;
+  if (!enrollment) notFound();
 
-  const enrollment = enrollmentDoc.data();
-  const percent = enrollment?.progressSummary?.percent || 0;
+  const percent = (enrollment.progress_summary as any)?.percent || 0;
 
   if (percent < 100) {
     return (

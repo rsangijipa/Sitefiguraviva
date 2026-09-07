@@ -1,5 +1,4 @@
-import { adminDb } from "@/lib/firebase/admin";
-import { FieldValue } from "firebase-admin/firestore";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 
 export interface AuditLogEntry {
   actor: {
@@ -29,11 +28,23 @@ export interface AuditLogEntry {
  */
 export async function logAudit(entry: AuditLogEntry) {
   try {
-    await adminDb.collection("audit_logs").add({
-      ...entry,
-      timestamp: FieldValue.serverTimestamp(),
-      version: "1.2",
-    });
+    const { error } = await createSupabaseServiceClient()
+      .from("audit_logs")
+      .insert({
+        event_type: entry.action,
+        actor_user_id: entry.actor.uid,
+        actor_email: entry.actor.email || null,
+        actor_role: entry.actor.role || null,
+        target_collection: entry.target.collection,
+        target_id: entry.target.id,
+        payload: {
+          metadata: entry.metadata,
+          summary: entry.target.summary,
+          payload: entry.payload,
+        },
+        diff: entry.diff || null,
+      });
+    if (error) throw error;
     console.log(
       `[AUDIT] ${entry.action} by ${entry.actor.uid} -> ${entry.target.id}`,
     );
@@ -45,16 +56,9 @@ export async function logAudit(entry: AuditLogEntry) {
 /**
  * Logs within an existing Firestore transaction.
  */
-export function logAuditInTransaction(
-  tx: FirebaseFirestore.Transaction,
-  entry: AuditLogEntry,
-) {
-  const ref = adminDb.collection("audit_logs").doc();
-  tx.set(ref, {
-    ...entry,
-    timestamp: FieldValue.serverTimestamp(),
-    version: "1.2",
-  });
+export function logAuditInTransaction(_tx: unknown, entry: AuditLogEntry) {
+  // Preserve events while legacy callers move to Supabase RPCs.
+  void logAudit(entry);
 }
 
 // Global Alias for smooth migration from auditService

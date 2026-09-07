@@ -9,18 +9,14 @@ import {
 } from "@/actions/profile";
 import { Camera, Loader2, Save, Lock } from "lucide-react";
 import { useRouter } from "next/navigation";
-import {
-  getAuth,
-  updatePassword,
-  EmailAuthProvider,
-  reauthenticateWithCredential,
-} from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
+import { createSupabaseBrowserClient } from "@/infrastructure/supabase/client";
 
 export function ProfileForm() {
   const { user, updateProfile } = useAuth(); // Get context updater
   const router = useRouter();
+  const supabase = createSupabaseBrowserClient();
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{
@@ -69,7 +65,6 @@ export function ProfileForm() {
   // Password State
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [currentPassword, setCurrentPassword] = useState(""); // Needed for re-auth
   const [showPasswordSection, setShowPasswordSection] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -157,43 +152,20 @@ export function ProfileForm() {
       });
       return;
     }
-    if (!user || !user.email) return;
+    if (!user) return;
 
     setLoading(true);
     setMessage(null);
 
     try {
-      const auth = getAuth();
-      const currentUser = auth.currentUser;
-      if (!currentUser) throw new Error("Usuário não autenticado.");
-
-      // Re-authenticate (Best practice before sensitive changes)
-      if (currentPassword) {
-        const credential = EmailAuthProvider.credential(
-          currentUser.email!,
-          currentPassword,
-        );
-        await reauthenticateWithCredential(currentUser, credential);
-      }
-
-      await updatePassword(currentUser, newPassword);
+      await supabase.auth.updateUser({ password: newPassword });
       setMessage({ type: "success", text: "Senha alterada com sucesso!" });
       setNewPassword("");
       setConfirmPassword("");
-      setCurrentPassword("");
       setShowPasswordSection(false);
     } catch (error: any) {
       console.error(error);
-      if (error.code === "auth/requires-recent-login") {
-        setMessage({
-          type: "error",
-          text: "Por segurança, faça login novamente antes de trocar a senha.",
-        });
-      } else if (error.code === "auth/wrong-password") {
-        setMessage({ type: "error", text: "Senha atual incorreta." });
-      } else {
-        setMessage({ type: "error", text: "Erro ao alterar senha." });
-      }
+      setMessage({ type: "error", text: "Erro ao alterar senha." });
     } finally {
       setLoading(false);
     }
@@ -482,27 +454,7 @@ export function ProfileForm() {
             className="space-y-4 animate-in fade-in slide-in-from-top-2"
           >
             <div className="p-4 bg-yellow-50 text-yellow-800 text-sm rounded-lg mb-4">
-              Para sua segurança, confirme sua senha atual antes de definir uma
-              nova.
-            </div>
-
-            <div>
-              <label
-                htmlFor="currentPassword"
-                className="block text-sm font-medium text-stone-700 mb-1"
-              >
-                Senha Atual
-              </label>
-              <input
-                id="currentPassword"
-                name="currentPassword"
-                type="password"
-                className="w-full p-2 border border-stone-200 rounded-lg"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                required
-                autoComplete="current-password"
-              />
+              Defina uma nova senha forte para sua conta.
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -554,7 +506,6 @@ export function ProfileForm() {
                   setShowPasswordSection(false);
                   setNewPassword("");
                   setConfirmPassword("");
-                  setCurrentPassword("");
                 }}
               >
                 Cancelar

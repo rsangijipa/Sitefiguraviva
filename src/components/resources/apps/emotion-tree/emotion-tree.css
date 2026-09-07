@@ -73,7 +73,7 @@
 
 .emotion-tree-app .hud-pill {
   border: 1px solid var(--hud-border);
-  background: var(--hud-surface-soft);
+  background: #173f32;
   border-radius: 9999px;
   color: var(--hud-text);
 }
@@ -111,7 +111,7 @@
 
 .emotion-tree-app .hud-btn-secondary {
   border: 1px solid var(--hud-border);
-  background: rgba(255, 255, 255, 0.1);
+  background: #173f32;
   color: var(--hud-text);
   border-radius: 9999px;
 }

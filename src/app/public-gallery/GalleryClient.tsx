@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
@@ -9,10 +9,11 @@ import {
   Filter,
   ArrowRight,
 } from "lucide-react";
-import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { GalleryImage } from "@/features/public-site/gallery/GalleryImage";
+import { normalizeGalleryMedia } from "@/features/public-site/gallery/gallery-media";
 
 export default function GalleryClient({
   initialGallery,
@@ -26,9 +27,15 @@ export default function GalleryClient({
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(
     null,
   );
+  const lastTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const safeGallery = useMemo(
-    () => (Array.isArray(initialGallery) ? initialGallery : []),
+    () =>
+      (Array.isArray(initialGallery) ? initialGallery : []).map((photo) => ({
+        ...photo,
+        ...normalizeGalleryMedia(photo),
+      })),
     [initialGallery],
   );
 
@@ -94,8 +101,14 @@ export default function GalleryClient({
   }, [filter, search, sort, safeGallery]);
 
   // Lightbox Handlers
-  const openLightbox = (index: number) => setSelectedPhotoIndex(index);
-  const closeLightbox = () => setSelectedPhotoIndex(null);
+  const openLightbox = (index: number, trigger: HTMLButtonElement) => {
+    lastTriggerRef.current = trigger;
+    setSelectedPhotoIndex(index);
+  };
+  const closeLightbox = () => {
+    setSelectedPhotoIndex(null);
+    window.requestAnimationFrame(() => lastTriggerRef.current?.focus());
+  };
   const nextPhoto = () => {
     if (selectedPhotoIndex !== null) {
       setSelectedPhotoIndex((selectedPhotoIndex + 1) % filteredPhotos.length);
@@ -110,11 +123,27 @@ export default function GalleryClient({
     }
   };
 
+  useEffect(() => {
+    if (selectedPhotoIndex === null) {
+      return;
+    }
+
+    closeButtonRef.current?.focus();
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") closeLightbox();
+      if (event.key === "ArrowRight") nextPhoto();
+      if (event.key === "ArrowLeft") prevPhoto();
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  });
+
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="fv-bg fv-bg-gallery flex min-h-screen flex-col bg-paper">
       <Navbar />
 
-      <main className="flex-1 container mx-auto px-6 max-w-7xl pt-16">
+      <div className="fv-container flex-1 pt-28">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -122,34 +151,34 @@ export default function GalleryClient({
         >
           {/* HEADER */}
           <header className="text-center pt-10">
-            <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-gold/10 text-gold mb-6">
+            <div className="mb-6 inline-flex items-center justify-center rounded-md bg-gold/15 p-3 text-gold-dark">
               <ImageIcon size={32} />
             </div>
             <h1 className="font-serif text-4xl md:text-6xl text-primary font-bold mb-4">
               Galeria de Imagens
             </h1>
-            <p className="text-text/60 text-lg font-light max-w-2xl mx-auto">
+            <p className="fv-lead mx-auto text-center">
               Um registro visual dos encontros, vivências e da beleza que
               floresce no Instituto Figura Viva.
             </p>
           </header>
 
           {/* SHOWROOM CONTROLS */}
-          <section className="bg-white p-6 rounded-[2rem] shadow-sm border border-stone-100 flex flex-col xl:flex-row gap-8 justify-between items-end">
+          <section className="flex flex-col items-end justify-between gap-8 border-y border-border py-6 xl:flex-row">
             {/* Stats & Search */}
             <div className="w-full xl:w-auto flex-1 space-y-4">
               <div className="flex items-center gap-4">
-                <p className="text-xs uppercase tracking-widest font-bold text-text/40">
+                <p className="text-xs font-bold uppercase tracking-widest text-muted">
                   {filteredPhotos.length} Registros
                 </p>
-                <div className="h-4 w-px bg-stone-200"></div>
-                <div className="flex gap-4 text-xs font-bold uppercase tracking-widest text-primary/60">
+                <div className="h-4 w-px bg-border" aria-hidden></div>
+                <div className="flex gap-4 text-xs font-bold uppercase tracking-widest text-text/70">
                   <button
                     onClick={() => setSort("curadoria")}
                     className={
                       sort === "curadoria"
-                        ? "text-gold underline decoration-2 underline-offset-4"
-                        : "hover:text-primary"
+                        ? "min-h-11 text-primary underline decoration-2 underline-offset-4"
+                        : "min-h-11 hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                     }
                   >
                     Recentes
@@ -158,8 +187,8 @@ export default function GalleryClient({
                     onClick={() => setSort("az")}
                     className={
                       sort === "az"
-                        ? "text-gold underline decoration-2 underline-offset-4"
-                        : "hover:text-primary"
+                        ? "min-h-11 text-primary underline decoration-2 underline-offset-4"
+                        : "min-h-11 hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                     }
                   >
                     A-Z
@@ -169,33 +198,34 @@ export default function GalleryClient({
 
               <div className="relative group w-full max-w-md">
                 <Search
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-text/30 group-focus-within:text-gold transition-colors"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-muted transition-colors group-focus-within:text-primary"
                   size={18}
                 />
                 <input
                   type="text"
+                  aria-label="Buscar momentos"
                   placeholder="Buscar momentos..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 rounded-xl outline-none bg-stone-50 border border-stone-200 focus:border-gold/50 text-primary placeholder-text/30 transition-all font-light"
+                  className="h-12 w-full rounded-md border border-border bg-paper pl-12 pr-4 text-primary outline-none transition-colors placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/15"
                 />
               </div>
             </div>
 
             {/* Tags Filter */}
             <div className="w-full xl:w-auto flex flex-col items-end gap-3">
-              <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-text/40">
+              <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted">
                 <Filter size={10} /> Filtros
               </div>
               <div className="flex flex-wrap justify-end gap-2">
                 <button
                   onClick={() => setFilter("Todos")}
-                  className={`px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all border
-                                    ${
-                                      filter === "Todos"
-                                        ? "bg-primary border-primary text-white shadow-lg"
-                                        : "bg-white border-stone-200 text-text/60 hover:border-gold hover:text-gold"
-                                    }`}
+                  aria-pressed={filter === "Todos"}
+                  className={`min-h-11 rounded-sm border px-4 py-2 text-[10px] font-bold uppercase tracking-wider transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+                    filter === "Todos"
+                      ? "border-primary bg-primary text-white"
+                      : "border-border bg-paper text-text/70 hover:border-igarape hover:bg-areia hover:text-primary"
+                  }`}
                 >
                   Todos
                 </button>
@@ -203,12 +233,12 @@ export default function GalleryClient({
                   <button
                     key={tag}
                     onClick={() => setFilter(tag)}
-                    className={`px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all border
-                                        ${
-                                          filter === tag
-                                            ? "bg-gold border-gold text-white shadow-lg"
-                                            : "bg-white border-stone-200 text-text/60 hover:border-gold hover:text-gold"
-                                        }`}
+                    aria-pressed={filter === tag}
+                    className={`min-h-11 rounded-sm border px-4 py-2 text-[10px] font-bold uppercase tracking-wider transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+                      filter === tag
+                        ? "border-primary bg-primary text-white"
+                        : "border-border bg-paper text-text/70 hover:border-igarape hover:bg-areia hover:text-primary"
+                    }`}
                   >
                     {tag}
                   </button>
@@ -220,17 +250,21 @@ export default function GalleryClient({
           {/* GRID CONTENT */}
           <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
             {filteredPhotos.map((photo, index) => (
-              <motion.div
+              <motion.button
+                type="button"
                 key={photo.id}
                 layoutId={photo.id}
-                className="break-inside-avoid relative group cursor-pointer rounded-2xl overflow-hidden bg-stone-100 shadow-sm hover:shadow-xl transition-all duration-500"
-                onClick={() => openLightbox(index)}
+                aria-label={`Abrir imagem: ${photo.title}`}
+                className="group relative block w-full cursor-pointer break-inside-avoid overflow-hidden rounded-md border border-border bg-areia text-left transition-colors duration-500 hover:border-igarape focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                onClick={(event) => openLightbox(index, event.currentTarget)}
                 whileHover={{ y: -5 }}
               >
-                <img
+                <GalleryImage
                   src={photo.src}
                   alt={photo.title}
-                  className="w-full h-auto object-cover opacity-95 group-hover:opacity-100 transition-opacity"
+                  width={photo.width}
+                  height={photo.height}
+                  imageClassName="opacity-95 transition-opacity group-hover:opacity-100"
                 />
                 {/* Hover Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
@@ -251,18 +285,18 @@ export default function GalleryClient({
                       .map((tag: string, i: number) => (
                         <span
                           key={i}
-                          className="text-[9px] uppercase font-bold tracking-widest text-white/80 bg-white/20 px-2 py-1 rounded"
+                          className="rounded-sm bg-paper/25 px-2 py-1 text-[9px] font-bold uppercase tracking-widest text-white"
                         >
                           {tag}
                         </span>
                       ))}
                   </div>
                 </div>
-              </motion.div>
+              </motion.button>
             ))}
 
             {filteredPhotos.length === 0 && (
-              <div className="col-span-full py-20 bg-stone-50/50 rounded-[2rem] border border-dashed border-stone-200">
+              <div className="col-span-full rounded-md border border-dashed border-border bg-areia/50 py-20">
                 <EmptyState
                   icon={ImageIcon}
                   title="Nenhum Momento Encontrado"
@@ -273,7 +307,7 @@ export default function GalleryClient({
             )}
           </div>
         </motion.div>
-      </main>
+      </div>
 
       <Footer />
 
@@ -286,59 +320,76 @@ export default function GalleryClient({
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4"
             onClick={closeLightbox}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="gallery-dialog-title"
           >
             <button
+              ref={closeButtonRef}
+              type="button"
               onClick={closeLightbox}
-              className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors z-[110]"
+              aria-label="Fechar imagem ampliada"
+              className="absolute right-4 top-4 z-[110] inline-flex min-h-11 min-w-11 items-center justify-center rounded-full bg-black/30 text-white/70 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-white sm:right-6 sm:top-6"
             >
               <X size={32} />
             </button>
 
             <div
-              className="relative max-w-5xl max-h-[90vh] bg-white rounded-2xl overflow-hidden shadow-2xl flex flex-col lg:flex-row"
+              className="relative flex max-h-[90vh] max-w-5xl flex-col overflow-hidden rounded-md bg-paper lg:flex-row"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Image Container */}
-              <div className="flex-1 bg-stone-50 relative flex items-center justify-center p-4">
-                <img
+              <div className="relative flex flex-1 items-center justify-center bg-areia p-4">
+                <GalleryImage
                   src={filteredPhotos[selectedPhotoIndex].src}
                   alt={filteredPhotos[selectedPhotoIndex].title}
-                  className="max-w-full max-h-[70vh] object-contain rounded-lg shadow-lg"
+                  width={filteredPhotos[selectedPhotoIndex].width}
+                  height={filteredPhotos[selectedPhotoIndex].height}
+                  fit="contain"
+                  sizes="(max-width: 1024px) 100vw, 70vw"
+                  className="max-h-[70vh] rounded-md"
                 />
 
                 {/* Nav Buttons */}
                 <button
+                  type="button"
+                  aria-label="Imagem anterior"
                   onClick={(e) => {
                     e.stopPropagation();
                     prevPhoto();
                   }}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 p-4 bg-white/80 hover:bg-gold hover:text-white text-primary rounded-full transition-all shadow-lg backdrop-blur"
+                  className="absolute left-4 top-1/2 min-h-11 min-w-11 -translate-y-1/2 rounded-full bg-paper/90 p-4 text-primary backdrop-blur transition-colors hover:bg-primary hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
                 >
                   <ArrowRight className="rotate-180" size={24} />
                 </button>
                 <button
+                  type="button"
+                  aria-label="Próxima imagem"
                   onClick={(e) => {
                     e.stopPropagation();
                     nextPhoto();
                   }}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 p-4 bg-white/80 hover:bg-gold hover:text-white text-primary rounded-full transition-all shadow-lg backdrop-blur"
+                  className="absolute right-4 top-1/2 min-h-11 min-w-11 -translate-y-1/2 rounded-full bg-paper/90 p-4 text-primary backdrop-blur transition-colors hover:bg-primary hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
                 >
                   <ArrowRight size={24} />
                 </button>
               </div>
 
               {/* Sidebar Info */}
-              <div className="w-full lg:w-80 bg-white p-8 border-l border-stone-100 flex flex-col overflow-y-auto">
-                <h3 className="font-serif text-2xl text-primary mb-4 leading-tight">
+              <div className="flex w-full flex-col overflow-y-auto border-l border-border bg-paper p-8 lg:w-80">
+                <h3
+                  id="gallery-dialog-title"
+                  className="font-serif text-2xl text-primary mb-4 leading-tight"
+                >
                   {filteredPhotos[selectedPhotoIndex].title}
                 </h3>
-                <div className="w-10 h-1 bg-gold/30 mb-6 rounded-full"></div>
-                <p className="text-text/70 text-sm leading-relaxed mb-8 whitespace-pre-line font-light">
+                <div className="mb-6 h-px w-10 bg-terra" aria-hidden></div>
+                <p className="mb-8 whitespace-pre-line text-sm leading-relaxed text-text/80">
                   {filteredPhotos[selectedPhotoIndex].caption ||
                     "Sem descrição disponível."}
                 </p>
                 <div className="mt-auto">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-text/30 mb-3">
+                  <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-muted">
                     Tags
                   </p>
                   <div className="flex flex-wrap gap-2">
@@ -351,7 +402,7 @@ export default function GalleryClient({
                     ).map((tag: any) => (
                       <span
                         key={tag}
-                        className="text-[9px] uppercase tracking-widest text-primary/60 bg-stone-100 px-2.5 py-1 rounded-full"
+                        className="rounded-sm bg-areia px-2.5 py-1 text-[9px] uppercase tracking-widest text-primary"
                       >
                         {tag}
                       </span>

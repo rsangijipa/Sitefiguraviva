@@ -37,16 +37,14 @@ export default function FAQSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <section className="section-padding bg-paper border-t border-primary/5">
-      <div className="container mx-auto max-w-4xl">
+    <section className="fv-section fv-section--cream fv-bg fv-bg-faq border-t border-border/60">
+      <div className="fv-container max-w-4xl">
         <div className="text-center mb-16">
-          <span className="text-xs font-bold tracking-[0.2em] uppercase text-gold mb-4 block">
-            Dúvidas Comuns
-          </span>
+          <span className="fv-eyebrow mb-4">Dúvidas Comuns</span>
           <h2 className="heading-section">Perguntas Frequentes</h2>
         </div>
 
-        <div className="space-y-4">
+        <div className="border-t border-border">
           {faqs.map((faq, idx) => (
             <motion.div
               key={idx}
@@ -54,34 +52,35 @@ export default function FAQSection() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.05 }}
               viewport={{ once: true }}
-              className={cn(
-                "bg-white rounded-2xl border transition-all duration-300 overflow-hidden",
-                openIndex === idx
-                  ? "border-gold/30 shadow-soft-md"
-                  : "border-transparent shadow-none hover:border-gold/10",
-              )}
+              className="mb-3 overflow-hidden rounded-2xl border border-border bg-surface shadow-soft-sm"
             >
               <button
                 onClick={() => setOpenIndex(openIndex === idx ? null : idx)}
-                className="w-full flex items-center justify-between p-6 text-left"
+                aria-expanded={openIndex === idx}
+                aria-controls={`faq-resposta-${idx}`}
+                className="flex w-full items-center justify-between gap-6 px-5 py-5 text-left"
               >
                 <span
                   className={cn(
-                    "font-serif text-lg font-bold transition-colors",
-                    openIndex === idx ? "text-primary" : "text-primary/70",
+                    "font-serif text-lg font-semibold transition-colors",
+                    openIndex === idx ? "text-primary" : "text-text/80",
                   )}
                 >
                   {faq.question}
                 </span>
                 <div
                   className={cn(
-                    "w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300",
+                    "flex h-8 w-8 shrink-0 items-center justify-center rounded-sm border transition-colors duration-300",
                     openIndex === idx
-                      ? "bg-gold text-white rotate-180"
-                      : "bg-paper text-primary/50",
+                      ? "border-igarape text-igarape"
+                      : "border-border text-muted",
                   )}
                 >
-                  {openIndex === idx ? <Minus size={16} /> : <Plus size={16} />}
+                  {openIndex === idx ? (
+                    <Minus size={16} aria-hidden />
+                  ) : (
+                    <Plus size={16} aria-hidden />
+                  )}
                 </div>
               </button>
 
@@ -93,7 +92,10 @@ export default function FAQSection() {
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                   >
-                    <div className="px-6 pb-6 pt-0 text-primary/70 leading-relaxed font-light">
+                    <div
+                      id={`faq-resposta-${idx}`}
+                      className="max-w-[62ch] pb-8 pr-14 leading-relaxed text-text/75"
+                    >
                       {faq.answer}
                     </div>
                   </motion.div>

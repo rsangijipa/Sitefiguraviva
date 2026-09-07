@@ -1,7 +1,13 @@
 import { test, expect } from "@playwright/test";
-import { loginAsStudent } from "./helpers";
+import {
+  loginAsStudent,
+  HAS_STUDENT_CREDENTIALS,
+  MISSING_STUDENT_CREDENTIALS,
+} from "./helpers";
 
 test.describe("Student Completion Journey", () => {
+  test.skip(!HAS_STUDENT_CREDENTIALS, MISSING_STUDENT_CREDENTIALS);
+
   test("should complete a course and see the certificate", async ({ page }) => {
     // 1. Login as student
     await loginAsStudent(page);

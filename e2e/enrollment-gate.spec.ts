@@ -1,62 +1,86 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
 /**
  * E2E Tests for Enrollment Gate (Orbital 07)
  * Proves that access is synchronized between Admin and Student.
+ *
+ * MARKED FIXME: these are placeholders, not working tests. Every case leaves
+ * its setup as a comment ("Simulate Stripe Webhook...", "Setup enrollment with
+ * accessUntil in the past") and then asserts against invented ids such as
+ * demo-course and draft-course, on a /cursos route that does not exist. They
+ * cannot pass, so they were failing the e2e command on every run.
+ *
+ * They are kept rather than deleted because they describe the access rules
+ * worth covering. Implementing them needs seeded fixtures and a signed-in
+ * context; until then fixme keeps the intent visible without a red pipeline.
+ * Note that the project docs list this file as completed E2E verification of
+ * the enrollment gate — it is not.
  */
-test.describe('Enrollment Gate SSoT', () => {
+test.describe.fixme("Enrollment Gate SSoT", () => {
+  test("PIX Flow: Pending enrollment blocks access, Admin approval grants it", async ({
+    page,
+  }) => {
+    // 1. Student requests PIX access (Assuming a button exists)
+    // For E2E, we might simulate the enrollment state in DB directly if no UI exists yet
+    // But the requirement says "prove synchronization in the real world"
 
-    test('PIX Flow: Pending enrollment blocks access, Admin approval grants it', async ({ page }) => {
-        // 1. Student requests PIX access (Assuming a button exists)
-        // For E2E, we might simulate the enrollment state in DB directly if no UI exists yet
-        // But the requirement says "prove synchronization in the real world"
+    // Mocking/Setup: In a real E2E, we'd go through the UI.
+    // Here we'll describe the steps as requested.
 
-        // Mocking/Setup: In a real E2E, we'd go through the UI.
-        // Here we'll describe the steps as requested.
+    await page.goto("/cursos");
+    // Click PIX button...
+    // Expect enrollment state: pending
 
-        await page.goto('/cursos');
-        // Click PIX button...
-        // Expect enrollment state: pending
+    await page.goto("/portal/course/demo-course");
+    await expect(page.locator("text=Aguardando Aprovação PIX")).toBeVisible();
 
-        await page.goto('/portal/course/demo-course');
-        await expect(page.locator('text=Aguardando Aprovação PIX')).toBeVisible();
+    // Attempt lesson access
+    await page.goto("/portal/course/demo-course/lesson/intro");
+    await expect(page).toHaveURL(/.*checkout|.*error|.*pending/);
+  });
 
-        // Attempt lesson access
-        await page.goto('/portal/course/demo-course/lesson/intro');
-        await expect(page).toHaveURL(/.*checkout|.*error|.*pending/);
-    });
+  test("Stripe Flow: Webhook confirmation grants immediate access", async ({
+    page,
+  }) => {
+    // 1. Simulate Stripe Webhook (via API call or CLI)
+    // ...
 
-    test('Stripe Flow: Webhook confirmation grants immediate access', async ({ page }) => {
-        // 1. Simulate Stripe Webhook (via API call or CLI)
-        // ...
+    await page.goto("/portal/course/demo-course");
+    await expect(page.locator("text=Assistir Aula")).toBeVisible();
+  });
 
-        await page.goto('/portal/course/demo-course');
-        await expect(page.locator('text=Assistir Aula')).toBeVisible();
-    });
+  test("Subscription: Expiration blocks access server-side", async ({
+    page,
+  }) => {
+    // 1. Setup enrollment with accessUntil in the past
+    // ...
 
-    test('Subscription: Expiration blocks access server-side', async ({ page }) => {
-        // 1. Setup enrollment with accessUntil in the past
-        // ...
+    await page.goto("/portal/course/demo-course");
+    await expect(page.locator("text=Sua assinatura expirou")).toBeVisible();
 
-        await page.goto('/portal/course/demo-course');
-        await expect(page.locator('text=Sua assinatura expirou')).toBeVisible();
+    // Anti-bypass check
+    const response = await page.goto(
+      "/api/course/demo-course/lesson/intro/content",
+    );
+    expect(response?.status()).toBe(403);
+  });
 
-        // Anti-bypass check
-        const response = await page.goto('/api/course/demo-course/lesson/intro/content');
-        expect(response?.status()).toBe(403);
-    });
+  test("URL Bypass: Direct navigation without enrollment is blocked", async ({
+    page,
+  }) => {
+    await page.goto("/portal/course/unauthorized-course/lesson/secret");
+    await expect(page).toHaveURL(/.*checkout|.*login/);
+  });
 
-    test('URL Bypass: Direct navigation without enrollment is blocked', async ({ page }) => {
-        await page.goto('/portal/course/unauthorized-course/lesson/secret');
-        await expect(page).toHaveURL(/.*checkout|.*login/);
-    });
+  test("Publication Gate: Active enrollment on draft course is blocked", async ({
+    page,
+  }) => {
+    // 1. User has active enrollment
+    // 2. Admin marks course as Draft
 
-    test('Publication Gate: Active enrollment on draft course is blocked', async ({ page }) => {
-        // 1. User has active enrollment
-        // 2. Admin marks course as Draft
-
-        await page.goto('/portal/course/draft-course');
-        await expect(page.locator('text=Este curso não está disponível no momento')).toBeVisible();
-    });
-
+    await page.goto("/portal/course/draft-course");
+    await expect(
+      page.locator("text=Este curso não está disponível no momento"),
+    ).toBeVisible();
+  });
 });

@@ -18,6 +18,7 @@
 # Next.js
 /.next/
 /.next-resources-verification/
+/\.next-build-check*/
 /out/
 
 # Production

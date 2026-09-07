@@ -1,6 +1,6 @@
 import { updateLessonProgress } from "@/app/actions/progress";
-import { adminAuth } from "@/lib/firebase/admin";
 import { assertCanAccessCourse } from "@/lib/auth/access-gate";
+import { verifySession } from "@/lib/auth/server";
 import { progressService } from "@/lib/progress/progressService";
 import { gamificationService } from "@/lib/gamification/gamificationService";
 import { revalidatePath } from "next/cache";
@@ -20,10 +20,8 @@ jest.mock("next/cache", () => ({
   revalidatePath: jest.fn(),
 }));
 
-jest.mock("@/lib/firebase/admin", () => ({
-  adminAuth: {
-    verifySessionCookie: jest.fn(),
-  },
+jest.mock("@/lib/auth/server", () => ({
+  verifySession: jest.fn(),
 }));
 
 jest.mock("@/lib/auth/access-gate", () => ({
@@ -45,8 +43,13 @@ jest.mock("@/lib/gamification/gamificationService", () => ({
 describe("updateLessonProgress action", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (adminAuth.verifySessionCookie as jest.Mock).mockResolvedValue({
+    (verifySession as jest.Mock).mockResolvedValue({
       uid: "user123",
+      email: "user@example.com",
+      role: "student",
+      isAdmin: false,
+      isStaff: false,
+      isActive: true,
     });
     (assertCanAccessCourse as jest.Mock).mockResolvedValue({
       uid: "user123",
@@ -63,12 +66,7 @@ describe("updateLessonProgress action", () => {
   });
 
   it("returns unauthenticated when session cookie is missing", async () => {
-    const { cookies } = require("next/headers");
-    (cookies as jest.Mock).mockImplementationOnce(() =>
-      Promise.resolve({
-        get: jest.fn(() => undefined),
-      }),
-    );
+    (verifySession as jest.Mock).mockResolvedValueOnce(null);
 
     const result = await updateLessonProgress("c1", "m1", "l1", {
       status: "completed",

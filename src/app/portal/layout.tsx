@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { PortalClientLayout } from "./PortalClientLayout";
 import { ensureUserDoc } from "@/lib/auth/user-service";
 import { requireSession } from "@/lib/auth/server";
+import { PortalProviders } from "@/components/providers/PortalProviders";
 
 export const dynamic = "force-dynamic";
 
@@ -19,5 +20,9 @@ export default async function PortalLayout({
     redirect("/auth");
   }
 
-  return <PortalClientLayout>{children}</PortalClientLayout>;
+  return (
+    <PortalProviders>
+      <PortalClientLayout>{children}</PortalClientLayout>
+    </PortalProviders>
+  );
 }
