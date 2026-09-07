@@ -17,7 +17,7 @@ import {
   playScanIntro,
   pauseScanIntro,
   stopScanIntro,
-} from "../services/geminiService";
+} from "../services/bodyScanService";
 
 interface ScannerProps {
   onComplete: (data: BodyData) => void;
