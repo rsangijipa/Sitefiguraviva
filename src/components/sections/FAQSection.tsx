@@ -52,13 +52,13 @@ export default function FAQSection() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.05 }}
               viewport={{ once: true }}
-              className="overflow-hidden border-b border-border"
+              className="mb-3 overflow-hidden rounded-2xl border border-border bg-surface shadow-soft-sm"
             >
               <button
                 onClick={() => setOpenIndex(openIndex === idx ? null : idx)}
                 aria-expanded={openIndex === idx}
                 aria-controls={`faq-resposta-${idx}`}
-                className="flex w-full items-center justify-between gap-6 py-6 text-left"
+                className="flex w-full items-center justify-between gap-6 px-5 py-5 text-left"
               >
                 <span
                   className={cn(

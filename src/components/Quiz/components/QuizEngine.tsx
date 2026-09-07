@@ -33,10 +33,22 @@ export function QuizEngine({
   );
 
   const handleAnswer = (value: AnswerValue) => {
-    setAnswers((prev) => {
-      const filtered = prev.filter((a) => a.questionId !== currentQuestion.id);
+    const nextAnswers = (() => {
+      const filtered = answers.filter((a) => a.questionId !== currentQuestion.id);
       return [...filtered, { questionId: currentQuestion.id, value }];
+    })();
+    setAnswers(() => {
+      return nextAnswers;
     });
+
+    window.setTimeout(() => {
+      setIsTransitioning(true);
+      window.setTimeout(() => {
+        if (isLastQuestion) onComplete(nextAnswers);
+        else setCurrentQuestionIndex((prev) => prev + 1);
+        setIsTransitioning(false);
+      }, 200);
+    }, 180);
   };
 
   const handleNext = () => {

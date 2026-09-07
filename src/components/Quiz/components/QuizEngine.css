@@ -18,6 +18,10 @@
   gap: var(--space-lg);
   max-width: 680px;
   margin-inline: auto;
+  padding: var(--space-lg);
+  border: 1px solid var(--fv-nevoa);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 14px 32px rgba(38, 43, 34, 0.08);
 }
 
 .quiz-engine__answers {
@@ -29,6 +33,7 @@
 /* ── Navegação ── */
 .quiz-engine__navigation {
   display: flex;
+  justify-content: center;
   gap: var(--space-md);
   margin-top: var(--space-sm);
 }

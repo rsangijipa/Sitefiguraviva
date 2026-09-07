@@ -1,151 +1,139 @@
-"use client";
-
-import { ArrowRight, Instagram, Mail, MapPin, Phone } from "lucide-react";
+import { Instagram, Mail, MapPin, Phone, ArrowRight } from "lucide-react";
+import CookiePreferencesButton from "@/components/system/CookiePreferencesButton";
 import Link from "next/link";
-import { useInstituteSettings } from "@/hooks/useSiteSettings";
 import { PUBLIC_NAV_ITEMS } from "@/features/public-site/content/navigation";
 
+const explorar = PUBLIC_NAV_ITEMS.filter((item) => item.label !== "Instituto");
+
+const institucional = [
+  { label: "Instituto", href: "/instituto" },
+  { label: "Fundadora", href: "/instituto/fundadora" },
+  { label: "Manifesto", href: "/instituto/manifesto" },
+  { label: "Privacidade", href: "/privacidade" },
+  { label: "Termos", href: "/termos" },
+];
+
 export default function Footer() {
-  const { data } = useInstituteSettings();
-  const address = data.address || "Ouro Preto D'Oeste, Rondônia";
-  const phone = data.phone ? String(data.phone).replace(/\D/g, "") : "";
+  const address = "Rua Santos Dumont, 156 - Ouro Preto D'Oeste - RO";
+  const phone = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "5569992481585";
+  const mapsHref = `https://maps.google.com/?q=${encodeURIComponent(address)}`;
 
   return (
-    <footer className="relative overflow-hidden bg-[#3e332c] px-6 pb-8 pt-16 text-paper md:pt-20">
-      <div className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-gold/10 blur-3xl" />
-      <div className="container relative z-10 mx-auto max-w-7xl">
-        <div className="grid gap-12 border-b border-paper/10 pb-12 md:grid-cols-2 lg:grid-cols-[1.3fr_0.8fr_0.8fr_1fr]">
-          <div>
-            <p className="font-serif text-4xl text-paper">
-              Figura <span className="italic text-gold">Viva</span>
+    <footer className="fv-bg fv-bg-footer relative overflow-hidden bg-primary-solid pb-6 pt-10 text-paper md:pb-8 md:pt-14">
+      <div className="fv-container relative z-10">
+        <div className="mb-8 grid gap-7 border-b border-paper/15 pb-8 md:mb-10 md:grid-cols-12 md:gap-10">
+          <div className="md:col-span-5 lg:col-span-5">
+            <h3 className="mb-4 font-serif text-3xl md:text-4xl">
+              Figura <span className="font-light text-gold italic">Viva</span>
+            </h3>
+            <p className="mb-5 max-w-sm text-sm leading-relaxed text-paper/70">
+              Habitando a fronteira do encontro, cultivando awareness e
+              transformando vidas através da Gestalt-Terapia.
             </p>
-            <p className="mt-5 max-w-sm text-base leading-relaxed text-paper/65">
-              {data.quote ||
-                "Presença, encontro e formação em Gestalt-terapia."}
-            </p>
-            <a
-              href="https://www.instagram.com/institutofiguraviva/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-6 inline-flex min-h-11 items-center gap-3 text-sm text-paper/70 transition hover:text-gold"
-            >
-              <Instagram size={18} /> Instagram
-            </a>
+            <div className="mb-2 flex items-center gap-4">
+              <a
+                href="https://www.instagram.com/institutofiguraviva/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex h-12 w-12 items-center justify-center rounded-full border border-paper/25 transition-soft hover:bg-paper hover:text-primary"
+              >
+                <Instagram
+                  size={20}
+                  className="group-hover:scale-110 transition-transform"
+                />
+              </a>
+            </div>
           </div>
 
-          <div>
-            <h2 className="text-[11px] font-bold uppercase tracking-[0.24em] text-gold">
+          <nav
+            aria-label="Explorar o site"
+            className="md:col-span-3 lg:col-span-2"
+          >
+            <h4 className="mb-3 font-sans text-[10px] font-bold uppercase tracking-[0.3em] text-gold-light">
               Explorar
-            </h2>
-            <ul className="mt-5 space-y-1">
-              {PUBLIC_NAV_ITEMS.slice(2).map((item) => (
+            </h4>
+            <ul className="space-y-2 text-sm text-paper/75">
+              {explorar.map((item) => (
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="flex min-h-11 items-center text-sm text-paper/65 transition hover:text-paper"
+                    className="flex min-h-[44px] items-center py-1 transition-soft hover:text-gold-light"
                   >
                     {item.label}
                   </Link>
                 </li>
               ))}
             </ul>
-          </div>
+          </nav>
 
-          <div>
-            <h2 className="text-[11px] font-bold uppercase tracking-[0.24em] text-gold">
+          <nav
+            aria-label="Informações institucionais"
+            className="md:col-span-4 lg:col-span-2"
+          >
+            <h4 className="mb-3 font-sans text-[10px] font-bold uppercase tracking-[0.3em] text-gold-light">
               Institucional
-            </h2>
-            <ul className="mt-5 space-y-1">
-              <li>
-                <Link
-                  href="/instituto"
-                  className="flex min-h-11 items-center text-sm text-paper/65 transition hover:text-paper"
-                >
-                  Sobre o Instituto
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/instituto/fundadora"
-                  className="flex min-h-11 items-center text-sm text-paper/65 transition hover:text-paper"
-                >
-                  Fundadora
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/portal"
-                  className="flex min-h-11 items-center text-sm text-paper/65 transition hover:text-paper"
-                >
-                  Portal do Aluno
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/login"
-                  className="flex min-h-11 items-center text-sm text-paper/65 transition hover:text-paper"
-                >
-                  Clínica
-                </Link>
+            </h4>
+            <ul className="space-y-2 text-sm text-paper/75">
+              {institucional.map((item) => (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    className="flex min-h-[44px] items-center py-1 transition-soft hover:text-gold-light"
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+              <li className="flex min-h-[44px] items-center">
+                <CookiePreferencesButton />
               </li>
             </ul>
-          </div>
+          </nav>
 
-          <div>
-            <h2 className="text-[11px] font-bold uppercase tracking-[0.24em] text-gold">
+          <div className="md:col-span-12 lg:col-span-3">
+            <h4 className="mb-3 font-sans text-[10px] font-bold uppercase tracking-[0.3em] text-gold-light">
               Contato
-            </h2>
-            <div className="mt-5 space-y-4 text-sm text-paper/65">
+            </h4>
+            <div className="space-y-2 text-sm text-paper/75">
+              <p className="flex items-start gap-3 whitespace-pre-line leading-relaxed">
+                <MapPin size={16} className="mt-1 shrink-0 text-gold-light" />
+                {address}
+              </p>
               <a
                 href="mailto:contato@figuraviva.com.br"
-                className="flex items-start gap-3 transition hover:text-paper"
+                className="flex items-center gap-3 transition-soft hover:text-gold-light"
               >
-                <Mail size={17} className="mt-0.5 shrink-0 text-gold" />{" "}
+                <Mail size={16} className="shrink-0 text-gold-light" />
                 contato@figuraviva.com.br
               </a>
               {phone && (
                 <a
-                  href={`https://wa.me/55${phone}`}
+                  href={`https://wa.me/${phone.replace(/\D/g, "")}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-start gap-3 transition hover:text-paper"
+                  className="flex items-center gap-3 transition-soft hover:text-gold-light"
                 >
-                  <Phone size={17} className="mt-0.5 shrink-0 text-gold" />{" "}
-                  {data.phone}
+                  <Phone size={16} className="shrink-0 text-gold-light" />
+                  WhatsApp do Instituto
                 </a>
               )}
               <a
-                href={`https://maps.google.com/?q=${encodeURIComponent(address)}`}
+                href={mapsHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-start gap-3 transition hover:text-paper"
+                className="inline-flex items-center gap-2 rounded-md border border-paper/25 px-5 py-2.5 text-xs font-bold uppercase tracking-widest transition-soft hover:border-paper hover:bg-paper hover:text-primary"
               >
-                <MapPin size={17} className="mt-0.5 shrink-0 text-gold" />{" "}
-                <span>{address}</span>
-                <ArrowRight size={15} className="mt-0.5 shrink-0" />
+                Traçar Rota <ArrowRight size={14} aria-hidden />
               </a>
             </div>
           </div>
         </div>
-        <div className="flex flex-col gap-4 pt-6 text-[10px] font-bold uppercase tracking-[0.18em] text-paper/40 md:flex-row md:items-center md:justify-between">
-          <p>© {new Date().getFullYear()} Instituto Figura Viva</p>
-          <div className="flex flex-wrap gap-x-6 gap-y-2">
-            <Link
-              href="/privacidade"
-              className="min-h-11 inline-flex items-center hover:text-paper"
-            >
-              Privacidade
-            </Link>
-            <Link
-              href="/termos"
-              className="min-h-11 inline-flex items-center hover:text-paper"
-            >
-              Termos
-            </Link>
-            <span className="inline-flex min-h-11 items-center">
-              Diversidade
-            </span>
-          </div>
+
+        <div className="flex flex-col items-center justify-between gap-4 text-[10px] font-bold uppercase tracking-[0.2em] text-paper/45 md:flex-row">
+          <p>
+            &copy; {new Date().getFullYear()} Instituto Figura Viva &bull; Todos
+            os direitos reservados
+          </p>
         </div>
       </div>
     </footer>

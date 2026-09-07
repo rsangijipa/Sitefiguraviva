@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { PublicPageHero } from "@/features/public-site/components/PublicPageHero";
-import { PublicSiteFrame } from "@/features/public-site/components/PublicSiteFrame";
+import PublicPageHero from "@/features/public-site/components/PublicPageHero";
+import PublicSiteFrame from "@/features/public-site/components/PublicSiteFrame";
 
 export const metadata: Metadata = {
   title: "Manifesto",
