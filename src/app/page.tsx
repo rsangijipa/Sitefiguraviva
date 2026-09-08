@@ -71,13 +71,15 @@ async function getHomeData() {
       ]);
 
     const courses = (courseRows ?? []).map((data: any) => {
+      const image =
+        data.cover_image_url || data.image_url || data.thumbnail_url || null;
       return deepSafeSerialize({
         id: data.id,
         title: data.title || "",
         subtitle: data.subtitle || "",
         description: data.description || "",
-        image: data.image || null,
-        coverImage: data.coverImage || "",
+        image,
+        coverImage: image || "",
       });
     });
 

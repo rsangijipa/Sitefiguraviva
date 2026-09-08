@@ -9,17 +9,17 @@ export function LauraHero() {
   const { hero } = lauraPerlsContent;
 
   return (
-    <section className="relative min-h-[95vh] flex items-center justify-center overflow-hidden bg-[#d9d4c9]">
+    <section className="relative min-h-[95vh] flex items-center justify-center overflow-hidden bg-[#1b140d]">
       {/* Subtle Cream Light Leaks */}
-      <div className="absolute top-0 right-0 w-[700px] h-[700px] bg-[#e8e4db]/60 rounded-full blur-[120px] pointer-events-none -translate-y-1/4 translate-x-1/4" />
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#d9d4c9]/50 rounded-full blur-[100px] pointer-events-none translate-y-1/4 -translate-x-1/4" />
+      <div className="absolute top-0 right-0 w-[700px] h-[700px] bg-[#241b12]/60 rounded-full blur-[120px] pointer-events-none -translate-y-1/4 translate-x-1/4" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#1b140d]/50 rounded-full blur-[100px] pointer-events-none translate-y-1/4 -translate-x-1/4" />
 
       {/* Decorative Vintage Elements */}
-      <div className="absolute top-20 left-12 w-24 h-24 border border-[#b8ad96]/20 rotate-45 pointer-events-none" />
-      <div className="absolute bottom-32 right-16 w-16 h-16 border border-[#a88a4d]/20 rotate-12 pointer-events-none" />
+      <div className="absolute top-20 left-12 w-24 h-24 border border-[#4a3c28]/20 rotate-45 pointer-events-none" />
+      <div className="absolute bottom-32 right-16 w-16 h-16 border border-[#c9a768]/20 rotate-12 pointer-events-none" />
 
       {/* Center Decorative Line */}
-      <div className="absolute left-1/2 top-24 bottom-24 w-px bg-gradient-to-b from-transparent via-[#b8ad96]/30 to-transparent pointer-events-none hidden md:block" />
+      <div className="absolute left-1/2 top-24 bottom-24 w-px bg-gradient-to-b from-transparent via-[#4a3c28]/30 to-transparent pointer-events-none hidden md:block" />
 
       <div className="max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-12 md:gap-20 items-center relative z-10">
         {/* Text Column */}
@@ -31,11 +31,11 @@ export function LauraHero() {
         >
           {/* Archive Badge */}
           <div className="flex items-center gap-4">
-            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-sm border border-[#b8ad96] text-[10px] tracking-[0.3em] uppercase font-bold text-[#6a5a4a] bg-[#e8e4db] shadow-sm">
+            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-sm border border-[#4a3c28] text-[10px] tracking-[0.3em] uppercase font-bold text-[#a9987d] bg-[#241b12] shadow-sm">
               <BookOpen size={12} />
               Arquivo Histórico
             </span>
-            <div className="h-px flex-1 max-w-20 bg-[#b8ad96]/50" />
+            <div className="h-px flex-1 max-w-20 bg-[#3a2d1c]/50" />
           </div>
 
           {/* Main Title */}
@@ -44,30 +44,30 @@ export function LauraHero() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className="text-[11px] uppercase tracking-[0.4em] text-[#8a7a6a] font-bold"
+              className="text-[11px] uppercase tracking-[0.4em] text-[#8f7c64] font-bold"
             >
               Uma vida dedicada à psicoterapia
             </motion.p>
-            <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl leading-[0.9] text-[#3a2f25] tracking-tight">
+            <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl leading-[0.9] text-[#f5ecd9] tracking-tight">
               Laura <br />{" "}
-              <span className="italic text-[#5a4838] font-light">Posner</span>{" "}
+              <span className="italic text-[#cbb896] font-light">Posner</span>{" "}
               Perls
             </h1>
           </div>
 
           {/* Quote */}
-          <p className="text-xl md:text-2xl font-serif text-[#4a3a2a] max-w-lg leading-relaxed italic border-l-2 border-[#a88a4d]/60 pl-6 py-2">
+          <p className="text-xl md:text-2xl font-serif text-[#e6d7bd] max-w-lg leading-relaxed italic border-l-2 border-[#c9a768]/60 pl-6 py-2">
             {hero.title}
           </p>
 
           {/* Quick Facts Grid */}
-          <div className="grid grid-cols-2 gap-6 pt-8 border-t border-[#b8ad96]">
+          <div className="grid grid-cols-2 gap-6 pt-8 border-t border-[#4a3c28]">
             {hero.quickFacts.map((fact, i) => (
               <div key={i} className="group">
-                <span className="block text-[10px] uppercase tracking-[0.25em] text-[#8a7a6a] mb-1 font-bold">
+                <span className="block text-[10px] uppercase tracking-[0.25em] text-[#8f7c64] mb-1 font-bold">
                   {fact.label}
                 </span>
-                <span className="font-serif text-[#4a3a2a] text-lg tracking-tight">
+                <span className="font-serif text-[#e6d7bd] text-lg tracking-tight">
                   {fact.value}
                 </span>
               </div>
@@ -83,17 +83,17 @@ export function LauraHero() {
           className="relative"
         >
           {/* Soft Glow */}
-          <div className="absolute inset-0 bg-[#a88a4d]/10 blur-[80px] rounded-full scale-110" />
+          <div className="absolute inset-0 bg-[#c9a768]/10 blur-[80px] rounded-full scale-110" />
 
           {/* Double Frame Effect */}
           <div className="relative aspect-[3/4] md:aspect-[4/5]">
             {/* Outer Frame */}
-            <div className="absolute -inset-4 border-2 border-[#b8ad96]/40 rounded-sm" />
+            <div className="absolute -inset-4 border-2 border-[#4a3c28]/40 rounded-sm" />
 
             {/* Main Image Container */}
-            <div className="relative h-full bg-[#e8e4db] overflow-hidden rounded-sm shadow-2xl border-[12px] border-[#d9d4c9]">
+            <div className="relative h-full bg-[#241b12] overflow-hidden rounded-sm shadow-2xl border-[12px] border-[#3a2d1c]">
               {/* Inner Border */}
-              <div className="absolute inset-0 border border-[#b8ad96] z-10 pointer-events-none" />
+              <div className="absolute inset-0 border border-[#4a3c28] z-10 pointer-events-none" />
 
               {/* Image */}
               <div className="absolute inset-0 flex items-center justify-center">
@@ -124,9 +124,9 @@ export function LauraHero() {
           </div>
 
           {/* Legend Tag */}
-          <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-[#d9d4c9] text-[#6a5a4a] px-8 py-2 text-[9px] uppercase tracking-[0.35em] font-bold border border-[#b8ad96] whitespace-nowrap shadow-lg">
-            <span className="text-[#a88a4d]">★</span> Acervo Digital No. 742-LP{" "}
-            <span className="text-[#a88a4d]">★</span>
+          <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-[#1b140d] text-[#a9987d] px-8 py-2 text-[9px] uppercase tracking-[0.35em] font-bold border border-[#4a3c28] whitespace-nowrap shadow-lg">
+            <span className="text-[#d4b578]">★</span> Acervo Digital No. 742-LP{" "}
+            <span className="text-[#d4b578]">★</span>
           </div>
         </motion.div>
       </div>
@@ -136,7 +136,7 @@ export function LauraHero() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5, duration: 1 }}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 text-[#6a5a4a] text-xs tracking-widest uppercase cursor-pointer"
+        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 text-[#a9987d] text-xs tracking-widest uppercase cursor-pointer"
         onClick={() =>
           document
             .getElementById("timeline")
@@ -144,10 +144,10 @@ export function LauraHero() {
         }
       >
         <span className="font-bold">Linha do Tempo</span>
-        <div className="w-px h-8 bg-[#b8ad96] relative">
+        <div className="w-px h-8 bg-[#3a2d1c] relative">
           <ArrowDown
             size={12}
-            className="absolute -bottom-2 -left-1.5 animate-bounce text-[#a88a4d]"
+            className="absolute -bottom-2 -left-1.5 animate-bounce text-[#d4b578]"
           />
         </div>
       </motion.div>

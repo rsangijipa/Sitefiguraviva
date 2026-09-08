@@ -14,6 +14,7 @@ import {
   PenTool,
   Award,
   Users,
+  Heart,
   Instagram,
   ChevronRight,
   type LucideIcon,
@@ -25,6 +26,7 @@ import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 const NAV_ICONS: Record<string, LucideIcon> = {
   Instituto: Users,
+  "Laura Perls": Heart,
   Formações: Award,
   Recursos: Sparkles,
   Biblioteca: BookOpen,

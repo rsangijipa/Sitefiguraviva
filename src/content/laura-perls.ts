@@ -434,26 +434,28 @@ export const lauraPerlsContent = {
   ],
   gallery: [
     {
-      src: "/laura/laura1.jpg",
-      alt: "Laura Perls em 1975",
+      src: "/laura/laura2.png",
+      alt: "Laura Perls ao ar livre",
       caption:
-        "Laura Perls, ca. 1975. A matriarca da Gestalt em sua maturidade clínica.",
+        "Laura Perls em retrato ao ar livre. O colar e a postura serena marcam os registros mais divulgados de sua maturidade.",
       credit: "Acervo Histórico / Reprodução",
       license: "Fair Use / Divulgação Cultural",
     },
     {
-      src: "/laura/laura2.png",
-      alt: "Registro Histórico de Laura Perls",
-      caption: "Momentos de ensino e supervisão.",
-      credit: "Acervo Instituto Figura Viva",
-      license: "Acervo Interno",
+      src: "/laura/laura3.jpg",
+      alt: "Laura Perls em entrevista filmada",
+      caption:
+        "Still de uma entrevista gravada. A presença atenta e o diálogo Eu-Tu em ação, mesmo diante das câmeras.",
+      credit: "Acervo Histórico / Reprodução em vídeo",
+      license: "Fair Use",
     },
     {
-      src: "/laura/laura3.jpg",
-      alt: "Laura Perls em Entrevista",
-      caption: "A presença atenta e o diálogo Eu-Tu em ação.",
-      credit: "Acervo Histórico",
-      license: "Fair Use",
+      src: "/laura/laura1.jpg",
+      alt: "Laura Perls, close-up",
+      caption:
+        "O sorriso característico que atravessa os registros de Laura Perls — a mesma imagem que abre este arquivo, aqui em close.",
+      credit: "Acervo Histórico / Reprodução",
+      license: "Fair Use / Divulgação Cultural",
     },
   ],
 };

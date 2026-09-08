@@ -9,36 +9,36 @@ export function LauraGallery() {
   const { gallery } = lauraPerlsContent;
 
   return (
-    <section className="py-32 bg-[#e8e4db] border-t border-[#b8ad96] relative overflow-hidden">
+    <section className="py-16 bg-[#241b12] border-t border-[#4a3c28] relative overflow-hidden">
       {/* Decorative Top Border */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#b8ad96] to-transparent" />
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#4a3c28] to-transparent" />
 
       {/* Decorative Corner Elements */}
-      <div className="absolute top-8 left-8 w-16 h-16 border-t-2 border-l-2 border-[#b8ad96]/30 hidden md:block" />
-      <div className="absolute top-8 right-8 w-16 h-16 border-t-2 border-r-2 border-[#b8ad96]/30 hidden md:block" />
+      <div className="absolute top-8 left-8 w-16 h-16 border-t-2 border-l-2 border-[#4a3c28]/30 hidden md:block" />
+      <div className="absolute top-8 right-8 w-16 h-16 border-t-2 border-r-2 border-[#4a3c28]/30 hidden md:block" />
 
       <div className="max-w-6xl mx-auto px-6">
         {/* Section Header */}
-        <div className="text-center mb-20">
+        <div className="text-center mb-10">
           <div className="inline-flex items-center gap-3 mb-6">
-            <ImageIcon size={18} className="text-[#a88a4d]" />
-            <div className="h-px w-12 bg-[#a88a4d]/60" />
-            <span className="text-[11px] tracking-[0.3em] uppercase font-bold text-[#8a7a6a]">
+            <ImageIcon size={18} className="text-[#d4b578]" />
+            <div className="h-px w-12 bg-[#c9a768]/60" />
+            <span className="text-[11px] tracking-[0.3em] uppercase font-bold text-[#8f7c64]">
               Memórias Visuais
             </span>
-            <div className="h-px w-12 bg-[#a88a4d]/60" />
-            <ImageIcon size={18} className="text-[#a88a4d]" />
+            <div className="h-px w-12 bg-[#c9a768]/60" />
+            <ImageIcon size={18} className="text-[#d4b578]" />
           </div>
 
-          <h2 className="font-serif text-4xl md:text-6xl text-[#3a2f25] leading-tight tracking-tight">
+          <h2 className="font-serif text-4xl md:text-6xl text-[#f5ecd9] leading-tight tracking-tight">
             Galeria{" "}
-            <span className="italic text-[#5a4838] font-light">Histórica</span>
+            <span className="italic text-[#cbb896] font-light">Histórica</span>
           </h2>
 
-          <div className="max-w-2xl mx-auto mt-8 p-6 bg-[#d9d4c9] border-l-2 border-[#a88a4d] rounded-r-sm">
-            <p className="text-lg text-[#4a3a2a] font-serif italic leading-relaxed">
+          <div className="max-w-2xl mx-auto mt-8 p-6 bg-[#1b140d] border-l-2 border-[#c9a768] rounded-r-sm">
+            <p className="text-lg text-[#e6d7bd] font-serif italic leading-relaxed">
               "O contato é a realidade básica do organismo."
-              <span className="block text-sm text-[#8a7a6a] mt-2 not-italic">
+              <span className="block text-sm text-[#8f7c64] mt-2 not-italic">
                 — Registros raros integrados ao acervo digital do Instituto
               </span>
             </p>
@@ -57,9 +57,9 @@ export function LauraGallery() {
               className="group"
             >
               {/* Polaroid Style Frame */}
-              <div className="bg-[#d9d4c9] p-3 pb-16 shadow-lg hover:shadow-2xl transition-all duration-700 transform hover:-translate-y-1">
+              <div className="bg-[#1b140d] p-3 pb-16 shadow-lg hover:shadow-2xl transition-all duration-700 transform hover:-translate-y-1">
                 {/* Image Container */}
-                <div className="aspect-square bg-[#b8ad96] relative overflow-hidden">
+                <div className="aspect-square bg-[#3a2d1c] relative overflow-hidden">
                   <Image
                     src={item.src}
                     alt={item.alt}
@@ -69,13 +69,13 @@ export function LauraGallery() {
                   />
 
                   {/* Hover Overlay */}
-                  <div className="absolute inset-0 bg-[#3a2f25]/90 opacity-0 group-hover:opacity-100 transition-opacity duration-700 flex flex-col items-center justify-center text-[#e8e4db] p-8 text-center">
-                    <Quote size={24} className="text-[#a88a4d] mb-4" />
+                  <div className="absolute inset-0 bg-[#0d0906]/90 opacity-0 group-hover:opacity-100 transition-opacity duration-700 flex flex-col items-center justify-center text-[#e8e4db] p-8 text-center">
+                    <Quote size={24} className="text-[#d4b578] mb-4" />
                     <p className="text-lg font-serif italic mb-6 leading-relaxed">
                       "{item.caption}"
                     </p>
-                    <div className="h-px w-12 bg-[#a88a4d]/60 mb-4" />
-                    <span className="text-[10px] uppercase tracking-[0.3em] text-[#a88a4d] font-bold">
+                    <div className="h-px w-12 bg-[#c9a768]/60 mb-4" />
+                    <span className="text-[10px] uppercase tracking-[0.3em] text-[#d4b578] font-bold">
                       {item.credit}
                     </span>
                   </div>
@@ -83,13 +83,13 @@ export function LauraGallery() {
 
                 {/* Caption Area */}
                 <div className="absolute bottom-0 left-0 right-0 p-4 text-center">
-                  <p className="font-serif text-[#3a2f25] italic text-sm truncate">
+                  <p className="font-serif text-[#f5ecd9] italic text-sm truncate">
                     {item.alt}
                   </p>
                   <div className="mt-2 flex items-center justify-center gap-1">
-                    <div className="w-1 h-1 rounded-full bg-[#a88a4d]/50" />
-                    <div className="w-1 h-1 rounded-full bg-[#a88a4d]/30" />
-                    <div className="w-1 h-1 rounded-full bg-[#a88a4d]/50" />
+                    <div className="w-1 h-1 rounded-full bg-[#c9a768]/50" />
+                    <div className="w-1 h-1 rounded-full bg-[#c9a768]/30" />
+                    <div className="w-1 h-1 rounded-full bg-[#c9a768]/50" />
                   </div>
                 </div>
               </div>
@@ -102,13 +102,13 @@ export function LauraGallery() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="mt-20 text-center"
+          className="mt-10 text-center"
         >
           <a
             href="https://www.stadtarchiv-pforzheim.de/"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-4 px-8 py-4 bg-[#3a2f25] text-[#e8e4db] text-sm tracking-[0.15em] uppercase font-bold rounded-sm hover:bg-[#4a3a2a] transition-all shadow-xl hover:shadow-2xl group"
+            className="inline-flex items-center gap-4 px-8 py-4 bg-[#0d0906] text-[#e8e4db] text-sm tracking-[0.15em] uppercase font-bold rounded-sm hover:bg-[#c9a768] transition-all shadow-xl hover:shadow-2xl group"
           >
             <span>Explorar Arquivo Municipal de Pforzheim</span>
             <ExternalLink
@@ -117,7 +117,7 @@ export function LauraGallery() {
             />
           </a>
 
-          <p className="mt-6 text-xs text-[#8a7a6a] italic">
+          <p className="mt-6 text-xs text-[#8f7c64] italic">
             Acervo original preservado na cidade natal de Laura Perls
           </p>
         </motion.div>

@@ -8,7 +8,7 @@ export function WhySheMatters() {
   const { whySheMatters } = lauraPerlsContent;
 
   return (
-    <section className="py-24 bg-[#4a3a2a] relative overflow-hidden">
+    <section className="py-14 bg-[#1b140d] relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5">
         <svg className="w-full h-full" viewBox="0 0 100 100">
@@ -30,20 +30,20 @@ export function WhySheMatters() {
 
       <div className="max-w-5xl mx-auto px-6 relative z-10">
         {/* Section Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-8">
           <div className="inline-flex items-center gap-3 mb-6">
-            <div className="h-px w-12 bg-[#a88a4d]/60" />
-            <span className="w-10 h-10 rounded-full bg-[#e8e4db] flex items-center justify-center">
-              <Quote size={20} className="text-[#4a3a2a]" />
+            <div className="h-px w-12 bg-[#c9a768]/60" />
+            <span className="w-10 h-10 rounded-full bg-[#241b12] flex items-center justify-center">
+              <Quote size={20} className="text-[#e6d7bd]" />
             </span>
-            <div className="h-px w-12 bg-[#a88a4d]/60" />
+            <div className="h-px w-12 bg-[#c9a768]/60" />
           </div>
 
-          <span className="text-[11px] tracking-[0.3em] uppercase font-bold text-[#b8ad96] block mb-4">
+          <span className="text-[11px] tracking-[0.3em] uppercase font-bold text-[#c7b89a] block mb-4">
             Por Que Laura Importa
           </span>
           <h2 className="font-serif text-4xl md:text-5xl text-[#e8e4db] leading-tight">
-            A <span className="italic text-[#a88a4d] font-light">Essência</span>{" "}
+            A <span className="italic text-[#d4b578] font-light">Essência</span>{" "}
             de Laura Perls
           </h2>
         </div>
@@ -60,30 +60,30 @@ export function WhySheMatters() {
               className="relative"
             >
               {/* Quote Card */}
-              <div className="bg-[#e8e4db] rounded-lg shadow-xl p-8 h-full flex flex-col">
+              <div className="bg-[#241b12] rounded-lg shadow-xl p-8 h-full flex flex-col">
                 {/* Quote Icon */}
                 <div className="mb-6">
-                  <div className="w-12 h-12 rounded-full bg-[#4a3a2a]/10 flex items-center justify-center">
-                    <Quote size={24} className="text-[#4a3a2a]" />
+                  <div className="w-12 h-12 rounded-full bg-[#c9a768]/10 flex items-center justify-center">
+                    <Quote size={24} className="text-[#e6d7bd]" />
                   </div>
                 </div>
 
                 {/* Quote Text */}
-                <p className="font-serif text-xl text-[#4a3a2a] italic leading-relaxed flex-1">
+                <p className="font-serif text-xl text-[#e6d7bd] italic leading-relaxed flex-1">
                   "{item.quote}"
                 </p>
 
                 {/* Context */}
-                <div className="mt-6 pt-4 border-t border-[#b8ad96]">
-                  <p className="text-xs text-[#6a5a4a] uppercase tracking-wider font-bold">
+                <div className="mt-6 pt-4 border-t border-[#4a3c28]">
+                  <p className="text-xs text-[#a9987d] uppercase tracking-wider font-bold">
                     {item.context}
                   </p>
                 </div>
               </div>
 
               {/* Decorative Number */}
-              <div className="absolute -top-4 -right-4 w-12 h-12 rounded-full bg-[#a88a4d] flex items-center justify-center shadow-lg">
-                <span className="font-serif text-xl font-bold text-[#4a3a2a]">
+              <div className="absolute -top-4 -right-4 w-12 h-12 rounded-full bg-[#c9a768] flex items-center justify-center shadow-lg">
+                <span className="font-serif text-xl font-bold text-[#e6d7bd]">
                   {index + 1}
                 </span>
               </div>
@@ -98,7 +98,7 @@ export function WhySheMatters() {
           viewport={{ once: true }}
           className="mt-16 text-center"
         >
-          <div className="inline-block max-w-3xl p-8 bg-[#e8e4db]/10 rounded-lg border border-[#a88a4d]/30">
+          <div className="inline-block max-w-3xl p-8 bg-[#241b12]/10 rounded-lg border border-[#c9a768]/30">
             <p className="font-serif text-xl text-[#e8e4db] italic leading-relaxed">
               Laura Perls não foi apenas a esposa de Fritz Perls. Ela foi uma
               teórica brilhante, uma clínica dedicada e uma pioneira que trouxe

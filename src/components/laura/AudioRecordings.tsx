@@ -224,7 +224,7 @@ function AudioPlayer({
   };
 
   return (
-    <div className="bg-[#e8e4db] border border-[#b8ad96] rounded-lg shadow-md overflow-hidden relative">
+    <div className="bg-[#241b12] border border-[#4a3c28] rounded-lg shadow-md overflow-hidden relative">
       {/* Hidden Audio Element */}
       <audio ref={audioRef} onEnded={handleEnded} preload="metadata" />
 
@@ -232,16 +232,16 @@ function AudioPlayer({
       <button
         onClick={togglePlay}
         disabled={isLoading}
-        className="absolute left-0 top-0 bottom-0 w-20 bg-[#4a3a2a] hover:bg-[#3a2f25] flex items-center justify-center z-20 transition-colors disabled:opacity-50"
+        className="absolute left-0 top-0 bottom-0 w-20 bg-[#c9a768] hover:bg-[#0d0906] flex items-center justify-center z-20 transition-colors disabled:opacity-50"
         style={{ borderRadius: "0.5rem 0 0 0.5rem" }}
       >
-        <div className="w-12 h-12 rounded-full bg-[#d9d4c9] flex items-center justify-center shadow-lg">
+        <div className="w-12 h-12 rounded-full bg-[#1b140d] flex items-center justify-center shadow-lg">
           {isLoading ? (
-            <div className="w-5 h-5 border-2 border-[#4a3a2a] border-t-transparent rounded-full animate-spin" />
+            <div className="w-5 h-5 border-2 border-[#6b5636] border-t-transparent rounded-full animate-spin" />
           ) : isPlaying ? (
-            <Pause size={24} className="text-[#4a3a2a]" />
+            <Pause size={24} className="text-[#e6d7bd]" />
           ) : (
-            <Play size={24} className="text-[#4a3a2a] ml-1" />
+            <Play size={24} className="text-[#e6d7bd] ml-1" />
           )}
         </div>
       </button>
@@ -267,10 +267,10 @@ function AudioPlayer({
 
         {/* Header Info */}
         <div className="flex items-center gap-3 mb-2">
-          <span className="px-3 py-1 bg-[#a88a4d]/20 text-[#6a5a4a] text-[10px] uppercase tracking-widest font-bold rounded-full">
+          <span className="px-3 py-1 bg-[#c9a768]/20 text-[#f5ecd9] text-[10px] uppercase tracking-widest font-bold rounded-full">
             {year}
           </span>
-          <div className="flex items-center gap-1 text-[#8a7a6a] text-xs">
+          <div className="flex items-center gap-1 text-[#8f7c64] text-xs">
             <Clock size={12} />
             <span>
               {isLoading ? "Carregando..." : formatTime(currentTime)} /{" "}
@@ -280,8 +280,8 @@ function AudioPlayer({
         </div>
 
         {/* Title */}
-        <h3 className="font-serif text-xl text-[#4a3a2a] mb-1">{title}</h3>
-        <p className="text-[#5a4838] font-serif italic text-sm">
+        <h3 className="font-serif text-xl text-[#e6d7bd] mb-1">{title}</h3>
+        <p className="text-[#cbb896] font-serif italic text-sm">
           {description}
         </p>
 
@@ -294,8 +294,8 @@ function AudioPlayer({
               exit={{ opacity: 0, height: 0 }}
               className="mt-4"
             >
-              <div className="bg-[#d9d4c9] border border-[#a88a4d]/30 rounded-lg p-4">
-                <p className="font-serif text-[#3a2f25] text-base leading-relaxed italic text-center">
+              <div className="bg-[#1b140d] border border-[#c9a768]/30 rounded-lg p-4">
+                <p className="font-serif text-[#f5ecd9] text-base leading-relaxed italic text-center">
                   {currentSubtitle}
                 </p>
               </div>
@@ -305,9 +305,9 @@ function AudioPlayer({
       </div>
 
       {/* Progress Bar */}
-      <div className="h-1 bg-[#b8ad96] cursor-pointer relative">
+      <div className="h-1 bg-[#3a2d1c] cursor-pointer relative">
         <motion.div
-          className="h-full bg-[#a88a4d] cursor-pointer"
+          className="h-full bg-[#c9a768] cursor-pointer"
           style={{ width: `${progress}%` }}
         />
         <input
@@ -322,7 +322,7 @@ function AudioPlayer({
       </div>
 
       {/* Controls Bar */}
-      <div className="px-4 py-3 bg-[#d9d4c9] flex items-center justify-between">
+      <div className="px-4 py-3 bg-[#1b140d] flex items-center justify-between">
         {/* Waveform Visual */}
         <div className="flex items-center gap-0.5 h-8 flex-1 mr-4">
           {Array.from({ length: 40 }).map((_, i) => (
@@ -339,9 +339,9 @@ function AudioPlayer({
               className={`w-0.5 rounded-full ${
                 i / 40 <= progress / 100
                   ? isPlaying
-                    ? "bg-[#a88a4d]"
-                    : "bg-[#b8ad96]"
-                  : "bg-[#e8e4db]"
+                    ? "bg-[#c9a768]"
+                    : "bg-[#3a2d1c]"
+                  : "bg-[#241b12]"
               }`}
             />
           ))}
@@ -353,8 +353,8 @@ function AudioPlayer({
             onClick={() => setShowSubtitles(!showSubtitles)}
             className={`p-2 rounded-lg transition-colors ${
               showSubtitles
-                ? "bg-[#a88a4d]/20 text-[#4a3a2a]"
-                : "text-[#8a7a6a] hover:text-[#4a3a2a]"
+                ? "bg-[#c9a768]/20 text-[#e6d7bd]"
+                : "text-[#8f7c64] hover:text-[#e6d7bd]"
             }`}
             title={showSubtitles ? "Ocultar legendas" : "Mostrar legendas"}
           >
@@ -363,7 +363,7 @@ function AudioPlayer({
 
           <button
             onClick={toggleMute}
-            className="p-2 text-[#6a5a4a] hover:text-[#4a3a2a] transition-colors"
+            className="p-2 text-[#a9987d] hover:text-[#e6d7bd] transition-colors"
           >
             {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
           </button>
@@ -377,37 +377,37 @@ export function AudioRecordings() {
   const { audioRecordings } = lauraPerlsContent;
 
   return (
-    <section className="py-24 bg-[#d9d4c9] relative overflow-hidden">
+    <section className="py-14 bg-[#1b140d] relative overflow-hidden">
       {/* Decorative Background */}
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
         <div
           className="absolute inset-0"
           style={{
-            backgroundImage: `repeating-linear-gradient(90deg, transparent, transparent 40px, #4a3a2a 40px, #4a3a2a 41px)`,
+            backgroundImage: `repeating-linear-gradient(90deg, transparent, transparent 40px, #e6d7bd 40px, #e6d7bd 41px)`,
           }}
         />
       </div>
 
       <div className="max-w-4xl mx-auto px-6 relative z-10">
         {/* Section Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-8">
           <div className="inline-flex items-center gap-3 mb-6">
-            <div className="h-px w-12 bg-[#a88a4d]/60" />
-            <div className="w-10 h-10 rounded-full bg-[#4a3a2a] flex items-center justify-center">
+            <div className="h-px w-12 bg-[#c9a768]/60" />
+            <div className="w-10 h-10 rounded-full bg-[#c9a768] flex items-center justify-center">
               <FileAudio size={20} className="text-[#e8e4db]" />
             </div>
-            <div className="h-px w-12 bg-[#a88a4d]/60" />
+            <div className="h-px w-12 bg-[#c9a768]/60" />
           </div>
 
-          <span className="text-[11px] tracking-[0.3em] uppercase font-bold text-[#8a7a6a] block mb-4">
+          <span className="text-[11px] tracking-[0.3em] uppercase font-bold text-[#8f7c64] block mb-4">
             Arquivo de Fritz Perls
           </span>
-          <h2 className="font-serif text-4xl md:text-5xl text-[#3a2f25] leading-tight">
+          <h2 className="font-serif text-4xl md:text-5xl text-[#f5ecd9] leading-tight">
             Gravações{" "}
-            <span className="italic text-[#5a4838] font-light">Históricas</span>{" "}
+            <span className="italic text-[#cbb896] font-light">Históricas</span>{" "}
             de Fritz Perls
           </h2>
-          <p className="mt-6 text-[#4a3a2a] font-serif italic max-w-xl mx-auto">
+          <p className="mt-6 text-[#e6d7bd] font-serif italic max-w-xl mx-auto">
             Gravações originais de Fritz Perls sobre a teoria da Gestalt. Clique
             no play para ouvir.
           </p>
@@ -441,23 +441,23 @@ export function AudioRecordings() {
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: (index + 1) * 0.1 }}
             >
-              <div className="bg-[#e8e4db] border border-[#b8ad96] rounded-lg shadow-md p-6 opacity-75">
+              <div className="bg-[#241b12] border border-[#4a3c28] rounded-lg shadow-md p-6 opacity-75">
                 <div className="flex items-center gap-3 mb-2">
-                  <span className="px-3 py-1 bg-[#a88a4d]/20 text-[#6a5a4a] text-[10px] uppercase tracking-widest font-bold rounded-full">
+                  <span className="px-3 py-1 bg-[#c9a768]/20 text-[#f5ecd9] text-[10px] uppercase tracking-widest font-bold rounded-full">
                     {recording.year}
                   </span>
-                  <div className="flex items-center gap-1 text-[#8a7a6a] text-xs">
+                  <div className="flex items-center gap-1 text-[#8f7c64] text-xs">
                     <Clock size={12} />
                     <span>{recording.duration}</span>
                   </div>
                 </div>
-                <h3 className="font-serif text-xl text-[#4a3a2a] mb-1">
+                <h3 className="font-serif text-xl text-[#e6d7bd] mb-1">
                   {recording.title}
                 </h3>
-                <p className="text-[#5a4838] font-serif italic text-sm">
+                <p className="text-[#cbb896] font-serif italic text-sm">
                   {recording.description}
                 </p>
-                <p className="text-xs text-[#8a7a6a] mt-3 italic">
+                <p className="text-xs text-[#8f7c64] mt-3 italic">
                   Em breve - Legendas em português
                 </p>
               </div>
@@ -466,8 +466,8 @@ export function AudioRecordings() {
         </div>
 
         {/* Note */}
-        <div className="mt-12 p-6 bg-[#d9d4c9] border-l-4 border-[#a88a4d] rounded-r-sm">
-          <p className="text-[#4a3a2a] font-serif italic text-sm">
+        <div className="mt-12 p-6 bg-[#1b140d] border-l-4 border-[#c9a768] rounded-r-sm">
+          <p className="text-[#e6d7bd] font-serif italic text-sm">
             <strong className="not-italic">Nota:</strong> Estas gravações são de
             Fritz Perls, co-fundador da Gestalt-terapia. As legendas em
             português foram traduzidas para fins educacionais pelo Instituto
