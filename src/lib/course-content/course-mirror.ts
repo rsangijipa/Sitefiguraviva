@@ -52,6 +52,17 @@ export async function mirrorCourseToSupabase(
     if (typeof patch.contentRevision === "number")
       row.content_revision = patch.contentRevision;
 
+    // `frequency` and `syllabus` have no dedicated Supabase columns yet;
+    // fold them into `details` (jsonb) so the mirror doesn't need a schema
+    // migration to carry them.
+    if (typeof patch.frequency === "string" || Array.isArray(patch.syllabus)) {
+      const details: Record<string, unknown> = {};
+      if (typeof patch.frequency === "string")
+        details.frequency = patch.frequency;
+      if (Array.isArray(patch.syllabus)) details.syllabus = patch.syllabus;
+      row.details = details;
+    }
+
     row.updated_at = new Date().toISOString();
 
     // New course row: Supabase requires `title` on insert, so only attempt

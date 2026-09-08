@@ -81,6 +81,12 @@ function mapCourse(row: TableRow<"courses">): ContentRecord {
     team: row.team,
     mediators: legacy.mediators ?? (Array.isArray(row.team) ? row.team : []),
     date: legacy.date ?? details.date ?? row.duration_label,
+    frequency: legacy.frequency ?? details.frequency ?? null,
+    syllabus: Array.isArray(details.syllabus)
+      ? details.syllabus
+      : Array.isArray(legacy.syllabus)
+        ? legacy.syllabus
+        : [],
     stats: row.stats,
     communityEnabled: row.community_enabled,
     certificateRules: row.certificate_rules,

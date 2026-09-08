@@ -1,23 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import {
-  X,
-  BookOpen,
-  Image as ImageIcon,
-  Save,
-  Loader2,
-  ChevronDown,
-  Plus,
-  Trash2,
-} from "lucide-react";
+import { BookOpen, Image as ImageIcon, Save, Trash2 } from "lucide-react";
 import Button from "@/components/ui/Button";
-import { motion, AnimatePresence } from "framer-motion";
 import ImageUpload from "@/components/admin/ImageUpload";
+import SyllabusEditor from "@/components/admin/courses/SyllabusEditor";
 import { adminCourseService } from "@/services/adminCourseService";
 import { useToast } from "@/context/ToastContext";
+import { cn } from "@/lib/utils";
 
-import { Modal } from "@/components/ui/Modal";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from "@/components/ui/Modal";
+import { FormSection } from "@/components/admin/FormShell";
 
 interface CourseFormData {
   title: string;
@@ -26,9 +25,11 @@ interface CourseFormData {
   instructor: string;
   category: string;
   duration: string;
+  frequency: string;
   level: string;
   coverImage: string;
   status: "draft" | "open" | "closed";
+  syllabus: string[];
 }
 
 interface CourseEditorModalProps {
@@ -45,10 +46,19 @@ const initialFormState: CourseFormData = {
   instructor: "",
   category: "",
   duration: "",
+  frequency: "",
   level: "beginner",
   coverImage: "",
   status: "draft",
+  syllabus: [],
 };
+
+const SECTIONS = [
+  { id: "info", label: "Informações Básicas" },
+  { id: "details", label: "Detalhes & Mídia" },
+  { id: "syllabus", label: "Ementa" },
+  { id: "settings", label: "Configurações" },
+] as const;
 
 export default function CourseEditorModal({
   isOpen,
@@ -68,20 +78,26 @@ export default function CourseEditorModal({
           instructor: editingCourse.instructor || "",
           category: editingCourse.category || "",
           duration: editingCourse.duration || "",
+          frequency: editingCourse.frequency || "",
           level: editingCourse.level || "beginner",
           coverImage: editingCourse.coverImage || editingCourse.image || "",
           status: editingCourse.status || "draft",
+          syllabus: Array.isArray(editingCourse.syllabus)
+            ? editingCourse.syllabus
+            : [],
         }
       : initialFormState,
   );
 
-  const [activeSection, setActiveSection] = useState<
-    "info" | "details" | "settings"
-  >("info");
+  const [activeSection, setActiveSection] =
+    useState<(typeof SECTIONS)[number]["id"]>("info");
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
 
-  const updateField = (field: keyof CourseFormData, value: string) => {
+  const updateField = <K extends keyof CourseFormData>(
+    field: K,
+    value: CourseFormData[K],
+  ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     setHasChanges(true);
   };
@@ -109,11 +125,13 @@ export default function CourseEditorModal({
           instructor: formData.instructor,
           category: formData.category,
           duration: formData.duration,
+          frequency: formData.frequency,
           level: formData.level,
           description: formData.description,
           coverImage: formData.coverImage,
           image: formData.coverImage,
           status: formData.status,
+          syllabus: formData.syllabus,
         });
 
         addToast("Curso criado com sucesso!", "success");
@@ -142,69 +160,51 @@ export default function CourseEditorModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose}>
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[95vh] md:max-h-[90vh] overflow-hidden flex flex-col pointer-events-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="bg-gradient-to-r from-primary to-primary/80 px-8 py-6 flex items-center justify-between">
+    <Modal isOpen={isOpen} onClose={handleClose} ariaLabel="Editor de curso">
+      <ModalContent size="xl" className="max-h-[92vh]">
+        <ModalHeader>
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
-              <BookOpen size={24} className="text-white" />
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+              <BookOpen size={20} />
             </div>
             <div>
-              <h2 className="font-serif text-2xl text-white font-bold">
+              <h2 className="font-serif text-xl md:text-2xl text-stone-800 font-bold">
                 {isEditing ? "Editar Curso" : "Criar Novo Curso"}
               </h2>
-              <p className="text-sm text-white/70">
+              <p className="text-sm text-stone-500">
                 {isEditing
                   ? "Atualize as informações do curso"
                   : "Preencha as informações do curso"}
               </p>
             </div>
           </div>
-          <button
-            onClick={handleClose}
-            className="p-2 hover:bg-white/20 rounded-full transition-colors"
-          >
-            <X size={24} className="text-white" />
-          </button>
-        </div>
+        </ModalHeader>
 
-        {/* Section Tabs */}
-        <div
-          className="flex overflow-x-auto border-b border-stone-100 bg-stone-50"
-          data-lenis-prevent
-        >
-          {[
-            { id: "info", label: "Informações Básicas" },
-            { id: "details", label: "Detalhes & Mídia" },
-            { id: "settings", label: "Configurações" },
-          ].map((section) => (
+        {/* Section Tabs — matches the tab styling used across the admin panel */}
+        <div className="flex overflow-x-auto border-b border-stone-100 bg-stone-50/50 shrink-0 px-5 md:px-8">
+          {SECTIONS.map((section) => (
             <button
               key={section.id}
-              onClick={() => setActiveSection(section.id as any)}
-              className={`shrink-0 whitespace-nowrap px-4 py-3 text-xs font-medium transition-colors md:flex-1 md:px-6 md:py-4 md:text-sm ${
+              onClick={() => setActiveSection(section.id)}
+              className={cn(
+                "shrink-0 whitespace-nowrap px-4 py-3 text-xs font-medium border-b-2 transition-all md:px-6 md:text-sm",
                 activeSection === section.id
-                  ? "bg-white text-primary border-b-2 border-primary"
-                  : "text-stone-500 hover:text-stone-800 hover:bg-white/50"
-              }`}
+                  ? "border-primary text-primary"
+                  : "border-transparent text-stone-500 hover:text-stone-800",
+              )}
             >
               {section.label}
             </button>
           ))}
         </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+        <ModalBody>
           {/* Section: Info */}
           {activeSection === "info" && (
-            <div className="space-y-6 animate-fade-in">
-              {/* Title */}
+            <FormSection
+              title="Informações Básicas"
+              description="Como o curso aparece no catálogo"
+            >
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-widest text-stone-400">
                   Título do Curso *
@@ -214,13 +214,12 @@ export default function CourseEditorModal({
                   required
                   value={formData.title}
                   onChange={(e) => updateField("title", e.target.value)}
-                  className="w-full text-2xl font-serif font-bold p-4 bg-stone-50 rounded-xl border-2 border-transparent focus:bg-white focus:border-primary transition-all outline-none"
+                  className="w-full text-xl font-serif font-bold p-4 bg-stone-50 rounded-xl border-2 border-transparent focus:bg-white focus:border-primary transition-all outline-none"
                   placeholder="Ex: Formação em Gestalt-Terapia"
                   autoFocus
                 />
               </div>
 
-              {/* Subtitle */}
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-widest text-stone-400">
                   Subtítulo
@@ -234,7 +233,6 @@ export default function CourseEditorModal({
                 />
               </div>
 
-              {/* Description */}
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-widest text-stone-400">
                   Descrição
@@ -248,7 +246,6 @@ export default function CourseEditorModal({
                 />
               </div>
 
-              {/* Instructor & Category */}
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-xs font-bold uppercase tracking-widest text-stone-400">
@@ -276,17 +273,16 @@ export default function CourseEditorModal({
                   />
                 </div>
               </div>
-            </div>
+            </FormSection>
           )}
 
           {/* Section: Details */}
           {activeSection === "details" && (
-            <div className="space-y-8 animate-fade-in">
-              {/* Cover Image */}
-              <div className="space-y-4">
-                <label className="text-xs font-bold uppercase tracking-widest text-stone-400">
-                  Imagem de Capa
-                </label>
+            <div className="space-y-8">
+              <FormSection
+                title="Imagem de Capa"
+                description="Recomendado: 1920x1080px (16:9)"
+              >
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="aspect-video bg-stone-100 rounded-2xl overflow-hidden relative group">
                     {formData.coverImage ? (
@@ -316,54 +312,77 @@ export default function CourseEditorModal({
                       onUpload={(url) => updateField("coverImage", url)}
                       folder="courses/covers"
                     />
-                    <p className="text-xs text-stone-400 mt-2">
-                      Recomendado: 1920x1080px (16:9)
-                    </p>
                   </div>
                 </div>
-              </div>
+              </FormSection>
 
-              {/* Duration & Level */}
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-widest text-stone-400">
-                    Duração
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.duration}
-                    onChange={(e) => updateField("duration", e.target.value)}
-                    className="w-full p-4 bg-stone-50 rounded-xl border-2 border-transparent focus:bg-white focus:border-primary transition-all outline-none"
-                    placeholder="Ex: 20 horas, 10 semanas"
-                  />
-                </div>
+              <FormSection
+                title="Duração e Frequência"
+                description="Como o curso se organiza no tempo"
+              >
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-widest text-stone-400">
+                      Duração
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.duration}
+                      onChange={(e) => updateField("duration", e.target.value)}
+                      className="w-full p-4 bg-stone-50 rounded-xl border-2 border-transparent focus:bg-white focus:border-primary transition-all outline-none"
+                      placeholder="Ex: 20 horas, 10 semanas"
+                    />
+                  </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-widest text-stone-400">
-                    Nível de Dificuldade
-                  </label>
-                  <select
-                    value={formData.level}
-                    onChange={(e) => updateField("level", e.target.value)}
-                    className="w-full p-4 bg-stone-50 rounded-xl border-2 border-transparent focus:bg-white focus:border-primary transition-all outline-none appearance-none cursor-pointer"
-                  >
-                    <option value="beginner">🌱 Iniciante</option>
-                    <option value="intermediate">🌿 Intermediário</option>
-                    <option value="advanced">🌳 Avançado</option>
-                  </select>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-widest text-stone-400">
+                      Frequência
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.frequency}
+                      onChange={(e) => updateField("frequency", e.target.value)}
+                      className="w-full p-4 bg-stone-50 rounded-xl border-2 border-transparent focus:bg-white focus:border-primary transition-all outline-none"
+                      placeholder="Ex: Encontros quinzenais, 2x por semana"
+                    />
+                  </div>
+
+                  <div className="space-y-2 col-span-2">
+                    <label className="text-xs font-bold uppercase tracking-widest text-stone-400">
+                      Nível de Dificuldade
+                    </label>
+                    <select
+                      value={formData.level}
+                      onChange={(e) => updateField("level", e.target.value)}
+                      className="w-full p-4 bg-stone-50 rounded-xl border-2 border-transparent focus:bg-white focus:border-primary transition-all outline-none appearance-none cursor-pointer"
+                    >
+                      <option value="beginner">🌱 Iniciante</option>
+                      <option value="intermediate">🌿 Intermediário</option>
+                      <option value="advanced">🌳 Avançado</option>
+                    </select>
+                  </div>
                 </div>
-              </div>
+              </FormSection>
             </div>
+          )}
+
+          {/* Section: Syllabus (Ementa) */}
+          {activeSection === "syllabus" && (
+            <FormSection
+              title="Ementa Básica"
+              description="Tópicos que aparecem na página do curso para quem está decidindo se inscrever"
+            >
+              <SyllabusEditor
+                topics={formData.syllabus}
+                onChange={(syllabus) => updateField("syllabus", syllabus)}
+              />
+            </FormSection>
           )}
 
           {/* Section: Settings */}
           {activeSection === "settings" && (
-            <div className="space-y-6 animate-fade-in">
-              {/* Status */}
-              <div className="space-y-4">
-                <label className="text-xs font-bold uppercase tracking-widest text-stone-400">
-                  Status do Curso
-                </label>
+            <div className="space-y-6">
+              <FormSection title="Status do Curso">
                 <div className="grid grid-cols-3 gap-4">
                   {[
                     {
@@ -387,7 +406,8 @@ export default function CourseEditorModal({
                   ].map((option) => (
                     <button
                       key={option.value}
-                      onClick={() => updateField("status", option.value)}
+                      type="button"
+                      onClick={() => updateField("status", option.value as any)}
                       className={`p-4 rounded-xl border-2 text-left transition-all ${
                         formData.status === option.value
                           ? option.color === "green"
@@ -418,9 +438,8 @@ export default function CourseEditorModal({
                     </button>
                   ))}
                 </div>
-              </div>
+              </FormSection>
 
-              {/* Info Box */}
               <div className="bg-primary/5 border border-primary/20 rounded-xl p-6">
                 <h4 className="font-bold text-primary mb-2">
                   📚 Próximos Passos
@@ -435,10 +454,9 @@ export default function CourseEditorModal({
               </div>
             </div>
           )}
-        </div>
+        </ModalBody>
 
-        {/* Footer */}
-        <div className="border-t border-stone-100 px-8 py-6 bg-stone-50 flex items-center justify-between">
+        <ModalFooter className="flex items-center justify-between">
           <div className="text-sm text-stone-400">
             {hasChanges && (
               <span className="flex items-center gap-2">
@@ -461,8 +479,8 @@ export default function CourseEditorModal({
               {isEditing ? "Salvar Alterações" : "Criar Curso"}
             </Button>
           </div>
-        </div>
-      </motion.div>
+        </ModalFooter>
+      </ModalContent>
     </Modal>
   );
 }

@@ -235,9 +235,45 @@ export default function CourseDetailClient({ course }: { course: any }) {
                   </div>
                 </section>
               )}
+
+              {Array.isArray((course as any).syllabus) &&
+                (course as any).syllabus.length > 0 && (
+                  <section className="bg-white p-8 rounded-2xl border border-stone-100 shadow-sm">
+                    <h3 className="font-serif text-2xl text-primary mb-6">
+                      Ementa
+                    </h3>
+                    <ul className="space-y-4">
+                      {(course as any).syllabus.map(
+                        (topic: string, i: number) => (
+                          <li key={i} className="flex items-start gap-4">
+                            <span className="w-1.5 h-1.5 mt-2.5 rounded-full bg-accent shrink-0" />
+                            <span className="text-primary/70 leading-relaxed">
+                              {topic}
+                            </span>
+                          </li>
+                        ),
+                      )}
+                    </ul>
+                  </section>
+                )}
             </div>
 
             <div className="md:col-span-4 space-y-8">
+              {(course as any).frequency && (
+                <div className="bg-stone-50 p-6 rounded-2xl border border-stone-100 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-primary shadow-sm shrink-0">
+                    <Calendar size={20} />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-primary text-xs uppercase tracking-wider">
+                      Frequência
+                    </h4>
+                    <p className="text-sm text-primary/70">
+                      {(course as any).frequency}
+                    </p>
+                  </div>
+                </div>
+              )}
               {course.details?.schedule && (
                 <div className="bg-stone-50 p-8 rounded-2xl border border-stone-100 sticky top-32">
                   <div className="flex items-center gap-3 mb-6">

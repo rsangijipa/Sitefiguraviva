@@ -24,7 +24,7 @@ import {
   Image as ImageIcon,
   ChevronRight,
   Bell,
-  X as CloseIcon,
+  X,
   AlertTriangle,
 } from "lucide-react";
 import Image from "next/image";
@@ -32,6 +32,7 @@ import Button from "@/components/ui/Button";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import ImageUpload from "@/components/admin/ImageUpload";
+import SyllabusEditor from "@/components/admin/courses/SyllabusEditor";
 import { useToast } from "@/context/ToastContext";
 import { adminCourseService } from "@/services/adminCourseService";
 import { motion, AnimatePresence } from "framer-motion";
@@ -174,9 +175,21 @@ export default function CourseEditorClient({
         initial={{ opacity: 0, scale: 0.98, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.98, y: 10 }}
-        className="bg-white/95 backdrop-blur-md rounded-[2.5rem] shadow-[0_0_50px_rgba(0,0,0,0.1)] w-[98vw] h-[96vh] flex flex-col overflow-hidden border border-white pointer-events-auto"
+        className="relative bg-white/95 backdrop-blur-md rounded-[2.5rem] shadow-[0_0_50px_rgba(0,0,0,0.1)] w-[98vw] h-[96vh] flex flex-col overflow-hidden border border-white pointer-events-auto"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Close button — pinned to the true top-right corner of the editor
+            card, above the "Logado como" bar, instead of living inline with
+            the Save/Publish button cluster. */}
+        <button
+          onClick={() => router.push("/admin/courses")}
+          className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20 p-2.5 bg-white hover:bg-red-50 text-stone-400 hover:text-red-500 rounded-full transition-all border border-stone-200 shadow-lg"
+          title="Fechar Editor"
+          aria-label="Fechar Editor"
+        >
+          <X size={20} />
+        </button>
+
         <AdminPageShell
           title={course.title || "Novo Curso"}
           description={currentTab.description}
@@ -188,17 +201,6 @@ export default function CourseEditorClient({
           ]}
           actions={
             <div className="flex items-center gap-4">
-              {/* Close Button */}
-              <button
-                onClick={() => router.push("/admin/courses")}
-                className="p-2.5 bg-stone-100 hover:bg-red-50 text-stone-400 hover:text-red-500 rounded-full transition-all border border-stone-200"
-                title="Fechar Editor"
-              >
-                <CloseIcon size={20} />
-              </button>
-
-              <div className="h-8 w-px bg-stone-200" />
-
               <div className="flex items-center gap-2">
                 {/* Unsaved changes indicator */}
                 {hasUnsavedChanges && (
@@ -255,7 +257,7 @@ export default function CourseEditorClient({
           }
         >
           {/* Tabs Navigation */}
-          <div className="flex overflow-x-auto -mb-px border-b border-stone-100 no-scrollbar bg-stone-50/50 backdrop-blur-sm -mx-8 px-8">
+          <div className="shrink-0 flex overflow-x-auto -mb-px border-b border-stone-100 no-scrollbar bg-stone-50/50 backdrop-blur-sm -mx-8 px-8">
             {TABS.map((tab) => (
               <button
                 key={tab.id}
@@ -273,8 +275,12 @@ export default function CourseEditorClient({
             ))}
           </div>
 
-          {/* Content Area */}
-          <div className="flex-1 overflow-y-auto custom-scrollbar px-4 sm:px-8 pb-12 scroll-smooth">
+          {/* Content Area. `min-h-0` is required here: without it, a flex-1
+              child in a flex-column parent refuses to shrink below its
+              content's natural height, so the panel just grows past the
+              viewport instead of scrolling internally — the scrollbar never
+              activates. */}
+          <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar px-4 sm:px-8 pb-12 scroll-smooth">
             {/* Draft Warning Banner */}
             {course.status === "draft" && (
               <div className="bg-amber-50 border border-amber-300 text-amber-900 p-4 rounded-2xl mb-6 flex items-start gap-3 mt-6 shadow-sm">
@@ -460,6 +466,19 @@ export default function CourseEditorClient({
                               <option value="advanced">Avançado</option>
                             </select>
                           </div>
+                          <div className="space-y-2 col-span-2">
+                            <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400 pl-1">
+                              Frequência
+                            </label>
+                            <input
+                              value={course.frequency || ""}
+                              onChange={(e) =>
+                                updateCourse({ frequency: e.target.value })
+                              }
+                              placeholder="Ex: Encontros quinzenais, 2x por semana"
+                              className="w-full p-4 bg-white rounded-xl border border-stone-100 focus:border-primary transition-all outline-none text-sm"
+                            />
+                          </div>
                         </div>
                       </FormSection>
 
@@ -474,6 +493,16 @@ export default function CourseEditorClient({
                           }
                           rows={6}
                           className="w-full p-4 bg-white rounded-xl border border-stone-100 focus:border-primary transition-all outline-none resize-none text-sm"
+                        />
+                      </FormSection>
+
+                      <FormSection
+                        title="Ementa"
+                        description="Tópicos exibidos na página do curso para quem está decidindo se inscrever"
+                      >
+                        <SyllabusEditor
+                          topics={course.syllabus || []}
+                          onChange={(syllabus) => updateCourse({ syllabus })}
                         />
                       </FormSection>
                     </div>

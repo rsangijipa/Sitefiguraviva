@@ -62,8 +62,10 @@ export interface CourseDoc {
   instructorTitle?: string;
   workload?: number;
   duration?: string;
+  frequency?: string; // "2x por semana", "Encontros quinzenais", etc.
   level?: string;
   category?: string;
+  syllabus?: string[]; // Basic curriculum/ementa shown to prospective students before enrollment
 
   // Status & Visibility
   isPublished: boolean;
