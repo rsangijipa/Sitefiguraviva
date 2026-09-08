@@ -6,6 +6,41 @@ import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { logAudit } from "@/lib/audit";
 import { whatsappService } from "@/services/whatsappService";
+import { writeEnrollmentMirror } from "@/lib/auth/enrollment-service";
+
+// Firestore -> Postgres status mapping for the Supabase dual-write.
+// Both sides already share the same literal values (see
+// supabase/migrations/202606110001_p2_lms_foundation.sql, enum
+// public.enrollment_status: pending_approval | active | completed | canceled |
+// refunded | ... legacy values), so this is an identity map kept explicit for
+// documentation/future-proofing rather than a real transformation.
+const ENROLLMENT_STATUS_TO_SUPABASE: Record<string, string> = {
+  pending_approval: "pending_approval",
+  active: "active",
+  completed: "completed",
+  canceled: "canceled",
+  refunded: "refunded",
+};
+
+async function mirrorEnrollmentToSupabase(
+  uid: string,
+  courseId: string,
+  patch: Record<string, unknown>,
+  context: string,
+) {
+  try {
+    await writeEnrollmentMirror({
+      uid,
+      courseId,
+      enrollmentDoc: patch as any,
+    });
+  } catch (supabaseError) {
+    console.error(
+      `[${context}] Supabase mirror write failed (Firestore write already committed):`,
+      supabaseError,
+    );
+  }
+}
 
 // Helper to ensure admin
 async function assertAdmin() {
@@ -108,6 +143,19 @@ export async function enrollUser(email: string, courseId: string) {
 
     await enrollmentRef.set(enrollmentData, { merge: true });
 
+    await mirrorEnrollmentToSupabase(
+      uid,
+      courseId,
+      {
+        status:
+          ENROLLMENT_STATUS_TO_SUPABASE[enrollmentData.status] ??
+          enrollmentData.status,
+        paymentMethod: "manual",
+        courseVersionAtEnrollment: enrollmentData.courseVersionAtEnrollment,
+      },
+      "enrollUser",
+    );
+
     await logAudit({
       actor: { uid: adminUser.uid, email: adminUser.email, role: "admin" },
       action: "ENROLLMENT_CREATED",
@@ -170,6 +218,13 @@ export async function revokeAccess(
       updatedAt: Timestamp.now(),
       reason,
     });
+
+    await mirrorEnrollmentToSupabase(
+      uid,
+      courseId,
+      { status: ENROLLMENT_STATUS_TO_SUPABASE["canceled"] },
+      "revokeAccess",
+    );
 
     await logAudit({
       actor: { uid: adminUser.uid, email: adminUser.email, role: "admin" },
@@ -267,6 +322,13 @@ export async function updateEnrollmentStatus(
       // "completed" usually keeps access, so no change to enrolledCourseIds
     });
 
+    await mirrorEnrollmentToSupabase(
+      uid,
+      courseId,
+      { status: ENROLLMENT_STATUS_TO_SUPABASE[newStatus] ?? newStatus },
+      "updateEnrollmentStatus",
+    );
+
     revalidatePath(`/portal`);
     revalidatePath(`/portal/courses/${courseId}`);
 
@@ -297,6 +359,13 @@ export async function approveEnrollment(uid: string, courseId: string) {
       approvedBy: adminUser.uid,
       approvedAt: FieldValue.serverTimestamp(),
     });
+
+    await mirrorEnrollmentToSupabase(
+      uid,
+      courseId,
+      { status: "active" },
+      "approveEnrollment",
+    );
 
     await logAudit({
       actor: { uid: adminUser.uid, email: adminUser.email, role: "admin" },

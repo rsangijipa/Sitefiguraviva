@@ -27,6 +27,10 @@ export async function markLessonCompleted(
     await assertCanAccessCourse(uid, courseId);
 
     // 3. Service Call (Idempotent)
+    // Note: progressService.markLessonCompleted already awards XP and the
+    // "first_steps" badge internally (see lib/progress/progressService.ts).
+    // Do not call gamificationService.onLessonCompletion here as well —
+    // that duplicated XP for every lesson completion.
     await progressService.markLessonCompleted(
       uid,
       courseId,
@@ -34,10 +38,7 @@ export async function markLessonCompleted(
       lessonId,
     );
 
-    // 4. Gamification Logic
-    await gamificationService.onLessonCompletion(uid, courseId, lessonId);
-
-    // 5. Revalidate to show new progress in UI
+    // 4. Revalidate to show new progress in UI
     revalidatePath(`/portal/course/${courseId}`);
     revalidatePath(`/portal/course/${courseId}/lesson/${lessonId}`);
     revalidatePath(`/admin/enrollments`);
@@ -87,7 +88,10 @@ export async function updateLessonProgress(
   }
 }
 
-export async function updateLessonLastAccess(courseId: string, lessonId: string) {
+export async function updateLessonLastAccess(
+  courseId: string,
+  lessonId: string,
+) {
   try {
     const session = await verifySession();
     if (!session) throw new Error("Unauthenticated");

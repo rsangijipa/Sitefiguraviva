@@ -114,12 +114,16 @@ export function CertificateIssueCard({
 
       {issued ? (
         <Link href={`/portal/course/${courseId}/certificate`} target="_blank">
-          <Button className="bg-green-600 hover:bg-green-700 text-white border-none shadow-green-200">
+          <Button
+            data-testid="certificate-issued"
+            className="bg-green-600 hover:bg-green-700 text-white border-none shadow-green-200"
+          >
             <Download className="mr-2" size={18} /> Ver / Imprimir
           </Button>
         </Link>
       ) : (
         <Button
+          data-testid="issue-certificate-button"
           onClick={handleIssue}
           disabled={loading || issued}
           className="bg-amber-600 hover:bg-amber-700 text-white border-none shadow-amber-200"

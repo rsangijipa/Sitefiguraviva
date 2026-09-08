@@ -4,6 +4,7 @@ import { auth, adminDb } from "@/lib/firebase/admin";
 import { FieldValue } from "firebase-admin/firestore";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
+import { writeEnrollmentMirror } from "@/lib/auth/enrollment-service";
 
 /**
  * Enrolls a lead (application) into a course.
@@ -117,6 +118,28 @@ export async function enrollLead(
       },
       { merge: true },
     );
+
+    // 4b. Dual-write to Supabase enrollments table (migration in progress).
+    // Firestore status "active" maps 1:1 to Postgres enum public.enrollment_status
+    // value "active" (see supabase/migrations/202606110001_p2_lms_foundation.sql).
+    // Firestore paymentStatus "paid" maps 1:1 to Postgres enum public.payment_status "paid".
+    try {
+      await writeEnrollmentMirror({
+        uid: userId,
+        courseId: data.courseId,
+        enrollmentDoc: {
+          status: "active",
+          paymentStatus: "paid",
+          paymentMethod: "manual",
+          sourceRef: applicationId,
+        } as any,
+      });
+    } catch (supabaseError) {
+      console.error(
+        "[EnrollLead] Supabase mirror write failed (Firestore write already committed):",
+        supabaseError,
+      );
+    }
 
     // 5. Update Application Status
     await adminDb.collection("applications").doc(applicationId).update({

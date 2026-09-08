@@ -84,8 +84,15 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // 3. Create Pending Enrollment (Idempotent key use ideally, but here simple set)
-    const enrollmentId = `${uid}_${normalizedCourseId}`;
+    // 3. Create Pending Enrollment
+    // `uid` here always comes from getBearerSupabaseSessionClaims (a real
+    // Supabase Auth UUID matching profiles.id), so it's safe to write into
+    // `user_id`. Do NOT set `id` to a client-built string — `enrollments.id`
+    // is a Postgres `uuid` column with a DB-generated default; a composite
+    // "${uid}_${courseId}" string fails uuid validation and throws (this
+    // previously broke subscription checkout after the Stripe session had
+    // already been created). Upsert against the (user_id, course_id)
+    // partial unique index instead.
     const enrollmentData = {
       status: "pending_approval" as const,
       payment_status: "pending" as const,
@@ -98,8 +105,8 @@ export async function POST(req: NextRequest) {
     };
     const { error: enrollmentError } = await supabase
       .from("enrollments")
-      .upsert({ id: enrollmentId, ...enrollmentData } as any, {
-        onConflict: "id",
+      .upsert(enrollmentData as any, {
+        onConflict: "user_id,course_id",
       });
     if (enrollmentError) throw enrollmentError;
 

@@ -65,28 +65,57 @@ export const gamificationService = {
   ) {
     if (!userId || amount <= 0) return;
 
+    // Deterministic idempotency key: the same (user, reason, subject) can only
+    // ever grant XP once, regardless of how many times awardXp is called for
+    // it (duplicate action calls, retries, refresh, concurrent requests).
+    // Reasons without a natural subject (e.g. "daily_login") fall back to a
+    // per-day key so repeated logins on the same day don't double-grant.
+    const subject =
+      metadata?.lessonId || metadata?.courseId || metadata?.badgeId || null;
+    const dayKey = new Date().toISOString().slice(0, 10);
+    const transId = subject
+      ? `${userId}_${reason}_${subject}`
+      : `${userId}_${reason}_${dayKey}`;
+
     try {
-      const docRef = adminDb.collection("gamification_profiles").doc(userId);
-      const profile = await this.getProfile(userId);
+      const profileRef = adminDb
+        .collection("gamification_profiles")
+        .doc(userId);
+      const transRef = adminDb.collection("xp_transactions").doc(transId);
 
-      if (!profile) return;
+      // Ensure profile exists before the transaction (getProfile creates it
+      // on first access); the transaction itself only reads/writes.
+      const initialProfile = await this.getProfile(userId);
+      if (!initialProfile) return;
 
-      const newTotalXp = profile.totalXp + amount;
-      const newLevel = calculateLevel(newTotalXp);
+      const result = await adminDb.runTransaction(async (tx) => {
+        const [transSnap, profileSnap] = await Promise.all([
+          tx.get(transRef),
+          tx.get(profileRef),
+        ]);
 
-      // Update Profile
-      await docRef.update({
-        totalXp: FieldValue.increment(amount),
-        level: newLevel,
-        updatedAt: FieldValue.serverTimestamp(),
-      });
+        if (transSnap.exists) {
+          // Already granted for this (user, reason, subject) — no-op.
+          const existingProfile = profileSnap.data() as UserGamificationProfile;
+          return {
+            newTotalXp: existingProfile.totalXp,
+            newLevel: existingProfile.level,
+            leveledUp: false,
+            duplicate: true,
+          };
+        }
 
-      // Log Transaction
-      const transId = `${userId}_${Date.now()}`;
-      await adminDb
-        .collection("xp_transactions")
-        .doc(transId)
-        .set({
+        const profile = profileSnap.data() as UserGamificationProfile;
+        const newTotalXp = profile.totalXp + amount;
+        const newLevel = calculateLevel(newTotalXp);
+
+        tx.update(profileRef, {
+          totalXp: FieldValue.increment(amount),
+          level: newLevel,
+          updatedAt: FieldValue.serverTimestamp(),
+        });
+
+        tx.set(transRef, {
           userId,
           amount,
           reason,
@@ -94,7 +123,15 @@ export const gamificationService = {
           timestamp: FieldValue.serverTimestamp(),
         });
 
-      return { newTotalXp, newLevel, leveledUp: newLevel > profile.level };
+        return {
+          newTotalXp,
+          newLevel,
+          leveledUp: newLevel > profile.level,
+          duplicate: false,
+        };
+      });
+
+      return result;
     } catch (error) {
       console.error("[AdminGamificationService] Error awarding XP:", error);
     }

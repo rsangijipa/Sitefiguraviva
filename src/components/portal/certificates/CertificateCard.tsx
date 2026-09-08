@@ -22,7 +22,10 @@ export const CertificateCard = ({
         : new Date();
 
   return (
-    <div className="bg-white rounded-xl border border-stone-100 shadow-sm overflow-hidden flex flex-col md:flex-row">
+    <div
+      data-testid="portal-certificate-card"
+      className="bg-white rounded-xl border border-stone-100 shadow-sm overflow-hidden flex flex-col md:flex-row"
+    >
       {/* Visual Left (Gold side) */}
       <div className="bg-gradient-to-br from-yellow-50 to-amber-100 w-full md:w-32 flex items-center justify-center p-6 shrink-0 relative overflow-hidden">
         <div className="absolute top-0 right-0 p-2 opacity-10">

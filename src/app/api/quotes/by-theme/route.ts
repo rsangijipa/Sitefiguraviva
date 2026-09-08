@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 
-import { hasTheme, listQuotes } from "@/components/resources/apps/emotion-tree/lib/server/quote-repository";
-import type { ThemeFilter } from "@/components/resources/apps/emotion-tree/types/quote";
+import {
+  hasTheme,
+  listQuotes,
+} from "@/features/awareness-tree/lib/server/quote-repository";
+import type { ThemeFilter } from "@/features/awareness-tree/types/quote";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);

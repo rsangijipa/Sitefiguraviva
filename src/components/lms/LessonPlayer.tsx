@@ -229,6 +229,7 @@ export function LessonPlayer({
                   {!activeLesson.isCompleted &&
                     activeLesson.type !== "video" && (
                       <Button
+                        data-testid="mark-lesson-complete"
                         onClick={() => {
                           const modId = getModuleId(activeLesson);
                           if (modId) onMarkComplete(activeLesson.id, modId);

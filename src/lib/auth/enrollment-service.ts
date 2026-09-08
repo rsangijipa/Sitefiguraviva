@@ -17,6 +17,9 @@ export interface StripeActivationPayload {
  * Unified logic to mirror enrollments to both collections bidirectionally.
  * Used by Stripe Webhook, Admin PIX actions, etc.
  */
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function writeEnrollmentMirror({
   uid,
   courseId,
@@ -26,11 +29,18 @@ export async function writeEnrollmentMirror({
   courseId: string;
   enrollmentDoc: Partial<EnrollmentDoc>;
 }) {
-  const enrollmentId = `${uid}_${courseId}`;
   const supabase = createSupabaseServiceClient();
+  // `enrollments.id`/`user_id` are Postgres `uuid` columns tied to
+  // `profiles(id)` (Supabase Auth). `uid` here may instead be a legacy
+  // Firebase UID (not a valid UUID) for accounts not yet migrated — those
+  // must go into `legacy_firebase_uid` instead, or the upsert throws
+  // "invalid input syntax for type uuid" and silently no-ops wherever this
+  // is wrapped in try/catch. Never invent a client-side `id`: let Postgres
+  // generate it and upsert against whichever partial unique index matches.
+  const isSupabaseUid = UUID_RE.test(uid);
   const dataToSet: any = {
-    id: enrollmentId,
-    user_id: uid,
+    user_id: isSupabaseUid ? uid : null,
+    legacy_firebase_uid: isSupabaseUid ? null : uid,
     course_id: courseId,
     status: enrollmentDoc.status,
     payment_status:
@@ -54,9 +64,11 @@ export async function writeEnrollmentMirror({
         ? enrollmentDoc.paidAt.toISOString()
         : enrollmentDoc.paidAt),
   };
-  const { error } = await supabase
-    .from("enrollments")
-    .upsert(dataToSet, { onConflict: "id" });
+  const { error } = await supabase.from("enrollments").upsert(dataToSet, {
+    onConflict: isSupabaseUid
+      ? "user_id,course_id"
+      : "legacy_firebase_uid,course_id",
+  });
   if (error) throw error;
 }
 
@@ -85,11 +97,20 @@ export async function activateEnrollmentFromStripe(
   const contentRevision = courseData?.content_revision || 1;
   const totalLessons =
     (courseData?.legacy_payload as any)?.stats?.lessonsCount || 0;
-  const { data: existingRow } = await supabase
+  // `enrollments.id` is a DB-generated uuid, not `${uid}_${courseId}` — look
+  // the row up by (user_id, course_id) or (legacy_firebase_uid, course_id)
+  // instead, matching the identity column writeEnrollmentMirror actually
+  // uses for this uid.
+  const isSupabaseUid = UUID_RE.test(uid);
+  const existingQuery = supabase
     .from("enrollments")
     .select("*")
-    .eq("id", enrollmentId)
-    .maybeSingle();
+    .eq("course_id", courseId);
+  const { data: existingRow } = await (
+    isSupabaseUid
+      ? existingQuery.eq("user_id", uid)
+      : existingQuery.eq("legacy_firebase_uid", uid)
+  ).maybeSingle();
   const existing = existingRow as any;
 
   // Idempotency: If sourceRef is the same and already active, skip

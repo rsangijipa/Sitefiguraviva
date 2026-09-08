@@ -335,7 +335,7 @@ function CourseContent({ initialData }: { initialData?: any }) {
                 <h3 className="font-bold text-stone-700 mb-4">Seu Progresso</h3>
                 <div className="mb-2 flex justify-between text-xs font-bold text-stone-500">
                   <span>Concluído</span>
-                  <span>
+                  <span data-testid="course-progress-percent">
                     {Math.round(enrollment?.progressSummary?.percent || 0)}%
                   </span>
                 </div>

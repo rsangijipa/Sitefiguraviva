@@ -1,19 +1,33 @@
 import { NextResponse } from "next/server";
 
-import { verifySessionToken } from "@/components/resources/apps/emotion-tree/lib/firebase/admin";
-import { registerInteractions } from "@/components/resources/apps/emotion-tree/lib/server/quote-repository";
-import { INTERACTION_ACTIONS, THEME_SLUGS } from "@/components/resources/apps/emotion-tree/types/quote";
-import type { InteractionAction, InteractionPayload, ThemeFilter } from "@/components/resources/apps/emotion-tree/types/quote";
+import { verifySessionToken } from "@/features/awareness-tree/lib/firebase/admin";
+import { registerInteractions } from "@/features/awareness-tree/lib/server/quote-repository";
+import {
+  INTERACTION_ACTIONS,
+  THEME_SLUGS,
+} from "@/features/awareness-tree/types/quote";
+import type {
+  InteractionAction,
+  InteractionPayload,
+  ThemeFilter,
+} from "@/features/awareness-tree/types/quote";
 
 /** teto de itens aceitos por requisicao (o batch do Firestore para em 500) */
 const MAX_ITEMS = 200;
 
 function isAction(value: unknown): value is InteractionAction {
-  return typeof value === "string" && (INTERACTION_ACTIONS as readonly string[]).includes(value);
+  return (
+    typeof value === "string" &&
+    (INTERACTION_ACTIONS as readonly string[]).includes(value)
+  );
 }
 
 function isTheme(value: unknown): value is ThemeFilter {
-  return value === "all" || (typeof value === "string" && (THEME_SLUGS as readonly string[]).includes(value));
+  return (
+    value === "all" ||
+    (typeof value === "string" &&
+      (THEME_SLUGS as readonly string[]).includes(value))
+  );
 }
 
 export async function POST(request: Request) {
@@ -40,7 +54,10 @@ export async function POST(request: Request) {
 
   const uid = await verifySessionToken(request.headers.get("authorization"));
   if (uid === null) {
-    return NextResponse.json({ error: "Sessao nao autenticada" }, { status: 401 });
+    return NextResponse.json(
+      { error: "Sessao nao autenticada" },
+      { status: 401 },
+    );
   }
 
   const payloads: InteractionPayload[] = [];
@@ -55,7 +72,10 @@ export async function POST(request: Request) {
     // allowlist de verdade: antes bastava `actionType` ser truthy e qualquer
     // string ia parar no Firestore, poluindo a analise depois
     if (!isAction(candidate.actionType)) {
-      return NextResponse.json({ error: "actionType invalido" }, { status: 400 });
+      return NextResponse.json(
+        { error: "actionType invalido" },
+        { status: 400 },
+      );
     }
 
     if (candidate.theme !== undefined && !isTheme(candidate.theme)) {
@@ -71,13 +91,17 @@ export async function POST(request: Request) {
 
     const sessionId =
       uid === "unverified"
-        ? typeof candidate.sessionId === "string" && candidate.sessionId.length > 0
+        ? typeof candidate.sessionId === "string" &&
+          candidate.sessionId.length > 0
           ? candidate.sessionId
           : null
         : uid;
 
     if (!sessionId) {
-      return NextResponse.json({ error: "sessionId obrigatorio" }, { status: 400 });
+      return NextResponse.json(
+        { error: "sessionId obrigatorio" },
+        { status: 400 },
+      );
     }
 
     payloads.push({

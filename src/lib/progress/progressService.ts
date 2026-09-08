@@ -4,6 +4,68 @@ import { publishEvent } from "@/lib/events/bus";
 import { issueCertificate } from "@/actions/certificate";
 import { gamificationService } from "@/lib/gamification/gamificationService";
 import { XP_VALUES } from "@/lib/gamification";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
+import { logger } from "@/lib/logger";
+
+/**
+ * Dual-write helper: mirrors lesson progress into Supabase's `lesson_progress`
+ * table so that read paths backed by Supabase (e.g. courseService.ts,
+ * services/progressService.ts) don't see stale/empty data.
+ *
+ * This is best-effort and non-blocking: Firestore remains the source of
+ * truth at this stage, so a Supabase failure here must never bubble up and
+ * break the caller's Firestore write.
+ */
+async function syncSupabaseLessonProgress({
+  uid,
+  courseId,
+  lessonId,
+  status,
+  percent,
+  maxWatchedSecond,
+  completedAt,
+}: {
+  uid: string;
+  courseId: string;
+  lessonId: string;
+  status: string;
+  percent?: number;
+  maxWatchedSecond?: number;
+  completedAt?: boolean;
+}): Promise<void> {
+  try {
+    const supabase = createSupabaseServiceClient();
+    const row: Record<string, unknown> = {
+      user_id: uid,
+      course_id: courseId,
+      lesson_id: lessonId,
+      status,
+      updated_at: new Date().toISOString(),
+    };
+    if (percent !== undefined) row.percent = percent;
+    if (maxWatchedSecond !== undefined)
+      row.max_watched_second = maxWatchedSecond;
+    if (completedAt) row.completed_at = new Date().toISOString();
+
+    const { error } = await supabase
+      .from("lesson_progress")
+      .upsert(row as any, { onConflict: "user_id,course_id,lesson_id" });
+
+    if (error) {
+      logger.error(
+        "[ProgressService] Supabase dual-write failed for lesson_progress:",
+        error,
+        { uid, courseId, lessonId },
+      );
+    }
+  } catch (err) {
+    logger.error(
+      "[ProgressService] Supabase dual-write threw for lesson_progress:",
+      err,
+      { uid, courseId, lessonId },
+    );
+  }
+}
 
 /**
  * Service to manage course progress with SSoT (Single Source of Truth) principles.
@@ -42,6 +104,16 @@ export const progressService = {
       },
       { merge: true },
     );
+
+    // 1b. Dual-write to Supabase (non-blocking, best-effort)
+    await syncSupabaseLessonProgress({
+      uid,
+      courseId,
+      lessonId,
+      status: "completed",
+      percent: 100,
+      completedAt: true,
+    });
 
     // 2. Publish Event for Audit/Async Workers
     await publishEvent({
@@ -113,6 +185,17 @@ export const progressService = {
     }
 
     await progressRef.set(updateData, { merge: true });
+
+    // Dual-write to Supabase (non-blocking, best-effort)
+    await syncSupabaseLessonProgress({
+      uid,
+      courseId,
+      lessonId,
+      status: data.status,
+      percent: data.percent,
+      maxWatchedSecond: data.maxWatchedSecond,
+      completedAt: data.status === "completed",
+    });
 
     // Update last accessed lesson in enrollment
     const enrollmentRef = adminDb

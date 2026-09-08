@@ -251,6 +251,7 @@ export const CoursePlayer = ({
                         // Condition: !isCompleted && type != 'video'
                         activeLesson.type !== "video" && (
                           <Button
+                            data-testid="mark-lesson-complete"
                             onClick={() =>
                               onMarkComplete(
                                 activeLesson.id,
