@@ -5,6 +5,7 @@ import { logAudit } from "@/lib/audit";
 import { writeEnrollmentMirror } from "@/lib/auth/enrollment-service";
 import { requireAdmin } from "@/lib/auth/server";
 import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
+import { findOrCreateSupabaseUserByEmail } from "@/lib/auth/admin-user-lookup";
 
 /**
  * Manual/admin enrollment management. This used to be built entirely on
@@ -23,46 +24,6 @@ async function assertAdmin() {
   return { uid: context.uid, email: context.email };
 }
 
-async function findOrCreateSupabaseUser(email: string) {
-  const supabase = createSupabaseServiceClient();
-  const normalizedEmail = email.toLowerCase().trim();
-
-  const { data: existingProfile } = await supabase
-    .from("profiles")
-    .select("id, display_name")
-    .eq("email", normalizedEmail)
-    .maybeSingle();
-
-  if (existingProfile) {
-    return { uid: existingProfile.id, isNew: false };
-  }
-
-  // No profile with this email yet — create a placeholder Supabase Auth
-  // user + profile so the student can claim it later (password reset) or
-  // sign in with the email once the admin shares access.
-  const { data: created, error: createError } =
-    await supabase.auth.admin.createUser({
-      email: normalizedEmail,
-      email_confirm: false,
-      user_metadata: { created_by: "admin_manual_enrollment" },
-    });
-
-  if (createError || !created?.user) {
-    throw new Error(createError?.message || "Falha ao criar usuário");
-  }
-
-  const { error: profileError } = await supabase.from("profiles").upsert({
-    id: created.user.id,
-    email: normalizedEmail,
-    display_name: normalizedEmail.split("@")[0],
-    role: "student",
-    is_active: true,
-  });
-  if (profileError) throw profileError;
-
-  return { uid: created.user.id, isNew: true };
-}
-
 /**
  * Enrolls a user in a course by email.
  * If the user does not exist yet, creates a placeholder Supabase account.
@@ -71,7 +32,7 @@ export async function enrollUser(email: string, courseId: string) {
   try {
     const adminUser = await assertAdmin();
     const supabase = createSupabaseServiceClient();
-    const { uid } = await findOrCreateSupabaseUser(email);
+    const { uid } = await findOrCreateSupabaseUserByEmail(email);
 
     const { data: courseData } = await supabase
       .from("courses")
