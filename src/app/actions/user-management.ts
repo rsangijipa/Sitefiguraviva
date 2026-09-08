@@ -1,62 +1,59 @@
 "use server";
 
 import { requireAdmin } from "@/lib/auth/server";
-import { adminAuth, adminDb } from "@/lib/firebase/admin";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import { UserRole, UserStatus } from "@/types/user";
-import { Timestamp } from "firebase-admin/firestore";
 import { revalidatePath } from "next/cache";
 
 import { auditService } from "@/lib/audit";
 import { deepSafeSerialize } from "@/lib/utils";
 
-// Removed local logAudit helper in favor of centralized auditService
+/**
+ * User accounts are created exclusively through Supabase Auth
+ * (registerForCourseAction, admin OAuth login) — nothing writes to Firebase
+ * Auth anymore. This file used to manage users entirely through the
+ * Firebase Admin SDK (adminAuth.listUsers/updateUser/deleteUser +
+ * Firestore's `users` collection), which meant every account created after
+ * the Supabase migration was completely invisible to "Usuários &
+ * Permissões" and "Alunos & Matrículas" in the admin panel — the exact
+ * symptom of a student who signs up never appearing for the admin to find.
+ */
 
-// --- Actions ---
+const ROLE_MAP: Record<string, UserRole> = {
+  admin: "admin",
+  administrador: "admin",
+  tutor: "tutor",
+  student: "student",
+};
+
+function normalizeRole(role: unknown): UserRole {
+  return ROLE_MAP[String(role || "").toLowerCase()] || "student";
+}
 
 export async function updateUserRole(targetUid: string, newRole: UserRole) {
-  const adminClaims = await requireAdmin(); // Throws invalid-session or unauthorized
+  const adminClaims = await requireAdmin();
   const actorUid = adminClaims.uid;
 
-  if (newRole === "admin" && adminClaims.uid === targetUid) {
-    // Prevent self-demotion if applied logic needed, but self-promotion is main risk usually protected by requireAdmin
-    // Here admin is already admin.
-  }
-
   try {
-    const userRef = adminDb.collection("users").doc(targetUid);
-    const userDoc = await userRef.get();
-    const oldRole = userDoc.data()?.role || "student";
-    const isActive = userDoc.data()?.isActive !== false;
+    const supabase = createSupabaseServiceClient();
+    const { data: before } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", targetUid)
+      .maybeSingle();
 
-    // 1. Update Firestore Doc
-    await userRef.set(
-      {
-        role: newRole,
-        updatedAt: Timestamp.now(),
-      },
-      { merge: true },
-    );
+    const { error } = await supabase
+      .from("profiles")
+      .update({ role: newRole, updated_at: new Date().toISOString() })
+      .eq("id", targetUid);
+    if (error) throw error;
 
-    // 2. Set Custom Claims (so idToken is valid immediately)
-    // We only set 'admin' claim if role is admin.
-    // For 'tutor' we might want a 'tutor' claim, but currently we rely on DB for that permissions mostly.
-    // But for consistency:
-    const claims = {
-      role: newRole,
-      admin: newRole === "admin" && isActive,
-      tutor: newRole === "tutor" && isActive,
-      isActive,
-    };
-    // Note: setCustomUserClaims overwrites existing claims.
-    await adminAuth.setCustomUserClaims(targetUid, claims);
-
-    // 3. Audit
     await auditService.logEvent({
       eventType: "USER_ROLE_UPDATED",
       actor: { uid: actorUid, email: adminClaims.email },
-      target: { id: targetUid, collection: "users" },
+      target: { id: targetUid, collection: "profiles" },
       diff: {
-        before: { role: oldRole },
+        before: { role: before?.role || "student" },
         after: { role: newRole },
       },
     });
@@ -81,53 +78,39 @@ export async function toggleUserStatus(
     return { success: false, error: "You cannot change your own status." };
   }
 
+  const isActive = newStatus !== "disabled";
+
   try {
-    const userRef = adminDb.collection("users").doc(targetUid);
-    const userDoc = await userRef.get();
-    const oldStatus = userDoc.data()?.status || "active";
-    const oldIsActive = userDoc.data()?.isActive;
+    const supabase = createSupabaseServiceClient();
+    const { data: before } = await supabase
+      .from("profiles")
+      .select("is_active")
+      .eq("id", targetUid)
+      .maybeSingle();
 
-    const updateData: any = {
-      status: newStatus,
-      isActive: newStatus !== "disabled",
-      updatedAt: Timestamp.now(),
-    };
+    const { error } = await supabase
+      .from("profiles")
+      .update({ is_active: isActive, updated_at: new Date().toISOString() })
+      .eq("id", targetUid);
+    if (error) throw error;
 
-    if (newStatus === "disabled") {
-      updateData.disabledAt = Timestamp.now();
-      updateData.disabledBy = actorUid;
-      updateData.disabledReason = reason || "No reason provided";
-
-      // Disable in Auth (Revoke tokens)
-      await adminAuth.updateUser(targetUid, { disabled: true });
-      await adminAuth.revokeRefreshTokens(targetUid);
-    } else {
-      // Re-enable
-      updateData.disabledAt = null;
-      updateData.disabledBy = null;
-      updateData.disabledReason = null;
-
-      await adminAuth.updateUser(targetUid, { disabled: false });
-    }
-
-    await userRef.set(updateData, { merge: true });
-
-    const role = (userDoc.data()?.role || "student") as UserRole;
-    const isActive = newStatus !== "disabled";
-    await adminAuth.setCustomUserClaims(targetUid, {
-      role,
-      admin: role === "admin" && isActive,
-      tutor: role === "tutor" && isActive,
-      isActive,
-    });
+    // Belt-and-suspenders: also block sign-in at the auth layer, not just
+    // the app-level `is_active` gate.
+    await supabase.auth.admin
+      .updateUserById(targetUid, {
+        ban_duration: isActive ? "none" : "87600000h", // ~10,000 years
+      })
+      .catch((err) =>
+        console.error("toggleUserStatus: auth ban update failed:", err),
+      );
 
     await auditService.logEvent({
-      eventType: newStatus === "disabled" ? "USER_DISABLED" : "USER_ENABLED",
+      eventType: isActive ? "USER_ENABLED" : "USER_DISABLED",
       actor: { uid: actorUid, email: adminClaims.email },
-      target: { id: targetUid, collection: "users" },
+      target: { id: targetUid, collection: "profiles" },
       diff: {
-        before: { status: oldStatus, isActive: oldIsActive },
-        after: { status: newStatus, isActive: newStatus !== "disabled" },
+        before: { isActive: before?.is_active },
+        after: { isActive },
       },
       payload: { reason },
     });
@@ -152,21 +135,21 @@ export async function deleteUser(targetUid: string) {
   }
 
   try {
-    // 1. Delete from Firebase Auth
-    await adminAuth.deleteUser(targetUid).catch((err) => {
-      // If user not found in Auth but exists in DB, we still want to clean DB
-      if (err.code !== "auth/user-not-found") throw err;
+    const supabase = createSupabaseServiceClient();
+
+    await supabase.auth.admin.deleteUser(targetUid).catch((err) => {
+      // Already gone from Auth (e.g. previously deleted) — still clean the
+      // profile row rather than failing the whole action.
+      console.error("deleteUser: auth delete failed:", err);
     });
 
-    // 2. Delete from Firestore Profile
-    await adminDb.collection("users").doc(targetUid).delete();
+    await supabase.from("profiles").delete().eq("id", targetUid);
 
-    // 3. Audit
     await auditService.logEvent({
       eventType: "USER_DELETED",
       actor: { uid: actorUid, email: adminClaims.email },
-      target: { id: targetUid, collection: "users" },
-      payload: { deletedAt: Timestamp.now() },
+      target: { id: targetUid, collection: "profiles" },
+      payload: { deletedAt: new Date().toISOString() },
     });
 
     revalidatePath("/admin/users");
@@ -187,53 +170,49 @@ export async function listUsersForAdmin(
   await requireAdmin();
 
   try {
-    const authPage = await adminAuth.listUsers(
-      Math.min(pageSize, 1000),
-      pageToken,
-    );
-    const authUsers = authPage.users;
+    const supabase = createSupabaseServiceClient();
+    const page = pageToken ? parseInt(pageToken, 10) || 1 : 1;
+    const perPage = Math.min(pageSize, 1000);
 
-    // Batched profile lookup: one BatchGetDocuments call per chunk instead of
-    // one round-trip per user (was up to `pageSize` individual reads per load).
-    const profileMap = new Map<string, any>();
-    const PROFILE_CHUNK_SIZE = 300;
+    const [
+      { data: authPage, error: authError },
+      { data: profiles, error: profileError },
+    ] = await Promise.all([
+      supabase.auth.admin.listUsers({ page, perPage }),
+      supabase.from("profiles").select("*"),
+    ]);
 
-    for (let i = 0; i < authUsers.length; i += PROFILE_CHUNK_SIZE) {
-      const refs = authUsers
-        .slice(i, i + PROFILE_CHUNK_SIZE)
-        .map((u) => adminDb.collection("users").doc(u.uid));
+    if (authError) throw authError;
+    if (profileError) throw profileError;
 
-      if (refs.length === 0) continue;
+    const profileMap = new Map((profiles || []).map((p) => [p.id, p]));
 
-      const snaps = await adminDb.getAll(...refs);
-      for (const snap of snaps) {
-        profileMap.set(snap.id, snap.exists ? snap.data() : null);
-      }
-    }
-
-    const merged = authUsers.map((u) => {
-      const p = profileMap.get(u.uid) || {};
-      const isActive = p?.isActive !== undefined ? p.isActive : !u.disabled;
+    const merged = (authPage?.users || []).map((u) => {
+      const p = profileMap.get(u.id);
+      const isActive = p?.is_active ?? true;
       return {
-        id: u.uid,
-        uid: u.uid,
+        id: u.id,
+        uid: u.id,
         email: u.email || p?.email || null,
-        displayName: p?.displayName || u.displayName || null,
-        photoURL: p?.photoURL || u.photoURL || null,
-        role: p?.role || "student",
+        displayName:
+          p?.display_name || (u.user_metadata as any)?.full_name || null,
+        photoURL: p?.photo_url || null,
+        role: normalizeRole(p?.role),
         isActive,
         status: isActive ? "active" : "disabled",
-        profileCompletion: Number(p?.profileCompletion || 0),
-        phoneNumber: p?.phoneNumber || null,
-        createdAt: p?.createdAt || null,
-        lastLogin: p?.lastLogin || u.metadata?.lastSignInTime || null,
+        profileCompletion: 0,
+        phoneNumber: (u.user_metadata as any)?.phone || null,
+        createdAt: p?.created_at || u.created_at || null,
+        lastLogin: p?.last_login_at || u.last_sign_in_at || null,
       };
     });
+
+    const hasNextPage = (authPage?.users?.length || 0) >= perPage;
 
     return {
       success: true,
       users: deepSafeSerialize(merged),
-      nextPageToken: authPage.pageToken || null,
+      nextPageToken: hasNextPage ? String(page + 1) : null,
     };
   } catch (error) {
     console.error("listUsersForAdmin error:", error);

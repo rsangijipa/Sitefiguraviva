@@ -137,9 +137,16 @@ export default function EnrollmentStepper({
         }),
       });
 
-      // P0: 401 Handling
+      // P0: 401 Handling. This used to redirect silently — if the Supabase
+      // session hadn't finished propagating to the browser client yet (a
+      // race right after signup/login), the visitor's form data vanished
+      // with no explanation and no application row was ever created.
       if (res.status === 401) {
         setLoading(false);
+        addToast(
+          "Sua sessão expirou. Faça login novamente para confirmar seu interesse.",
+          "error",
+        );
         router.push(`/auth?next=/inscricao/${courseId}`);
         return;
       }
@@ -172,6 +179,10 @@ export default function EnrollmentStepper({
       // P0: 401 Handling
       if (res.status === 401) {
         setLoading(false);
+        addToast(
+          "Sua sessão expirou. Faça login novamente para continuar.",
+          "error",
+        );
         router.push(`/auth?next=/inscricao/${courseId}`);
         return;
       }
