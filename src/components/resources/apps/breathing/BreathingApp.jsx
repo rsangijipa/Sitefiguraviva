@@ -99,15 +99,15 @@ export default function BreathingApp({ onClose: _onClose }) {
 
   // Fixed Timer Ring + 5s Spinner
   const TimerRing = ({ total, current }) => {
-    const radius = 120;
+    const radius = 90;
     const circumference = 2 * Math.PI * radius;
     const progress = current / total;
     const strokeDashoffset = circumference - progress * circumference;
 
     return (
-      <div className="relative w-64 h-64 flex items-center justify-center">
+      <div className="relative w-48 h-48 flex items-center justify-center">
         {/* 5-Second Loop Spinner Ring (Outer) */}
-        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 260 260">
+        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 200 200">
           <defs>
             <linearGradient
               id="spinnerGradient"
@@ -121,9 +121,9 @@ export default function BreathingApp({ onClose: _onClose }) {
             </linearGradient>
           </defs>
           <motion.circle
-            cx="130"
-            cy="130"
-            r={128} // Slightly larger
+            cx="100"
+            cy="100"
+            r={98} // Slightly larger
             fill="none"
             stroke="url(#spinnerGradient)"
             strokeWidth="2"
@@ -137,11 +137,11 @@ export default function BreathingApp({ onClose: _onClose }) {
         {/* Progress Ring */}
         <svg
           className="absolute inset-0 w-full h-full rotate-[-90deg]"
-          viewBox="0 0 260 260"
+          viewBox="0 0 200 200"
         >
           <circle
-            cx="130"
-            cy="130"
+            cx="100"
+            cy="100"
             r={radius}
             className="stroke-stone-100"
             strokeWidth="4"
@@ -151,8 +151,8 @@ export default function BreathingApp({ onClose: _onClose }) {
             initial={{ strokeDashoffset: circumference }}
             animate={{ strokeDashoffset }}
             transition={{ duration: 1, ease: "linear" }}
-            cx="130"
-            cy="130"
+            cx="100"
+            cy="100"
             r={radius}
             className="stroke-primary/50"
             strokeWidth="4"
@@ -163,7 +163,7 @@ export default function BreathingApp({ onClose: _onClose }) {
         </svg>
 
         <div className="flex flex-col items-center z-10">
-          <span className="text-5xl font-sans font-light text-primary tracking-tight">
+          <span className="text-4xl font-sans font-light text-primary tracking-tight">
             {formatTime(current)}
           </span>
           <span className="text-xs font-bold uppercase tracking-widest text-gray-300 mt-2">
@@ -327,7 +327,7 @@ export default function BreathingApp({ onClose: _onClose }) {
           </button>
         </div>
 
-        <div className="relative mb-8 w-full flex justify-center scale-110">
+        <div className="relative mb-4 w-full flex justify-center">
           <BreathingAnimation
             technique={activeTechnique}
             isActive={sessionActive}
@@ -335,7 +335,7 @@ export default function BreathingApp({ onClose: _onClose }) {
           />
         </div>
 
-        <div className="mb-8">
+        <div className="mb-4">
           <TimerRing
             total={SESSION_DURATION_SECONDS}
             current={secondsRemaining}
