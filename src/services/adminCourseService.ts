@@ -175,7 +175,7 @@ export const adminCourseService = {
     materialId: string,
     filePath?: string,
   ): Promise<void> {
-    return deleteMaterialAction(courseId, materialId, filePath);
+    return deleteMaterialAction(courseId, materialId);
   },
 
   // --- UTILS ---

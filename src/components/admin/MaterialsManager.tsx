@@ -78,10 +78,10 @@ export default function MaterialsManager({ courseId }: MaterialsManagerProps) {
     }
   };
 
-  const handleDelete = async (materialId: string, filePath?: string) => {
+  const handleDelete = async (materialId: string) => {
     if (!confirm("Excluir este material?")) return;
     try {
-      await deleteMaterialAction(courseId, materialId, filePath);
+      await deleteMaterialAction(courseId, materialId);
       await loadMaterials();
       addToast("Material excluído.", "success");
     } catch (error) {
@@ -179,7 +179,7 @@ export default function MaterialsManager({ courseId }: MaterialsManagerProps) {
                 <Download size={16} />
               </a>
               <button
-                onClick={() => handleDelete(item.id, item.filePath)}
+                onClick={() => handleDelete(item.id)}
                 className="p-2 text-red-200 hover:text-red-500 transition-colors"
               >
                 <Trash2 size={16} />
