@@ -7,18 +7,20 @@ import {
   Sprout,
   Sparkles,
   Fingerprint,
+  Waves,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
 import BreathingApp from "./resources/apps/breathing/BreathingApp";
 import { App as QuizBank } from "./Quiz/App";
 import SomaScan from "./resources/apps/soma-scan/App";
+import LagoApp from "./resources/apps/lago/LagoApp";
 import ResourceModalShell from "./resources/ResourceModalShell";
 import ResourceAppFrame from "./resources/ResourceAppFrame";
 import { EmotionTreeApp } from "./resources/apps/emotion-tree/EmotionTreeApp";
 
 export default function ResourcesSection() {
-  const [activeResource, setActiveResource] = useState(null); // 'breathing' | 'emotion-tree' | 'quiz' | 'somascan'
+  const [activeResource, setActiveResource] = useState(null); // 'breathing' | 'emotion-tree' | 'quiz' | 'somascan' | 'lago'
   const scrollContainerRef = useRef(null);
   const openResource = (resource) => {
     setActiveResource(resource);
@@ -171,6 +173,31 @@ export default function ResourcesSection() {
                 Explorar Quizzes
               </span>
             </motion.div>
+
+            {/* Lago Card (NEW) */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4 }}
+              whileHover={{ y: -5 }}
+              className="flex-shrink-0 w-80 md:w-auto snap-center group relative bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col items-center text-center"
+              onClick={() => openResource("lago")}
+            >
+              <div className="w-16 h-16 rounded-2xl bg-sage/10 flex items-center justify-center text-sage mb-6 group-hover:scale-110 transition-transform">
+                <Waves size={32} />
+              </div>
+              <h3 className="text-xl font-serif text-primary font-bold mb-2">
+                Lago
+              </h3>
+              <p className="text-text/60 text-sm mb-6 flex-grow">
+                Um lago vivo em WebGL — toque a água, alimente as carpas, sinta
+                a calma se espalhar.
+              </p>
+              <span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-sage group-hover:text-primary transition-colors">
+                Entrar no Lago
+              </span>
+            </motion.div>
           </div>
 
           {/* Visual Scroll Controls */}
@@ -215,7 +242,9 @@ export default function ResourcesSection() {
               ? "Guia de Respiração"
               : activeResource === "somascan"
                 ? "SomaScan"
-                : "Banco de Quizzes"
+                : activeResource === "lago"
+                  ? "Lago"
+                  : "Banco de Quizzes"
         }
         onClose={closeResource}
         className={activeResource === "emotion-tree" ? "bg-[#0f1727]" : ""}
@@ -245,6 +274,13 @@ export default function ResourcesSection() {
           <ResourceAppFrame title="Banco de Quizzes">
             <div className="resource-app resource-app--light">
               <QuizBank />
+            </div>
+          </ResourceAppFrame>
+        )}
+        {activeResource === "lago" && (
+          <ResourceAppFrame title="Lago">
+            <div className="resource-app resource-app--light">
+              <LagoApp />
             </div>
           </ResourceAppFrame>
         )}
