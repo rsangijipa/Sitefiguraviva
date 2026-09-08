@@ -176,7 +176,10 @@ export default function CourseEditorModal({
         </div>
 
         {/* Section Tabs */}
-        <div className="flex border-b border-stone-100 bg-stone-50">
+        <div
+          className="flex overflow-x-auto border-b border-stone-100 bg-stone-50"
+          data-lenis-prevent
+        >
           {[
             { id: "info", label: "Informações Básicas" },
             { id: "details", label: "Detalhes & Mídia" },
@@ -185,7 +188,7 @@ export default function CourseEditorModal({
             <button
               key={section.id}
               onClick={() => setActiveSection(section.id as any)}
-              className={`flex-1 px-6 py-4 text-sm font-medium transition-colors ${
+              className={`shrink-0 whitespace-nowrap px-4 py-3 text-xs font-medium transition-colors md:flex-1 md:px-6 md:py-4 md:text-sm ${
                 activeSection === section.id
                   ? "bg-white text-primary border-b-2 border-primary"
                   : "text-stone-500 hover:text-stone-800 hover:bg-white/50"

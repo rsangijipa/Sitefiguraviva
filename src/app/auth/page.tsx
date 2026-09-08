@@ -89,6 +89,7 @@ function AuthContent() {
       // D. Redirect Logic
       // Priority 0: Continue the enrollment the account was created for.
       if (preferredPath) {
+        router.refresh();
         router.push(preferredPath);
         return;
       }
@@ -97,6 +98,11 @@ function AuthContent() {
         ? getSafeNextPath(next, userRole)
         : getRedirectPathForRole(userRole);
 
+      // The target layout is a server component gated on the session cookie
+      // (requireAdmin/requireSession). A plain client-side push can reuse the
+      // Router Cache entry rendered before login, landing on stale/wrong
+      // content until a manual refresh. Force a re-fetch first.
+      router.refresh();
       router.push(targetPath);
     } catch (err) {
       console.error("Post-Auth Error", err);

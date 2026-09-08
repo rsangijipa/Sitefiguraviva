@@ -50,26 +50,32 @@ export function AdminPageShell({
           )}
         >
           {/* Breadcrumbs */}
-          <nav className="flex items-center text-sm text-stone-500">
+          <nav className="flex min-w-0 flex-1 items-center text-sm text-stone-500">
             <Link
               href="/admin"
-              className="hover:text-primary transition-colors flex items-center gap-1"
+              className="flex shrink-0 items-center gap-1 transition-colors hover:text-primary"
             >
               <LayoutDashboard size={14} />
-              <span>Admin</span>
+              <span className="hidden sm:inline">Admin</span>
             </Link>
             {breadcrumbs.map((crumb, idx) => (
-              <div key={idx} className="flex items-center text-stone-500">
-                <ChevronRight size={14} className="mx-1 text-stone-300" />
+              <div
+                key={idx}
+                className="flex min-w-0 items-center text-stone-500"
+              >
+                <ChevronRight
+                  size={14}
+                  className="mx-1 shrink-0 text-stone-300"
+                />
                 {crumb.href ? (
                   <Link
                     href={crumb.href}
-                    className="hover:text-primary transition-colors flex items-center gap-1"
+                    className="truncate transition-colors hover:text-primary"
                   >
                     {crumb.label}
                   </Link>
                 ) : (
-                  <span className="font-medium text-stone-800">
+                  <span className="truncate font-medium text-stone-800">
                     {crumb.label}
                   </span>
                 )}
@@ -78,7 +84,7 @@ export function AdminPageShell({
           </nav>
 
           {/* User Context */}
-          <div className="text-xs text-stone-400">
+          <div className="hidden shrink-0 truncate pl-4 text-xs text-stone-400 md:block">
             Logado como{" "}
             <span className="font-bold text-stone-600">{user.email}</span>
           </div>

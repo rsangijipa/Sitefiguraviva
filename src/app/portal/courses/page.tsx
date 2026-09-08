@@ -281,7 +281,7 @@ export default async function MyCoursesPage() {
           </div>
         ) : (
           <EmptyState
-            icon={BookOpen}
+            icon={<BookOpen size={40} strokeWidth={1.5} />}
             title="Sua Prateleira está Vazia"
             description="Você ainda não se matriculou em nenhuma formação. Descubra novos caminhos no nosso catálogo."
             action={

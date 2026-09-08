@@ -1,19 +1,22 @@
-import { requireAdmin } from '@/lib/auth/server';
-import AdminShell from './AdminShell';
-import { headers } from 'next/headers'; // Used to force dynamic if needed, but cookies() implies dynamic.
-import { RequireRole } from '@/components/system/RequireRole';
+import { requireAdmin } from "@/lib/auth/server";
+import AdminShell from "./AdminShell";
+import { headers } from "next/headers"; // Used to force dynamic if needed, but cookies() implies dynamic.
+import { RequireRole } from "@/components/system/RequireRole";
 
-export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+export const dynamic = "force-dynamic";
 
-    // This call is the Gatekeeper. 
-    // It redirects to /admin/login if no valid session or no admin claim.
-    await requireAdmin();
+export default async function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  // This call is the Gatekeeper.
+  // It redirects to /admin/login if no valid session or no admin claim.
+  await requireAdmin();
 
-    return (
-        <AdminShell>
-            <RequireRole roles={['admin']}>
-                {children}
-            </RequireRole>
-        </AdminShell>
-    );
+  return (
+    <AdminShell>
+      <RequireRole roles={["admin"]}>{children}</RequireRole>
+    </AdminShell>
+  );
 }

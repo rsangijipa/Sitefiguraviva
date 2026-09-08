@@ -257,7 +257,7 @@ export default function UsersManager() {
         </div>
 
         {/* Users List */}
-        <div className="md:col-span-12">
+        <div className="md:col-span-12 min-w-0">
           <Card className="border-stone-100 shadow-sm overflow-hidden bg-white">
             <div className="overflow-x-auto">
               <table className="w-full border-collapse">

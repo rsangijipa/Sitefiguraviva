@@ -176,7 +176,10 @@ export const DashboardShell = ({ children }: { children: React.ReactNode }) => {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-4 lg:p-8 scroll-smooth">
+        <main
+          className="flex-1 overflow-y-auto p-4 lg:p-8 scroll-smooth"
+          data-lenis-prevent
+        >
           <div className="max-w-7xl mx-auto space-y-8 animate-fade-in-up">
             {children}
           </div>

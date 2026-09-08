@@ -105,14 +105,6 @@ export default function AdminShell({
       variant="admin"
       className="fv-admin flex min-h-screen selection:bg-gold/20"
     >
-      {/* Mobile Toggle */}
-      <button
-        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className="fixed bottom-6 right-6 z-50 rounded-full bg-primary p-4 text-white transition-transform active:scale-90 lg:hidden"
-      >
-        {isSidebarOpen ? <X size={24} /> : <LayoutDashboard size={24} />}
-      </button>
-
       {/* Sidebar */}
       <aside
         className={`
@@ -143,7 +135,10 @@ export default function AdminShell({
           </div>
         </div>
 
-        <nav className="flex-1 min-h-0 pb-6 px-6 space-y-2 overflow-y-auto custom-scrollbar overscroll-contain">
+        <nav
+          className="flex-1 min-h-0 pb-6 px-6 space-y-2 overflow-y-auto custom-scrollbar overscroll-contain"
+          data-lenis-prevent
+        >
           {navItems.map((item) => {
             const isActive = pathname === item.path;
             return (
@@ -214,10 +209,20 @@ export default function AdminShell({
       </AnimatePresence>
 
       {/* Main Content */}
-      <main className="panel-surface flex-1 lg:ml-80 p-4 md:p-6 lg:p-8 min-h-screen relative overflow-y-auto custom-scrollbar">
+      <main
+        className="panel-surface flex-1 lg:ml-80 p-4 md:p-6 lg:p-8 min-h-screen relative overflow-y-auto custom-scrollbar"
+        data-lenis-prevent
+      >
         {/* Sticky Mobile Tracker/Header background */}
         <div className="lg:hidden sticky top-0 z-30 bg-paper/80 backdrop-blur-md -mx-4 px-4 py-2 mb-4 border-b border-stone-100 flex items-center justify-between">
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              aria-label={isSidebarOpen ? "Fechar menu" : "Abrir menu"}
+              className="p-1.5 -ml-1.5 text-stone-500 hover:bg-stone-100 rounded-lg active:scale-95 transition-transform"
+            >
+              {isSidebarOpen ? <X size={20} /> : <LayoutDashboard size={20} />}
+            </button>
             <Image
               src="/assets/logo.jpeg"
               alt="Logo"

@@ -163,7 +163,10 @@ export const SidebarNav = ({ className }: { className?: string }) => {
       <UserGamificationSummary />
 
       {/* Nav Items */}
-      <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto custom-scrollbar">
+      <nav
+        className="flex-1 px-4 py-6 space-y-1 overflow-y-auto custom-scrollbar"
+        data-lenis-prevent
+      >
         {NAV_ITEMS.map((item) => (
           <NavItem
             key={item.href}

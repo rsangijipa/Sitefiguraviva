@@ -48,7 +48,7 @@ export default async function CertificatesPage() {
         </div>
       ) : (
         <EmptyState
-          icon={Award}
+          icon={<Award size={40} strokeWidth={1.5} />}
           title="Nenhum certificado ainda"
           description="Complete 100% de um curso para desbloquear seu certificado oficial. Continue firme na jornada!"
         />
