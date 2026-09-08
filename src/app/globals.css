@@ -1454,3 +1454,124 @@ html[data-cookie-consent="pending"] [data-floating-whatsapp] {
 .fv-resource-card:hover .fv-resource-card__cta {
   color: var(--fv-verde-raiz);
 }
+
+/* ─── Lago resource — scoped animations & range input ──────────────────── */
+
+.lago-app {
+  --lago-accent: rgb(var(--color-accent));
+}
+
+@keyframes lago-ring-pulse {
+  0% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  60% {
+    opacity: 0.15;
+    transform: scale(1.12);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.22);
+  }
+}
+
+@keyframes lago-koi-swim {
+  0%,
+  100% {
+    transform: translateX(0) rotate(0deg);
+  }
+  35% {
+    transform: translateX(8px) rotate(8deg);
+  }
+  65% {
+    transform: translateX(-5px) rotate(-5deg);
+  }
+}
+
+@keyframes lago-float-particle {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateY(-14px);
+    opacity: 0.9;
+  }
+}
+
+@keyframes lago-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes lago-modal-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.lago-app .animate-slide-up {
+  animation: lago-slide-up 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.lago-app .animate-modal-in {
+  animation: lago-modal-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.lago-app .pond-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 9999px;
+  outline: none;
+  min-height: 44px;
+  background: linear-gradient(
+    to right,
+    var(--lago-accent),
+    rgb(var(--color-accent-light))
+  );
+}
+
+.lago-app .pond-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--lago-accent);
+  cursor: pointer;
+  box-shadow: 0 0 0 3px rgb(var(--color-accent) / 0.15);
+  transition: box-shadow 0.15s ease;
+}
+
+.lago-app .pond-range::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 0 5px rgb(var(--color-accent) / 0.25);
+}
+
+.lago-app .pond-range::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--lago-accent);
+  cursor: pointer;
+}
+
+.lago-app canvas {
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}

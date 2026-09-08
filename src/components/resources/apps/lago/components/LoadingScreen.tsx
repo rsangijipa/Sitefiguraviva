@@ -83,7 +83,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
               strokeWidth="1.5"
               fill="none"
               style={{
-                animation: `ring-pulse 3s ease-out infinite`,
+                animation: `lago-ring-pulse 3s ease-out infinite`,
                 animationDelay: `${i * 0.45}s`,
               }}
             />
@@ -97,7 +97,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
             rx="14"
             ry="6"
             fill="rgba(251,146,60,0.75)"
-            style={{ animation: "koi-swim 4s ease-in-out infinite" }}
+            style={{ animation: "lago-koi-swim 4s ease-in-out infinite" }}
           />
           <ellipse
             cx="92"
@@ -106,7 +106,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
             ry="4.5"
             fill="rgba(248,250,252,0.55)"
             style={{
-              animation: "koi-swim 4s ease-in-out infinite",
+              animation: "lago-koi-swim 4s ease-in-out infinite",
               animationDelay: "1.6s",
             }}
           />
@@ -168,7 +168,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
               height: `${4 + (i % 5) * 3}px`,
               left: `${8 + i * 7.5}%`,
               top: `${20 + ((i * 53) % 60)}%`,
-              animation: `float-particle ${5 + (i % 4)}s ease-in-out infinite`,
+              animation: `lago-float-particle ${5 + (i % 4)}s ease-in-out infinite`,
               animationDelay: `${i * 0.4}s`,
             }}
           />
