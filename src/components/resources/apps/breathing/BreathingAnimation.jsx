@@ -1,67 +1,31 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-// Componente Mandala com múltiplas camadas de pétalas rotativas
-const Mandala = ({ phase, theme, scale }) => {
-  // Configuração refinada para múltiplas camadas delicadas
+const RING_MIN_SCALE = 0.7;
+const RING_MAX_SCALE = 1;
+
+// Mandala compacta: um núcleo + duas camadas de pétalas que giram devagar,
+// e a escala geral segue o ritmo da respiração (inspira = expande).
+const Mandala = ({ theme, scale }) => {
   const rings = useMemo(
     () => [
-      {
-        count: 12,
-        size: 60,
-        radius: 20,
-        speed: 1.5,
-        opacity: 0.9,
-        hueOffset: 0,
-      },
-      {
-        count: 16,
-        size: 90,
-        radius: 50,
-        speed: -1.2,
-        opacity: 0.8,
-        hueOffset: 30,
-      },
-      {
-        count: 20,
-        size: 120,
-        radius: 90,
-        speed: 0.8,
-        opacity: 0.7,
-        hueOffset: 60,
-      },
-      {
-        count: 24,
-        size: 160,
-        radius: 130,
-        speed: -0.6,
-        opacity: 0.6,
-        hueOffset: 90,
-      },
-      {
-        count: 32,
-        size: 200,
-        radius: 180,
-        speed: 0.4,
-        opacity: 0.5,
-        hueOffset: 120,
-      },
+      { count: 10, size: 26, radius: 34, spinDuration: 60 },
+      { count: 16, size: 40, radius: 62, spinDuration: 90 },
     ],
     [],
   );
 
   return (
-    <div
-      className="relative flex items-center justify-center transition-transform duration-[100ms] ease-out will-change-transform"
-      style={{
-        width: "600px",
-        height: "600px",
-        transform: `scale(${scale})`,
-      }}
+    <motion.div
+      data-mandala-scale={scale}
+      className="relative flex items-center justify-center will-change-transform"
+      style={{ width: "220px", height: "220px" }}
+      animate={{ scale }}
+      transition={{ duration: 1, ease: "easeInOut" }}
     >
-      {/* Glow Ambiente Central - Aura Suave */}
+      {/* Aura central suave */}
       <div
-        className="absolute inset-0 rounded-full blur-[100px] opacity-40 transition-colors duration-1000"
+        className="absolute inset-0 rounded-full blur-3xl opacity-40 transition-colors duration-1000"
         style={{
           background: `radial-gradient(circle, ${theme.primary}, ${theme.secondary}, transparent 70%)`,
         }}
@@ -72,7 +36,9 @@ const Mandala = ({ phase, theme, scale }) => {
           key={ringIndex}
           className="absolute inset-0 flex items-center justify-center"
           style={{
-            animation: `spin ${120 + ringIndex * 40}s linear infinite ${ring.speed < 0 ? "reverse" : "normal"}`,
+            animation: `mandala-spin ${ring.spinDuration}s linear infinite ${
+              ringIndex % 2 === 1 ? "reverse" : "normal"
+            }`,
           }}
         >
           {Array.from({ length: ring.count }).map((_, i) => {
@@ -80,20 +46,14 @@ const Mandala = ({ phase, theme, scale }) => {
             return (
               <div
                 key={i}
-                className="absolute transition-all duration-1000"
+                className="absolute rounded-full"
                 style={{
                   width: `${ring.size}px`,
                   height: `${ring.size}px`,
-                  background: `linear-gradient(135deg, ${theme.primary}55, ${theme.secondary}55)`,
-                  transform: `rotate(${rotation}deg) translateY(-${ring.radius}px) rotate(45deg)`,
+                  background: `linear-gradient(135deg, ${theme.primary}66, ${theme.secondary}66)`,
+                  transform: `rotate(${rotation}deg) translateY(-${ring.radius}px)`,
                   transformOrigin: "center center",
-                  borderRadius: "50% 0 50% 0",
-                  opacity: ring.opacity * 0.6,
-                  backdropFilter: "blur(1px)",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  boxShadow: `0 0 10px ${theme.secondary}30`,
-                  mixBlendMode: "normal",
-                  filter: `hue-rotate(${ring.hueOffset}deg)`,
+                  border: "1px solid rgba(255,255,255,0.12)",
                 }}
               />
             );
@@ -101,103 +61,87 @@ const Mandala = ({ phase, theme, scale }) => {
         </div>
       ))}
 
-      {/* Centro Lótus - Núcleo de Respiração */}
+      {/* Núcleo */}
       <div className="relative z-10 flex items-center justify-center">
         <div
-          className="absolute w-32 h-32 rounded-full blur-xl opacity-60 animate-pulse"
-          style={{ backgroundColor: theme.primary }}
-        />
-        <div
-          className="w-24 h-24 rounded-full relative flex items-center justify-center transition-all duration-1000"
+          className="w-16 h-16 rounded-full flex items-center justify-center"
           style={{
             background: `conic-gradient(from 0deg, ${theme.primary}, ${theme.secondary}, ${theme.primary})`,
-            boxShadow: `0 0 50px ${theme.primary}80`,
-            opacity: 0.9,
+            boxShadow: `0 0 32px ${theme.primary}70`,
           }}
         >
-          <div className="w-20 h-20 bg-white/10 backdrop-blur-md rounded-full border border-white/30" />
+          <div className="w-11 h-11 bg-white/15 backdrop-blur-md rounded-full border border-white/30" />
         </div>
       </div>
 
       <style>{`
-        @keyframes spin {
+        @keyframes mandala-spin {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
         }
       `}</style>
-    </div>
+    </motion.div>
   );
 };
 
-// Componente principal de animação de respiração
 export const BreathingAnimation = ({ technique, isActive, onPhaseChange }) => {
   const [phase, setPhase] = useState("inhale");
-  const [scale, setScale] = useState(0.7);
+  const [scale, setScale] = useState(RING_MIN_SCALE);
 
   useEffect(() => {
     if (!isActive) {
-      setScale(0.7);
+      setScale(RING_MIN_SCALE);
       return;
     }
-    let timeoutId;
+
+    const timeoutIds = [];
+    const schedule = (fn, seconds) => {
+      const id = window.setTimeout(fn, seconds * 1000);
+      timeoutIds.push(id);
+      return id;
+    };
 
     const runCycle = () => {
       setPhase("inhale");
-      setScale(1.0); // Expande
+      setScale(RING_MAX_SCALE);
       onPhaseChange?.("Inspire...");
-      timeoutId = window.setTimeout(() => {
-        if (technique.holdDuration > 0) {
-          setPhase("hold");
-          setScale(1.0); // Mantém expandido
-          onPhaseChange?.("Segure...");
-          timeoutId = window.setTimeout(() => {
-            setPhase("exhale");
-            setScale(0.7); // Contrai
-            onPhaseChange?.("Expire...");
-            timeoutId = window.setTimeout(() => {
-              if (technique.holdAfterExhale > 0) {
-                setPhase("wait");
-                setScale(0.7); // Mantém contraído
-                onPhaseChange?.("Pausa...");
-                timeoutId = window.setTimeout(
-                  runCycle,
-                  technique.holdAfterExhale * 1000,
-                );
-              } else {
-                runCycle();
-              }
-            }, technique.exhaleDuration * 1000);
-          }, technique.holdDuration * 1000);
-        } else {
+
+      schedule(() => {
+        const afterInhale = () => {
           setPhase("exhale");
-          setScale(0.7);
+          setScale(RING_MIN_SCALE);
           onPhaseChange?.("Expire...");
-          timeoutId = window.setTimeout(() => {
+
+          schedule(() => {
             if (technique.holdAfterExhale > 0) {
               setPhase("wait");
-              setScale(0.7);
               onPhaseChange?.("Pausa...");
-              timeoutId = window.setTimeout(
-                runCycle,
-                technique.holdAfterExhale * 1000,
-              );
+              schedule(runCycle, technique.holdAfterExhale);
             } else {
               runCycle();
             }
-          }, technique.exhaleDuration * 1000);
+          }, technique.exhaleDuration);
+        };
+
+        if (technique.holdDuration > 0) {
+          setPhase("hold");
+          onPhaseChange?.("Segure...");
+          schedule(afterInhale, technique.holdDuration);
+        } else {
+          afterInhale();
         }
-      }, technique.inhaleDuration * 1000);
+      }, technique.inhaleDuration);
     };
+
     runCycle();
-    return () => clearTimeout(timeoutId);
+    return () => timeoutIds.forEach((id) => window.clearTimeout(id));
   }, [isActive, technique, onPhaseChange]);
 
-  // Tema de cores da mandala baseado na técnica
   const mandalaTheme = useMemo(() => {
-    const is478 = technique.id === "4-7-8" || technique.id === "4-6";
+    const isCalming = technique.id === "4-7-8" || technique.id === "4-6";
     return {
-      primary: is478 ? "#588157" : "#C45B50",
-      secondary: is478 ? "#A3B18A" : "#E6AD9B",
+      primary: isCalming ? "#588157" : "#C45B50",
+      secondary: isCalming ? "#A3B18A" : "#E6AD9B",
     };
   }, [technique.id]);
 
@@ -219,31 +163,28 @@ export const BreathingAnimation = ({ technique, isActive, onPhaseChange }) => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center py-4 md:py-8">
-      {/* Mandala com animação de escala - Responsivo para Mobile */}
-      <div className="relative flex items-center justify-center w-[280px] h-[280px] md:w-[500px] md:h-[500px]">
-        <div className="scale-[0.45] md:scale-100 flex items-center justify-center">
-          <Mandala phase={phase} theme={mandalaTheme} scale={scale} />
+    <div className="flex flex-col items-center justify-center py-2 md:py-4">
+      <div className="relative flex items-center justify-center w-[160px] h-[160px] md:w-[220px] md:h-[220px]">
+        <div className="scale-[0.73] md:scale-100 flex items-center justify-center">
+          <Mandala theme={mandalaTheme} scale={scale} />
         </div>
       </div>
 
-      {/* Texto de Instrução */}
-      <div className="h-24 mt-8 flex flex-col items-center justify-start">
+      <div className="h-16 mt-4 flex flex-col items-center justify-start">
         <AnimatePresence mode="wait">
           <motion.p
             key={phase}
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-            className="text-3xl font-serif text-ink tracking-tight text-center"
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="text-2xl font-serif text-ink tracking-tight text-center"
           >
             {getInstructionText()}
           </motion.p>
         </AnimatePresence>
-        {/* Subtexto para duração */}
         <motion.p
-          className="text-earth-light/80 font-sans text-sm mt-2"
+          className="text-earth-light/80 font-sans text-sm mt-1"
           animate={{ opacity: phase === "hold" || phase === "wait" ? 1 : 0 }}
         >
           {phase === "hold"
