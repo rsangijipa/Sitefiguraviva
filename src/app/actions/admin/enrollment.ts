@@ -1,202 +1,111 @@
 "use server";
 
-import { adminAuth, adminDb } from "@/lib/firebase/admin";
-import { Timestamp, FieldValue } from "firebase-admin/firestore";
 import { revalidatePath } from "next/cache";
 import { logAudit } from "@/lib/audit";
-import { whatsappService } from "@/services/whatsappService";
 import { writeEnrollmentMirror } from "@/lib/auth/enrollment-service";
 import { requireAdmin } from "@/lib/auth/server";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 
-// Firestore -> Postgres status mapping for the Supabase dual-write.
-// Both sides already share the same literal values (see
-// supabase/migrations/202606110001_p2_lms_foundation.sql, enum
-// public.enrollment_status: pending_approval | active | completed | canceled |
-// refunded | ... legacy values), so this is an identity map kept explicit for
-// documentation/future-proofing rather than a real transformation.
-const ENROLLMENT_STATUS_TO_SUPABASE: Record<string, string> = {
-  pending_approval: "pending_approval",
-  active: "active",
-  completed: "completed",
-  canceled: "canceled",
-  refunded: "refunded",
-};
+/**
+ * Manual/admin enrollment management. This used to be built entirely on
+ * Firestore + Firebase Admin Auth (adminAuth.getUserByEmail/createUser),
+ * from back when accounts were Firebase-first. Every account is now created
+ * through Supabase Auth (registerForCourseAction) and the admin's user
+ * picker (listUsersForAdmin) lists Supabase users, so looking a student up
+ * by email in Firebase Auth here would never find them — "Nova Matrícula"
+ * would either fail outright or spawn a duplicate placeholder account in a
+ * system nothing else reads from. Rewritten to operate on Supabase
+ * (`profiles` + `enrollments`) end to end.
+ */
 
-async function mirrorEnrollmentToSupabase(
-  uid: string,
-  courseId: string,
-  patch: Record<string, unknown>,
-  context: string,
-) {
-  try {
-    await writeEnrollmentMirror({
-      uid,
-      courseId,
-      enrollmentDoc: patch as any,
-    });
-  } catch (supabaseError) {
-    console.error(
-      `[${context}] Supabase mirror write failed (Firestore write already committed):`,
-      supabaseError,
-    );
-  }
-}
-
-// Helper to ensure admin. The `session` cookie now carries a Supabase
-// access-token JWT (see src/app/api/auth/login/route.ts), not a Firebase
-// session cookie, so admin checks must go through the Supabase-based
-// verifySession() rather than adminAuth.verifySessionCookie (which always
-// throws against a Supabase JWT and previously made every action below
-// unconditionally fail).
 async function assertAdmin() {
   const context = await requireAdmin();
-  return { uid: context.uid, email: context.email, admin: true };
+  return { uid: context.uid, email: context.email };
 }
 
-// Helper to send internal notification
-async function sendNotification(
-  uid: string,
-  title: string,
-  body: string,
-  link: string = "/portal",
-) {
-  try {
-    const notificationRef = adminDb
-      .collection("users")
-      .doc(uid)
-      .collection("notifications");
-    await notificationRef.add({
-      title,
-      body,
-      link,
-      isRead: false,
-      createdAt: Timestamp.now(),
-      type: "course_update",
-    });
-  } catch (error) {
-    console.error("Failed to send notification:", error);
+async function findOrCreateSupabaseUser(email: string) {
+  const supabase = createSupabaseServiceClient();
+  const normalizedEmail = email.toLowerCase().trim();
+
+  const { data: existingProfile } = await supabase
+    .from("profiles")
+    .select("id, display_name")
+    .eq("email", normalizedEmail)
+    .maybeSingle();
+
+  if (existingProfile) {
+    return { uid: existingProfile.id, isNew: false };
   }
+
+  // No profile with this email yet — create a placeholder Supabase Auth
+  // user + profile so the student can claim it later (password reset) or
+  // sign in with the email once the admin shares access.
+  const { data: created, error: createError } =
+    await supabase.auth.admin.createUser({
+      email: normalizedEmail,
+      email_confirm: false,
+      user_metadata: { created_by: "admin_manual_enrollment" },
+    });
+
+  if (createError || !created?.user) {
+    throw new Error(createError?.message || "Falha ao criar usuário");
+  }
+
+  const { error: profileError } = await supabase.from("profiles").upsert({
+    id: created.user.id,
+    email: normalizedEmail,
+    display_name: normalizedEmail.split("@")[0],
+    role: "student",
+    is_active: true,
+  });
+  if (profileError) throw profileError;
+
+  return { uid: created.user.id, isNew: true };
 }
 
 /**
- * Enrolls a user in a course.
- * If user does not exist, creates a placeholder account (staging user).
+ * Enrolls a user in a course by email.
+ * If the user does not exist yet, creates a placeholder Supabase account.
  */
 export async function enrollUser(email: string, courseId: string) {
   try {
     const adminUser = await assertAdmin();
-    const normalizedEmail = email.toLowerCase().trim();
+    const supabase = createSupabaseServiceClient();
+    const { uid } = await findOrCreateSupabaseUser(email);
 
-    let uid: string;
+    const { data: courseData } = await supabase
+      .from("courses")
+      .select("title, content_revision")
+      .eq("id", courseId)
+      .maybeSingle();
 
-    try {
-      const userRecord = await adminAuth.getUserByEmail(normalizedEmail);
-      uid = userRecord.uid;
-    } catch (error: any) {
-      if (error.code === "auth/user-not-found") {
-        // Create placeholder user
-        const newUser = await adminAuth.createUser({
-          email: normalizedEmail,
-          emailVerified: false,
-          displayName: normalizedEmail.split("@")[0], // Fallback name
-          disabled: false,
-        });
-        uid = newUser.uid;
+    if (!courseData) throw new Error("Course not found");
 
-        // Create Firestore User Doc placeholder
-        await adminDb.collection("users").doc(uid).set({
-          uid,
-          email: normalizedEmail,
-          role: "student",
-          isActive: true,
-          createdAt: Timestamp.now(),
-          isPlaceholder: true,
-        });
-      } else {
-        throw error;
-      }
-    }
-
-    const enrollmentId = `${uid}_${courseId}`;
-    const enrollmentRef = adminDb.collection("enrollments").doc(enrollmentId);
-
-    // Fetch Course Revision and User Snapshot for SSoT
-    const [courseSnap, userSnap] = await Promise.all([
-      adminDb.collection("courses").doc(courseId).get(),
-      adminDb.collection("users").doc(uid).get(),
-    ]);
-
-    if (!courseSnap.exists) throw new Error("Course not found");
-    const courseData = courseSnap.data();
-    const userData = userSnap.data();
-
-    const enrollmentData = {
+    await writeEnrollmentMirror({
       uid,
       courseId,
-      status: "active",
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
-      enrolledBy: adminUser.email || "admin@system",
-      reason: "Manual Admin Enrollment",
-      courseVersionAtEnrollment: courseData?.contentRevision || 1,
-      courseTitle: courseData?.title || "Curso",
-      userName: userData?.displayName || normalizedEmail.split("@")[0],
-    };
-
-    await enrollmentRef.set(enrollmentData, { merge: true });
-
-    await mirrorEnrollmentToSupabase(
-      uid,
-      courseId,
-      {
-        status:
-          ENROLLMENT_STATUS_TO_SUPABASE[enrollmentData.status] ??
-          enrollmentData.status,
+      enrollmentDoc: {
+        status: "active",
         paymentMethod: "manual",
-        courseVersionAtEnrollment: enrollmentData.courseVersionAtEnrollment,
-      },
-      "enrollUser",
-    );
+        courseVersionAtEnrollment: courseData.content_revision || 1,
+      } as any,
+    });
 
     await logAudit({
       actor: { uid: adminUser.uid, email: adminUser.email, role: "admin" },
       action: "ENROLLMENT_CREATED",
-      target: { collection: "enrollments", id: enrollmentId },
-      diff: { after: enrollmentData },
+      target: { collection: "enrollments", id: `${uid}_${courseId}` },
+      diff: {
+        after: { uid, courseId, status: "active", paymentMethod: "manual" },
+      },
     });
 
-    // Send Notification
-    await sendNotification(
-      uid,
-      "Nova Matrícula!",
-      `Você foi matriculado(a) no curso: ${enrollmentData.courseTitle}.`,
-      `/portal/course/${courseId}`,
-    );
-
-    // Robust Access Control: Sync to User Doc
-    await adminDb
-      .collection("users")
-      .doc(uid)
-      .update({
-        enrolledCourseIds: FieldValue.arrayUnion(courseId),
-      });
-
-    // Notify student via WhatsApp if phone exists
-    if (userData?.phone) {
-      await whatsappService.notifyEnrollment(
-        userData.phone,
-        userData.displayName || normalizedEmail.split("@")[0],
-        enrollmentData.courseTitle,
-      );
-    }
-
-    // Force cache revalidation for all relevant paths
     revalidatePath(`/portal/courses/${courseId}`);
     revalidatePath(`/portal/course/${courseId}`);
     revalidatePath(`/portal`);
-    revalidatePath(`/admin/users/${uid}`);
+    revalidatePath(`/admin/enrollments`);
 
-    return { success: true, uid, enrollmentId };
+    return { success: true, uid, enrollmentId: `${uid}_${courseId}` };
   } catch (error: any) {
     console.error("Enrollment Error:", error);
     return { success: false, error: error.message };
@@ -204,7 +113,7 @@ export async function enrollUser(email: string, courseId: string) {
 }
 
 /**
- * Revokes access (locks enrollment).
+ * Revokes access (cancels enrollment).
  */
 export async function revokeAccess(
   uid: string,
@@ -213,37 +122,22 @@ export async function revokeAccess(
 ) {
   try {
     const adminUser = await assertAdmin();
-    const enrollmentId = `${uid}_${courseId}`;
 
-    await adminDb.collection("enrollments").doc(enrollmentId).update({
-      status: "canceled",
-      updatedAt: Timestamp.now(),
-      reason,
-    });
-
-    await mirrorEnrollmentToSupabase(
+    await writeEnrollmentMirror({
       uid,
       courseId,
-      { status: ENROLLMENT_STATUS_TO_SUPABASE["canceled"] },
-      "revokeAccess",
-    );
+      enrollmentDoc: { status: "canceled" } as any,
+    });
 
     await logAudit({
       actor: { uid: adminUser.uid, email: adminUser.email, role: "admin" },
       action: "ENROLLMENT_REVOKED",
-      target: { collection: "enrollments", id: enrollmentId },
+      target: { collection: "enrollments", id: `${uid}_${courseId}` },
       diff: { after: { status: "canceled", reason } },
     });
 
-    // Revoke access from User Doc
-    await adminDb
-      .collection("users")
-      .doc(uid)
-      .update({
-        enrolledCourseIds: FieldValue.arrayRemove(courseId),
-      });
-
     revalidatePath(`/portal`);
+    revalidatePath(`/admin/enrollments`);
     return { success: true };
   } catch (error: any) {
     console.error("Revoke Error:", error);
@@ -262,7 +156,6 @@ export async function batchEnrollUsers(emails: string[], courseId: string) {
       failed: [] as { email: string; error: string }[],
     };
 
-    // Process in parallel with error isolation
     await Promise.all(
       emails.map(async (email) => {
         try {
@@ -288,7 +181,6 @@ export async function batchEnrollUsers(emails: string[], courseId: string) {
 
 /**
  * Updates the status of an enrollment.
- * Ensures the user document's enrolledCourseIds is kept in sync.
  */
 export async function updateEnrollmentStatus(
   uid: string,
@@ -302,44 +194,23 @@ export async function updateEnrollmentStatus(
 ) {
   try {
     const adminUser = await assertAdmin();
-    const enrollmentId = `${uid}_${courseId}`;
-    const enrollmentRef = adminDb.collection("enrollments").doc(enrollmentId);
-    const userRef = adminDb.collection("users").doc(uid);
 
-    await adminDb.runTransaction(async (tx) => {
-      tx.update(enrollmentRef, {
-        status: newStatus,
-        updatedAt: FieldValue.serverTimestamp(),
-      });
-
-      if (newStatus === "active") {
-        tx.update(userRef, {
-          enrolledCourseIds: FieldValue.arrayUnion(courseId),
-        });
-      } else if (newStatus === "canceled" || newStatus === "refunded") {
-        tx.update(userRef, {
-          enrolledCourseIds: FieldValue.arrayRemove(courseId),
-        });
-      }
-      // "completed" usually keeps access, so no change to enrolledCourseIds
-    });
-
-    await mirrorEnrollmentToSupabase(
+    await writeEnrollmentMirror({
       uid,
       courseId,
-      { status: ENROLLMENT_STATUS_TO_SUPABASE[newStatus] ?? newStatus },
-      "updateEnrollmentStatus",
-    );
-
-    revalidatePath(`/portal`);
-    revalidatePath(`/portal/courses/${courseId}`);
+      enrollmentDoc: { status: newStatus } as any,
+    });
 
     await logAudit({
       actor: { uid: adminUser.uid, email: adminUser.email, role: "admin" },
       action: "ENROLLMENT_STATUS_UPDATED",
-      target: { collection: "enrollments", id: enrollmentId },
+      target: { collection: "enrollments", id: `${uid}_${courseId}` },
       diff: { after: { status: newStatus } },
     });
+
+    revalidatePath(`/portal`);
+    revalidatePath(`/portal/courses/${courseId}`);
+    revalidatePath(`/admin/enrollments`);
 
     return { success: true };
   } catch (error: any) {
@@ -352,49 +223,37 @@ export async function updateEnrollmentStatus(
  * Specifically approves a pending enrollment.
  */
 export async function approveEnrollment(uid: string, courseId: string) {
-  const adminUser = await assertAdmin();
-  const res = await updateEnrollmentStatus(uid, courseId, "active");
+  try {
+    const adminUser = await assertAdmin();
+    const res = await updateEnrollmentStatus(uid, courseId, "active");
+    if (!res.success) return res;
 
-  if (res.success) {
-    const enrollmentId = `${uid}_${courseId}`;
-    await adminDb.collection("enrollments").doc(enrollmentId).update({
-      approvedBy: adminUser.uid,
-      approvedAt: FieldValue.serverTimestamp(),
-    });
-
-    await mirrorEnrollmentToSupabase(
-      uid,
-      courseId,
-      { status: "active" },
-      "approveEnrollment",
-    );
+    const supabase = createSupabaseServiceClient();
+    await supabase
+      .from("enrollments")
+      .update({
+        approved_by: adminUser.uid,
+        approved_at: new Date().toISOString(),
+      })
+      .eq("user_id", uid)
+      .eq("course_id", courseId);
 
     await logAudit({
       actor: { uid: adminUser.uid, email: adminUser.email, role: "admin" },
       action: "ENROLLMENT_APPROVED",
-      target: { collection: "enrollments", id: enrollmentId },
+      target: { collection: "enrollments", id: `${uid}_${courseId}` },
       diff: { after: { status: "active", approvedBy: adminUser.uid } },
     });
 
-    await sendNotification(
-      uid,
-      "Matrícula Aprovada!",
-      "Sua matrícula foi aprovada. O acesso ao curso já está liberado!",
-      `/portal/course/${courseId}`,
-    );
+    // Note: `profiles` has no phone column today, so the WhatsApp
+    // enrollment notification (previously read from a Firestore-only
+    // `phone` field) has no source to read from here — dropped rather than
+    // silently sent to a wrong/stale number. Re-add once phone capture is
+    // part of the Supabase profile.
 
-    // Notify student via WhatsApp if phone exists
-    const userDoc = await adminDb.collection("users").doc(uid).get();
-    const userData = userDoc.data();
-    if (userData?.phone) {
-      const courseDoc = await adminDb.collection("courses").doc(courseId).get();
-      await whatsappService.notifyEnrollment(
-        userData.phone,
-        userData.displayName || userData.email.split("@")[0],
-        courseDoc.data()?.title || "Curso",
-      );
-    }
+    return { success: true };
+  } catch (error: any) {
+    console.error("Approve Enrollment Error:", error);
+    return { success: false, error: error.message };
   }
-
-  return res;
 }

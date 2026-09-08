@@ -126,8 +126,9 @@ export function EnrollmentCard({
                 {enrollment.status?.replace("_", " ")}
               </span>
               <span className="text-[11px] text-stone-400 font-medium">
-                {enrollment.enrolledAt?.toDate?.()?.toLocaleDateString() ||
-                  "Data N/A"}
+                {enrollment.enrolledAt
+                  ? new Date(enrollment.enrolledAt).toLocaleDateString()
+                  : "Data N/A"}
               </span>
             </div>
           </div>
