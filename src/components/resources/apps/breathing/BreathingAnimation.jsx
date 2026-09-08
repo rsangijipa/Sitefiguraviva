@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const RING_MIN_SCALE = 0.7;
@@ -88,6 +88,14 @@ export const BreathingAnimation = ({ technique, isActive, onPhaseChange }) => {
   const [phase, setPhase] = useState("inhale");
   const [scale, setScale] = useState(RING_MIN_SCALE);
 
+  // onPhaseChange is often passed as a fresh inline function on every parent
+  // render (e.g. a ticking timer). Reading it through a ref keeps the cycle
+  // effect below from restarting every time the parent re-renders.
+  const onPhaseChangeRef = useRef(onPhaseChange);
+  useEffect(() => {
+    onPhaseChangeRef.current = onPhaseChange;
+  }, [onPhaseChange]);
+
   useEffect(() => {
     if (!isActive) {
       setScale(RING_MIN_SCALE);
@@ -104,18 +112,18 @@ export const BreathingAnimation = ({ technique, isActive, onPhaseChange }) => {
     const runCycle = () => {
       setPhase("inhale");
       setScale(RING_MAX_SCALE);
-      onPhaseChange?.("Inspire...");
+      onPhaseChangeRef.current?.("Inspire...");
 
       schedule(() => {
         const afterInhale = () => {
           setPhase("exhale");
           setScale(RING_MIN_SCALE);
-          onPhaseChange?.("Expire...");
+          onPhaseChangeRef.current?.("Expire...");
 
           schedule(() => {
             if (technique.holdAfterExhale > 0) {
               setPhase("wait");
-              onPhaseChange?.("Pausa...");
+              onPhaseChangeRef.current?.("Pausa...");
               schedule(runCycle, technique.holdAfterExhale);
             } else {
               runCycle();
@@ -125,7 +133,7 @@ export const BreathingAnimation = ({ technique, isActive, onPhaseChange }) => {
 
         if (technique.holdDuration > 0) {
           setPhase("hold");
-          onPhaseChange?.("Segure...");
+          onPhaseChangeRef.current?.("Segure...");
           schedule(afterInhale, technique.holdDuration);
         } else {
           afterInhale();
@@ -135,7 +143,7 @@ export const BreathingAnimation = ({ technique, isActive, onPhaseChange }) => {
 
     runCycle();
     return () => timeoutIds.forEach((id) => window.clearTimeout(id));
-  }, [isActive, technique, onPhaseChange]);
+  }, [isActive, technique]);
 
   const mandalaTheme = useMemo(() => {
     const isCalming = technique.id === "4-7-8" || technique.id === "4-6";

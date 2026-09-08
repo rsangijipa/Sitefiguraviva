@@ -74,6 +74,35 @@ describe("BreathingAnimation", () => {
     expect(onPhaseChange).toHaveBeenCalledWith("Inspire...");
   });
 
+  it("keeps advancing phases even when the parent passes a new onPhaseChange function on every render", () => {
+    const phases = [];
+    const { rerender } = render(
+      <BreathingAnimation
+        technique={technique}
+        isActive={true}
+        onPhaseChange={(p) => phases.push(p)}
+      />,
+    );
+
+    // Simulate a parent re-rendering every second (e.g. a countdown timer)
+    // with a fresh inline onPhaseChange callback each time, as
+    // BreathingApp.jsx's `onPhaseChange={() => {}}` does.
+    for (let second = 1; second <= 10; second += 1) {
+      act(() => {
+        jest.advanceTimersByTime(1000);
+      });
+      rerender(
+        <BreathingAnimation
+          technique={technique}
+          isActive={true}
+          onPhaseChange={(p) => phases.push(p)}
+        />,
+      );
+    }
+
+    expect(phases).toContain("Expire...");
+  });
+
   it("resets to the resting scale when isActive is false", () => {
     const { container } = render(
       <BreathingAnimation
