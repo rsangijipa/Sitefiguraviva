@@ -737,7 +737,7 @@ export const PondCanvas = forwardRef<PondCanvasHandle, PondCanvasProps>(
     }));
 
     return (
-      <div className="relative w-full h-full overflow-hidden bg-slate-950 touch-none select-none">
+      <div className="absolute inset-0 overflow-hidden bg-slate-950 touch-none select-none">
         {/* WebGL water simulation canvas */}
         <canvas
           ref={canvasRef}
