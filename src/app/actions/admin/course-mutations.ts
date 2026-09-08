@@ -22,6 +22,10 @@ import {
   listModules,
 } from "@/lib/repositories/courseRepository.server";
 import { touchCourseRevision } from "@/lib/course-content/revision";
+import {
+  mirrorCourseToSupabase,
+  deleteCourseFromSupabase,
+} from "@/lib/course-content/course-mirror";
 
 type MutablePayload = Record<string, any>;
 
@@ -111,6 +115,13 @@ export async function createCourseAction(
     createdAt: FieldValue.serverTimestamp(),
     updatedAt: FieldValue.serverTimestamp(),
   });
+  await mirrorCourseToSupabase(docRef.id, {
+    ...payload,
+    image: coverImage,
+    coverImage,
+    status: "draft",
+    isPublished: false,
+  });
   revalidatePath("/admin/courses");
   return docRef.id;
 }
@@ -139,8 +150,12 @@ export async function updateCourseAction(
 
   await docRef.update(updatePayload);
   await touchCourseRevision(courseId, "course-updated", actor);
+  await mirrorCourseToSupabase(courseId, updatePayload);
   revalidatePath("/admin/courses");
   revalidatePath(`/admin/courses/${courseId}`);
+  revalidatePath("/");
+  revalidatePath("/curso");
+  revalidatePath(`/curso/${courseId}`);
 }
 
 export async function deleteCourseAction(courseId: string): Promise<void> {
@@ -178,7 +193,10 @@ export async function deleteCourseAction(courseId: string): Promise<void> {
   batch.delete(adminDb.collection("courses").doc(courseId));
 
   await batch.commit();
+  await deleteCourseFromSupabase(courseId);
   revalidatePath("/admin/courses");
+  revalidatePath("/");
+  revalidatePath("/curso");
 }
 
 // --- MODULES ---

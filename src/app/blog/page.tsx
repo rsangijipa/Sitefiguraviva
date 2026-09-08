@@ -1,10 +1,10 @@
-import { db } from "@/lib/firebase/admin";
 import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { Calendar, ArrowRight } from "lucide-react";
 import Image from "next/image";
 import type { Metadata } from "next";
 import PublicSiteFrame from "@/features/public-site/components/PublicSiteFrame";
+import { listPublishedContent } from "@/features/content/infrastructure/supabaseContentRepository";
 
 export const metadata: Metadata = {
   title: "Blog",
@@ -18,39 +18,31 @@ export const metadata: Metadata = {
 // Revalidate every hour
 export const revalidate = 3600;
 
+function formatDate(value: unknown): string | null {
+  if (!value || typeof value !== "string") return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+}
+
+// Reads Supabase's `posts` table, same source as /blog/[id] (detail page)
+// and the admin blog manager. This page used to read Firestore's `posts`
+// collection instead, so a post created/edited in the admin (which writes
+// Supabase) could appear here but 404 on click, or not appear at all.
 async function getPosts(): Promise<any[]> {
   try {
-    const postsSnap = await db
-      .collection("posts")
-      .where("isPublished", "==", true)
-      .get();
-
-    const posts = postsSnap.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-      // Keep original timestamp for sorting before formatting
-      _raw_created_at: doc.data().created_at,
-    }));
-
-    // Sort in-memory to avoid composite index requirement
-    return (posts as any[])
-      .sort((a, b) => {
-        const dateA = a._raw_created_at?.toDate?.() || new Date(0);
-        const dateB = b._raw_created_at?.toDate?.() || new Date(0);
-        return dateB.getTime() - dateA.getTime();
-      })
-      .map((post) => {
-        const { _raw_created_at, ...rest } = post;
-        return {
-          ...rest,
-          created_at:
-            _raw_created_at?.toDate?.().toLocaleDateString("pt-BR", {
-              day: "2-digit",
-              month: "long",
-              year: "numeric",
-            }) || null,
-        };
-      });
+    const posts = await listPublishedContent("posts");
+    return posts
+      .filter((post: any) => post.type !== "library")
+      .map((post: any) => ({
+        ...post,
+        image: post.image ?? post.imageUrl,
+        created_at: formatDate(post.created_at),
+      }));
   } catch (error) {
     console.error("Error fetching posts:", error);
     return [];

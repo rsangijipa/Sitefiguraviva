@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb, adminAuth } from "@/lib/firebase/admin";
+import { adminDb } from "@/lib/firebase/admin";
+import { verifySession } from "@/lib/auth/server";
 import {
   DEFAULT_FOUNDER,
   DEFAULT_INSTITUTE,
@@ -8,21 +9,14 @@ import {
 
 export async function GET(request: NextRequest) {
   try {
-    // 1. Auth Check (Admin Only) - Simple check for development ease, or strict session check
-    // Ideally should check session cookie, but for a seed script triggered via browser,
-    // we might rely on the user being logged in OR a secret key.
-    // Let's use the session cookie for strict security.
-
-    const sessionCookie = request.cookies.get("session")?.value;
-    if (!sessionCookie) {
+    // The `session` cookie carries a Supabase JWT, not a Firebase session
+    // cookie, so admin checks go through verifySession() (Supabase-based)
+    // rather than adminAuth.verifySessionCookie, which always threw here.
+    const claims = await verifySession();
+    if (!claims) {
       return NextResponse.json({ error: "Unauthenticated" }, { status: 401 });
     }
-
-    const decodedToken = await adminAuth.verifySessionCookie(
-      sessionCookie,
-      true,
-    );
-    if (decodedToken.role !== "admin" && !decodedToken.admin) {
+    if (!claims.isAdmin) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

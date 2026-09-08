@@ -10,7 +10,6 @@ export const SWRegistration = () => {
         navigator.serviceWorker.getRegistrations().then((registrations) => {
           for (const registration of registrations) {
             registration.unregister();
-            console.log("SW unregistered (Dev Mode)");
           }
         });
         return;
@@ -19,11 +18,8 @@ export const SWRegistration = () => {
       window.addEventListener("load", () => {
         navigator.serviceWorker
           .register("/sw.js")
-          .then((registration) => {
-            console.log("SW registered: ", registration);
-          })
           .catch((registrationError) => {
-            console.log("SW registration failed: ", registrationError);
+            console.error("SW registration failed: ", registrationError);
           });
       });
     }

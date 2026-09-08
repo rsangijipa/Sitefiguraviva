@@ -3,10 +3,10 @@
 import { adminAuth, adminDb } from "@/lib/firebase/admin";
 import { Timestamp, FieldValue } from "firebase-admin/firestore";
 import { revalidatePath } from "next/cache";
-import { cookies } from "next/headers";
 import { logAudit } from "@/lib/audit";
 import { whatsappService } from "@/services/whatsappService";
 import { writeEnrollmentMirror } from "@/lib/auth/enrollment-service";
+import { requireAdmin } from "@/lib/auth/server";
 
 // Firestore -> Postgres status mapping for the Supabase dual-write.
 // Both sides already share the same literal values (see
@@ -42,13 +42,15 @@ async function mirrorEnrollmentToSupabase(
   }
 }
 
-// Helper to ensure admin
+// Helper to ensure admin. The `session` cookie now carries a Supabase
+// access-token JWT (see src/app/api/auth/login/route.ts), not a Firebase
+// session cookie, so admin checks must go through the Supabase-based
+// verifySession() rather than adminAuth.verifySessionCookie (which always
+// throws against a Supabase JWT and previously made every action below
+// unconditionally fail).
 async function assertAdmin() {
-  const sessionCookie = (await cookies()).get("session")?.value;
-  if (!sessionCookie) throw new Error("Unauthenticated");
-  const token = await adminAuth.verifySessionCookie(sessionCookie, true);
-  if (!token.admin && token.role !== "admin") throw new Error("Forbidden");
-  return token;
+  const context = await requireAdmin();
+  return { uid: context.uid, email: context.email, admin: true };
 }
 
 // Helper to send internal notification

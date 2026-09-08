@@ -1,9 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { adminDb, adminAuth } from "@/lib/firebase/admin";
+import { adminDb } from "@/lib/firebase/admin";
 import { FieldValue } from "firebase-admin/firestore";
 import { assertIsTutorOrAdmin } from "@/lib/auth/authoring-gate";
+import { mirrorCourseToSupabase } from "@/lib/course-content/course-mirror";
 
 export async function validateCoursePublishable(
   courseId: string,
@@ -114,10 +115,16 @@ export async function toggleCourseStatus(
 
     await courseRef.update(updates);
 
-    // Audit Trail
-    const cookieStore = await import("next/headers").then((m) => m.cookies());
-    const session = cookieStore.get("session")?.value;
-    const actor = await adminAuth.verifySessionCookie(session || "", true);
+    // This status/isPublished flag is the exact gate registerForCourseAction
+    // checks in Supabase before allowing signup — without mirroring it,
+    // toggling a course to "open" here never actually opens enrollment.
+    await mirrorCourseToSupabase(courseId, {
+      status: newStatus,
+      isPublished,
+    });
+
+    // Audit Trail (actor already verified above by assertIsTutorOrAdmin)
+    const actor = await assertIsTutorOrAdmin();
 
     await import("@/lib/audit").then((m) =>
       m.auditService.logEvent({
@@ -165,10 +172,8 @@ export async function bumpCourseRevision(courseId: string) {
       updatedAt: FieldValue.serverTimestamp(),
     });
 
-    // Audit Trail
-    const cookieStore = await import("next/headers").then((m) => m.cookies());
-    const session = cookieStore.get("session")?.value;
-    const actor = await adminAuth.verifySessionCookie(session || "", true);
+    // Audit Trail (actor already verified above by assertIsTutorOrAdmin)
+    const actor = await assertIsTutorOrAdmin();
 
     await import("@/lib/audit").then((m) =>
       m.auditService.logEvent({

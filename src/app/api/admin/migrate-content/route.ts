@@ -1,27 +1,23 @@
 import { NextResponse } from "next/server";
-import { adminDb, adminAuth } from "@/lib/firebase/admin";
+import { adminDb } from "@/lib/firebase/admin";
 import { FieldValue } from "firebase-admin/firestore";
-import { cookies } from "next/headers";
+import { verifySession } from "@/lib/auth/server";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   try {
-    const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get("session")?.value;
-
-    if (!sessionCookie) {
+    // The `session` cookie carries a Supabase JWT, not a Firebase session
+    // cookie, so admin checks go through verifySession() (Supabase-based)
+    // rather than adminAuth.verifySessionCookie, which always threw here.
+    const claims = await verifySession();
+    if (!claims) {
       return NextResponse.json(
         { error: "Unauthorized: No session" },
         { status: 401 },
       );
     }
-
-    const decodedClaims = await adminAuth.verifySessionCookie(
-      sessionCookie,
-      true,
-    );
-    if (decodedClaims.role !== "admin") {
+    if (!claims.isAdmin) {
       return NextResponse.json(
         { error: "Unauthorized: Admins only" },
         { status: 403 },

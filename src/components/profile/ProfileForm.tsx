@@ -84,17 +84,14 @@ export function ProfileForm() {
       // 1. Upload Avatar if changed
       let newPhotoURL = user?.photoURL;
       if (avatarFile) {
-        console.log("[DEBUG] Starting avatar upload...", avatarFile.name);
         const formData = new FormData();
         formData.append("file", avatarFile);
 
         const uploadRes = await uploadAvatar(formData);
-        console.log("[DEBUG] Upload result:", uploadRes);
         if (uploadRes.error) throw new Error(uploadRes.error);
         if (uploadRes.url) newPhotoURL = uploadRes.url;
       }
 
-      console.log("[DEBUG] Updating profile info...");
       // 2. Update Info
       const updateRes = await updateProfileAction({
         displayName,
@@ -106,12 +103,10 @@ export function ProfileForm() {
         dateOfBirth,
         instagram,
       });
-      console.log("[DEBUG] Update result:", updateRes);
       if (updateRes.error) throw new Error(updateRes.error);
 
       // 3. Update Client Context (Sync Sidebar)
       if (user) {
-        console.log("[DEBUG] Syncing client context...");
         try {
           // We don't want this to block if there's a connection issue with Firebase Client SDK,
           // since the source of truth (Firestore/Action) already succeeded.

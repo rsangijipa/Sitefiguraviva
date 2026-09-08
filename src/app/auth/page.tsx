@@ -80,7 +80,16 @@ function AuthContent() {
       // Enforce Profile Sync (SSoT)
       const syncResult = await ensureUserProfileAction();
       if (!syncResult.success) {
+        // Falling back to "student" here used to silently send an admin
+        // whose profile-sync failed into the student portal instead of
+        // surfacing the failure. Fail loudly instead: retry is cheap and a
+        // mis-synced role is a bigger problem than an extra click.
         console.error("Profile Sync Failed:", syncResult.error);
+        setError(
+          "Não foi possível sincronizar seu perfil. Tente novamente em instantes.",
+        );
+        setLoading(false);
+        return;
       }
 
       // Get role from sync result or default

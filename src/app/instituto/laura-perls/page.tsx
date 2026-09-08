@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     title: lauraPerlsContent.meta.title,
     description: lauraPerlsContent.meta.description,
     type: "article",
-    images: ["/images/laura-perls-hero.jpg"],
+    images: ["/laura/laura1.jpg"],
   },
 };
 

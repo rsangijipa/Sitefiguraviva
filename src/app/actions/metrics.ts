@@ -1,21 +1,17 @@
 "use server";
 
-import { cookies } from "next/headers";
-import { adminAuth } from "@/lib/firebase/admin";
 import {
   buildAdminDashboardKPIs,
   buildStudentDashboardKPIs,
 } from "@/lib/metrics/kpi";
+import {
+  verifySession as requireSessionBase,
+  requireAdmin,
+} from "@/lib/auth/server";
 
 async function requireSession() {
-  const sessionCookie = (await cookies()).get("session")?.value;
-  if (!sessionCookie) throw new Error("Unauthenticated");
-  return adminAuth.verifySessionCookie(sessionCookie, true);
-}
-
-async function requireAdmin() {
-  const claims = await requireSession();
-  if (!claims.admin && claims.role !== "admin") throw new Error("Forbidden");
+  const claims = await requireSessionBase();
+  if (!claims) throw new Error("Unauthenticated");
   return claims;
 }
 

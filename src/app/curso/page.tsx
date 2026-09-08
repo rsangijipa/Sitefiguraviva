@@ -1,36 +1,22 @@
-import { db } from "@/lib/firebase/admin";
 import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { Calendar, ArrowRight } from "lucide-react";
 import { CourseCover } from "@/components/courses/CourseCover";
 import PublicPageHero from "@/features/public-site/components/PublicPageHero";
 import PublicSiteFrame from "@/features/public-site/components/PublicSiteFrame";
+import { listPublishedCourses } from "@/features/content/infrastructure/supabaseContentRepository";
 
 // Revalidate every hour
 export const revalidate = 3600;
 
+// Reads the same Supabase `courses` table (published + open) as the
+// homepage's "Formações" section and the /curso/[id] detail page. This page
+// used to read from Firestore while the home page and course detail already
+// read from Supabase — two different data sources meant the count and
+// content shown here vs. on the homepage never matched.
 async function getCourses(): Promise<any[]> {
   try {
-    const snap = await db.collection("courses").get();
-
-    return snap.docs
-      .map((doc) => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          ...data,
-          isPublished: data.isPublished !== false,
-          createdAt: data.createdAt?.toDate
-            ? data.createdAt.toDate().toISOString()
-            : null,
-        } as any;
-      })
-      .filter((c) => c.isPublished !== false || c.status === "open")
-      .sort((a, b) => {
-        const dateA = new Date(a.createdAt || 0).getTime();
-        const dateB = new Date(b.createdAt || 0).getTime();
-        return dateB - dateA;
-      });
+    return await listPublishedCourses();
   } catch (error) {
     console.error("Error fetching courses:", error);
     return [];

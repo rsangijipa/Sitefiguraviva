@@ -134,8 +134,11 @@ export async function activateEnrollmentFromStripe(
     updateData.access_until = accessUntil.toISOString();
   }
 
-  // Initialize progress if new or missing
-  if (!existing || !existing.progressSummary) {
+  // Initialize progress if new or missing. `existing` is a raw Supabase row
+  // (snake_case columns) — reading `.progressSummary` here always returned
+  // undefined and reset progress to zero on every re-activation (e.g. a
+  // Stripe subscription renewal for an already-enrolled student).
+  if (!existing || !existing.progress_summary) {
     updateData.progress_summary = {
       completedLessonsCount: 0,
       totalLessons: totalLessons,

@@ -143,6 +143,35 @@ export async function registerForCourseAction(
         "registerForCourseAction profile upsert failed:",
         profileError,
       );
+
+      // Without a `profiles` row, the auth user is orphaned: role/is_active
+      // checks throughout the app (getRedirectPathForRole, requireAdmin,
+      // enrollment gates) treat it inconsistently even though the account
+      // can sign in. Retry once, and if it still fails, delete the auth user
+      // so the visitor gets a clean "try again" instead of a half-created,
+      // silently broken account.
+      const { error: retryError } = await supabase.from("profiles").upsert({
+        id: created.user.id,
+        email,
+        display_name: fullName,
+        role: "student",
+        is_active: true,
+      });
+
+      if (retryError) {
+        await supabase.auth.admin
+          .deleteUser(created.user.id)
+          .catch((e) =>
+            console.error(
+              "registerForCourseAction rollback deleteUser failed:",
+              e,
+            ),
+          );
+        return {
+          success: false,
+          error: "Não foi possível concluir o cadastro. Tente novamente.",
+        };
+      }
     }
 
     return { success: true, courseId };

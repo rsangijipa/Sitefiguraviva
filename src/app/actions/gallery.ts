@@ -1,33 +1,9 @@
 "use server";
 
-import { adminDb, adminAuth } from "@/lib/firebase/admin";
+import { adminDb } from "@/lib/firebase/admin";
 import { FieldValue } from "firebase-admin/firestore";
-import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
-
-async function assertIsAdmin() {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("session")?.value;
-
-  if (!sessionCookie) {
-    throw new Error("Unauthenticated");
-  }
-
-  const decodedToken = await adminAuth.verifySessionCookie(sessionCookie, true);
-
-  if (decodedToken.role === "admin" || decodedToken.admin === true) {
-    return decodedToken;
-  }
-
-  const userDoc = await adminDb.collection("users").doc(decodedToken.uid).get();
-  const userData = userDoc.data();
-
-  if (userData?.role !== "admin") {
-    throw new Error("Access Denied: Admin role required.");
-  }
-
-  return decodedToken;
-}
+import { requireAdmin as assertIsAdmin } from "@/lib/auth/server";
 
 export async function saveGalleryItemAction(id: string | null, data: any) {
   try {

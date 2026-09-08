@@ -1,17 +1,9 @@
 "use server";
 
-import { adminAuth, adminDb } from "@/lib/firebase/admin";
+import { adminDb } from "@/lib/firebase/admin";
 import { Timestamp } from "firebase-admin/firestore";
 import { revalidatePath } from "next/cache";
-import { cookies } from "next/headers";
-
-async function assertAdmin() {
-  const sessionCookie = (await cookies()).get("session")?.value;
-  if (!sessionCookie) throw new Error("Unauthenticated");
-  const token = await adminAuth.verifySessionCookie(sessionCookie, true);
-  if (!token.admin && token.role !== "admin") throw new Error("Forbidden");
-  return token;
-}
+import { requireAdmin as assertAdmin } from "@/lib/auth/server";
 
 export async function createEvent(data: {
   title: string;
