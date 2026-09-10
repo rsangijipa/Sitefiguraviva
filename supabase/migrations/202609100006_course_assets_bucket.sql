@@ -2,7 +2,29 @@
 -- This is safe to run repeatedly in the Supabase SQL editor.
 insert into storage.buckets (id, name, public)
 values ('course-assets', 'course-assets', true)
-on conflict (id) do update set public = true;
+on conflict (id) do update set
+  public = true,
+  file_size_limit = 10485760,
+  allowed_mime_types = array[
+    'application/pdf',
+    'image/jpeg',
+    'image/png',
+    'image/webp',
+    'image/avif'
+  ]::text[];
+
+update storage.buckets
+set
+  public = true,
+  file_size_limit = 10485760,
+  allowed_mime_types = array[
+    'application/pdf',
+    'image/jpeg',
+    'image/png',
+    'image/webp',
+    'image/avif'
+  ]::text[]
+where id = 'course-assets';
 
 drop policy if exists course_assets_public_read on storage.objects;
 create policy course_assets_public_read
