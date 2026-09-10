@@ -151,7 +151,8 @@ const CourseCard = ({
               </p>
             ) : (
               <p className="text-xs text-stone-500 italic">
-                Acesso restrito ou pendente.
+                Seu acesso ainda não está liberado. Verifique o status da
+                matrícula ou fale com o suporte.
               </p>
             )}
 

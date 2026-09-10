@@ -333,6 +333,28 @@ function CourseContent({ initialData }: { initialData?: any }) {
               {/* Progress Card */}
               <Card className="p-6">
                 <h3 className="font-bold text-stone-700 mb-4">Seu Progresso</h3>
+                {isAccessDenied && (
+                  <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+                    <p className="font-semibold">
+                      {status === "pending_approval"
+                        ? "Sua matrícula está em análise."
+                        : status === "expired"
+                          ? "O período de acesso terminou."
+                          : "Este conteúdo ainda não está liberado para você."}
+                    </p>
+                    <p className="mt-1 text-xs text-amber-800">
+                      {status === "pending_approval"
+                        ? "A equipe informará você quando a aprovação for concluída."
+                        : "Se você acredita que deveria ter acesso, fale com o suporte."}
+                    </p>
+                    <Link
+                      href="/portal/support"
+                      className="mt-2 inline-block text-xs font-bold underline"
+                    >
+                      Acessar suporte
+                    </Link>
+                  </div>
+                )}
                 <div className="mb-2 flex justify-between text-xs font-bold text-stone-500">
                   <span>Concluído</span>
                   <span data-testid="course-progress-percent">

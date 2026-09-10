@@ -7,9 +7,23 @@ export type StudentDashboardKpisData = {
   certificates: any[];
   certificatesCount: number;
   events: any[];
+  pendingAssessments: any[];
+  recentAnnouncements: any[];
   profileCompletion: number;
   weeklyActivity: WeeklyPoint[];
-  lastCourse: any | null;
+  lastCourse: {
+    courseId: string;
+    courseTitle: string;
+    percent: number;
+    moduleTitle?: string;
+    lessonId?: string;
+    lessonTitle?: string;
+    lessonType?: string;
+    lessonProgress?: number;
+    action: "start" | "continue" | "review";
+    lastLessonId?: string;
+    progressSummary?: Record<string, unknown>;
+  } | null;
   gamification: {
     totalXp: number;
     level: number;
@@ -103,6 +117,8 @@ export async function buildStudentDashboardKPIs(
     certificates: [],
     certificatesCount: 0,
     events: [],
+    pendingAssessments: [],
+    recentAnnouncements: [],
     profileCompletion: 0,
     weeklyActivity: weeklyPoints([]),
     lastCourse: null,
@@ -197,9 +213,59 @@ export async function buildStudentDashboardKPIs(
           .in("id", courseIds)
       : { data: [], error: null };
     if (courseError) throw courseError;
+    const [
+      { data: lessons, error: lessonsError },
+      { data: modules, error: modulesError },
+    ] = await Promise.all([
+      courseIds.length
+        ? supabase
+            .from("lessons")
+            .select("id,course_id,module_id,title,type,sort_order,is_published")
+            .in("course_id", courseIds)
+            .eq("is_published", true)
+        : Promise.resolve({ data: [], error: null }),
+      courseIds.length
+        ? supabase
+            .from("course_modules")
+            .select("id,course_id,title,sort_order,is_published")
+            .in("course_id", courseIds)
+            .eq("is_published", true)
+        : Promise.resolve({ data: [], error: null }),
+    ]);
+    if (lessonsError) throw lessonsError;
+    if (modulesError) throw modulesError;
+    const [
+      { data: assessments, error: assessmentsError },
+      { data: announcements, error: announcementsError },
+    ] = await Promise.all([
+      courseIds.length
+        ? (supabase as any)
+            .from("assessments")
+            .select("id,course_id,title,lesson_id,status,is_required")
+            .in("course_id", courseIds)
+            .eq("status", "published")
+        : Promise.resolve({ data: [], error: null }),
+      courseIds.length
+        ? supabase
+            .from("announcements")
+            .select("id,course_id,title,created_at,publish_at")
+            .in("course_id", courseIds)
+            .order("publish_at", { ascending: false })
+            .limit(5)
+        : Promise.resolve({ data: [], error: null }),
+    ]);
+    if (assessmentsError) throw assessmentsError;
+    if (announcementsError) throw announcementsError;
     const courseById = new Map(
       (courses ?? []).map((course) => [course.id, course]),
     );
+    const publishedLessonsByCourse = new Map<string, Set<string>>();
+    for (const lesson of lessons ?? []) {
+      const lessonIds =
+        publishedLessonsByCourse.get(lesson.course_id) ?? new Set<string>();
+      lessonIds.add(lesson.id);
+      publishedLessonsByCourse.set(lesson.course_id, lessonIds);
+    }
     const progressByCourse = new Map<
       string,
       (typeof progressResult.data)[number][]
@@ -211,14 +277,17 @@ export async function buildStudentDashboardKPIs(
       ]);
     empty.enrollments = (enrollmentResult.data ?? []).map((enrollment) => {
       const courseProgress = progressByCourse.get(enrollment.course_id) ?? [];
-      const percent = courseProgress.length
-        ? Math.round(
-            courseProgress.reduce(
-              (sum, item) => sum + numberValue(item.percent),
-              0,
-            ) / courseProgress.length,
-          )
-        : numberValue((enrollment.progress_summary as any)?.percent);
+      const publishedLessonIds = publishedLessonsByCourse.get(
+        enrollment.course_id,
+      );
+      const completedCount = courseProgress.filter(
+        (item) =>
+          item.status === "completed" &&
+          publishedLessonIds?.has(item.lesson_id),
+      ).length;
+      const percent = publishedLessonIds?.size
+        ? Math.round((completedCount / publishedLessonIds.size) * 100)
+        : 0;
       const lastLessonId = [...courseProgress].sort((a, b) =>
         b.updated_at.localeCompare(a.updated_at),
       )[0]?.lesson_id;
@@ -233,13 +302,100 @@ export async function buildStudentDashboardKPIs(
         },
       };
     });
-    empty.lastCourse = empty.enrollments[0]
-      ? {
-          ...empty.enrollments[0],
-          percent: empty.enrollments[0].progressSummary.percent,
-        }
-      : null;
+    const selectedCourse = empty.enrollments[0];
+    if (selectedCourse) {
+      const courseLessons = (lessons ?? [])
+        .filter((lesson) => lesson.course_id === selectedCourse.courseId)
+        .sort((a, b) => a.sort_order - b.sort_order);
+      const courseProgress =
+        progressByCourse.get(selectedCourse.courseId) ?? [];
+      const progressByLesson = new Map(
+        courseProgress.map((item) => [item.lesson_id, item]),
+      );
+      const lastProgress = selectedCourse.lastLessonId
+        ? progressByLesson.get(selectedCourse.lastLessonId)
+        : undefined;
+      const lastIndex = selectedCourse.lastLessonId
+        ? courseLessons.findIndex(
+            (lesson) => lesson.id === selectedCourse.lastLessonId,
+          )
+        : -1;
+      const nextLesson =
+        lastProgress?.status === "completed"
+          ? courseLessons[lastIndex + 1]
+          : courseLessons[lastIndex >= 0 ? lastIndex : 0];
+      const activeLesson = nextLesson ?? courseLessons[0];
+      const moduleTitle = activeLesson
+        ? (modules ?? []).find((module) => module.id === activeLesson.module_id)
+            ?.title
+        : undefined;
+      const isComplete = selectedCourse.progressSummary.percent >= 100;
+      empty.lastCourse = {
+        courseId: selectedCourse.courseId,
+        courseTitle: selectedCourse.courseTitle,
+        percent: selectedCourse.progressSummary.percent,
+        moduleTitle,
+        lessonId: isComplete ? undefined : activeLesson?.id,
+        lessonTitle: isComplete ? undefined : activeLesson?.title,
+        lessonType: isComplete ? undefined : activeLesson?.type,
+        lessonProgress: isComplete
+          ? undefined
+          : numberValue(progressByLesson.get(activeLesson?.id ?? "")?.percent),
+        action: isComplete ? "review" : lastProgress ? "continue" : "start",
+        lastLessonId: selectedCourse.lastLessonId,
+        progressSummary: selectedCourse.progressSummary,
+      };
+    }
     empty.certificates = certificateResult.data ?? [];
+    const assessmentIds = (assessments ?? []).map(
+      (assessment) => assessment.id,
+    );
+    const { data: submissions, error: submissionsError } = assessmentIds.length
+      ? await supabase
+          .from("assessment_submissions")
+          .select("assessment_id,status,submitted_at,passed,percentage")
+          .eq("user_id", uid)
+          .in("assessment_id", assessmentIds)
+      : { data: [], error: null };
+    if (submissionsError) throw submissionsError;
+    const gradedSubmissions = new Map(
+      (submissions ?? [])
+        .filter((submission) => submission.status === "graded")
+        .map((submission) => [submission.assessment_id, submission]),
+    );
+    const submittedIds = new Set(
+      (submissions ?? [])
+        .filter((submission) => submission.status !== "graded")
+        .map((submission) => submission.assessment_id),
+    );
+    empty.pendingAssessments = (assessments ?? []).filter(
+      (assessment) =>
+        !submittedIds.has(assessment.id) &&
+        !gradedSubmissions.get(assessment.id)?.passed,
+    );
+    const announcementRows = announcements ?? [];
+    const announcementIds = announcementRows.map(
+      (announcement) => announcement.id,
+    );
+    const { data: readRows, error: readsError } = announcementIds.length
+      ? await (supabase as any)
+          .from("student_announcement_reads")
+          .select("announcement_id")
+          .eq("user_id", uid)
+          .in("announcement_id", announcementIds)
+      : { data: [], error: null };
+    // Until the migration is applied, treat recent announcements as unread
+    // rather than making the entire student dashboard unavailable.
+    const readIds = readsError
+      ? new Set<string>()
+      : new Set(
+          (readRows ?? []).map(
+            (row: { announcement_id: string }) => row.announcement_id,
+          ),
+        );
+    empty.recentAnnouncements = announcementRows.filter(
+      (announcement) => !readIds.has(announcement.id),
+    );
     empty.certificatesCount = empty.certificates.length;
     empty.events = (eventResult.data ?? []).map((event) => ({
       ...event,

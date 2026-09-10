@@ -90,6 +90,10 @@ export default function PortalDashboard() {
   const [loading, setLoading] = useState(true);
   const [enrollments, setEnrollments] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
+  const [dataPendingAssessments, setDataPendingAssessments] = useState<any[]>(
+    [],
+  );
+  const [recentAnnouncements, setRecentAnnouncements] = useState<any[]>([]);
   const [certificates, setCertificates] = useState<any[]>([]);
   const [weeklyActivity, setWeeklyActivity] = useState<
     { day: string; value: number }[]
@@ -131,6 +135,8 @@ export default function PortalDashboard() {
       });
       setEnrollments([]);
       setEvents([]);
+      setDataPendingAssessments([]);
+      setRecentAnnouncements([]);
       setCertificates([]);
       setLastCourse(null);
       setGamification(null);
@@ -150,6 +156,8 @@ export default function PortalDashboard() {
         const data = kpi.data;
         setEnrollments(data.enrollments || []);
         setEvents(data.events || []);
+        setDataPendingAssessments(data.pendingAssessments || []);
+        setRecentAnnouncements(data.recentAnnouncements || []);
         setCertificates(data.certificates || []);
         setWeeklyActivity(data.weeklyActivity || []);
         setProfileCompletion(
@@ -193,6 +201,72 @@ export default function PortalDashboard() {
           value: 0,
         }));
   const maxActivityValue = Math.max(...activityPoints.map((p) => p.value), 1);
+  const incompleteCourses = enrollments.filter(
+    (enrollment) => Number(enrollment.progressSummary?.percent ?? 0) < 100,
+  );
+  const pendingItems = [
+    ...incompleteCourses.slice(0, 2).map((enrollment) => ({
+      label: enrollment.progressSummary?.percent
+        ? `Continuar ${enrollment.courseTitle}`
+        : `Começar ${enrollment.courseTitle}`,
+      href: `/portal/course/${enrollment.courseId}`,
+    })),
+    ...(certificates.length > 0
+      ? [
+          {
+            label: `${certificates.length} certificado(s) disponível(is)`,
+            href: "/portal/certificates",
+          },
+        ]
+      : []),
+    ...(events.length > 0
+      ? [
+          {
+            label: `${events.length} evento(s) próximo(s)`,
+            href: "/portal/events",
+          },
+        ]
+      : []),
+    ...(dataPendingAssessments ?? []).slice(0, 2).map((assessment: any) => ({
+      label: `Avaliação: ${assessment.title}`,
+      href: `/portal/exam/${assessment.id}`,
+    })),
+    ...(recentAnnouncements.length > 0
+      ? [
+          {
+            label: `${recentAnnouncements.length} comunicado(s) recente(s)`,
+            href: "/portal",
+          },
+        ]
+      : []),
+  ];
+  const journeyEvents = [
+    ...enrollments.slice(0, 1).map((enrollment) => ({
+      label: `Matrícula em ${enrollment.courseTitle}`,
+      date: enrollment.enrolled_at,
+      complete: true,
+    })),
+    ...(lastCourse?.lastLessonId
+      ? [{ label: "Última atividade registrada", date: null, complete: true }]
+      : []),
+    ...(certificates.length > 0
+      ? [
+          {
+            label: "Certificado emitido",
+            date: certificates[0].issued_at,
+            complete: true,
+          },
+        ]
+      : []),
+    ...(dataPendingAssessments.length > 0
+      ? [{ label: "Avaliação disponível", date: null, complete: false }]
+      : []),
+    ...events.slice(0, 2).map((event) => ({
+      label: `Evento: ${event.title}`,
+      date: event.startsAt,
+      complete: false,
+    })),
+  ];
 
   return (
     <div className="panel-surface -m-4 min-h-screen space-y-8 p-4 animate-fade-in md:-m-6 md:p-6 lg:-m-8 lg:p-8">
@@ -267,6 +341,84 @@ export default function PortalDashboard() {
         </div>
       )}
 
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <section
+          className="editorial-card lg:col-span-8 p-6"
+          aria-labelledby="pending-title"
+        >
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-agedGold">
+                Próximas ações
+              </p>
+              <h2
+                id="pending-title"
+                className="text-xl font-serif text-ink mt-1"
+              >
+                Seu centro de pendências
+              </h2>
+            </div>
+          </div>
+          {pendingItems.length > 0 ? (
+            <div className="grid gap-2 md:grid-cols-2">
+              {pendingItems.map((item) => (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className="flex items-center justify-between rounded-xl border border-stone-100 bg-stone-50/60 px-4 py-3 text-sm font-semibold text-ink transition hover:border-agedGold/40 hover:bg-white"
+                >
+                  <span>{item.label}</span>
+                  <span aria-hidden="true" className="text-agedGold">
+                    →
+                  </span>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <p className="rounded-xl border border-stone-100 bg-stone-50/60 px-4 py-5 text-sm text-stone-500">
+              Você está em dia. Novas atividades aparecerão aqui.
+            </p>
+          )}
+        </section>
+        <section
+          className="editorial-card lg:col-span-4 p-6"
+          aria-labelledby="journey-title"
+        >
+          <div className="flex items-center justify-between mb-5">
+            <h2 id="journey-title" className="text-xl font-serif text-ink">
+              Minha jornada
+            </h2>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400">
+              Resumo
+            </span>
+          </div>
+          {journeyEvents.length > 0 ? (
+            <ol className="space-y-4">
+              {journeyEvents.map((event) => (
+                <li key={event.label} className="flex gap-3 text-sm">
+                  <span
+                    className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-agedGold ring-4 ring-agedGold/10"
+                    aria-hidden="true"
+                  />
+                  <div>
+                    <p className="font-semibold text-ink">{event.label}</p>
+                    <p className="text-xs text-stone-400">
+                      {event.date
+                        ? new Date(event.date).toLocaleDateString("pt-BR")
+                        : "Agora"}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p className="text-sm text-stone-500">
+              Sua jornada começa quando você iniciar um curso.
+            </p>
+          )}
+        </section>
+      </div>
+
       {/* Row 1: Cockpit */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Hero Card: Resume (Col-8) */}
@@ -283,32 +435,62 @@ export default function PortalDashboard() {
                 <div className="flex-1 w-full">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="px-3 py-1 bg-agedGold/10 text-agedGold text-[9px] font-bold uppercase tracking-[0.2em] rounded-sm border border-agedGold/10">
-                      Continuar Estudando
+                      {lastCourse.action === "start"
+                        ? "Começar sua jornada"
+                        : lastCourse.action === "review"
+                          ? "Curso concluído"
+                          : "Continuar estudando"}
                     </span>
                   </div>
                   <h2 className="text-2xl font-serif text-ink mb-2 group-hover:text-agedGold transition-colors tracking-tight">
                     {lastCourse.courseTitle}
                   </h2>
-                  <p className="text-sm text-stone-500 mb-6 font-serif italic">
-                    Retome sua última lição e avance no seu processo.
+                  <p className="text-sm text-stone-500 mb-2 font-serif italic">
+                    {lastCourse.action === "review"
+                      ? "Revise seu percurso ou acesse seu certificado."
+                      : lastCourse.lessonTitle ||
+                        "Sua próxima etapa de aprendizagem."}
                   </p>
+                  {lastCourse.moduleTitle && lastCourse.action !== "review" && (
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-5">
+                      {lastCourse.moduleTitle}
+                      {lastCourse.lessonType
+                        ? ` · ${lastCourse.lessonType}`
+                        : ""}
+                    </p>
+                  )}
 
                   <div className="flex items-center gap-6">
                     <Link
-                      href={`/portal/course/${lastCourse.courseId}${lastCourse.lastLessonId ? `/lesson/${lastCourse.lastLessonId}` : ""}`}
+                      href={
+                        lastCourse.action === "review"
+                          ? `/portal/course/${lastCourse.courseId}`
+                          : `/portal/course/${lastCourse.courseId}${lastCourse.lessonId ? `/lesson/${lastCourse.lessonId}` : ""}`
+                      }
                       className="bg-ink text-agedGold hover:bg-agedGold hover:text-ink px-8 py-2.5 rounded-sm text-[10px] font-bold uppercase tracking-widest transition-all shadow-lg flex items-center gap-2"
                     >
-                      <Play size={14} className="fill-current" /> Continuar Aula
+                      <Play size={14} className="fill-current" />
+                      {lastCourse.action === "start"
+                        ? "Começar curso"
+                        : lastCourse.action === "review"
+                          ? "Revisar curso"
+                          : "Continuar aula"}
                     </Link>
                     <div className="flex-1 max-w-[140px]">
                       <div className="h-1 bg-stone-100 rounded-full overflow-hidden">
                         <div
                           className="h-full bg-agedGold transition-all duration-1000"
-                          style={{ width: `${lastCourse.percent}%` }}
+                          style={{
+                            width: `${Math.min(100, Math.max(0, lastCourse.percent))}%`,
+                          }}
                         />
                       </div>
                       <p className="text-[9px] font-bold uppercase tracking-widest text-stone-400 mt-2">
                         {lastCourse.percent}% concluído
+                      </p>
+                      <p className="text-[10px] text-stone-400 mt-1">
+                        Aulas publicadas concluídas; avaliações obrigatórias
+                        também contam para a conclusão.
                       </p>
                     </div>
                   </div>
@@ -440,7 +622,7 @@ export default function PortalDashboard() {
       {/* Row 2: Journey & Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* My Journey (Visão Macro) */}
-          <div className="editorial-card lg:col-span-12 p-6">
+        <div className="editorial-card lg:col-span-12 p-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
               <TrendingUp size={20} className="text-primary" />

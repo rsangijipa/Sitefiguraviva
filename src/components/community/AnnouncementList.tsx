@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Pin } from "lucide-react";
 import { AnnouncementDoc } from "@/types/lms";
 import { announcementService } from "@/services/announcementService";
+import { markAnnouncementRead } from "@/app/actions/announcements";
 
 export default function AnnouncementList({ courseId }: { courseId: string }) {
   const [announcements, setAnnouncements] = useState<AnnouncementDoc[]>([]);
@@ -42,6 +43,16 @@ export default function AnnouncementList({ courseId }: { courseId: string }) {
       {announcements.map((announcement) => (
         <div
           key={announcement.id}
+          onClick={() => void markAnnouncementRead(announcement.id)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              void markAnnouncementRead(announcement.id);
+            }
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label={`Marcar comunicado ${announcement.title} como lido`}
           className="bg-white/50 p-4 rounded-lg border border-blue-100"
         >
           <div className="flex items-start gap-3">
