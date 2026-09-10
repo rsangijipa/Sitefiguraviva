@@ -1,31 +1,29 @@
 "use server";
 
-import { auth, adminDb } from "@/lib/firebase/admin";
-import { Timestamp } from "firebase-admin/firestore";
-import { cookies } from "next/headers";
-import { CertificateIssuer } from "@/lib/certificates/issuer";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
+import { verifySession } from "@/lib/auth/server";
+import { createNotification } from "@/features/notifications/infrastructure/supabaseNotificationRepository.server";
+import {
+  getCertificate as getCertificateFromRepo,
+  getUserCertificates as getUserCertificatesFromRepo,
+} from "@/features/certificates/infrastructure/supabaseCertificateRepository.server";
+import { issueCertificateSupabase } from "@/features/certificates/infrastructure/supabaseCertificateIssuer.server";
 
 /**
  * Issue a certificate to a student upon course completion.
- * Proxies to the canonical CertificateIssuer.
+ * Uses the canonical Supabase certificate issuer.
  */
 export async function issueCertificate(courseId: string, userId?: string) {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("session")?.value;
-
-  if (!sessionCookie) {
-    return { error: "Unauthorized" };
-  }
-
   try {
-    const claims = await auth.verifySessionCookie(sessionCookie, true);
+    const claims = await verifySession();
+    if (!claims) return { error: "Unauthorized" };
     const actorUid = claims.uid;
     const isAdmin = !!claims.admin || claims.role === "admin";
 
     // If userId is provided, actor check is handled inside Issuer
     const targetUid = userId || actorUid;
 
-    const result = await CertificateIssuer.issue(
+    const result = await issueCertificateSupabase(
       courseId,
       targetUid,
       actorUid,
@@ -35,21 +33,17 @@ export async function issueCertificate(courseId: string, userId?: string) {
     if (result.success) {
       // Re-trigger notification (action-specific)
       try {
-        const userDocRef = adminDb.collection("users").doc(targetUid);
-        const courseDocRef = adminDb.collection("courses").doc(courseId);
-        const [userSnap, courseSnap] = await Promise.all([
-          userDocRef.get(),
-          courseDocRef.get(),
-        ]);
-
-        await userDocRef.collection("notifications").add({
-          title: "🎓 Certificado Emitido!",
-          body: `Parabéns! Seu certificado do curso "${courseSnap.data()?.title || "Curso"}" foi emitido.`,
-          link: `/portal/certificates/${targetUid}_${courseId}`,
-          type: "certificate_issued",
-          isRead: false,
-          createdAt: Timestamp.now(),
-        });
+        const supabase = createSupabaseServiceClient();
+        await createNotification(
+          targetUid,
+          {
+            title: "🎓 Certificado Emitido!",
+            body: "Seu certificado de conclusão foi emitido.",
+            link: `/portal/certificates/${targetUid}_${courseId}`,
+            type: "certificate_available" as any,
+          },
+          supabase,
+        );
       } catch (e) {
         console.error("Failed to send notification for certificate", e);
       }
@@ -61,7 +55,10 @@ export async function issueCertificate(courseId: string, userId?: string) {
       };
     }
 
-    return { error: result.error, details: result.details };
+    return {
+      error: result.error,
+      details: (result as { details?: unknown }).details,
+    };
   } catch (error: any) {
     console.error("Issue Certificate Error:", error);
     return { error: "Erro ao emitir certificado", details: error.message };
@@ -79,22 +76,22 @@ export async function getCertificate(
   // Logic remains mostly same but can be simplified if we rely on the natural key
   // I'll keep the recovery logic for now as it's useful
   try {
-    let certDoc = await adminDb
-      .collection("certificates")
-      .doc(certificateId)
-      .get();
-
-    if (!certDoc.exists && certificateId.includes("_")) {
-      const [uid, cid] = certificateId.split("_");
-      // Try issuing if missing - this is the "Auto-Recovery" mentioned
-      // We can call the issuer directly here without session if we are internal
-      // but it's safer to just return not found if not authenticated.
-    }
-
-    if (!certDoc.exists) return { error: "Certificado não encontrado" };
-
-    const data = certDoc.data();
-    return { certificate: { ...data, id: certDoc.id } as Certificate };
+    const supabase = createSupabaseServiceClient();
+    const { data, error } = await supabase
+      .from("certificates")
+      .select("*")
+      .or(`id.eq.${certificateId},code.eq.${certificateId}`)
+      .maybeSingle();
+    if (error) throw error;
+    if (!data) return { error: "Certificado não encontrado" };
+    const certificate = await getCertificateFromRepo(
+      data.user_id,
+      data.course_id,
+      supabase,
+    );
+    return certificate
+      ? { certificate }
+      : { error: "Certificado não encontrado" };
   } catch (error: any) {
     return { error: error.message };
   }
@@ -118,13 +115,14 @@ export async function verifyCertificate(certificateId: string) {
       };
     }
 
-    const snap = await adminDb
-      .collection("certificatePublic")
-      .doc(certificateId)
-      .get();
-    if (!snap.exists)
+    const { data, error } = await createSupabaseServiceClient()
+      .from("certificates")
+      .select("*")
+      .eq("code", certificateId)
+      .maybeSingle();
+    if (error || !data)
       return { valid: false, message: "Certificado não encontrado" };
-    return { valid: true, certificate: snap.data() };
+    return { valid: true, certificate: data };
   } catch (e) {
     return { valid: false, message: "Erro ao verificar" };
   }
@@ -134,23 +132,18 @@ export async function verifyCertificate(certificateId: string) {
  * Get User Certificates
  */
 export async function getUserCertificates(userId?: string) {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("session")?.value;
-  if (!sessionCookie) return { error: "Unauthorized" };
-
   try {
-    const claims = await auth.verifySessionCookie(sessionCookie, true);
+    const claims = await verifySession();
+    if (!claims) return { error: "Unauthorized" };
     const targetUid = userId || claims.uid;
     if (claims.role !== "admin" && targetUid !== claims.uid)
       return { error: "Forbidden" };
 
-    const snap = await adminDb
-      .collection("certificates")
-      .where("userId", "==", targetUid)
-      .where("status", "==", "issued")
-      .get();
-
-    return { certificates: snap.docs.map((d) => ({ id: d.id, ...d.data() })) };
+    const certificates = await getUserCertificatesFromRepo(
+      targetUid,
+      createSupabaseServiceClient(),
+    );
+    return { certificates };
   } catch (e) {
     return { error: "Internal Error" };
   }
