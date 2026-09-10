@@ -27,6 +27,14 @@ function isSupportedSource(value: unknown): value is string {
 
   try {
     const url = new URL(source);
+    // A legacy record accidentally stored the site home as an image source.
+    // It makes the browser try to frame a page protected by X-Frame-Options.
+    if (
+      /(^|\.)institutofiguraviva\.com\.br$/i.test(url.hostname) &&
+      (url.pathname === "/" || url.pathname === "")
+    ) {
+      return false;
+    }
     return url.protocol === "http:" || url.protocol === "https:";
   } catch {
     return false;

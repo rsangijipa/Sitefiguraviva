@@ -335,12 +335,12 @@ export default function GalleryClient({
             </button>
 
             <div
-              className="relative flex max-h-[90vh] max-w-5xl flex-col overflow-hidden rounded-md bg-paper lg:flex-row"
+              className="relative flex max-h-[90vh] w-[min(96vw,1280px)] flex-col overflow-hidden rounded-2xl bg-paper shadow-2xl lg:flex-row"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Image Container */}
-              <div className="relative flex flex-1 items-center justify-center bg-areia p-4">
-                <div className="h-[min(70vh,720px)] w-[min(90vw,900px)] max-w-full">
+              <div className="relative flex min-h-[45vh] min-w-0 flex-1 items-center justify-center bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.55),transparent_65%),#e9dfcf] p-4 sm:p-8">
+                <div className="h-[min(68vh,760px)] w-full max-w-[920px]">
                   <GalleryImage
                     src={filteredPhotos[selectedPhotoIndex].src}
                     alt={filteredPhotos[selectedPhotoIndex].title}
@@ -379,7 +379,7 @@ export default function GalleryClient({
               </div>
 
               {/* Sidebar Info */}
-              <div className="flex w-full flex-col overflow-y-auto border-l border-border bg-paper p-8 lg:w-80">
+              <div className="flex max-h-[38vh] w-full shrink-0 flex-col overflow-y-auto border-t border-border bg-paper p-6 sm:p-8 lg:max-h-none lg:w-[min(34vw,380px)] lg:border-l lg:border-t-0">
                 <h3
                   id="gallery-dialog-title"
                   className="font-serif text-2xl text-primary mb-4 leading-tight"
