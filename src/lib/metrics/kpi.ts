@@ -75,6 +75,15 @@ function weeklyPoints(rows: { amount?: number; timestamp: string }[]) {
   }));
 }
 
+function basicProfileCompletion(
+  profile: { display_name?: string | null; photo_url?: string | null } | null,
+) {
+  if (!profile) return 0;
+  const fields = [profile.display_name, profile.photo_url];
+  const filled = fields.filter((value) => String(value ?? "").trim()).length;
+  return Math.round((filled / fields.length) * 100);
+}
+
 export async function buildStudentDashboardKPIs(
   uid: string,
 ): Promise<KpiActionResult<StudentDashboardKpisData>> {
@@ -145,7 +154,7 @@ export async function buildStudentDashboardKPIs(
         .limit(3),
       supabase
         .from("profiles")
-        .select("profile_completion")
+        .select("display_name,photo_url")
         .eq("id", uid)
         .maybeSingle(),
       supabase
@@ -238,9 +247,7 @@ export async function buildStudentDashboardKPIs(
       endsAt: event.ends_at,
       joinUrl: event.join_url,
     }));
-    empty.profileCompletion = numberValue(
-      profileResult.data?.profile_completion,
-    );
+    empty.profileCompletion = basicProfileCompletion(profileResult.data);
     const activityRows = (xpResult.data ?? []).length
       ? (xpResult.data ?? [])
       : (analyticsResult.data ?? []).map((event: { timestamp: string }) => ({
