@@ -248,14 +248,14 @@ export default function GalleryClient({
           </section>
 
           {/* GRID CONTENT */}
-          <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
+          <div className="grid grid-cols-1 gap-6 pb-12 sm:grid-cols-2 xl:grid-cols-3">
             {filteredPhotos.map((photo, index) => (
               <motion.button
                 type="button"
                 key={photo.id}
                 layoutId={photo.id}
                 aria-label={`Abrir imagem: ${photo.title}`}
-                className="group relative block w-full cursor-pointer break-inside-avoid overflow-hidden rounded-md border border-border bg-areia text-left transition-colors duration-500 hover:border-igarape focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                className="group relative block w-full cursor-pointer overflow-hidden rounded-2xl border border-border bg-areia text-left shadow-sm transition-all duration-500 hover:-translate-y-1 hover:border-igarape hover:shadow-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                 onClick={(event) => openLightbox(index, event.currentTarget)}
                 whileHover={{ y: -5 }}
               >
@@ -340,15 +340,18 @@ export default function GalleryClient({
             >
               {/* Image Container */}
               <div className="relative flex flex-1 items-center justify-center bg-areia p-4">
-                <GalleryImage
-                  src={filteredPhotos[selectedPhotoIndex].src}
-                  alt={filteredPhotos[selectedPhotoIndex].title}
-                  width={filteredPhotos[selectedPhotoIndex].width}
-                  height={filteredPhotos[selectedPhotoIndex].height}
-                  fit="contain"
-                  sizes="(max-width: 1024px) 100vw, 70vw"
-                  className="max-h-[70vh] rounded-md"
-                />
+                <div className="h-[min(70vh,720px)] w-[min(90vw,900px)] max-w-full">
+                  <GalleryImage
+                    src={filteredPhotos[selectedPhotoIndex].src}
+                    alt={filteredPhotos[selectedPhotoIndex].title}
+                    width={filteredPhotos[selectedPhotoIndex].width}
+                    height={filteredPhotos[selectedPhotoIndex].height}
+                    fit="contain"
+                    sizes="(max-width: 1024px) 100vw, 70vw"
+                    className="h-full w-full rounded-md"
+                    imageClassName="object-contain"
+                  />
+                </div>
 
                 {/* Nav Buttons */}
                 <button

@@ -19,7 +19,25 @@ export const revalidate = 3600; // Revalidate every hour
 
 async function getLibraryData() {
   try {
-    return await listPublishedContent("publicLibrary");
+    const items = await listPublishedContent("publicLibrary");
+    const localDocumentUrl =
+      "/documents/As%20polaridades%20do%20feminino%20na%20contemporaneidade%20e%20a%20depress%C3%A3o%20p%C3%B3s-parto%20uma%20vis%C3%A3o%20gest%C3%A1ltica.pdf";
+
+    return items.map((item) => {
+      const searchableTitle = String(item.title || "").toLowerCase();
+      const isPolaridadesDocument =
+        searchableTitle.includes("polaridades") &&
+        searchableTitle.includes("depress") &&
+        searchableTitle.includes("pós-parto");
+      const pointsToMissingBucket =
+        /supabase\.co\/storage\/v1\/object\/(public|sign)\/(uploads|documents)\//i.test(
+          String(item.pdfUrl || item.pdf_url || ""),
+        );
+
+      return isPolaridadesDocument || pointsToMissingBucket
+        ? { ...item, pdfUrl: localDocumentUrl, pdf_url: localDocumentUrl }
+        : item;
+    });
   } catch (error) {
     console.error("Error fetching library data:", error);
     return [];
