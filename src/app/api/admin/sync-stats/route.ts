@@ -1,99 +1,80 @@
 import { NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase/admin";
-import { FieldValue } from "firebase-admin/firestore";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import { verifySession } from "@/lib/auth/server";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(request: Request) {
+/** Recalculates canonical Supabase statistics without touching Firebase mirrors. */
+export async function POST() {
+  const claims = await verifySession();
+  if (!claims)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!claims.isAdmin)
+    return NextResponse.json({ error: "Admins only" }, { status: 403 });
   try {
-    // The `session` cookie carries a Supabase JWT, not a Firebase session
-    // cookie, so admin checks go through verifySession() (Supabase-based)
-    // rather than adminAuth.verifySessionCookie, which always threw here.
-    const claims = await verifySession();
-    if (!claims)
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    if (!claims.isAdmin)
-      return NextResponse.json({ error: "Admins only" }, { status: 403 });
-
-    const coursesSnap = await adminDb.collection("courses").get();
-    const batch = adminDb.batch();
-    let batchCount = 0;
-    let syncedCourses = 0;
-
-    for (const courseDoc of coursesSnap.docs) {
-      const courseId = courseDoc.id;
-      const modulesSnap = await courseDoc.ref
-        .collection("modules")
-        .where("isPublished", "==", true)
-        .get();
-      let totalPublishedLessons = 0;
-
-      for (const modDoc of modulesSnap.docs) {
-        const lessonsSnap = await modDoc.ref
-          .collection("lessons")
-          .where("isPublished", "==", true)
-          .get();
-        totalPublishedLessons += lessonsSnap.size;
-      }
-
-      // Update course stats
-      batch.update(courseDoc.ref, {
-        "stats.lessonsCount": totalPublishedLessons,
-        updatedAt: FieldValue.serverTimestamp(),
-      });
-      batchCount++;
-
-      // Sync all enrollments for this course
-      const enrollmentsSnap = await adminDb
-        .collection("enrollments")
-        .where("courseId", "==", courseId)
-        .get();
-      for (const enrollmentDoc of enrollmentsSnap.docs) {
-        const enrollmentRef = enrollmentDoc.ref;
-        const uid = enrollmentDoc.data().uid || enrollmentDoc.data().userId;
-
-        batch.update(enrollmentRef, {
-          "progressSummary.totalLessons": totalPublishedLessons,
-          updatedAt: FieldValue.serverTimestamp(),
-        });
-        batchCount++;
-
-        // Also update the mirror
-        if (uid) {
-          try {
-            const mirrorRef = adminDb
-              .collection("users")
-              .doc(uid)
-              .collection("enrollments")
-              .doc(courseId);
-            batch.update(mirrorRef, {
-              "progressSummary.totalLessons": totalPublishedLessons,
-              updatedAt: FieldValue.serverTimestamp(),
-            });
-            batchCount++;
-          } catch (e) {
-            // ignore if mirror doesn't exist to update
-          }
-        }
-
-        if (batchCount > 400) {
-          await batch.commit();
-          batchCount = 0;
-        }
-      }
-      syncedCourses++;
-    }
-
-    if (batchCount > 0) {
-      await batch.commit();
-    }
-
+    const supabase = createSupabaseServiceClient();
+    const [coursesResult, lessonsResult, enrollmentResult] = await Promise.all([
+      supabase.from("courses").select("id,stats"),
+      supabase.from("lessons").select("course_id").eq("is_published", true),
+      supabase.from("enrollments").select("id,course_id,progress_summary"),
+    ]);
+    const error =
+      coursesResult.error || lessonsResult.error || enrollmentResult.error;
+    if (error) throw error;
+    const totals = new Map<string, number>();
+    for (const lesson of lessonsResult.data ?? [])
+      totals.set(lesson.course_id, (totals.get(lesson.course_id) ?? 0) + 1);
+    const courseUpdates = await Promise.all(
+      (coursesResult.data ?? []).map((course) =>
+        supabase
+          .from("courses")
+          .update({
+            stats: {
+              ...(course.stats as object),
+              lessonsCount: totals.get(course.id) ?? 0,
+            },
+          })
+          .eq("id", course.id),
+      ),
+    );
+    const courseUpdateError = courseUpdates.find(
+      (result) => result.error,
+    )?.error;
+    if (courseUpdateError) throw courseUpdateError;
+    const enrollmentUpdates = await Promise.all(
+      (enrollmentResult.data ?? []).map((enrollment) =>
+        supabase
+          .from("enrollments")
+          .update({
+            progress_summary: {
+              ...(enrollment.progress_summary as object),
+              totalLessons: totals.get(enrollment.course_id) ?? 0,
+            },
+          })
+          .eq("id", enrollment.id),
+      ),
+    );
+    const enrollmentUpdateError = enrollmentUpdates.find(
+      (result) => result.error,
+    )?.error;
+    if (enrollmentUpdateError) throw enrollmentUpdateError;
     return NextResponse.json({
       success: true,
-      message: `Synced lessons count for ${syncedCourses} courses and their enrollments.`,
+      courses: (coursesResult.data ?? []).length,
+      enrollments: (enrollmentResult.data ?? []).length,
     });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    console.error("Sync Supabase statistics error:", error);
+    return NextResponse.json(
+      { error: "Unable to synchronize statistics" },
+      { status: 500 },
+    );
   }
+}
+
+export async function GET() {
+  return NextResponse.json(
+    { error: "Use POST to synchronize Supabase statistics." },
+    { status: 405, headers: { Allow: "POST" } },
+  );
 }

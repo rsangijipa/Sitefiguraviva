@@ -20,11 +20,7 @@ export async function getStudentDashboardKPIs(uid?: string) {
     const claims = await requireSession();
     const effectiveUid = uid || claims.uid;
 
-    if (
-      effectiveUid !== claims.uid &&
-      !claims.admin &&
-      claims.role !== "admin"
-    ) {
+    if (effectiveUid !== claims.uid && !claims.isAdmin) {
       return {
         success: false,
         error: "Forbidden",

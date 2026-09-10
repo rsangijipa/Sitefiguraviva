@@ -1,11 +1,6 @@
-import { adminDb } from "@/lib/firebase/admin";
-import { deepSafeSerialize } from "@/lib/utils";
-import { FieldPath } from "firebase-admin/firestore";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 
-type WeeklyPoint = {
-  day: string;
-  value: number;
-};
+type WeeklyPoint = { day: string; value: number };
 
 export type StudentDashboardKpisData = {
   enrollments: any[];
@@ -51,123 +46,56 @@ export type KpiActionResult<T> = {
   updatedAt: string;
 };
 
-function toPtWeekday(isoDate: string) {
-  return new Date(`${isoDate}T00:00:00`).toLocaleDateString("pt-BR", {
-    weekday: "short",
+const numberValue = (value: unknown) => Number(value ?? 0);
+const source = (entries: string[]) =>
+  Object.fromEntries(entries.map((entry) => [entry, `supabase/${entry}`]));
+
+function weekDays() {
+  return Array.from({ length: 7 }, (_, index) => {
+    const date = new Date();
+    date.setHours(0, 0, 0, 0);
+    date.setDate(date.getDate() - (6 - index));
+    return date;
   });
 }
 
-function normalizeTimestamp(raw: any): Date | null {
-  if (!raw) return null;
-  if (raw instanceof Date) return raw;
-  if (typeof raw.toDate === "function") return raw.toDate();
-  if (typeof raw === "string") return new Date(raw);
-  if (typeof raw._seconds === "number") return new Date(raw._seconds * 1000);
-  if (typeof raw.seconds === "number") return new Date(raw.seconds * 1000);
-  return null;
-}
-
-function buildWeekSeries() {
-  const map = new Map<string, number>();
-  const labels: string[] = [];
-
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    d.setDate(d.getDate() - i);
-    const key = d.toISOString().slice(0, 10);
-    labels.push(key);
-    map.set(key, 0);
+function weeklyPoints(rows: { amount?: number; timestamp: string }[]) {
+  const dates = weekDays();
+  const values = new Map(
+    dates.map((date) => [date.toISOString().slice(0, 10), 0]),
+  );
+  for (const row of rows) {
+    const key = new Date(row.timestamp).toISOString().slice(0, 10);
+    if (values.has(key))
+      values.set(key, (values.get(key) ?? 0) + numberValue(row.amount ?? 1));
   }
-
-  return { map, labels };
-}
-
-async function getWeeklyActivity(uid: string): Promise<{
-  points: WeeklyPoint[];
-  source: string;
-}> {
-  const weekStart = new Date();
-  weekStart.setHours(0, 0, 0, 0);
-  weekStart.setDate(weekStart.getDate() - 6);
-
-  const { map, labels } = buildWeekSeries();
-
-  const xpSnap = await adminDb
-    .collection("xp_transactions")
-    .where("userId", "==", uid)
-    .where("timestamp", ">=", weekStart)
-    .get();
-
-  if (!xpSnap.empty) {
-    xpSnap.docs.forEach((doc) => {
-      const data = doc.data();
-      const ts = normalizeTimestamp(data.timestamp);
-      if (!ts) return;
-      const key = ts.toISOString().slice(0, 10);
-      if (!map.has(key)) return;
-      const amount = Number(data.amount || 0);
-      map.set(
-        key,
-        (map.get(key) || 0) + (Number.isFinite(amount) ? amount : 0),
-      );
-    });
-
-    return {
-      points: labels.map((key) => ({
-        day: toPtWeekday(key),
-        value: map.get(key) || 0,
-      })),
-      source: "firestore/xp_transactions",
-    };
-  }
-
-  const analyticsSnap = await adminDb
-    .collection("analytics_events")
-    .where("userId", "==", uid)
-    .where("timestamp", ">=", weekStart)
-    .get();
-
-  analyticsSnap.docs.forEach((doc) => {
-    const data = doc.data();
-    const ts = normalizeTimestamp(data.timestamp);
-    if (!ts) return;
-    const key = ts.toISOString().slice(0, 10);
-    if (!map.has(key)) return;
-    map.set(key, (map.get(key) || 0) + 1);
-  });
-
-  return {
-    points: labels.map((key) => ({
-      day: toPtWeekday(key),
-      value: map.get(key) || 0,
-    })),
-    source: "firestore/analytics_events",
-  };
+  return dates.map((date) => ({
+    day: date.toLocaleDateString("pt-BR", { weekday: "short" }),
+    value: values.get(date.toISOString().slice(0, 10)) ?? 0,
+  }));
 }
 
 export async function buildStudentDashboardKPIs(
   uid: string,
 ): Promise<KpiActionResult<StudentDashboardKpisData>> {
   const updatedAt = new Date().toISOString();
-  const source: Record<string, string> = {
-    enrollments: "firestore/enrollments",
-    courses: "firestore/courses",
-    certificates: "firestore/certificates",
-    events: "firestore/events",
-    profile: "firestore/users",
-    weeklyActivity: "firestore/xp_transactions|analytics_events",
-  };
-
+  const dataSource = source([
+    "enrollments",
+    "courses",
+    "certificates",
+    "events",
+    "profiles",
+    "xp_transactions",
+    "analytics_events",
+    "gamification_profiles",
+  ]);
   const empty: StudentDashboardKpisData = {
     enrollments: [],
     certificates: [],
     certificatesCount: 0,
     events: [],
     profileCompletion: 0,
-    weeklyActivity: ["seg", "ter", "qua", "qui", "sex", "sab", "dom"].map(
-      (d) => ({ day: d, value: 0 }),
-    ),
+    weeklyActivity: weeklyPoints([]),
     lastCourse: null,
     gamification: null,
     availability: {
@@ -179,174 +107,178 @@ export async function buildStudentDashboardKPIs(
       gamification: false,
     },
   };
-
   try {
+    const supabase = createSupabaseServiceClient();
+    const sevenDaysAgo = new Date(Date.now() - 6 * 86400000).toISOString();
     const [
-      enrollmentRes,
-      certificatesRes,
-      eventsRes,
-      profileRes,
-      weeklyRes,
-      gamificationRes,
-    ] = await Promise.allSettled([
-      adminDb.collection("enrollments").where("uid", "==", uid).get(),
-      adminDb.collection("certificates").where("userId", "==", uid).get(),
-      adminDb
-        .collection("events")
-        .where("status", "in", ["scheduled", "live"])
-        .where("isPublic", "==", true)
-        .get(),
-      adminDb.collection("users").doc(uid).get(),
-      getWeeklyActivity(uid),
-      adminDb.collection("gamification_profiles").doc(uid).get(),
+      enrollmentResult,
+      certificateResult,
+      eventResult,
+      profileResult,
+      xpResult,
+      analyticsResult,
+      gamificationResult,
+      progressResult,
+    ] = await Promise.all([
+      supabase
+        .from("enrollments")
+        .select(
+          "id,course_id,status,enrolled_at,last_accessed_at,progress_summary",
+        )
+        .eq("user_id", uid)
+        .in("status", ["active", "completed"])
+        .order("last_accessed_at", { ascending: false, nullsFirst: false }),
+      supabase
+        .from("certificates")
+        .select("id,course_id,code,issued_at,metadata")
+        .eq("user_id", uid)
+        .order("issued_at", { ascending: false }),
+      supabase
+        .from("events")
+        .select(
+          "id,title,description,starts_at,ends_at,status,type,join_url,location",
+        )
+        .eq("is_public", true)
+        .in("status", ["scheduled", "live"])
+        .gte("starts_at", updatedAt)
+        .order("starts_at")
+        .limit(3),
+      supabase
+        .from("profiles")
+        .select("profile_completion")
+        .eq("id", uid)
+        .maybeSingle(),
+      supabase
+        .from("xp_transactions")
+        .select("amount,timestamp")
+        .eq("user_id", uid)
+        .gte("timestamp", sevenDaysAgo),
+      (supabase as any)
+        .from("analytics_events")
+        .select("timestamp")
+        .eq("user_id", uid)
+        .gte("timestamp", sevenDaysAgo),
+      supabase
+        .from("gamification_profiles")
+        .select("total_xp,level,current_streak,badges")
+        .eq("user_id", uid)
+        .maybeSingle(),
+      supabase
+        .from("lesson_progress")
+        .select("course_id,lesson_id,percent,status,updated_at")
+        .eq("user_id", uid),
     ]);
-
-    let enrollments: any[] = [];
-
-    if (enrollmentRes.status === "fulfilled") {
-      const enrollmentDocs = enrollmentRes.value.docs.map((d) => ({
-        id: d.id,
-        ...d.data(),
-      }));
-      const allowedEnrollments = enrollmentDocs.filter((e: any) =>
-        ["active", "completed"].includes(e.status),
-      );
-      const courseIds = [
-        ...new Set(
-          allowedEnrollments.map((e: any) => e.courseId).filter(Boolean),
-        ),
-      ];
-      const courseMap = new Map<string, any>();
-
-      if (courseIds.length > 0) {
-        const chunkSize = 10;
-        for (let i = 0; i < courseIds.length; i += chunkSize) {
-          const chunk = courseIds.slice(i, i + chunkSize);
-          const coursesSnap = await adminDb
-            .collection("courses")
-            .where(FieldPath.documentId(), "in", chunk)
-            .get();
-          coursesSnap.docs.forEach((c) => courseMap.set(c.id, c.data()));
-        }
-      }
-
-      enrollments = allowedEnrollments
-        .map((e: any) => ({
-          ...e,
-          courseTitle: courseMap.get(e.courseId)?.title || "Curso",
-          totalLessons: Number(courseMap.get(e.courseId)?.totalLessons || 0),
-        }))
-        .sort((a, b) => {
-          const tA = normalizeTimestamp(a.lastAccessedAt)?.getTime() || 0;
-          const tB = normalizeTimestamp(b.lastAccessedAt)?.getTime() || 0;
-          return tB - tA;
-        });
-
-      empty.availability.enrollments = true;
-      empty.enrollments = enrollments;
-      empty.lastCourse =
-        enrollments.length > 0
-          ? {
-              ...enrollments[0],
-              percent: Number(enrollments[0]?.progressSummary?.percent || 0),
-            }
-          : null;
-    }
-
-    if (certificatesRes.status === "fulfilled") {
-      empty.certificates = certificatesRes.value.docs.map((d) => ({
-        id: d.id,
-        ...d.data(),
-      }));
-      empty.certificatesCount = empty.certificates.length;
-      empty.availability.certificates = true;
-    }
-
-    if (eventsRes.status === "fulfilled") {
-      const now = new Date();
-      empty.events = eventsRes.value.docs
-        .map((d) => ({ id: d.id, ...d.data() }))
-        .filter((e: any) => {
-          const startsAt = normalizeTimestamp(e.startsAt);
-          return startsAt ? startsAt >= now : false;
-        })
-        .sort((a: any, b: any) => {
-          const tA = normalizeTimestamp(a.startsAt)?.getTime() || 0;
-          const tB = normalizeTimestamp(b.startsAt)?.getTime() || 0;
-          return tA - tB;
-        })
-        .slice(0, 3);
-      empty.availability.events = true;
-    }
-
-    if (profileRes.status === "fulfilled" && profileRes.value.exists) {
-      empty.profileCompletion = Number(
-        profileRes.value.data()?.profileCompletion || 0,
-      );
-      empty.availability.profileCompletion = true;
-    }
-
-    if (weeklyRes.status === "fulfilled") {
-      empty.weeklyActivity = weeklyRes.value.points;
-      source.weeklyActivity = weeklyRes.value.source;
-      empty.availability.weeklyActivity = true;
-    }
-
-    if (
-      gamificationRes &&
-      gamificationRes.status === "fulfilled" &&
-      gamificationRes.value &&
-      gamificationRes.value.exists
-    ) {
-      const gData = gamificationRes.value.data();
-      if (gData) {
-        const level = Number(gData.level || 1);
-        const totalXp = Number(gData.totalXp || 0);
-        // Basic XP formula: Level * 1000
-        const nextLevelXp = level * 1000;
-        const currentLevelBaseXp = (level - 1) * 1000;
-        const xpInCurrentLevel = totalXp - currentLevelBaseXp;
-        const xpNeededForNext = nextLevelXp - currentLevelBaseXp;
-
-        empty.gamification = {
-          totalXp,
-          level,
-          currentStreak: Number(gData.currentStreak || 0),
-          badgesCount: Array.isArray(gData.badges) ? gData.badges.length : 0,
-          nextLevelXp,
-          progressToNextLevel: Math.min(
-            100,
-            Math.max(0, (xpInCurrentLevel / xpNeededForNext) * 100),
-          ),
-        };
-        empty.availability.gamification = true;
-      }
-    }
-
-    const availableCount = Object.values(empty.availability).filter(
-      Boolean,
-    ).length;
-    if (availableCount === 0) {
+    const error =
+      enrollmentResult.error ||
+      certificateResult.error ||
+      eventResult.error ||
+      profileResult.error ||
+      xpResult.error ||
+      analyticsResult.error ||
+      gamificationResult.error ||
+      progressResult.error;
+    if (error) throw error;
+    const courseIds = [
+      ...new Set((enrollmentResult.data ?? []).map((row) => row.course_id)),
+    ];
+    const { data: courses, error: courseError } = courseIds.length
+      ? await supabase
+          .from("courses")
+          .select("id,title,stats")
+          .in("id", courseIds)
+      : { data: [], error: null };
+    if (courseError) throw courseError;
+    const courseById = new Map(
+      (courses ?? []).map((course) => [course.id, course]),
+    );
+    const progressByCourse = new Map<
+      string,
+      (typeof progressResult.data)[number][]
+    >();
+    for (const progress of progressResult.data ?? [])
+      progressByCourse.set(progress.course_id, [
+        ...(progressByCourse.get(progress.course_id) ?? []),
+        progress,
+      ]);
+    empty.enrollments = (enrollmentResult.data ?? []).map((enrollment) => {
+      const courseProgress = progressByCourse.get(enrollment.course_id) ?? [];
+      const percent = courseProgress.length
+        ? Math.round(
+            courseProgress.reduce(
+              (sum, item) => sum + numberValue(item.percent),
+              0,
+            ) / courseProgress.length,
+          )
+        : numberValue((enrollment.progress_summary as any)?.percent);
+      const lastLessonId = [...courseProgress].sort((a, b) =>
+        b.updated_at.localeCompare(a.updated_at),
+      )[0]?.lesson_id;
       return {
-        success: false,
-        error: "No KPI sources available",
-        source,
-        updatedAt,
+        ...enrollment,
+        courseId: enrollment.course_id,
+        courseTitle: courseById.get(enrollment.course_id)?.title ?? "Curso",
+        lastLessonId,
+        progressSummary: {
+          ...(enrollment.progress_summary as object),
+          percent,
+        },
+      };
+    });
+    empty.lastCourse = empty.enrollments[0]
+      ? {
+          ...empty.enrollments[0],
+          percent: empty.enrollments[0].progressSummary.percent,
+        }
+      : null;
+    empty.certificates = certificateResult.data ?? [];
+    empty.certificatesCount = empty.certificates.length;
+    empty.events = (eventResult.data ?? []).map((event) => ({
+      ...event,
+      startsAt: event.starts_at,
+      endsAt: event.ends_at,
+      joinUrl: event.join_url,
+    }));
+    empty.profileCompletion = numberValue(
+      profileResult.data?.profile_completion,
+    );
+    const activityRows = (xpResult.data ?? []).length
+      ? (xpResult.data ?? [])
+      : (analyticsResult.data ?? []).map((event: { timestamp: string }) => ({
+          timestamp: event.timestamp,
+          amount: 1,
+        }));
+    empty.weeklyActivity = weeklyPoints(activityRows);
+    const game = gamificationResult.data;
+    if (game) {
+      const nextLevelXp = numberValue(game.level) * 1000;
+      const baseXp = (numberValue(game.level) - 1) * 1000;
+      empty.gamification = {
+        totalXp: numberValue(game.total_xp),
+        level: numberValue(game.level),
+        currentStreak: numberValue(game.current_streak),
+        badgesCount: game.badges?.length ?? 0,
+        nextLevelXp,
+        progressToNextLevel: Math.max(
+          0,
+          Math.min(100, ((numberValue(game.total_xp) - baseXp) * 100) / 1000),
+        ),
       };
     }
-
-    return {
-      success: true,
-      data: deepSafeSerialize(empty),
-      source,
-      updatedAt,
+    empty.availability = {
+      enrollments: true,
+      certificates: true,
+      events: true,
+      weeklyActivity: true,
+      profileCompletion: true,
+      gamification: true,
     };
+    return { success: true, data: empty, source: dataSource, updatedAt };
   } catch (error: any) {
     console.error("buildStudentDashboardKPIs error:", error);
     return {
       success: false,
       error: error.message || "Failed to load student KPIs",
-      source,
+      source: dataSource,
       updatedAt,
     };
   }
@@ -356,80 +288,64 @@ export async function buildAdminDashboardKPIs(): Promise<
   KpiActionResult<AdminDashboardKpisData>
 > {
   const updatedAt = new Date().toISOString();
-  const source: Record<string, string> = {
-    totalUsers: "firestore/users",
-    accessGranted: "firestore/enrollments(status in active|completed)",
-    totalCourses: "firestore/courses",
-    libraryDocs: "firestore/posts(type=library)",
-    totalAuditLogs: "firestore/audit_logs",
-    recentUsers: "firestore/users(orderBy createdAt desc)",
-    pendingEnrollments: "firestore/enrollments(status=pending_approval)",
-  };
-
+  const dataSource = source([
+    "profiles",
+    "enrollments",
+    "courses",
+    "public_documents",
+    "audit_logs",
+  ]);
   try {
-    const [
-      usersCount,
-      accessGranted,
-      coursesCount,
-      libraryCount,
-      auditCount,
-      recentUsers,
-      pendingEnrollments,
-    ] = await Promise.all([
-      adminDb
-        .collection("users")
-        .count()
-        .get()
-        .then((s) => s.data().count),
-      adminDb
-        .collection("enrollments")
-        .where("status", "in", ["active", "completed"])
-        .count()
-        .get()
-        .then((s) => s.data().count),
-      adminDb
-        .collection("courses")
-        .count()
-        .get()
-        .then((s) => s.data().count),
-      adminDb
-        .collection("posts")
-        .where("type", "==", "library")
-        .count()
-        .get()
-        .then((s) => s.data().count),
-      adminDb
-        .collection("audit_logs")
-        .count()
-        .get()
-        .then((s) => s.data().count),
-      adminDb
-        .collection("users")
-        .orderBy("createdAt", "desc")
-        .limit(5)
-        .get()
-        .then((s) => s.docs.map((d) => ({ id: d.id, ...d.data() }))),
-      adminDb
-        .collection("enrollments")
-        .where("status", "==", "pending_approval")
-        .orderBy("createdAt", "desc")
-        .limit(5)
-        .get()
-        .then((s) => s.docs.map((d) => ({ id: d.id, ...d.data() }))),
-    ]);
-
+    const supabase = createSupabaseServiceClient();
+    const [users, access, courses, documents, audits, recentUsers, pending] =
+      await Promise.all([
+        supabase.from("profiles").select("id", { count: "exact", head: true }),
+        supabase
+          .from("enrollments")
+          .select("id", { count: "exact", head: true })
+          .in("status", ["active", "completed"]),
+        supabase.from("courses").select("id", { count: "exact", head: true }),
+        supabase
+          .from("public_documents")
+          .select("id", { count: "exact", head: true }),
+        supabase
+          .from("audit_logs")
+          .select("id", { count: "exact", head: true }),
+        supabase
+          .from("profiles")
+          .select("id,display_name,email,role,created_at")
+          .order("created_at", { ascending: false })
+          .limit(5),
+        supabase
+          .from("enrollments")
+          .select(
+            "id,user_id,course_id,status,enrolled_at,profiles(display_name,email),courses(title)",
+          )
+          .eq("status", "pending_approval")
+          .order("enrolled_at", { ascending: false })
+          .limit(5),
+      ]);
+    const error =
+      users.error ||
+      access.error ||
+      courses.error ||
+      documents.error ||
+      audits.error ||
+      recentUsers.error ||
+      pending.error;
+    if (error) throw error;
     return {
       success: true,
-      data: deepSafeSerialize({
-        totalUsers: usersCount,
-        accessGranted,
-        totalCourses: coursesCount,
-        libraryDocs: libraryCount,
-        totalAuditLogs: auditCount,
-        recentUsers,
-        pendingEnrollments,
-      }),
-      source,
+      data: {
+        totalUsers: users.count ?? 0,
+        accessGranted: access.count ?? 0,
+        totalCourses: courses.count ?? 0,
+        libraryDocs: documents.count ?? 0,
+        totalAuditLogs: audits.count ?? 0,
+        recentUsers: recentUsers.data ?? [],
+        pendingEnrollments: pending.data ?? [],
+      },
+      source: dataSource,
       updatedAt,
     };
   } catch (error: any) {
@@ -437,7 +353,7 @@ export async function buildAdminDashboardKPIs(): Promise<
     return {
       success: false,
       error: error.message || "Failed to load admin KPIs",
-      source,
+      source: dataSource,
       updatedAt,
     };
   }
