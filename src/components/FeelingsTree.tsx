@@ -438,7 +438,7 @@ export default function FeelingsTree({
       className={`${isModal ? "h-full w-full bg-[#f2f0e9]" : "py-24 relative overflow-hidden bg-[#f2f0e9]"}`}
     >
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-0 w-full h-full opacity-40 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] mix-blend-overlay" />
+        <div className="absolute top-0 left-0 w-full h-full opacity-40 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,.45)_1px,transparent_1px)] [background-size:18px_18px] mix-blend-overlay" />
       </div>
 
       <div className="container mx-auto max-w-5xl h-full relative z-10">

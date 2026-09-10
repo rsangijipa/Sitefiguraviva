@@ -14,7 +14,8 @@ export function getImageSrc(
   // Check for suspended legacy Firebase storage URLs
   if (
     url.includes("lithe-transport-479116-m2") ||
-    url.includes("firebasestorage.app")
+    url.includes("firebasestorage.app") ||
+    /supabase\.co\/storage\/v1\/object\/public\/uploads\//i.test(url)
   ) {
     return fallback;
   }

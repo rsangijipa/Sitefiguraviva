@@ -17,7 +17,7 @@ export function PaperCard({ children, className, onClick, active = false }) {
     >
       {children}
       {/* Texture overlay effect */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none rounded-2xl bg-[url('https://www.transparenttextures.com/patterns/cream-paper.png')]" />
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none rounded-2xl bg-[radial-gradient(circle_at_20%_20%,rgba(38,43,34,.35)_1px,transparent_1px)] [background-size:18px_18px]" />
     </motion.div>
   );
 }

@@ -49,7 +49,7 @@ export function OnboardingModal() {
           >
             {/* Header Art */}
             <div className="h-32 bg-stone-100 relative overflow-hidden flex items-center justify-center">
-              <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] mix-blend-overlay" />
+              <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,.5)_1px,transparent_1px)] [background-size:18px_18px] mix-blend-overlay" />
               <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-soft-md text-primary z-10">
                 <Sparkles size={32} />
               </div>

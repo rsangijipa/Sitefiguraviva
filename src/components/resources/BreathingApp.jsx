@@ -426,7 +426,7 @@ export default function BreathingApp({ onClose }) {
   return (
     <div className="relative flex min-h-full flex-col overflow-y-auto bg-paper">
       {/* Background Elements */}
-      <div className="fixed inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/cream-paper.png')]" />
+      <div className="fixed inset-0 opacity-[0.03] pointer-events-none bg-[radial-gradient(circle_at_20%_20%,rgba(38,43,34,.35)_1px,transparent_1px)] [background-size:18px_18px]" />
       <div className="fixed top-0 left-0 w-full h-full bg-gradient-to-br from-white/40 via-blue-50/5 to-accent/5 pointer-events-none" />
 
       <main className="relative z-10 flex min-h-full flex-grow flex-col justify-center py-6 sm:py-8">
