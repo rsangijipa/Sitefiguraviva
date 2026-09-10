@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
+import { Download, ExternalLink, FileText, Loader2, X } from "lucide-react";
 import Tooltip from "./ui/Tooltip";
 import { SafeHtml } from "./SafeHtml";
 
@@ -18,44 +18,106 @@ interface PDFReaderProps {
 }
 
 const PDFReader = ({ isOpen, onClose, article }: PDFReaderProps) => {
+  const [loading, setLoading] = useState(true);
+  const [failed, setFailed] = useState(false);
+  const pdfUrl = article?.pdf_url || article?.pdfUrl || "";
+  const viewerUrl = pdfUrl ? `${pdfUrl}#toolbar=1&navpanes=0&view=FitH` : "";
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setLoading(Boolean(pdfUrl));
+    setFailed(false);
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isOpen, pdfUrl, onClose]);
+
   if (!article) return null;
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[100] bg-white flex flex-col">
-          {/* Top Bar */}
-          <div className="flex items-center justify-between px-6 py-4 bg-primary text-white shadow-md z-10 shrink-0">
-            <div className="flex flex-col">
-              <h2 className="text-sm font-bold uppercase tracking-widest text-gold mb-1">
+        <div className="fixed inset-0 z-[100] flex flex-col bg-[#f4efe3] text-primary">
+          <div className="z-10 flex shrink-0 items-center justify-between gap-4 border-b border-primary/10 bg-primary px-4 py-3 text-white shadow-lg md:px-8">
+            <div className="min-w-0">
+              <h2 className="mb-1 text-xs font-bold uppercase tracking-widest text-gold md:text-sm">
                 Biblioteca Figura Viva
               </h2>
-              <p className="text-xs text-white/70 truncate max-w-[200px] md:max-w-md">
+              <p className="max-w-[58vw] truncate text-sm text-white/75 md:max-w-3xl">
                 {article.title}
               </p>
             </div>
 
-            <Tooltip content="Fechar Leitor">
-              <button
-                onClick={onClose}
-                className="p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
-              >
-                <X size={20} />
-              </button>
-            </Tooltip>
+            <div className="flex shrink-0 items-center gap-2">
+              {pdfUrl && (
+                <>
+                  <Tooltip content="Abrir em nova aba">
+                    <a
+                      href={pdfUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label="Abrir PDF em nova aba"
+                      className="inline-flex size-10 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                    >
+                      <ExternalLink size={18} />
+                    </a>
+                  </Tooltip>
+                  <Tooltip content="Baixar documento">
+                    <a
+                      href={pdfUrl}
+                      download
+                      aria-label="Baixar PDF"
+                      className="inline-flex size-10 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                    >
+                      <Download size={18} />
+                    </a>
+                  </Tooltip>
+                </>
+              )}
+              <Tooltip content="Fechar Leitor">
+                <button
+                  onClick={onClose}
+                  aria-label="Fechar leitor"
+                  className="inline-flex size-10 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                >
+                  <X size={20} />
+                </button>
+              </Tooltip>
+            </div>
           </div>
 
-          {/* Main Content Area */}
-          <div className="flex-1 w-full h-full bg-gray-100 relative overflow-hidden">
-            {article.pdf_url || article.pdfUrl ? (
-              <iframe
-                src={`${article.pdf_url || article.pdfUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`}
-                className="w-full h-full border-none block"
-                title={article.title}
-              />
+          <div className="relative flex min-h-0 flex-1 overflow-hidden bg-[radial-gradient(circle_at_top_left,rgba(182,143,77,0.16),transparent_34%),linear-gradient(180deg,#f7f1e6,#eee3d0)] p-3 md:p-8">
+            {pdfUrl && !failed ? (
+              <div className="relative mx-auto flex h-full w-full max-w-6xl flex-col overflow-hidden rounded-md border border-primary/15 bg-white shadow-2xl">
+                {loading && (
+                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-paper/95 px-6 text-center text-primary">
+                    <Loader2 className="animate-spin text-gold" size={28} />
+                    <div>
+                      <p className="font-serif text-2xl">Abrindo documento</p>
+                      <p className="mt-1 max-w-md text-sm text-primary/60">
+                        Se a prévia não carregar, use os botões acima para abrir
+                        em nova aba ou baixar o arquivo.
+                      </p>
+                    </div>
+                  </div>
+                )}
+                <iframe
+                  src={viewerUrl}
+                  className="block h-full w-full flex-1 border-none bg-white"
+                  title={article.title}
+                  referrerPolicy="no-referrer"
+                  onLoad={() => setLoading(false)}
+                  onError={() => {
+                    setLoading(false);
+                    setFailed(true);
+                  }}
+                />
+              </div>
             ) : (
-              <div className="overflow-y-auto h-full p-6 md:p-12 scrollbar-hide">
-                <div className="max-w-4xl mx-auto bg-white p-8 md:p-16 shadow-soft-xl rounded-2xl min-h-full">
+              <div className="h-full overflow-y-auto p-4 md:p-12 scrollbar-hide">
+                <div className="mx-auto min-h-full max-w-4xl rounded-2xl bg-white p-8 shadow-soft-xl md:p-16">
                   <header className="text-center mb-12">
                     <h1 className="font-serif text-3xl md:text-5xl text-primary leading-tight mb-6">
                       {article.title}
@@ -63,7 +125,39 @@ const PDFReader = ({ isOpen, onClose, article }: PDFReaderProps) => {
                     <div className="w-24 h-px bg-gold/20 mx-auto" />
                   </header>
                   <div className="prose-organic px-2 md:px-4">
-                    {article.content ? (
+                    {failed ? (
+                      <div className="mx-auto flex max-w-xl flex-col items-center rounded-md border border-primary/10 bg-areia/40 px-6 py-10 text-center">
+                        <FileText className="mb-4 text-gold" size={36} />
+                        <p className="text-lg font-semibold text-primary">
+                          A prévia do PDF não abriu neste navegador.
+                        </p>
+                        <p className="mt-2 text-sm leading-relaxed text-primary/65">
+                          O arquivo continua disponível. Abra em uma nova aba ou
+                          baixe para ler com o visualizador do seu dispositivo.
+                        </p>
+                        {pdfUrl && (
+                          <div className="mt-6 flex flex-wrap justify-center gap-3">
+                            <a
+                              href={pdfUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex min-h-11 items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary/90"
+                            >
+                              <ExternalLink size={16} />
+                              Abrir documento
+                            </a>
+                            <a
+                              href={pdfUrl}
+                              download
+                              className="inline-flex min-h-11 items-center gap-2 rounded-md border border-primary/15 px-4 py-2 text-sm font-semibold text-primary transition hover:bg-primary/5"
+                            >
+                              <Download size={16} />
+                              Baixar PDF
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    ) : article.content ? (
                       <SafeHtml html={article.content} />
                     ) : (
                       <p className="text-center text-primary/40 italic">
