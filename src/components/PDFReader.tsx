@@ -23,6 +23,24 @@ const PDFReader = ({ isOpen, onClose, article }: PDFReaderProps) => {
   const pdfUrl = article?.pdf_url || article?.pdfUrl || "";
   const viewerUrl = pdfUrl ? `${pdfUrl}#toolbar=1&navpanes=0&view=FitH` : "";
 
+  const handleFrameLoad = (event: React.SyntheticEvent<HTMLIFrameElement>) => {
+    // Supabase Storage returns JSON errors with HTTP 4xx inside an iframe.
+    // The iframe's load event still fires, so inspect the rendered document
+    // when same-origin access is available and keep a safe fallback otherwise.
+    setLoading(false);
+    try {
+      const bodyText =
+        event.currentTarget.contentDocument?.body?.textContent || "";
+      if (/bucket not found|no such bucket|object not found/i.test(bodyText)) {
+        setFailed(true);
+      }
+    } catch {
+      // Cross-origin PDF documents cannot be inspected; the browser PDF
+      // viewer will remain visible and its explicit open/download actions are
+      // available if the embedded viewer cannot render.
+    }
+  };
+
   useEffect(() => {
     if (!isOpen) return;
     setLoading(Boolean(pdfUrl));
@@ -108,7 +126,7 @@ const PDFReader = ({ isOpen, onClose, article }: PDFReaderProps) => {
                   className="block h-full w-full flex-1 border-none bg-white"
                   title={article.title}
                   referrerPolicy="no-referrer"
-                  onLoad={() => setLoading(false)}
+                  onLoad={handleFrameLoad}
                   onError={() => {
                     setLoading(false);
                     setFailed(true);

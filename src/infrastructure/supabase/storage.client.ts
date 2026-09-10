@@ -2,7 +2,10 @@
 
 import { createSupabaseBrowserClient } from "./client";
 
-const STORAGE_BUCKET = "uploads";
+// Keep administrative assets in the bucket already used by course uploads.
+// The old `uploads` bucket is not present in every Supabase environment and
+// caused public documents to render Storage's raw `Bucket not found` payload.
+const STORAGE_BUCKET = "course-assets";
 const DEFAULT_FOLDER = "uploads/admin";
 
 type UploadKind = "generic" | "image" | "pdf";
