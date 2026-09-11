@@ -19,6 +19,13 @@ const SCAN_SCRIPT = `
 
 let currentUtterance: SpeechSynthesisUtterance | null = null;
 let isPaused = false;
+let previousVoicesChanged: SpeechSynthesis["onvoiceschanged"] = null;
+
+const restoreVoicesChanged = () => {
+  if (!("speechSynthesis" in window)) return;
+  window.speechSynthesis.onvoiceschanged = previousVoicesChanged;
+  previousVoicesChanged = null;
+};
 
 // --- Áudio e TTS (Mantido) ---
 
@@ -59,6 +66,7 @@ export const playScanIntro = (onEnd: () => void, onStart: () => void) => {
   };
 
   if (window.speechSynthesis.getVoices().length === 0) {
+    previousVoicesChanged = window.speechSynthesis.onvoiceschanged;
     window.speechSynthesis.onvoiceschanged = setVoice;
   } else {
     setVoice();
@@ -67,6 +75,7 @@ export const playScanIntro = (onEnd: () => void, onStart: () => void) => {
   utterance.onend = () => {
     isPaused = false;
     currentUtterance = null;
+    restoreVoicesChanged();
     onEnd();
   };
 
@@ -90,6 +99,7 @@ export const stopScanIntro = () => {
     window.speechSynthesis.cancel();
     isPaused = false;
     currentUtterance = null;
+    restoreVoicesChanged();
   }
 };
 
@@ -121,9 +131,9 @@ export const generateHeuristicRecommendation = async (
   // 1. Caso Vazio: Estado Meditativo
   if (entries.length === 0) {
     return {
-      summary: "Silêncio e Observação.",
+      summary: "Nenhuma região foi registrada.",
       recommendation:
-        "Seu corpo parece estar em um estado de quietude ou neutralidade. Aproveite este momento para simplesmente focar no fluxo natural da sua respiração, sem tentar mudar nada.",
+        "Você pode voltar ao mapa para registrar uma percepção ou encerrar por aqui. A ausência de marcações não permite inferir um estado corporal.",
     };
   }
 
@@ -147,9 +157,9 @@ export const generateHeuristicRecommendation = async (
 
   if (neckOrHead && hasUpperTension) {
     return {
-      summary: "Você está carregando o peso do mundo nos ombros.",
+      summary: "Você registrou tensão na parte superior do corpo.",
       recommendation:
-        "Essa tensão na parte superior geralmente reflete excesso de atividade mental ou responsabilidade. Tente isto: Eleve os ombros até as orelhas inspirando fundo, e solte-os de uma vez expirando com um som de alívio 'Ahhh'. Repita 3 vezes.",
+        "Se for confortável, eleve os ombros ao inspirar e solte-os suavemente ao expirar. Interrompa se sentir dor ou desconforto.",
     };
   }
 
@@ -164,9 +174,9 @@ export const generateHeuristicRecommendation = async (
 
   if (activeCore && emotionalCore.length > 0) {
     return {
-      summary: "Há muita energia movendo-se pelo seu centro vital.",
+      summary: "Você percebeu sensações no peito ou no abdômen.",
       recommendation:
-        "Seu centro (peito e abdômen) é onde processamos emoções. Coloque uma mão sobre o coração e outra sobre o umbigo. Sinta o calor das mãos. Respire imaginando que está suavizando essas áreas, como gelo derretendo ao sol.",
+        "Se for confortável, apoie as mãos nessas áreas e observe a respiração sem tentar interpretar ou mudar a sensação.",
     };
   }
 
@@ -179,9 +189,10 @@ export const generateHeuristicRecommendation = async (
 
   if (headActive && feetMissingOrNeutral) {
     return {
-      summary: "Sua energia está concentrada no topo, desconectada da base.",
+      summary:
+        "Você registrou uma sensação na cabeça e pouca percepção nos pés.",
       recommendation:
-        "Para baixar essa energia mental, fique de pé (ou pressione os pés no chão se sentado). Tente sentir a textura do chão/meia. Imagine raízes crescendo das solas dos seus pés em direção ao centro da terra.",
+        "Se for confortável, note o contato dos pés com o chão e descreva mentalmente a pressão, a temperatura e a textura percebidas.",
     };
   }
 
@@ -189,21 +200,21 @@ export const generateHeuristicRecommendation = async (
   const weightCount = entries.filter((e) => e?.sensation === "weight").length;
   if (weightCount >= 2) {
     return {
-      summary: "A gravidade está exercendo uma força extra sobre você hoje.",
+      summary: "Você registrou sensação de peso em mais de uma região.",
       recommendation:
         "Respeite essa gravidade. Não lute contra o cansaço. Deite-se se possível, ou recoste-se totalmente na cadeira. Entregue o peso dos seus ossos para o suporte abaixo de você. Solte o controle.",
     };
   }
 
-  // Padrão: "Dissociação/Congelamento" (Dormência ou Frio/Neutro em extremidades)
+  // Dormência registrada em mais de uma região.
   const numbnessCount = entries.filter(
     (e) => e?.sensation === "numbness",
   ).length;
   if (numbnessCount >= 2) {
     return {
-      summary: "Partes de você parecem distantes ou silenciosas.",
+      summary: "Você registrou dormência em mais de uma região.",
       recommendation:
-        "Vamos convidar a presença de volta gentilmente. Comece a esfregar as palmas das mãos até aquecerem. Depois, toque suavemente as áreas que parecem 'adormecidas', como se estivesse dizendo 'estou aqui'.",
+        "Observe essas áreas sem forçar estímulos. Dormência persistente, súbita ou acompanhada de outros sintomas deve ser avaliada por um profissional de saúde.",
     };
   }
 
@@ -223,26 +234,26 @@ export const generateHeuristicRecommendation = async (
   switch (primarySensation) {
     case "tension":
       return {
-        summary: "Seu corpo está em estado de alerta e contração.",
+        summary: "A sensação predominante registrada foi tensão.",
         recommendation: isHighIntensity
           ? "A tensão está alta. Não force o relaxamento. Faça micro-movimentos: balance a cabeça, gire os punhos, destrave os joelhos. O movimento suave derrete a rigidez."
           : "Note onde a tensão começa e onde termina. Imagine que a cada expiração, essa área ganha um milímetro a mais de espaço.",
       };
     case "heat":
       return {
-        summary: "Você está gerando bastante calor ou inflamação sutil.",
+        summary: "A sensação predominante registrada foi calor.",
         recommendation:
           "Visualize uma cor azul fresca ou a sensação de uma brisa suave tocando as áreas quentes. Expire pela boca fazendo um bico suave, como se soprasse uma vela devagar.",
       };
     case "tingling":
       return {
-        summary: "Seu sistema elétrico (nervoso) está vibrante.",
+        summary: "A sensação predominante registrada foi formigamento.",
         recommendation:
           "Essa vibração é vida circulando. Se for ansiosa, faça exalações longas. Se for excitação, espalhe essa energia sacudindo as mãos e os pés por 15 segundos.",
       };
     case "neutral":
       return {
-        summary: "Um estado de equilíbrio, nem excesso nem falta.",
+        summary: "A sensação predominante registrada foi neutralidade.",
         recommendation:
           "A neutralidade é um ponto de descanso poderoso. Memorize como é sentir-se 'apenas bem' ou 'estável', para que possa voltar aqui quando estiver estressado.",
       };

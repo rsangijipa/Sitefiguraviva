@@ -1,8 +1,10 @@
 "use server";
 
-import { auth, db } from "@/lib/firebase/admin";
-import { Timestamp } from "firebase-admin/firestore";
-import { cookies } from "next/headers";
+import {
+  addAdminMaterial,
+  deleteAdminMaterial,
+} from "@/features/courses/infrastructure/supabaseAdminCourseRepository.server";
+import { requireAdmin } from "@/lib/auth/server";
 import { revalidatePath } from "next/cache";
 
 interface AddMaterialData {
@@ -13,28 +15,20 @@ interface AddMaterialData {
   filePath?: string;
 }
 
+function refreshMaterialPages(courseId: string) {
+  revalidatePath(`/admin/courses/${courseId}/materials`);
+  revalidatePath("/portal/materials");
+  revalidatePath(`/portal/course/${courseId}`);
+}
+
 export async function addMaterial(courseId: string, data: AddMaterialData) {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("session")?.value;
-  if (!sessionCookie) return { error: "Unauthorized" };
-
   try {
-    const claims = await auth.verifySessionCookie(sessionCookie, true);
-    if (claims.role !== "admin" && claims.admin !== true) {
-      return { error: "Forbidden" };
-    }
-
-    const ref = db.collection("courses").doc(courseId).collection("materials");
-
-    await ref.add({
+    await requireAdmin();
+    await addAdminMaterial(courseId, {
       ...data,
-      createdAt: Timestamp.now(),
-      createdBy: claims.uid,
+      isPublished: true,
     });
-
-    revalidatePath(`/admin/courses/${courseId}/materials`);
-    revalidatePath(`/portal/materials`);
-    revalidatePath(`/portal/course/${courseId}`); // Fix: Update course page content
+    refreshMaterialPages(courseId);
     return { success: true };
   } catch (error) {
     console.error("Add Material Error:", error);
@@ -47,37 +41,13 @@ export async function deleteMaterial(
   materialId: string,
   filePath?: string,
 ) {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("session")?.value;
-  if (!sessionCookie) return { error: "Unauthorized" };
-
   try {
-    const claims = await auth.verifySessionCookie(sessionCookie, true);
-    if (claims.role !== "admin" && claims.admin !== true)
-      return { error: "Forbidden" };
-
-    const materialRef = db
-      .collection("courses")
-      .doc(courseId)
-      .collection("materials")
-      .doc(materialId);
-    const materialDoc = await materialRef.get();
-    const resolvedFilePath =
-      filePath || materialDoc.data()?.filePath || materialDoc.data()?.file_path;
-
-    if (resolvedFilePath) {
-      const { deleteStorageObject } =
-        await import("@/infrastructure/supabase/storage.server");
-      await deleteStorageObject({ bucket: "uploads", path: resolvedFilePath });
-    }
-
-    await materialRef.delete();
-
-    revalidatePath(`/admin/courses/${courseId}/materials`);
-    revalidatePath(`/portal/materials`);
-    revalidatePath(`/portal/course/${courseId}`); // Fix: Update course page content
+    await requireAdmin();
+    await deleteAdminMaterial(materialId, filePath);
+    refreshMaterialPages(courseId);
     return { success: true };
   } catch (error) {
+    console.error("Delete Material Error:", error);
     return { error: "Failed to delete" };
   }
 }

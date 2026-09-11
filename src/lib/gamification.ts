@@ -1,5 +1,3 @@
-import { Timestamp } from "firebase/firestore";
-
 /**
  * Calculates current level based on total XP.
  * Formula: Level = floor(totalXp / 500) + 1
@@ -13,11 +11,16 @@ export const calculateLevel = (totalXp: number): number => {
  * @returns 'increment' | 'maintain' | 'reset'
  */
 export const verifyStreakStatus = (
-  lastActivityDate: Timestamp | null,
+  lastActivityDate: Date | string | { toDate(): Date } | null,
 ): "increment" | "maintain" | "reset" => {
   if (!lastActivityDate) return "increment";
 
-  const lastDate = lastActivityDate.toDate();
+  const lastDate =
+    typeof lastActivityDate === "string"
+      ? new Date(lastActivityDate)
+      : lastActivityDate instanceof Date
+        ? lastActivityDate
+        : lastActivityDate.toDate();
   const today = new Date();
 
   // Set times to midnight for comparison

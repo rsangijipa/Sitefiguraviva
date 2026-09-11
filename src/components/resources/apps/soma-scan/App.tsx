@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import Scanner from "./components/Scanner";
 import Results from "./components/Results";
 import { AppState, BodyData } from "./types";
-import { Fingerprint } from "lucide-react";
 
 const App: React.FC = () => {
   const [appState, setAppState] = useState<AppState>("intro");
@@ -23,7 +22,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="relative flex min-h-[min(68vh,620px)] w-full flex-col overflow-hidden bg-paper selection:bg-clay/30 sm:min-h-[min(60vh,560px)]">
+    <div className="h-full min-h-0 w-full relative flex flex-col overflow-hidden bg-paper selection:bg-clay/30">
       {/* Organic Background Shapes */}
       <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-[#f5f5f4] rounded-full blur-[80px] opacity-60 pointer-events-none animate-float" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#e7e5e4] rounded-full blur-[100px] opacity-50 pointer-events-none" />
@@ -31,16 +30,6 @@ const App: React.FC = () => {
         className="absolute top-[20%] right-[10%] w-[30%] h-[30%] bg-[#fff7ed] rounded-full blur-[60px] opacity-70 pointer-events-none animate-float"
         style={{ animationDelay: "2s" }}
       />
-
-      {/* Header */}
-      <header className="absolute top-0 z-10 flex w-full items-center justify-between p-4 sm:p-6">
-        <div className="flex items-center gap-2 text-stone-600">
-          <Fingerprint className="w-5 h-5 text-clay" />
-          <span className="font-serif italic text-xl tracking-wide">
-            SomaScan
-          </span>
-        </div>
-      </header>
 
       {/* Main Content */}
       <main className="flex-1 relative z-10">
@@ -61,6 +50,7 @@ const App: React.FC = () => {
 
               <div className="pt-5 sm:pt-8">
                 <button
+                  type="button"
                   onClick={handleStart}
                   className="resource-action group relative bg-stone-800 px-5 text-xs tracking-widest text-[#fdfbf7] hover:-translate-y-0.5 hover:bg-stone-700 sm:px-7"
                 >

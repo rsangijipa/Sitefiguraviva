@@ -17,7 +17,7 @@ import {
   Timer,
 } from "lucide-react";
 import { clsx } from "clsx";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 
 export default function BreathingApp({ onClose: _onClose }) {
   // STATES: 'menu' -> 'instructions' -> 'active' -> 'completed'
@@ -29,6 +29,7 @@ export default function BreathingApp({ onClose: _onClose }) {
   );
   const [sessionActive, setSessionActive] = useState(false);
   const timerRef = useRef(null);
+  const reducedMotion = useReducedMotion();
 
   const activeTechnique = TECHNIQUES[selectedTechniqueId];
 
@@ -61,18 +62,20 @@ export default function BreathingApp({ onClose: _onClose }) {
 
   // Timer Logic
   useEffect(() => {
-    if (sessionActive && secondsRemaining > 0) {
-      timerRef.current = window.setInterval(() => {
-        setSecondsRemaining((prev) => prev - 1);
-      }, 1000);
-    } else if (secondsRemaining === 0) {
-      completeSession();
-    }
-
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [sessionActive, secondsRemaining]);
+    if (!sessionActive) return undefined;
+    timerRef.current = window.setInterval(() => {
+      setSecondsRemaining((previous) => {
+        if (previous <= 1) {
+          window.clearInterval(timerRef.current);
+          setSessionActive(false);
+          setAppState("completed");
+          return 0;
+        }
+        return previous - 1;
+      });
+    }, 1000);
+    return () => window.clearInterval(timerRef.current);
+  }, [sessionActive]);
 
   const formatTime = (seconds) => {
     const m = Math.floor(seconds / 60);
@@ -86,7 +89,15 @@ export default function BreathingApp({ onClose: _onClose }) {
     // Steps: 1=Menu, 2=Info, 3=Active, 4=Done
     const steps = [1, 2, 3, 4];
     return (
-      <div className="flex items-center gap-2 mb-8">
+      <div
+        className="flex items-center gap-2 mb-8"
+        role="progressbar"
+        aria-label="Progresso da prática"
+        aria-valuemin={1}
+        aria-valuemax={4}
+        aria-valuenow={step}
+        aria-valuetext={`Etapa ${step} de 4`}
+      >
         {steps.map((s) => (
           <div
             key={s}
@@ -105,7 +116,12 @@ export default function BreathingApp({ onClose: _onClose }) {
     const strokeDashoffset = circumference - progress * circumference;
 
     return (
-      <div className="relative w-48 h-48 flex items-center justify-center">
+      <div
+        className="relative w-48 h-48 flex items-center justify-center"
+        role="timer"
+        aria-live="off"
+        aria-label={`${formatTime(current)} restantes`}
+      >
         {/* 5-Second Loop Spinner Ring (Outer) */}
         <svg className="absolute inset-0 w-full h-full" viewBox="0 0 200 200">
           <defs>
@@ -332,6 +348,7 @@ export default function BreathingApp({ onClose: _onClose }) {
             technique={activeTechnique}
             isActive={sessionActive}
             onPhaseChange={() => {}}
+            reducedMotion={reducedMotion}
           />
         </div>
 
@@ -345,12 +362,15 @@ export default function BreathingApp({ onClose: _onClose }) {
         {/* Controls */}
         <div className="flex items-center gap-6">
           <button
+            type="button"
             onClick={
               sessionActive
                 ? () => setSessionActive(false)
                 : () => setSessionActive(true)
             }
             className="w-16 h-16 rounded-full bg-stone-800 text-white flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all"
+            aria-label={sessionActive ? "Pausar prática" : "Continuar prática"}
+            aria-pressed={!sessionActive}
           >
             {sessionActive ? (
               <Pause fill="currentColor" size={24} />

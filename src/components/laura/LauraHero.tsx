@@ -1,156 +1,99 @@
 "use client";
-
 import { motion } from "framer-motion";
-import { lauraPerlsContent } from "@/content/laura-perls";
 import { ArrowDown, BookOpen } from "lucide-react";
 import Image from "next/image";
+import { lauraPerlsContent } from "@/content/laura-perls";
 
 export function LauraHero() {
   const { hero } = lauraPerlsContent;
-
   return (
-    <section className="relative min-h-[95vh] flex items-center justify-center overflow-hidden bg-[#1b140d]">
-      {/* Subtle Cream Light Leaks */}
-      <div className="absolute top-0 right-0 w-[700px] h-[700px] bg-[#241b12]/60 rounded-full blur-[120px] pointer-events-none -translate-y-1/4 translate-x-1/4" />
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#1b140d]/50 rounded-full blur-[100px] pointer-events-none translate-y-1/4 -translate-x-1/4" />
-
-      {/* Decorative Vintage Elements */}
-      <div className="absolute top-20 left-12 w-24 h-24 border border-[#4a3c28]/20 rotate-45 pointer-events-none" />
-      <div className="absolute bottom-32 right-16 w-16 h-16 border border-[#c9a768]/20 rotate-12 pointer-events-none" />
-
-      {/* Center Decorative Line */}
-      <div className="absolute left-1/2 top-24 bottom-24 w-px bg-gradient-to-b from-transparent via-[#4a3c28]/30 to-transparent pointer-events-none hidden md:block" />
-
-      <div className="max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-12 md:gap-20 items-center relative z-10">
-        {/* Text Column */}
+    <section className="relative overflow-hidden border-b border-primary/10 bg-paper px-6 pb-16 pt-28 md:pb-20 md:pt-36">
+      <div
+        className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(254,83,139,0.16),transparent_24%),radial-gradient(circle_at_70%_85%,rgba(1,201,77,0.12),transparent_25%)]"
+        aria-hidden="true"
+      />
+      <svg
+        className="pointer-events-none absolute -right-10 top-24 h-80 w-96 text-terra/30"
+        viewBox="0 0 360 300"
+        fill="none"
+        aria-hidden="true"
+      >
+        <path
+          d="M350 290C282 232 270 170 294 102C306 66 326 34 352 8M294 102C250 104 220 88 190 58M280 150C235 155 196 142 158 115"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+        <circle cx="190" cy="58" r="8" fill="#FE538B" />
+        <circle cx="158" cy="115" r="7" fill="#FED701" />
+      </svg>
+      <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[1fr_0.72fr]">
         <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 1, ease: "easeOut" }}
-          className="space-y-8"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-2xl"
         >
-          {/* Archive Badge */}
-          <div className="flex items-center gap-4">
-            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-sm border border-[#4a3c28] text-[10px] tracking-[0.3em] uppercase font-bold text-[#a9987d] bg-[#241b12] shadow-sm">
-              <BookOpen size={12} />
-              Arquivo Histórico
+          <div className="flex items-center gap-3 text-terra">
+            <BookOpen size={18} aria-hidden="true" />
+            <span className="text-xs font-bold uppercase tracking-[0.22em]">
+              Arquivo histórico
             </span>
-            <div className="h-px flex-1 max-w-20 bg-[#3a2d1c]/50" />
           </div>
-
-          {/* Main Title */}
-          <div className="space-y-2">
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="text-[11px] uppercase tracking-[0.4em] text-[#8f7c64] font-bold"
-            >
-              Uma vida dedicada à psicoterapia
-            </motion.p>
-            <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl leading-[0.9] text-[#f5ecd9] tracking-tight">
-              Laura <br />{" "}
-              <span className="italic text-[#cbb896] font-light">Posner</span>{" "}
-              Perls
-            </h1>
-          </div>
-
-          {/* Quote */}
-          <p className="text-xl md:text-2xl font-serif text-[#e6d7bd] max-w-lg leading-relaxed italic border-l-2 border-[#c9a768]/60 pl-6 py-2">
+          <p className="mt-8 text-xs font-bold uppercase tracking-[0.28em] text-igarape">
+            Uma vida dedicada à psicoterapia
+          </p>
+          <h1 className="mt-3 font-serif text-6xl leading-[0.92] text-primary md:text-8xl">
+            Laura <span className="italic text-terra">Posner</span> Perls
+          </h1>
+          <p className="mt-8 max-w-xl border-l-2 border-terra pl-5 font-serif text-xl italic leading-relaxed text-mata">
             {hero.title}
           </p>
-
-          {/* Quick Facts Grid */}
-          <div className="grid grid-cols-2 gap-6 pt-8 border-t border-[#4a3c28]">
-            {hero.quickFacts.map((fact, i) => (
-              <div key={i} className="group">
-                <span className="block text-[10px] uppercase tracking-[0.25em] text-[#8f7c64] mb-1 font-bold">
-                  {fact.label}
+          <div className="mt-8 grid max-w-lg grid-cols-2 gap-5 border-t border-nevoa pt-5">
+            {hero.quickFacts.map((f) => (
+              <div key={f.label}>
+                <span className="block text-[10px] font-bold uppercase tracking-widest text-pedra">
+                  {f.label}
                 </span>
-                <span className="font-serif text-[#e6d7bd] text-lg tracking-tight">
-                  {fact.value}
+                <span className="font-serif text-lg text-primary">
+                  {f.value}
                 </span>
               </div>
             ))}
           </div>
         </motion.div>
-
-        {/* Image Column (Elegant Vintage Frame) */}
         <motion.div
-          initial={{ opacity: 0.1 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="relative"
+          initial={{ opacity: 0, scale: 0.97 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="relative mx-auto w-full max-w-md"
         >
-          {/* Soft Glow */}
-          <div className="absolute inset-0 bg-[#c9a768]/10 blur-[80px] rounded-full scale-110" />
-
-          {/* Double Frame Effect */}
-          <div className="relative aspect-[3/4] md:aspect-[4/5]">
-            {/* Outer Frame */}
-            <div className="absolute -inset-4 border-2 border-[#4a3c28]/40 rounded-sm" />
-
-            {/* Main Image Container */}
-            <div className="relative h-full bg-[#241b12] overflow-hidden rounded-sm shadow-2xl border-[12px] border-[#3a2d1c]">
-              {/* Inner Border */}
-              <div className="absolute inset-0 border border-[#4a3c28] z-10 pointer-events-none" />
-
-              {/* Image */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                {hero.image && (
-                  <Image
-                    src={hero.image}
-                    alt="Laura Perls"
-                    fill
-                    className="object-cover sepia-[0.3] contrast-[0.95] transition-all duration-1000"
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    priority
-                    loading="eager"
-                  />
-                )}
-              </div>
-
-              {/* Subtle Vignette */}
-              <div className="absolute inset-0 shadow-[inset_0_0_80px_rgba(58,47,37,0.2)] pointer-events-none" />
-
-              {/* Paper Texture Overlay on Image */}
-              <div
-                className="absolute inset-0 opacity-[0.1] pointer-events-none mix-blend-multiply"
-                style={{
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-                }}
-              />
-            </div>
+          <div className="absolute -inset-5 rounded-[32px] bg-[linear-gradient(135deg,rgba(254,83,139,.22),rgba(254,215,1,.18),rgba(1,201,77,.18))]" />
+          <div className="relative aspect-[4/5] overflow-hidden rounded-[24px] border-4 border-primary bg-areia">
+            <Image
+              src={hero.image}
+              alt="Laura Perls"
+              fill
+              priority
+              className="object-cover sepia-[0.18]"
+              sizes="(max-width: 1024px) 90vw, 420px"
+            />
           </div>
-
-          {/* Legend Tag */}
-          <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-[#1b140d] text-[#a9987d] px-8 py-2 text-[9px] uppercase tracking-[0.35em] font-bold border border-[#4a3c28] whitespace-nowrap shadow-lg">
-            <span className="text-[#d4b578]">★</span> Acervo Digital No. 742-LP{" "}
-            <span className="text-[#d4b578]">★</span>
-          </div>
+          <p className="mt-4 text-center text-xs font-bold uppercase tracking-[0.18em] text-terra">
+            Acervo digital · Laura Perls
+          </p>
         </motion.div>
       </div>
-
-      {/* Scroll Indicator */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.5, duration: 1 }}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 text-[#a9987d] text-xs tracking-widest uppercase cursor-pointer"
+      <button
+        type="button"
+        className="absolute bottom-6 left-1/2 -translate-x-1/2 text-xs font-bold uppercase tracking-widest text-primary"
         onClick={() =>
           document
             .getElementById("timeline")
             ?.scrollIntoView({ behavior: "smooth" })
         }
       >
-        <span className="font-bold">Linha do Tempo</span>
-        <div className="w-px h-8 bg-[#3a2d1c] relative">
-          <ArrowDown
-            size={12}
-            className="absolute -bottom-2 -left-1.5 animate-bounce text-[#d4b578]"
-          />
-        </div>
-      </motion.div>
+        Explorar o arquivo{" "}
+        <ArrowDown size={15} className="mx-auto mt-2" aria-hidden="true" />
+      </button>
     </section>
   );
 }

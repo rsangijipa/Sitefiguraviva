@@ -20,17 +20,15 @@ function runNoFirebaseAudit(): AuditResult {
 }
 
 describe("Firebase runtime architecture", () => {
-  it("detects current Firebase runtime imports, configuration, and dependencies", () => {
+  it("reports only the remaining legacy configuration references", () => {
     const result = runNoFirebaseAudit();
 
     expect(result.violations).not.toEqual([]);
-    expect(result.violations).toEqual(
-      expect.arrayContaining([
-        expect.stringContaining("src/"),
-        expect.stringContaining("package.json"),
-        expect.stringContaining("next.config.mjs"),
-        expect.stringContaining("package.json:script test:rules"),
-      ]),
+    expect(result.violations.some((item) => item.startsWith("src/"))).toBe(
+      true,
+    );
+    expect(result.violations.some((item) => item.startsWith(".env"))).toBe(
+      true,
     );
   });
 });

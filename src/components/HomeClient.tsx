@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 
 // import { useApp } from '../context/AppContext'; (Removed)
@@ -56,7 +57,7 @@ import methodology from "./sections/MethodologySection";
 import ScrollProgressBar from "./motion/ScrollProgressBar";
 import Reveal from "./motion/Reveal";
 
-export default function HomeClient({ initialData }: HomeClientProps = {}) {
+function HomeClientContent({ initialData }: HomeClientProps = {}) {
   const { data: courses = [] } = useCourses(false, {
     initialData: initialData?.courses,
   });
@@ -174,34 +175,35 @@ export default function HomeClient({ initialData }: HomeClientProps = {}) {
 
       {/* MODALS */}
 
-      <CourseModal
-        isOpen={isCourseOpen}
-        onClose={closeModals}
-        course={selectedCourse}
-      />
+      {isCourseOpen && (
+        <CourseModal isOpen onClose={closeModals} course={selectedCourse} />
+      )}
 
-      <BlogPostModal
-        isOpen={isBlogOpen}
-        onClose={closeModals}
-        post={selectedPost}
-      />
+      {isBlogOpen && (
+        <BlogPostModal isOpen onClose={closeModals} post={selectedPost} />
+      )}
 
-      <PDFReader
-        isOpen={isReaderOpen}
-        onClose={closeModals}
-        article={selectedArticle}
-      />
-      <CalendarModal
-        isOpen={isCalendarOpen}
-        onClose={closeModals}
-        courses={courses}
-      />
-      <GalleryModal
-        isOpen={isGalleryOpen}
-        onClose={closeModals}
-        gallery={gallery}
-      />
-      <LegalModal isOpen={!!legalType} onClose={closeModals} type={legalType} />
+      {isReaderOpen && (
+        <PDFReader isOpen onClose={closeModals} article={selectedArticle} />
+      )}
+      {isCalendarOpen && (
+        <CalendarModal isOpen onClose={closeModals} courses={courses} />
+      )}
+      {isGalleryOpen && (
+        <GalleryModal isOpen onClose={closeModals} gallery={gallery} />
+      )}
+      {legalType && (
+        <LegalModal isOpen onClose={closeModals} type={legalType} />
+      )}
     </div>
+  );
+}
+
+export default function HomeClient(props: HomeClientProps = {}) {
+  const [queryClient] = useState(() => new QueryClient());
+  return (
+    <QueryClientProvider client={queryClient}>
+      <HomeClientContent {...props} />
+    </QueryClientProvider>
   );
 }

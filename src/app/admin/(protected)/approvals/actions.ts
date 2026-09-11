@@ -49,9 +49,14 @@ export async function approveEnrollment(
       .from("enrollments")
       .update({
         status: "active",
+        approved_by: actorUid,
+        approved_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })
-      .eq("id", enrollmentId);
+      .eq("id", enrollmentId)
+      .eq("user_id", uid)
+      .eq("course_id", courseId)
+      .eq("status", "pending_approval");
 
     if (error) throw error;
 
@@ -73,7 +78,7 @@ export async function rejectEnrollment(
   reason: string,
 ) {
   try {
-    await requireAdmin();
+    const adminUser = await requireAdmin();
     if (!reason) throw new Error("Motivo da rejeição é obrigatório.");
 
     const supabase = createSupabaseServiceClient();
@@ -82,9 +87,15 @@ export async function rejectEnrollment(
       .from("enrollments")
       .update({
         status: "canceled",
+        approved_by: adminUser.uid,
+        approved_at: new Date().toISOString(),
+        rejection_reason: reason.trim(),
         updated_at: new Date().toISOString(),
       })
-      .eq("id", enrollmentId);
+      .eq("id", enrollmentId)
+      .eq("user_id", uid)
+      .eq("course_id", courseId)
+      .eq("status", "pending_approval");
 
     if (error) throw error;
 

@@ -1,12 +1,13 @@
 import { updateProfile, uploadAvatar } from "@/actions/profile";
 import { updateLessonProgress } from "@/app/actions/progress";
+import { updateLessonProgressSupabase } from "@/features/progress/infrastructure/supabaseProgressService.server";
 import { issueCertificate } from "@/actions/certificate";
-import { db, auth, storage, adminAuth } from "@/lib/firebase/admin";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import { progressService } from "@/lib/progress/progressService";
 import { gamificationService } from "@/lib/gamification/gamificationService";
 import { assertCanAccessCourse } from "@/lib/auth/access-gate";
 import { verifySession } from "@/lib/auth/server";
-import { CertificateIssuer } from "@/lib/certificates/issuer";
+import { issueCertificateSupabase } from "@/features/certificates/infrastructure/supabaseCertificateIssuer.server";
 
 jest.mock("next/headers", () => ({
   cookies: jest.fn(() =>
@@ -39,6 +40,11 @@ jest.mock("@/lib/audit", () => ({
 
 jest.mock("sharp", () => {
   const mockSharp = jest.fn(() => ({
+    metadata: jest.fn().mockResolvedValue({
+      width: 512,
+      height: 512,
+      format: "jpeg",
+    }),
     resize: jest.fn().mockReturnThis(),
     webp: jest.fn().mockReturnThis(),
     toBuffer: jest.fn().mockResolvedValue(Buffer.from("mock-sanitized-buffer")),
@@ -49,6 +55,56 @@ jest.mock("sharp", () => {
 jest.mock("@/lib/auth/server", () => ({
   verifySession: jest.fn(),
 }));
+
+jest.mock("@/infrastructure/supabase/storage.server", () => ({
+  uploadPublicAsset: jest
+    .fn()
+    .mockResolvedValue("https://storage.test/avatars/student1/avatar.webp"),
+}));
+
+jest.mock("@/infrastructure/supabase/server", () => ({
+  createSupabaseServiceClient: jest.fn(() => ({
+    auth: {
+      admin: { updateUserById: jest.fn().mockResolvedValue({ error: null }) },
+    },
+    from: jest.fn(() => ({
+      select: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(),
+      maybeSingle: jest.fn().mockResolvedValue({ data: null, error: null }),
+      upsert: jest.fn().mockResolvedValue({ error: null }),
+      update: jest.fn().mockReturnThis(),
+      insert: jest.fn().mockReturnThis(),
+      single: jest
+        .fn()
+        .mockResolvedValue({ data: { id: "new_doc_id" }, error: null }),
+    })),
+  })),
+}));
+
+jest.mock(
+  "@/features/progress/infrastructure/supabaseProgressService.server",
+  () => ({
+    updateLessonProgressSupabase: jest.fn().mockResolvedValue(undefined),
+  }),
+);
+
+jest.mock(
+  "@/features/certificates/infrastructure/supabaseCertificateIssuer.server",
+  () => ({
+    issueCertificateSupabase: jest.fn().mockResolvedValue({
+      success: true,
+      certificateId: "new_doc_id",
+      verificationCode: "FV-26-AAAAAA",
+    }),
+  }),
+);
+
+jest.mock(
+  "@/features/notifications/infrastructure/supabaseNotificationRepository.server",
+  () => ({
+    createNotification: jest.fn().mockResolvedValue(undefined),
+  }),
+);
 
 jest.mock("@/lib/auth/access-gate", () => ({
   assertCanAccessCourse: jest.fn(),
@@ -148,16 +204,6 @@ describe("Student Flow Smoke", () => {
       isStaff: false,
       isActive: true,
     });
-    (auth.verifySessionCookie as jest.Mock).mockResolvedValue({
-      uid: "student1",
-      email: "student@test.com",
-      role: "student",
-    });
-    (adminAuth.verifySessionCookie as jest.Mock).mockResolvedValue({
-      uid: "student1",
-      email: "student@test.com",
-      role: "student",
-    });
     (assertCanAccessCourse as jest.Mock).mockResolvedValue({
       uid: "student1",
       courseId: "course1",
@@ -170,11 +216,6 @@ describe("Student Flow Smoke", () => {
     (gamificationService.onLessonCompletion as jest.Mock).mockResolvedValue(
       undefined,
     );
-    (CertificateIssuer.issue as jest.Mock).mockResolvedValue({
-      success: true,
-      certificateId: "new_doc_id",
-      verificationCode: "FV-26-AAAAAA",
-    });
   });
 
   it("updates profile and avatar", async () => {
@@ -190,13 +231,8 @@ describe("Student Flow Smoke", () => {
     const uploadRes = await uploadAvatar(formData);
     expect(uploadRes).toEqual({
       success: true,
-      url: expect.stringContaining("avatar.jpg"),
+      url: expect.stringContaining("avatar.webp"),
     });
-    expect(storage.bucket).toHaveBeenCalled();
-    expect(auth.updateUser).toHaveBeenCalledWith(
-      "student1",
-      expect.objectContaining({ photoURL: expect.any(String) }),
-    );
 
     const updateRes = await updateProfile({
       displayName: "New Name",
@@ -204,7 +240,6 @@ describe("Student Flow Smoke", () => {
     });
 
     expect(updateRes).toEqual({ success: true });
-    expect(db.collection).toHaveBeenCalledWith("users");
   });
 
   it("updates lesson progress and marks completion", async () => {
@@ -230,7 +265,7 @@ describe("Student Flow Smoke", () => {
     );
     expect(completed).toEqual({ success: true });
 
-    expect(progressService.updateLessonProgress).toHaveBeenCalledTimes(2);
+    expect(updateLessonProgressSupabase).toHaveBeenCalledTimes(2);
     expect(gamificationService.onLessonCompletion).toHaveBeenCalledTimes(1);
   });
 
@@ -242,7 +277,7 @@ describe("Student Flow Smoke", () => {
       certificateId: "new_doc_id",
       certificateNumber: "FV-26-AAAAAA",
     });
-    expect(CertificateIssuer.issue).toHaveBeenCalledWith(
+    expect(issueCertificateSupabase).toHaveBeenCalledWith(
       "course1",
       "student1",
       "student1",

@@ -1,7 +1,7 @@
 import { updateLessonProgress } from "@/app/actions/progress";
 import { assertCanAccessCourse } from "@/lib/auth/access-gate";
 import { verifySession } from "@/lib/auth/server";
-import { progressService } from "@/lib/progress/progressService";
+import { updateLessonProgressSupabase } from "@/features/progress/infrastructure/supabaseProgressService.server";
 import { gamificationService } from "@/lib/gamification/gamificationService";
 import { revalidatePath } from "next/cache";
 
@@ -28,11 +28,21 @@ jest.mock("@/lib/auth/access-gate", () => ({
   assertCanAccessCourse: jest.fn(),
 }));
 
-jest.mock("@/lib/progress/progressService", () => ({
-  progressService: {
-    updateLessonProgress: jest.fn(),
-  },
-}));
+jest.mock(
+  "@/features/progress/infrastructure/supabaseProgressService.server",
+  () => ({
+    updateLessonProgressSupabase: jest.fn(),
+    markLessonCompletedSupabase: jest.fn(),
+    recalculateProgressSupabase: jest.fn(),
+  }),
+);
+
+jest.mock(
+  "@/features/progress/infrastructure/supabaseProgressRepository.server",
+  () => ({
+    upsertLessonProgress: jest.fn(),
+  }),
+);
 
 jest.mock("@/lib/gamification/gamificationService", () => ({
   gamificationService: {
@@ -57,9 +67,7 @@ describe("updateLessonProgress action", () => {
       enrollmentId: "user123_c1",
       paymentMethod: "pix",
     });
-    (progressService.updateLessonProgress as jest.Mock).mockResolvedValue(
-      undefined,
-    );
+    (updateLessonProgressSupabase as jest.Mock).mockResolvedValue(undefined);
     (gamificationService.onLessonCompletion as jest.Mock).mockResolvedValue(
       undefined,
     );
@@ -96,10 +104,9 @@ describe("updateLessonProgress action", () => {
     });
 
     expect(result).toEqual({ success: true });
-    expect(progressService.updateLessonProgress).toHaveBeenCalledWith(
+    expect(updateLessonProgressSupabase).toHaveBeenCalledWith(
       "user123",
       "c1",
-      "m1",
       "l1",
       { status: "in_progress", percent: 42, maxWatchedSecond: 38 },
     );

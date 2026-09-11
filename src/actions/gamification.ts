@@ -1,203 +1,105 @@
 "use server";
 
-import { adminDb, auth } from "@/lib/firebase/admin";
-import { FieldValue, Timestamp } from "firebase-admin/firestore";
-import { cookies } from "next/headers";
-import {
-  XP_VALUES,
-  verifyStreakStatus,
-  calculateLevel,
-} from "@/lib/gamification";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
+import { verifySession } from "@/lib/auth/server";
+import { XP_VALUES } from "@/lib/gamification";
 import { telemetry } from "@/lib/telemetry";
 
-// ... imports remain the same
+type GamificationAction =
+  | "lesson_complete"
+  | "quiz_pass"
+  | "daily_login"
+  | "course_complete"
+  | "library_view";
 
-/**
- * Server-Side Action to process gamification events securely.
- */
+const EVENT_CONFIG: Record<
+  GamificationAction,
+  { reason: string; amount: number }
+> = {
+  lesson_complete: {
+    reason: "lesson_completed",
+    amount: XP_VALUES.LESSON_COMPLETED,
+  },
+  quiz_pass: { reason: "quiz_passed", amount: XP_VALUES.QUIZ_PASSED },
+  daily_login: { reason: "daily_login", amount: XP_VALUES.DAILY_LOGIN },
+  course_complete: {
+    reason: "course_completed",
+    amount: XP_VALUES.COURSE_COMPLETED,
+  },
+  library_view: { reason: "bonus", amount: 5 },
+};
+
+function eventKey(
+  uid: string,
+  data: {
+    actionType: GamificationAction;
+    courseId?: string;
+    lessonId?: string;
+  },
+) {
+  const today = new Date().toISOString().slice(0, 10);
+  if (data.actionType === "daily_login") return `daily_login:${uid}:${today}`;
+  if (data.actionType === "lesson_complete" && data.lessonId)
+    return `lesson_complete:${uid}:${data.lessonId}`;
+  if (data.actionType === "course_complete" && data.courseId)
+    return `course_complete:${uid}:${data.courseId}`;
+  // A library view and a quiz pass can legitimately occur more than once. The
+  // caller cannot choose this key, so it cannot replay another user's event.
+  return `${data.actionType}:${uid}:${crypto.randomUUID()}`;
+}
+
+/** Processes trusted gamification events through an idempotent Supabase RPC. */
 export async function processGamificationEvent(data: {
   courseId?: string;
   lessonId?: string;
-  actionType:
-    | "lesson_complete"
-    | "quiz_pass"
-    | "daily_login"
-    | "course_complete"
-    | "library_view";
-  metadata?: Record<string, any>;
+  actionType: GamificationAction;
+  metadata?: Record<string, unknown>;
 }) {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("session")?.value;
-
-  if (!sessionCookie) {
+  const session = await verifySession();
+  if (!session) {
     telemetry.error(new Error("Gamification attempt without session"));
     return { error: "Unauthorized" };
   }
+  if (
+    (data.actionType === "lesson_complete" &&
+      (!data.lessonId || !data.courseId)) ||
+    (data.actionType === "course_complete" && !data.courseId)
+  ) {
+    return { error: "Identificadores obrigatórios ausentes." };
+  }
 
   try {
-    const claims = await auth.verifySessionCookie(sessionCookie, true);
-    const uid = claims.uid;
-    if (!uid) return { error: "Unauthorized" };
-
-    // 1. Deterministic Event ID (Idempotency Key)
-    // Critical: naming must be unique per logical event, but constant for retries.
-    let eventId = "";
-    if (data.actionType === "daily_login") {
-      const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
-      eventId = `daily_login_${uid}_${today}`;
-    } else if (data.actionType === "lesson_complete" && data.lessonId) {
-      eventId = `lesson_complete_${uid}_${data.lessonId}`;
-    } else if (data.actionType === "course_complete" && data.courseId) {
-      eventId = `course_complete_${uid}_${data.courseId}`;
-    } else {
-      // Fallback for generic events (quiz?) - use timestamp if not unique restricted
-      eventId = `event_${uid}_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-    }
-
-    // 2. Transaction: Idempotency + State Update
-    return await adminDb.runTransaction(async (transaction) => {
-      // A. Check Idempotency
-      const eventRef = adminDb.collection("gamification_events").doc(eventId);
-      const eventSnap = await transaction.get(eventRef);
-
-      if (eventSnap.exists) {
-        // Event already processed. Return success to UI but do nothing.
-        telemetry.track("gamification_idempotent_skip", { eventId, uid });
-        return { success: true, processed: false, reason: "idempotent_skip" };
-      }
-
-      // B. Load User Profile
-      const profileRef = adminDb.collection("gamification_profiles").doc(uid);
-      const profileSnap = await transaction.get(profileRef);
-
-      const profileData = profileSnap.exists ? profileSnap.data() : {};
-      const profile = {
-        totalXp: profileData?.totalXp || 0,
-        level: profileData?.level || 1,
-        currentStreak: profileData?.currentStreak || 0,
-        longestStreak: profileData?.longestStreak || 0,
-        lastActivityDate: profileData?.lastActivityDate || null,
-        badges: profileData?.badges || [],
-      };
-
-      // C. Validation & Calculation
-      let xpDelta = 0;
-      let streakUpdate: any = {};
-      const newBadges: string[] = [];
-
-      switch (data.actionType) {
-        case "daily_login":
-          const streakStatus = verifyStreakStatus(profile.lastActivityDate); // Lib handles Timestamp
-          if (streakStatus === "increment") {
-            xpDelta = XP_VALUES.DAILY_LOGIN || 10;
-            const next = profile.currentStreak + 1;
-            streakUpdate = {
-              currentStreak: next,
-              longestStreak: Math.max(next, profile.longestStreak),
-            };
-            if (next === 7) newBadges.push("dedicated_learner_week");
-            if (next === 30) newBadges.push("dedicated_learner_month");
-          } else if (streakStatus === "reset") {
-            xpDelta = XP_VALUES.DAILY_LOGIN || 5;
-            streakUpdate = { currentStreak: 1 };
-          } else {
-            // "maintain": already logged in today, but maybe no XP awarded previously?
-            // With idempotency key based on Date, we shouldn't reach here if we rely on eventId.
-            // But if logic differs, safe to just update timestamp.
-            streakUpdate = { updatedAt: FieldValue.serverTimestamp() };
-          }
-          break;
-
-        case "lesson_complete":
-          if (!data.lessonId || !data.courseId) throw new Error("Missing IDs");
-          xpDelta = XP_VALUES.LESSON_COMPLETED || 50;
-          if (!profile.badges.includes("first_lesson"))
-            newBadges.push("first_lesson");
-          break;
-
-        case "course_complete":
-          if (!data.courseId) throw new Error("Missing Course ID");
-          xpDelta = XP_VALUES.COURSE_COMPLETED || 500;
-          if (!profile.badges.includes("first_course"))
-            newBadges.push("first_course");
-          break;
-
-        case "quiz_pass":
-          xpDelta = XP_VALUES.QUIZ_PASSED || 100;
-          break;
-
-        case "library_view":
-          xpDelta = 5;
-          const libraryViews = (profileData?.libraryViews || 0) + 1;
-          streakUpdate = { libraryViews };
-          if (
-            libraryViews >= 20 &&
-            !profile.badges.includes("library_patron")
-          ) {
-            newBadges.push("library_patron");
-          }
-          break;
-      }
-
-      // D. Apply Updates
-      const newTotalXp = (profile.totalXp || 0) + xpDelta;
-      const newLevel = calculateLevel(newTotalXp);
-      const leveledUp = newLevel > profile.level;
-
-      const allUniqueBadges = Array.from(
-        new Set([...profile.badges, ...newBadges]),
-      );
-
-      // E. Write to Ledger (Audit Trail)
-      transaction.set(eventRef, {
-        uid,
+    const config = EVENT_CONFIG[data.actionType];
+    const badges = [
+      ...(data.actionType === "lesson_complete" ? ["first_lesson"] : []),
+      ...(data.actionType === "course_complete" ? ["first_course"] : []),
+    ];
+    const { data: result, error } = await (
+      createSupabaseServiceClient() as any
+    ).rpc("process_gamification_event", {
+      p_user_id: session.uid,
+      p_event_key: eventKey(session.uid, data),
+      p_reason: config.reason,
+      p_amount: config.amount,
+      p_metadata: {
+        ...(data.metadata || {}),
+        courseId: data.courseId,
+        lessonId: data.lessonId,
         actionType: data.actionType,
-        eventId,
-        xpAwarded: xpDelta,
-        badgesEarned: newBadges,
-        metadata: data.metadata || {},
-        timestamp: FieldValue.serverTimestamp(),
-        ip: "server-action",
-      });
-
-      // F. Update User Profile
-      transaction.set(
-        profileRef,
-        {
-          ...streakUpdate,
-          totalXp: newTotalXp,
-          level: newLevel,
-          badges: allUniqueBadges,
-          lastActivityDate: FieldValue.serverTimestamp(),
-          updatedAt: FieldValue.serverTimestamp(),
-        },
-        { merge: true },
-      );
-
-      // G. Legacy Transaction Log (Optional, for backward compat if needed)
-      // Keeping it purely for admin logs if dashboard relies on it
-      if (xpDelta > 0) {
-        const legacyRef = adminDb.collection("xp_transactions").doc();
-        transaction.set(legacyRef, {
-          userId: uid,
-          amount: xpDelta,
-          reason: data.actionType,
-          eventId, // Link to idempotent event
-          timestamp: FieldValue.serverTimestamp(),
-        });
-      }
-
-      return {
-        success: true,
-        processed: true,
-        xpAwarded: xpDelta,
-        newLevel,
-        leveledUp,
-        newBadges,
-      };
+      },
+      p_badges: badges,
     });
+    if (error) throw error;
+    return {
+      success: true,
+      processed: Boolean(result?.processed),
+      xpAwarded: result?.processed ? config.amount : 0,
+      newLevel: Number(result?.newLevel || 1),
+      leveledUp: Boolean(result?.leveledUp),
+      newBadges: Array.isArray(result?.newBadges) ? result.newBadges : [],
+    };
   } catch (error) {
     telemetry.error(error, { actionType: data.actionType });
-    return { error: "Could not process gamification event." };
+    return { error: "Não foi possível registrar a conquista." };
   }
 }

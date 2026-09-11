@@ -2,7 +2,11 @@ import {
   startAssessmentAttempt,
   submitAssessmentAttempt,
 } from "@/actions/assessment";
-import { auth, adminDb } from "@/lib/firebase/admin";
+import { verifySession } from "@/lib/auth/server";
+import {
+  startSupabaseAssessmentAttempt,
+  submitSupabaseAssessmentAttempt,
+} from "@/features/assessments/infrastructure/supabaseAssessmentLifecycle.server";
 
 jest.mock("next/headers", () => ({
   cookies: jest.fn(() =>
@@ -29,6 +33,20 @@ jest.mock("@/lib/rateLimit", () => ({
     SUBMIT_ASSIGNMENT: { points: 5, windowMs: 60_000 },
   },
 }));
+
+jest.mock("@/lib/auth/server", () => ({
+  verifySession: jest.fn(),
+  requireAdmin: jest.fn(),
+}));
+
+jest.mock(
+  "@/features/assessments/infrastructure/supabaseAssessmentLifecycle.server",
+  () => ({
+    startSupabaseAssessmentAttempt: jest.fn(),
+    submitSupabaseAssessmentAttempt: jest.fn(),
+    gradeSupabaseAssessmentAttempt: jest.fn(),
+  }),
+);
 
 jest.mock("@/lib/firebase/admin", () => {
   const assessmentDocGet = jest.fn();
@@ -81,20 +99,10 @@ jest.mock("@/lib/firebase/admin", () => {
   };
 });
 
-const firebaseModule = jest.requireMock("@/lib/firebase/admin");
-const mocks = firebaseModule.__mocks as {
-  assessmentDocGet: jest.Mock;
-  submissionDocGet: jest.Mock;
-  submissionDocUpdate: jest.Mock;
-  assessmentSubmissionsWhereGet: jest.Mock;
-  assessmentSubmissionsAdd: jest.Mock;
-  collectionMock: jest.Mock;
-};
-
 describe("assessment attempts server actions", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (auth.verifySessionCookie as jest.Mock).mockResolvedValue({
+    (verifySession as jest.Mock).mockResolvedValue({
       uid: "user-123",
       role: "student",
     });
@@ -102,33 +110,24 @@ describe("assessment attempts server actions", () => {
 
   describe("startAssessmentAttempt", () => {
     it("creates a new submission with incremented attempt number", async () => {
-      mocks.assessmentDocGet.mockResolvedValue({
-        exists: true,
-        data: () => ({ id: "a1", courseId: "course-1" }),
+      (startSupabaseAssessmentAttempt as jest.Mock).mockResolvedValue({
+        success: true,
+        submissionId: "sub-2",
       });
-      mocks.assessmentSubmissionsWhereGet.mockResolvedValue({
-        docs: [{ data: () => ({ attemptNumber: 1 }) }],
-      });
-      mocks.assessmentSubmissionsAdd.mockResolvedValue({ id: "sub-2" });
 
       const result = await startAssessmentAttempt("a1", "course-1");
 
       expect(result).toEqual({ success: true, submissionId: "sub-2" });
-      expect(mocks.assessmentSubmissionsAdd).toHaveBeenCalledWith(
-        expect.objectContaining({
-          assessmentId: "a1",
-          userId: "user-123",
-          courseId: "course-1",
-          status: "pending",
-          attemptNumber: 2,
-        }),
+      expect(startSupabaseAssessmentAttempt).toHaveBeenCalledWith(
+        "user-123",
+        "a1",
+        "course-1",
       );
     });
 
     it("rejects when assessment course does not match", async () => {
-      mocks.assessmentDocGet.mockResolvedValue({
-        exists: true,
-        data: () => ({ id: "a1", courseId: "other-course" }),
+      (startSupabaseAssessmentAttempt as jest.Mock).mockResolvedValue({
+        error: "Curso da avaliação inválido",
       });
 
       const result = await startAssessmentAttempt("a1", "course-1");
@@ -138,34 +137,34 @@ describe("assessment attempts server actions", () => {
 
   describe("submitAssessmentAttempt", () => {
     it("updates submission for owner", async () => {
-      mocks.submissionDocGet.mockResolvedValue({
-        exists: true,
-        data: () => ({ userId: "user-123", assessmentId: "a1" }),
+      (submitSupabaseAssessmentAttempt as jest.Mock).mockResolvedValue({
+        success: true,
       });
-      mocks.submissionDocUpdate.mockResolvedValue(undefined);
 
       const result = await submitAssessmentAttempt("sub-1", [
         { questionId: "q1", selectedOptions: ["opt1"] },
       ]);
 
       expect(result).toEqual({ success: true });
-      expect(mocks.submissionDocUpdate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: "submitted",
-          answers: [{ questionId: "q1", selectedOptions: ["opt1"] }],
-        }),
+      expect(submitSupabaseAssessmentAttempt).toHaveBeenCalledWith(
+        "user-123",
+        "sub-1",
+        [{ questionId: "q1", selectedOptions: ["opt1"] }],
       );
     });
 
     it("rejects spoofed submission updates from another user", async () => {
-      mocks.submissionDocGet.mockResolvedValue({
-        exists: true,
-        data: () => ({ userId: "attacker-target" }),
+      (submitSupabaseAssessmentAttempt as jest.Mock).mockResolvedValue({
+        error: "Acesso negado",
       });
 
       const result = await submitAssessmentAttempt("sub-1", []);
       expect(result).toEqual({ error: "Acesso negado" });
-      expect(mocks.submissionDocUpdate).not.toHaveBeenCalled();
+      expect(submitSupabaseAssessmentAttempt).toHaveBeenCalledWith(
+        "user-123",
+        "sub-1",
+        [],
+      );
     });
   });
 });

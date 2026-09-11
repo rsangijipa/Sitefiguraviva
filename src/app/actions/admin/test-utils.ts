@@ -1,120 +1,93 @@
 "use server";
 
-import { auth, adminDb } from "@/lib/firebase/admin";
-import { Timestamp } from "firebase-admin/firestore";
-import { cookies } from "next/headers";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
+import { verifySession } from "@/lib/auth/server";
+import { logger } from "@/lib/logger";
 
-/**
- * Generate a test certificate for development/testing
- * ADMIN ONLY
- */
+async function getAdminContext() {
+  const session = await verifySession();
+  if (!session) return { error: "Unauthorized", status: 401 } as const;
+  if (!session.isAdmin) return { error: "Acesso negado", status: 403 } as const;
+  return { session } as const;
+}
+
 export async function generateTestCertificate() {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("session")?.value;
-
-  if (!sessionCookie) {
-    return { error: "Unauthorized" };
-  }
+  const context = await getAdminContext();
+  if (!("session" in context))
+    return { error: context.error, status: context.status };
 
   try {
-    const claims = await auth.verifySessionCookie(sessionCookie, true);
-
-    // Must be admin
-    const userDoc = await adminDb.collection("users").doc(claims.uid).get();
-    const userData = userDoc.data();
-
-    if (userData?.role !== "admin") {
+    const supabase = createSupabaseServiceClient();
+    const { data: course, error: courseError } = await supabase
+      .from("courses")
+      .select("id,title")
+      .limit(1)
+      .maybeSingle();
+    if (courseError) throw courseError;
+    if (!course)
       return {
-        error:
-          "Acesso negado. Apenas administradores podem gerar certificados de teste.",
+        error: "Crie um curso antes de gerar um certificado de teste.",
+        status: 409,
       };
-    }
 
-    // Create test certificate
     const certificateNumber = `IFV-TEST-${Date.now().toString().slice(-6)}`;
-    const certRef = adminDb.collection("certificates").doc();
-
-    const testCertificate = {
-      userId: claims.uid,
-      courseId: "test-course-001",
-      studentName: userData?.displayName || claims.email || "Aluno de Teste",
-      courseName: "Curso de Teste - Gestalt-Terapia Fundamentals",
-      completedAt: Timestamp.now(),
-      issuedAt: Timestamp.now(),
-      certificateNumber,
-      instructorName: "Lilian Vanessa Gusmão",
-      instructorTitle: "Psicóloga e Gestalt-terapeuta",
-      courseWorkload: 40,
-      validationUrl: `${process.env.NEXT_PUBLIC_BASE_URL || "https://figuraviva.com"}/verify/${certRef.id}`,
-      status: "issued",
-      // Test metadata
-      isTest: true,
-      createdBy: claims.uid,
-    };
-
-    await certRef.set(testCertificate);
+    const { data, error } = await supabase
+      .from("certificates")
+      .insert({
+        user_id: context.session.uid,
+        course_id: course.id,
+        code: certificateNumber,
+        issued_at: new Date().toISOString(),
+        metadata: {
+          isTest: true,
+          studentName: context.session.email || "Administrador",
+          courseName: course.title,
+          issuedBy: context.session.uid,
+        },
+      } as any)
+      .select("id")
+      .single();
+    if (error) throw error;
 
     return {
       success: true,
-      certificateId: certRef.id,
+      certificateId: data.id,
       certificateNumber,
       message: "Certificado de teste criado com sucesso!",
     };
-  } catch (error: any) {
-    console.error("Generate Test Certificate Error:", error);
-    return {
-      error: "Erro ao gerar certificado de teste",
-      details: error?.message || "Unknown error",
-    };
+  } catch (error) {
+    logger.error("Generate test certificate failed", { error });
+    return { error: "Erro ao gerar certificado de teste", status: 500 };
   }
 }
 
-/**
- * Delete test certificates
- * ADMIN ONLY
- */
 export async function deleteTestCertificates() {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("session")?.value;
-
-  if (!sessionCookie) {
-    return { error: "Unauthorized" };
-  }
+  const context = await getAdminContext();
+  if (!("session" in context))
+    return { error: context.error, status: context.status };
 
   try {
-    const claims = await auth.verifySessionCookie(sessionCookie, true);
-
-    // Must be admin
-    const userDoc = await adminDb.collection("users").doc(claims.uid).get();
-    const userData = userDoc.data();
-
-    if (userData?.role !== "admin") {
-      return { error: "Acesso negado" };
+    const supabase = createSupabaseServiceClient();
+    const { data: rows, error: listError } = await supabase
+      .from("certificates")
+      .select("id")
+      .contains("metadata", { isTest: true });
+    if (listError) throw listError;
+    const ids = (rows ?? []).map((row) => row.id);
+    if (ids.length) {
+      const { error } = await supabase
+        .from("certificates")
+        .delete()
+        .in("id", ids);
+      if (error) throw error;
     }
-
-    // Find and delete all test certificates
-    const testCerts = await adminDb
-      .collection("certificates")
-      .where("isTest", "==", true)
-      .get();
-
-    const batch = adminDb.batch();
-    testCerts.docs.forEach((doc) => {
-      batch.delete(doc.ref);
-    });
-
-    await batch.commit();
-
     return {
       success: true,
-      deleted: testCerts.size,
-      message: `${testCerts.size} certificados de teste removidos.`,
+      deleted: ids.length,
+      message: `${ids.length} certificados de teste removidos.`,
     };
-  } catch (error: any) {
-    console.error("Delete Test Certificates Error:", error);
-    return {
-      error: "Erro ao deletar certificados de teste",
-      details: error?.message,
-    };
+  } catch (error) {
+    logger.error("Delete test certificates failed", { error });
+    return { error: "Erro ao deletar certificados de teste", status: 500 };
   }
 }

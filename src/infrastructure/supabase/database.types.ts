@@ -37,6 +37,15 @@ export interface Database {
           email: string;
           display_name: string | null;
           photo_url: string | null;
+          bio: string | null;
+          phone_number: string | null;
+          profession: string | null;
+          city: string | null;
+          state: string | null;
+          date_of_birth: string | null;
+          instagram: string | null;
+          profile_completion: number;
+          profile_completed_at: string | null;
           role: AppRole;
           is_active: boolean;
           stripe_customer_id: string | null;
@@ -55,7 +64,7 @@ export interface Database {
         Row: {
           id: string;
           user_id: string;
-          course_id: string;
+          course_id: string | null;
           answers: Json;
           consent: Json;
           status: string;
@@ -66,7 +75,7 @@ export interface Database {
         Insert: Partial<Database["public"]["Tables"]["applications"]["Row"]> & {
           id: string;
           user_id: string;
-          course_id: string;
+          course_id?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["applications"]["Row"]>;
         Relationships: [];
@@ -266,7 +275,8 @@ export interface Database {
       community_threads: {
         Row: {
           id: string;
-          course_id: string;
+          course_id: string | null;
+          channel: string;
           author_id: string | null;
           legacy_author_firebase_uid: string | null;
           title: string;
@@ -287,7 +297,7 @@ export interface Database {
           Database["public"]["Tables"]["community_threads"]["Row"]
         > & {
           id: string;
-          course_id: string;
+          course_id?: string | null;
           title: string;
           content: string;
           author_name: string;
@@ -426,6 +436,7 @@ export interface Database {
             | "bonus"
             | "admin_reward";
           metadata: Json;
+          idempotency_key: string | null;
           timestamp: string;
         };
         Insert: Partial<
@@ -495,6 +506,31 @@ export interface Database {
           key: string;
         };
         Update: Partial<Database["public"]["Tables"]["public_pages"]["Row"]>;
+        Relationships: [];
+      };
+      public_documents: {
+        Row: {
+          id: string;
+          title: string;
+          category: string;
+          file_url: string;
+          file_path: string | null;
+          file_size: string | null;
+          file_type: string;
+          is_published: boolean;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<
+          Database["public"]["Tables"]["public_documents"]["Row"]
+        > & {
+          title: string;
+          file_url: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["public_documents"]["Row"]
+        >;
         Relationships: [];
       };
       posts: {
@@ -670,6 +706,7 @@ export interface Database {
           author_id: string | null;
           is_pinned: boolean;
           target_audience: string | null;
+          publish_at: string;
           created_at: string;
           updated_at: string;
         };

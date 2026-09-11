@@ -8,7 +8,7 @@ const map = (row: any): AnnouncementDoc => ({
   content: row.content,
   authorId: row.author_id || "",
   isPinned: row.is_pinned,
-  publishAt: row.created_at as any,
+  publishAt: row.publish_at || row.created_at,
   createdAt: row.created_at as any,
 });
 
@@ -27,7 +27,15 @@ export const announcementService = {
     courseId: string,
     _tenantId?: string,
   ): Promise<AnnouncementDoc[]> {
-    return this.getCourseAnnouncements(courseId);
+    const { data, error } = await (createSupabaseBrowserClient() as any)
+      .from("announcements")
+      .select("*")
+      .eq("course_id", courseId)
+      .lte("publish_at", new Date().toISOString())
+      .order("is_pinned", { ascending: false })
+      .order("publish_at", { ascending: false });
+    if (error) throw error;
+    return (data ?? []).map(map);
   },
   subscribeToPublishedAnnouncements(
     courseId: string,
@@ -57,16 +65,27 @@ export const announcementService = {
   },
   async createAnnouncement(
     courseId: string,
-    data: Omit<AnnouncementDoc, "id" | "createdAt">,
+    data: Omit<AnnouncementDoc, "id" | "createdAt" | "authorId" | "courseId">,
   ): Promise<string> {
-    const { data: row, error } = await (createSupabaseBrowserClient() as any)
+    const supabase: any = createSupabaseBrowserClient();
+    const { data: authData, error: authError } = await supabase.auth.getUser();
+    if (authError) throw authError;
+    if (!authData.user) throw new Error("Usuário não autenticado");
+    const publishAt =
+      data.publishAt instanceof Date
+        ? data.publishAt.toISOString()
+        : typeof data.publishAt === "string"
+          ? data.publishAt
+          : new Date().toISOString();
+    const { data: row, error } = await supabase
       .from("announcements")
       .insert({
         course_id: courseId,
         title: data.title,
         content: data.content,
-        author_id: data.authorId,
+        author_id: authData.user.id,
         is_pinned: data.isPinned,
+        publish_at: publishAt,
       })
       .select("id")
       .single();

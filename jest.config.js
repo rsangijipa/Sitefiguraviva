@@ -14,6 +14,7 @@ const customJestConfig = {
     "<rootDir>/tests/e2e/",
     "<rootDir>/.worktrees/",
     "<rootDir>/.claude/worktrees/",
+    "<rootDir>/scripts/.*\\.test\\.mjs$",
   ],
   moduleNameMapper: {
     // Handle module aliases (this will be automatically configured for you soon)

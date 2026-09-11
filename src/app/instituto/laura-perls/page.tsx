@@ -6,7 +6,7 @@ import { LauraContributions } from "@/components/laura/LauraContributions";
 import { LauraGallery } from "@/components/laura/LauraGallery";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
-import { BackToTop } from "@/components/laura/BackToTop";
+import BackToTop from "@/components/BackToTop";
 import { WhySheMatters } from "@/components/laura/WhySheMatters";
 import { AudioRecordings } from "@/components/laura/AudioRecordings";
 import { InteractiveMap } from "@/components/laura/InteractiveMap";
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
 
 export default function LauraPerlsPage() {
   return (
-    <div className="fv-bg fv-bg-laura-archive relative min-h-screen bg-[#1b140d] text-[#e6d7bd]">
+    <div className="laura-page fv-bg fv-bg-laura-archive relative min-h-screen bg-paper text-mata">
       {/* Aged Paper Texture Overlay */}
       <div
         className="fixed inset-0 opacity-[0.04] pointer-events-none z-[9999]"
@@ -42,7 +42,7 @@ export default function LauraPerlsPage() {
       <div className="fixed bottom-40 right-20 w-48 h-48 rounded-full bg-[#6b4a35]/5 blur-2xl pointer-events-none z-0" />
 
       {/* Decorative Border Frame */}
-      <div className="fixed inset-4 md:inset-8 border border-[#4a3c28]/30 pointer-events-none z-50 rounded-sm">
+      <div className="fixed inset-4 md:inset-8 border border-terra/20 pointer-events-none z-50 rounded-sm">
         {/* Corner Ornaments */}
         <div className="absolute -top-1 -left-1 w-8 h-8 border-t-2 border-l-2 border-[#c9a768]" />
         <div className="absolute -top-1 -right-1 w-8 h-8 border-t-2 border-r-2 border-[#c9a768]" />
@@ -52,26 +52,50 @@ export default function LauraPerlsPage() {
 
       <Navbar />
 
-      <div className="relative font-sans selection:bg-[#c9a768]/30">
+      <div className="relative font-sans selection:bg-aurora/20">
         <LauraHero />
-
-        <WhySheMatters />
-
-        <InteractiveMap />
-
-        <AudioRecordings />
-
-        <LauraTimeline />
-
-        <ConceptsDeepDive />
-
-        <LauraContributions />
-
-        <LegacyTree />
-
-        <Testimonials />
-
-        <Quiz />
+        <div className="mx-auto max-w-7xl space-y-3 px-4 py-8 md:px-8">
+          {[
+            [
+              "Contexto e legado",
+              <WhySheMatters key="why" />,
+              <InteractiveMap key="map" />,
+            ],
+            [
+              "Vida e obra",
+              <AudioRecordings key="audio" />,
+              <LauraTimeline key="timeline" />,
+            ],
+            [
+              "Conceitos e contribuições",
+              <ConceptsDeepDive key="concepts" />,
+              <LauraContributions key="contributions" />,
+            ],
+            [
+              "Continuidade",
+              <LegacyTree key="tree" />,
+              <Testimonials key="testimonials" />,
+            ],
+            ["Para explorar", <Quiz key="quiz" />],
+          ].map(([title, first, second]) => (
+            <details
+              key={title as string}
+              className="group overflow-hidden rounded-[24px] border-2 border-primary/10 bg-paper"
+              open={false}
+            >
+              <summary className="flex cursor-pointer list-none items-center justify-between px-5 py-4 font-serif text-2xl font-bold text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+                <span>{title as string}</span>
+                <span className="text-terra transition group-open:rotate-45">
+                  +
+                </span>
+              </summary>
+              <div className="border-t border-primary/10">
+                {first}
+                {second}
+              </div>
+            </details>
+          ))}
+        </div>
 
         {/* Readings Section */}
         <section className="relative overflow-hidden bg-[#1b140d] border-t border-[#4a3c28] py-14">

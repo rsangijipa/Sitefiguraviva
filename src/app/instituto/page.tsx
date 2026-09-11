@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Compass, HeartHandshake, Leaf } from "lucide-react";
-import { db } from "@/lib/firebase/admin";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import PublicPageHero from "@/features/public-site/components/PublicPageHero";
 import PublicSiteFrame from "@/features/public-site/components/PublicSiteFrame";
 
@@ -18,11 +18,15 @@ export const metadata: Metadata = {
 
 async function getInstituteData() {
   try {
-    const [institute, founder] = await Promise.all([
-      db.collection("siteSettings").doc("institute").get(),
-      db.collection("siteSettings").doc("founder").get(),
-    ]);
-    return { institute: institute.data() || {}, founder: founder.data() || {} };
+    const { data, error } = await createSupabaseServiceClient()
+      .from("public_pages")
+      .select("key,content")
+      .in("key", ["institute", "founder"]);
+    if (error) throw error;
+    const values = Object.fromEntries(
+      (data ?? []).map((row: any) => [row.key, row.content || {}]),
+    );
+    return { institute: values.institute || {}, founder: values.founder || {} };
   } catch {
     return { institute: {}, founder: {} };
   }

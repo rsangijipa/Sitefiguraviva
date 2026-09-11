@@ -1,15 +1,17 @@
 "use server";
 
-import { auth, db, adminDb } from "@/lib/firebase/admin";
-import { Timestamp } from "firebase-admin/firestore";
-import { cookies } from "next/headers";
-import { revalidatePath } from "next/cache";
+import { randomUUID } from "crypto";
+import { createNotification } from "@/features/notifications/infrastructure/supabaseNotificationRepository.server";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
+import { logAudit } from "@/lib/audit";
+import { requireAdmin } from "@/lib/auth/server";
 import { rateLimit, RateLimitPresets } from "@/lib/rateLimit";
+import { revalidatePath } from "next/cache";
 
 interface CreateEventData {
   title: string;
   description: string;
-  startsAt: string; // ISO string from form
+  startsAt: string;
   endsAt: string;
   type: "webinar" | "in_person";
   joinUrl?: string;
@@ -17,85 +19,72 @@ interface CreateEventData {
   courseId?: string;
 }
 
+function refreshEventPages() {
+  revalidatePath("/admin/events");
+  revalidatePath("/portal/events");
+}
+
 export async function createEvent(data: CreateEventData) {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("session")?.value;
-  if (!sessionCookie) return { error: "Unauthorized" };
-
   try {
-    const claims = await auth.verifySessionCookie(sessionCookie, true);
-    if (claims.role !== "admin" && claims.admin !== true) {
-      return { error: "Forbidden: Admins only" };
-    }
-
-    // Rate limiting: Prevent abuse
-    const rateLimitResult = await rateLimit(
-      claims.uid,
+    const admin = await requireAdmin();
+    const limited = await rateLimit(
+      admin.uid,
       "createEvent",
       RateLimitPresets.CREATE_EVENT,
     );
-
-    if (!rateLimitResult.allowed) {
-      const waitSeconds = Math.ceil(
-        (rateLimitResult.resetAt - Date.now()) / 1000,
-      );
+    if (!limited.allowed) {
       return {
-        error: `Limite de criação de eventos excedido. Aguarde ${waitSeconds}s.`,
+        error: `Limite de criação de eventos excedido. Aguarde ${Math.ceil((limited.resetAt - Date.now()) / 1000)}s.`,
       };
     }
 
-    const eventsRef = db.collection("events");
-
-    const eventDoc = await eventsRef.add({
-      title: data.title,
-      description: data.description,
-      startsAt: Timestamp.fromDate(new Date(data.startsAt)),
-      endsAt: data.endsAt ? Timestamp.fromDate(new Date(data.endsAt)) : null,
+    const supabase = createSupabaseServiceClient();
+    const id = randomUUID();
+    const { error } = await supabase.from("events").insert({
+      id,
+      title: data.title.trim(),
+      description: data.description?.trim() || null,
+      starts_at: new Date(data.startsAt).toISOString(),
+      ends_at: data.endsAt ? new Date(data.endsAt).toISOString() : null,
       type: data.type,
-      provider: data.type === "webinar" ? "google_meet" : "onsite",
       status: "scheduled",
-      joinUrl: data.joinUrl || null,
+      is_public: false,
+      join_url: data.joinUrl || null,
       location: data.location || null,
-      courseId: data.courseId || null,
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
-      createdBy: claims.uid,
+      course_id: data.courseId || null,
     });
+    if (error) throw error;
 
-    // 🔔 Mass Notification Logic
     if (data.courseId) {
-      const enrollmentsSnap = await adminDb
-        .collection("enrollments")
-        .where("courseId", "==", data.courseId)
-        .where("status", "==", "active")
-        .get();
-
-      if (!enrollmentsSnap.empty) {
-        const batch = adminDb.batch();
-        enrollmentsSnap.docs.forEach((enrollDoc) => {
-          const studentUid = enrollDoc.data().uid;
-          const notificationRef = adminDb
-            .collection("users")
-            .doc(studentUid)
-            .collection("notifications")
-            .doc();
-
-          batch.set(notificationRef, {
-            title: "Nova Mentoria Agendada!",
-            body: `Um novo encontro foi marcado: ${data.title}. Veja data e horário na agenda.`,
-            link: "/portal/events",
-            type: "event_scheduled",
-            isRead: false,
-            createdAt: Timestamp.now(),
-          });
-        });
-        await batch.commit();
-      }
+      const { data: enrollments, error: enrollmentError } = await supabase
+        .from("enrollments")
+        .select("user_id")
+        .eq("course_id", data.courseId)
+        .eq("status", "active");
+      if (enrollmentError) throw enrollmentError;
+      await Promise.all(
+        (enrollments || []).map(({ user_id }) =>
+          createNotification(
+            user_id,
+            {
+              title: "Nova Mentoria Agendada!",
+              body: `Um novo encontro foi marcado: ${data.title}. Veja data e horário na agenda.`,
+              link: "/portal/events",
+              type: "event_scheduled" as any,
+            },
+            supabase,
+          ),
+        ),
+      );
     }
 
-    revalidatePath("/admin/events");
-    revalidatePath("/portal/events");
-    return { success: true, id: eventDoc.id };
+    await logAudit({
+      action: "EVENT_CREATED",
+      actor: { uid: admin.uid, email: admin.email, role: admin.role },
+      target: { id, collection: "events", summary: data.title },
+    });
+    refreshEventPages();
+    return { success: true, id };
   } catch (error) {
     console.error("Create Event Error:", error);
     return { error: "Failed to create event" };
@@ -103,29 +92,19 @@ export async function createEvent(data: CreateEventData) {
 }
 
 export async function deleteEvent(eventId: string) {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("session")?.value;
-  if (!sessionCookie) return { error: "Unauthorized" };
-
   try {
-    const claims = await auth.verifySessionCookie(sessionCookie, true);
-    if (claims.role !== "admin" && claims.admin !== true) {
-      return { error: "Forbidden: Admins only" };
-    }
-
-    await db.collection("events").doc(eventId).delete();
-
-    // Audit
-    await import("@/lib/audit").then((m) =>
-      m.auditService.logEvent({
-        eventType: "EVENT_DELETED",
-        actor: { uid: claims.uid, email: claims.email },
-        target: { id: eventId, collection: "events" },
-      }),
-    );
-
-    revalidatePath("/admin/events");
-    revalidatePath("/portal/events");
+    const admin = await requireAdmin();
+    const { error } = await createSupabaseServiceClient()
+      .from("events")
+      .delete()
+      .eq("id", eventId);
+    if (error) throw error;
+    await logAudit({
+      action: "EVENT_DELETED",
+      actor: { uid: admin.uid, email: admin.email, role: admin.role },
+      target: { id: eventId, collection: "events" },
+    });
+    refreshEventPages();
     return { success: true };
   } catch (error) {
     console.error("Delete Event Error:", error);
@@ -137,33 +116,20 @@ export async function updateEventStatus(
   eventId: string,
   status: "scheduled" | "live" | "ended" | "cancelled",
 ) {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("session")?.value;
-  if (!sessionCookie) return { error: "Unauthorized" };
-
   try {
-    const claims = await auth.verifySessionCookie(sessionCookie, true);
-    if (claims.role !== "admin" && claims.admin !== true) {
-      return { error: "Forbidden: Admins only" };
-    }
-
-    await db.collection("events").doc(eventId).update({
-      status,
-      updatedAt: Timestamp.now(),
+    const admin = await requireAdmin();
+    const { error } = await createSupabaseServiceClient()
+      .from("events")
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq("id", eventId);
+    if (error) throw error;
+    await logAudit({
+      action: "EVENT_STATUS_UPDATED",
+      actor: { uid: admin.uid, email: admin.email, role: admin.role },
+      target: { id: eventId, collection: "events" },
+      metadata: { status },
     });
-
-    // Audit
-    await import("@/lib/audit").then((m) =>
-      m.auditService.logEvent({
-        eventType: "EVENT_STATUS_UPDATED",
-        actor: { uid: claims.uid, email: claims.email },
-        target: { id: eventId, collection: "events" },
-        payload: { status },
-      }),
-    );
-
-    revalidatePath("/admin/events");
-    revalidatePath("/portal/events");
+    refreshEventPages();
     return { success: true };
   } catch (error) {
     console.error("Update Event Status Error:", error);

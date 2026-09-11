@@ -9,9 +9,8 @@ import {
 } from "@/actions/profile";
 import { Camera, Loader2, Save, Lock } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase/client";
 import { createSupabaseBrowserClient } from "@/infrastructure/supabase/client";
+import { SafeImage } from "@/components/ui/SafeImage";
 
 export function ProfileForm() {
   const { user, updateProfile } = useAuth(); // Get context updater
@@ -44,21 +43,24 @@ export function ProfileForm() {
       setDisplayName(user.displayName || "");
       setPreviewUrl(user.photoURL);
 
-      // Fetch Bio from Firestore
-      getDoc(doc(db, "users", user.uid))
-        .then((snap) => {
-          if (snap.exists()) {
-            const data = snap.data();
-            setBio(data.bio || "");
-            setPhoneNumber(data.phoneNumber || "");
-            setProfession(data.profession || "");
-            setCity(data.city || "");
-            setState(data.state || "");
-            setDateOfBirth(data.dateOfBirth || "");
-            setInstagram(data.instagram || "");
-          }
-        })
-        .catch((err) => console.error(err));
+      // Supabase is the source of truth for the profile.
+      void (async () => {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select(
+            "bio,phone_number,profession,city,state,date_of_birth,instagram",
+          )
+          .eq("id", user.uid)
+          .maybeSingle();
+        if (error) throw error;
+        setBio(data?.bio || "");
+        setPhoneNumber(data?.phone_number || "");
+        setProfession(data?.profession || "");
+        setCity(data?.city || "");
+        setState(data?.state || "");
+        setDateOfBirth(data?.date_of_birth || "");
+        setInstagram(data?.instagram || "");
+      })().catch((err) => console.error("Erro ao carregar perfil:", err));
     }
   }, [user]);
 
@@ -70,8 +72,24 @@ export function ProfileForm() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+        setMessage({ type: "error", text: "Use uma imagem JPG, PNG ou WEBP." });
+        e.target.value = "";
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        setMessage({
+          type: "error",
+          text: "A imagem deve ter no máximo 5 MB.",
+        });
+        e.target.value = "";
+        return;
+      }
       setAvatarFile(file);
-      setPreviewUrl(URL.createObjectURL(file));
+      setPreviewUrl((current) => {
+        if (current?.startsWith("blob:")) URL.revokeObjectURL(current);
+        return URL.createObjectURL(file);
+      });
     }
   };
 
@@ -108,12 +126,11 @@ export function ProfileForm() {
       // 3. Update Client Context (Sync Sidebar)
       if (user) {
         try {
-          // We don't want this to block if there's a connection issue with Firebase Client SDK,
-          // since the source of truth (Firestore/Action) already succeeded.
+          // The server action is authoritative; this only refreshes local auth UI.
           await updateProfile({ displayName, photoURL: newPhotoURL });
         } catch (e) {
           console.error(
-            "[DEBUG] Client-side updateProfile failed, but data is saved in Firestore:",
+            "[DEBUG] Client-side profile refresh failed, but data was saved:",
             e,
           );
         }
@@ -234,10 +251,12 @@ export function ProfileForm() {
           <div className="relative group">
             <div className="w-24 h-24 rounded-full overflow-hidden bg-stone-100 border border-stone-200">
               {previewUrl ? (
-                <img
+                <SafeImage
                   src={previewUrl}
                   alt="Avatar"
-                  className="w-full h-full object-cover"
+                  fill
+                  sizes="96px"
+                  className="object-cover"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-stone-300 font-serif text-3xl">
@@ -247,7 +266,8 @@ export function ProfileForm() {
             </div>
             <label
               htmlFor="avatar-upload"
-              className="absolute inset-0 flex items-center justify-center bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-full"
+              aria-label="Selecionar nova foto de perfil"
+              className="absolute inset-0 flex cursor-pointer items-center justify-center rounded-full bg-black/40 text-white opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 md:focus-within:opacity-100"
             >
               <Camera size={24} />
               <input
@@ -255,7 +275,7 @@ export function ProfileForm() {
                 name="avatar"
                 type="file"
                 className="hidden"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp"
                 onChange={handleFileChange}
               />
             </label>

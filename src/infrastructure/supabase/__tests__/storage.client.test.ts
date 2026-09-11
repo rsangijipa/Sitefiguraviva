@@ -24,7 +24,7 @@ describe("uploadAdminAsset", () => {
     const getPublicUrl = jest.fn().mockReturnValue({
       data: {
         publicUrl:
-          "https://project.supabase.co/storage/v1/object/public/uploads/uploads/admin/uuid-1-cover.jpg",
+          "https://project.supabase.co/storage/v1/object/public/course-assets/uploads/admin/uuid-1-cover.jpg",
       },
     });
     const from = jest.fn().mockReturnValue({ upload, getPublicUrl });
@@ -43,13 +43,13 @@ describe("uploadAdminAsset", () => {
         },
       ),
     ).resolves.toEqual({
-      url: "https://project.supabase.co/storage/v1/object/public/uploads/uploads/admin/uuid-1-cover.jpg",
+      url: "https://project.supabase.co/storage/v1/object/public/course-assets/uploads/admin/uuid-1-cover.jpg",
       path: "uploads/admin/uuid-1-cover.jpg",
       name: "cover.jpg",
       size: "5 B",
     });
 
-    expect(from).toHaveBeenCalledWith("uploads");
+    expect(from).toHaveBeenCalledWith("course-assets");
     expect(upload).toHaveBeenCalledWith(
       "uploads/admin/uuid-1-cover.jpg",
       expect.any(File),

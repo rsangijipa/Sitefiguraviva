@@ -1,290 +1,310 @@
 "use client";
 
-import React, { useState, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import dynamic from "next/dynamic";
+import { useState } from "react";
+import { motion } from "framer-motion";
 import {
-  Wind,
-  Sprout,
+  ChevronDown,
+  ChevronUp,
+  Clock3,
+  LockKeyhole,
   Sparkles,
-  Fingerprint,
-  Waves,
-  ChevronLeft,
-  ChevronRight,
 } from "lucide-react";
-import BreathingApp from "./resources/apps/breathing/BreathingApp";
-import { App as QuizBank } from "./Quiz/App";
-import SomaScan from "./resources/apps/soma-scan/App";
-import LagoApp from "./resources/apps/lago/LagoApp";
-import ResourceModalShell from "./resources/ResourceModalShell";
+import { ResourceExperience } from "./resources/ResourceExperience";
 import ResourceAppFrame from "./resources/ResourceAppFrame";
-import { EmotionTreeApp } from "./resources/apps/emotion-tree/EmotionTreeApp";
+import ComingSoonResource from "./resources/ComingSoonResource";
+import { resourceCatalog } from "./resources/resourceCatalog";
+import { emotionTreeFonts } from "./resources/apps/emotion-tree/fonts";
+
+const ResourceLoading = () => (
+  <div
+    className="flex h-full items-center justify-center bg-paper"
+    role="status"
+    aria-label="Carregando recurso"
+  >
+    <div className="text-center">
+      <div
+        className="h-5 w-5 animate-spin border-2 border-accent border-t-transparent rounded-full mx-auto"
+        aria-hidden="true"
+      />
+      <span className="mt-3 block text-sm text-text/60">
+        Preparando recurso...
+      </span>
+    </div>
+  </div>
+);
+
+const lazy = (loader) =>
+  dynamic(loader, {
+    ssr: false,
+    loading: ResourceLoading,
+  });
+
+const resourceApps = {
+  "roda-das-emocoes": lazy(() =>
+    import("@/features/interactive-resources/emotion-wheel/EmotionWheelExperience").then(
+      (module) => module.EmotionWheelExperience,
+    ),
+  ),
+  breathing: lazy(() => import("./resources/apps/breathing/BreathingApp")),
+  "emotion-tree": lazy(() =>
+    import("./resources/apps/emotion-tree/EmotionTreeApp").then(
+      (module) => module.EmotionTreeApp,
+    ),
+  ),
+  somascan: lazy(() => import("./resources/apps/soma-scan/App")),
+  quiz: lazy(() => import("./Quiz/App").then((module) => module.App)),
+  lago: lazy(() => import("./resources/apps/lago/LagoApp")),
+  "grounding-54321": lazy(() => import("./resources/apps/grounding-54321/App")),
+  "body-map": lazy(() => import("./resources/apps/body-map/BodyMapApp")),
+  "intensidade-agora": lazy(
+    () => import("./resources/apps/intensidade-agora/IntensidadeAgoraApp"),
+  ),
+  "diario-aqui-e-agora": lazy(
+    () => import("./resources/apps/diario-aqui-e-agora/App"),
+  ),
+  "check-in": lazy(() => import("./resources/apps/check-in/CheckInApp")),
+  "necessidades-agora": lazy(
+    () => import("./resources/apps/necessidades-agora/NeedsNowApp"),
+  ),
+  "figura-e-fundo": lazy(() => import("./resources/apps/figura-e-fundo/App")),
+  polaridades: lazy(
+    () => import("./resources/apps/polaridades/PolaridadesApp"),
+  ),
+  "duas-cadeiras": lazy(() => import("./resources/apps/duas-cadeiras/App")),
+  "jardim-de-pensamentos": lazy(
+    () => import("./resources/apps/jardim-de-pensamentos/JardimPensamentosApp"),
+  ),
+  "sala-de-pausa": lazy(
+    () => import("./resources/apps/sala-de-pausa/SalaDePausaApp"),
+  ),
+  "cartas-gestalticas": lazy(
+    () => import("./resources/apps/cartas-gestalticas/App"),
+  ),
+  "banco-de-microcasos": lazy(
+    () => import("./resources/apps/banco-de-microcasos/BancoMicrocasosApp"),
+  ),
+  "fronteiras-de-contato": lazy(
+    () => import("./resources/apps/fronteiras-de-contato/App"),
+  ),
+  "ciclo-do-contato": lazy(() => import("./resources/apps/ciclodocontato/App")),
+  "caso-clinico": lazy(
+    () => import("./resources/apps/casoclinicointerativo/App"),
+  ),
+};
+
+const categories = ["PERCEBER", "REGULAR", "EXPERIMENTAR", "APRENDER"];
+
+function ResourceCard({ resource, index, onOpen }) {
+  const Icon = resource.icon;
+  const available = resource.status === "available";
+
+  return (
+    <motion.button
+      type="button"
+      initial={{ opacity: 0, y: 12 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-24px" }}
+      transition={{ duration: 0.28, delay: Math.min(index * 0.035, 0.14) }}
+      onClick={() => onOpen(resource.slug)}
+      aria-label={`${resource.title}. ${resource.description}`}
+      className="group relative min-h-52 overflow-hidden rounded-2xl border border-primary/15 bg-paper p-5 text-left shadow-[0_10px_30px_rgba(41,54,39,0.06)] transition duration-200 hover:-translate-y-1 hover:border-terra/45 hover:shadow-[0_16px_34px_rgba(41,54,39,0.11)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-3"
+    >
+      <span className="absolute inset-x-0 top-0 h-1 bg-terra/0 transition-colors group-hover:bg-terra/70" />
+      <span className="flex items-start justify-between gap-4">
+        <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-primary/10 bg-areia text-primary transition group-hover:border-terra/25 group-hover:text-terra">
+          <Icon size={21} aria-hidden="true" />
+        </span>
+        <span className="rounded-full border border-primary/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-primary/65">
+          {available ? "Disponível" : "Em preparação"}
+        </span>
+      </span>
+
+      <span className="mt-5 block font-serif text-2xl leading-tight text-primary">
+        {resource.title}
+      </span>
+      <span className="mt-2 block text-sm leading-relaxed text-text/72">
+        {resource.description}
+      </span>
+
+      <span className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-primary/60">
+        {resource.duration ? (
+          <span className="inline-flex items-center gap-1.5">
+            <Clock3 size={14} aria-hidden="true" />
+            {resource.duration}
+          </span>
+        ) : null}
+        {resource.privacy === "private" ? (
+          <span className="inline-flex items-center gap-1.5">
+            <LockKeyhole size={14} aria-hidden="true" />
+            Conteúdo pessoal
+          </span>
+        ) : null}
+      </span>
+    </motion.button>
+  );
+}
 
 export default function ResourcesSection() {
-  const [activeResource, setActiveResource] = useState(null); // 'breathing' | 'emotion-tree' | 'quiz' | 'somascan' | 'lago'
-  const scrollContainerRef = useRef(null);
-  const openResource = (resource) => {
-    setActiveResource(resource);
-  };
+  const [activeSlug, setActiveSlug] = useState(null);
+  const [activeSection, setActiveSection] = useState(null);
+  const [openCategories, setOpenCategories] = useState({});
 
-  const closeResource = () => {
-    setActiveResource(null);
-  };
+  const resource = resourceCatalog.find((item) => item.slug === activeSlug);
+  const ActiveApp = activeSlug ? resourceApps[activeSlug] : null;
 
-  const scroll = (direction) => {
-    if (scrollContainerRef.current) {
-      const scrollAmount = direction === "left" ? -350 : 350;
-      scrollContainerRef.current.scrollBy({
-        left: scrollAmount,
-        behavior: "smooth",
-      });
+  const handleOpen = (slug) => {
+    setActiveSlug(slug);
+    const found = resourceCatalog.find((item) => item.slug === slug);
+    if (found?.sections?.[0]) {
+      setActiveSection(found.sections[0].id);
+    } else {
+      setActiveSection(null);
     }
+  };
+
+  const toggleCategory = (category) => {
+    setOpenCategories((current) => ({
+      ...current,
+      [category]: !current[category],
+    }));
   };
 
   return (
     <section
       id="recursos-interativos"
-      className="py-24 bg-surface border-t border-stone-100 relative overflow-hidden transition-colors duration-500"
+      aria-labelledby="resources-title"
+      className="border-t border-primary/10 bg-surface py-16 sm:py-20"
     >
-      <div className="container mx-auto px-6 max-w-7xl relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-12 text-center max-w-2xl mx-auto"
-        >
-          <span className="text-xs font-bold tracking-[0.2em] uppercase text-accent mb-4 block">
-            Ferramentas de Cuidado
+      <div className="container relative mx-auto max-w-7xl px-4 sm:px-6">
+        <header className="mx-auto mb-12 max-w-2xl text-center">
+          <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-terra">
+            <Sparkles size={14} aria-hidden="true" />
+            Ferramentas de cuidado e formação
           </span>
-          <h2 className="heading-section text-primary">
-            Recursos{" "}
-            <span className="italic text-accent font-light">Interativos</span>
-          </h2>
-          <p className="text-lg text-text/80 mt-4">
-            Espaços digitais desenhados para cultivar a presença e a awareness
-            no seu dia a dia.
-          </p>
-        </motion.div>
-
-        {/* Horizontal Scroll Container */}
-        <div className="relative w-full">
-          {/* Fade Edges */}
-          <div className="absolute left-0 top-0 bottom-12 w-12 bg-gradient-to-r from-surface to-transparent z-10 pointer-events-none" />
-          <div className="absolute right-0 top-0 bottom-12 w-12 bg-gradient-to-l from-surface to-transparent z-10 pointer-events-none" />
-
-          <div
-            ref={scrollContainerRef}
-            className="flex md:grid md:grid-cols-2 lg:grid-cols-4 overflow-x-auto md:overflow-visible snap-x snap-mandatory gap-6 pb-12 px-6 md:px-0 scrollbar-hide"
-            style={{ scrollBehavior: "smooth" }}
+          <h2
+            id="resources-title"
+            className="heading-section mt-3 text-primary"
           >
-            {/* Breathing App Card */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              whileHover={{ y: -5 }}
-              className="flex-shrink-0 w-80 md:w-auto snap-center group relative bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col items-center text-center"
-              onClick={() => openResource("breathing")}
-            >
-              <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center text-accent mb-6 group-hover:scale-110 transition-transform">
-                <Wind size={32} />
-              </div>
-              <h3 className="text-xl font-serif text-primary font-bold mb-2">
-                Guia de Respiração
-              </h3>
-              <p className="text-text/60 text-sm mb-6 flex-grow">
-                Uma pausa guiada para reduzir a ansiedade e reconectar com o
-                agora.
-              </p>
-              <span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-accent group-hover:text-primary transition-colors">
-                Iniciar Prática
-              </span>
-            </motion.div>
+            Recursos <span className="italic text-accent">Interativos</span>
+          </h2>
+          <p className="mt-4 text-base leading-relaxed text-text/75 sm:text-lg">
+            Convites digitais para observar, sentir e refletir — no seu ritmo,
+            sem substituir acompanhamento profissional.
+          </p>
+        </header>
 
-            {/* Feelings Tree Card */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              whileHover={{ y: -5 }}
-              className="flex-shrink-0 w-80 md:w-auto snap-center group relative bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col items-center text-center"
-              onClick={() => openResource("emotion-tree")}
-            >
-              <div className="w-16 h-16 rounded-2xl bg-gold/10 flex items-center justify-center text-gold mb-6 group-hover:scale-110 transition-transform">
-                <Sprout size={32} />
-              </div>
-              <h3 className="text-xl font-serif text-primary font-bold mb-2">
-                Árvore da Awareness
-              </h3>
-              <p className="text-text/60 text-sm mb-6 flex-grow">
-                Visualize e nomeie suas emoções em uma experiência interativa
-                3D.
-              </p>
-              <span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-gold group-hover:text-primary transition-colors">
-                Acessar Árvore
-              </span>
-            </motion.div>
+        <div className="space-y-10">
+          {categories.map((category) => {
+            const items = resourceCatalog.filter(
+              (item) => item.category === category,
+            );
+            const isOpen = Boolean(openCategories[category]);
+            const visibleItems = isOpen ? items : items.slice(0, 4);
+            const hasHiddenItems = items.length > 4;
+            const panelId = `resources-${category.toLowerCase()}`;
+            const headingId = `category-${category.toLowerCase()}`;
 
-            {/* SomaScan Card (NEW) */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-              whileHover={{ y: -5 }}
-              className="flex-shrink-0 w-80 md:w-auto snap-center group relative bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col items-center text-center"
-              onClick={() => openResource("somascan")}
-            >
-              <div className="w-16 h-16 rounded-2xl bg-stone-100 flex items-center justify-center text-stone-600 mb-6 group-hover:scale-110 transition-transform">
-                <Fingerprint size={32} />
-              </div>
-              <h3 className="text-xl font-serif text-primary font-bold mb-2">
-                SomaScan
-              </h3>
-              <p className="text-text/60 text-sm mb-6 flex-grow">
-                Mapeamento corporal consciente para escutar o que o corpo diz.
-              </p>
-              <span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-stone-600 group-hover:text-primary transition-colors">
-                Iniciar Scan
-              </span>
-            </motion.div>
+            return (
+              <section
+                key={category}
+                aria-labelledby={headingId}
+                className="border-b border-primary/10 pb-10"
+              >
+                <div className="mb-5 flex items-center justify-between gap-4">
+                  <div>
+                    <h3
+                      id={headingId}
+                      className="font-serif text-2xl text-primary"
+                    >
+                      {category}
+                    </h3>
+                    <p className="mt-1 text-sm text-primary/55">
+                      {items.length}{" "}
+                      {items.length === 1 ? "experiência" : "experiências"}
+                    </p>
+                  </div>
+                  {hasHiddenItems ? (
+                    <button
+                      type="button"
+                      aria-expanded={isOpen}
+                      aria-controls={panelId}
+                      onClick={() => toggleCategory(category)}
+                      className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-primary/15 px-4 text-xs font-bold uppercase tracking-widest text-primary transition hover:border-terra hover:text-terra focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+                    >
+                      {isOpen ? "Recolher" : "Ver todos"}
+                      {isOpen ? (
+                        <ChevronUp size={18} aria-hidden="true" />
+                      ) : (
+                        <ChevronDown size={18} aria-hidden="true" />
+                      )}
+                    </button>
+                  ) : null}
+                </div>
 
-            {/* Mental Health Quiz Card */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3 }}
-              whileHover={{ y: -5 }}
-              className="flex-shrink-0 w-80 md:w-auto snap-center group relative bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col items-center text-center"
-              onClick={() => openResource("quiz")}
-            >
-              <div className="w-16 h-16 rounded-2xl bg-sage/10 flex items-center justify-center text-sage mb-6 group-hover:scale-110 transition-transform">
-                <Sparkles size={32} />
-              </div>
-              <h3 className="text-xl font-serif text-primary font-bold mb-2">
-                Banco de Quizzes
-              </h3>
-              <p className="text-text/60 text-sm mb-6 flex-grow">
-                MenteQuiz: questionários e reflexões sobre saúde mental,
-                comportamento e autoconhecimento.
-              </p>
-              <span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-sage group-hover:text-primary transition-colors">
-                Explorar Quizzes
-              </span>
-            </motion.div>
-
-            {/* Lago Card (NEW) */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.4 }}
-              whileHover={{ y: -5 }}
-              className="flex-shrink-0 w-80 md:w-auto snap-center group relative bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col items-center text-center"
-              onClick={() => openResource("lago")}
-            >
-              <div className="w-16 h-16 rounded-2xl bg-sage/10 flex items-center justify-center text-sage mb-6 group-hover:scale-110 transition-transform">
-                <Waves size={32} />
-              </div>
-              <h3 className="text-xl font-serif text-primary font-bold mb-2">
-                Lago
-              </h3>
-              <p className="text-text/60 text-sm mb-6 flex-grow">
-                Um lago vivo em WebGL — toque a água, alimente as carpas, sinta
-                a calma se espalhar.
-              </p>
-              <span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-sage group-hover:text-primary transition-colors">
-                Entrar no Lago
-              </span>
-            </motion.div>
-          </div>
-
-          {/* Visual Scroll Controls */}
-          <div className="flex md:hidden items-center justify-center gap-6 mt-4 opacity-70 hover:opacity-100 transition-opacity pb-4">
-            <button
-              onClick={() => scroll("left")}
-              className="p-3 rounded-full hover:bg-stone-100 text-stone-400 hover:text-stone-800 transition-colors border border-transparent hover:border-stone-200"
-              aria-label="Scroll Left"
-            >
-              <ChevronLeft size={24} />
-            </button>
-
-            <div className="w-32 h-1.5 bg-stone-100 rounded-full overflow-hidden">
-              <motion.div
-                className="h-full bg-stone-300 w-1/3 rounded-full"
-                animate={{ x: [0, 80, 0] }}
-                transition={{
-                  repeat: Infinity,
-                  duration: 4,
-                  ease: "easeInOut",
-                }}
-              />
-            </div>
-
-            <button
-              onClick={() => scroll("right")}
-              className="p-3 rounded-full hover:bg-stone-100 text-stone-400 hover:text-stone-800 transition-colors border border-transparent hover:border-stone-200"
-              aria-label="Scroll Right"
-            >
-              <ChevronRight size={24} />
-            </button>
-          </div>
+                <div
+                  id={panelId}
+                  className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
+                >
+                  {visibleItems.map((item, index) => (
+                    <ResourceCard
+                      key={item.slug}
+                      resource={item}
+                      index={index}
+                      onOpen={handleOpen}
+                    />
+                  ))}
+                </div>
+              </section>
+            );
+          })}
         </div>
       </div>
 
-      <ResourceModalShell
-        open={!!activeResource}
-        title={
-          activeResource === "emotion-tree"
-            ? "Árvore das Emoções"
-            : activeResource === "breathing"
-              ? "Guia de Respiração"
-              : activeResource === "somascan"
-                ? "SomaScan"
-                : activeResource === "lago"
-                  ? "Lago"
-                  : "Banco de Quizzes"
-        }
-        onClose={closeResource}
-        className={activeResource === "emotion-tree" ? "bg-[#0f1727]" : ""}
+      <ResourceExperience
+        isOpen={Boolean(resource)}
+        title={resource?.title ?? "Recurso interativo"}
+        category={resource ? `${resource.category} · Figura Viva` : undefined}
+        onClose={() => setActiveSlug(null)}
+        sections={resource?.sections}
+        activeSection={activeSection}
+        onSectionChange={setActiveSection}
+        className={resource?.slug === "emotion-tree" ? emotionTreeFonts : ""}
       >
-        {activeResource === "breathing" && (
-          <ResourceAppFrame title="Guia de Respiração">
-            <div className="resource-app resource-app--light">
-              <BreathingApp onClose={closeResource} />
-            </div>
-          </ResourceAppFrame>
-        )}
-        {activeResource === "emotion-tree" && (
-          <ResourceAppFrame title="Árvore das Emoções">
-            <div className="resource-app resource-app--tree">
-              <EmotionTreeApp />
-            </div>
-          </ResourceAppFrame>
-        )}
-        {activeResource === "somascan" && (
-          <ResourceAppFrame title="SomaScan">
-            <div className="resource-app resource-app--light">
-              <SomaScan />
-            </div>
-          </ResourceAppFrame>
-        )}
-        {activeResource === "quiz" && (
-          <ResourceAppFrame title="Banco de Quizzes">
-            <div className="resource-app resource-app--light">
-              <QuizBank />
-            </div>
-          </ResourceAppFrame>
-        )}
-        {activeResource === "lago" && (
-          <ResourceAppFrame title="Lago">
-            <div className="resource-app resource-app--light">
-              <LagoApp />
-            </div>
-          </ResourceAppFrame>
-        )}
-      </ResourceModalShell>
+        {resource ? (
+          <>
+            {resource.status === "coming-soon" ? (
+              <ComingSoonResource
+                resource={resource}
+                onClose={() => setActiveSlug(null)}
+              />
+            ) : ActiveApp ? (
+              <div
+                className={
+                  resource.slug === "emotion-tree"
+                    ? "resource-app--tree h-full min-h-0"
+                    : "h-full min-h-0"
+                }
+              >
+                <ActiveApp
+                  activeSection={activeSection}
+                  onSectionChange={setActiveSection}
+                />
+              </div>
+            ) : (
+              <ResourceAppFrame
+                title={resource.title}
+                status="error"
+                errorMessage="Este recurso ainda não possui uma implementação disponível."
+              >
+                {null}
+              </ResourceAppFrame>
+            )}
+          </>
+        ) : null}
+      </ResourceExperience>
     </section>
   );
 }
+
+export { resourceApps };

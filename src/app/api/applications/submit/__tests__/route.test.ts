@@ -1,10 +1,24 @@
 /** @jest-environment node */
 
 const upsert = jest.fn().mockResolvedValue({ error: null });
+const maybeSingle = jest
+  .fn()
+  .mockResolvedValueOnce({
+    data: { id: "co-visar", status: "open", is_published: true },
+    error: null,
+  })
+  .mockResolvedValueOnce({ data: null, error: null });
+
+const query = () => ({
+  select: jest.fn(() => ({
+    eq: jest.fn(() => ({ maybeSingle })),
+  })),
+  upsert,
+});
 
 jest.mock("@/infrastructure/supabase/server", () => ({
   createSupabaseServiceClient: jest.fn(() => ({
-    from: jest.fn(() => ({ upsert })),
+    from: jest.fn(query),
   })),
 }));
 
@@ -38,7 +52,11 @@ describe("POST /api/applications/submit", () => {
             phone: "6992399836",
             profession: "Psicólogo",
           },
-          consent: { lgpd: true, acceptedAt: "2026-09-05T00:00:00.000Z" },
+          consent: {
+            lgpd: true,
+            acceptedAt: "2026-09-05T00:00:00.000Z",
+            termsVersion: "2026-09-09",
+          },
         }),
     } as any);
 
@@ -48,7 +66,11 @@ describe("POST /api/applications/submit", () => {
         id: "user-1_co-visar",
         user_id: "user-1",
         course_id: "co-visar",
-        consent: { lgpd: true, acceptedAt: "2026-09-05T00:00:00.000Z" },
+        consent: {
+          lgpd: true,
+          acceptedAt: "2026-09-05T00:00:00.000Z",
+          termsVersion: "2026-09-09",
+        },
         status: "submitted",
         source: "internal",
       }),

@@ -1,78 +1,56 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { adminDb } from "@/lib/firebase/admin";
-import { FieldValue } from "firebase-admin/firestore";
 import { assertIsTutorOrAdmin } from "@/lib/auth/authoring-gate";
-import { mirrorCourseToSupabase } from "@/lib/course-content/course-mirror";
+import {
+  getAdminCourse,
+  listAdminModules,
+  listAdminLessons,
+  updateAdminCourse,
+  updateAdminModule,
+  updateAdminLesson,
+} from "@/features/courses/infrastructure/supabaseAdminCourseRepository.server";
 
-export async function validateCoursePublishable(
-  courseId: string,
-): Promise<{ valid: boolean; errors: string[] }> {
-  const errors: string[] = [];
-  const courseSnap = await adminDb.collection("courses").doc(courseId).get();
-  if (!courseSnap.exists)
-    return { valid: false, errors: ["Curso não encontrado."] };
-
-  const courseData = courseSnap.data();
-  if (!courseData?.title) errors.push("Curso precisa de um título.");
-  if (!courseData?.description) errors.push("Curso precisa de uma descrição.");
-  if (!courseData?.coverImage && !courseData?.image)
-    errors.push("Curso precisa de uma imagem de capa.");
-
-  const modulesSnap = await adminDb
-    .collection("courses")
-    .doc(courseId)
-    .collection("modules")
-    .get();
-  // Assume missing isPublished flag means it is published (legacy default)
-  const publishedModules = modulesSnap.docs.filter(
-    (doc) => doc.data().isPublished !== false,
+function hasPublishedContent(lesson: any): boolean {
+  if (typeof lesson.content === "string" && lesson.content.trim()) return true;
+  return (
+    Array.isArray(lesson.blocks) &&
+    lesson.blocks.some((b: any) => b?.isPublished !== false)
   );
+}
 
-  if (publishedModules.length === 0) {
+export async function validateCoursePublishable(courseId: string) {
+  const errors: string[] = [];
+  const course = await getAdminCourse(courseId);
+  if (!course) return { valid: false, errors: ["Curso não encontrado."] };
+  if (!course.title) errors.push("Curso precisa de um título.");
+  if (!course.description) errors.push("Curso precisa de uma descrição.");
+  if (!course.image) errors.push("Curso precisa de uma imagem de capa.");
+  const modules = await listAdminModules(courseId);
+  const publishedModules = modules.filter((m: any) => m.isPublished !== false);
+  if (!publishedModules.length)
     errors.push("O curso precisa ter pelo menos um módulo publicado.");
-  }
-
-  let hasPublishedLesson = false;
-
-  for (const mod of publishedModules) {
-    const lessonsSnap = await mod.ref.collection("lessons").get();
-    const publishedLessons = lessonsSnap.docs.filter(
-      (doc) => doc.data().isPublished !== false,
+  let hasLesson = false;
+  for (const courseModule of publishedModules) {
+    const lessons = await listAdminLessons(courseId, courseModule.id);
+    const publishedLessons = lessons.filter(
+      (l: any) => l.isPublished !== false,
     );
-
-    if (publishedLessons.length === 0) {
+    if (!publishedLessons.length)
       errors.push(
-        `O módulo "${mod.data().title || "Sem título"}" está publicado, mas não possui aulas publicadas.`,
+        `O módulo "${courseModule.title || "Sem título"}" não possui aulas publicadas.`,
       );
-    }
-
     for (const lesson of publishedLessons) {
-      hasPublishedLesson = true;
-      const blocksSnap = await lesson.ref.collection("blocks").get();
-      const publishedBlocks = blocksSnap.docs.filter(
-        (doc) => doc.data().isPublished !== false,
-      );
-
-      const hasLegacyContent = !!lesson.data().content;
-
-      if (publishedBlocks.length === 0 && !hasLegacyContent) {
+      hasLesson = true;
+      if (!hasPublishedContent(lesson))
         errors.push(
-          `A aula "${lesson.data().title || "Sem título"}" está publicada, mas não possui conteúdo (blocos).`,
+          `A aula "${lesson.title || "Sem título"}" não possui conteúdo.`,
         );
-      }
     }
   }
-
-  if (publishedModules.length > 0 && !hasPublishedLesson) {
+  if (publishedModules.length && !hasLesson)
     errors.push("O curso precisa ter pelo menos uma aula publicada.");
-  }
-
-  return {
-    valid: errors.length === 0,
-    errors,
-  };
+  return { valid: errors.length === 0, errors };
 }
 
 export async function toggleCourseStatus(
@@ -80,116 +58,59 @@ export async function toggleCourseStatus(
   currentStatus: string,
 ) {
   try {
-    await assertIsTutorOrAdmin();
-  } catch (e) {
-    return { success: false, error: "Unauthorized" };
-  }
-
-  try {
+    const actor = await assertIsTutorOrAdmin();
     const newStatus = currentStatus === "open" ? "draft" : "open";
     const isPublished = newStatus === "open";
-
     if (isPublished) {
-      const { valid, errors } = await validateCoursePublishable(courseId);
-      if (!valid) {
-        return {
-          success: false,
-          error: errors.join(" | "),
-        };
-      }
+      const result = await validateCoursePublishable(courseId);
+      if (!result.valid)
+        return { success: false, error: result.errors.join(" | ") };
     }
-
-    const courseRef = adminDb.collection("courses").doc(courseId);
-    const courseDoc = await courseRef.get();
-    const oldData = courseDoc.data();
-
-    const updates: any = {
-      status: newStatus,
-      isPublished: isPublished,
-      updatedAt: FieldValue.serverTimestamp(),
-    };
-
-    if (isPublished) {
-      updates.publishedAt = FieldValue.serverTimestamp();
-    }
-
-    await courseRef.update(updates);
-
-    // This status/isPublished flag is the exact gate registerForCourseAction
-    // checks in Supabase before allowing signup — without mirroring it,
-    // toggling a course to "open" here never actually opens enrollment.
-    await mirrorCourseToSupabase(courseId, {
-      status: newStatus,
+    const course = await getAdminCourse(courseId);
+    if (!course) throw new Error("Curso não encontrado.");
+    await updateAdminCourse(courseId, {
+      status: newStatus as any,
       isPublished,
     });
-
-    // Audit Trail (actor already verified above by assertIsTutorOrAdmin)
-    const actor = await assertIsTutorOrAdmin();
-
-    await import("@/lib/audit").then((m) =>
-      m.auditService.logEvent({
-        eventType: "COURSE_STATUS_UPDATED",
-        actor: { uid: actor.uid, email: actor.email },
-        target: { id: courseId, collection: "courses" },
-        diff: {
-          before: { status: currentStatus, isPublished: oldData?.isPublished },
-          after: { status: newStatus, isPublished },
-        },
-      }),
-    );
-
-    // Revalidate all relevant paths
+    const { auditService } = await import("@/lib/audit");
+    await auditService.logEvent({
+      eventType: "COURSE_STATUS_UPDATED",
+      actor: { uid: actor.uid, email: actor.email },
+      target: { id: courseId, collection: "courses" },
+      diff: {
+        before: { status: currentStatus, isPublished: course.isPublished },
+        after: { status: newStatus, isPublished },
+      },
+    });
     revalidatePath("/admin/courses");
     revalidatePath("/");
     revalidatePath("/curso");
     revalidatePath(`/curso/${courseId}`);
-    revalidatePath(`/portal/courses`); // Student dashboard
-
     return { success: true, newStatus, isPublished };
-  } catch (error) {
-    console.error("Failed to toggle course status:", error);
-    return { success: false, error: "Database update failed" };
+  } catch (error: any) {
+    return { success: false, error: error.message || "Database update failed" };
   }
 }
 
-/**
- * Increments the contentRevision of a course, effectively creating a new academic version.
- * This is useful when major content changes are made and we want new certificates to reflect this.
- */
 export async function bumpCourseRevision(courseId: string) {
   try {
-    await assertIsTutorOrAdmin();
-    const courseRef = adminDb.collection("courses").doc(courseId);
-    const courseDoc = await courseRef.get();
-    if (!courseDoc.exists) throw new Error("Course not found");
-
-    const data = courseDoc.data();
-    const oldRevision = data?.contentRevision || 1;
-    const newRevision = oldRevision + 1;
-
-    await courseRef.update({
-      contentRevision: newRevision,
-      updatedAt: FieldValue.serverTimestamp(),
-    });
-
-    // Audit Trail (actor already verified above by assertIsTutorOrAdmin)
     const actor = await assertIsTutorOrAdmin();
-
-    await import("@/lib/audit").then((m) =>
-      m.auditService.logEvent({
-        eventType: "COURSE_VERSION_BUMPED",
-        actor: { uid: actor.uid, email: actor.email },
-        target: { id: courseId, collection: "courses" },
-        payload: { oldRevision, newRevision },
-      }),
-    );
-
+    const course = await getAdminCourse(courseId);
+    if (!course) throw new Error("Course not found");
+    const oldRevision = (course as any).contentRevision || 1;
+    const newRevision = oldRevision + 1;
+    await updateAdminCourse(courseId, { contentRevision: newRevision } as any);
+    const { auditService } = await import("@/lib/audit");
+    await auditService.logEvent({
+      eventType: "COURSE_VERSION_BUMPED",
+      actor: { uid: actor.uid, email: actor.email },
+      target: { id: courseId, collection: "courses" },
+      payload: { oldRevision, newRevision },
+    });
     revalidatePath(`/curso/${courseId}`);
     revalidatePath(`/admin/courses/${courseId}`);
-
     return { success: true, newRevision };
   } catch (error: any) {
-    console.error("Failed to bump course revision:", error);
     return { success: false, error: error.message };
   }
 }
@@ -201,36 +122,17 @@ export async function toggleModulePublish(
 ) {
   try {
     await assertIsTutorOrAdmin();
-    if (isPublished) {
-      // Validate: Module must have at least one published lesson
-      const lessonsSnap = await adminDb
-        .collection("courses")
-        .doc(courseId)
-        .collection("modules")
-        .doc(moduleId)
-        .collection("lessons")
-        .get();
-
-      const publishedLessons = lessonsSnap.docs.filter(
-        (doc) => doc.data().isPublished !== false,
-      );
-      if (publishedLessons.length === 0) {
-        return {
-          success: false,
-          error: "O módulo precisa ter pelo menos uma aula publicada.",
-        };
-      }
-    }
-    await adminDb
-      .collection("courses")
-      .doc(courseId)
-      .collection("modules")
-      .doc(moduleId)
-      .update({
-        isPublished,
-        updatedAt: FieldValue.serverTimestamp(),
-      });
-
+    if (
+      isPublished &&
+      !(await listAdminLessons(courseId, moduleId)).some(
+        (l: any) => l.isPublished !== false,
+      )
+    )
+      return {
+        success: false,
+        error: "O módulo precisa ter pelo menos uma aula publicada.",
+      };
+    await updateAdminModule(moduleId, { isPublished });
     revalidatePath(`/admin/courses/${courseId}`);
     return { success: true };
   } catch (error: any) {
@@ -246,43 +148,18 @@ export async function toggleLessonPublish(
 ) {
   try {
     await assertIsTutorOrAdmin();
-    if (isPublished) {
-      // Validate: Lesson must have blocks OR legacy content
-      const lessonRef = adminDb
-        .collection("courses")
-        .doc(courseId)
-        .collection("modules")
-        .doc(moduleId)
-        .collection("lessons")
-        .doc(lessonId);
-
-      const lessonSnap = await lessonRef.get();
-      const blocksSnap = await lessonRef.collection("blocks").get();
-      const publishedBlocks = blocksSnap.docs.filter(
-        (doc) => doc.data().isPublished !== false,
-      );
-      const hasLegacyContent = !!lessonSnap.data()?.content;
-
-      if (publishedBlocks.length === 0 && !hasLegacyContent) {
-        return {
-          success: false,
-          error: "A aula precisa ter conteúdo (blocos) para ser publicada.",
-        };
-      }
-    }
-    await adminDb
-      .collection("courses")
-      .doc(courseId)
-      .collection("modules")
-      .doc(moduleId)
-      .collection("lessons")
-      .doc(lessonId)
-      .update({
-        isPublished,
-        updatedAt: FieldValue.serverTimestamp(),
-      });
-
+    const lesson = (await listAdminLessons(courseId, moduleId)).find(
+      (l: any) => l.id === lessonId,
+    ) as any;
+    if (!lesson) throw new Error("Aula não encontrada.");
+    if (isPublished && !hasPublishedContent(lesson))
+      return {
+        success: false,
+        error: "A aula precisa ter conteúdo (blocos) para ser publicada.",
+      };
+    await updateAdminLesson(lessonId, { isPublished });
     revalidatePath(`/admin/courses/${courseId}`);
+    revalidatePath(`/portal/course/${courseId}`);
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message };

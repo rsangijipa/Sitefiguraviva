@@ -1,281 +1,100 @@
-import { adminDb } from "@/lib/firebase/admin";
-import { FieldValue, Timestamp } from "firebase-admin/firestore";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import {
-  UserGamificationProfile,
-  XpTransaction,
-  EarnedBadge,
-} from "@/types/gamification";
-import {
-  calculateLevel,
-  verifyStreakStatus,
-  XP_VALUES,
-} from "@/lib/gamification";
-import { logger } from "@/lib/logger";
+  awardBadge as awardBadgeRepository,
+  awardXp as awardXpRepository,
+  getProfile as getProfileRepository,
+  updateStreak as updateStreakRepository,
+} from "@/features/gamification/infrastructure/supabaseGamificationRepository.server";
+import { XP_VALUES } from "@/lib/gamification";
 
+/** Server facade kept for existing callers; Supabase is the source of truth. */
 export const gamificationService = {
-  /**
-   * Get or initialize a user's gamification profile (Server-Side).
-   */
-  async getProfile(userId: string): Promise<UserGamificationProfile | null> {
+  async getProfile(userId: string) {
     if (!userId) return null;
-
     try {
-      const docRef = adminDb.collection("gamification_profiles").doc(userId);
-      const snap = await docRef.get();
-
-      if (snap.exists) {
-        return snap.data() as UserGamificationProfile;
-      }
-
-      // Initialize if doesn't exist
-      const newProfile: UserGamificationProfile = {
-        uid: userId,
-        totalXp: 0,
-        level: 1,
-        currentStreak: 0,
-        longestStreak: 0,
-        lastActivityDate: null,
-        badges: [],
-        updatedAt: Timestamp.now() as any,
-      };
-
-      await docRef.set({
-        ...newProfile,
-        updatedAt: FieldValue.serverTimestamp(),
-      });
-
-      return newProfile;
-    } catch (error) {
-      console.error(
-        "[AdminGamificationService] Error fetching profile:",
-        error,
+      const profile = await getProfileRepository(
+        userId,
+        createSupabaseServiceClient() as any,
       );
+      return {
+        uid: profile.userId,
+        totalXp: profile.totalXp,
+        level: profile.level,
+        currentStreak: profile.currentStreak,
+        longestStreak: profile.longestStreak,
+        lastActivityDate: profile.lastActivityDate,
+        badges: profile.badges,
+        updatedAt: profile.updatedAt,
+      };
+    } catch (error) {
+      console.error("[Gamification] Profile read failed:", error);
       return null;
     }
   },
 
-  /**
-   * Award XP to a user (Server-Side).
-   */
   async awardXp(
     userId: string,
     amount: number,
-    reason: XpTransaction["reason"],
+    reason: any,
     metadata?: Record<string, any>,
   ) {
     if (!userId || amount <= 0) return;
-
-    // Deterministic idempotency key: the same (user, reason, subject) can only
-    // ever grant XP once, regardless of how many times awardXp is called for
-    // it (duplicate action calls, retries, refresh, concurrent requests).
-    // Reasons without a natural subject (e.g. "daily_login") fall back to a
-    // per-day key so repeated logins on the same day don't double-grant.
-    const subject =
-      metadata?.lessonId || metadata?.courseId || metadata?.badgeId || null;
-    const dayKey = new Date().toISOString().slice(0, 10);
-    const transId = subject
-      ? `${userId}_${reason}_${subject}`
-      : `${userId}_${reason}_${dayKey}`;
-
-    try {
-      const profileRef = adminDb
-        .collection("gamification_profiles")
-        .doc(userId);
-      const transRef = adminDb.collection("xp_transactions").doc(transId);
-
-      // Ensure profile exists before the transaction (getProfile creates it
-      // on first access); the transaction itself only reads/writes.
-      const initialProfile = await this.getProfile(userId);
-      if (!initialProfile) return;
-
-      const result = await adminDb.runTransaction(async (tx) => {
-        const [transSnap, profileSnap] = await Promise.all([
-          tx.get(transRef),
-          tx.get(profileRef),
-        ]);
-
-        if (transSnap.exists) {
-          // Already granted for this (user, reason, subject) — no-op.
-          const existingProfile = profileSnap.data() as UserGamificationProfile;
-          return {
-            newTotalXp: existingProfile.totalXp,
-            newLevel: existingProfile.level,
-            leveledUp: false,
-            duplicate: true,
-          };
-        }
-
-        const profile = profileSnap.data() as UserGamificationProfile;
-        const newTotalXp = profile.totalXp + amount;
-        const newLevel = calculateLevel(newTotalXp);
-
-        tx.update(profileRef, {
-          totalXp: FieldValue.increment(amount),
-          level: newLevel,
-          updatedAt: FieldValue.serverTimestamp(),
-        });
-
-        tx.set(transRef, {
-          userId,
-          amount,
-          reason,
-          metadata: metadata || {},
-          timestamp: FieldValue.serverTimestamp(),
-        });
-
-        return {
-          newTotalXp,
-          newLevel,
-          leveledUp: newLevel > profile.level,
-          duplicate: false,
-        };
-      });
-
-      return result;
-    } catch (error) {
-      console.error("[AdminGamificationService] Error awarding XP:", error);
-    }
+    return awardXpRepository(
+      userId,
+      amount,
+      reason,
+      metadata,
+      createSupabaseServiceClient() as any,
+    );
   },
 
-  /**
-   * Updates user streak (Server-Side).
-   */
   async updateStreak(userId: string) {
     if (!userId) return;
-
-    try {
-      const docRef = adminDb.collection("gamification_profiles").doc(userId);
-      const profile = await this.getProfile(userId);
-
-      if (!profile) return;
-
-      const status = verifyStreakStatus(profile.lastActivityDate as any);
-
-      if (status === "maintain") return;
-
-      let updates: any = {
-        lastActivityDate: FieldValue.serverTimestamp(),
-        updatedAt: FieldValue.serverTimestamp(),
-      };
-
-      if (status === "increment") {
-        const nextStreak = (profile.currentStreak || 0) + 1;
-        updates.currentStreak = FieldValue.increment(1);
-        if (nextStreak > (profile.longestStreak || 0)) {
-          updates.longestStreak = nextStreak;
-        }
-        await this.awardXp(userId, XP_VALUES.DAILY_LOGIN, "daily_login");
-      } else if (status === "reset") {
-        updates.currentStreak = 1;
-        await this.awardXp(userId, XP_VALUES.DAILY_LOGIN, "daily_login");
-      }
-
-      await docRef.update(updates);
-    } catch (error) {
-      console.error("[AdminGamificationService] Error updating streak:", error);
-    }
+    return updateStreakRepository(userId, createSupabaseServiceClient() as any);
   },
 
-  /**
-   * Award a badge (Server-Side).
-   */
   async awardBadge(userId: string, badgeId: string, courseId?: string) {
     if (!userId || !badgeId) return;
-
-    try {
-      const docRef = adminDb.collection("gamification_profiles").doc(userId);
-      const profile = await this.getProfile(userId);
-
-      if (!profile || profile.badges.includes(badgeId)) return;
-
-      await docRef.update({
-        badges: FieldValue.arrayUnion(badgeId),
-        updatedAt: FieldValue.serverTimestamp(),
-      });
-
-      const earnedId = `${userId}_${badgeId}`;
-      await adminDb
-        .collection("earned_badges")
-        .doc(earnedId)
-        .set({
-          userId,
-          badgeId,
-          courseId: courseId || null,
-          earnedAt: FieldValue.serverTimestamp(),
-        });
-
-      console.log(`[Gamification] Awarded badge ${badgeId} to ${userId}`);
-    } catch (error) {
-      console.error("[AdminGamificationService] Error awarding badge:", error);
-    }
+    return awardBadgeRepository(
+      userId,
+      badgeId,
+      courseId,
+      createSupabaseServiceClient() as any,
+    );
   },
 
-  /**
-   * Process Course Completion Logic
-   */
   async onCourseCompletion(
     userId: string,
     courseId: string,
     courseTitle: string,
   ) {
-    console.log(
-      `[Gamification] Processing completion for ${userId} in ${courseId}`,
-    );
-
-    // 1. Award XP for Course Completion
     await this.awardXp(
       userId,
       XP_VALUES.COURSE_COMPLETED || 500,
       "course_completed",
       { courseId, courseTitle },
     );
-
-    // 2. Check for "First Step" Badge (First Course Completed)
     const profile = await this.getProfile(userId);
-    const earnedBadges = profile?.badges || [];
-
-    // Check both potential IDs just in case
     if (
-      !earnedBadges.includes("course_completion_1") &&
-      !earnedBadges.includes("first_steps")
+      !profile?.badges.includes("course_completion_1") &&
+      !profile?.badges.includes("first_steps")
     ) {
-      // Use 'course_completion_1' as it matches badgesData.ts generally
       await this.awardBadge(userId, "course_completion_1", courseId);
     }
-
-    // 3. Check for specific courses (Example: Gestalt Master)
-    if (
-      courseTitle &&
-      courseTitle.toLowerCase().includes("formação completa em gestalt")
-    ) {
+    if (courseTitle?.toLowerCase().includes("formação completa em gestalt")) {
       await this.awardBadge(userId, "gestalt_master", courseId);
     }
-
-    // 4. Check for Scholar (3 courses? or same as First Step? In progressService it was 2nd course?)
-    // Leaving logic simple for now.
   },
 
-  /**
-   * Process Lesson Completion Logic
-   */
   async onLessonCompletion(userId: string, courseId: string, lessonId: string) {
-    console.log(
-      `[Gamification] Processing lesson completion: ${userId} -> ${lessonId}`,
-    );
-
-    // 1. Award XP
     await this.awardXp(
       userId,
       XP_VALUES.LESSON_COMPLETED || 50,
       "lesson_completed",
       { courseId, lessonId },
     );
-
-    // 2. Check for "First Steps" Badge
     const profile = await this.getProfile(userId);
-    const earnedBadges = profile?.badges || [];
-
-    if (!earnedBadges.includes("first_steps")) {
+    if (profile && !profile.badges.includes("first_steps")) {
       await this.awardBadge(userId, "first_steps", courseId);
     }
   },

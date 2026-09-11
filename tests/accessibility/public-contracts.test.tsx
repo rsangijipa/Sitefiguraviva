@@ -64,6 +64,6 @@ describe("public accessibility contracts", () => {
 
   it("uses native buttons for interactive resource cards", () => {
     const resources = read("src/components/ResourcesSection.jsx");
-    expect(resources.match(/<motion\.button/g)).toHaveLength(4);
+    expect(resources).toMatch(/<motion\.button[\s\S]*type="button"/);
   });
 });

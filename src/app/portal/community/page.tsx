@@ -15,6 +15,7 @@ import { motion } from "framer-motion";
 import { communityService } from "@/services/communityService";
 import { CommunityThreadDoc } from "@/types/lms";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { NewTopicModal } from "@/components/portal/community/NewTopicModal";
 import Link from "next/link";
 // Removed date-fns
 
@@ -22,6 +23,7 @@ export default function CommunityPage() {
   const [activeTab, setActiveTab] = useState("all");
   const [threads, setThreads] = useState<CommunityThreadDoc[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isNewTopicOpen, setIsNewTopicOpen] = useState(false);
 
   useEffect(() => {
     async function loadThreads() {
@@ -64,11 +66,19 @@ export default function CommunityPage() {
             Troque experiências e tire dúvidas com outros alunos.
           </p>
         </div>
-        <button className="btn-primary flex items-center gap-2 px-6 py-3 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all">
+        <button
+          type="button"
+          onClick={() => setIsNewTopicOpen(true)}
+          className="btn-primary flex items-center gap-2 px-6 py-3 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all"
+        >
           <Plus size={20} />
           <span>Novo Tópico</span>
         </button>
       </div>
+      <NewTopicModal
+        isOpen={isNewTopicOpen}
+        onClose={() => setIsNewTopicOpen(false)}
+      />
 
       {/* Controls */}
       <div className="flex flex-col md:flex-row gap-4">

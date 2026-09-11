@@ -1,46 +1,27 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  collection,
-  getDocs,
-  doc,
-  updateDoc,
-  orderBy,
-  query,
-  limit,
-  startAfter,
-} from "firebase/firestore";
-import { db } from "@/lib/firebase/client";
+import { createSupabaseBrowserClient } from "@/infrastructure/supabase/client";
 import { UserData, UserRole } from "@/types/user";
 
 export const useAllUsersPaginated = (pageSize = 20, lastDoc?: any) => {
   return useQuery({
     queryKey: ["users_admin", pageSize, lastDoc?.id],
     queryFn: async () => {
-      let q = query(
-        collection(db, "users"),
-        orderBy("lastLogin", "desc"),
-        limit(pageSize),
-      );
-
-      if (lastDoc) {
-        // When using startAfter, we need to rebuild the query to ensure correct ordering/limits
-        q = query(
-          collection(db, "users"),
-          orderBy("lastLogin", "desc"),
-          startAfter(lastDoc),
-          limit(pageSize),
-        );
-      }
-
-      const snapshot = await getDocs(q);
-      const users = snapshot.docs.map(
-        (doc) => ({ uid: doc.id, ...doc.data() }) as UserData,
-      );
+      const supabase = createSupabaseBrowserClient();
+      let query = supabase
+        .from("profiles")
+        .select("*")
+        .order("last_login_at", { ascending: false })
+        .limit(pageSize);
+      if (lastDoc?.last_login_at)
+        query = query.lt("last_login_at", lastDoc.last_login_at);
+      const { data, error } = await query;
+      if (error) throw error;
+      const users = (data || []).map(toUserData);
 
       return {
         users,
-        lastVisible: snapshot.docs[snapshot.docs.length - 1],
-        hasMore: snapshot.docs.length === pageSize,
+        lastVisible: users[users.length - 1],
+        hasMore: users.length === pageSize,
       };
     },
   });
@@ -52,15 +33,14 @@ export const useAllUsers = (initialData?: UserData[]) => {
   return useQuery({
     queryKey: ["users_admin_legacy"],
     queryFn: async () => {
-      const q = query(
-        collection(db, "users"),
-        orderBy("lastLogin", "desc"),
-        limit(50),
-      );
-      const snapshot = await getDocs(q);
-      return snapshot.docs.map(
-        (doc) => ({ uid: doc.id, ...doc.data() }) as UserData,
-      );
+      const supabase = createSupabaseBrowserClient();
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .order("last_login_at", { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return (data || []).map(toUserData);
     },
     initialData,
   });
@@ -71,11 +51,39 @@ export const useUpdateUserRole = () => {
 
   return useMutation({
     mutationFn: async ({ uid, role }: { uid: string; role: UserRole }) => {
-      const userRef = doc(db, "users", uid);
-      await updateDoc(userRef, { role });
+      const supabase = createSupabaseBrowserClient();
+      const { error } = await supabase
+        .from("profiles")
+        .update({ role })
+        .eq("id", uid);
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users_admin"] });
     },
   });
 };
+
+function toUserData(profile: any): UserData {
+  return {
+    uid: profile.id,
+    email: profile.email,
+    displayName: profile.display_name,
+    photoURL: profile.photo_url,
+    role: profile.role,
+    status: profile.is_active ? "active" : "disabled",
+    isAdmin: profile.role === "admin",
+    createdAt: profile.created_at,
+    updatedAt: profile.updated_at,
+    lastLogin: profile.last_login_at,
+    bio: profile.bio || undefined,
+    phoneNumber: profile.phone_number || undefined,
+    profession: profile.profession || undefined,
+    city: profile.city || undefined,
+    state: profile.state || undefined,
+    dateOfBirth: profile.date_of_birth || undefined,
+    instagram: profile.instagram || undefined,
+    profileCompletion: profile.profile_completion,
+    profileCompletedAt: profile.profile_completed_at,
+  } as UserData;
+}

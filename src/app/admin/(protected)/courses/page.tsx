@@ -10,6 +10,7 @@ import { CourseDoc } from "@/types/lms";
 import { useToast } from "@/context/ToastContext";
 import CourseEditorModal from "@/components/admin/CourseEditorModal";
 import { AdminPageShell } from "@/components/admin/AdminPageShell";
+import { SafeImage } from "@/components/ui/SafeImage";
 
 export default function CoursesPage() {
   const router = useRouter();
@@ -177,8 +178,9 @@ export default function CoursesPage() {
               {/* Quick Edit Button */}
               <button
                 onClick={(e) => handleOpenEdit(e, course)}
-                className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/90 backdrop-blur-sm text-stone-600 hover:bg-primary hover:text-white transition-colors shadow-lg opacity-0 group-hover:opacity-100"
+                className="absolute right-4 top-4 z-10 flex min-h-11 min-w-11 items-center justify-center rounded-full bg-white/90 text-stone-600 shadow-lg transition-colors hover:bg-primary hover:text-white md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100"
                 title="Abrir Construtor de Curso"
+                aria-label={`Editar curso ${course.title}`}
               >
                 <Pencil size={16} />
               </button>
@@ -189,10 +191,12 @@ export default function CoursesPage() {
                 onClick={() => handleCardClick(course)}
               >
                 {course.coverImage || course.thumbnail ? (
-                  <img
+                  <SafeImage
                     src={course.coverImage || course.thumbnail}
                     alt={course.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-stone-300">

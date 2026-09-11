@@ -1,342 +1,324 @@
 "use server";
 
-import { auth, adminDb } from "@/lib/firebase/admin";
-import { cookies } from "next/headers";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
+import { verifySession } from "@/lib/auth/server";
 import type {
-  StudentAnalytics,
   CourseAnalytics,
-  AssessmentAnalytics,
   PlatformAnalytics,
+  StudentAnalytics,
 } from "@/types/analytics";
 
-/**
- * Get student analytics for a specific course
- */
-export async function getStudentAnalytics(courseId: string) {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("session")?.value;
+type Result<T> = { students?: T; analytics?: T; error?: string };
+const numberValue = (value: unknown) => Number(value ?? 0);
 
-  if (!sessionCookie) {
-    return { error: "Unauthorized" };
-  }
+async function requireAnalyticsAdmin() {
+  const session = await verifySession();
+  if (!session) return { error: "Unauthorized" };
+  if (!session.isAdmin) return { error: "Forbidden: Admins only" };
+  return { session };
+}
 
+/** Reads the canonical Supabase tables; Firebase is no longer a reporting source. */
+export async function getStudentAnalytics(
+  courseId: string,
+): Promise<Result<StudentAnalytics[]>> {
+  const authorization = await requireAnalyticsAdmin();
+  if ("error" in authorization) return authorization;
   try {
-    const claims = await auth.verifySessionCookie(sessionCookie, true);
+    const supabase = createSupabaseServiceClient();
+    const [enrollments, lessons, assessments, certificates] = await Promise.all(
+      [
+        supabase
+          .from("enrollments")
+          .select("user_id,enrolled_at")
+          .eq("course_id", courseId)
+          .not("user_id", "is", null),
+        supabase
+          .from("lesson_progress")
+          .select("user_id,status,percent,updated_at")
+          .eq("course_id", courseId)
+          .not("user_id", "is", null),
+        supabase
+          .from("assessment_progress")
+          .select("user_id,attempts,best_percentage,passed")
+          .eq("course_id", courseId)
+          .not("user_id", "is", null),
+        supabase
+          .from("certificates")
+          .select("id,user_id")
+          .eq("course_id", courseId)
+          .not("user_id", "is", null),
+      ],
+    );
+    const error =
+      enrollments.error ||
+      lessons.error ||
+      assessments.error ||
+      certificates.error;
+    if (error) throw error;
+    const userIds = (enrollments.data ?? []).flatMap((row) =>
+      row.user_id ? [row.user_id] : [],
+    );
+    const { data: profiles, error: profilesError } = userIds.length
+      ? await supabase
+          .from("profiles")
+          .select("id,display_name,email")
+          .in("id", userIds)
+      : { data: [], error: null };
+    if (profilesError) throw profilesError;
 
-    if (claims.role !== "admin" && claims.admin !== true) {
-      return { error: "Forbidden: Admins only" };
-    }
-
-    // Get all enrollments for this course
-    const enrollmentsQuery = await adminDb
-      .collection("enrollments")
-      .where("courseId", "==", courseId)
-      .get();
-
-    const studentsAnalytics: StudentAnalytics[] = [];
-
-    for (const enrollDoc of enrollmentsQuery.docs) {
-      const enrollment = enrollDoc.data();
-
-      // Get user details
-      const userDoc = await adminDb
-        .collection("users")
-        .doc(enrollment.userId)
-        .get();
-      const userData = userDoc.data();
-
-      // Get course progress
-      const progressDoc = await adminDb
-        .collection("users")
-        .doc(enrollment.userId)
-        .collection("courseProgress")
-        .doc(courseId)
-        .get();
-
-      const progress = progressDoc.exists ? progressDoc.data() : null;
-
-      // Get assessment progress
-      const assessmentProgressQuery = await adminDb
-        .collection("users")
-        .doc(enrollment.userId)
-        .collection("assessmentProgress")
-        .where("courseId", "==", courseId)
-        .get();
-
-      let totalAssessments = 0;
-      let completedAssessments = 0;
-      let totalScore = 0;
-      let passedAssessments = 0;
-      let failedAssessments = 0;
-
-      for (const assessmentProg of assessmentProgressQuery.docs) {
-        const data = assessmentProg.data();
-        totalAssessments++;
-        if (data.attempts > 0) {
-          completedAssessments++;
-          totalScore += data.bestPercentage || 0;
-          if (data.passed) {
-            passedAssessments++;
-          } else {
-            failedAssessments++;
-          }
-        }
-      }
-
-      const averageScore =
-        completedAssessments > 0 ? totalScore / completedAssessments : 0;
-
-      // Get certificate
-      const certificateQuery = await adminDb
-        .collection("certificates")
-        .where("userId", "==", enrollment.userId)
-        .where("courseId", "==", courseId)
-        .where("status", "==", "issued")
-        .limit(1)
-        .get();
-
-      const certificateIssued = !certificateQuery.empty;
-      const certificateId = certificateIssued
-        ? certificateQuery.docs[0].id
-        : undefined;
-
-      const studentAnalytics: StudentAnalytics = {
-        userId: enrollment.userId,
-        userName: userData?.displayName || userData?.email || "Anônimo",
-        userEmail: userData?.email || "",
-        courseId,
-        courseName: "", // Will be populated later
-        enrolledAt: enrollment.enrolledAt,
-        lastActive: progress?.lastUpdated,
-        totalLessons: progress?.totalLessons || 0,
-        completedLessons: progress?.completedLessons || 0,
-        progressPercentage: progress?.completionPercentage || 0,
-        totalAssessments,
-        completedAssessments,
-        averageScore,
-        passedAssessments,
-        failedAssessments,
-        totalTimeSpent: progress?.totalTimeSpent || 0,
-        isComplete: progress?.completionPercentage >= 100,
-        certificateIssued,
-        certificateId,
-      };
-
-      studentsAnalytics.push(studentAnalytics);
-    }
-
-    return { students: studentsAnalytics };
+    const byUser = <T extends { user_id: string | null }>(rows: T[]) => {
+      const result = new Map<string, T[]>();
+      for (const row of rows)
+        if (row.user_id)
+          result.set(row.user_id, [...(result.get(row.user_id) ?? []), row]);
+      return result;
+    };
+    const profilesById = new Map(
+      (profiles ?? []).map((profile) => [profile.id, profile]),
+    );
+    const lessonByUser = byUser(lessons.data ?? []);
+    const assessmentByUser = byUser(assessments.data ?? []);
+    const certificateByUser = new Map(
+      (certificates.data ?? []).flatMap((certificate) =>
+        certificate.user_id
+          ? [[certificate.user_id, certificate.id] as const]
+          : [],
+      ),
+    );
+    const students = (enrollments.data ?? []).flatMap((enrollment) => {
+      if (!enrollment.user_id) return [];
+      const profile = profilesById.get(enrollment.user_id);
+      const studentLessons = lessonByUser.get(enrollment.user_id) ?? [];
+      const studentAssessments = assessmentByUser.get(enrollment.user_id) ?? [];
+      const attempted = studentAssessments.filter(
+        (assessment) => assessment.attempts > 0,
+      );
+      const progressPercentage = studentLessons.length
+        ? studentLessons.reduce(
+            (sum, lesson) => sum + numberValue(lesson.percent),
+            0,
+          ) / studentLessons.length
+        : 0;
+      const certificateId = certificateByUser.get(enrollment.user_id);
+      return [
+        {
+          userId: enrollment.user_id,
+          userName: profile?.display_name || profile?.email || "Anônimo",
+          userEmail: profile?.email || "",
+          courseId,
+          courseName: "",
+          enrolledAt: enrollment.enrolled_at,
+          lastActive: studentLessons
+            .map((lesson) => lesson.updated_at)
+            .sort()
+            .at(-1),
+          totalLessons: studentLessons.length,
+          completedLessons: studentLessons.filter(
+            (lesson) =>
+              lesson.status === "completed" ||
+              numberValue(lesson.percent) >= 100,
+          ).length,
+          progressPercentage,
+          totalAssessments: studentAssessments.length,
+          completedAssessments: attempted.length,
+          averageScore: attempted.length
+            ? attempted.reduce(
+                (sum, assessment) =>
+                  sum + numberValue(assessment.best_percentage),
+                0,
+              ) / attempted.length
+            : 0,
+          passedAssessments: studentAssessments.filter(
+            (assessment) => assessment.passed,
+          ).length,
+          failedAssessments: studentAssessments.filter(
+            (assessment) => assessment.attempts > 0 && !assessment.passed,
+          ).length,
+          totalTimeSpent: 0,
+          isComplete: progressPercentage >= 100,
+          certificateIssued: Boolean(certificateId),
+          certificateId,
+        },
+      ];
+    });
+    return { students };
   } catch (error) {
     console.error("Get Student Analytics Error:", error);
     return { error: "Erro ao buscar analytics de alunos" };
   }
 }
 
-/**
- * Get course analytics overview
- */
-export async function getCourseAnalytics(courseId: string) {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("session")?.value;
-
-  if (!sessionCookie) {
-    return { error: "Unauthorized" };
-  }
-
+export async function getCourseAnalytics(
+  courseId: string,
+): Promise<Result<CourseAnalytics>> {
+  const authorization = await requireAnalyticsAdmin();
+  if ("error" in authorization) return authorization;
   try {
-    const claims = await auth.verifySessionCookie(sessionCookie, true);
-
-    if (claims.role !== "admin" && claims.admin !== true) {
-      return { error: "Forbidden: Admins only" };
-    }
-
-    // Get course details
-    const courseDoc = await adminDb.collection("courses").doc(courseId).get();
-    if (!courseDoc.exists) {
-      return { error: "Curso não encontrado" };
-    }
-
-    const courseData = courseDoc.data();
-
-    // Get enrollments
-    const enrollmentsQuery = await adminDb
-      .collection("enrollments")
-      .where("courseId", "==", courseId)
-      .get();
-
-    const totalEnrollments = enrollmentsQuery.size;
-
-    // Calculate active vs inactive (30 days)
-    const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
-    let activeStudents = 0;
-    let totalProgress = 0;
-    let completedStudents = 0;
-
-    for (const enrollDoc of enrollmentsQuery.docs) {
-      const enrollment = enrollDoc.data();
-
-      // Get progress
-      const progressDoc = await adminDb
-        .collection("users")
-        .doc(enrollment.userId)
-        .collection("courseProgress")
-        .doc(courseId)
-        .get();
-
-      if (progressDoc.exists) {
-        const progress = progressDoc.data();
-        totalProgress += progress.completionPercentage || 0;
-
-        if (progress.completionPercentage >= 100) {
-          completedStudents++;
-        }
-
-        if (progress.lastUpdated?.toMillis() > thirtyDaysAgo) {
-          activeStudents++;
-        }
-      }
-    }
-
-    const averageProgress =
-      totalEnrollments > 0 ? totalProgress / totalEnrollments : 0;
-    const completionRate =
-      totalEnrollments > 0 ? (completedStudents / totalEnrollments) * 100 : 0;
-    const inactiveStudents = totalEnrollments - activeStudents;
-
-    // Get assessments
-    const assessmentsQuery = await adminDb
-      .collection("assessments")
-      .where("courseId", "==", courseId)
-      .get();
-
-    const totalAssessments = assessmentsQuery.size;
-
-    // Calculate average assessment score
-    let totalAssessmentScore = 0;
-    let totalAssessmentSubmissions = 0;
-    let passedSubmissions = 0;
-
-    for (const assessmentDoc of assessmentsQuery.docs) {
-      const submissionsQuery = await adminDb
-        .collection("assessmentSubmissions")
-        .where("assessmentId", "==", assessmentDoc.id)
-        .where("status", "==", "graded")
-        .get();
-
-      for (const subDoc of submissionsQuery.docs) {
-        const submission = subDoc.data();
-        totalAssessmentSubmissions++;
-        totalAssessmentScore += submission.percentage || 0;
-        if (submission.passed) {
-          passedSubmissions++;
-        }
-      }
-    }
-
-    const averageAssessmentScore =
-      totalAssessmentSubmissions > 0
-        ? totalAssessmentScore / totalAssessmentSubmissions
-        : 0;
-    const assessmentPassRate =
-      totalAssessmentSubmissions > 0
-        ? (passedSubmissions / totalAssessmentSubmissions) * 100
-        : 0;
-
-    // Get certificates
-    const certificatesQuery = await adminDb
-      .collection("certificates")
-      .where("courseId", "==", courseId)
-      .where("status", "==", "issued")
-      .get();
-
-    const certificatesIssued = certificatesQuery.size;
-
-    const analytics: CourseAnalytics = {
-      courseId,
-      courseName: courseData?.title || "Curso",
-      totalEnrollments,
-      activeStudents,
-      inactiveStudents,
-      averageProgress,
-      completionRate,
-      totalAssessments,
-      averageAssessmentScore,
-      assessmentPassRate,
-      certificatesIssued,
-      averageTimePerStudent: 0, // TODO: Calculate from session tracking
+    const supabase = createSupabaseServiceClient();
+    const [course, assessments, studentResult] = await Promise.all([
+      supabase.from("courses").select("title").eq("id", courseId).maybeSingle(),
+      supabase.from("assessments").select("id").eq("course_id", courseId),
+      getStudentAnalytics(courseId),
+    ]);
+    if (course.error || assessments.error)
+      throw course.error || assessments.error;
+    if (!course.data) return { error: "Curso não encontrado" };
+    if (studentResult.error) return { error: studentResult.error };
+    const students = studentResult.students ?? [];
+    const activeAfter = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    const activeStudents = students.filter(
+      (student) =>
+        student.lastActive &&
+        new Date(student.lastActive as string).getTime() >= activeAfter,
+    ).length;
+    const assessmentAttempts = students.reduce(
+      (sum, student) =>
+        sum + student.passedAssessments + student.failedAssessments,
+      0,
+    );
+    return {
+      analytics: {
+        courseId,
+        courseName: course.data.title,
+        totalEnrollments: students.length,
+        activeStudents,
+        inactiveStudents: students.length - activeStudents,
+        averageProgress: students.length
+          ? students.reduce(
+              (sum, student) => sum + student.progressPercentage,
+              0,
+            ) / students.length
+          : 0,
+        completionRate: students.length
+          ? (students.filter((student) => student.isComplete).length * 100) /
+            students.length
+          : 0,
+        totalAssessments: (assessments.data ?? []).length,
+        averageAssessmentScore: students.filter(
+          (student) => student.completedAssessments,
+        ).length
+          ? students.reduce((sum, student) => sum + student.averageScore, 0) /
+            students.filter((student) => student.completedAssessments).length
+          : 0,
+        assessmentPassRate: assessmentAttempts
+          ? (students.reduce(
+              (sum, student) => sum + student.passedAssessments,
+              0,
+            ) *
+              100) /
+            assessmentAttempts
+          : 0,
+        certificatesIssued: students.filter(
+          (student) => student.certificateIssued,
+        ).length,
+        averageTimePerStudent: 0,
+      },
     };
-
-    return { analytics };
   } catch (error) {
     console.error("Get Course Analytics Error:", error);
     return { error: "Erro ao buscar analytics do curso" };
   }
 }
 
-/**
- * Get platform-wide analytics
- */
-export async function getPlatformAnalytics() {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("session")?.value;
-
-  if (!sessionCookie) {
-    return { error: "Unauthorized" };
-  }
-
+export async function getPlatformAnalytics(): Promise<
+  Result<PlatformAnalytics>
+> {
+  const authorization = await requireAnalyticsAdmin();
+  if ("error" in authorization) return authorization;
   try {
-    const claims = await auth.verifySessionCookie(sessionCookie, true);
-
-    if (claims.admin !== true) {
-      return { error: "Forbidden: Admins only" };
-    }
-
-    // Get counts
-    const usersCount = (await adminDb.collection("users").count().get()).data()
-      .count;
-    const coursesCount = (
-      await adminDb.collection("courses").count().get()
-    ).data().count;
-    const enrollmentsCount = (
-      await adminDb.collection("enrollments").count().get()
-    ).data().count;
-    const certificatesCount = (
-      await adminDb
-        .collection("certificates")
-        .where("status", "==", "issued")
-        .count()
-        .get()
-    ).data().count;
-
-    // 30 days metrics
-    const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
-
-    // TODO: Implement more detailed metrics
-
-    const analytics: PlatformAnalytics = {
-      totalUsers: usersCount,
-      totalCourses: coursesCount,
-      totalEnrollments: enrollmentsCount,
-      totalCertificates: certificatesCount,
-      activeUsers: 0, // TODO
-      newEnrollments: 0, // TODO
-      certificatesIssued: 0, // TODO
-      averageCourseCompletion: 0, // TODO
-      averageAssessmentScore: 0, // TODO
-      topCourses: [],
-      topStudents: [],
+    const supabase = createSupabaseServiceClient();
+    const since = new Date(Date.now() - 30 * 86400000).toISOString();
+    const [
+      profiles,
+      courses,
+      enrollments,
+      certificates,
+      progress,
+      submissions,
+    ] = await Promise.all([
+      supabase.from("profiles").select("id", { count: "exact", head: true }),
+      supabase.from("courses").select("id", { count: "exact", head: true }),
+      supabase
+        .from("enrollments")
+        .select("course_id,enrolled_at", { count: "exact" }),
+      supabase.from("certificates").select("issued_at", { count: "exact" }),
+      supabase.from("lesson_progress").select("user_id,percent,updated_at"),
+      supabase
+        .from("assessment_submissions")
+        .select("percentage")
+        .eq("status", "graded"),
+    ]);
+    const error =
+      profiles.error ||
+      courses.error ||
+      enrollments.error ||
+      certificates.error ||
+      progress.error ||
+      submissions.error;
+    if (error) throw error;
+    const counts = new Map<string, number>();
+    for (const enrollment of enrollments.data ?? [])
+      counts.set(
+        enrollment.course_id,
+        (counts.get(enrollment.course_id) ?? 0) + 1,
+      );
+    const ids = [...counts.keys()];
+    const { data: namedCourses, error: namesError } = ids.length
+      ? await supabase.from("courses").select("id,title").in("id", ids)
+      : { data: [], error: null };
+    if (namesError) throw namesError;
+    const names = new Map(
+      (namedCourses ?? []).map((course) => [course.id, course.title]),
+    );
+    const progressRows = progress.data ?? [],
+      submissionRows = submissions.data ?? [];
+    return {
+      analytics: {
+        totalUsers: profiles.count ?? 0,
+        totalCourses: courses.count ?? 0,
+        totalEnrollments: enrollments.count ?? 0,
+        totalCertificates: certificates.count ?? 0,
+        activeUsers: new Set(
+          progressRows
+            .filter((row) => row.updated_at >= since)
+            .map((row) => row.user_id),
+        ).size,
+        newEnrollments: (enrollments.data ?? []).filter(
+          (row) => row.enrolled_at >= since,
+        ).length,
+        certificatesIssued: (certificates.data ?? []).filter(
+          (row) => row.issued_at >= since,
+        ).length,
+        averageCourseCompletion: progressRows.length
+          ? progressRows.reduce(
+              (sum, row) => sum + numberValue(row.percent),
+              0,
+            ) / progressRows.length
+          : 0,
+        averageAssessmentScore: submissionRows.length
+          ? submissionRows.reduce(
+              (sum, row) => sum + numberValue(row.percentage),
+              0,
+            ) / submissionRows.length
+          : 0,
+        topCourses: [...counts.entries()]
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 5)
+          .map(([courseId, enrollments]) => ({
+            courseId,
+            courseName: names.get(courseId) ?? "Curso",
+            enrollments,
+          })),
+        topStudents: [],
+      },
     };
-
-    return { analytics };
   } catch (error) {
     console.error("Get Platform Analytics Error:", error);
     return { error: "Erro ao buscar analytics da plataforma" };
   }
 }
 
-/**
- * Track granular student interaction events
- */
 export type EventType =
   | "video_play"
   | "video_pause"
@@ -354,72 +336,57 @@ export type EventType =
 export async function trackEvent(
   type: EventType,
   resourceId: string,
-  metadata: Record<string, any> = {},
+  metadata: Record<string, unknown> = {},
 ) {
-  try {
-    const sessionCookie = (await cookies()).get("session")?.value;
-    if (!sessionCookie) return { success: false, error: "Unauthenticated" };
-
-    const decodedToken = await auth.verifySessionCookie(sessionCookie, true);
-    const uid = decodedToken.uid;
-
-    const eventId = `${uid}_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    await adminDb.collection("analytics_events").doc(eventId).set({
-      userId: uid,
-      type,
-      resourceId,
-      metadata,
-      timestamp: new Date(), // using Date for standard Firestore timestamp consistency in this file
-    });
-
-    return { success: true };
-  } catch (error: any) {
-    console.error("[TrackEvent Error]:", error);
-    return { success: false, error: error.message };
-  }
+  const session = await verifySession();
+  if (!session) return { success: false, error: "Unauthenticated" };
+  return insertEvent(session.uid, session.uid, type, resourceId, metadata);
 }
 
-/**
- * Track funnel milestones using server-side writes to analytics_events.
- */
 export async function trackFunnelEvent(
-  type:
-    | "funnel_signup"
-    | "funnel_enrollment_pending"
-    | "funnel_enrollment_active"
-    | "funnel_course_completed"
-    | "funnel_certificate_issued",
-  metadata: Record<string, any> = {},
+  type: Extract<EventType, `funnel_${string}`>,
+  metadata: Record<string, unknown> = {},
   explicitUserId?: string,
 ) {
+  const session = await verifySession();
+  if (!session) return { success: false, error: "Unauthenticated" };
+  if (explicitUserId && explicitUserId !== session.uid && !session.isAdmin)
+    return { success: false, error: "Forbidden" };
+  return insertEvent(
+    explicitUserId ?? session.uid,
+    session.uid,
+    type,
+    null,
+    metadata,
+  );
+}
+
+async function insertEvent(
+  userId: string,
+  actorUserId: string,
+  type: EventType,
+  resourceId: string | null,
+  metadata: Record<string, unknown>,
+) {
   try {
-    const sessionCookie = (await cookies()).get("session")?.value;
-    if (!sessionCookie) return { success: false, error: "Unauthenticated" };
-
-    const decodedToken = await auth.verifySessionCookie(sessionCookie, true);
-    const actorUid = decodedToken.uid;
-    const actorIsAdmin =
-      decodedToken.admin === true || decodedToken.role === "admin";
-
-    const userId = explicitUserId || actorUid;
-    if (explicitUserId && explicitUserId !== actorUid && !actorIsAdmin) {
-      return { success: false, error: "Forbidden" };
-    }
-
-    const eventId = `${userId}_${type}_${Date.now()}`;
-    await adminDb.collection("analytics_events").doc(eventId).set({
-      userId,
-      actorUid,
-      type,
-      metadata,
-      source: "server_action",
-      timestamp: new Date(),
-    });
-
+    // analytics_events is introduced by a later migration and is intentionally
+    // kept outside the generated schema until types are regenerated remotely.
+    const { error } = await (createSupabaseServiceClient() as any)
+      .from("analytics_events")
+      .insert({
+        id: crypto.randomUUID(),
+        user_id: userId,
+        actor_user_id: actorUserId,
+        type,
+        resource_id: resourceId,
+        metadata,
+        source: "server_action",
+        timestamp: new Date().toISOString(),
+      });
+    if (error) throw error;
     return { success: true };
-  } catch (error: any) {
-    console.error("[trackFunnelEvent Error]:", error);
-    return { success: false, error: error.message };
+  } catch (error) {
+    console.error("Track analytics event error:", error);
+    return { success: false, error: "Erro ao registrar evento" };
   }
 }

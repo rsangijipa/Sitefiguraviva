@@ -34,8 +34,6 @@ export async function GET(request: Request) {
     // 2. Fetch Course Details (Optimized)
     const courseIds = enrollments.map((e: any) => e.courseId);
 
-    // Firestore 'in' query supports up to 10 items. We need to chunk if needed.
-    // Assuming typical user has < 10 courses for MVP. If more, we chunk.
     const { data: courseRows, error: courseError } = await supabase
       .from("courses")
       .select("id,title,subtitle,description,image_url,slug")
@@ -57,11 +55,10 @@ export async function GET(request: Request) {
       // Serialize timestamps for JSON
       const serializedEnrollment = {
         ...enrollment,
-        enrolledAt: (enrollment as any)?.enrolledAt?.toDate?.()?.toISOString(),
-        // @ts-ignore
-        accessExpiresAt: (enrollment as any)?.accessExpiresAt
-          ?.toDate?.()
-          ?.toISOString(),
+        // Postgres timestamps are already ISO strings. Keeping them intact is
+        // important for clients that sort or display enrollment validity.
+        enrolledAt: enrollment?.enrolledAt ?? null,
+        accessExpiresAt: enrollment?.accessExpiresAt ?? null,
       };
       return { ...course, enrollment: serializedEnrollment };
     });
@@ -69,10 +66,8 @@ export async function GET(request: Request) {
     // re-sort based on enrollment date (coursesData query doesn't preserve order of IDs)
     // We can sort by the enrollment order found in 'enrollments' array which was already sorted.
     const sorted = merged.sort((a, b) => {
-      // @ts-ignore
-      const dateA = new Date(a.enrollment.enrolledAt).getTime();
-      // @ts-ignore
-      const dateB = new Date(b.enrollment.enrolledAt).getTime();
+      const dateA = new Date(a.enrollment.enrolledAt ?? 0).getTime();
+      const dateB = new Date(b.enrollment.enrolledAt ?? 0).getTime();
       return dateB - dateA;
     });
 

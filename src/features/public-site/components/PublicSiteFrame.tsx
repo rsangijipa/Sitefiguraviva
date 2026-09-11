@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
+import BackToTop from "@/components/BackToTop";
 
 export default function PublicSiteFrame({ children }: { children: ReactNode }) {
   return (
@@ -10,6 +11,7 @@ export default function PublicSiteFrame({ children }: { children: ReactNode }) {
         {children}
       </main>
       <Footer />
+      <BackToTop />
     </div>
   );
 }

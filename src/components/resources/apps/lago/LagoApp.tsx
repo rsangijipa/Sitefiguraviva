@@ -19,6 +19,9 @@ export default function LagoApp() {
     available: true,
     error: null as string | null,
   });
+  const [interactionStatus, setInteractionStatus] = useState(
+    "Use os controles ou as teclas C e P para interagir.",
+  );
 
   const [config, setConfig] = useState<WaterSimConfig>({
     damping: 0.991,
@@ -37,11 +40,32 @@ export default function LagoApp() {
 
   const handleClearLake = () => {
     pondRef.current?.clearLake();
+    setInteractionStatus("A superfície do lago foi serenada.");
   };
 
   const handleTossStoneBurst = () => {
     pondRef.current?.tossRandomStone();
+    setInteractionStatus("Uma pedra criou novas ondas no lago.");
   };
+
+  useEffect(() => {
+    const handleShortcut = (event: KeyboardEvent) => {
+      if (showInfo || event.ctrlKey || event.metaKey || event.altKey) return;
+      const target = event.target as HTMLElement | null;
+      if (target?.matches("input, textarea, select, [contenteditable=true]"))
+        return;
+      if (event.key.toLowerCase() === "c") {
+        event.preventDefault();
+        handleClearLake();
+      }
+      if (event.key.toLowerCase() === "p") {
+        event.preventDefault();
+        handleTossStoneBurst();
+      }
+    };
+    window.addEventListener("keydown", handleShortcut);
+    return () => window.removeEventListener("keydown", handleShortcut);
+  }, [showInfo]);
 
   // Called by PondCanvas as each init stage completes
   const handleLoadProgress = useCallback((progress: number) => {
@@ -114,7 +138,7 @@ export default function LagoApp() {
   };
 
   return (
-    <main className="lago-app relative min-h-[min(72vh,640px)] w-full h-full overflow-hidden rounded-[1.5rem] bg-slate-950 font-sans select-none sm:min-h-[min(62vh,560px)]">
+    <main className="lago-app relative w-full h-full overflow-hidden rounded-[1.5rem] bg-slate-950 font-sans select-none">
       {/* Loading Screen — overlaid until sim is ready */}
       <LoadingScreen progress={loadingProgress} onComplete={() => {}} />
 
@@ -127,6 +151,10 @@ export default function LagoApp() {
         onWebGLError={handleWebGLError}
         onAudioStatus={handleAudioStatus}
       />
+
+      <p className="sr-only" role="status" aria-live="polite">
+        {interactionStatus}
+      </p>
 
       {webglError && (
         <div
@@ -146,13 +174,8 @@ export default function LagoApp() {
           transition-opacity duration-700 ${isLoaded ? "opacity-100" : "opacity-0"}`}
       >
         <div className="pointer-events-auto flex items-center gap-3 bg-white/90 backdrop-blur-md border border-stone-200 px-3.5 py-1.5 rounded-full shadow-lg">
-          <div className="flex items-center gap-2">
-            <Droplets className="w-3.5 h-3.5 text-accent" aria-hidden="true" />
-            <h1 className="text-sm font-semibold tracking-widest text-primary font-serif">
-              Lago
-            </h1>
-          </div>
-          <span className="text-[11px] text-text/60 hidden sm:inline border-l border-stone-200 pl-2.5 leading-none">
+          <Droplets className="w-3.5 h-3.5 text-accent" aria-hidden="true" />
+          <span className="text-[11px] text-text/60 leading-none">
             {modeHints[config.mode]}
           </span>
         </div>
@@ -185,6 +208,13 @@ export default function LagoApp() {
           </button>
         </div>
       </header>
+
+      <div
+        className={`absolute left-4 top-16 z-20 rounded-full border border-white/20 bg-slate-950/55 px-3 py-1.5 text-[11px] text-white/80 backdrop-blur-md transition-opacity ${isLoaded ? "opacity-100" : "opacity-0"}`}
+      >
+        Teclado: <kbd className="font-semibold text-white">P</kbd> pedra ·{" "}
+        <kbd className="font-semibold text-white">C</kbd> serenar
+      </div>
 
       {/* Controls — fades in after load */}
       <div

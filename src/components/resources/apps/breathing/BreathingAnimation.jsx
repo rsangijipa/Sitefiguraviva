@@ -6,7 +6,7 @@ const RING_MAX_SCALE = 1;
 
 // Mandala compacta: um núcleo + duas camadas de pétalas que giram devagar,
 // e a escala geral segue o ritmo da respiração (inspira = expande).
-const Mandala = ({ theme, scale }) => {
+const Mandala = ({ theme, scale, reducedMotion }) => {
   const rings = useMemo(
     () => [
       { count: 10, size: 26, radius: 34, spinDuration: 60 },
@@ -20,8 +20,8 @@ const Mandala = ({ theme, scale }) => {
       data-mandala-scale={scale}
       className="relative flex items-center justify-center will-change-transform"
       style={{ width: "220px", height: "220px" }}
-      animate={{ scale }}
-      transition={{ duration: 1, ease: "easeInOut" }}
+      animate={{ scale: reducedMotion ? 1 : scale }}
+      transition={{ duration: reducedMotion ? 0 : 1, ease: "easeInOut" }}
     >
       {/* Aura central suave */}
       <div
@@ -36,9 +36,11 @@ const Mandala = ({ theme, scale }) => {
           key={ringIndex}
           className="absolute inset-0 flex items-center justify-center"
           style={{
-            animation: `mandala-spin ${ring.spinDuration}s linear infinite ${
-              ringIndex % 2 === 1 ? "reverse" : "normal"
-            }`,
+            animation: reducedMotion
+              ? "none"
+              : `mandala-spin ${ring.spinDuration}s linear infinite ${
+                  ringIndex % 2 === 1 ? "reverse" : "normal"
+                }`,
           }}
         >
           {Array.from({ length: ring.count }).map((_, i) => {
@@ -84,7 +86,12 @@ const Mandala = ({ theme, scale }) => {
   );
 };
 
-export const BreathingAnimation = ({ technique, isActive, onPhaseChange }) => {
+export const BreathingAnimation = ({
+  technique,
+  isActive,
+  onPhaseChange,
+  reducedMotion = false,
+}) => {
   const [phase, setPhase] = useState("inhale");
   const [scale, setScale] = useState(RING_MIN_SCALE);
 
@@ -174,7 +181,11 @@ export const BreathingAnimation = ({ technique, isActive, onPhaseChange }) => {
     <div className="flex flex-col items-center justify-center py-2 md:py-4">
       <div className="relative flex items-center justify-center w-[160px] h-[160px] md:w-[220px] md:h-[220px]">
         <div className="scale-[0.73] md:scale-100 flex items-center justify-center">
-          <Mandala theme={mandalaTheme} scale={scale} />
+          <Mandala
+            theme={mandalaTheme}
+            scale={scale}
+            reducedMotion={reducedMotion}
+          />
         </div>
       </div>
 
@@ -182,10 +193,10 @@ export const BreathingAnimation = ({ technique, isActive, onPhaseChange }) => {
         <AnimatePresence mode="wait">
           <motion.p
             key={phase}
-            initial={{ opacity: 0, y: 8 }}
+            initial={reducedMotion ? false : { opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
+            exit={reducedMotion ? undefined : { opacity: 0, y: -8 }}
+            transition={{ duration: reducedMotion ? 0 : 0.4, ease: "easeOut" }}
             className="text-2xl font-serif text-ink tracking-tight text-center"
           >
             {getInstructionText()}

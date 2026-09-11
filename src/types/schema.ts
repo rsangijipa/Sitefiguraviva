@@ -1,4 +1,4 @@
-import type { Timestamp } from "firebase/firestore";
+import type { Timestamp } from "@/types/time";
 
 // Allow flexible timestamp types (client or admin SDK)
 type FlexibleTimestamp =

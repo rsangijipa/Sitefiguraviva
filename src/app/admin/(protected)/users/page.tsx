@@ -23,6 +23,7 @@ import {
   deleteUser,
 } from "@/app/actions/user-management";
 import type { UserRole } from "@/types/user";
+import { SafeImage } from "@/components/ui/SafeImage";
 
 type AdminUser = {
   id: string;
@@ -294,12 +295,14 @@ export default function UsersManager() {
                         >
                           <td className="p-4">
                             <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-full bg-stone-100 flex items-center justify-center shrink-0 border border-stone-200 overflow-hidden">
+                              <div className="relative w-10 h-10 rounded-full bg-stone-100 flex items-center justify-center shrink-0 border border-stone-200 overflow-hidden">
                                 {user.photoURL ? (
-                                  <img
+                                  <SafeImage
                                     src={user.photoURL}
-                                    alt=""
-                                    className="w-full h-full object-cover"
+                                    alt={`Avatar de ${user.displayName || user.email}`}
+                                    fill
+                                    sizes="40px"
+                                    className="object-cover"
                                   />
                                 ) : (
                                   <User size={18} className="text-stone-400" />

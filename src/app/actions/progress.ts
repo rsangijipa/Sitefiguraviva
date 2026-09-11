@@ -1,8 +1,11 @@
 "use server";
 
-import { adminDb } from "@/lib/firebase/admin";
-import { FieldValue } from "firebase-admin/firestore";
-import { progressService } from "@/lib/progress/progressService";
+import { upsertLessonProgress } from "@/features/progress/infrastructure/supabaseProgressRepository.server";
+import {
+  markLessonCompletedSupabase,
+  recalculateProgressSupabase,
+  updateLessonProgressSupabase,
+} from "@/features/progress/infrastructure/supabaseProgressService.server";
 import { assertCanAccessCourse } from "@/lib/auth/access-gate";
 import { verifySession } from "@/lib/auth/server";
 import { revalidatePath } from "next/cache";
@@ -26,17 +29,8 @@ export async function markLessonCompleted(
     // This ensures only enrolled students with active status can progress.
     await assertCanAccessCourse(uid, courseId);
 
-    // 3. Service Call (Idempotent)
-    // Note: progressService.markLessonCompleted already awards XP and the
-    // "first_steps" badge internally (see lib/progress/progressService.ts).
-    // Do not call gamificationService.onLessonCompletion here as well —
-    // that duplicated XP for every lesson completion.
-    await progressService.markLessonCompleted(
-      uid,
-      courseId,
-      moduleId,
-      lessonId,
-    );
+    // 3. Service Call (Idempotent). Progress and certificate eligibility use Supabase.
+    await markLessonCompletedSupabase(uid, courseId, lessonId);
 
     // 4. Revalidate to show new progress in UI
     revalidatePath(`/portal/course/${courseId}`);
@@ -66,13 +60,7 @@ export async function updateLessonProgress(
 
     await assertCanAccessCourse(uid, courseId);
 
-    await progressService.updateLessonProgress(
-      uid,
-      courseId,
-      moduleId,
-      lessonId,
-      data,
-    );
+    await updateLessonProgressSupabase(uid, courseId, lessonId, data);
 
     if (data.status === "completed") {
       // Award XP
@@ -99,19 +87,12 @@ export async function updateLessonLastAccess(
 
     await assertCanAccessCourse(uid, courseId);
 
-    await adminDb
-      .collection("progress")
-      .doc(`${uid}_${courseId}_${lessonId}`)
-      .set(
-        {
-          userId: uid,
-          courseId,
-          lessonId,
-          lastAccessedAt: FieldValue.serverTimestamp(),
-          updatedAt: FieldValue.serverTimestamp(),
-        },
-        { merge: true },
-      );
+    await upsertLessonProgress({
+      userId: uid,
+      courseId,
+      lessonId,
+      status: "in_progress",
+    });
 
     return { success: true };
   } catch (error: any) {
@@ -153,7 +134,7 @@ export async function recalculateProgress(
     }
 
     // Perform Canonical Recalculation
-    await progressService.recalculateEnrollmentProgress(uid, courseId);
+    await recalculateProgressSupabase(uid, courseId);
 
     // Revalidate relevant paths
     revalidatePath(`/portal/course/${courseId}`);

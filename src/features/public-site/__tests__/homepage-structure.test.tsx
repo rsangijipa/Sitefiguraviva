@@ -1,9 +1,14 @@
 import { render, screen } from "@testing-library/react";
+import type React from "react";
 
 import HomeClient from "@/components/HomeClient";
 
 jest.mock("@/context/UIContext", () => ({
   useUI: () => ({ showAlert: jest.fn() }),
+}));
+
+jest.mock("@/components/providers/ThemeProvider", () => ({
+  useTheme: () => ({ setPreference: jest.fn() }),
 }));
 
 jest.mock("next/navigation", () => ({
@@ -71,6 +76,64 @@ jest.mock(
       return <section>Depoimentos</section>;
     },
 );
+jest.mock(
+  "@/components/sections/CoursesSection",
+  () =>
+    function MockCoursesSection({ courses }: { courses: any[] }) {
+      return (
+        <section>
+          {courses.map((course) => (
+            <div data-testid="formation-card" key={course.id}>
+              {course.title}
+            </div>
+          ))}
+        </section>
+      );
+    },
+);
+jest.mock(
+  "@/components/sections/BlogSection",
+  () =>
+    function MockBlogSection({ blogPosts }: { blogPosts: any[] }) {
+      return (
+        <section>
+          {blogPosts.slice(0, 3).map((post) => (
+            <div data-testid="content-card" key={post.id}>
+              {post.title}
+            </div>
+          ))}
+        </section>
+      );
+    },
+);
+jest.mock(
+  "@/components/motion/Reveal",
+  () =>
+    function MockReveal({ children }: { children: React.ReactNode }) {
+      return <>{children}</>;
+    },
+);
+jest.mock(
+  "@/components/motion/ScrollProgressBar",
+  () =>
+    function MockScrollProgressBar() {
+      return null;
+    },
+);
+jest.mock(
+  "@/components/sections/FAQSection",
+  () =>
+    function MockFAQSection() {
+      return null;
+    },
+);
+jest.mock(
+  "@/components/InstagramSection",
+  () =>
+    function MockInstagramSection() {
+      return null;
+    },
+);
 
 const courses = Array.from({ length: 5 }, (_, index) => ({
   id: `course-${index}`,
@@ -85,11 +148,11 @@ const posts = Array.from({ length: 5 }, (_, index) => ({
 }));
 
 describe("focused homepage", () => {
-  it("caps formations and recent content at three cards each", () => {
+  it("caps formations and recent content at three cards each", async () => {
     render(<HomeClient initialData={{ courses, posts, gallery: [] }} />);
 
     expect(screen.getAllByTestId("formation-card")).toHaveLength(3);
-    expect(screen.getAllByTestId("content-card")).toHaveLength(3);
+    expect(await screen.findAllByTestId("content-card")).toHaveLength(3);
   });
 
   it("does not mount long-form or interactive homepage sections", () => {

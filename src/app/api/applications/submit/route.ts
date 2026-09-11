@@ -25,6 +25,13 @@ const applicationSchema = z.object({
     .object({
       lgpd: z.boolean().optional(),
       acceptedAt: z.string().datetime().optional(),
+      termsVersion: z.string().trim().min(1).max(100).optional(),
+    })
+    .refine((value) => value.lgpd === true, {
+      message: "LGPD consent is required",
+    })
+    .refine((value) => Boolean(value.acceptedAt && value.termsVersion), {
+      message: "Terms version and acceptance timestamp are required",
     })
     .optional()
     .default({}),
@@ -66,22 +73,44 @@ export async function POST(req: NextRequest) {
     }
 
     const { courseId, answers, consent } = parsed.data;
-    const applicationId = `${uid}_${courseId}`;
-    const { error } = await createSupabaseServiceClient()
-      .from("applications")
-      .upsert(
-        {
-          id: applicationId,
-          user_id: uid,
-          course_id: courseId,
-          answers,
-          consent,
-          status: "submitted",
-          source: "internal",
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "id" },
+    const supabase = createSupabaseServiceClient();
+    const { data: course, error: courseError } = await supabase
+      .from("courses")
+      .select("id, status, is_published")
+      .eq("id", courseId)
+      .maybeSingle();
+    if (courseError) throw courseError;
+    if (!course || course.status !== "open" || course.is_published !== true) {
+      return NextResponse.json(
+        { error: "Course is not accepting applications" },
+        { status: 409 },
       );
+    }
+    const applicationId = `${uid}_${courseId}`;
+    const { data: existing, error: existingError } = await supabase
+      .from("applications")
+      .select("status")
+      .eq("id", applicationId)
+      .maybeSingle();
+    if (existingError) throw existingError;
+    const protectedStatuses = new Set(["contacted", "enrolled", "approved"]);
+    const nextStatus =
+      existing?.status && protectedStatuses.has(existing.status)
+        ? existing.status
+        : "submitted";
+    const { error } = await supabase.from("applications").upsert(
+      {
+        id: applicationId,
+        user_id: uid,
+        course_id: courseId,
+        answers,
+        consent,
+        status: nextStatus,
+        source: "internal",
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "id" },
+    );
 
     if (error) throw error;
 

@@ -16,8 +16,8 @@ export default function PublicPageHero({
   visual,
 }: PublicPageHeroProps) {
   return (
-    <header className="relative isolate overflow-hidden border-b border-primary/10 bg-paper px-6 pb-16 pt-32 md:pb-20 md:pt-40">
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_80%_20%,rgba(212,175,55,0.14),transparent_34%),linear-gradient(120deg,rgba(255,255,255,0.62),transparent_62%)]" />
+    <header className="relative isolate overflow-hidden border-b border-primary/10 bg-paper px-6 pb-12 pt-28 md:pb-14 md:pt-32">
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_82%_32%,rgba(254,83,139,0.12),transparent_22%),radial-gradient(circle_at_72%_72%,rgba(1,201,77,0.10),transparent_24%),linear-gradient(120deg,rgba(241,233,219,0.55),transparent_62%)]" />
       <div className="container relative z-10 mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.72fr)]">
         <div className="max-w-3xl">
           {eyebrow && (

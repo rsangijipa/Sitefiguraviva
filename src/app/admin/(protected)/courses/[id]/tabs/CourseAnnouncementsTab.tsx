@@ -7,7 +7,6 @@ import { useToast } from "@/context/ToastContext";
 import { AnnouncementDoc } from "@/types/lms";
 import { announcementService } from "@/services/announcementService";
 import { cn } from "@/lib/utils";
-import { Timestamp } from "firebase/firestore";
 
 export default function CourseAnnouncementsTab({
   courseId,
@@ -43,12 +42,12 @@ export default function CourseAnnouncementsTab({
     e.preventDefault();
 
     // Parse date/time
-    let publishAt = Timestamp.now();
+    let publishAt = new Date().toISOString();
     if (formData.publishAtDate && formData.publishAtTime) {
       const date = new Date(
         `${formData.publishAtDate}T${formData.publishAtTime}`,
       );
-      publishAt = Timestamp.fromDate(date);
+      publishAt = date.toISOString();
     }
 
     try {
@@ -57,8 +56,6 @@ export default function CourseAnnouncementsTab({
         content: formData.content, // Ideally use a proper markdown editor
         isPinned: formData.isPinned,
         publishAt: publishAt,
-        authorId: "admin",
-        courseId: courseId,
       });
       addToast("Aviso criado com sucesso", "success");
       setIsCreating(false);

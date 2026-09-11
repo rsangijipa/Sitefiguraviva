@@ -2,8 +2,8 @@ import { activateEnrollmentFromStripe } from "@/lib/auth/enrollment-service";
 import { logAudit } from "@/lib/audit";
 
 const constructEventMock = jest.fn();
-const eventRefUpdateMock = jest.fn();
-const runTransactionMock = jest.fn();
+const stripeEventInsertMock = jest.fn();
+const stripeEventUpdateMock = jest.fn();
 
 jest.mock("@/lib/stripe", () => ({
   getStripe: () => ({
@@ -13,15 +13,19 @@ jest.mock("@/lib/stripe", () => ({
   }),
 }));
 
-jest.mock("@/lib/firebase/admin", () => ({
-  adminDb: {
-    collection: jest.fn(() => ({
-      doc: jest.fn(() => ({
-        update: eventRefUpdateMock,
-      })),
-    })),
-    runTransaction: (...args: any[]) => runTransactionMock(...args),
-  },
+jest.mock("@/infrastructure/supabase/server", () => ({
+  createSupabaseServiceClient: jest.fn(() => ({
+    from: jest.fn((table: string) => {
+      if (table === "stripe_webhook_events") {
+        return {
+          insert: stripeEventInsertMock,
+          update: stripeEventUpdateMock,
+          select: jest.fn(),
+        };
+      }
+      return { select: jest.fn(), update: jest.fn(), insert: jest.fn() };
+    }),
+  })),
 }));
 
 jest.mock("@/lib/auth/enrollment-service", () => ({
@@ -55,17 +59,10 @@ describe("billing webhook route", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    runTransactionMock.mockImplementation(async (handler: any) => {
-      const tx = {
-        get: jest.fn(async () => ({ exists: false })),
-        set: jest.fn(),
-      };
-      await handler(tx);
-      return null;
+    stripeEventInsertMock.mockResolvedValue({ error: null });
+    stripeEventUpdateMock.mockReturnValue({
+      eq: jest.fn().mockResolvedValue({ error: null }),
     });
-
-    eventRefUpdateMock.mockResolvedValue(undefined);
   });
 
   function makeRequest() {

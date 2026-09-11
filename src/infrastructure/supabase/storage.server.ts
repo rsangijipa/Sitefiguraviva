@@ -35,3 +35,18 @@ export async function uploadPublicCourseAsset(input: {
 
   return storage.getPublicUrl(input.path).data.publicUrl;
 }
+
+export async function uploadPublicAsset(input: {
+  bucket: string;
+  path: string;
+  body: Buffer;
+  contentType: string;
+}): Promise<string> {
+  const storage = createSupabaseServiceClient().storage.from(input.bucket);
+  const { error } = await storage.upload(input.path, input.body, {
+    contentType: input.contentType,
+    upsert: true,
+  });
+  if (error) throw error;
+  return storage.getPublicUrl(input.path).data.publicUrl;
+}

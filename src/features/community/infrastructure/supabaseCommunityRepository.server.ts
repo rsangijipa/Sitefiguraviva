@@ -9,7 +9,7 @@ type ReplyRow = TableRow<"community_replies">;
 function mapThreadRow(row: ThreadRow): CommunityThreadDoc {
   return {
     id: row.id,
-    courseId: row.course_id,
+    courseId: row.course_id || "global",
     title: row.title,
     content: row.content,
     authorId: row.legacy_author_firebase_uid || row.author_id || "",
@@ -49,6 +49,7 @@ export async function listGlobalThreads(
   const { data, error } = await supabase
     .from("community_threads")
     .select("*")
+    .is("course_id", null)
     .eq("is_deleted", false)
     .order("is_pinned", { ascending: false })
     .order("last_reply_at", { ascending: false })

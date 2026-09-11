@@ -1,7 +1,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { AppHeader } from "../components/AppHeader";
 import { QuizCard } from "../components/QuizCard";
 import { CATEGORIES } from "../data/categories";
 import { QUIZZES } from "../data/quizzes";
@@ -46,8 +45,6 @@ export function Home({ onSelectQuestionnaire, onSelectInstrument }: HomeProps) {
 
   return (
     <div className="home">
-      <AppHeader />
-
       <main className="qz-app-container home__main">
         {/* HERO */}
         <motion.section

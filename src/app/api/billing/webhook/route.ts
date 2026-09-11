@@ -1,30 +1,84 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getStripe } from "@/lib/stripe";
-import { adminDb } from "@/lib/firebase/admin";
-import { FieldValue } from "firebase-admin/firestore";
 import Stripe from "stripe";
-import { EnrollmentDoc } from "@/types/lms";
-import {
-  computeAccessStatus,
-  AccessStatus,
-  PaymentStatus,
-  StripeSubscriptionStatus,
-} from "@/lib/enrollmentStatus";
 import {
   activateEnrollmentFromStripe,
   writeEnrollmentMirror,
 } from "@/lib/auth/enrollment-service";
-import { logSystemError } from "@/lib/logging";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
+import { getStripe } from "@/lib/stripe";
 import { logAudit } from "@/lib/audit";
+import { logSystemError } from "@/lib/logging";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
+type EventLock = "claimed" | "done" | "processing";
+
+async function claimEvent(event: Stripe.Event): Promise<EventLock> {
+  const supabase = createSupabaseServiceClient();
+  const { error } = await (supabase as any)
+    .from("stripe_webhook_events")
+    .insert({
+      id: event.id,
+      type: event.type,
+      livemode: event.livemode,
+      event_created_at: new Date(event.created * 1000).toISOString(),
+      status: "processing",
+    });
+  if (!error) return "claimed";
+  if (error.code !== "23505") throw error;
+
+  const { data, error: readError } = await (supabase as any)
+    .from("stripe_webhook_events")
+    .select("status")
+    .eq("id", event.id)
+    .maybeSingle();
+  if (readError) throw readError;
+  if (data?.status === "done") return "done";
+  if (data?.status === "processing") return "processing";
+
+  const { error: retryError } = await (supabase as any)
+    .from("stripe_webhook_events")
+    .update({
+      status: "processing",
+      processing_started_at: new Date().toISOString(),
+      error_message: null,
+    })
+    .eq("id", event.id)
+    .eq("status", "error");
+  if (retryError) throw retryError;
+  return "claimed";
+}
+
+async function finishEvent(id: string, errorMessage?: string) {
+  const patch = errorMessage
+    ? {
+        status: "error",
+        failed_at: new Date().toISOString(),
+        error_message: errorMessage.slice(0, 1000),
+      }
+    : { status: "done", processed_at: new Date().toISOString() };
+  const { error } = await (createSupabaseServiceClient() as any)
+    .from("stripe_webhook_events")
+    .update(patch)
+    .eq("id", id);
+  if (error) throw error;
+}
+
+async function findSubscriptionEnrollment(subscriptionId: string) {
+  const { data, error } = await createSupabaseServiceClient()
+    .from("enrollments")
+    .select("*")
+    .eq("source_ref", subscriptionId)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
 export async function POST(req: NextRequest) {
   const stripe = getStripe();
   const body = await req.text();
-  const signature = req.headers.get("stripe-signature") as string;
-
+  const signature = req.headers.get("stripe-signature") || "";
   let event: Stripe.Event;
 
   try {
@@ -33,110 +87,55 @@ export async function POST(req: NextRequest) {
       signature,
       process.env.STRIPE_WEBHOOK_SECRET!,
     );
-  } catch (err: any) {
-    // Never log the raw payload here: it's attacker-controlled on an
-    // unverified request and may carry customer/payment data (P1-04 in
-    // docs/RELATORIO_AUDITORIA_COMPLETA_2026-09-04.md).
-    const errorMsg = `Webhook signature verification failed: ${err.message}`;
-    console.error(errorMsg);
-    await logSystemError("webhook", errorMsg, {
-      bodyLength: body.length,
-    });
+  } catch (error: any) {
+    const message = `Webhook signature verification failed: ${error.message}`;
+    console.error(message);
+    await logSystemError("webhook", message, { bodyLength: body.length });
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
-  const eventId = event.id;
-  const eventRef = adminDb.collection("stripe_events").doc(eventId);
-
-  // -------------------------------------------------------------------------
-  // 1. Idempotency & Locking (Processing / Done pattern)
-  // -------------------------------------------------------------------------
   try {
-    const eventDoc = await adminDb.runTransaction(async (t) => {
-      const doc = await t.get(eventRef);
-      if (!doc.exists) {
-        t.set(eventRef, {
-          id: eventId,
-          type: event.type,
-          created: event.created,
-          status: "processing",
-          processingStartedAt: FieldValue.serverTimestamp(),
-          livemode: event.livemode,
-        });
-        return null; // Signals "We are first, proceed"
-      }
-      return doc.data(); // Signals "Already exists"
-    });
+    const lock = await claimEvent(event);
+    if (lock === "done")
+      return NextResponse.json({ received: true, status: "already_done" });
+    if (lock === "processing")
+      return NextResponse.json({
+        received: true,
+        status: "processing_concurrently",
+      });
 
-    if (eventDoc) {
-      // Event already exists
-      if (eventDoc.status === "done") {
-        return NextResponse.json({ received: true, status: "already_done" });
-      }
-      if (eventDoc.status === "processing") {
-        // Concurrency edge case: another request is handling it right now.
-        // We return 200 to Stripe so it doesn't retry immediately and cause race conditions.
-        return NextResponse.json({
-          received: true,
-          status: "processing_concurrently",
-        });
-      }
-      // If status is 'error', we assume the transaction above didn't block us from retrying logic
-      // (actually for strictness we might want to allow retry only after X time, but simple is ok for now: let it flow through logic again if logic fixes it)
-      // However, for safety in this robust plan, let's treat 'error' as allow-retry.
-      // But valid flow above only writes if !exists. So if 'error' exists, we skipped the write but returned the doc.
-      // We should allow retry.
-    }
-  } catch (err: any) {
-    console.error("Idempotency lock error", err);
-    return NextResponse.json({ error: "Lock error" }, { status: 500 });
-  }
-
-  const session = event.data.object as
-    | Stripe.Checkout.Session
-    | Stripe.Subscription
-    | Stripe.Invoice;
-
-  // -------------------------------------------------------------------------
-  // 2. Logic Execution
-  // -------------------------------------------------------------------------
-  try {
     switch (event.type) {
       case "checkout.session.completed": {
-        const checkoutSession = session as Stripe.Checkout.Session;
-        const uid = checkoutSession.metadata?.uid;
-        const courseId = checkoutSession.metadata?.courseId;
-        const isSubscription = checkoutSession.mode === "subscription";
-        const checkoutPaymentStatus = checkoutSession.payment_status;
+        const session = event.data.object as Stripe.Checkout.Session;
+        const uid = session.metadata?.uid;
+        const courseId = session.metadata?.courseId;
+        const isSubscription = session.mode === "subscription";
         const subscriptionId =
-          typeof checkoutSession.subscription === "string"
-            ? checkoutSession.subscription
+          typeof session.subscription === "string"
+            ? session.subscription
             : null;
-
         if (uid && courseId && subscriptionId) {
-          const stripeMeta = {
-            "stripe.subscriptionId": subscriptionId,
-            "stripe.subscriptionStatus": "active",
-            updatedAt: FieldValue.serverTimestamp(),
-          };
           await writeEnrollmentMirror({
             uid,
             courseId,
-            enrollmentDoc: stripeMeta as any,
+            enrollmentDoc: {
+              sourceRef: subscriptionId,
+              paymentStatus: "pending",
+              paymentMethod: "subscription",
+            } as any,
           });
         }
-
         if (
           uid &&
           courseId &&
           !isSubscription &&
-          checkoutPaymentStatus === "paid"
+          session.payment_status === "paid"
         ) {
           await activateEnrollmentFromStripe({
             uid,
             courseId,
-            sessionId: checkoutSession.id,
-            isSubscription,
+            sessionId: session.id,
+            isSubscription: false,
             paymentStatus: "paid",
           });
         } else if (uid && courseId) {
@@ -151,213 +150,106 @@ export async function POST(req: NextRequest) {
             metadata: {
               eventType: event.type,
               isSubscription,
-              checkoutPaymentStatus: checkoutPaymentStatus || "unknown",
-              subscriptionId: subscriptionId || null,
+              checkoutPaymentStatus: session.payment_status || "unknown",
+              subscriptionId,
             },
           });
         }
         break;
       }
-
       case "invoice.paid": {
-        const invoice = session as Stripe.Invoice;
-        const subscriptionId = (invoice as any).subscription as string;
-
-        let enrollmentQuery = await adminDb
-          .collection("enrollments")
-          .where("stripe.subscriptionId", "==", subscriptionId)
-          .limit(1)
-          .get();
-
-        if (enrollmentQuery.empty) {
-          enrollmentQuery = await adminDb
-            .collection("enrollments")
-            .where("sourceRef", "==", subscriptionId)
-            .limit(1)
-            .get();
-        }
-
-        if (!enrollmentQuery.empty) {
-          const data = enrollmentQuery.docs[0].data() as EnrollmentDoc;
-          await activateEnrollmentFromStripe({
-            uid: data.uid || data.userId,
-            courseId: data.courseId,
-            sessionId: subscriptionId,
-            isSubscription: true,
-            paymentStatus: "paid",
-          });
-        }
-        break;
-      }
-
-      case "invoice.payment_failed": {
-        const invoice = session as Stripe.Invoice;
-        const subscriptionId = (invoice as any).subscription as string;
-
-        const enrollmentQuery = await adminDb
-          .collection("enrollments")
-          .where("stripe.subscriptionId", "==", subscriptionId)
-          .limit(1)
-          .get();
-
-        if (!enrollmentQuery.empty) {
-          const docSnap = enrollmentQuery.docs[0];
-          const data = docSnap.data();
-
-          const currentApproval = data.approvalStatus || "approved";
-          const currentStripeStatus =
-            data["stripe.subscriptionStatus"] || "past_due";
-
-          // Force payment failed
-          const finalStatus = computeAccessStatus(
-            "failed",
-            currentApproval,
-            currentStripeStatus,
-          );
-
-          const updateData = {
-            status: finalStatus,
-            paymentStatus: "failed",
-            "stripe.latestInvoiceStatus": invoice.status,
-            updatedAt: FieldValue.serverTimestamp(),
-          };
-
-          await writeEnrollmentMirror({
-            uid: data.uid || data.userId,
-            courseId: data.courseId,
-            enrollmentDoc: updateData as any,
-          });
-        }
-        break;
-      }
-
-      case "customer.subscription.updated": {
-        const subscription = session as Stripe.Subscription;
-        const subscriptionId = subscription.id;
-        const stripeStatus = subscription.status as StripeSubscriptionStatus;
-
-        const enrollmentQuery = await adminDb
-          .collection("enrollments")
-          .where("stripe.subscriptionId", "==", subscriptionId)
-          .limit(1)
-          .get();
-
-        if (!enrollmentQuery.empty) {
-          const docSnap = enrollmentQuery.docs[0];
-          const data = docSnap.data();
-
-          const currentPayment = data.paymentStatus || "pending";
-          const currentApproval = data.approvalStatus || "approved";
-
-          // Update ONLY stripe status in our inputs
-          const finalStatus = computeAccessStatus(
-            currentPayment,
-            currentApproval,
-            stripeStatus,
-          );
-
-          const updateData: Record<string, unknown> = {
-            status: finalStatus,
-            "stripe.subscriptionStatus": stripeStatus,
-            "stripe.currentPeriodEnd":
-              typeof (subscription as any).current_period_end === "number"
-                ? new Date((subscription as any).current_period_end * 1000)
-                : null,
-            updatedAt: FieldValue.serverTimestamp(),
-          };
-
-          if (stripeStatus === "canceled") {
-            updateData.endedAt = FieldValue.serverTimestamp();
+        const invoice = event.data.object as Stripe.Invoice;
+        const subscriptionId = (invoice as any).subscription as string | null;
+        if (subscriptionId) {
+          const enrollment = await findSubscriptionEnrollment(subscriptionId);
+          if (enrollment?.course_id && enrollment.user_id) {
+            await activateEnrollmentFromStripe({
+              uid: enrollment.user_id,
+              courseId: enrollment.course_id,
+              sessionId: subscriptionId,
+              isSubscription: true,
+              paymentStatus: "paid",
+            });
           }
-
-          await writeEnrollmentMirror({
-            uid: data.uid || data.userId,
-            courseId: data.courseId,
-            enrollmentDoc: updateData as any,
-          });
         }
         break;
       }
-
+      case "invoice.payment_failed": {
+        const invoice = event.data.object as Stripe.Invoice;
+        const subscriptionId = (invoice as any).subscription as string | null;
+        if (subscriptionId) {
+          const enrollment = await findSubscriptionEnrollment(subscriptionId);
+          if (
+            enrollment?.course_id &&
+            (enrollment.user_id || enrollment.legacy_firebase_uid)
+          ) {
+            await writeEnrollmentMirror({
+              uid: enrollment.user_id || enrollment.legacy_firebase_uid,
+              courseId: enrollment.course_id,
+              enrollmentDoc: {
+                status: "canceled",
+                paymentStatus: "failed",
+                sourceRef: subscriptionId,
+              } as any,
+            });
+          }
+        }
+        break;
+      }
+      case "customer.subscription.updated":
       case "customer.subscription.deleted": {
-        const subscription = session as Stripe.Subscription;
-        const subscriptionId = subscription.id;
-
-        const enrollmentQuery = await adminDb
-          .collection("enrollments")
-          .where("stripe.subscriptionId", "==", subscriptionId)
-          .limit(1)
-          .get();
-
-        if (!enrollmentQuery.empty) {
-          const docSnap = enrollmentQuery.docs[0];
-          const data = docSnap.data();
-
-          const currentPayment = data.paymentStatus || "pending";
-          const currentApproval = data.approvalStatus || "approved";
-
-          // Subscription deleted -> canceled
-          const finalStatus = computeAccessStatus(
-            currentPayment,
-            currentApproval,
-            "canceled",
-          );
-
-          const updateData = {
-            status: finalStatus,
-            "stripe.subscriptionStatus": "canceled",
-            endedAt: FieldValue.serverTimestamp(),
-            updatedAt: FieldValue.serverTimestamp(),
-          };
-
+        const subscription = event.data.object as Stripe.Subscription;
+        const enrollment = await findSubscriptionEnrollment(subscription.id);
+        if (
+          enrollment?.course_id &&
+          (enrollment.user_id || enrollment.legacy_firebase_uid)
+        ) {
+          const canceled =
+            event.type === "customer.subscription.deleted" ||
+            subscription.status === "canceled";
           await writeEnrollmentMirror({
-            uid: data.uid || data.userId,
-            courseId: data.courseId,
-            enrollmentDoc: updateData as any,
+            uid: enrollment.user_id || enrollment.legacy_firebase_uid,
+            courseId: enrollment.course_id,
+            enrollmentDoc: {
+              status: canceled ? "canceled" : enrollment.status,
+              sourceRef: subscription.id,
+            } as any,
           });
-
-          await logAudit({
-            actor: { uid: "system", role: "webhook" },
-            action: "billing.subscription_canceled",
-            target: {
-              collection: "enrollments",
-              id: docSnap.id,
-              summary: `Subscription ${subscriptionId} canceled. Access Revoked.`,
-            },
-            metadata: { subscriptionId },
-            diff: { after: updateData },
-          });
+          if (canceled)
+            await logAudit({
+              actor: { uid: "system", role: "webhook" },
+              action: "billing.subscription_canceled",
+              target: {
+                collection: "enrollments",
+                id: enrollment.id,
+                summary: `Subscription ${subscription.id} canceled`,
+              },
+              metadata: { subscriptionId: subscription.id },
+            });
         }
         break;
       }
     }
 
-    // -------------------------------------------------------------------------
-    // 3. Mark as Done
-    // -------------------------------------------------------------------------
-    await eventRef.update({
-      status: "done",
-      processedAt: FieldValue.serverTimestamp(),
-    });
-
+    await finishEvent(event.id);
     return NextResponse.json({ received: true });
   } catch (error: any) {
-    const errorMsg = `Webhook handler failed: ${error.message}`;
-    console.error(errorMsg);
+    const message = `Webhook handler failed: ${error.message}`;
+    console.error(message);
     await logSystemError(
       "webhook",
-      errorMsg,
+      message,
       { eventId: event.id, type: event.type },
       "critical",
     );
-
-    // Mark event as failed so we can audit or retry manualy
-    await eventRef.update({
-      failedAt: FieldValue.serverTimestamp(),
-      error: error.message, // Warning: Firestore field size limit
-      status: "error",
-    });
-
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    try {
+      await finishEvent(event.id, error.message);
+    } catch (finishError) {
+      console.error("Webhook event failure recording failed", finishError);
+    }
+    return NextResponse.json(
+      { error: "Webhook processing failed" },
+      { status: 500 },
+    );
   }
 }

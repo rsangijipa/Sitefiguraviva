@@ -1,7 +1,12 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { motion, AnimatePresence, HTMLMotionProps } from "framer-motion";
+import React, { useEffect, useRef } from "react";
+import {
+  motion,
+  AnimatePresence,
+  HTMLMotionProps,
+  useReducedMotion,
+} from "framer-motion";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createPortal } from "react-dom";
@@ -18,28 +23,71 @@ export interface ModalProps {
   onClose: () => void;
   children: React.ReactNode;
   ariaLabel?: string;
+  ariaLabelledBy?: string;
 }
 
-export function Modal({ isOpen, onClose, children, ariaLabel }: ModalProps) {
-  // Close on ESC
+export function Modal({
+  isOpen,
+  onClose,
+  children,
+  ariaLabel,
+  ariaLabelledBy,
+}: ModalProps) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const returnFocusRef = useRef<HTMLElement | null>(null);
+
   useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+    if (!isOpen) return;
+    returnFocusRef.current = document.activeElement as HTMLElement | null;
+    const dialog = dialogRef.current;
+    const focusable = () =>
+      Array.from(
+        dialog?.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ) ?? [],
+      );
+    requestAnimationFrame(() => (focusable()[0] ?? dialog)?.focus());
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.defaultPrevented) return;
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const items = focusable();
+      if (!items.length) {
+        event.preventDefault();
+        dialog?.focus();
+        return;
+      }
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
-    if (isOpen) window.addEventListener("keydown", handleEsc);
-    return () => window.removeEventListener("keydown", handleEsc);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      returnFocusRef.current?.focus();
+    };
   }, [isOpen, onClose]);
 
   // Lock body scroll
   useEffect(() => {
     if (isOpen) {
+      const previousOverflow = document.body.style.overflow;
       document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
+      return () => {
+        document.body.style.overflow = previousOverflow;
+      };
     }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
   }, [isOpen]);
 
   if (typeof document === "undefined") return null;
@@ -49,10 +97,15 @@ export function Modal({ isOpen, onClose, children, ariaLabel }: ModalProps) {
       <AnimatePresence>
         {isOpen && (
           <div
+            ref={dialogRef}
             className="fixed inset-0 z-[100] flex items-center justify-center"
             role="dialog"
             aria-modal="true"
-            aria-label={ariaLabel}
+            aria-label={
+              ariaLabelledBy ? undefined : ariaLabel || "Janela modal"
+            }
+            aria-labelledby={ariaLabelledBy}
+            tabIndex={-1}
           >
             {/* Backdrop */}
             <motion.div
@@ -65,8 +118,8 @@ export function Modal({ isOpen, onClose, children, ariaLabel }: ModalProps) {
             />
 
             {/* Content Layer */}
-            <div className="relative z-10 w-full h-full flex items-center justify-center p-4 sm:p-6 pointer-events-none">
-              <div className="pointer-events-auto w-full flex justify-center items-center mobile-app-safe-area">
+            <div className="relative z-10 flex h-full w-full items-center justify-center p-0 sm:p-6 pointer-events-none">
+              <div className="pointer-events-auto flex h-full w-full min-h-0 items-center justify-center mobile-app-safe-area">
                 {children}
               </div>
             </div>
@@ -89,6 +142,7 @@ export function ModalContent({
   size = "md",
   ...props
 }: ModalContentProps) {
+  const reducedMotion = useReducedMotion();
   const sizes = {
     sm: "max-w-md",
     md: "max-w-2xl",
@@ -99,11 +153,13 @@ export function ModalContent({
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95, y: 20 }}
+      initial={
+        reducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95, y: 20 }
+      }
       animate={{ opacity: 1, scale: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.95, y: 20 }}
+      exit={reducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95, y: 20 }}
       className={cn(
-        "relative w-full bg-white rounded-[2rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] border border-transparent",
+        "relative flex h-[calc(100dvh-32px)] max-h-[calc(100dvh-32px)] w-full min-h-0 flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-2xl max-sm:h-[100dvh] max-sm:max-h-[100dvh] max-sm:rounded-none",
         sizes[size],
         className,
       )}
@@ -134,7 +190,7 @@ export function ModalHeader({
       <button
         onClick={onClose}
         className="group flex items-center gap-2 bg-white border border-gray-200 pl-3 pr-2 py-2 rounded-full text-primary hover:bg-primary hover:text-white transition-all focus:outline-none focus:ring-2 focus:ring-primary ml-4 shadow-sm hover:translate-y-[-1px]"
-        aria-label="Close"
+        aria-label="Fechar"
       >
         <span className="text-[10px] font-bold uppercase tracking-widest opacity-0 w-0 group-hover:w-auto group-hover:opacity-100 transition-all duration-300 overflow-hidden whitespace-nowrap">
           Fechar

@@ -1,7 +1,7 @@
 "use server";
 
-import { auth, db } from "@/lib/firebase/admin";
-import { cookies } from "next/headers";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
+import { verifySession } from "@/lib/auth/server";
 import {
   AssessmentDoc,
   AssessmentSubmissionDoc,
@@ -9,22 +9,15 @@ import {
   MultipleChoiceQuestion,
   TrueFalseQuestion,
 } from "@/types/assessment";
-import { FieldValue, Timestamp } from "firebase-admin/firestore";
+import { getAssessment } from "@/features/assessments/infrastructure/supabaseAssessmentRepository.server";
 import { gamificationService } from "@/lib/gamification/gamificationService";
 import { XP_VALUES } from "@/lib/gamification";
 
 // Helper: Verify Auth
 async function getAuthenticatedUser() {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("session")?.value;
-  if (!sessionCookie) throw new Error("Unauthorized");
-
-  try {
-    const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
-    return decodedClaims.uid;
-  } catch {
-    throw new Error("Unauthorized");
-  }
+  const session = await verifySession();
+  if (!session) throw new Error("Unauthorized");
+  return session.uid;
 }
 
 // Action: Save Draft (Autosave)
@@ -33,24 +26,24 @@ export async function saveDraft(
   answers: Record<string, any>,
 ) {
   const uid = await getAuthenticatedUser();
-  const submissionId = `${uid}_${assessmentId}_draft`; // Simple ID strategy for draft
-
-  // Upsert draft
-  await db.collection("submissions").doc(submissionId).set(
-    {
-      assessmentId,
-      userId: uid,
-      status: "pending", // Changed from 'in_progress' to 'pending' to match AssessmentSubmissionDoc
-      answers: [], // TODO: Map Record<string, any> to StudentAnswer[]
-      // We are storing raw answers for draft, but for strict type compliance we might need to adjust.
-      // For now, using merge: true allows partial data which might not fully validate against Submission doc if we were strict,
-      // but Firestore is schemaless so this is fine for the draft document.
-      draftAnswers: answers,
-      lastSavedAt: FieldValue.serverTimestamp(),
-      attemptNumber: 1, // TODO: Handle multi-attempt logic later
-    },
-    { merge: true },
-  );
+  const supabase = createSupabaseServiceClient();
+  const assessment = await getAssessment(assessmentId, supabase as any);
+  if (!assessment) throw new Error("Assessment not found");
+  await supabase.from("assessment_submissions").upsert({
+    id: `${uid}_${assessmentId}_draft`,
+    assessment_id: assessmentId,
+    user_id: uid,
+    course_id: assessment.courseId,
+    attempt_number: 1,
+    answers: [],
+    score: 0,
+    percentage: 0,
+    passed: false,
+    status: "pending",
+    feedback: JSON.stringify(answers),
+    started_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  } as any);
 
   return { success: true, savedAt: new Date().toISOString() };
 }
@@ -63,13 +56,9 @@ export async function submitAssessment(
   const uid = await getAuthenticatedUser();
 
   // 1. Fetch Source of Truth (Assessment with Correct Answers)
-  const assessmentDoc = await db
-    .collection("assessments")
-    .doc(assessmentId)
-    .get();
-  if (!assessmentDoc.exists) throw new Error("Assessment not found");
-
-  const assessment = assessmentDoc.data() as AssessmentDoc;
+  const supabase = createSupabaseServiceClient();
+  const assessment = await getAssessment(assessmentId, supabase as any);
+  if (!assessment) throw new Error("Assessment not found");
 
   // 2. Grading Logic
   let totalScore = 0;
@@ -162,17 +151,28 @@ export async function submitAssessment(
     score: totalScore,
     percentage: percent,
     passed,
-    submittedAt: Timestamp.now(),
-    startedAt: Timestamp.now(), // placeholder, should be passed from client or fetched from draft
+    submittedAt: new Date().toISOString(),
+    startedAt: new Date().toISOString(),
   };
-
-  await db.collection("submissions").doc(submissionId).set(submission);
-
-  // 4. Update Draft to Closed? (Or just delete it)
-  await db
-    .collection("submissions")
-    .doc(`${uid}_${assessmentId}_draft`)
-    .delete();
+  await supabase.from("assessment_submissions").insert({
+    id: submissionId,
+    assessment_id: assessmentId,
+    user_id: uid,
+    course_id: assessment.courseId,
+    attempt_number: 1,
+    status: submission.status,
+    answers: submission.answers as any,
+    score: totalScore,
+    percentage: percent,
+    passed,
+    submitted_at: new Date().toISOString(),
+    started_at: new Date().toISOString(),
+  } as any);
+  await supabase
+    .from("assessment_submissions")
+    .delete()
+    .eq("id", `${uid}_${assessmentId}_draft`)
+    .eq("user_id", uid);
 
   // 5. Update Enrollment/Progress via Event Bus
   // This is the "Total Sync" pattern

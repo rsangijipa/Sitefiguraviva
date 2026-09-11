@@ -50,13 +50,19 @@ export default function Reveal({
     const el = ref.current;
     if (!el) return;
 
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    )
+      return;
 
     // Já visível no primeiro quadro: fica como está. O topo da página não deve
     // depender de observador para existir.
     if (el.getBoundingClientRect().top < window.innerHeight * 0.92) return;
 
     setState("oculto");
+
+    if (typeof IntersectionObserver === "undefined") return;
 
     const observer = new IntersectionObserver(
       (entries) => {

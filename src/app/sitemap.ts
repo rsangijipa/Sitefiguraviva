@@ -1,25 +1,39 @@
 import { MetadataRoute } from "next";
-import { db } from "@/lib/firebase/admin";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://figuraviva.com.br";
 
-  // Fetch published courses and posts to include in sitemap
-  const [coursesSnap, postsSnap] = await Promise.all([
-    db.collection("courses").where("isPublished", "==", true).get(),
-    db.collection("posts").where("isPublished", "==", true).get(),
+  const supabase = createSupabaseServiceClient();
+  const safeQuery = async (query: PromiseLike<{ data: any[] | null }>) =>
+    Promise.race([
+      query,
+      new Promise<{ data: any[] | null }>((resolve) =>
+        setTimeout(() => resolve({ data: null }), 1500),
+      ),
+    ]);
+  const [{ data: courses }, { data: posts }] = await Promise.all([
+    safeQuery(
+      supabase
+        .from("courses")
+        .select("id, updated_at")
+        .eq("is_published", true),
+    ),
+    safeQuery(
+      supabase.from("posts").select("id, updated_at").eq("is_published", true),
+    ),
   ]);
 
-  const courses = coursesSnap.docs.map((doc) => ({
-    url: `${baseUrl}/curso/${doc.id}`,
-    lastModified: new Date(),
+  const courseRoutes = (courses ?? []).map((course) => ({
+    url: `${baseUrl}/curso/${course.id}`,
+    lastModified: course.updated_at ? new Date(course.updated_at) : new Date(),
     changeFrequency: "weekly" as const,
     priority: 0.8,
   }));
 
-  const posts = postsSnap.docs.map((doc) => ({
-    url: `${baseUrl}/blog/${doc.id}`,
-    lastModified: new Date(),
+  const postRoutes = (posts ?? []).map((post) => ({
+    url: `${baseUrl}/blog/${post.id}`,
+    lastModified: post.updated_at ? new Date(post.updated_at) : new Date(),
     changeFrequency: "monthly" as const,
     priority: 0.6,
   }));
@@ -33,6 +47,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/public-library",
     "/public-gallery",
     "/blog",
+    "/privacidade",
   ].map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date(),
@@ -40,5 +55,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: route === "" ? 1.0 : 0.7,
   }));
 
-  return [...routes, ...courses, ...posts];
+  return [...routes, ...courseRoutes, ...postRoutes];
 }

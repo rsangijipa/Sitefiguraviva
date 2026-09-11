@@ -1,78 +1,39 @@
 "use server";
 
-import { auth, adminDb } from "@/lib/firebase/admin";
-import { logAudit } from "@/lib/audit";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { logAudit } from "@/lib/audit";
+import { verifySession } from "@/lib/auth/server";
 
-const COOKIE_NAME = "session";
 const IMPERSONATION_COOKIE_NAME = "admin_session_backup";
 
+/** Deliberately disabled until a Supabase-native audited impersonation design exists. */
 export async function impersonateUser(targetUid: string) {
-  const cookieStore = await cookies();
-  const currentSession = cookieStore.get(COOKIE_NAME)?.value;
-
-  if (!currentSession) {
-    return { error: "Unauthorized: No active session" };
-  }
-
-  try {
-    const claims = await auth.verifySessionCookie(currentSession, true);
-    await logAudit({
-      actor: {
-        uid: claims.uid,
-        email: claims.email,
-        role: String(claims.role || "unknown"),
-      },
-      action: "auth.impersonate_attempt_denied",
-      target: { collection: "users", id: targetUid },
-      metadata: { reason: "feature_disabled_security_hardening" },
-    });
-  } catch {
-    // no-op
-  }
-
+  const session = await verifySession();
+  if (!session) return { error: "Unauthorized: No active session" };
+  if (!session.isAdmin) return { error: "Forbidden" };
+  await logAudit({
+    actor: { uid: session.uid, email: session.email, role: session.role },
+    action: "auth.impersonate_attempt_denied",
+    target: { collection: "profiles", id: targetUid },
+    metadata: { reason: "feature_disabled_security_hardening" },
+  });
   return {
     error: "Impersonation is temporarily disabled for security hardening.",
   };
 }
 
+/** Clears a stale legacy backup cookie; no identity is switched in Supabase. */
 export async function stopImpersonation() {
+  const session = await verifySession();
   const cookieStore = await cookies();
-  const backupSession = cookieStore.get(IMPERSONATION_COOKIE_NAME)?.value;
-
-  if (!backupSession) {
-    // If lost, just logout completely
-    cookieStore.delete(COOKIE_NAME);
-    redirect("/auth");
-  }
-
-  try {
-    // Verify backup token is still valid
-    const claims = await auth.verifySessionCookie(backupSession, true);
-
-    // Log stop
+  cookieStore.delete(IMPERSONATION_COOKIE_NAME);
+  if (session?.isAdmin) {
     await logAudit({
-      actor: { uid: claims.uid, role: "admin" },
+      actor: { uid: session.uid, email: session.email, role: session.role },
       action: "auth.impersonate_stop",
       target: { collection: "system", id: "self" },
+      metadata: { legacyCookieCleared: true },
     });
-
-    // Restore
-    cookieStore.set(COOKIE_NAME, backupSession, {
-      maxAge: 60 * 60 * 24 * 5, // reset window
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      path: "/",
-    });
-
-    cookieStore.delete(IMPERSONATION_COOKIE_NAME);
-
-    return { success: true };
-  } catch (e) {
-    // Backup invalid
-    cookieStore.delete(COOKIE_NAME);
-    cookieStore.delete(IMPERSONATION_COOKIE_NAME);
-    redirect("/auth");
   }
+  return { success: true };
 }

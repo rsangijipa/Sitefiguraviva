@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { db } from "@/lib/firebase/admin";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import PublicPageHero from "@/features/public-site/components/PublicPageHero";
 import PublicSiteFrame from "@/features/public-site/components/PublicSiteFrame";
 
@@ -19,8 +19,13 @@ export const metadata: Metadata = {
 
 async function getFounder() {
   try {
-    const snap = await db.collection("siteSettings").doc("founder").get();
-    return snap.data() || {};
+    const { data, error } = await createSupabaseServiceClient()
+      .from("public_pages")
+      .select("content")
+      .eq("key", "founder")
+      .maybeSingle();
+    if (error) throw error;
+    return (data?.content || {}) as Record<string, any>;
   } catch {
     return {};
   }
@@ -28,7 +33,8 @@ async function getFounder() {
 
 export default async function FounderPage() {
   const founder = await getFounder();
-  const name = founder.name || "Lília";
+  const name =
+    !founder.name || founder.name === "Lília" ? "Lilian Gusmão" : founder.name;
   return (
     <PublicSiteFrame>
       <PublicPageHero
@@ -50,7 +56,7 @@ export default async function FounderPage() {
       <div className="container mx-auto grid max-w-6xl gap-12 px-6 py-16 md:grid-cols-[0.65fr_1fr] md:py-24">
         <div className="relative mx-auto aspect-[4/5] w-full max-w-sm overflow-hidden rounded-[2rem] bg-stone-100 shadow-xl">
           <Image
-            src={founder.image || "/assets/foto-grupo.jpg"}
+            src={founder.image || "/assets/lilian-vanessa.jpeg"}
             alt={`Retrato de ${name}`}
             fill
             className="object-cover"

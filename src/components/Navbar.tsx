@@ -180,11 +180,11 @@ export default function Navbar() {
         <>
           <div
             onClick={() => setMobileOpen(false)}
-            className="fixed inset-0 z-[60] bg-[rgba(241,233,219,0.9)] backdrop-blur-sm xl:hidden"
+            className="fixed inset-0 z-[60] bg-mata/80 backdrop-blur-sm xl:hidden dark:bg-black/75"
             aria-hidden="true"
           />
           <div
-            className="fixed top-2 right-2 bottom-2 left-2 z-[70] bg-[rgba(253,250,244,0.96)] backdrop-blur-2xl rounded-[2rem] border border-fv-nevoa flex flex-col overflow-hidden xl:hidden"
+            className="fixed top-2 right-2 bottom-2 left-2 z-[70] flex flex-col overflow-hidden rounded-[2rem] border border-nevoa bg-paper backdrop-blur-2xl xl:hidden dark:border-border dark:bg-surface"
             role="dialog"
             aria-modal="true"
             aria-label="Menu de navegação"
@@ -192,7 +192,7 @@ export default function Navbar() {
             tabIndex={-1}
           >
             {/* Mobile Header Inside Menu */}
-            <div className="flex items-center justify-between px-8 py-6 border-b border-border/70">
+            <div className="flex items-center justify-between border-b border-border/70 px-8 py-6 dark:border-border">
               <Link
                 href="/"
                 className="flex items-center gap-2"
@@ -213,7 +213,7 @@ export default function Navbar() {
               </Link>
               <button
                 onClick={() => setMobileOpen(false)}
-                className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center text-primary rounded-full bg-areia hover:bg-nevoa/40 border border-border transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                className="flex h-11 min-h-[44px] w-11 min-w-[44px] items-center justify-center rounded-full border border-border bg-areia text-primary transition-colors hover:bg-nevoa/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:border-border dark:hover:bg-surface-raised"
                 aria-label="Fechar menu"
               >
                 <X size={20} />
@@ -233,10 +233,10 @@ export default function Navbar() {
                     key={item.label}
                     href={item.href}
                     onClick={() => setMobileOpen(false)}
-                    className="group flex w-full items-center justify-between rounded-md px-6 py-4 transition-colors hover:bg-areia active:bg-nevoa"
+                    className="group flex w-full items-center justify-between rounded-md px-6 py-4 text-primary transition-colors hover:bg-areia active:bg-nevoa dark:hover:bg-surface-raised dark:active:bg-border"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="rounded-md bg-areia p-2.5 text-primary transition-colors group-hover:bg-primary group-hover:text-white">
+                      <div className="rounded-md bg-areia p-2.5 text-primary transition-colors group-hover:bg-primary-solid group-hover:text-white dark:bg-surface-raised dark:group-hover:bg-primary-solid">
                         <item.icon size={18} />
                       </div>
                       <span className="text-xl font-serif text-primary">
@@ -245,7 +245,7 @@ export default function Navbar() {
                     </div>
                     <ChevronRight
                       size={16}
-                      className="text-nevoa transition-all group-hover:translate-x-1 group-hover:text-primary"
+                      className="text-pedra transition-all group-hover:translate-x-1 group-hover:text-primary"
                     />
                   </a>
                 ))}

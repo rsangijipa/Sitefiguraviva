@@ -1,19 +1,22 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { collection, getDocs, orderBy, query } from "firebase/firestore";
-import { db } from "@/lib/firebase/client";
+import { listProfiles } from "@/features/gamification/infrastructure/supabaseGamificationRepository.server";
 
 export const useAllGamificationProfiles = () => {
   return useQuery({
     queryKey: ["admin_gamification_profiles"],
     queryFn: async () => {
-      const q = query(
-        collection(db, "gamification_profiles"),
-        orderBy("totalXp", "desc"),
-      );
-      const snapshot = await getDocs(q);
-      return snapshot.docs.map((doc) => ({ uid: doc.id, ...doc.data() }));
+      const profiles = await listProfiles();
+      return profiles.map((profile) => ({
+        uid: profile.userId,
+        totalXp: profile.totalXp,
+        level: profile.level,
+        currentStreak: profile.currentStreak,
+        longestStreak: profile.longestStreak,
+        lastActivityDate: profile.lastActivityDate,
+        badges: profile.badges,
+      }));
     },
   });
 };

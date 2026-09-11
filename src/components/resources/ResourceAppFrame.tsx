@@ -58,5 +58,7 @@ export default function ResourceAppFrame({
     );
   }
 
-  return <div className="resource-app-frame">{children}</div>;
+  return (
+    <div className="resource-app-frame h-full min-h-0 w-full">{children}</div>
+  );
 }

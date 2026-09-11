@@ -1,9 +1,8 @@
 "use server";
 
-import { adminDb, adminAuth } from "@/lib/firebase/admin";
+import { randomUUID } from "crypto";
 import { verifySession, requireAdmin } from "@/lib/auth/server";
-import { FieldValue } from "firebase-admin/firestore";
-import { EnrollmentDoc, EnrollmentStatus } from "@/types/lms";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import { logAudit } from "@/lib/audit";
 import { revalidatePath } from "next/cache";
 import { telemetry } from "@/lib/telemetry";
@@ -11,155 +10,124 @@ import { trackFunnelEvent } from "@/actions/analytics";
 import { writeEnrollmentMirror } from "@/lib/auth/enrollment-service";
 import { buildPixPayload, getPixConfig } from "@/lib/pix";
 
-/**
- * Aluno solicita acesso via PIX.
- * Cria uma matrícula com status 'pending_approval'.
- */
+async function getEnrollment(userId: string, courseId: string) {
+  const { data, error } = await createSupabaseServiceClient()
+    .from("enrollments")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("course_id", courseId)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+/** Aluno solicita acesso via PIX e cria matrícula pendente de aprovação. */
 export async function createEnrollmentPending(courseId: string) {
   const session = await verifySession();
   if (!session) return { success: false, error: "Unauthorized" };
-  const uid = session.uid;
-
-  const enrollmentId = `${uid}_${courseId}`;
-  const enrollmentRef = adminDb.collection("enrollments").doc(enrollmentId);
-
   try {
-    const snap = await enrollmentRef.get();
-
-    if (snap.exists) {
-      const data = snap.data() as EnrollmentDoc;
-      if (data.status === "active" || data.status === "completed") {
-        // Já possui acesso ou concluiu, não faz nada
-        return { success: true };
-      }
-      if (data.status === "pending_approval") return { success: true };
-    }
-
-    const newEnrollment: Partial<EnrollmentDoc> = {
-      uid: uid,
-      userId: uid,
-      courseId: courseId,
-      status: "pending_approval",
-      paymentMethod: "pix",
-      createdAt: FieldValue.serverTimestamp() as any,
-      updatedAt: FieldValue.serverTimestamp() as any,
-    };
-
+    const existing = await getEnrollment(session.uid, courseId);
+    if (
+      ["active", "completed", "pending_approval"].includes(
+        existing?.status || "",
+      )
+    )
+      return { success: true };
     await writeEnrollmentMirror({
-      uid,
+      uid: session.uid,
       courseId,
-      enrollmentDoc: newEnrollment,
+      enrollmentDoc: {
+        status: "pending_approval",
+        paymentMethod: "pix",
+      } as any,
     });
-
     revalidatePath(`/curso/${courseId}`);
-    telemetry.track("enrollment_pix_pending_approval", { uid, courseId });
-    await trackFunnelEvent("funnel_enrollment_pending", { courseId }, uid);
+    telemetry.track("enrollment_pix_pending_approval", {
+      uid: session.uid,
+      courseId,
+    });
+    await trackFunnelEvent(
+      "funnel_enrollment_pending",
+      { courseId },
+      session.uid,
+    );
     return { success: true };
   } catch (error: any) {
     telemetry.error(error, {
       context: "createEnrollmentPending",
-      uid,
+      uid: session.uid,
       courseId,
     });
-    return { success: false, error: error.message };
+    return {
+      success: false,
+      error: error.message || "Não foi possível solicitar a matrícula.",
+    };
   }
 }
 
-/**
- * Gera um payload PIX ("copia e cola") real, a partir da chave PIX do
- * operador configurada em `PIX_MERCHANT_KEY`. Antes, o código exibido era
- * gerado com `Math.random()` e não apontava para nenhuma conta real — um
- * QR Code que parecia um pagamento de verdade, mas nunca foi (ver
- * docs/RELATORIO_AUDITORIA_COMPLETA_2026-09-04.md). Sem a chave configurada,
- * retornamos `configured: false` e a UI deve deixar isso explícito ao aluno
- * em vez de fabricar um código falso.
- */
+/** Produz um PIX copia-e-cola somente quando a chave do operador está configurada. */
 export async function generatePixPayload(courseId: string) {
   const session = await verifySession();
   if (!session) return { success: false, error: "Unauthorized" as const };
-
   const config = getPixConfig();
-  if (!config) {
+  if (!config)
     return { success: true, configured: false as const, payload: null };
-  }
-
-  const payload = buildPixPayload(config, {
-    txId: `${session.uid}${courseId}`.slice(0, 25),
-  });
-
-  return { success: true, configured: true as const, payload };
+  return {
+    success: true,
+    configured: true as const,
+    payload: buildPixPayload(config, {
+      txId: `${session.uid}${courseId}`.slice(0, 25),
+    }),
+  };
 }
 
-/**
- * Admin aprova matrícula PIX.
- */
+/** Admin aprova uma matrícula PIX pendente. */
 export async function approvePixEnrollment(userId: string, courseId: string) {
-  const adminSession = await requireAdmin();
-  if (!adminSession) return { success: false, error: "Unauthorized" };
-
-  const enrollmentId = `${userId}_${courseId}`;
-  const enrollmentRef = adminDb.collection("enrollments").doc(enrollmentId);
-
+  const admin = await requireAdmin();
   try {
-    const snap = await enrollmentRef.get();
-    if (!snap.exists) throw new Error("Enrollment not found");
-
-    const data = snap.data() as EnrollmentDoc;
-    if (data.status === "active") return { alreadyActive: true };
-
-    const approvalId = `pix_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-
-    const updates: Partial<EnrollmentDoc> = {
-      status: "active",
-      paymentMethod: "pix",
-      paidAt: FieldValue.serverTimestamp() as any,
-      approvedBy: adminSession.uid,
-      approvedAt: FieldValue.serverTimestamp() as any,
-      sourceRef: approvalId,
-      updatedAt: FieldValue.serverTimestamp() as any,
-    };
-
+    const existing = await getEnrollment(userId, courseId);
+    if (!existing) return { success: false, error: "Enrollment not found" };
+    if (existing.status === "active") return { alreadyActive: true };
+    const sourceRef = `pix_${randomUUID()}`;
+    const approvedAt = new Date();
     await writeEnrollmentMirror({
       uid: userId,
       courseId,
-      enrollmentDoc: updates,
+      enrollmentDoc: {
+        status: "active",
+        paymentMethod: "pix",
+        paidAt: approvedAt,
+        approvedBy: admin.uid,
+        approvedAt,
+        sourceRef,
+      } as any,
     });
-    const result = { success: true, updates };
-
-    if (result.success) {
-      telemetry.track("enrollment_pix_approved", {
-        adminId: adminSession.uid,
-        userId,
-        courseId,
-        transactionId: result.updates?.sourceRef,
-      });
-      await trackFunnelEvent(
-        "funnel_enrollment_active",
-        {
-          courseId,
-          approvedBy: adminSession.uid,
-          paymentMethod: "pix",
-        },
-        userId,
-      );
-      await logAudit({
-        actor: {
-          uid: adminSession.uid,
-          email: adminSession.email,
-          role: "admin",
-        },
-        action: "PIX_APPROVED",
-        target: {
-          collection: "enrollments",
-          id: enrollmentId,
-          summary: `PIX approved for user ${userId}`,
-        },
-        diff: { after: result.updates },
-      });
-      revalidatePath(`/admin/enrollments`);
-      revalidatePath(`/portal/course/${courseId}`);
-    }
-
+    telemetry.track("enrollment_pix_approved", {
+      adminId: admin.uid,
+      userId,
+      courseId,
+      transactionId: sourceRef,
+    });
+    await trackFunnelEvent(
+      "funnel_enrollment_active",
+      { courseId, approvedBy: admin.uid, paymentMethod: "pix" },
+      userId,
+    );
+    await logAudit({
+      actor: { uid: admin.uid, email: admin.email, role: admin.role },
+      action: "PIX_APPROVED",
+      target: {
+        collection: "enrollments",
+        id: existing.id,
+        summary: `PIX approved for user ${userId}`,
+      },
+      diff: {
+        before: { status: existing.status },
+        after: { status: "active", sourceRef },
+      },
+    });
+    revalidatePath("/admin/enrollments");
+    revalidatePath(`/portal/course/${courseId}`);
     return { success: true };
   } catch (error: any) {
     telemetry.error(error, {
@@ -167,64 +135,55 @@ export async function approvePixEnrollment(userId: string, courseId: string) {
       userId,
       courseId,
     });
-    return { success: false, error: error.message };
+    return {
+      success: false,
+      error: error.message || "Não foi possível aprovar a matrícula.",
+    };
   }
 }
 
-/**
- * Admin reprova matrícula PIX.
- */
+/** Admin recusa uma matrícula PIX pendente. */
 export async function rejectPixEnrollment(
   userId: string,
   courseId: string,
   reason: string,
 ) {
-  const adminSession = await requireAdmin();
-  if (!adminSession) return { success: false, error: "Unauthorized" };
-
-  const enrollmentId = `${userId}_${courseId}`;
-  const enrollmentRef = adminDb.collection("enrollments").doc(enrollmentId);
-
+  const admin = await requireAdmin();
+  const normalizedReason = reason.trim().slice(0, 1_000);
+  if (!normalizedReason)
+    return { success: false, error: "Informe o motivo da recusa." };
   try {
-    const snap = await enrollmentRef.get();
-    if (!snap.exists) throw new Error("Enrollment not found");
-
-    const updates: Partial<EnrollmentDoc> = {
-      status: "canceled",
-      rejectionReason: reason,
-      approvedBy: adminSession.uid, // "Decided by"
-      approvedAt: FieldValue.serverTimestamp() as any,
-      updatedAt: FieldValue.serverTimestamp() as any,
-    };
-
+    const existing = await getEnrollment(userId, courseId);
+    if (!existing) return { success: false, error: "Enrollment not found" };
+    const approvedAt = new Date();
     await writeEnrollmentMirror({
       uid: userId,
       courseId,
-      enrollmentDoc: updates,
+      enrollmentDoc: {
+        status: "canceled",
+        approvedBy: admin.uid,
+        approvedAt,
+        rejectionReason: normalizedReason,
+      } as any,
     });
-    const result = { success: true, updates };
-
     await logAudit({
-      actor: {
-        uid: adminSession.uid,
-        email: adminSession.email,
-        role: "admin",
-      },
+      actor: { uid: admin.uid, email: admin.email, role: admin.role },
       action: "PIX_REJECTED",
       target: {
         collection: "enrollments",
-        id: enrollmentId,
-        summary: `PIX rejected for user ${userId}: ${reason}`,
+        id: existing.id,
+        summary: `PIX rejected for user ${userId}`,
       },
-      diff: { after: result.updates },
+      diff: {
+        before: { status: existing.status },
+        after: { status: "canceled", rejectionReason: normalizedReason },
+      },
     });
-
-    revalidatePath(`/admin/enrollments`);
+    revalidatePath("/admin/enrollments");
     telemetry.track("enrollment_pix_rejected", {
-      adminId: adminSession.uid,
+      adminId: admin.uid,
       userId,
       courseId,
-      reason,
     });
     return { success: true };
   } catch (error: any) {
@@ -233,6 +192,9 @@ export async function rejectPixEnrollment(
       userId,
       courseId,
     });
-    return { success: false, error: error.message };
+    return {
+      success: false,
+      error: error.message || "Não foi possível recusar a matrícula.",
+    };
   }
 }

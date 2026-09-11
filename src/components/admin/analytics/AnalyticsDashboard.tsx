@@ -91,6 +91,12 @@ export default function AnalyticsDashboard({
       ];
 
       const formatEnrollmentDate = (value: unknown) => {
+        if (typeof value === "string" || value instanceof Date) {
+          const date = new Date(value);
+          return Number.isNaN(date.getTime())
+            ? ""
+            : date.toLocaleDateString("pt-BR");
+        }
         if (value && typeof value === "object" && "toDate" in value) {
           const date = (value as { toDate: () => Date }).toDate();
           return date.toLocaleDateString("pt-BR");

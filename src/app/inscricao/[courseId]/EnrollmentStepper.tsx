@@ -133,7 +133,11 @@ export default function EnrollmentStepper({
         body: JSON.stringify({
           courseId,
           answers: formData,
-          consent: { lgpd: true, acceptedAt: new Date().toISOString() },
+          consent: {
+            lgpd: true,
+            acceptedAt: new Date().toISOString(),
+            termsVersion: "2026-09-09",
+          },
         }),
       });
 

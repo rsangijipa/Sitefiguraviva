@@ -1,8 +1,8 @@
 "use server";
 
-import { adminDb } from "@/lib/firebase/admin";
 import { revalidatePath } from "next/cache";
 import { assertIsTutorOrAdmin } from "@/lib/auth/authoring-gate";
+import { createAdminCourse } from "@/features/courses/infrastructure/supabaseAdminCourseRepository.server";
 
 import { z } from "zod";
 
@@ -24,7 +24,7 @@ export async function createCourseAction(data: any) {
       validatedData,
     );
 
-    const docRef = await adminDb.collection("courses").add({
+    const id = await createAdminCourse({
       title: validatedData.title,
       subtitle: validatedData.subtitle || "",
       instructor: validatedData.instructor || "",
@@ -37,15 +37,13 @@ export async function createCourseAction(data: any) {
       image: "",
       description: "",
       contentRevision: 1,
-      createdAt: new Date(),
-      updatedAt: new Date(),
       stats: {
         lessonsCount: 0,
         studentsCount: 0,
       },
     });
 
-    console.log("[SERVER ACTION] Course created successfully! ID:", docRef.id);
+    console.log("[SERVER ACTION] Course created successfully! ID:", id);
 
     // Revalidate the courses page to show the new course
     revalidatePath("/admin/courses");
@@ -53,7 +51,7 @@ export async function createCourseAction(data: any) {
 
     const response = {
       success: true,
-      id: docRef.id,
+      id,
     };
     console.log("[SERVER ACTION] Returning success:", response);
     return response;

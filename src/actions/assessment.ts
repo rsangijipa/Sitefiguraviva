@@ -1,106 +1,121 @@
 "use server";
 
-import { auth, db, adminDb } from "@/lib/firebase/admin";
-import { Timestamp } from "firebase-admin/firestore";
-import { cookies } from "next/headers";
-import { revalidatePath } from "next/cache";
+import { randomUUID } from "crypto";
+import {
+  gradeSupabaseAssessmentAttempt,
+  startSupabaseAssessmentAttempt,
+  submitSupabaseAssessmentAttempt,
+} from "@/features/assessments/infrastructure/supabaseAssessmentLifecycle.server";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
+import { logAudit } from "@/lib/audit";
+import { requireAdmin, verifySession } from "@/lib/auth/server";
 import { rateLimit, RateLimitPresets } from "@/lib/rateLimit";
+import { revalidatePath } from "next/cache";
 import type {
   AssessmentDoc,
-  StudentAnswer,
   AssessmentSubmissionDoc,
+  StudentAnswer,
 } from "@/types/assessment";
 import type { UserData } from "@/types/user";
 
-async function requireUserClaims() {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("session")?.value;
+const supabase = () => createSupabaseServiceClient();
 
-  if (!sessionCookie) {
-    throw new Error("Unauthorized");
-  }
+type AttemptResult = {
+  success?: boolean;
+  submissionId?: string;
+  error?: string;
+};
+type GradeResult = AttemptResult & {
+  score?: number;
+  totalPoints?: number;
+  percentage?: number;
+  passed?: boolean | null;
+  requiresManualReview?: boolean;
+};
 
-  return auth.verifySessionCookie(sessionCookie, true);
-}
-
-async function requireAdminClaims() {
-  const claims = await requireUserClaims();
-
-  if (claims.role !== "admin" && claims.admin !== true) {
-    throw new Error("Forbidden: Admins only");
-  }
-
-  return claims;
-}
-
-/**
- * Server Actions can only return values that React can serialize. Firestore
- * timestamps are class instances, so normalize them before returning admin
- * data to client components.
- */
-function serializeFirestoreValue(value: unknown): unknown {
-  if (value instanceof Timestamp) {
-    return value.toDate().toISOString();
-  }
-
-  if (value instanceof Date) {
-    return value.toISOString();
-  }
-
-  if (Array.isArray(value)) {
-    return value.map(serializeFirestoreValue);
-  }
-
-  if (value && typeof value === "object") {
-    return Object.fromEntries(
-      Object.entries(value as Record<string, unknown>).map(([key, item]) => [
-        key,
-        serializeFirestoreValue(item),
-      ]),
-    );
-  }
-
-  return value;
-}
-
-function serializeFirestoreDocument<T>(id: string, data: unknown): T {
-  return { id, ...(serializeFirestoreValue(data) as object) } as T;
-}
-
-/**
- * Read assessment management data through the server. The browser does not
- * authenticate with Firebase, so client-side Firestore reads would otherwise
- * be rejected by the Firestore rules for Supabase-authenticated admins.
- */
-export async function getAdminAssessments(): Promise<AssessmentDoc[]> {
-  await requireAdminClaims();
-
-  const snapshot = await adminDb
-    .collection("assessments")
-    .orderBy("title")
-    .get();
-
-  return snapshot.docs.map((doc) =>
-    serializeFirestoreDocument<AssessmentDoc>(doc.id, doc.data()),
-  );
-}
-
-export async function getAdminSubmissionMetrics(): Promise<{
-  total: number;
-  pending: number;
-}> {
-  await requireAdminClaims();
-
-  const submissions = adminDb.collection("assessmentSubmissions");
-  const [total, pending] = await Promise.all([
-    submissions.count().get(),
-    submissions.where("status", "==", "submitted").count().get(),
-  ]);
-
+function assessment(row: any): AssessmentDoc {
   return {
-    total: total.data().count,
-    pending: pending.data().count,
-  };
+    id: row.id,
+    courseId: row.course_id,
+    lessonId: row.lesson_id || undefined,
+    title: row.title,
+    description: row.description || "",
+    questions: Array.isArray(row.questions) ? row.questions : [],
+    passingScore: Number(row.passing_score),
+    totalPoints: Number(row.total_points),
+    status: row.status,
+    isRequired: false,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    createdBy: row.created_by || "",
+  } as AssessmentDoc;
+}
+
+function submission(row: any): AssessmentSubmissionDoc {
+  return {
+    id: row.id,
+    assessmentId: row.assessment_id,
+    userId: row.user_id || "",
+    courseId: row.course_id,
+    answers: Array.isArray(row.answers) ? row.answers : [],
+    status: row.status,
+    score: Number(row.score),
+    percentage: Number(row.percentage),
+    passed: row.passed,
+    gradedBy: row.graded_by || undefined,
+    feedback: row.feedback || undefined,
+    attemptNumber: row.attempt_number,
+    startedAt: row.started_at,
+    submittedAt: row.submitted_at || undefined,
+    gradedAt: row.graded_at || undefined,
+    lastSavedAt: row.updated_at,
+  } as AssessmentSubmissionDoc;
+}
+
+function user(row: any): UserData {
+  return {
+    uid: row.id,
+    email: row.email,
+    displayName: row.display_name,
+    photoURL: row.photo_url,
+    role: row.role,
+    status: row.is_active ? "active" : "disabled",
+    isAdmin: row.role === "admin",
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    lastLogin: row.last_login_at,
+  } as UserData;
+}
+
+function refreshAdmin() {
+  revalidatePath("/admin/assessments");
+  revalidatePath("/admin/assessments/submissions");
+}
+
+export async function getAdminAssessments(): Promise<AssessmentDoc[]> {
+  await requireAdmin();
+  const { data, error } = await supabase()
+    .from("assessments")
+    .select("*")
+    .order("title");
+  if (error) throw error;
+  return (data || []).map(assessment);
+}
+
+export async function getAdminSubmissionMetrics() {
+  await requireAdmin();
+  const [total, pending] = await Promise.all([
+    supabase()
+      .from("assessment_submissions")
+      .select("*", { count: "exact", head: true }),
+    supabase()
+      .from("assessment_submissions")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "submitted"),
+  ]);
+  if (total.error) throw total.error;
+  if (pending.error) throw pending.error;
+  return { total: total.count || 0, pending: pending.count || 0 };
 }
 
 export async function getAdminSubmissionsPage({
@@ -111,418 +126,171 @@ export async function getAdminSubmissionsPage({
   status?: string;
   pageSize?: number;
   cursorId?: string;
-}): Promise<{
-  submissions: AssessmentSubmissionDoc[];
-  users: Record<string, UserData>;
-  lastVisible?: string;
-  hasMore: boolean;
-}> {
-  await requireAdminClaims();
-
-  const normalizedPageSize = Math.min(Math.max(Math.floor(pageSize), 1), 100);
-  let submissionsQuery = adminDb
-    .collection("assessmentSubmissions")
-    .orderBy("submittedAt", "desc")
-    .limit(normalizedPageSize);
-
+}) {
+  await requireAdmin();
+  const client = supabase();
+  let cursorTimestamp: string | undefined;
   if (cursorId) {
-    const cursor = await adminDb
-      .collection("assessmentSubmissions")
-      .doc(cursorId)
-      .get();
-
-    if (cursor.exists) {
-      submissionsQuery = submissionsQuery.startAfter(cursor);
-    }
+    const { data, error } = await client
+      .from("assessment_submissions")
+      .select("submitted_at")
+      .eq("id", cursorId)
+      .maybeSingle();
+    if (error) throw error;
+    cursorTimestamp = data?.submitted_at || undefined;
   }
-
-  const snapshot = await submissionsQuery.get();
-  let submissions = snapshot.docs.map((doc) =>
-    serializeFirestoreDocument<AssessmentSubmissionDoc>(doc.id, doc.data()),
-  );
-
-  // Status filtering remains in memory to avoid requiring an additional
-  // Firestore composite index. The current screen does not filter by status.
-  if (status) {
-    submissions = submissions.filter(
-      (submission) => submission.status === status,
-    );
-  }
-
-  const uniqueUserIds = [
-    ...new Set(submissions.map((submission) => submission.userId)),
+  let query = client
+    .from("assessment_submissions")
+    .select("*")
+    .order("submitted_at", { ascending: false, nullsFirst: false })
+    .limit(Math.min(Math.max(Math.floor(pageSize), 1), 100));
+  if (status) query = query.eq("status", status as any);
+  if (cursorTimestamp) query = query.lt("submitted_at", cursorTimestamp);
+  const { data, error } = await query;
+  if (error) throw error;
+  const submissions = (data || []).map(submission);
+  const ids = [
+    ...new Set(submissions.map((item) => item.userId).filter(Boolean)),
   ];
-  const userSnapshots = await Promise.all(
-    uniqueUserIds.map((uid) => adminDb.collection("users").doc(uid).get()),
-  );
-  const users = Object.fromEntries(
-    userSnapshots
-      .filter((snapshot) => snapshot.exists)
-      .map((snapshot) => [
-        snapshot.id,
-        serializeFirestoreDocument<UserData>(snapshot.id, snapshot.data()),
-      ]),
-  ) as Record<string, UserData>;
-
+  const { data: profiles, error: profileError } = ids.length
+    ? await client.from("profiles").select("*").in("id", ids)
+    : { data: [], error: null };
+  if (profileError) throw profileError;
   return {
     submissions,
-    users,
-    lastVisible: snapshot.docs.at(-1)?.id,
-    hasMore: snapshot.docs.length === normalizedPageSize,
+    users: Object.fromEntries(
+      (profiles || []).map((item) => [item.id, user(item)]),
+    ) as Record<string, UserData>,
+    lastVisible: submissions.at(-1)?.id,
+    hasMore:
+      submissions.length === Math.min(Math.max(Math.floor(pageSize), 1), 100),
   };
 }
 
-/**
- * Start a new assessment attempt in a server-authoritative way.
- */
 export async function startAssessmentAttempt(
   assessmentId: string,
   courseId: string,
-) {
+): Promise<AttemptResult> {
   try {
-    const claims = await requireUserClaims();
-    const uid = claims.uid;
-
-    const assessmentSnap = await adminDb
-      .collection("assessments")
-      .doc(assessmentId)
-      .get();
-    if (!assessmentSnap.exists) {
-      return { error: "Avaliação não encontrada" };
-    }
-
-    const assessment = assessmentSnap.data() as AssessmentDoc;
-    if (assessment.courseId !== courseId) {
-      return { error: "Curso da avaliação inválido" };
-    }
-
-    const existingAttempts = await adminDb
-      .collection("assessmentSubmissions")
-      .where("assessmentId", "==", assessmentId)
-      .where("userId", "==", uid)
-      .get();
-
-    const maxAttempt = existingAttempts.docs.reduce((max, d) => {
-      const value = Number(d.data()?.attemptNumber || 0);
-      return value > max ? value : max;
-    }, 0);
-
-    const submissionRef = await adminDb
-      .collection("assessmentSubmissions")
-      .add({
-        assessmentId,
-        userId: uid,
-        courseId,
-        answers: [],
-        status: "pending",
-        attemptNumber: maxAttempt + 1,
-        startedAt: Timestamp.now(),
-      });
-
-    return { success: true, submissionId: submissionRef.id };
+    const session = await verifySession();
+    if (!session) return { error: "Unauthorized" };
+    return await startSupabaseAssessmentAttempt(
+      session.uid,
+      assessmentId,
+      courseId,
+    );
   } catch (error) {
     console.error("Start Assessment Attempt Error:", error);
     return { error: "Erro ao iniciar avaliação" };
   }
 }
 
-/**
- * Submit an assessment attempt answer payload before grading.
- */
 export async function submitAssessmentAttempt(
   submissionId: string,
   answers: StudentAnswer[],
-) {
+): Promise<AttemptResult> {
   try {
-    const claims = await requireUserClaims();
-    const uid = claims.uid;
-
-    const submissionRef = adminDb
-      .collection("assessmentSubmissions")
-      .doc(submissionId);
-    const submissionSnap = await submissionRef.get();
-    if (!submissionSnap.exists) {
-      return { error: "Submissão não encontrada" };
-    }
-
-    const submission = submissionSnap.data() as AssessmentSubmissionDoc;
-    if (submission.userId !== uid) {
-      return { error: "Acesso negado" };
-    }
-
-    await submissionRef.update({
+    const session = await verifySession();
+    if (!session) return { error: "Unauthorized" };
+    return await submitSupabaseAssessmentAttempt(
+      session.uid,
+      submissionId,
       answers,
-      status: "submitted",
-      submittedAt: Timestamp.now(),
-    });
-
-    return { success: true };
+    );
   } catch (error) {
     console.error("Submit Assessment Attempt Error:", error);
     return { error: "Erro ao enviar avaliação" };
   }
 }
 
-/**
- * Grade an assessment submission
- * Auto-grades multiple choice and true/false
- * Marks essays/practicals for manual review
- */
-export async function gradeAssessment(submissionId: string) {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("session")?.value;
-
-  if (!sessionCookie) {
-    return { error: "Unauthorized" };
-  }
-
+export async function gradeAssessment(
+  submissionId: string,
+): Promise<GradeResult> {
   try {
-    const claims = await auth.verifySessionCookie(sessionCookie, true);
-
-    // Rate limiting: Prevent spam submissions
-    const rateLimitResult = await rateLimit(
-      claims.uid,
+    const session = await verifySession();
+    if (!session) return { error: "Unauthorized" };
+    const limited = await rateLimit(
+      session.uid,
       "submitAssessment",
       RateLimitPresets.SUBMIT_ASSIGNMENT,
     );
-
-    if (!rateLimitResult.allowed) {
-      const waitSeconds = Math.ceil(
-        (rateLimitResult.resetAt - Date.now()) / 1000,
-      );
+    if (!limited.allowed)
       return {
-        error: `Limite de submissões excedido. Aguarde ${waitSeconds}s.`,
+        error: `Limite de submissões excedido. Aguarde ${Math.ceil((limited.resetAt - Date.now()) / 1000)}s.`,
       };
-    }
-
-    // Get submission
-    const submissionRef = adminDb
-      .collection("assessmentSubmissions")
-      .doc(submissionId);
-    const submissionSnap = await submissionRef.get();
-
-    if (!submissionSnap.exists) {
-      return { error: "Submissão não encontrada" };
-    }
-
-    const submission = submissionSnap.data() as AssessmentSubmissionDoc;
-
-    // Verify ownership
-    if (submission.userId !== claims.uid) {
-      return { error: "Acesso negado" };
-    }
-
-    // Get assessment
-    const assessmentSnap = await adminDb
-      .collection("assessments")
-      .doc(submission.assessmentId)
-      .get();
-
-    if (!assessmentSnap.exists) {
-      return { error: "Avaliação não encontrada" };
-    }
-
-    const assessment = assessmentSnap.data() as AssessmentDoc;
-
-    // Auto-grade
-    let totalPoints = 0;
-    let earnedPoints = 0;
-    let requiresManualReview = false;
-
-    const gradedAnswers: StudentAnswer[] = submission.answers.map((answer) => {
-      const question = assessment.questions.find(
-        (q) => q.id === answer.questionId,
-      );
-
-      if (!question) return answer;
-
-      totalPoints += question.points;
-
-      // Multiple Choice grading
-      if (question.type === "multiple_choice" && answer.selectedOptions) {
-        const correctOptions = question.options
-          .filter((opt) => opt.isCorrect)
-          .map((opt) => opt.id);
-
-        const isCorrect =
-          correctOptions.length === answer.selectedOptions.length &&
-          correctOptions.every((id) => answer.selectedOptions!.includes(id));
-
-        const pointsEarned = isCorrect ? question.points : 0;
-        earnedPoints += pointsEarned;
-
-        return { ...answer, isCorrect, pointsEarned };
-      }
-
-      // True/False grading
-      if (
-        question.type === "true_false" &&
-        answer.booleanAnswer !== undefined
-      ) {
-        const isCorrect = answer.booleanAnswer === question.correctAnswer;
-        const pointsEarned = isCorrect ? question.points : 0;
-        earnedPoints += pointsEarned;
-
-        return { ...answer, isCorrect, pointsEarned };
-      }
-
-      // Essay/Practical - requires manual review
-      if (question.type === "essay" || question.type === "practical") {
-        requiresManualReview = true;
-        return { ...answer, pointsEarned: 0 }; // Will be graded manually
-      }
-
-      return answer;
-    });
-
-    const percentage = totalPoints > 0 ? (earnedPoints / totalPoints) * 100 : 0;
-    const passed = percentage >= assessment.passingScore;
-
-    // Update submission
-    const updateData: any = {
-      answers: gradedAnswers,
-      score: earnedPoints,
-      percentage,
-      passed: requiresManualReview ? false : passed, // Don't mark as passed if needs review
-      status: requiresManualReview ? "submitted" : "graded",
-      gradedAt: Timestamp.now(),
-    };
-
-    await submissionRef.update(updateData);
-
-    // Update user progress
-    const progressRef = adminDb
-      .collection("users")
-      .doc(claims.uid)
-      .collection("assessmentProgress")
-      .doc(submission.assessmentId);
-
-    const progressSnap = await progressRef.get();
-    const currentProgress = progressSnap.exists ? progressSnap.data() : null;
-
-    const newBestPercentage = Math.max(
-      percentage,
-      currentProgress?.bestPercentage || 0,
-    );
-    const newBestScore = Math.max(
-      earnedPoints,
-      currentProgress?.bestScore || 0,
-    );
-    const totalAttempts = (currentProgress?.attempts || 0) + 1;
-
-    await progressRef.set(
-      {
-        assessmentId: submission.assessmentId,
-        userId: claims.uid,
-        courseId: submission.courseId,
-        attempts: totalAttempts,
-        bestScore: newBestScore,
-        bestPercentage: newBestPercentage,
-        passed: requiresManualReview
-          ? false
-          : newBestPercentage >= assessment.passingScore,
-        lastAttemptAt: Timestamp.now(),
-        submissions: [...(currentProgress?.submissions || []), submissionId],
-      },
-      { merge: true },
-    );
-
-    return {
-      success: true,
-      score: earnedPoints,
-      totalPoints,
-      percentage,
-      passed: requiresManualReview ? null : passed,
-      requiresManualReview,
-    };
+    return await gradeSupabaseAssessmentAttempt(session.uid, submissionId);
   } catch (error) {
     console.error("Grade Assessment Error:", error);
     return { error: "Erro ao processar avaliação" };
   }
 }
 
-/**
- * Create a new assessment (Admin only)
- */
 export async function createAssessment(data: Partial<AssessmentDoc>) {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("session")?.value;
-
-  if (!sessionCookie) {
-    return { error: "Unauthorized" };
-  }
-
   try {
-    const claims = await auth.verifySessionCookie(sessionCookie, true);
-
-    if (claims.role !== "admin" && claims.admin !== true) {
-      return { error: "Forbidden: Admins only" };
-    }
-
-    // Calculate total points
+    const admin = await requireAdmin();
+    if (!data.courseId || !data.title)
+      return { error: "Curso e título são obrigatórios" };
+    const id = randomUUID();
     const totalPoints =
-      data.questions?.reduce((sum, q) => sum + q.points, 0) || 0;
-
-    const assessmentRef = await adminDb.collection("assessments").add({
-      ...data,
-      totalPoints,
-      status: data.status || "draft",
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
-      createdBy: claims.uid,
+      data.questions?.reduce((sum, question) => sum + question.points, 0) || 0;
+    const { error } = await supabase()
+      .from("assessments")
+      .insert({
+        id,
+        course_id: data.courseId,
+        lesson_id: data.lessonId || null,
+        title: data.title,
+        description: data.description || null,
+        questions: (data.questions || []) as any,
+        passing_score: data.passingScore ?? 70,
+        total_points: totalPoints,
+        status: data.status || "draft",
+        created_by: admin.uid,
+      });
+    if (error) throw error;
+    await logAudit({
+      action: "ASSESSMENT_CREATED",
+      actor: { uid: admin.uid, email: admin.email, role: admin.role },
+      target: { id, collection: "assessments", summary: data.title },
     });
-
-    return { success: true, id: assessmentRef.id };
+    refreshAdmin();
+    return { success: true, id };
   } catch (error) {
     console.error("Create Assessment Error:", error);
     return { error: "Erro ao criar avaliação" };
   }
 }
 
-/**
- * Update an existing assessment (Admin only)
- */
 export async function updateAssessment(
   id: string,
   data: Partial<AssessmentDoc>,
 ) {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("session")?.value;
-
-  if (!sessionCookie) {
-    return { error: "Unauthorized" };
-  }
-
   try {
-    const claims = await auth.verifySessionCookie(sessionCookie, true);
-
-    if (claims.role !== "admin" && claims.admin !== true) {
-      return { error: "Forbidden: Admins only" };
-    }
-
-    // Calculate total points
-    const totalPoints =
-      data.questions?.reduce((sum, q) => sum + q.points, 0) || 0;
-
-    await adminDb
-      .collection("assessments")
-      .doc(id)
-      .update({
-        ...data,
-        totalPoints,
-        updatedAt: Timestamp.now(),
-      });
-
-    // Audit
-    await import("@/lib/audit").then((m) =>
-      m.auditService.logEvent({
-        eventType: "ASSESSMENT_UPDATED",
-        actor: { uid: claims.uid, email: claims.email },
-        target: { id, collection: "assessments" },
-      }),
+    const admin = await requireAdmin();
+    const totalPoints = data.questions?.reduce(
+      (sum, question) => sum + question.points,
+      0,
     );
-
-    revalidatePath("/admin/assessments");
+    const { error } = await supabase()
+      .from("assessments")
+      .update({
+        title: data.title,
+        description: data.description,
+        lesson_id: data.lessonId,
+        questions: data.questions as any,
+        passing_score: data.passingScore,
+        total_points: totalPoints,
+        status: data.status,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", id);
+    if (error) throw error;
+    await logAudit({
+      action: "ASSESSMENT_UPDATED",
+      actor: { uid: admin.uid, email: admin.email, role: admin.role },
+      target: { id, collection: "assessments" },
+    });
+    refreshAdmin();
     return { success: true };
   } catch (error) {
     console.error("Update Assessment Error:", error);
@@ -531,28 +299,19 @@ export async function updateAssessment(
 }
 
 export async function deleteAssessment(id: string) {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("session")?.value;
-  if (!sessionCookie) return { error: "Unauthorized" };
-
   try {
-    const claims = await auth.verifySessionCookie(sessionCookie, true);
-    if (claims.role !== "admin" && claims.admin !== true) {
-      return { error: "Forbidden: Admins only" };
-    }
-
-    await adminDb.collection("assessments").doc(id).delete();
-
-    // Audit
-    await import("@/lib/audit").then((m) =>
-      m.auditService.logEvent({
-        eventType: "ASSESSMENT_DELETED",
-        actor: { uid: claims.uid, email: claims.email },
-        target: { id, collection: "assessments" },
-      }),
-    );
-
-    revalidatePath("/admin/assessments");
+    const admin = await requireAdmin();
+    const { error } = await supabase()
+      .from("assessments")
+      .delete()
+      .eq("id", id);
+    if (error) throw error;
+    await logAudit({
+      action: "ASSESSMENT_DELETED",
+      actor: { uid: admin.uid, email: admin.email, role: admin.role },
+      target: { id, collection: "assessments" },
+    });
+    refreshAdmin();
     return { success: true };
   } catch (error) {
     console.error("Delete Assessment Error:", error);
@@ -564,76 +323,45 @@ export async function updateAssessmentStatus(
   id: string,
   status: "draft" | "published" | "archived",
 ) {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("session")?.value;
-  if (!sessionCookie) return { error: "Unauthorized" };
-
-  try {
-    const claims = await auth.verifySessionCookie(sessionCookie, true);
-    if (claims.role !== "admin" && claims.admin !== true) {
-      return { error: "Forbidden: Admins only" };
-    }
-
-    await adminDb.collection("assessments").doc(id).update({
-      status,
-      updatedAt: Timestamp.now(),
-    });
-
-    // Audit
-    await import("@/lib/audit").then((m) =>
-      m.auditService.logEvent({
-        eventType: "ASSESSMENT_STATUS_UPDATED",
-        actor: { uid: claims.uid, email: claims.email },
-        target: { id, collection: "assessments" },
-        payload: { status },
-      }),
-    );
-
-    revalidatePath("/admin/assessments");
-    return { success: true };
-  } catch (error) {
-    console.error("Update Assessment Status Error:", error);
-    return { error: "Erro ao atualizar status da avaliação" };
-  }
+  return updateAssessment(id, { status } as Partial<AssessmentDoc>);
 }
 
-/**
- * Get single submission detail (Admin only)
- */
 export async function getSubmissionDetail(id: string): Promise<{
   submission: AssessmentSubmissionDoc;
   user: UserData | null;
   assessment: AssessmentDoc | null;
 } | null> {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("session")?.value;
-  if (!sessionCookie) return null;
-
   try {
-    const claims = await auth.verifySessionCookie(sessionCookie, true);
-    if (claims.role !== "admin" && claims.admin !== true) return null;
-
-    const subSnap = await adminDb
-      .collection("assessmentSubmissions")
-      .doc(id)
-      .get();
-    if (!subSnap.exists) return null;
-
-    const data = subSnap.data() as AssessmentSubmissionDoc;
-
-    // Fetch associated data
-    const [userSnap, assessmentSnap] = await Promise.all([
-      adminDb.collection("users").doc(data.userId).get(),
-      adminDb.collection("assessments").doc(data.assessmentId).get(),
+    await requireAdmin();
+    const client = supabase();
+    const { data: row, error } = await client
+      .from("assessment_submissions")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
+    if (error) throw error;
+    if (!row) return null;
+    const [profileResult, assessmentResult] = await Promise.all([
+      row.user_id
+        ? client
+            .from("profiles")
+            .select("*")
+            .eq("id", row.user_id)
+            .maybeSingle()
+        : Promise.resolve({ data: null, error: null }),
+      client
+        .from("assessments")
+        .select("*")
+        .eq("id", row.assessment_id)
+        .maybeSingle(),
     ]);
-
+    if (profileResult.error) throw profileResult.error;
+    if (assessmentResult.error) throw assessmentResult.error;
     return {
-      submission: { id: subSnap.id, ...data },
-      user: userSnap.exists
-        ? ({ uid: userSnap.id, ...userSnap.data() } as UserData)
-        : null,
-      assessment: assessmentSnap.exists
-        ? ({ id: assessmentSnap.id, ...assessmentSnap.data() } as AssessmentDoc)
+      submission: submission(row),
+      user: profileResult.data ? user(profileResult.data) : null,
+      assessment: assessmentResult.data
+        ? assessment(assessmentResult.data)
         : null,
     };
   } catch (error) {
@@ -642,96 +370,77 @@ export async function getSubmissionDetail(id: string): Promise<{
   }
 }
 
-/**
- * Save manual grading for a submission
- */
 export async function saveManualGrading(
   submissionId: string,
-  gradingData: {
-    answers: StudentAnswer[];
-    feedback?: string;
-  },
+  gradingData: { answers: StudentAnswer[]; feedback?: string },
 ) {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("session")?.value;
-  if (!sessionCookie) return { error: "Unauthorized" };
-
   try {
-    const claims = await auth.verifySessionCookie(sessionCookie, true);
-    if (claims.role !== "admin" && claims.admin !== true) {
-      return { error: "Forbidden" };
-    }
-
-    const subRef = adminDb
-      .collection("assessmentSubmissions")
-      .doc(submissionId);
-    const subSnap = await subRef.get();
-    if (!subSnap.exists) return { error: "Submissão não encontrada" };
-
-    const submission = subSnap.data() as AssessmentSubmissionDoc;
-
-    // Get assessment for passing score rules
-    const assessmentSnap = await adminDb
-      .collection("assessments")
-      .doc(submission.assessmentId)
-      .get();
-    if (!assessmentSnap.exists) return { error: "Avaliação não encontrada" };
-    const assessment = assessmentSnap.data() as AssessmentDoc;
-
-    // Calculate totals
-    const totalScore = gradingData.answers.reduce(
-      (sum, a) => sum + (a.pointsEarned || 0),
+    const admin = await requireAdmin();
+    const client = supabase();
+    const { data: row, error: submissionError } = await client
+      .from("assessment_submissions")
+      .select("*")
+      .eq("id", submissionId)
+      .maybeSingle();
+    if (submissionError) throw submissionError;
+    if (!row) return { error: "Submissão não encontrada" };
+    const { data: assessmentRow, error: assessmentError } = await client
+      .from("assessments")
+      .select("passing_score,total_points")
+      .eq("id", row.assessment_id)
+      .maybeSingle();
+    if (assessmentError) throw assessmentError;
+    if (!assessmentRow) return { error: "Avaliação não encontrada" };
+    const score = gradingData.answers.reduce(
+      (sum, answer) => sum + (answer.pointsEarned || 0),
       0,
     );
-    const totalPossiblePoints = assessment.totalPoints || 100;
-    const percentage = (totalScore / totalPossiblePoints) * 100;
-    const passed = percentage >= assessment.passingScore;
-
-    const updateData = {
-      answers: gradingData.answers,
-      score: totalScore,
-      percentage,
-      passed,
-      status: "graded" as const,
-      feedback: gradingData.feedback || "",
-      gradedBy: claims.uid,
-      gradedAt: Timestamp.now(),
-    };
-
-    await subRef.update(updateData);
-
-    // Update user progress
-    const progressRef = adminDb
-      .collection("users")
-      .doc(submission.userId)
-      .collection("assessmentProgress")
-      .doc(submission.assessmentId);
-
-    const progressSnap = await progressRef.get();
-    const currentProgress = progressSnap.exists ? progressSnap.data() : null;
-
-    const newBestPercentage = Math.max(
-      percentage,
-      currentProgress?.bestPercentage || 0,
-    );
-    const newBestScore = Math.max(totalScore, currentProgress?.bestScore || 0);
-
-    await progressRef.set(
+    const percentage = assessmentRow.total_points
+      ? (score / assessmentRow.total_points) * 100
+      : 0;
+    const passed = percentage >= Number(assessmentRow.passing_score);
+    const { error } = await client
+      .from("assessment_submissions")
+      .update({
+        answers: gradingData.answers as any,
+        score,
+        percentage,
+        passed,
+        status: "graded",
+        feedback: gradingData.feedback || null,
+        graded_by: admin.uid,
+        graded_at: new Date().toISOString(),
+      })
+      .eq("id", submissionId);
+    if (error) throw error;
+    const { data: progress } = await client
+      .from("assessment_progress")
+      .select("*")
+      .eq("user_id", row.user_id)
+      .eq("assessment_id", row.assessment_id)
+      .maybeSingle();
+    await client.from("assessment_progress").upsert(
       {
-        assessmentId: submission.assessmentId,
-        userId: submission.userId,
-        courseId: submission.courseId,
-        bestScore: newBestScore,
-        bestPercentage: newBestPercentage,
-        passed: newBestPercentage >= assessment.passingScore,
-        lastAttemptAt: Timestamp.now(),
-      },
-      { merge: true },
+        id: progress?.id || randomUUID(),
+        assessment_id: row.assessment_id,
+        user_id: row.user_id,
+        course_id: row.course_id,
+        attempts: progress?.attempts || 1,
+        best_score: Math.max(Number(progress?.best_score || 0), score),
+        best_percentage: Math.max(
+          Number(progress?.best_percentage || 0),
+          percentage,
+        ),
+        passed: Boolean(progress?.passed) || passed,
+        last_attempt_at: new Date().toISOString(),
+        submissions: Array.isArray(progress?.submissions)
+          ? progress.submissions
+          : [submissionId],
+      } as any,
+      { onConflict: "user_id,assessment_id" },
     );
-
+    refreshAdmin();
     revalidatePath(`/admin/assessments/submissions/${submissionId}`);
-    revalidatePath("/admin/assessments/submissions");
-
     return { success: true };
   } catch (error) {
     console.error("Save Manual Grading Error:", error);

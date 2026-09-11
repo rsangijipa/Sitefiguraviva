@@ -63,6 +63,14 @@ export async function writeEnrollmentMirror({
       (enrollmentDoc.paidAt instanceof Date
         ? enrollmentDoc.paidAt.toISOString()
         : enrollmentDoc.paidAt),
+    approved_by: (enrollmentDoc as any).approved_by ?? enrollmentDoc.approvedBy,
+    approved_at:
+      (enrollmentDoc as any).approved_at ??
+      (enrollmentDoc.approvedAt instanceof Date
+        ? enrollmentDoc.approvedAt.toISOString()
+        : enrollmentDoc.approvedAt),
+    rejection_reason:
+      (enrollmentDoc as any).rejection_reason ?? enrollmentDoc.rejectionReason,
   };
   const { error } = await supabase.from("enrollments").upsert(dataToSet, {
     onConflict: isSupabaseUid

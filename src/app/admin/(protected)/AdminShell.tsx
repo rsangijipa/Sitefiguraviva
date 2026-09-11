@@ -28,10 +28,10 @@ import {
   Search,
   ArrowRight,
   User as UserIcon,
+  Menu,
 } from "lucide-react";
 import PageShell from "@/components/ui/PageShell";
 import { useFounderSettings } from "@/hooks/useSiteSettings";
-import Breadcrumbs from "@/components/ui/Breadcrumbs";
 
 export default function AdminShell({
   children,
@@ -192,6 +192,15 @@ export default function AdminShell({
           <p className="text-center text-[9px] text-stone-300 font-bold tracking-widest pt-2 opacity-60">
             © 2024 INSTITUTO FIGURA VIVA
           </p>
+          <p
+            className="text-center text-[9px] text-stone-400"
+            title={process.env.NEXT_PUBLIC_BUILD_SHA}
+          >
+            Build{" "}
+            {process.env.NEXT_PUBLIC_BUILD_SHA === "não informado"
+              ? "não informado"
+              : process.env.NEXT_PUBLIC_BUILD_SHA?.slice(0, 8)}
+          </p>
         </div>
       </aside>
 
@@ -210,7 +219,7 @@ export default function AdminShell({
 
       {/* Main Content */}
       <main
-        className="panel-surface flex-1 lg:ml-80 p-4 md:p-6 lg:p-8 min-h-screen relative overflow-y-auto custom-scrollbar"
+        className="panel-surface relative min-h-dvh flex-1 overflow-y-auto p-4 md:p-6 lg:ml-80 lg:p-8 custom-scrollbar"
         data-lenis-prevent
       >
         {/* Sticky Mobile Tracker/Header background */}
@@ -219,9 +228,9 @@ export default function AdminShell({
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
               aria-label={isSidebarOpen ? "Fechar menu" : "Abrir menu"}
-              className="p-1.5 -ml-1.5 text-stone-500 hover:bg-stone-100 rounded-lg active:scale-95 transition-transform"
+              className="-ml-1.5 flex min-h-11 min-w-11 items-center justify-center rounded-lg text-stone-500 transition-transform hover:bg-stone-100 active:scale-95"
             >
-              {isSidebarOpen ? <X size={20} /> : <LayoutDashboard size={20} />}
+              {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
             <Image
               src="/assets/logo.jpeg"
@@ -242,7 +251,6 @@ export default function AdminShell({
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto animate-fade-in-up">
-          <Breadcrumbs />
           <header className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div className="flex items-center gap-4">
               <div className="hidden sm:block">

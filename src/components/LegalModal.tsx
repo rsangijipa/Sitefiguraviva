@@ -1,9 +1,14 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import { X, ShieldCheck, FileText, Calendar } from "lucide-react";
 import { Modal, ModalContent } from "./ui/Modal";
-import { useLegalSettings } from "@/hooks/useSiteSettings";
+import {
+  DEFAULT_LEGAL,
+  getSiteSettings,
+  LegalSettings,
+} from "@/lib/siteSettings";
 
 interface LegalModalProps {
   isOpen: boolean;
@@ -12,7 +17,20 @@ interface LegalModalProps {
 }
 
 export default function LegalModal({ isOpen, onClose, type }: LegalModalProps) {
-  const { data, isFetching } = useLegalSettings({ aggressiveRefresh: isOpen });
+  const [data, setData] = useState<LegalSettings>(DEFAULT_LEGAL);
+  const [isFetching, setIsFetching] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    let active = true;
+    setIsFetching(true);
+    getSiteSettings<LegalSettings>("legal", DEFAULT_LEGAL)
+      .then((settings) => active && setData(settings))
+      .finally(() => active && setIsFetching(false));
+    return () => {
+      active = false;
+    };
+  }, [isOpen]);
 
   if (!type || !data) return null;
 

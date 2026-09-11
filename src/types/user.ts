@@ -1,4 +1,4 @@
-import type { Timestamp } from "firebase/firestore";
+import type { Timestamp } from "@/types/time";
 
 export type UserRole = "admin" | "tutor" | "student";
 export type UserStatus = "active" | "disabled";

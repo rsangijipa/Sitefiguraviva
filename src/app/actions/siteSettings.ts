@@ -1,7 +1,6 @@
 "use server";
 
-import { adminDb } from "@/lib/firebase/admin";
-import { Timestamp } from "firebase-admin/firestore";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import { revalidatePath } from "next/cache";
 
 /**
@@ -22,26 +21,23 @@ export async function updateSiteSettings(
 
     // Basic structural validation
     const validatedData = siteSettingsSchema.parse(data);
-    const updatedAt = Timestamp.now();
-
-    await adminDb
-      .collection("siteSettings")
-      .doc(key)
-      .set(
-        {
-          ...validatedData,
-          updatedAt,
-          updatedBy: user.email,
-        },
-        { merge: true },
-      );
+    const updatedAt = new Date().toISOString();
+    const { error } = await createSupabaseServiceClient()
+      .from("public_pages")
+      .upsert({
+        key,
+        content: { ...validatedData, updatedAt, updatedBy: user.email },
+        is_published: true,
+        updated_at: updatedAt,
+      } as any);
+    if (error) throw error;
 
     revalidatePath("/");
     revalidatePath("/", "layout");
     revalidatePath("/admin/settings", "page");
     revalidatePath("/public-library", "page");
     revalidatePath("/public-gallery", "page");
-    return { success: true, updatedAt: updatedAt.toDate().toISOString() };
+    return { success: true, updatedAt };
   } catch (error: any) {
     console.error(`Error updating settings/${key}:`, error);
     return { success: false, error: error.message };
@@ -51,10 +47,9 @@ export async function updateSiteSettings(
 export async function seedSiteSettingsAction() {
   try {
     await requireAdmin();
-    const batch = adminDb.batch();
+    const supabase = createSupabaseServiceClient();
 
-    // Import defaults from a place that doesn't trigger client-side firebase
-    // For now, let's just use the ones already here and add legal
+    // Keep the seed payload local so the action remains independent of client state.
     const defaults = {
       founder: {
         name: "Lilian Vanessa Nicacio Gusmão Vianei",
@@ -112,38 +107,19 @@ export async function seedSiteSettingsAction() {
       },
     };
 
-    const founderRef = adminDb.collection("siteSettings").doc("founder");
-    const instituteRef = adminDb.collection("siteSettings").doc("institute");
-    const seoRef = adminDb.collection("siteSettings").doc("seo");
-    const legalRef = adminDb.collection("siteSettings").doc("legal");
-    const configRef = adminDb.collection("siteSettings").doc("config");
-
-    const [fSnap, iSnap, sSnap, lSnap, cSnap] = await Promise.all([
-      founderRef.get(),
-      instituteRef.get(),
-      seoRef.get(),
-      legalRef.get(),
-      configRef.get(),
-    ]);
-
-    if (!fSnap.exists)
-      batch.set(founderRef, {
-        ...defaults.founder,
-        updatedAt: Timestamp.now(),
-      });
-    if (!iSnap.exists)
-      batch.set(instituteRef, {
-        ...defaults.institute,
-        updatedAt: Timestamp.now(),
-      });
-    if (!sSnap.exists)
-      batch.set(seoRef, { ...defaults.seo, updatedAt: Timestamp.now() });
-    if (!lSnap.exists)
-      batch.set(legalRef, { ...defaults.legal, updatedAt: Timestamp.now() });
-    if (!cSnap.exists)
-      batch.set(configRef, { ...defaults.config, updatedAt: Timestamp.now() });
-
-    await batch.commit();
+    const { data: existing, error: readError } = await supabase
+      .from("public_pages")
+      .select("key")
+      .in("key", ["founder", "institute", "seo", "legal", "config"]);
+    if (readError) throw readError;
+    const existingKeys = new Set((existing ?? []).map((row: any) => row.key));
+    const rows = Object.entries(defaults)
+      .filter(([key]) => !existingKeys.has(key))
+      .map(([key, content]) => ({ key, content, is_published: true }));
+    if (rows.length) {
+      const { error } = await supabase.from("public_pages").insert(rows as any);
+      if (error) throw error;
+    }
     revalidatePath("/");
     revalidatePath("/", "layout");
     return { success: true };
