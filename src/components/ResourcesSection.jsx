@@ -274,10 +274,7 @@ export default function ResourcesSection() {
         {resource ? (
           <>
             {resource.status === "coming-soon" ? (
-              <ComingSoonResource
-                resource={resource}
-                onClose={() => setActiveSlug(null)}
-              />
+              <ComingSoonResource resource={resource} />
             ) : ActiveApp ? (
               <div
                 className={

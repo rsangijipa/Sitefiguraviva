@@ -3,10 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Check, Ear, Footprints, Pause, Wind } from "lucide-react";
 
-interface SalaDePausaAppProps {
-  onClose?: () => void;
-}
-
 const pauses = [
   {
     id: "body",
@@ -42,7 +38,7 @@ const pauses = [
   },
 ] as const;
 
-export default function SalaDePausaApp({ onClose }: SalaDePausaAppProps) {
+export default function SalaDePausaApp() {
   const [selectedId, setSelectedId] = useState<
     (typeof pauses)[number]["id"] | null
   >(null);
@@ -89,15 +85,6 @@ export default function SalaDePausaApp({ onClose }: SalaDePausaAppProps) {
             >
               Escolher outra pausa
             </button>
-            {onClose ? (
-              <button
-                type="button"
-                onClick={onClose}
-                className="resource-action bg-primary text-paper"
-              >
-                Encerrar recurso
-              </button>
-            ) : null}
           </div>
         </div>
       </section>

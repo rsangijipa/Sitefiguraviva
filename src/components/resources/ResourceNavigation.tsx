@@ -19,11 +19,11 @@ export function ResourceNavigation({
   children,
 }: ResourceNavigationProps) {
   return (
-    <div className="flex w-full items-center gap-3">
+    <div className="flex w-full items-center gap-3 px-4 sm:px-6 py-3.5 sm:py-5 border-b border-primary/10">
       <button
         type="button"
         onClick={onBack}
-        className="inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-xl border border-primary/15 bg-white/85 px-3.5 py-2 text-xs font-bold uppercase tracking-wider text-primary shadow-sm transition hover:border-terra hover:text-terra focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+        className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl border border-primary/15 bg-white/85 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-primary shadow-sm transition hover:border-terra hover:text-terra focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
         aria-label={`Voltar para ${backLabel}`}
       >
         <ArrowLeft size={16} aria-hidden="true" />

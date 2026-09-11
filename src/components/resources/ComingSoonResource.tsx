@@ -5,10 +5,8 @@ import type { ResourceDefinition } from "./resourceCatalog";
 
 export default function ComingSoonResource({
   resource,
-  onClose,
 }: {
   resource: ResourceDefinition;
-  onClose: () => void;
 }) {
   const [text, setText] = useState("");
   const [started, setStarted] = useState(false);
@@ -59,13 +57,6 @@ export default function ComingSoonResource({
           >
             Começar a explorar <ArrowRight size={16} />
           </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="mt-5 block w-full text-sm text-primary underline"
-          >
-            Voltar para Recursos
-          </button>
         </div>
       </div>
     );
@@ -86,12 +77,6 @@ export default function ComingSoonResource({
           placeholder="Escreva, se quiser. Você pode apenas continuar..."
         />
         <div className="mt-6 flex flex-wrap gap-3">
-          <button
-            className="resource-action bg-primary text-paper"
-            onClick={onClose}
-          >
-            Encerrar
-          </button>
           <button
             className="resource-action resource-action--secondary"
             onClick={() => {
