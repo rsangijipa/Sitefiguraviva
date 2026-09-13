@@ -4,6 +4,10 @@ import { requireAdmin } from "@/lib/auth/server";
 import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import { revalidatePath } from "next/cache";
 
+function rethrowRedirect(error: unknown) {
+  if (typeof (error as { digest?: unknown })?.digest === "string" && (error as { digest: string }).digest.startsWith("NEXT_REDIRECT")) throw error;
+}
+
 export async function getPendingEnrollmentsAction() {
   try {
     await requireAdmin();
@@ -16,7 +20,7 @@ export async function getPendingEnrollmentsAction() {
 
     if (error) {
       console.error("getPendingEnrollmentsAction Error:", error);
-      return { success: false, enrollments: [] };
+      return { success: false, error: error.message, enrollments: [] };
     }
 
     const formatted = (enrollments || []).map((e: any) => ({
@@ -30,8 +34,9 @@ export async function getPendingEnrollmentsAction() {
 
     return { success: true, enrollments: formatted };
   } catch (error: any) {
+    rethrowRedirect(error);
     console.error("getPendingEnrollmentsAction Error:", error);
-    return { success: false, enrollments: [] };
+    return { success: false, error: error?.message || "Falha ao carregar aprovações.", enrollments: [] };
   }
 }
 
@@ -58,6 +63,7 @@ export async function approveEnrollment(
     revalidatePath("/admin/approvals");
     return { success: true };
   } catch (error: any) {
+    rethrowRedirect(error);
     console.error("approveEnrollment error:", error);
     return {
       success: false,
@@ -91,6 +97,7 @@ export async function rejectEnrollment(
     revalidatePath("/admin/approvals");
     return { success: true };
   } catch (error: any) {
+    rethrowRedirect(error);
     console.error("rejectEnrollment error:", error);
     return {
       success: false,

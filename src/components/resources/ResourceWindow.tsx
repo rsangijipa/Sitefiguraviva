@@ -45,7 +45,7 @@ export function ResourceWindow({
 
   return (
     <div
-      className={`relative flex flex-1 flex-col min-h-0 w-full overflow-hidden rounded-[2rem] border border-white/85 bg-paper shadow-[0_28px_90px_rgba(30,25,20,0.35)] max-sm:rounded-none max-sm:border-0 ${className}`}
+      className={`relative flex flex-1 flex-col min-h-0 w-full overflow-hidden bg-paper ${className}`}
       role="region"
       aria-label={title}
     >
@@ -53,7 +53,7 @@ export function ResourceWindow({
       <ResourceWindowScrollContext.Provider value={resetScroll}>
         <div
           ref={scrollRef}
-          className="flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden p-4 sm:p-8"
+          className="flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden"
           data-lenis-prevent
         >
           {children}

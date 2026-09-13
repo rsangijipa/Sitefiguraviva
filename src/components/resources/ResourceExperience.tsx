@@ -35,7 +35,7 @@ export function ResourceExperience({
     <Modal isOpen={isOpen} onClose={onClose} ariaLabel={title}>
       <ModalContent
         size="full"
-        className="flex h-[100dvh] max-h-[100dvh] w-full max-w-full flex-col min-h-0 bg-paper sm:h-[min(94dvh,960px)] sm:max-h-[calc(100dvh-24px)] sm:w-[min(96vw,1440px)] sm:rounded-[2rem] sm:border sm:border-white/80 sm:bg-paper sm:shadow-[0_28px_90px_rgba(30,25,20,0.35)] p-0 m-0 overflow-hidden"
+        className="flex h-[100dvh] max-h-[100dvh] w-screen max-w-none flex-col min-h-0 bg-paper p-0 m-0 overflow-hidden"
       >
         <div className="flex h-full w-full flex-col min-h-0">
           <ResourceNavigation
@@ -53,8 +53,8 @@ export function ResourceExperience({
               scrollKey={activeSection}
             >
               {sections && sections.length > 0 && (
-                <nav className="sticky top-0 z-10 -mt-4 -mx-4 sm:-mx-8 mb-4 sm:mb-8 bg-paper pb-2">
-                  <div className="flex gap-1 overflow-x-auto scrollbar-none px-4 sm:px-8 pt-4 pr-16 sm:pr-20">
+                <nav aria-label="Seções do recurso" className="sticky top-0 z-10 border-b border-primary/10 bg-paper">
+                  <div className="flex gap-1 overflow-x-auto scrollbar-none px-4 py-2">
                     {sections.map((section) => {
                       const Icon = section.icon;
                       const isActive = activeSection === section.id;
@@ -63,7 +63,7 @@ export function ResourceExperience({
                           key={section.id}
                           type="button"
                           onClick={() => onSectionChange?.(section.id)}
-                          className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold ${
+                          className={`inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold ${
                             isActive
                               ? "bg-primary text-white"
                               : "border border-primary/15 bg-white/85 text-primary hover:border-terra hover:text-terra"

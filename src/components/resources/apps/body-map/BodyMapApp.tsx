@@ -129,7 +129,7 @@ export default function BodyMapApp() {
   return (
     <section
       aria-labelledby="body-map-title"
-      className="min-h-full bg-paper px-4 py-8 sm:px-7"
+      className="min-h-full bg-paper px-4 py-6 sm:px-7"
     >
       <header className="mx-auto max-w-5xl border-b border-primary/12 pb-6">
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-terra">
@@ -137,7 +137,7 @@ export default function BodyMapApp() {
         </p>
         <h2
           id="body-map-title"
-          className="mt-2 font-serif text-4xl text-primary"
+          className="mt-2 font-serif text-3xl text-primary sm:text-4xl"
         >
           Mapa Corporal
         </h2>

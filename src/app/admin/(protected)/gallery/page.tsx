@@ -28,11 +28,13 @@ import {
   saveGalleryItemAction,
   deleteGalleryItemAction,
 } from "@/app/actions/gallery";
+import { AdminEmptyState, AdminErrorState, AdminLoadingState } from "@/components/admin/AdminStates";
+import { Toolbar } from "@/components/admin/Toolbar";
 
 export default function GalleryManager() {
   // const [gallery, setGallery] = useState<any[]>([]);
   // const [loading, setLoading] = useState(true);
-  const { data: gallery = [], isLoading: loading, refetch } = useGallery();
+  const { data: gallery = [], isLoading: loading, refetch, error } = useGallery();
   const { user } = useAuth();
   const { addToast } = useToast();
 
@@ -124,12 +126,12 @@ export default function GalleryManager() {
     });
 
   return (
-    <div className="space-y-12 pb-20">
+    <div className="space-y-5 pb-8">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div>
-          <h3 className="font-serif text-3xl mb-2 text-primary">
+          <h1 className="font-serif text-2xl mb-1 text-primary">
             Galeria de Imagens
-          </h3>
+          </h1>
           <p className="text-primary/40 text-sm max-w-lg">
             Gerencie as imagens exibidas na galeria do site. Adicione fotos de
             encontros e momentos especiais.
@@ -140,14 +142,14 @@ export default function GalleryManager() {
             setIsEditing(true);
             setFormData(initialForm);
           }}
-          className="bg-primary text-paper px-8 py-4 rounded-xl flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest hover:bg-gold transition-soft hover:shadow-xl transform active:scale-95 shadow-lg border border-primary/10"
+          className="bg-primary text-paper px-4 py-2.5 rounded-lg flex items-center gap-2 text-xs font-bold hover:bg-gold transition-soft"
         >
           <Plus size={16} /> Nova Imagem
         </button>
       </header>
 
       {/* Filters & Search */}
-      <div className="flex flex-col md:flex-row gap-6 items-end bg-white/40 backdrop-blur-md p-6 rounded-[2rem] border border-stone-200/60 shadow-sm">
+      <Toolbar className="items-end">
         <div className="flex-1 w-full space-y-2">
           <label className="text-[10px] font-bold uppercase tracking-widest text-primary/40 ml-2">
             Buscar
@@ -176,7 +178,7 @@ export default function GalleryManager() {
             <option value="Espaço">Espaço</option>
           </select>
         </div>
-      </div>
+      </Toolbar>
 
       <AnimatePresence>
         {isEditing && (
@@ -186,19 +188,19 @@ export default function GalleryManager() {
             exit={{ opacity: 0, scale: 0.98 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-primary/20 backdrop-blur-sm"
           >
-            <div className="bg-white w-full max-w-2xl rounded-[2rem] shadow-2xl overflow-hidden flex flex-col">
-              <div className="p-8 border-b border-gray-100 flex justify-between items-center bg-stone-50/50">
+            <div role="dialog" aria-modal="true" aria-labelledby="gallery-editor-title" className="bg-white w-full max-w-2xl max-h-[calc(100dvh-2rem)] rounded-xl shadow-2xl overflow-hidden flex flex-col">
+              <div className="sticky top-0 z-10 p-5 border-b border-gray-100 flex justify-between items-center bg-white">
                 <div>
-                  <h3 className="font-serif text-2xl text-primary">
+                  <h2 id="gallery-editor-title" className="font-serif text-xl text-primary">
                     {formData.id ? "Editar Imagem" : "Nova Imagem"}
-                  </h3>
+                  </h2>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-primary/40 mt-1">
                     Detalhes da foto
                   </p>
                 </div>
                 <button
                   onClick={() => setIsEditing(false)}
-                  className="p-2 hover:bg-gray-200 rounded-full transition-colors"
+                  aria-label="Fechar editor sem salvar" className="p-2 hover:bg-gray-200 rounded-full transition-colors"
                 >
                   <X size={24} className="text-primary/40" />
                 </button>
@@ -206,7 +208,7 @@ export default function GalleryManager() {
 
               <form
                 onSubmit={handleSubmit}
-                className="p-8 space-y-6 overflow-y-auto max-h-[70vh] custom-scrollbar bg-[#FDFCF9]"
+                className="p-5 space-y-5 overflow-y-auto bg-[#FDFCF9]"
               >
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/40 ml-2">
@@ -287,7 +289,7 @@ export default function GalleryManager() {
                   />
                 </div>
 
-                <div className="pt-4 flex justify-end gap-4 border-t border-gray-100">
+                <div className="sticky bottom-0 -mx-5 -mb-5 mt-2 flex justify-end gap-3 border-t border-gray-100 bg-white p-4">
                   <button
                     type="button"
                     onClick={() => setIsEditing(false)}
@@ -333,13 +335,13 @@ export default function GalleryManager() {
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-20">
-            <Loader2 className="animate-spin text-gold" size={40} />
-          </div>
+          <AdminLoadingState rows={6} />
+        ) : error ? (
+          <AdminErrorState title="Não foi possível carregar a galeria." retry={() => refetch()} />
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredGallery.map((item) => (
-              <div
+              <article
                 key={item.id}
                 className="group relative overflow-hidden rounded-2xl border border-stone-200 bg-areia shadow-sm transition-all hover:-translate-y-1 hover:border-gold/40 hover:shadow-xl"
               >
@@ -372,12 +374,10 @@ export default function GalleryManager() {
                 >
                   <Trash2 size={16} />
                 </button>
-              </div>
+              </article>
             ))}
             {filteredGallery.length === 0 && (
-              <div className="col-span-full py-20 text-center text-primary/30 border-2 border-dashed border-gray-100 rounded-[2rem]">
-                Nenhuma imagem encontrada com os filtros atuais.
-              </div>
+              <div className="col-span-full"><AdminEmptyState title="Nenhuma imagem encontrada" description="Ajuste os filtros ou adicione uma nova imagem." /></div>
             )}
           </div>
         )}

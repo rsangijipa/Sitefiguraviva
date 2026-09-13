@@ -24,17 +24,17 @@ export default function FiguraEFundoApp() {
   const [selected, setSelected] = useState<number | null>(null);
   const [round, setRound] = useState(0);
   return (
-    <div className="h-full min-h-0 overflow-y-auto bg-areia px-6 py-10">
-      <div className="mx-auto max-w-3xl">
+    <div className="flex h-full min-h-0 flex-col bg-areia">
+      <div className="mx-auto w-full max-w-5xl flex-1 px-5 py-6 sm:px-8">
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-terra">
           EXPERIMENTAR · FIGURA E FUNDO
         </p>
-        <h2 className="mt-4 font-serif text-4xl text-primary">
+        <h2 className="mt-2 font-serif text-3xl text-primary sm:text-4xl">
           Observe sem procurar nada.
         </h2>
         <p className="mt-3 text-text/70">O que apareceu primeiro para você?</p>
         <div
-          className="relative mt-8 h-[min(55vh,420px)] overflow-hidden rounded-[24px] border-2 border-primary/15 bg-paper"
+          className="relative mt-6 h-[min(58dvh,34rem)] overflow-hidden rounded-xl border-2 border-primary/15 bg-paper"
           role="group"
           aria-label="Campo visual interativo"
         >

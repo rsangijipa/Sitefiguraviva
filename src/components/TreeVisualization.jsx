@@ -358,8 +358,9 @@ const TreeVisualization = ({ emotions = [], onLeafClick, isModal = false }) => {
 
             const clock = new THREE.Clock();
 
+            let animationFrame;
             const animate = () => {
-                requestAnimationFrame(animate);
+                animationFrame = requestAnimationFrame(animate);
                 const time = clock.getElapsedTime();
 
                 if (controlsRef.current) controlsRef.current.update();
@@ -411,6 +412,7 @@ const TreeVisualization = ({ emotions = [], onLeafClick, isModal = false }) => {
             window.addEventListener('resize', handleResize);
 
             return () => {
+                cancelAnimationFrame(animationFrame);
                 window.removeEventListener('resize', handleResize);
                 elm.removeEventListener('mousemove', onMouseMove);
                 elm.removeEventListener('click', onClick);
@@ -418,8 +420,28 @@ const TreeVisualization = ({ emotions = [], onLeafClick, isModal = false }) => {
                     containerRef.current.removeChild(renderer.domElement);
                 }
                 controls.dispose();
-                // Dispose resources...
+                // Three keeps GPU allocations until each material, texture and
+                // geometry is explicitly released. Dispose the whole scene so
+                // navigating away cannot exhaust the browser context budget.
+                scene.traverse((object) => {
+                    /** @type {any} */
+                    const resource = object;
+                    if (resource.geometry) resource.geometry.dispose();
+                    const materials = Array.isArray(resource.material) ? resource.material : [resource.material];
+                    materials.filter(Boolean).forEach((material) => {
+                        Object.values(material).forEach((value) => {
+                            if (value?.isTexture) value.dispose();
+                        });
+                        material.dispose?.();
+                    });
+                });
+                renderer.renderLists?.dispose();
                 renderer.dispose();
+                renderer.forceContextLoss?.();
+                scene.clear();
+                rendererRef.current = null;
+                sceneRef.current = null;
+                cameraRef.current = null;
             };
         } catch (e) {
             console.error("Three.js initialization error:", e);

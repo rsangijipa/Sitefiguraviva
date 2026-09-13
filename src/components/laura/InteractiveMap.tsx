@@ -8,7 +8,7 @@ export function InteractiveMap() {
   const { journeyMap } = lauraPerlsContent;
 
   return (
-    <section className="py-14 bg-[#0d0906] relative overflow-hidden">
+    <section className="py-8 md:py-10 bg-[#0d0906] relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <svg className="w-full h-full" viewBox="0 0 800 400">
@@ -54,7 +54,7 @@ export function InteractiveMap() {
           <span className="text-[11px] tracking-[0.3em] uppercase font-bold text-[#c7b89a] block mb-4">
             Jornada Global
           </span>
-          <h2 className="font-serif text-4xl md:text-5xl text-[#e8e4db] leading-tight">
+          <h2 className="font-serif text-3xl md:text-4xl text-[#e8e4db] leading-tight">
             Onde Laura{" "}
             <span className="italic text-[#d4b578] font-light">
               Viviu e Trabalhou
@@ -63,7 +63,7 @@ export function InteractiveMap() {
         </div>
 
         {/* Map Cards */}
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-3 gap-4 md:gap-5">
           {journeyMap.map((country, index) => (
             <motion.div
               key={index}
@@ -79,17 +79,17 @@ export function InteractiveMap() {
               )}
 
               {/* Country Card */}
-              <div className="bg-[#241b12] rounded-lg shadow-xl overflow-hidden h-full">
+              <div className="bg-[#241b12] rounded-md border border-[#4a3c28] overflow-hidden h-full">
                 {/* Header */}
-                <div className="bg-[#3a2d1c] px-6 py-4 flex items-center gap-3">
-                  <span className="text-3xl">{country.flag}</span>
-                  <h3 className="font-serif text-2xl text-[#e8e4db]">
+                <div className="bg-[#3a2d1c] px-5 py-3 flex items-center gap-3">
+                  <span className="text-2xl">{country.flag}</span>
+                  <h3 className="font-serif text-xl text-[#e8e4db]">
                     {country.country}
                   </h3>
                 </div>
 
                 {/* Cities */}
-                <div className="p-6 space-y-4">
+                <div className="p-5 space-y-3">
                   {country.cities.map((city, cityIndex) => (
                     <div
                       key={cityIndex}
@@ -118,7 +118,7 @@ export function InteractiveMap() {
                 </div>
 
                 {/* Decorative Footer */}
-                <div className="px-6 py-3 bg-[#1b140d] flex justify-center">
+                <div className="px-5 py-2 bg-[#1b140d] flex justify-center">
                   <div className="flex gap-1">
                     <div className="w-1.5 h-1.5 rounded-full bg-[#c9a768]/40" />
                     <div className="w-1.5 h-1.5 rounded-full bg-[#c9a768]/60" />
@@ -141,7 +141,7 @@ export function InteractiveMap() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ delay: 0.5 }}
-          className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6"
+          className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4"
         >
           {[
             { label: "Países", value: "3", icon: "🌍" },
@@ -151,10 +151,10 @@ export function InteractiveMap() {
           ].map((stat, index) => (
             <div
               key={index}
-              className="text-center p-4 bg-[#241b12]/10 rounded-lg border border-[#c9a768]/30"
+              className="text-center p-3 bg-[#241b12]/10 rounded-md border border-[#c9a768]/30"
             >
-              <span className="text-3xl block mb-2">{stat.icon}</span>
-              <span className="font-serif text-3xl text-[#e8e4db] font-bold">
+              <span className="text-2xl block mb-1">{stat.icon}</span>
+              <span className="font-serif text-2xl text-[#e8e4db] font-bold">
                 {stat.value}
               </span>
               <span className="block text-xs text-[#c7b89a] uppercase tracking-widest mt-1">

@@ -7,7 +7,7 @@ export default function PolaridadesApp() {
   const [done, setDone] = useState(false);
   if (done)
     return (
-      <div className="flex h-full min-h-0 overflow-y-auto bg-paper p-6 text-center">
+      <div className="flex h-full min-h-0 bg-paper p-6 text-center">
         <div className="m-auto">
           <h2 className="font-serif text-4xl text-primary">
             Você pode permanecer com essa tensão.
@@ -25,12 +25,12 @@ export default function PolaridadesApp() {
       </div>
     );
   return (
-    <div className="h-full min-h-0 overflow-y-auto bg-paper px-6 py-12">
-      <div className="mx-auto max-w-2xl">
+    <div className="flex h-full min-h-0 flex-col bg-paper">
+      <div className="mx-auto w-full max-w-2xl flex-1 px-5 py-6 sm:px-8">
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-terra">
           EXPERIMENTAR · POLARIDADES
         </p>
-        <h2 className="mt-4 font-serif text-4xl text-primary">
+        <h2 className="mt-2 font-serif text-3xl text-primary sm:text-4xl">
           Duas tendências podem coexistir.
         </h2>
         <p className="mt-3 text-text/70">
@@ -76,13 +76,15 @@ export default function PolaridadesApp() {
           Uma reflexão, se quiser
           <textarea className="mt-2 min-h-28 w-full rounded-xl border border-primary/20 bg-areia p-3 font-normal" />
         </label>
+      </div>
+      <footer className="flex justify-end border-t border-primary/10 bg-paper px-5 py-3 sm:px-8">
         <button
-          className="resource-action mt-8 bg-primary text-paper"
+          className="resource-action bg-primary text-paper"
           onClick={() => setDone(true)}
         >
           Encerrar sem registrar
         </button>
-      </div>
+      </footer>
     </div>
   );
 }

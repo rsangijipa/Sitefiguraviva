@@ -10,7 +10,7 @@ export function LauraTimeline() {
   return (
     <section
       id="timeline"
-      className="py-16 bg-[#241b12] overflow-hidden relative"
+      className="py-8 md:py-10 bg-[#241b12] overflow-hidden relative"
     >
       {/* Decorative Elements */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#4a3c28]/50 to-transparent" />
@@ -24,7 +24,7 @@ export function LauraTimeline() {
 
       <div className="max-w-5xl mx-auto px-6 relative z-10">
         {/* Section Header */}
-        <div className="text-center mb-24">
+        <div className="text-center mb-10 md:mb-14">
           <div className="inline-flex items-center gap-3 mb-6">
             <div className="h-px w-12 bg-[#c9a768]/60" />
             <Calendar size={16} className="text-[#d4b578]" />
@@ -33,15 +33,15 @@ export function LauraTimeline() {
           <span className="text-[11px] tracking-[0.3em] uppercase font-bold text-[#8f7c64] block mb-4">
             Jornada de Vida
           </span>
-          <h2 className="font-serif text-4xl md:text-6xl text-[#f5ecd9] leading-tight tracking-tight">
+          <h2 className="font-serif text-3xl md:text-4xl text-[#f5ecd9] leading-tight tracking-tight">
             Crônica{" "}
             <span className="italic text-[#cbb896] font-light">Histórica</span>
           </h2>
-          <div className="h-px w-32 bg-[#c9a768]/40 mx-auto mt-8" />
+          <div className="h-px w-20 bg-[#c9a768]/40 mx-auto mt-5" />
         </div>
 
         {/* Timeline Events */}
-        <div className="space-y-24 md:space-y-32">
+        <div className="space-y-10 md:space-y-14">
           {timeline.map((event, index) => (
             <motion.div
               key={index}
@@ -61,11 +61,11 @@ export function LauraTimeline() {
                 className={`md:w-1/2 flex flex-col justify-start ${index % 2 === 0 ? "md:items-start md:pl-16" : "md:items-end md:pr-16"} pl-12 md:pl-0 pt-1`}
               >
                 <div className="relative">
-                  <span className="font-serif text-6xl md:text-9xl text-[#3a2d1c] font-bold leading-none select-none tracking-tighter">
+                  <span className="font-serif text-5xl md:text-7xl text-[#3a2d1c] font-bold leading-none select-none tracking-tighter">
                     {event.year}
                   </span>
                   <span
-                    className={`absolute ${index % 2 === 0 ? "left-0" : "right-0"} bottom-0 font-serif text-2xl md:text-3xl text-[#e6d7bd] font-bold`}
+                    className={`absolute ${index % 2 === 0 ? "left-0" : "right-0"} bottom-0 font-serif text-xl md:text-2xl text-[#e6d7bd] font-bold`}
                   >
                     {event.year}
                   </span>
@@ -76,13 +76,13 @@ export function LauraTimeline() {
               <div
                 className={`md:w-1/2 pl-12 ${index % 2 === 0 ? "md:pr-16 md:pl-0 md:text-right" : "md:pl-16 md:text-left"}`}
               >
-                <div className="p-6 md:p-8 bg-[#1b140d] border border-[#4a3c28] rounded-sm shadow-sm hover:shadow-md transition-shadow duration-500">
-                  <h3 className="font-serif text-2xl md:text-4xl text-[#f5ecd9] mb-3 leading-snug tracking-tight">
+                <div className="p-5 md:p-6 bg-[#1b140d] border border-[#4a3c28] rounded-md transition-colors duration-300">
+                  <h3 className="font-serif text-xl md:text-2xl text-[#f5ecd9] mb-2 leading-snug tracking-tight">
                     {event.title}
                   </h3>
 
                   <div
-                    className={`flex items-center gap-2 mb-5 text-[#a9987d] ${index % 2 === 0 ? "md:justify-end" : ""}`}
+                    className={`flex items-center gap-2 mb-3 text-[#a9987d] ${index % 2 === 0 ? "md:justify-end" : ""}`}
                   >
                     <MapPin size={12} />
                     <span className="text-[10px] uppercase tracking-[0.25em] font-bold">
@@ -90,7 +90,7 @@ export function LauraTimeline() {
                     </span>
                   </div>
 
-                  <p className="text-[#e6d7bd] font-serif leading-relaxed text-lg md:text-2xl italic">
+                  <p className="text-[#e6d7bd] font-serif leading-relaxed text-base md:text-lg italic">
                     "{event.description}"
                   </p>
                 </div>

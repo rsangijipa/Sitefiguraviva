@@ -134,7 +134,7 @@ export default function SalaDePausaApp() {
   return (
     <section
       aria-labelledby="pause-room-title"
-      className="min-h-full bg-paper px-4 py-10 sm:px-7"
+      className="min-h-full bg-paper px-4 py-6 sm:px-7"
     >
       <header className="mx-auto max-w-2xl text-center">
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-terra">
@@ -142,7 +142,7 @@ export default function SalaDePausaApp() {
         </p>
         <h2
           id="pause-room-title"
-          className="mt-3 font-serif text-4xl text-primary sm:text-5xl"
+          className="mt-2 font-serif text-3xl text-primary sm:text-4xl"
         >
           Sala de Pausa
         </h2>
@@ -151,7 +151,7 @@ export default function SalaDePausaApp() {
           obrigatória.
         </p>
       </header>
-      <div className="mx-auto mt-10 grid max-w-3xl gap-3 sm:grid-cols-2">
+      <div className="mx-auto mt-6 grid max-w-3xl gap-3 sm:grid-cols-2">
         {pauses.map((pause) => {
           const Icon = pause.icon;
           return (

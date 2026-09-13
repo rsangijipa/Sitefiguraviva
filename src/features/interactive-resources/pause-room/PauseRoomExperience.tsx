@@ -390,7 +390,7 @@ export default function PauseRoomExperience() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -12 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
-            className="flex min-h-full flex-1 flex-col items-center overflow-y-auto px-4 py-6"
+            className="flex min-h-full flex-1 flex-col items-center px-4 py-6"
           >
             <PauseStage
               practice={currentPractice}

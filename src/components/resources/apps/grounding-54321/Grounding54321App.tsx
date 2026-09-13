@@ -25,11 +25,11 @@ export default function Grounding54321App() {
   };
   if (step === steps.length)
     return (
-      <div className="flex h-full min-h-0 flex-col items-center justify-center overflow-y-auto bg-paper px-6 text-center">
+      <div className="flex h-full min-h-0 flex-col items-center justify-center bg-paper px-5 text-center sm:px-8">
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-terra">
           Travessia concluída
         </p>
-        <h2 className="mt-3 font-serif text-4xl text-primary">
+          <h2 className="mt-3 font-serif text-3xl text-primary sm:text-4xl">
           Você pode permanecer por aqui.
         </h2>
         <p className="mt-4 max-w-md text-text/70">
@@ -53,13 +53,13 @@ export default function Grounding54321App() {
       </div>
     );
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-y-auto bg-paper px-5 py-12 sm:px-10">
-      <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center text-center">
+    <div className="flex h-full min-h-0 flex-col bg-paper">
+      <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center px-5 py-6 text-center sm:px-10">
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-terra">
           5 · 4 · 3 · 2 · 1
         </p>
         <div
-          className="mt-4 font-serif text-[8rem] leading-none text-primary"
+          className="mt-3 font-serif text-[6rem] leading-none text-primary sm:text-[8rem]"
           aria-live="polite"
         >
           {total}
@@ -88,7 +88,8 @@ export default function Grounding54321App() {
             </button>
           ))}
         </div>
-        <div className="mt-10 flex flex-wrap justify-center gap-3">
+      </div>
+      <footer className="flex flex-wrap items-center justify-center gap-2 border-t border-primary/10 bg-paper px-4 py-3 sm:gap-3">
           <button
             className="resource-action bg-primary text-paper disabled:opacity-40"
             disabled={count < total}
@@ -109,14 +110,13 @@ export default function Grounding54321App() {
             {muted ? <VolumeX size={17} /> : <Volume2 size={17} />}{" "}
             {muted ? "Áudio desligado" : "Áudio ligado"}
           </button>
-        </div>
         <button
-          className="mt-8 text-sm text-primary underline underline-offset-4"
+          className="min-h-11 px-3 text-sm text-primary underline underline-offset-4"
           onClick={reset}
         >
           Fazer sem registrar
         </button>
-      </div>
+      </footer>
     </div>
   );
 }

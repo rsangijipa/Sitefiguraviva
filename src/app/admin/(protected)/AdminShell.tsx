@@ -15,6 +15,8 @@ import {
   Search,
   ArrowRight,
   Settings,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 import PageShell from "@/components/ui/PageShell";
 import { useFounderSettings } from "@/hooks/useSiteSettings";
@@ -34,6 +36,7 @@ export default function AdminShell({
   const router = useRouter();
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
 
@@ -73,11 +76,12 @@ export default function AdminShell({
       {/* Sidebar */}
       <aside
         className={`
-                fixed z-40 flex h-full w-80 flex-col border-r border-border bg-areia transition-all duration-500
+                fixed z-40 flex h-full w-72 flex-col border-r border-border bg-areia transition-[width,transform] duration-200
+                ${isSidebarCollapsed ? "lg:w-20" : "lg:w-72"}
                 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
             `}
       >
-        <div className="p-10">
+        <div className="p-5">
           <div className="flex items-center gap-3 mb-2">
             <div className="relative w-10 h-10 shrink-0">
               <Image
@@ -88,10 +92,11 @@ export default function AdminShell({
                 sizes="40px"
               />
             </div>
-            <h1 className="font-serif text-2xl text-primary tracking-tight">
+            <h1 className={`font-serif text-xl text-primary tracking-tight ${isSidebarCollapsed ? "lg:hidden" : ""}`}>
               Figura <span className="font-light text-gold italic">Viva</span>
             </h1>
           </div>
+          <button onClick={() => setIsSidebarCollapsed((value) => !value)} className="hidden lg:grid h-8 w-8 place-items-center rounded-md text-stone-500 hover:bg-stone-100" aria-label={isSidebarCollapsed ? "Expandir menu" : "Recolher menu"}>{isSidebarCollapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}</button>
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
             <span className="text-[9px] uppercase tracking-[0.25em] font-bold text-stone-400">
@@ -101,12 +106,12 @@ export default function AdminShell({
         </div>
 
         <nav
-          className="flex-1 min-h-0 pb-6 px-6 space-y-2 overflow-y-auto custom-scrollbar overscroll-contain"
+          className="flex-1 min-h-0 pb-4 px-3 space-y-1 overflow-y-auto"
           data-lenis-prevent
         >
           {ADMIN_NAVIGATION_GROUPS.map((group) => (
             <section key={group.label} aria-label={group.label}>
-              <h2 className="px-3 pb-2 pt-3 text-[9px] font-bold uppercase tracking-[0.18em] text-stone-400">
+              <h2 className={`px-3 pb-1 pt-3 text-[9px] font-bold uppercase tracking-[0.18em] text-stone-400 ${isSidebarCollapsed ? "lg:hidden" : ""}`}>
                 {group.label}
               </h2>
               <div className="space-y-2">
@@ -117,10 +122,11 @@ export default function AdminShell({
                       key={item.path}
                       href={item.path}
                       onClick={() => setIsSidebarOpen(false)}
-                      className={`flex items-center gap-4 px-6 py-4 rounded-xl transition-all duration-300 group ${
+                      title={isSidebarCollapsed ? item.label : undefined}
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors group ${
                         isActive
-                          ? "bg-primary text-white shadow-lg shadow-primary/20 translate-x-2"
-                          : "text-stone-500 hover:text-primary hover:bg-stone-100/80 hover:translate-x-1"
+                          ? "bg-primary text-white"
+                          : "text-stone-500 hover:text-primary hover:bg-stone-100/80"
                       }`}
                     >
                       <item.icon
@@ -128,7 +134,7 @@ export default function AdminShell({
                         className={`transition-transform duration-300 ${isActive ? "text-gold-light" : "group-hover:scale-110 group-hover:text-gold"}`}
                       />
                       <span
-                        className={`text-[11px] font-bold uppercase tracking-widest ${isActive ? "opacity-100" : "opacity-80"}`}
+                        className={`text-[11px] font-bold uppercase tracking-widest ${isSidebarCollapsed ? "lg:hidden" : ""} ${isActive ? "opacity-100" : "opacity-80"}`}
                       >
                         {item.label}
                       </span>
@@ -184,8 +190,7 @@ export default function AdminShell({
 
       {/* Main Content */}
       <main
-        className="panel-surface flex-1 lg:ml-80 p-4 md:p-6 lg:p-8 min-h-screen relative overflow-y-auto custom-scrollbar"
-        data-lenis-prevent
+        className={`panel-surface flex-1 p-4 md:p-6 lg:p-7 min-h-screen relative ${isSidebarCollapsed ? "lg:ml-20" : "lg:ml-72"}`}
       >
         {/* Sticky Mobile Tracker/Header background */}
         <div className="lg:hidden sticky top-0 z-30 bg-paper/80 backdrop-blur-md -mx-4 px-4 py-2 mb-4 border-b border-stone-100 flex items-center justify-between">
@@ -217,10 +222,10 @@ export default function AdminShell({
 
         <div className="relative z-10 max-w-7xl mx-auto animate-fade-in-up">
           <Breadcrumbs />
-          <header className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <header className="mb-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
             <div className="flex items-center gap-4">
               <div className="hidden sm:block">
-                <h2 className="font-serif text-2xl md:text-3xl text-primary mb-0.5 tracking-tight">
+                  <h2 className="font-serif text-xl md:text-2xl text-primary mb-0.5 tracking-tight">
                   Painel de Controle
                 </h2>
                 <p className="text-stone-400 text-[9px] md:text-[10px] font-bold uppercase tracking-[0.15em]">

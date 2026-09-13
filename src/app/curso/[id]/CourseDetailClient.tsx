@@ -68,11 +68,11 @@ export default function CourseDetailClient({ course }: { course: any }) {
       <div className="pt-32 pb-20 md:pt-40">
         <div className="container mx-auto px-6 max-w-6xl relative">
           <button
-            onClick={() => router.push("/#instituto")}
-            className="hidden md:flex items-center gap-2 text-accent font-bold uppercase tracking-widest text-[10px] mb-12 hover:translate-x-[-5px] transition-transform"
-            aria-label="Voltar para a lista de cursos"
+            onClick={() => router.push("/curso")}
+            className="mb-6 inline-flex min-h-11 items-center gap-2 rounded-lg border border-primary/20 bg-paper px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-primary transition-colors hover:border-gold hover:bg-areia focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold md:mb-12 md:px-4"
+            aria-label="Voltar para Formações"
           >
-            <ArrowLeft size={14} /> Voltar para Cursos
+            <ArrowLeft size={16} /> Voltar para Formações
           </button>
 
           <div className="grid lg:grid-cols-2 gap-16 items-start mb-24">

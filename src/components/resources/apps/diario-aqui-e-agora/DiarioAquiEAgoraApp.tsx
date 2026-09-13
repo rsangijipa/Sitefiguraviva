@@ -12,7 +12,7 @@ export default function DiarioAquiEAgoraApp() {
   const [values, setValues] = useState<string[]>(["", "", "", ""]);
   if (saved)
     return (
-      <div className="flex h-full min-h-0 items-center justify-center overflow-y-auto bg-paper p-6 text-center">
+      <div className="flex h-full min-h-0 items-center justify-center bg-paper p-6 text-center">
         <div>
           <h2 className="font-serif text-4xl text-primary">
             Registro guardado localmente nesta sessão.
@@ -30,12 +30,12 @@ export default function DiarioAquiEAgoraApp() {
       </div>
     );
   return (
-    <div className="h-full min-h-0 overflow-y-auto bg-paper px-5 py-10 sm:px-10">
-      <div className="mx-auto max-w-2xl">
+    <div className="flex h-full min-h-0 flex-col bg-paper">
+      <div className="mx-auto w-full max-w-3xl flex-1 px-5 py-6 sm:px-10">
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-terra">
           DIÁRIO · AQUI E AGORA
         </p>
-        <h2 className="mt-4 font-serif text-4xl text-primary">
+        <h2 className="mt-2 font-serif text-3xl text-primary sm:text-4xl">
           Um espaço para notar.
         </h2>
         <p className="mt-3 text-sm text-text/65">
@@ -52,7 +52,8 @@ export default function DiarioAquiEAgoraApp() {
             <button
               key={key}
               onClick={() => setMode(key)}
-              className={`min-h-11 rounded-xl border px-4 text-sm ${mode === key ? "border-primary bg-primary text-paper" : "border-primary/20 text-primary"}`}
+              aria-pressed={mode === key}
+              className={`min-h-11 rounded-lg border px-4 text-sm ${mode === key ? "border-primary bg-primary text-paper" : "border-primary/20 text-primary"}`}
             >
               {text}
             </button>
@@ -61,7 +62,7 @@ export default function DiarioAquiEAgoraApp() {
         {mode === "free" ? (
           <textarea
             aria-label="Escrita livre"
-            className="mt-8 min-h-64 w-full rounded-xl border border-primary/20 bg-areia p-4"
+            className="mt-6 min-h-[min(48dvh,32rem)] w-full rounded-xl border border-primary/20 bg-areia p-4"
             placeholder="Escreva o que quiser guardar..."
           />
         ) : mode === "quick" ? (
@@ -91,7 +92,8 @@ export default function DiarioAquiEAgoraApp() {
             ))}
           </div>
         )}
-        <div className="mt-8 flex flex-wrap gap-3">
+      </div>
+      <footer className="flex flex-wrap justify-end gap-3 border-t border-primary/10 bg-paper px-5 py-3 sm:px-10">
           <button
             className="resource-action bg-primary text-paper"
             onClick={() => setSaved(true)}
@@ -104,8 +106,7 @@ export default function DiarioAquiEAgoraApp() {
           >
             Finalizar sem salvar
           </button>
-        </div>
-      </div>
+      </footer>
     </div>
   );
 }

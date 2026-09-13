@@ -31,6 +31,7 @@ interface Course {
   description?: string;
   details?: { intro: string };
   category?: string;
+  slug?: string;
 }
 
 interface CoursesSectionProps {
@@ -187,9 +188,14 @@ export default function CoursesSection({
                             Inscrições Encerradas
                           </span>
                         ) : (
-                          <button className="-ml-2 inline-flex touch-manipulation items-center gap-2 rounded-md bg-transparent px-2 py-3 text-xs font-bold uppercase tracking-widest text-primary transition-all hover:bg-areia group-hover:gap-4 active:scale-95">
+                          <Link
+                            href={`/curso/${course.slug || course.id}`}
+                            onClick={(event) => event.stopPropagation()}
+                            className="-ml-2 inline-flex touch-manipulation items-center gap-2 rounded-md bg-transparent px-2 py-3 text-xs font-bold uppercase tracking-widest text-primary transition-all hover:bg-areia group-hover:gap-4 active:scale-95"
+                            aria-label={`Saiba mais sobre ${course.title}`}
+                          >
                             Saiba Mais <span className="text-gold">→</span>
-                          </button>
+                          </Link>
                         )}
                       </div>
                     </div>

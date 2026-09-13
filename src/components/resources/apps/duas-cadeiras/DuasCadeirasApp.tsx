@@ -9,7 +9,7 @@ export default function DuasCadeirasApp() {
   const [done, setDone] = useState(false);
   if (done)
     return (
-      <div className="flex h-full min-h-0 items-center justify-center overflow-y-auto bg-paper p-6 text-center">
+      <div className="flex h-full min-h-0 items-center justify-center bg-paper p-6 text-center">
         <div>
           <h2 className="font-serif text-4xl text-primary">
             O diálogo pode permanecer aberto.
@@ -28,12 +28,12 @@ export default function DuasCadeirasApp() {
     );
   const active = chair === "A" ? textA : textB;
   return (
-    <div className="h-full min-h-0 overflow-y-auto bg-paper px-6 py-10">
-      <div className="mx-auto max-w-3xl">
+    <div className="flex h-full min-h-0 flex-col bg-paper">
+      <div className="mx-auto w-full max-w-3xl flex-1 px-5 py-6 sm:px-8">
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-terra">
           EXPERIMENTAR · DUAS CADEIRAS
         </p>
-        <h2 className="mt-4 font-serif text-4xl text-primary">
+        <h2 className="mt-2 font-serif text-3xl text-primary sm:text-4xl">
           Dê espaço a duas perspectivas.
         </h2>
         <p className="mt-3 text-sm text-text/70">
@@ -85,7 +85,8 @@ export default function DuasCadeirasApp() {
             placeholder="Escreva a partir desta cadeira..."
           />
         </label>
-        <div className="mt-6 flex flex-wrap gap-3">
+      </div>
+      <footer className="flex flex-wrap justify-end gap-3 border-t border-primary/10 bg-paper px-5 py-3 sm:px-8">
           <button
             className="resource-action bg-primary text-paper"
             onClick={() => setChair(chair === "A" ? "B" : "A")}
@@ -98,8 +99,7 @@ export default function DuasCadeirasApp() {
           >
             Encerrar
           </button>
-        </div>
-      </div>
+      </footer>
     </div>
   );
 }

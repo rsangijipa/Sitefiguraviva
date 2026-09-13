@@ -993,6 +993,27 @@ html[data-cookie-consent="pending"] [data-floating-whatsapp] {
     );
   }
 
+  /* Arquivo Laura Perls: registro institucional Figura Viva. As experiências
+     internas mantêm seu conteúdo, mas compartilham um ritmo compacto para a
+     leitura não virar uma sucessão de blocos monumentais. */
+  .laura-viva section {
+    padding-block: 2.75rem;
+  }
+
+  .laura-viva section > div[class*="max-w"] {
+    padding-inline: 1.25rem;
+  }
+
+  @media (min-width: 768px) {
+    .laura-viva section {
+      padding-block: 3.5rem;
+    }
+
+    .laura-viva section > div[class*="max-w"] {
+      padding-inline: 2rem;
+    }
+  }
+
   .fv-bg-library::before {
     background-image: url("/assets/fv/backgrounds/library.webp");
     background-image: image-set(
@@ -1574,4 +1595,38 @@ html[data-cookie-consent="pending"] [data-floating-whatsapp] {
 .lago-app canvas {
   touch-action: none;
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Laura Perls archive: translate the former sepia-only components to the
+   Figura Viva institutional palette without changing their content logic. */
+.laura-viva [class*="bg-[#1b140d]"] { background-color: #FDFAF4 !important; }
+.laura-viva [class*="bg-[#241b12]"] { background-color: #F1E9DB !important; }
+.laura-viva [class*="bg-[#0d0906]"] { background-color: #005A1F !important; }
+.laura-viva [class*="border-[#4a3c28]"] { border-color: rgb(0 90 31 / 0.2) !important; }
+.laura-viva [class*="border-[#c9a768]"] { border-color: #96551F !important; }
+.laura-viva [class*="bg-[#c9a768]"] { background-color: #96551F !important; }
+.laura-viva [class*="text-[#f5ecd9]"],
+.laura-viva [class*="text-[#e8e4db]"],
+.laura-viva [class*="text-[#e6d7bd]"] { color: #262B22 !important; }
+.laura-viva [class*="text-[#cbb896]"],
+.laura-viva [class*="text-[#c7b89a]"],
+.laura-viva [class*="text-[#a9987d]"],
+.laura-viva [class*="text-[#8f7c64]"] { color: #4B4B49 !important; }
+.laura-viva [class*="text-[#d4b578]"] { color: #96551F !important; }
+.laura-viva [class*="bg-[#0d0906]"] [class*="text-[#e8e4db]"],
+.laura-viva [class*="bg-[#0d0906]"] [class*="text-[#f5ecd9]"] { color: #FDFAF4 !important; }
+.laura-viva [class*="shadow-"] { box-shadow: none; }
+
+/* Cartão do quiz fica sobre a superfície clara: evita herdar o texto claro da
+   seção verde e mantém leitura nítida durante toda a interação. */
+.laura-viva .laura-quiz-card [class*="text-[#f5ecd9]"],
+.laura-viva .laura-quiz-card [class*="text-[#e8e4db]"],
+.laura-viva .laura-quiz-card [class*="text-[#e6d7bd]"] { color: #262B22 !important; }
+.laura-viva .laura-quiz-card [class*="text-[#a9987d]"],
+.laura-viva .laura-quiz-card [class*="text-[#8f7c64]"] { color: #4B4B49 !important; }
+
+@media (max-width: 767px) {
+  .laura-viva [class*="grid"] { gap: 1rem; }
+  .laura-viva [class*="p-8"],
+  .laura-viva [class*="p-10"] { padding: 1.25rem; }
 }

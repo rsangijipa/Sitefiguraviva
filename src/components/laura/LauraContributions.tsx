@@ -8,7 +8,7 @@ export function LauraContributions() {
   const { contributions } = lauraPerlsContent;
 
   return (
-    <section className="py-16 bg-[#1b140d] relative overflow-hidden">
+    <section className="py-8 md:py-10 bg-[#1b140d] relative overflow-hidden">
       {/* Decorative Pattern */}
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
         <div
@@ -36,20 +36,20 @@ export function LauraContributions() {
             <Sparkles size={18} className="text-[#d4b578]" />
           </div>
 
-          <h2 className="font-serif text-4xl md:text-6xl text-[#f5ecd9] leading-tight tracking-tight">
+          <h2 className="font-serif text-3xl md:text-4xl text-[#f5ecd9] leading-tight tracking-tight">
             Contribuições{" "}
             <span className="italic text-[#cbb896] font-light">
               Fundamentais
             </span>
           </h2>
-          <p className="mt-6 text-lg text-[#e6d7bd] font-serif italic max-w-2xl mx-auto">
+          <p className="mt-4 text-base text-[#e6d7bd] font-serif italic max-w-2xl mx-auto">
             Os pilares teóricos e práticos que Laura Perls desenvolveu ao longo
             de sua trajetória
           </p>
         </div>
 
         {/* Contributions Cards */}
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-3 gap-4 md:gap-5">
           {contributions.map((item, index) => (
             <motion.div
               key={index}
@@ -60,7 +60,7 @@ export function LauraContributions() {
               className="group relative"
             >
               {/* Card */}
-              <div className="relative bg-[#241b12] border border-[#4a3c28] p-8 md:p-10 rounded-sm shadow-sm hover:shadow-xl transition-all duration-700 h-full">
+              <div className="relative bg-[#241b12] border border-[#4a3c28] p-5 md:p-6 rounded-md transition-colors duration-300 h-full">
                 {/* Decorative Top Line */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-1 bg-gradient-to-r from-transparent via-[#c9a768]/40 to-transparent group-hover:via-[#c9a768]/70 transition-colors" />
 
@@ -72,23 +72,23 @@ export function LauraContributions() {
                 </div>
 
                 {/* Icon */}
-                <div className="w-14 h-14 bg-[#1b140d] border border-[#4a3c28] rounded-full flex items-center justify-center text-[#a9987d] mb-10 group-hover:text-[#d4b578]/50 group-hover:border-[#c9a768]/20 transition-all duration-500">
-                  <Quote size={24} strokeWidth={1.5} />
+                <div className="w-11 h-11 bg-[#1b140d] border border-[#4a3c28] rounded-full flex items-center justify-center text-[#a9987d] mb-5 group-hover:text-[#d4b578]/50 group-hover:border-[#c9a768]/20 transition-all duration-500">
+                  <Quote size={20} strokeWidth={1.5} />
                 </div>
 
                 {/* Title */}
-                <h3 className="font-serif text-2xl text-[#f5ecd9] mb-5 tracking-tight group-hover:text-[#e6d7bd] transition-colors">
+                <h3 className="font-serif text-xl text-[#f5ecd9] mb-3 tracking-tight group-hover:text-[#e6d7bd] transition-colors">
                   {item.title}
                 </h3>
 
                 {/* Summary */}
-                <p className="text-[#e6d7bd] font-serif leading-relaxed text-lg italic font-light mb-12">
+                <p className="text-[#e6d7bd] font-serif leading-relaxed text-base italic font-light mb-6">
                   {item.summary}
                 </p>
 
                 {/* Implication */}
-                <div className="pt-6 border-t border-[#4a3c28]/50">
-                  <p className="text-[9px] font-bold uppercase tracking-[0.4em] text-[#8f7c64] mb-4 transition-colors group-hover:text-[#d4b578]/40">
+                <div className="pt-4 border-t border-[#4a3c28]/50">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-[#8f7c64] mb-2 transition-colors group-hover:text-[#d4b578]/40">
                     Implicação Clínica
                   </p>
                   <p className="text-sm text-[#cbb896] font-serif leading-relaxed italic group-hover:text-[#e6d7bd] transition-colors">

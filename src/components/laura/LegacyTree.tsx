@@ -10,7 +10,7 @@ export function LegacyTree() {
   const founder = legacyTree[0];
 
   return (
-    <section className="py-14 bg-[#241b12] relative overflow-hidden">
+    <section className="py-8 md:py-10 bg-[#241b12] relative overflow-hidden">
       {/* Decorative Elements */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#4a3c28] to-transparent" />
       <div className="absolute inset-0 opacity-[0.02] pointer-events-none">
@@ -45,14 +45,14 @@ export function LegacyTree() {
           <span className="text-[11px] tracking-[0.3em] uppercase font-bold text-[#8f7c64] block mb-4">
             Linhagem Terapêutica
           </span>
-          <h2 className="font-serif text-4xl md:text-5xl text-[#f5ecd9] leading-tight">
+          <h2 className="font-serif text-3xl md:text-4xl text-[#f5ecd9] leading-tight">
             A{" "}
             <span className="italic text-[#cbb896] font-light">
               Árvore do Legado
             </span>{" "}
             de Laura
           </h2>
-          <p className="mt-6 text-[#e6d7bd] font-serif italic max-w-2xl mx-auto">
+          <p className="mt-4 text-sm text-[#e6d7bd] font-serif italic max-w-2xl mx-auto">
             O pensamento de Laura Perls continua florescendo através de gerações
             de terapeutas que levaram seu trabalho para o mundo inteiro.
           </p>
@@ -70,8 +70,8 @@ export function LegacyTree() {
           >
             {/* Founder */}
             <div className="relative z-20">
-              <div className="w-28 h-28 rounded-full bg-[#c9a768] shadow-2xl flex flex-col items-center justify-center border-4 border-[#e8e4db]">
-                <span className="font-serif text-3xl text-[#e8e4db] font-bold">
+              <div className="w-20 h-20 rounded-full bg-[#c9a768] flex flex-col items-center justify-center border-4 border-[#e8e4db]">
+                <span className="font-serif text-2xl text-[#e8e4db] font-bold">
                   {founder.name
                     .split(" ")
                     .map((n) => n[0])
@@ -87,7 +87,7 @@ export function LegacyTree() {
             </div>
 
             {/* Branches */}
-            <div className="flex flex-wrap justify-center gap-8 mt-12">
+            <div className="flex flex-wrap justify-center gap-5 mt-8">
               {founder.students.map((student, index) => (
                 <motion.div
                   key={index}
@@ -98,10 +98,10 @@ export function LegacyTree() {
                   className="relative"
                 >
                   {/* Branch Line */}
-                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 w-px h-8 bg-[#c9a768]" />
+                  <div className="absolute -top-5 left-1/2 -translate-x-1/2 w-px h-5 bg-[#c9a768]" />
 
                   {/* Student Card */}
-                  <div className="w-64 bg-[#1b140d] rounded-lg shadow-lg border border-[#4a3c28] overflow-hidden">
+                  <div className="w-64 bg-[#1b140d] rounded-md border border-[#4a3c28] overflow-hidden">
                     {/* Student Header */}
                     <div className="bg-[#c9a768] px-4 py-3">
                       <div className="flex items-center gap-2">
@@ -156,7 +156,7 @@ export function LegacyTree() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6"
+          className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4"
         >
           {[
             { label: "Terapeutas Diretos", value: "3+" },
@@ -166,7 +166,7 @@ export function LegacyTree() {
           ].map((stat, index) => (
             <div
               key={index}
-              className="text-center p-6 bg-[#0d0906] rounded-lg"
+              className="text-center p-4 bg-[#0d0906] rounded-md"
             >
               <span className="block font-serif text-3xl text-[#d4b578] font-bold">
                 {stat.value}
@@ -184,7 +184,7 @@ export function LegacyTree() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ delay: 0.3 }}
-          className="mt-16 text-center"
+          className="mt-8 text-center"
         >
           <div className="inline-flex items-center gap-4 px-8 py-4 bg-[#1b140d] border border-[#4a3c28] rounded-lg shadow-md">
             <span className="text-[#e6d7bd] font-serif italic">

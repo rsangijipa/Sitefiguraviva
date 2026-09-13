@@ -197,12 +197,12 @@ export default function BreathingApp({ onClose: _onClose }) {
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 20 }}
-      className="max-w-5xl w-full mx-auto px-6 py-12 flex flex-col items-center"
+      className="max-w-5xl w-full mx-auto px-5 py-6 sm:px-8 flex flex-col items-center"
     >
       <StepIndicator step={1} />
 
-      <header className="mb-12 text-center max-w-2xl relative">
-        <h1 className="text-4xl md:text-5xl font-serif text-primary mb-4 tracking-tight">
+      <header className="mb-7 text-center max-w-2xl relative">
+        <h1 className="text-3xl md:text-4xl font-serif text-primary mb-3 tracking-tight">
           Escolha sua Prática
         </h1>
         <p className="text-lg font-sans text-gray-500">
@@ -210,7 +210,7 @@ export default function BreathingApp({ onClose: _onClose }) {
         </p>
       </header>
 
-      <div className="grid md:grid-cols-2 gap-6 w-full mb-12">
+      <div className="grid md:grid-cols-2 gap-4 w-full mb-7">
         {Object.entries(TECHNIQUES).map(([id, tech]) => (
           <PaperCard
             key={id}
@@ -266,7 +266,7 @@ export default function BreathingApp({ onClose: _onClose }) {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="max-w-2xl w-full mx-auto px-6 py-12 flex flex-col items-center text-center"
+      className="max-w-2xl w-full mx-auto px-5 py-6 sm:px-8 flex flex-col items-center text-center"
     >
       <StepIndicator step={2} />
 
@@ -424,12 +424,12 @@ export default function BreathingApp({ onClose: _onClose }) {
   );
 
   return (
-    <div className="relative z-0 flex h-full min-h-0 w-full flex-col overflow-y-auto bg-paper">
+    <div className="relative z-0 flex h-full min-h-0 w-full flex-col bg-paper">
       {/* Background Elements */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[radial-gradient(circle_at_20%_20%,rgba(38,43,34,.35)_1px,transparent_1px)] [background-size:18px_18px]" />
       <div className="absolute top-0 left-0 h-full w-full pointer-events-none bg-gradient-to-br from-white/40 via-blue-50/5 to-accent/5" />
 
-      <main className="relative z-10 flex flex-1 min-h-0 flex-col justify-center py-8">
+      <main className="relative z-10 flex flex-1 min-h-0 flex-col justify-center py-5">
         <AnimatePresence mode="wait">
           {appState === "menu" && (
             <motion.div key="menu" className="w-full">

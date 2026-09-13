@@ -18,20 +18,25 @@ import {
   rejectEnrollment,
   getPendingEnrollmentsAction,
 } from "./actions";
+import { AdminEmptyState, AdminErrorState, AdminLoadingState } from "@/components/admin/AdminStates";
+import { AdminPageShell } from "@/components/admin/AdminPageShell";
 
 export default function ApprovalsPage() {
   const [pendingEnrollments, setPendingEnrollments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const { addToast } = useToast();
   const [processingId, setProcessingId] = useState<string | null>(null);
 
   const fetchPending = async () => {
     setLoading(true);
-    const result = await getPendingEnrollmentsAction();
-    if (result.success) {
-      setPendingEnrollments(result.enrollments);
-    }
-    setLoading(false);
+    setLoadError(null);
+    try {
+      const result = await getPendingEnrollmentsAction();
+      if (result.success) setPendingEnrollments(result.enrollments);
+      else setLoadError(result.error || "Não foi possível carregar aprovações.");
+    } catch { setLoadError("Não foi possível carregar aprovações."); }
+    finally { setLoading(false); }
   };
 
   useEffect(() => {
@@ -92,26 +97,18 @@ export default function ApprovalsPage() {
   };
 
   return (
-    <div className="space-y-8">
-      <header>
-        <h1 className="font-serif text-3xl text-primary">Fila de Aprovação</h1>
-        <p className="text-stone-500 font-light">
+    <AdminPageShell title="Aprovações" description="Libere acessos pagos sem interromper o restante do painel." breadcrumbs={[{ label: "Aprovações" }]}>
+      <div className="space-y-4">
+        <p className="text-sm text-stone-500">
           {pendingEnrollments.length} matriculas pagas aguardando liberação.
         </p>
-      </header>
 
       {loading ? (
-        <div className="flex justify-center py-20">
-          <Clock className="animate-spin text-stone-300" size={40} />
-        </div>
+        <AdminLoadingState rows={4} />
+      ) : loadError ? (
+        <AdminErrorState title={loadError} retry={fetchPending} />
       ) : pendingEnrollments.length === 0 ? (
-        <div className="text-center py-20 bg-stone-50 rounded-3xl border border-dashed border-stone-200">
-          <Check className="mx-auto mb-4 text-stone-300" size={48} />
-          <h3 className="text-lg font-bold text-stone-500">Tudo em dia!</h3>
-          <p className="text-stone-400">
-            Nenhum aluno pago aguardando aprovação.
-          </p>
-        </div>
+        <AdminEmptyState title="Tudo em dia" description="Nenhum aluno pago aguardando aprovação." />
       ) : (
         <div className="grid gap-6">
           {pendingEnrollments.map((en) => (
@@ -192,6 +189,7 @@ export default function ApprovalsPage() {
           ))}
         </div>
       )}
-    </div>
+      </div>
+    </AdminPageShell>
   );
 }

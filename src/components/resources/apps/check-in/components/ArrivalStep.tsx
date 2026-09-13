@@ -41,7 +41,7 @@ export function ArrivalStep({ state, actions, totalSteps }: ArrivalStepProps) {
   );
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-y-auto bg-paper">
+    <div className="flex min-h-full flex-col bg-paper">
       <header className="border-b border-primary/10 px-4 py-5 sm:px-8">
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-terra">
           Perceber · Check-in Corporal
@@ -64,7 +64,7 @@ export function ArrivalStep({ state, actions, totalSteps }: ArrivalStepProps) {
       </header>
 
       <form
-        className="flex-1 overflow-y-auto px-4 py-6 sm:px-8"
+        className="flex-1 px-4 py-6 sm:px-8"
         onKeyDown={handleKeyDown}
         onSubmit={(e) => e.preventDefault()}
       >
@@ -94,7 +94,7 @@ export function ArrivalStep({ state, actions, totalSteps }: ArrivalStepProps) {
           })}
         </div>
 
-        <div className="sticky bottom-0 -mx-4 mt-8 flex justify-end gap-3 bg-gradient-to-t from-bg-paper via-bg-paper to-transparent px-4 py-4 pt-8">
+        <div className="sticky bottom-0 -mx-4 mt-8 flex justify-end gap-3 border-t border-primary/10 bg-paper px-4 py-3">
           <button
             type="button"
             onClick={() => {

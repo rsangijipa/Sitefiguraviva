@@ -4,19 +4,19 @@ export default function JardimPensamentosApp() {
   const [text, setText] = useState("");
   const [leaves, setLeaves] = useState<string[]>([]);
   return (
-    <div className="h-full min-h-0 overflow-y-auto bg-areia px-6 py-10">
-      <div className="mx-auto max-w-3xl">
+    <div className="flex h-full min-h-0 flex-col bg-areia">
+      <div className="mx-auto w-full max-w-5xl flex-1 px-5 py-6 sm:px-8">
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-terra">
           REGULAR · JARDIM DE PENSAMENTOS
         </p>
-        <h2 className="mt-4 font-serif text-4xl text-primary">
+        <h2 className="mt-2 font-serif text-3xl text-primary sm:text-4xl">
           Um pensamento pode ficar aqui.
         </h2>
         <p className="mt-3 text-text/70">
           Escreva uma frase curta e escolha como se relacionar com ela. Nada é
           salvo por padrão.
         </p>
-        <div className="mt-8 flex gap-3">
+        <div className="mt-6 flex flex-col gap-2 sm:flex-row">
           <input
             value={text}
             onChange={(e) => setText(e.target.value)}
@@ -41,7 +41,7 @@ export default function JardimPensamentosApp() {
             Colocar no jardim
           </button>
         </div>
-        <div className="relative mt-8 min-h-64 rounded-[24px] border-2 border-primary/10 bg-paper p-6">
+        <div className="relative mt-6 min-h-[min(52dvh,30rem)] rounded-xl border-2 border-primary/10 bg-paper p-5">
           <div className="absolute bottom-5 left-5 right-5 h-1 rounded-full bg-igarape/40" />
           {leaves.length === 0 ? (
             <p className="py-20 text-center font-serif text-xl italic text-primary/55">
@@ -80,13 +80,10 @@ export default function JardimPensamentosApp() {
             </div>
           )}
         </div>
-        <button
-          className="mt-6 text-sm text-primary underline"
-          onClick={() => setLeaves([])}
-        >
-          Limpar tudo sem salvar
-        </button>
       </div>
+      <footer className="flex justify-end border-t border-primary/10 bg-areia px-5 py-3 sm:px-8">
+        <button className="min-h-11 px-3 text-sm text-primary underline" onClick={() => setLeaves([])}>Limpar tudo sem salvar</button>
+      </footer>
     </div>
   );
 }

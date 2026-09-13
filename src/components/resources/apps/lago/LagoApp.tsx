@@ -138,7 +138,7 @@ export default function LagoApp() {
   };
 
   return (
-    <main className="lago-app relative w-full h-full overflow-hidden rounded-[1.5rem] bg-slate-950 font-sans select-none">
+    <main className="lago-app relative h-full min-h-0 w-full overflow-hidden bg-slate-950 font-sans select-none">
       {/* Loading Screen — overlaid until sim is ready */}
       <LoadingScreen progress={loadingProgress} onComplete={() => {}} />
 
@@ -170,7 +170,7 @@ export default function LagoApp() {
 
       {/* Top bar — fades in after load */}
       <header
-        className={`absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none z-20
+        className={`absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none z-20
           transition-opacity duration-700 ${isLoaded ? "opacity-100" : "opacity-0"}`}
       >
         <div className="pointer-events-auto flex items-center gap-3 bg-white/90 backdrop-blur-md border border-stone-200 px-3.5 py-1.5 rounded-full shadow-lg">
@@ -210,7 +210,7 @@ export default function LagoApp() {
       </header>
 
       <div
-        className={`absolute left-4 top-16 z-20 rounded-full border border-white/20 bg-slate-950/55 px-3 py-1.5 text-[11px] text-white/80 backdrop-blur-md transition-opacity ${isLoaded ? "opacity-100" : "opacity-0"}`}
+        className={`absolute left-3 top-14 z-20 hidden rounded-full border border-white/20 bg-slate-950/55 px-3 py-1.5 text-[11px] text-white/80 backdrop-blur-md transition-opacity sm:block ${isLoaded ? "opacity-100" : "opacity-0"}`}
       >
         Teclado: <kbd className="font-semibold text-white">P</kbd> pedra ·{" "}
         <kbd className="font-semibold text-white">C</kbd> serenar

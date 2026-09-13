@@ -24,7 +24,6 @@ import {
   Image as ImageIcon,
   ChevronRight,
   Bell,
-  X,
   AlertTriangle,
 } from "lucide-react";
 import Image from "next/image";
@@ -45,7 +44,6 @@ import CourseSettingsTab from "./tabs/CourseSettingsTab";
 import { toggleCourseStatus } from "@/app/actions/admin-publishing";
 import { AdminPageShell } from "@/components/admin/AdminPageShell";
 import { FormShell, FormSection } from "@/components/admin/FormShell";
-import { Modal } from "@/components/ui/Modal";
 
 const TABS = [
   {
@@ -170,31 +168,11 @@ export default function CourseEditorClient({
   const currentTab = TABS.find((t) => t.id === activeTab) || TABS[0];
 
   return (
-    <Modal isOpen={true} onClose={() => router.push("/admin/courses")}>
-      <motion.div
-        initial={{ opacity: 0, scale: 0.98, y: 10 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.98, y: 10 }}
-        className="relative bg-white/95 backdrop-blur-md rounded-[2.5rem] shadow-[0_0_50px_rgba(0,0,0,0.1)] w-[98vw] h-[96vh] flex flex-col overflow-hidden border border-white pointer-events-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Close button — pinned to the true top-right corner of the editor
-            card, above the "Logado como" bar, instead of living inline with
-            the Save/Publish button cluster. */}
-        <button
-          onClick={() => router.push("/admin/courses")}
-          className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20 p-2.5 bg-white hover:bg-red-50 text-stone-400 hover:text-red-500 rounded-full transition-all border border-stone-200 shadow-lg"
-          title="Fechar Editor"
-          aria-label="Fechar Editor"
-        >
-          <X size={20} />
-        </button>
-
         <AdminPageShell
           title={course.title || "Novo Curso"}
           description={currentTab.description}
           backLink="/admin/courses"
-          className="min-h-0 h-full flex-1 flex flex-col bg-transparent overflow-hidden max-w-none"
+          className="min-h-0 flex-1 flex flex-col max-w-none"
           breadcrumbs={[
             { label: "Cursos", href: "/admin/courses" },
             { label: course.title || "Curso" },
@@ -257,13 +235,13 @@ export default function CourseEditorClient({
           }
         >
           {/* Tabs Navigation */}
-          <div className="shrink-0 flex overflow-x-auto -mb-px border-b border-stone-100 no-scrollbar bg-stone-50/50 backdrop-blur-sm -mx-8 px-8">
+          <div className="shrink-0 flex overflow-x-auto -mb-px border-b border-stone-100 no-scrollbar bg-stone-50/50">
             {TABS.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
-                  "flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-all whitespace-nowrap",
+                  "flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-all whitespace-nowrap",
                   activeTab === tab.id
                     ? "border-primary text-primary"
                     : "border-transparent text-stone-500 hover:text-stone-800 hover:bg-stone-50",
@@ -275,12 +253,7 @@ export default function CourseEditorClient({
             ))}
           </div>
 
-          {/* Content Area. `min-h-0` is required here: without it, a flex-1
-              child in a flex-column parent refuses to shrink below its
-              content's natural height, so the panel just grows past the
-              viewport instead of scrolling internally — the scrollbar never
-              activates. */}
-          <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar px-4 sm:px-8 pb-12 scroll-smooth">
+          <div className="flex-1 px-0 pb-12 scroll-smooth">
             {/* Draft Warning Banner */}
             {course.status === "draft" && (
               <div className="bg-amber-50 border border-amber-300 text-amber-900 p-4 rounded-2xl mb-6 flex items-start gap-3 mt-6 shadow-sm">
@@ -542,7 +515,5 @@ export default function CourseEditorClient({
             </Button>
           </div>
         </AdminPageShell>
-      </motion.div>
-    </Modal>
   );
 }

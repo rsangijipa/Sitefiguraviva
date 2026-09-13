@@ -82,7 +82,7 @@ export function BodyMappingStep({
   return (
     <section
       aria-labelledby="mapping-title"
-      className="flex min-h-full w-full flex-col overflow-y-auto bg-paper"
+      className="flex min-h-full w-full flex-col bg-paper"
     >
       <header className="border-b border-primary/10 px-4 py-5 sm:px-8">
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-terra">

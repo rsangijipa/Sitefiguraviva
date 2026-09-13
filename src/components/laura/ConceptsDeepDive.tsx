@@ -16,7 +16,7 @@ export function ConceptsDeepDive() {
   ];
 
   return (
-    <section className="py-14 bg-[#241b12] relative overflow-hidden">
+    <section className="py-8 md:py-10 bg-[#241b12] relative overflow-hidden">
       {/* Decorative Background */}
       <div className="absolute top-0 left-0 w-96 h-96 bg-[#c9a768]/5 rounded-full blur-3xl" />
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#c9a768]/5 rounded-full blur-3xl" />
@@ -35,11 +35,11 @@ export function ConceptsDeepDive() {
           <span className="text-[11px] tracking-[0.3em] uppercase font-bold text-[#8f7c64] block mb-4">
             Aprofundamento Teórico
           </span>
-          <h2 className="font-serif text-4xl md:text-5xl text-[#f5ecd9] leading-tight">
+          <h2 className="font-serif text-3xl md:text-4xl text-[#f5ecd9] leading-tight">
             Explore os{" "}
             <span className="italic text-[#cbb896] font-light">Conceitos</span>
           </h2>
-          <p className="mt-6 text-[#e6d7bd] font-serif italic max-w-2xl mx-auto">
+          <p className="mt-4 text-sm text-[#e6d7bd] font-serif italic max-w-2xl mx-auto">
             Laura Perls desenvolveu conceitos fundamentais que transformaram a
             prática da Gestalt-terapia. Clique em cada cartão para explorar em
             profundidade.
@@ -47,7 +47,7 @@ export function ConceptsDeepDive() {
         </div>
 
         {/* Concept Cards */}
-        <div className="grid gap-6">
+        <div className="grid gap-3">
           {concepts.map((concept, index) => {
             const Icon = concept.icon;
             const isExpanded = expanded === concept.key;
@@ -64,14 +64,14 @@ export function ConceptsDeepDive() {
                 {/* Header - Always Visible */}
                 <button
                   onClick={() => setExpanded(isExpanded ? null : concept.key)}
-                  className="w-full px-8 py-6 bg-[#1b140d] flex items-center justify-between hover:bg-[#2e2416] transition-colors"
+                  className="w-full px-5 py-4 bg-[#1b140d] flex items-center justify-between hover:bg-[#2e2416] transition-colors"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-[#c9a768] flex items-center justify-center">
-                      <Icon size={24} className="text-[#e8e4db]" />
+                    <div className="w-10 h-10 rounded-full bg-[#c9a768] flex items-center justify-center">
+                      <Icon size={20} className="text-[#e8e4db]" />
                     </div>
                     <div className="text-left">
-                      <h3 className="font-serif text-2xl text-[#f5ecd9]">
+                      <h3 className="font-serif text-xl text-[#f5ecd9]">
                         {concept.data.title}
                       </h3>
                       <p className="text-sm text-[#a9987d] font-serif italic mt-1">
@@ -99,26 +99,26 @@ export function ConceptsDeepDive() {
                       transition={{ duration: 0.4, ease: "easeInOut" }}
                       className="overflow-hidden"
                     >
-                      <div className="px-8 py-8 bg-[#241b12] border-t border-[#4a3c28]">
+                      <div className="px-5 py-5 bg-[#241b12] border-t border-[#4a3c28]">
                         {/* Definition */}
-                        <div className="mb-8 p-6 bg-[#1b140d] border-l-4 border-[#c9a768] rounded-r-sm">
-                          <p className="font-serif text-lg text-[#f5ecd9] italic leading-relaxed">
+                        <div className="mb-5 p-4 bg-[#1b140d] border-l-4 border-[#c9a768] rounded-r-sm">
+                          <p className="font-serif text-base text-[#f5ecd9] italic leading-relaxed">
                             "{concept.data.definition}"
                           </p>
                         </div>
 
-                        <div className="grid md:grid-cols-2 gap-8">
+                        <div className="grid md:grid-cols-2 gap-5">
                           {/* Components */}
                           <div>
-                            <h4 className="flex items-center gap-2 font-bold text-[#f5ecd9] uppercase tracking-widest text-xs mb-6">
+                            <h4 className="flex items-center gap-2 font-bold text-[#f5ecd9] uppercase tracking-widest text-xs mb-3">
                               <span className="w-2 h-2 bg-[#c9a768] rounded-full" />
                               Componentes
                             </h4>
-                            <div className="space-y-4">
+                            <div className="space-y-2">
                               {concept.data.components.map((comp, i) => (
                                 <div
                                   key={i}
-                                  className="flex items-start gap-3 p-4 bg-[#1b140d] rounded-sm border border-[#4a3c28]"
+                                  className="flex items-start gap-3 p-3 bg-[#1b140d] rounded-sm border border-[#4a3c28]"
                                 >
                                   <div className="w-8 h-8 rounded-full bg-[#c9a768]/20 flex items-center justify-center shrink-0">
                                     <span className="font-serif font-bold text-[#a9987d]">
@@ -140,7 +140,7 @@ export function ConceptsDeepDive() {
 
                           {/* Clinical Applications */}
                           <div>
-                            <h4 className="flex items-center gap-2 font-bold text-[#f5ecd9] uppercase tracking-widest text-xs mb-6">
+                            <h4 className="flex items-center gap-2 font-bold text-[#f5ecd9] uppercase tracking-widest text-xs mb-3">
                               <span className="w-2 h-2 bg-[#c9a768] rounded-full" />
                               Aplicações Clínicas
                             </h4>
@@ -179,12 +179,12 @@ export function ConceptsDeepDive() {
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          className="mt-16 text-center p-8 bg-[#0d0906] rounded-lg shadow-xl"
+          className="mt-8 text-center p-5 bg-[#0d0906] rounded-md"
         >
-          <h3 className="font-serif text-2xl text-[#e8e4db] mb-4">
+          <h3 className="font-serif text-xl text-[#e8e4db] mb-2">
             Quer aprender mais sobre Laura Perls?
           </h3>
-          <p className="text-[#c7b89a] font-serif italic mb-6">
+          <p className="text-sm text-[#c7b89a] font-serif italic mb-4">
             Nossos cursos de formação em Gestalt-terapia exploram esses
             conceitos em profundidade
           </p>

@@ -9,7 +9,7 @@ export function LauraGallery() {
   const { gallery } = lauraPerlsContent;
 
   return (
-    <section className="py-16 bg-[#241b12] border-t border-[#4a3c28] relative overflow-hidden">
+    <section className="py-8 md:py-10 bg-[#241b12] border-t border-[#4a3c28] relative overflow-hidden">
       {/* Decorative Top Border */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#4a3c28] to-transparent" />
 
@@ -30,13 +30,13 @@ export function LauraGallery() {
             <ImageIcon size={18} className="text-[#d4b578]" />
           </div>
 
-          <h2 className="font-serif text-4xl md:text-6xl text-[#f5ecd9] leading-tight tracking-tight">
+          <h2 className="font-serif text-3xl md:text-4xl text-[#f5ecd9] leading-tight tracking-tight">
             Galeria{" "}
             <span className="italic text-[#cbb896] font-light">Histórica</span>
           </h2>
 
-          <div className="max-w-2xl mx-auto mt-8 p-6 bg-[#1b140d] border-l-2 border-[#c9a768] rounded-r-sm">
-            <p className="text-lg text-[#e6d7bd] font-serif italic leading-relaxed">
+          <div className="max-w-2xl mx-auto mt-5 p-4 bg-[#1b140d] border-l-2 border-[#c9a768] rounded-r-sm">
+            <p className="text-base text-[#e6d7bd] font-serif italic leading-relaxed">
               "O contato é a realidade básica do organismo."
               <span className="block text-sm text-[#8f7c64] mt-2 not-italic">
                 — Registros raros integrados ao acervo digital do Instituto
@@ -46,7 +46,7 @@ export function LauraGallery() {
         </div>
 
         {/* Gallery Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
           {gallery.map((item, index) => (
             <motion.div
               key={index}
@@ -57,7 +57,7 @@ export function LauraGallery() {
               className="group"
             >
               {/* Polaroid Style Frame */}
-              <div className="bg-[#1b140d] p-3 pb-16 shadow-lg hover:shadow-2xl transition-all duration-700 transform hover:-translate-y-1">
+              <div className="bg-[#1b140d] p-3 pb-12 border border-[#4a3c28] transition-transform duration-300 hover:-translate-y-1">
                 {/* Image Container */}
                 <div className="aspect-square bg-[#3a2d1c] relative overflow-hidden">
                   <Image
