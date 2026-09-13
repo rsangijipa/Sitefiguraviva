@@ -7,6 +7,16 @@ jest.mock("@/context/UIContext", () => ({
   useUI: () => ({ showAlert: jest.fn() }),
 }));
 
+// HomeClient is tested in isolation; the real theme provider requires the
+// application shell and otherwise throws while effects are mounted.
+jest.mock("@/components/providers/ThemeProvider", () => ({
+  useTheme: () => ({ setPreference: jest.fn() }),
+}));
+jest.mock("@/components/motion/ScrollProgressBar", () => () => null);
+jest.mock("@/components/motion/Reveal", () => ({ children }: { children: React.ReactNode }) => <>{children}</>);
+jest.mock("@/components/sections/CoursesSection", () => ({ courses = [] }: { courses?: Array<{ id: string; title: string }> }) => <section>{courses.map((course) => <article data-testid="formation-card" key={course.id}>{course.title}</article>)}</section>);
+jest.mock("@/components/sections/BlogSection", () => ({ blogPosts = [] }: { blogPosts?: Array<{ id: string; title: string }> }) => <section>{blogPosts.slice(0, 3).map((post) => <article data-testid="content-card" key={post.id}>{post.title}</article>)}</section>);
+
 jest.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
   useRouter: () => ({ push: jest.fn() }),

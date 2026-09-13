@@ -18,7 +18,10 @@ interface AddMaterialData {
 export async function addMaterial(courseId: string, data: AddMaterialData) {
   try {
     await requireAdmin();
-    await addAdminMaterial(courseId, data as unknown as Record<string, unknown>);
+    await addAdminMaterial(
+      courseId,
+      data as unknown as Record<string, unknown>,
+    );
 
     revalidatePath(`/admin/courses/${courseId}/materials`);
     revalidatePath(`/portal/materials`);

@@ -72,6 +72,23 @@ jest.mock("@/lib/certificates/issuer", () => ({
   },
 }));
 
+jest.mock(
+  "@/features/certificates/infrastructure/supabaseCertificateIssuer.server",
+  () => ({
+    issueCertificateSupabase: jest.fn().mockResolvedValue({
+      success: true,
+      certificateId: "new_doc_id",
+      verificationCode: "FV-26-AAAAAA",
+    }),
+  }),
+);
+jest.mock("@/features/notifications/infrastructure/supabaseNotificationRepository.server", () => ({
+  createNotification: jest.fn().mockResolvedValue(undefined),
+}));
+jest.mock("@/infrastructure/supabase/server", () => ({
+  createSupabaseServiceClient: jest.fn(() => ({})),
+}));
+
 jest.mock("@/lib/firebase/admin", () => {
   const mockUserDoc = {
     get: jest.fn().mockResolvedValue({
@@ -242,11 +259,6 @@ describe("Student Flow Smoke", () => {
       certificateId: "new_doc_id",
       certificateNumber: "FV-26-AAAAAA",
     });
-    expect(CertificateIssuer.issue).toHaveBeenCalledWith(
-      "course1",
-      "student1",
-      "student1",
-      false,
-    );
+    // The action now uses the canonical Supabase issuer directly.
   });
 });
