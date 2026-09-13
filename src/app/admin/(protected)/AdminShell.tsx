@@ -9,29 +9,20 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
-  BookOpen,
-  PenTool,
-  Settings,
   LogOut,
-  Globe,
   Home,
   X,
-  FileText,
-  Users,
-  Check,
-  UserPlus,
-  Activity,
-  Shield,
-  Calendar,
-  Trophy,
-  ClipboardList,
   Search,
   ArrowRight,
-  User as UserIcon,
+  Settings,
 } from "lucide-react";
 import PageShell from "@/components/ui/PageShell";
 import { useFounderSettings } from "@/hooks/useSiteSettings";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import {
+  ADMIN_NAVIGATION_GROUPS,
+  isAdminRouteActive,
+} from "@/config/admin-navigation";
 
 export default function AdminShell({
   children,
@@ -58,33 +49,7 @@ export default function AdminShell({
     return <>{children}</>;
   }
 
-  const navItems = [
-    { icon: LayoutDashboard, label: "Visão Geral", path: "/admin" },
-    { icon: Shield, label: "Usuários & Permissões", path: "/admin/users" },
-    { icon: UserPlus, label: "Interessados", path: "/admin/applications" },
-    { icon: BookOpen, label: "Cursos", path: "/admin/courses" },
-    { icon: Check, label: "Aprovações", path: "/admin/approvals" },
-    {
-      icon: FileText,
-      label: "Avaliações (Provas)",
-      path: "/admin/assessments",
-    },
-    {
-      icon: ClipboardList,
-      label: "Correções (Provas)",
-      path: "/admin/assessments/submissions",
-    },
-    { icon: Calendar, label: "Eventos Ao Vivo", path: "/admin/events" },
-    { icon: Users, label: "Alunos & Matrículas", path: "/admin/enrollments" },
-    { icon: Trophy, label: "Gamificação", path: "/admin/gamification" },
-    { icon: Globe, label: "Google Suite", path: "/admin/google" },
-    { icon: PenTool, label: "Diário Visual", path: "/admin/blog" },
-    { icon: BookOpen, label: "Galeria", path: "/admin/gallery" },
-    { icon: FileText, label: "Documentos", path: "/admin/public-docs" },
-    { icon: Activity, label: "Logs de Sistema", path: "/admin/logs" },
-    { icon: Settings, label: "Utilidades (Dev)", path: "/admin/utilities" },
-    { icon: Settings, label: "Configurações", path: "/admin/settings" },
-  ];
+  const navItems = ADMIN_NAVIGATION_GROUPS.flatMap((group) => group.items);
 
   const suggestions = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -139,31 +104,40 @@ export default function AdminShell({
           className="flex-1 min-h-0 pb-6 px-6 space-y-2 overflow-y-auto custom-scrollbar overscroll-contain"
           data-lenis-prevent
         >
-          {navItems.map((item) => {
-            const isActive = pathname === item.path;
-            return (
-              <Link
-                key={item.path}
-                href={item.path}
-                onClick={() => setIsSidebarOpen(false)}
-                className={`flex items-center gap-4 px-6 py-4 rounded-xl transition-all duration-300 group ${
-                  isActive
-                    ? "bg-primary text-white shadow-lg shadow-primary/20 translate-x-2"
-                    : "text-stone-500 hover:text-primary hover:bg-stone-100/80 hover:translate-x-1"
-                }`}
-              >
-                <item.icon
-                  size={18}
-                  className={`transition-transform duration-300 ${isActive ? "text-gold-light" : "group-hover:scale-110 group-hover:text-gold"}`}
-                />
-                <span
-                  className={`text-[11px] font-bold uppercase tracking-widest ${isActive ? "opacity-100" : "opacity-80"}`}
-                >
-                  {item.label}
-                </span>
-              </Link>
-            );
-          })}
+          {ADMIN_NAVIGATION_GROUPS.map((group) => (
+            <section key={group.label} aria-label={group.label}>
+              <h2 className="px-3 pb-2 pt-3 text-[9px] font-bold uppercase tracking-[0.18em] text-stone-400">
+                {group.label}
+              </h2>
+              <div className="space-y-2">
+                {group.items.map((item) => {
+                  const isActive = isAdminRouteActive(pathname, item.path);
+                  return (
+                    <Link
+                      key={item.path}
+                      href={item.path}
+                      onClick={() => setIsSidebarOpen(false)}
+                      className={`flex items-center gap-4 px-6 py-4 rounded-xl transition-all duration-300 group ${
+                        isActive
+                          ? "bg-primary text-white shadow-lg shadow-primary/20 translate-x-2"
+                          : "text-stone-500 hover:text-primary hover:bg-stone-100/80 hover:translate-x-1"
+                      }`}
+                    >
+                      <item.icon
+                        size={18}
+                        className={`transition-transform duration-300 ${isActive ? "text-gold-light" : "group-hover:scale-110 group-hover:text-gold"}`}
+                      />
+                      <span
+                        className={`text-[11px] font-bold uppercase tracking-widest ${isActive ? "opacity-100" : "opacity-80"}`}
+                      >
+                        {item.label}
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </section>
+          ))}
         </nav>
 
         <div className="space-y-3 border-t border-border p-6">

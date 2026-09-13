@@ -3,6 +3,14 @@ import type { PauseSessionRecord } from "./types";
 const PAUSE_SESSIONS_TABLE = "pause_sessions";
 const LOCAL_STORAGE_KEY = "fv_pause_sessions";
 
+export interface SaveSessionOptions {
+  /**
+   * Reflections are personal content. They may only be retained locally after
+   * an explicit choice in the interface.
+   */
+  allowLocalStorage?: boolean;
+}
+
 interface PauseSessionRow {
   id: string;
   user_id: string;
@@ -74,13 +82,19 @@ async function getSupabaseClientAndUser() {
 
 export async function saveSession(
   record: PauseSessionRecord,
+  options: SaveSessionOptions = {},
 ): Promise<PauseSessionRecord> {
   validateReflection(record.reflection);
 
   const ctx = await getSupabaseClientAndUser();
 
   if (!ctx) {
-    // Unauthenticated: skip persistence, return a locally-stored copy
+    // Unauthenticated: preserve the in-memory result unless the person opted
+    // in to retain this personal reflection on the current device.
+    if (!options.allowLocalStorage) {
+      return record;
+    }
+
     const items = loadLocal();
     const existingIndex = items.findIndex(
       (r) => r.clientRequestId === record.clientRequestId,

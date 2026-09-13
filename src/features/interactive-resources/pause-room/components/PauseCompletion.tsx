@@ -10,6 +10,8 @@ interface PauseCompletionProps {
   endedBy: string;
   reflection: string;
   onReflectionChange(value: string): void;
+  localPersistenceEnabled: boolean;
+  onLocalPersistenceChange(enabled: boolean): void;
   onSave(): void;
   onReturn(): void;
   saving?: boolean;
@@ -23,6 +25,8 @@ export function PauseCompletion({
   endedBy,
   reflection,
   onReflectionChange,
+  localPersistenceEnabled,
+  onLocalPersistenceChange,
   onSave,
   onReturn,
   saving,
@@ -85,15 +89,43 @@ export function PauseCompletion({
         </div>
       </div>
 
+      <div className="rounded-xl border border-border/60 bg-areia/40 p-4">
+        <div className="flex items-start gap-3">
+          <input
+            id="pause-local-persistence"
+            type="checkbox"
+            checked={localPersistenceEnabled}
+            onChange={(event) => onLocalPersistenceChange(event.target.checked)}
+            className="mt-1 h-4 w-4 rounded border-border text-primary focus:ring-gold"
+            aria-describedby="pause-local-persistence-description"
+          />
+          <div>
+            <label
+              htmlFor="pause-local-persistence"
+              className="text-sm font-semibold text-text"
+            >
+              Guardar esta pausa neste dispositivo
+            </label>
+            <p
+              id="pause-local-persistence-description"
+              className="mt-1 text-xs leading-relaxed text-muted"
+            >
+              Sua reflexão e a sessão ficarão somente neste navegador. Não
+              marque em computadores compartilhados.
+            </p>
+          </div>
+        </div>
+      </div>
+
       <div className="flex flex-col gap-3 sm:flex-row">
         <button
           type="button"
           onClick={onSave}
-          disabled={saving}
+          disabled={saving || !localPersistenceEnabled}
           className="resource-action flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-paper transition disabled:opacity-40 hover:bg-primary-dark"
         >
           <Save size={16} aria-hidden="true" />
-          {saving ? "Salvando..." : "Salvar esta pausa"}
+          {saving ? "Salvando..." : "Guardar neste dispositivo"}
         </button>
         <button
           type="button"

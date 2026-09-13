@@ -21,6 +21,9 @@ import { ListeningPractice } from "./practices/ListeningPractice";
 import { MovementPractice } from "./practices/MovementPractice";
 import { SlowingPractice } from "./practices/SlowingPractice";
 
+const LOCAL_PERSISTENCE_CONSENT_KEY = "fv_pause_room_local_storage_consent";
+const LOCAL_DRAFT_KEY = "fv_pause_room_draft";
+
 /* ── static practice configs ─────────────────────────────────── */
 const PRACTICES: PausePracticeConfig[] = [
   {
@@ -129,6 +132,8 @@ export default function PauseRoomExperience() {
   const [elapsedMs, setElapsedMs] = useState(0);
   const [hideTimer, setHideTimer] = useState(false);
   const [reflection, setReflection] = useState("");
+  const [localPersistenceEnabled, setLocalPersistenceEnabled] = useState(false);
+  const [localStorageReady, setLocalStorageReady] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [showSwitchDialog, setShowSwitchDialog] = useState(false);
@@ -164,25 +169,36 @@ export default function PauseRoomExperience() {
     return () => clearInterval(id);
   }, [status, isPaused, selectedDuration]);
 
-  /* load history + drafts on mount */
+  /* Load a draft only after a prior, explicit device-storage choice. */
   useEffect(() => {
-    /* History is loaded lazily; skip for now (unauthenticated default). */
     try {
-      const draft = localStorage.getItem("fv_pause_room_draft");
-      if (draft) setReflection(draft);
+      const hasConsent =
+        localStorage.getItem(LOCAL_PERSISTENCE_CONSENT_KEY) === "granted";
+      setLocalPersistenceEnabled(hasConsent);
+      if (hasConsent) {
+        const draft = localStorage.getItem(LOCAL_DRAFT_KEY);
+        if (draft) setReflection(draft);
+      }
     } catch {
       /* ignore */
+    } finally {
+      setLocalStorageReady(true);
     }
   }, []);
 
-  /* persist draft while typing reflection */
+  /* Never auto-save personal content before the person opts in. */
   useEffect(() => {
+    if (!localStorageReady) return;
     try {
-      localStorage.setItem("fv_pause_room_draft", reflection);
+      if (localPersistenceEnabled && reflection) {
+        localStorage.setItem(LOCAL_DRAFT_KEY, reflection);
+      } else {
+        localStorage.removeItem(LOCAL_DRAFT_KEY);
+      }
     } catch {
       /* ignore */
     }
-  }, [reflection]);
+  }, [reflection, localPersistenceEnabled, localStorageReady]);
 
   /* cleanup on unmount / leaving active */
   useEffect(() => {
@@ -231,23 +247,34 @@ export default function PauseRoomExperience() {
   };
 
   const handleSave = async () => {
+    if (!localPersistenceEnabled) {
+      setSaveError(
+        "Escolha guardar neste dispositivo antes de salvar esta pausa.",
+      );
+      return;
+    }
+
     setSaveError(null);
     setSaving(true);
     try {
-      await saveSession({
-        id: crypto.randomUUID(),
-        userId: "",
-        practiceId: selectedPractice!,
-        plannedDurationSeconds: selectedDuration * 60,
-        activeDurationSeconds: Math.round(elapsedMs / 1000),
-        endedBy: "user",
-        reflection: reflection || null,
-        contentVersion: "1",
-        createdAt: new Date().toISOString(),
-        clientRequestId: crypto.randomUUID(),
-      });
+      const savedSession = await saveSession(
+        {
+          id: crypto.randomUUID(),
+          userId: "",
+          practiceId: selectedPractice!,
+          plannedDurationSeconds: selectedDuration * 60,
+          activeDurationSeconds: Math.round(elapsedMs / 1000),
+          endedBy: "user",
+          reflection: reflection || null,
+          contentVersion: "1",
+          createdAt: new Date().toISOString(),
+          clientRequestId: crypto.randomUUID(),
+        },
+        { allowLocalStorage: true },
+      );
+      setHistory((current) => [savedSession, ...current]);
       try {
-        localStorage.removeItem("fv_pause_room_draft");
+        localStorage.removeItem(LOCAL_DRAFT_KEY);
       } catch {
         /* ignore */
       }
@@ -260,11 +287,25 @@ export default function PauseRoomExperience() {
 
   const handleReturnToCatalog = () => {
     try {
-      localStorage.removeItem("fv_pause_room_draft");
+      localStorage.removeItem(LOCAL_DRAFT_KEY);
     } catch {
       /* ignore */
     }
     setStatus("idle");
+  };
+
+  const handleLocalPersistenceChange = (enabled: boolean) => {
+    setLocalPersistenceEnabled(enabled);
+    try {
+      if (enabled) {
+        localStorage.setItem(LOCAL_PERSISTENCE_CONSENT_KEY, "granted");
+      } else {
+        localStorage.removeItem(LOCAL_PERSISTENCE_CONSENT_KEY);
+        localStorage.removeItem(LOCAL_DRAFT_KEY);
+      }
+    } catch {
+      /* Storage may be unavailable; the choice remains valid in memory. */
+    }
   };
 
   /* ── computed values ───────────────────────────────────────── */
@@ -435,6 +476,8 @@ export default function PauseRoomExperience() {
               endedBy={endedBy}
               reflection={reflection}
               onReflectionChange={(v) => setReflection(v.slice(0, 500))}
+              localPersistenceEnabled={localPersistenceEnabled}
+              onLocalPersistenceChange={handleLocalPersistenceChange}
               onSave={handleSave}
               onReturn={handleReturnToCatalog}
               saving={saving}
