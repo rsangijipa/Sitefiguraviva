@@ -213,7 +213,7 @@ export const resourceCatalog: ResourceDefinition[] = [
     category: "REGULAR",
     duration: "2–5 min",
     icon: Waves,
-    status: "coming-soon",
+    status: "available",
     privacy: "private",
     persistence: "optional",
     sections: [

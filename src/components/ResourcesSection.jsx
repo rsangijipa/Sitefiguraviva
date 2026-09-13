@@ -70,8 +70,10 @@ const resourceApps = {
   "jardim-de-pensamentos": lazy(
     () => import("./resources/apps/jardim-de-pensamentos/JardimPensamentosApp"),
   ),
-  "rio-dos-pensamentos": lazy(
-    () => import("./resources/apps/rios-dos-pensamentos/ThoughtRiverApp"),
+  "rio-dos-pensamentos": lazy(() =>
+    import("@/features/interactive-resources/thought-river/ThoughtRiverExperience").then(
+      (module) => module.ThoughtRiverExperience,
+    ),
   ),
   "sons-para-awareness": lazy(
     () =>
