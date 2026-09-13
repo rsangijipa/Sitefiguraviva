@@ -454,8 +454,12 @@ export async function updateMaterialAction(
 export async function deleteMaterialAction(
   courseId: string,
   materialId: string,
+  filePath?: string,
 ): Promise<void> {
   await requireAdmin();
+  // Retain the path in the contract while this legacy Firestore mutation is
+  // migrated to the Supabase course repository.
+  void filePath;
   await adminDb
     .collection("courses")
     .doc(courseId)
