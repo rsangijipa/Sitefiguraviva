@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --color-creme-papel: #FDFAF4;
+    --color-areia: #F1E9DB;
+    --color-verde-raiz: #005A1F;
+    --color-verde-igarape: #07614C;
+    --color-terra-barro: #96551F;
+    --color-mata: #262B22;
+    --color-nevoa: #D8CFBE;
+    --color-pedra: #6B6B63;
+    --color-grafite: #4B4B49;
+    --color-aurora: #FE538B;
+    --color-vazante: #FED701;
+    --color-broto: #01C94D;
+  }
+
+  body {
+    background-color: var(--color-creme-papel);
+    color: var(--color-mata);
+    font-family: 'Karla', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Fraunces', serif;
+  }
+}
+
+/* Confluência Gradient Accent (discreet, never used as text) */
+.gradient-confluencia {
+  background: linear-gradient(90deg, #FE538B 0%, #FED701 50%, #01C94D 100%);
+}
+
+.gradient-confluencia-subtle {
+  background: linear-gradient(90deg, rgba(254, 83, 139, 0.4) 0%, rgba(254, 215, 1, 0.4) 50%, rgba(1, 201, 77, 0.4) 100%);
+}
+
+/* Card Confluência shape */
+.card-confluencia {
+  border-radius: 24px;
+  border: 2px solid var(--color-nevoa);
+  background-color: var(--color-creme-papel);
+}
+
+/* Focus styles for WCAG AA accessibility */
+*:focus-visible {
+  outline: 2px solid var(--color-verde-raiz) !important;
+  outline-offset: 2px !important;
+}

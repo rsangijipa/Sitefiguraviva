@@ -1,0 +1,6 @@
+{
+  "name": "Instituto Figura Viva — Necessidades Agora",
+  "description": "Recurso interativo de seleção tátil de necessidades presentes integrado ao Portal do Aluno do Instituto Figura Viva.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

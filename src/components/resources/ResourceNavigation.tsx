@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, X } from "lucide-react";
 
 export interface ResourceNavigationProps {
   title: string;
@@ -39,6 +39,14 @@ export function ResourceNavigation({
           {title}
         </h1>
       </div>
+      <button
+        type="button"
+        onClick={onBack}
+        className="ml-auto inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-lg text-primary transition hover:bg-areia focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+        aria-label="Fechar recurso"
+      >
+        <X size={20} aria-hidden="true" />
+      </button>
       {children}
     </div>
   );

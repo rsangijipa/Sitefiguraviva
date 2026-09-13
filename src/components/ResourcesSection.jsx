@@ -17,6 +17,7 @@ import ResourceAppFrame from "./resources/ResourceAppFrame";
 import ComingSoonResource from "./resources/ComingSoonResource";
 import { resourceCatalog } from "./resources/resourceCatalog";
 import { emotionTreeFonts } from "./resources/apps/emotion-tree/fonts";
+import { useAuth } from "@/context/AuthContext";
 
 const ResourceLoading = () => (
   <div
@@ -43,6 +44,9 @@ const lazy = (loader) =>
   });
 
 const resourceApps = {
+  "roda-das-emocoes": lazy(() =>
+    import("./resources/apps/EmotionWheel/EmotionWheelApp"),
+  ),
   breathing: lazy(() => import("./resources/apps/breathing/BreathingApp")),
   "emotion-tree": lazy(() =>
     import("./resources/apps/emotion-tree/EmotionTreeApp").then(
@@ -50,7 +54,11 @@ const resourceApps = {
     ),
   ),
   somascan: lazy(() => import("./resources/apps/soma-scan/App")),
-  quiz: lazy(() => import("./Quiz/App").then((module) => module.App)),
+  quiz: lazy(() =>
+    import("./resources/apps/mental-health-quiz/App").then(
+      (module) => module.App,
+    ),
+  ),
   lago: lazy(() => import("./resources/apps/lago/LagoApp")),
   "grounding-54321": lazy(() => import("./resources/apps/grounding-54321/App")),
   "body-map": lazy(() => import("./resources/apps/body-map/BodyMapApp")),
@@ -194,6 +202,7 @@ function ResourceCardContent({ resource, available }) {
 
 export default function ResourcesSection({ initialActiveSlug = null }) {
   const router = useRouter();
+  const { user } = useAuth();
   const [activeSlug, setActiveSlug] = useState(initialActiveSlug);
   const [activeSection, setActiveSection] = useState(null);
   const [openCategories, setOpenCategories] = useState({});
@@ -394,6 +403,12 @@ export default function ResourcesSection({ initialActiveSlug = null }) {
                 <ActiveApp
                   activeSection={activeSection}
                   onSectionChange={setActiveSection}
+                  userId={user?.id ?? user?.uid}
+                  user={user}
+                  onExit={() => {
+                    setActiveSlug(null);
+                    router.push("/recursos");
+                  }}
                 />
               </div>
             ) : (

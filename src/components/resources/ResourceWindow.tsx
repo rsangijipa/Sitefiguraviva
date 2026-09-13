@@ -48,6 +48,7 @@ export function ResourceWindow({
       className={`relative flex flex-1 flex-col min-h-0 w-full overflow-hidden bg-paper ${className}`}
       role="region"
       aria-label={title}
+      data-resource-window
     >
       {/* Scrollable Content Container */}
       <ResourceWindowScrollContext.Provider value={resetScroll}>
