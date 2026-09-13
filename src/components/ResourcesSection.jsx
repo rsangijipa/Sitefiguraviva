@@ -78,6 +78,11 @@ const resourceApps = {
   "sala-de-pausa": lazy(
     () => import("./resources/apps/sala-de-pausa/SalaDePausaApp"),
   ),
+  "rio-dos-pensamentos": lazy(() =>
+    import("@/features/interactive-resources/thought-river/ThoughtRiverExperience").then(
+      (module) => module.ThoughtRiverExperience,
+    ),
+  ),
   "cartas-gestalticas": lazy(
     () => import("./resources/apps/cartas-gestalticas/App"),
   ),

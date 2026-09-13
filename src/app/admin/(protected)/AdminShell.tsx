@@ -8,30 +8,18 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import {
-  LayoutDashboard,
-  BookOpen,
-  PenTool,
-  Settings,
   LogOut,
-  Globe,
   Home,
   X,
-  FileText,
-  Users,
-  Check,
-  UserPlus,
-  Activity,
-  Shield,
-  Calendar,
-  Trophy,
-  ClipboardList,
   Search,
   ArrowRight,
   User as UserIcon,
   Menu,
+  Settings,
 } from "lucide-react";
 import PageShell from "@/components/ui/PageShell";
 import { useFounderSettings } from "@/hooks/useSiteSettings";
+import { ADMIN_NAV_ITEMS } from "./admin-nav";
 
 export default function AdminShell({
   children,
@@ -58,39 +46,17 @@ export default function AdminShell({
     return <>{children}</>;
   }
 
-  const navItems = [
-    { icon: LayoutDashboard, label: "Visão Geral", path: "/admin" },
-    { icon: Shield, label: "Usuários & Permissões", path: "/admin/users" },
-    { icon: UserPlus, label: "Interessados", path: "/admin/applications" },
-    { icon: BookOpen, label: "Cursos", path: "/admin/courses" },
-    { icon: Check, label: "Aprovações", path: "/admin/approvals" },
-    {
-      icon: FileText,
-      label: "Avaliações (Provas)",
-      path: "/admin/assessments",
-    },
-    {
-      icon: ClipboardList,
-      label: "Correções (Provas)",
-      path: "/admin/assessments/submissions",
-    },
-    { icon: Calendar, label: "Eventos Ao Vivo", path: "/admin/events" },
-    { icon: Users, label: "Alunos & Matrículas", path: "/admin/enrollments" },
-    { icon: Trophy, label: "Gamificação", path: "/admin/gamification" },
-    { icon: Globe, label: "Google Suite", path: "/admin/google" },
-    { icon: PenTool, label: "Diário Visual", path: "/admin/blog" },
-    { icon: BookOpen, label: "Galeria", path: "/admin/gallery" },
-    { icon: FileText, label: "Documentos", path: "/admin/public-docs" },
-    { icon: Activity, label: "Logs de Sistema", path: "/admin/logs" },
-    { icon: Settings, label: "Utilidades (Dev)", path: "/admin/utilities" },
-    { icon: Settings, label: "Configurações", path: "/admin/settings" },
-  ];
+  const navItems = ADMIN_NAV_ITEMS;
 
   const suggestions = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     if (!q) return navItems.slice(0, 6);
     return navItems
-      .filter((item) => item.label.toLowerCase().includes(q))
+      .filter(
+        (item) =>
+          item.label.toLowerCase().includes(q) ||
+          item.keywords?.some((k) => k.toLowerCase().includes(q)),
+      )
       .slice(0, 8);
   }, [searchQuery]);
 

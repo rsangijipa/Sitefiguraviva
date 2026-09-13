@@ -207,6 +207,21 @@ export const resourceCatalog: ResourceDefinition[] = [
     ],
   },
   {
+    slug: "rio-dos-pensamentos",
+    title: "Rio dos Pensamentos",
+    description: "Observe pensamentos passando, sem precisar afastá-los.",
+    category: "REGULAR",
+    duration: "2–5 min",
+    icon: Waves,
+    status: "available",
+    privacy: "private",
+    persistence: "optional",
+    sections: [
+      { id: "experience", label: "Experiência" },
+      { id: "history", label: "Histórico" },
+    ],
+  },
+  {
     slug: "fronteiras-de-contato",
     title: "Fronteiras de Contato",
     description: "Reflita sobre aproximação e limites.",
@@ -278,13 +293,6 @@ export const resourceCatalog: ResourceDefinition[] = [
       "Observe pensamentos sem precisar afastá-los.",
       "REGULAR",
       Leaf,
-    ],
-    [
-      "rio-dos-pensamentos",
-      "Rio dos Pensamentos",
-      "Deixe pensamentos seguirem seu curso.",
-      "REGULAR",
-      Waves,
     ],
     [
       "escuta",
