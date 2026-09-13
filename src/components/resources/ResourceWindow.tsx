@@ -1,13 +1,28 @@
 "use client";
 
-import { ArrowLeft, X } from "lucide-react";
-import { Modal, ModalBody, ModalContent } from "@/components/ui/Modal";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  type ReactNode,
+} from "react";
+import { X } from "lucide-react";
 
 export interface ResourceWindowProps {
   isOpen: boolean;
   title: string;
   onClose: () => void;
-  children: React.ReactNode;
+  children: ReactNode;
+  className?: string;
+  scrollKey?: string;
+}
+
+const ResourceWindowScrollContext = createContext<() => void>(() => {});
+
+export function useResourceWindowScrollReset() {
+  return useContext(ResourceWindowScrollContext);
 }
 
 export function ResourceWindow({
@@ -15,39 +30,45 @@ export function ResourceWindow({
   title,
   onClose,
   children,
+  className = "",
+  scrollKey,
 }: ResourceWindowProps) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const resetScroll = useCallback(() => {
+    if (scrollRef.current) scrollRef.current.scrollTop = 0;
+  }, []);
+
+  useEffect(() => {
+    resetScroll();
+  }, [resetScroll, scrollKey]);
+
+  if (!isOpen) return null;
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} ariaLabel={title}>
-      <ModalContent
-        size="full"
-        className="h-[90dvh] max-h-[90vh] w-[min(96vw,1440px)] rounded-[1.5rem] bg-paper p-0"
+    <div
+      className={`relative flex flex-1 flex-col min-h-0 w-full overflow-hidden rounded-[2rem] border border-white/85 bg-paper shadow-[0_28px_90px_rgba(30,25,20,0.35)] max-sm:rounded-none max-sm:border-0 ${className}`}
+      role="region"
+      aria-label={title}
+    >
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label={`Fechar ${title}`}
+        className="absolute top-4 right-4 z-10 inline-flex h-10 w-10 items-center justify-center rounded-full border border-primary/15 bg-white text-primary shadow-sm transition hover:bg-primary hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
       >
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-[70] flex items-center justify-between p-3 sm:p-4">
-          <button
-            className="pointer-events-auto flex items-center gap-2 rounded-full bg-white/80 px-3 py-2 text-xs font-bold uppercase tracking-widest text-primary shadow-sm backdrop-blur transition-all hover:bg-gold hover:text-white focus:outline-none focus:ring-2 focus:ring-primary"
-            aria-label={`Voltar de ${title}`}
-            onClick={onClose}
-          >
-            <ArrowLeft size={16} />
-            Voltar
-          </button>
-          <button
-            className="pointer-events-auto group flex items-center gap-2 rounded-full bg-white/80 pl-3 pr-2 py-2 text-primary shadow-sm backdrop-blur transition-all hover:bg-gold hover:text-white focus:outline-none focus:ring-2 focus:ring-primary"
-            aria-label={`Fechar ${title}`}
-            onClick={onClose}
-          >
-            <span className="text-[10px] font-bold uppercase tracking-widest">
-              Fechar
-            </span>
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-stone-100 transition-colors group-hover:bg-white/20">
-              <X size={14} />
-            </span>
-          </button>
+        <X size={18} aria-hidden="true" />
+      </button>
+
+      {/* Scrollable Content Container */}
+      <ResourceWindowScrollContext.Provider value={resetScroll}>
+        <div
+          ref={scrollRef}
+          className="flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden p-4 sm:p-8 pt-14"
+          data-lenis-prevent
+        >
+          {children}
         </div>
-        <ModalBody className="min-h-0 overflow-hidden bg-paper p-0 [&>div]:h-full [&>div]:p-0">
-          <div className="h-full min-h-0">{children}</div>
-        </ModalBody>
-      </ModalContent>
-    </Modal>
+      </ResourceWindowScrollContext.Provider>
+    </div>
   );
 }

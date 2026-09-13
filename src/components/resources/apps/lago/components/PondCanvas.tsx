@@ -162,7 +162,10 @@ export const PondCanvas = forwardRef<PondCanvasHandle, PondCanvasProps>(
         });
       };
       waterAudio.onStatusChange(reportAudioStatus);
-      return () => waterAudio.onStatusChange(null);
+      return () => {
+        waterAudio.onStatusChange(null);
+        waterAudio.dispose();
+      };
     }, [onAudioStatus]);
 
     useEffect(() => {

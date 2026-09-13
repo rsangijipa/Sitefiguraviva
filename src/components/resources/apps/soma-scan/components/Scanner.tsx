@@ -18,6 +18,7 @@ import {
   pauseScanIntro,
   stopScanIntro,
 } from "../services/bodyScanService";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 interface ScannerProps {
   onComplete: (data: BodyData) => void;
@@ -113,6 +114,8 @@ const SensationButton: React.FC<SensationButtonProps> = ({
 
   return (
     <button
+      type="button"
+      aria-pressed={isSelected}
       onClick={() => onSelect(type)}
       className={`
         resource-action group relative flex flex-col items-center justify-center p-3
@@ -129,6 +132,7 @@ const SensationButton: React.FC<SensationButtonProps> = ({
 
       {/* Icon with scale effect */}
       <Icon
+        aria-hidden="true"
         className={`w-6 h-6 mb-2 stroke-[1.5px] ${config.textColor} relative z-10 transition-transform duration-300 ${isSelected ? "scale-110" : "group-hover:scale-110"}`}
       />
 
@@ -152,14 +156,11 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
     null,
   );
   const [tempIntensity, setTempIntensity] = useState<number>(3);
+  const sheetRef = useFocusTrap<HTMLDivElement>(selectedPart !== null);
+
+  const closeSheet = () => setSelectedPart(null);
 
   useEffect(() => {
-    // Start playing automatically when component mounts
-    playScanIntro(
-      () => setIsPlaying(false), // onEnd
-      () => setIsPlaying(true), // onStart
-    );
-
     return () => {
       stopScanIntro();
     };
@@ -189,7 +190,7 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
         intensity: tempIntensity,
       } as BodyLog,
     }));
-    setSelectedPart(null);
+    closeSheet();
   };
 
   return (
@@ -198,22 +199,32 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
       <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-start z-10 pointer-events-none">
         <div className="pointer-events-auto bg-white/60 backdrop-blur-md p-3 rounded-full border border-white shadow-sm">
           <button
+            type="button"
             onClick={togglePlayback}
+            aria-label={
+              isPlaying ? "Pausar áudio guiado" : "Reproduzir áudio guiado"
+            }
+            aria-pressed={isPlaying}
             className="text-stone-600 hover:text-clay transition-colors flex items-center justify-center"
           >
             {isPlaying ? (
-              <Pause className="w-6 h-6 stroke-1" />
+              <Pause className="w-6 h-6 stroke-1" aria-hidden="true" />
             ) : (
-              <Play className="w-6 h-6 stroke-1" />
+              <Play className="w-6 h-6 stroke-1" aria-hidden="true" />
             )}
           </button>
         </div>
 
+        <span className="sr-only" role="status" aria-live="polite">
+          {isPlaying ? "Áudio guiado em reprodução" : "Áudio guiado pausado"}
+        </span>
+
         <button
+          type="button"
           onClick={() => onComplete(data)}
           className="resource-action pointer-events-auto bg-stone-800 font-serif text-sm tracking-wide text-stone-100 hover:bg-stone-700"
         >
-          <Check className="w-4 h-4" /> Concluir
+          <Check className="w-4 h-4" aria-hidden="true" /> Concluir
         </button>
       </div>
 
@@ -243,22 +254,40 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
       {/* Sensation Selector Modal / Sheet */}
       {selectedPart && (
         <div className="absolute inset-0 z-20 bg-paper/80 backdrop-blur-md flex items-end md:items-center justify-center p-4 animate-fade-in">
-          <div className="relative flex max-h-[calc(100%-1rem)] w-full max-w-sm flex-col space-y-5 overflow-hidden rounded-[2rem] border border-white/50 bg-[#fafaf9] p-5 shadow-2xl sm:p-7">
+          <div
+            ref={sheetRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="soma-scan-sheet-title"
+            tabIndex={-1}
+            onKeyDown={(event) => {
+              if (event.key !== "Escape") return;
+              event.preventDefault();
+              event.stopPropagation();
+              closeSheet();
+            }}
+            className="relative flex max-h-[calc(100%-1rem)] w-full max-w-sm flex-col space-y-5 overflow-hidden rounded-[2rem] border border-white/50 bg-[#fafaf9] p-5 shadow-2xl sm:p-7"
+          >
             {/* Background blur orb */}
             <div className="absolute -top-20 -left-20 w-40 h-40 bg-stone-200/50 rounded-full blur-3xl pointer-events-none"></div>
 
             {/* Header */}
             <div className="flex justify-between items-center mb-1 relative z-10 flex-shrink-0">
-              <h3 className="text-3xl font-serif italic text-stone-800">
+              <h3
+                id="soma-scan-sheet-title"
+                className="text-3xl font-serif italic text-stone-800"
+              >
                 <span className="capitalize">
                   {bodyPartTranslations[selectedPart] || selectedPart}
                 </span>
               </h3>
               <button
-                onClick={() => setSelectedPart(null)}
+                type="button"
+                onClick={closeSheet}
+                aria-label="Fechar registro de sensação"
                 className="text-stone-400 hover:text-stone-800 transition-colors bg-white/50 p-2 rounded-full hover:bg-white"
               >
-                <X className="w-5 h-5 stroke-1" />
+                <X className="w-5 h-5 stroke-1" aria-hidden="true" />
               </button>
             </div>
 
@@ -305,9 +334,12 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
             >
               <div className="pt-2 border-t border-stone-200/60">
                 <div className="flex justify-between items-center mb-3">
-                  <span className="text-xs font-bold uppercase tracking-widest text-stone-500">
+                  <label
+                    htmlFor="soma-scan-intensity"
+                    className="text-xs font-bold uppercase tracking-widest text-stone-500"
+                  >
                     Intensidade
-                  </span>
+                  </label>
                   <span className="text-xs font-medium text-stone-400 bg-stone-100 px-2 py-1 rounded-md">
                     {tempIntensity === 1
                       ? "Leve"
@@ -318,11 +350,13 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
                   </span>
                 </div>
                 <input
+                  id="soma-scan-intensity"
                   type="range"
                   min="1"
                   max="5"
                   step="1"
                   value={tempIntensity}
+                  aria-valuetext={`${tempIntensity === 1 ? "Leve" : tempIntensity === 5 ? "Intensa" : tempIntensity}, ${tempIntensity} de 5`}
                   onChange={(e) => setTempIntensity(parseInt(e.target.value))}
                   className="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-stone-600 hover:accent-clay transition-all"
                 />
@@ -336,6 +370,7 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
             {/* Confirm Button */}
             <div className="relative z-10 pt-2">
               <button
+                type="button"
                 onClick={handleSavePart}
                 disabled={!tempSensation}
                 className={`resource-action
@@ -347,7 +382,9 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
                   }
                 `}
               >
-                {tempSensation ? <Save className="w-4 h-4" /> : null}
+                {tempSensation ? (
+                  <Save className="w-4 h-4" aria-hidden="true" />
+                ) : null}
                 {tempSensation
                   ? "Confirmar Registro"
                   : "Selecione uma sensação"}

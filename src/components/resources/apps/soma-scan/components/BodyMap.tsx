@@ -8,6 +8,18 @@ interface BodyMapProps {
   readOnly?: boolean;
 }
 
+const bodyPartLabels: Record<BodyPartId, string> = {
+  head: "Cabeça",
+  neck: "Pescoço",
+  chest: "Peito",
+  stomach: "Abdômen",
+  leftArm: "Braço esquerdo",
+  rightArm: "Braço direito",
+  leftLeg: "Perna esquerda",
+  rightLeg: "Perna direita",
+  feet: "Pés",
+};
+
 const getFillColor = (
   sensation?: SensationType,
   intensity: number = 0,
@@ -48,6 +60,16 @@ const BodyMap: React.FC<BodyMapProps> = ({
     if (!readOnly) {
       onSelectPart(part);
     }
+  };
+
+  const handleKeyDown = (
+    event: React.KeyboardEvent<SVGElement>,
+    part: BodyPartId,
+  ) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    handleInteract(part);
   };
 
   const getStyle = (part: BodyPartId) => ({
@@ -97,10 +119,20 @@ const BodyMap: React.FC<BodyMapProps> = ({
       id={id}
       d={d}
       style={getStyle(interactId)}
+      role={readOnly ? undefined : "button"}
+      tabIndex={readOnly ? undefined : 0}
+      aria-label={readOnly ? undefined : bodyPartLabels[interactId]}
+      aria-haspopup={readOnly ? undefined : "dialog"}
       onClick={(e) => {
         e.stopPropagation();
         handleInteract(interactId);
       }}
+      onKeyDown={(event) => handleKeyDown(event, interactId)}
+      className={
+        readOnly
+          ? undefined
+          : "focus-visible:outline-none focus-visible:stroke-stone-800"
+      }
     />
   );
 
@@ -111,6 +143,12 @@ const BodyMap: React.FC<BodyMapProps> = ({
       viewBox="0 0 300 700"
       preserveAspectRatio="xMidYMid meet"
       className="h-full w-auto max-h-[70vh] mx-auto filter drop-shadow-lg"
+      role={readOnly ? "img" : "group"}
+      aria-label={
+        readOnly
+          ? "Mapa corporal com sensações registradas"
+          : "Regiões do corpo"
+      }
     >
       <defs>
         <filter id="organic-blur" x="-20%" y="-20%" width="140%" height="140%">
@@ -119,7 +157,7 @@ const BodyMap: React.FC<BodyMapProps> = ({
       </defs>
 
       {/* Background Silhouette (Non-interactive visual anchor) */}
-      <g filter="url(#organic-blur)">
+      <g filter="url(#organic-blur)" aria-hidden="true">
         {renderBackPath(paths.head)}
         {renderBackPath(paths.neck)}
         {renderBackPath(paths.chest)}
@@ -147,14 +185,32 @@ const BodyMap: React.FC<BodyMapProps> = ({
 
         {/* Feet Group */}
         <g
+          role={readOnly ? undefined : "button"}
+          tabIndex={readOnly ? undefined : 0}
+          aria-label={readOnly ? undefined : bodyPartLabels.feet}
+          aria-haspopup={readOnly ? undefined : "dialog"}
           onClick={(e) => {
             e.stopPropagation();
             handleInteract("feet");
           }}
+          onKeyDown={(event) => handleKeyDown(event, "feet")}
           style={{ cursor: readOnly ? "default" : "pointer" }}
+          className={
+            readOnly
+              ? undefined
+              : "focus-visible:outline-none focus-visible:stroke-stone-800"
+          }
         >
-          <path d={paths.feetLeft} style={getStyle("feet")} />
-          <path d={paths.feetRight} style={getStyle("feet")} />
+          <path
+            d={paths.feetLeft}
+            style={getStyle("feet")}
+            aria-hidden="true"
+          />
+          <path
+            d={paths.feetRight}
+            style={getStyle("feet")}
+            aria-hidden="true"
+          />
         </g>
       </g>
     </svg>
