@@ -112,6 +112,12 @@ export const CoursePlayer = ({
   // ...
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
+  useEffect(() => {
+    if (activeLesson?.id) {
+      trackEvent("page_view", activeLesson.id, { courseId: course.id });
+    }
+  }, [activeLesson?.id, course.id]);
+
   if (loading) {
     return (
       <div className="h-[calc(100vh-4rem)] flex flex-col bg-[#FDFCF9] animate-pulse">
@@ -139,12 +145,6 @@ export const CoursePlayer = ({
       </div>
     );
   }
-
-  useEffect(() => {
-    if (activeLesson?.id) {
-      trackEvent("page_view", activeLesson.id, { courseId: course.id });
-    }
-  }, [activeLesson?.id, course.id]);
 
   // Helper to resolve Module ID
   const getModuleId = (lesson: Lesson) => {

@@ -43,6 +43,7 @@ interface BookRow {
   cover_image_url: string;
   cover_storage_path: string;
   purchase_url: string;
+  publication_year: number | null;
   is_published: boolean;
   sort_order: number;
 }
@@ -55,6 +56,7 @@ const initialForm = {
   coverImageUrl: "",
   coverStoragePath: "",
   purchaseUrl: "",
+  publicationYear: "",
 };
 
 export default function BooksManager() {
@@ -99,7 +101,18 @@ export default function BooksManager() {
 
     setIsSubmitting(true);
     try {
-      const res = await saveBookAction(formData.id || null, formData);
+      const trimmedYear = formData.publicationYear.trim();
+      const publicationYear = trimmedYear ? Number(trimmedYear) : null;
+      if (publicationYear !== null && !Number.isInteger(publicationYear)) {
+        addToast("Ano de publicação inválido.", "error");
+        setIsSubmitting(false);
+        return;
+      }
+
+      const res = await saveBookAction(formData.id || null, {
+        ...formData,
+        publicationYear,
+      });
       if (res.success) {
         addToast(
           formData.id ? "Livro atualizado!" : "Livro adicionado à estante!",
@@ -128,6 +141,8 @@ export default function BooksManager() {
       coverImageUrl: book.cover_image_url,
       coverStoragePath: book.cover_storage_path,
       purchaseUrl: book.purchase_url,
+      publicationYear:
+        book.publication_year != null ? String(book.publication_year) : "",
     });
     setCoverConfirmed(true);
     setIsEditing(true);
@@ -288,25 +303,25 @@ export default function BooksManager() {
 
                         {/* Coluna dos campos */}
                         <div className="space-y-4">
-                          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            <div className="space-y-1.5">
-                              <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/40 ml-1">
-                                Título
-                              </label>
-                              <input
-                                required
-                                value={formData.title}
-                                onChange={(e) =>
-                                  setFormData({
-                                    ...formData,
-                                    title: e.target.value,
-                                  })
-                                }
-                                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gold/20 focus:border-gold transition-all text-primary font-serif text-base"
-                                placeholder="Ex: Gestalt-Terapia Explicada"
-                              />
-                            </div>
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/40 ml-1">
+                              Título
+                            </label>
+                            <input
+                              required
+                              value={formData.title}
+                              onChange={(e) =>
+                                setFormData({
+                                  ...formData,
+                                  title: e.target.value,
+                                })
+                              }
+                              className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gold/20 focus:border-gold transition-all text-primary font-serif text-base"
+                              placeholder="Ex: Gestalt-Terapia Explicada"
+                            />
+                          </div>
 
+                          <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_auto]">
                             <div className="space-y-1.5">
                               <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/40 ml-1">
                                 Autor(a)
@@ -322,6 +337,27 @@ export default function BooksManager() {
                                 }
                                 className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gold/20 focus:border-gold transition-all text-sm text-primary"
                                 placeholder="Ex: Fritz Perls"
+                              />
+                            </div>
+
+                            <div className="space-y-1.5">
+                              <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/40 ml-1">
+                                Ano de publicação
+                              </label>
+                              <input
+                                type="number"
+                                inputMode="numeric"
+                                min={0}
+                                max={9999}
+                                value={formData.publicationYear}
+                                onChange={(e) =>
+                                  setFormData({
+                                    ...formData,
+                                    publicationYear: e.target.value,
+                                  })
+                                }
+                                className="w-full sm:w-28 bg-white border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gold/20 focus:border-gold transition-all text-sm text-primary"
+                                placeholder="Opcional"
                               />
                             </div>
                           </div>

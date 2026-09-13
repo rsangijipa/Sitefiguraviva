@@ -20,6 +20,9 @@ const bookInput = z.object({
     .refine((value) => /^https?:\/\//i.test(value), {
       message: "O link de compra precisa começar com http:// ou https://.",
     }),
+  publicationYear: z
+    .union([z.number().int().min(0).max(9999), z.null()])
+    .optional(),
 });
 
 function revalidateBookPaths() {
@@ -42,6 +45,7 @@ export async function saveBookAction(id: string | null, data: unknown) {
       cover_image_url: input.coverImageUrl,
       cover_storage_path: input.coverStoragePath,
       purchase_url: input.purchaseUrl,
+      publication_year: input.publicationYear ?? null,
       updated_at: new Date().toISOString(),
     };
 

@@ -21,7 +21,9 @@ async function getBooks() {
   try {
     const { data, error } = await createSupabaseServiceClient()
       .from("book_recommendations")
-      .select("id, title, author, description, cover_image_url, purchase_url")
+      .select(
+        "id, title, author, description, cover_image_url, purchase_url, publication_year",
+      )
       .eq("is_published", true)
       .order("sort_order", { ascending: true });
 
@@ -34,6 +36,7 @@ async function getBooks() {
       description: book.description,
       coverImageUrl: book.cover_image_url,
       purchaseUrl: book.purchase_url,
+      publicationYear: book.publication_year,
     }));
   } catch (error) {
     console.error("Error fetching book recommendations:", error);

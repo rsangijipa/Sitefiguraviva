@@ -717,6 +717,7 @@ export interface Database {
           cover_image_url: string;
           cover_storage_path: string;
           purchase_url: string;
+          publication_year: number | null;
           is_published: boolean;
           sort_order: number;
           updated_by: string | null;
