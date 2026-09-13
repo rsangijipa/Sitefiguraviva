@@ -32,7 +32,7 @@ export function LauraHero() {
           {/* Archive Badge */}
           <div className="flex items-center gap-4">
             <span className="inline-flex items-center gap-2 px-4 py-2 rounded-sm border border-[#4a3c28] text-[10px] tracking-[0.3em] uppercase font-bold text-[#a9987d] bg-[#241b12] shadow-sm">
-              <BookOpen size={12} />
+              <BookOpen size={12} aria-hidden="true" />
               Arquivo Histórico
             </span>
             <div className="h-px flex-1 max-w-20 bg-[#3a2d1c]/50" />
@@ -62,8 +62,8 @@ export function LauraHero() {
 
           {/* Quick Facts Grid */}
           <div className="grid grid-cols-2 gap-6 pt-8 border-t border-[#4a3c28]">
-            {hero.quickFacts.map((fact, i) => (
-              <div key={i} className="group">
+            {hero.quickFacts.map((fact) => (
+              <div key={fact.label} className="group">
                 <span className="block text-[10px] uppercase tracking-[0.25em] text-[#8f7c64] mb-1 font-bold">
                   {fact.label}
                 </span>
@@ -132,7 +132,8 @@ export function LauraHero() {
       </div>
 
       {/* Scroll Indicator */}
-      <motion.div
+      <motion.button
+        type="button"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5, duration: 1 }}
@@ -150,7 +151,7 @@ export function LauraHero() {
             className="absolute -bottom-2 -left-1.5 animate-bounce text-[#d4b578]"
           />
         </div>
-      </motion.div>
+      </motion.button>
     </section>
   );
 }
