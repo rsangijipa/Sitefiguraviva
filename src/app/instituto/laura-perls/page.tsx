@@ -27,7 +27,7 @@ export const metadata: Metadata = {
 
 export default function LauraPerlsPage() {
   return (
-    <div className="laura-viva fv-bg fv-bg-laura-archive relative min-h-screen bg-[#FDFAF4] text-[#262B22]">
+    <div className="laura-viva fv-bg fv-bg-laura-archive relative min-h-screen bg-[#FDFAF4] text-[#262B22] dark:bg-[#0d0906] dark:text-[#f5ecd9]">
       <div
         className="fixed inset-0 z-[9999] pointer-events-none opacity-[0.035]"
         style={{
@@ -37,7 +37,7 @@ export default function LauraPerlsPage() {
       <div className="fixed left-10 top-20 z-0 h-32 w-32 rounded-full bg-[#FE538B]/10 blur-2xl pointer-events-none" />
       <div className="fixed bottom-40 right-20 z-0 h-48 w-48 rounded-full bg-[#01C94D]/10 blur-3xl pointer-events-none" />
       <Navbar />
-      <main className="relative font-sans selection:bg-[#FED701]/45">
+      <div className="relative font-sans selection:bg-[#FED701]/45">
         <LauraHero />
         <WhySheMatters />
         <InteractiveMap />
@@ -49,7 +49,7 @@ export default function LauraPerlsPage() {
         <Quiz />
         <LauraReadings />
         <LauraGallery />
-      </main>
+      </div>
       <Footer />
     </div>
   );

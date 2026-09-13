@@ -1,9 +1,9 @@
 "use server";
 
-import { adminDb } from "@/lib/firebase/admin";
-import { Timestamp } from "firebase-admin/firestore";
 import { revalidatePath } from "next/cache";
 import { requireAdmin as assertAdmin } from "@/lib/auth/server";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
+import { randomUUID } from "crypto";
 
 export async function createEvent(data: {
   title: string;
@@ -17,21 +17,24 @@ export async function createEvent(data: {
   try {
     await assertAdmin();
 
-    const eventData = {
-      ...data,
-      startsAt: Timestamp.fromDate(new Date(data.startsAt)),
-      endsAt: data.endsAt ? Timestamp.fromDate(new Date(data.endsAt)) : null,
+    const supabase = createSupabaseServiceClient();
+    const id = randomUUID();
+    const { error } = await supabase.from("events").insert({
+      id,
+      title: data.title,
+      description: data.description,
+      starts_at: new Date(data.startsAt).toISOString(),
+      ends_at: data.endsAt ? new Date(data.endsAt).toISOString() : null,
       status: "scheduled",
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
-    };
-
-    const docRef = await adminDb.collection("events").add(eventData);
+      is_public: data.isPublic,
+      course_id: data.courseId ?? null,
+    });
+    if (error) throw error;
 
     revalidatePath("/portal");
     revalidatePath("/admin/events");
 
-    return { success: true, id: docRef.id };
+    return { success: true, id };
   } catch (error: any) {
     console.error("Create Event Error:", error);
     return { success: false, error: error.message };
@@ -41,7 +44,9 @@ export async function createEvent(data: {
 export async function deleteEvent(eventId: string) {
   try {
     await assertAdmin();
-    await adminDb.collection("events").doc(eventId).delete();
+    const supabase = createSupabaseServiceClient();
+    const { error } = await supabase.from("events").delete().eq("id", eventId);
+    if (error) throw error;
     revalidatePath("/portal");
     revalidatePath("/admin/events");
     return { success: true };

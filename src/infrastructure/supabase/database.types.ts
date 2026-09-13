@@ -40,6 +40,15 @@ export interface Database {
           role: AppRole;
           is_active: boolean;
           stripe_customer_id: string | null;
+          bio: string | null;
+          phone_number: string | null;
+          profession: string | null;
+          city: string | null;
+          state: string | null;
+          date_of_birth: string | null;
+          instagram: string | null;
+          profile_completion: number;
+          profile_completed_at: string | null;
           created_at: string;
           updated_at: string;
           last_login_at: string | null;
@@ -49,6 +58,68 @@ export interface Database {
           email: string;
         };
         Update: Partial<Database["public"]["Tables"]["profiles"]["Row"]>;
+        Relationships: [];
+      };
+      need_records: {
+        Row: {
+          id: string;
+          user_id: string;
+          client_request_id: string;
+          schema_version: number;
+          content_version: string;
+          state: "selected" | "unsure";
+          entries: Json;
+          ordered: boolean;
+          focus_entry_id: string | null;
+          small_step: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["need_records"]["Row"]> & {
+          user_id: string;
+          client_request_id: string;
+          content_version: string;
+          state: "selected" | "unsure";
+        };
+        Update: Partial<Database["public"]["Tables"]["need_records"]["Row"]>;
+        Relationships: [];
+      };
+      awareness_interactions: {
+        Row: {
+          id: string;
+          user_id: string;
+          action_type: "click" | "favorite" | "random" | "theme_filter";
+          quote_id: string | null;
+          theme: string;
+          created_at: string;
+        };
+        Insert: Partial<
+          Database["public"]["Tables"]["awareness_interactions"]["Row"]
+        > & {
+          user_id: string;
+          action_type: "click" | "favorite" | "random" | "theme_filter";
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["awareness_interactions"]["Row"]
+        >;
+        Relationships: [];
+      };
+      awareness_favorites: {
+        Row: {
+          user_id: string;
+          quote_id: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<
+          Database["public"]["Tables"]["awareness_favorites"]["Row"]
+        > & {
+          user_id: string;
+          quote_id: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["awareness_favorites"]["Row"]
+        >;
         Relationships: [];
       };
       applications: {
@@ -202,7 +273,13 @@ export interface Database {
           subscription_id: string | null;
           enrolled_at: string;
           paid_at: string | null;
-          payment_method: "pix" | "stripe" | "subscription" | "free" | null;
+          payment_method:
+            | "pix"
+            | "stripe"
+            | "subscription"
+            | "free"
+            | "manual"
+            | null;
           source_ref: string | null;
           access_until: string | null;
           approved_by: string | null;

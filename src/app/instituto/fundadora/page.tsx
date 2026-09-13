@@ -116,7 +116,7 @@ export default async function FounderPage() {
               <p className="text-xs font-bold uppercase tracking-[0.24em] text-gold">
                 Currículo
               </p>
-              <p className="mt-3 max-w-xl leading-relaxed text-primary/70">
+              <p className="mt-3 max-w-xl leading-relaxed text-primary/70 dark:text-[#31513b]">
                 Trajetória documentada em detalhe na Plataforma Lattes.
               </p>
             </div>
@@ -125,7 +125,7 @@ export default async function FounderPage() {
                 href={founder.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex min-h-11 shrink-0 items-center gap-2 font-bold uppercase tracking-widest text-primary hover:text-gold"
+                className="inline-flex min-h-11 shrink-0 items-center gap-2 font-bold uppercase tracking-widest text-primary hover:text-gold dark:text-[#173522]"
               >
                 Ver currículo Lattes <ArrowRight size={15} />
               </a>
@@ -133,7 +133,7 @@ export default async function FounderPage() {
           </div>
           <Link
             href="/instituto"
-            className="mt-7 inline-flex min-h-11 items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary hover:text-gold"
+            className="mt-7 inline-flex min-h-11 items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary hover:text-gold dark:text-[#173522]"
           >
             <ArrowLeft size={15} /> Voltar ao Instituto
           </Link>

@@ -107,8 +107,7 @@ export const DEFAULT_TEAM: TeamSettings = {
 };
 
 // Legal copy lives in a dependency-free module (./legal) so Server
-// Components can render it without pulling in the client Firebase SDK
-// imported at the top of this file. Re-exported here for existing callers.
+// Components can render it without importing the browser data client.
 export { DEFAULT_LEGAL, LEGAL_ROUTES } from "./legal";
 export type {
   LegalSettings,

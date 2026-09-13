@@ -9,7 +9,7 @@ export function LauraHero() {
   const { hero } = lauraPerlsContent;
 
   return (
-    <section className="relative flex min-h-[82svh] items-center justify-center overflow-hidden bg-[#FDFAF4] py-16 md:py-20">
+    <section className="relative flex min-h-[82svh] items-center justify-center overflow-hidden bg-[#FDFAF4] py-16 md:py-20 dark:bg-[#0d0906]">
       <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full bg-[#FE538B]/25 blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 left-[18%] h-64 w-72 rounded-full bg-[#FED701]/35 blur-3xl pointer-events-none" />
       <div className="absolute -bottom-28 -left-12 h-80 w-80 rounded-full bg-[#01C94D]/20 blur-3xl pointer-events-none" />
@@ -31,7 +31,7 @@ export function LauraHero() {
         >
           {/* Archive Badge */}
           <div className="flex items-center gap-4">
-            <span className="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-[#005A1F]/20 text-[10px] tracking-[0.2em] uppercase font-bold text-[#005A1F] bg-white/80">
+            <span className="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-[#005A1F]/20 text-[10px] tracking-[0.2em] uppercase font-bold text-[#005A1F] bg-white/80 dark:border-[#a8d7b4]/30 dark:bg-[#241b12] dark:text-[#a8d7b4]">
               <BookOpen size={12} aria-hidden="true" />
               Arquivo Histórico
             </span>
@@ -44,19 +44,21 @@ export function LauraHero() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className="text-[11px] uppercase tracking-[0.24em] text-[#96551F] font-bold"
+              className="text-[11px] uppercase tracking-[0.24em] text-[#96551F] font-bold dark:text-[#d4b578]"
             >
               Uma vida dedicada à psicoterapia
             </motion.p>
-            <h1 className="font-serif text-5xl md:text-7xl leading-[0.9] text-[#005A1F] tracking-tight">
+            <h1 className="font-serif text-5xl md:text-7xl leading-[0.9] text-[#005A1F] tracking-tight dark:text-[#a8d7b4]">
               Laura <br />{" "}
-              <span className="italic text-[#96551F] font-light">Posner</span>{" "}
+              <span className="italic text-[#96551F] font-light dark:text-[#d4b578]">
+                Posner
+              </span>{" "}
               Perls
             </h1>
           </div>
 
           {/* Quote */}
-          <p className="text-lg md:text-xl font-serif text-[#262B22] max-w-lg leading-relaxed italic border-l-2 border-[#96551F] pl-4 py-1">
+          <p className="text-lg md:text-xl font-serif text-[#262B22] max-w-lg leading-relaxed italic border-l-2 border-[#96551F] pl-4 py-1 dark:text-[#f5ecd9]">
             {hero.title}
           </p>
 
@@ -64,10 +66,10 @@ export function LauraHero() {
           <div className="grid grid-cols-2 gap-x-5 gap-y-4 pt-5 border-t border-[#005A1F]/20">
             {hero.quickFacts.map((fact) => (
               <div key={fact.label} className="group">
-                <span className="block text-[10px] uppercase tracking-[0.18em] text-[#96551F] mb-1 font-bold">
+                <span className="block text-[10px] uppercase tracking-[0.18em] text-[#96551F] mb-1 font-bold dark:text-[#d4b578]">
                   {fact.label}
                 </span>
-                <span className="font-serif text-[#262B22] text-base tracking-tight">
+                <span className="font-serif text-[#262B22] text-base tracking-tight dark:text-[#f5ecd9]">
                   {fact.value}
                 </span>
               </div>
@@ -136,7 +138,7 @@ export function LauraHero() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5, duration: 1 }}
-        className="absolute bottom-5 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-[#005A1F] text-xs tracking-widest uppercase cursor-pointer"
+        className="absolute bottom-5 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-[#005A1F] text-xs tracking-widest uppercase cursor-pointer dark:text-[#a8d7b4]"
         onClick={() =>
           document
             .getElementById("timeline")

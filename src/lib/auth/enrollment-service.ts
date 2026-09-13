@@ -1,7 +1,10 @@
 "use server";
 
 import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
-import { EnrollmentDoc, EnrollmentStatus } from "@/types/lms";
+import type {
+  EnrollmentStatus,
+  Json,
+} from "@/infrastructure/supabase/database.types";
 import { logAudit } from "@/lib/audit";
 
 export interface StripeActivationPayload {
@@ -13,12 +16,34 @@ export interface StripeActivationPayload {
   paymentStatus?: "paid" | "pending";
 }
 
-/**
- * Unified logic to mirror enrollments to both collections bidirectionally.
- * Used by Stripe Webhook, Admin PIX actions, etc.
- */
-const UUID_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+type DateValue = Date | string | null | undefined;
+
+export type EnrollmentWriteInput = {
+  status?: EnrollmentStatus;
+  userName?: string;
+  paymentStatus?: "paid" | "pending" | "failed";
+  paymentMethod?: "pix" | "stripe" | "subscription" | "free" | "manual";
+  subscriptionId?: string;
+  sourceRef?: string;
+  accessUntil?: DateValue;
+  enrolledAt?: DateValue;
+  paidAt?: DateValue;
+  approvedBy?: string;
+  approvedAt?: DateValue;
+  rejectionReason?: string;
+  courseVersionAtEnrollment?: number;
+  courseSnapshotAtEnrollment?: Json;
+  completedAt?: DateValue;
+  lastAccessedAt?: DateValue;
+  progressSummary?: Json;
+  [key: string]: unknown;
+};
+
+function toIsoDate(value: unknown): string | null | undefined {
+  if (value === undefined || value === null) return value as null | undefined;
+  if (value instanceof Date) return value.toISOString();
+  return typeof value === "string" ? value : undefined;
+}
 
 export async function writeEnrollmentMirror({
   uid,
@@ -27,47 +52,52 @@ export async function writeEnrollmentMirror({
 }: {
   uid: string;
   courseId: string;
-  enrollmentDoc: Partial<EnrollmentDoc>;
+  enrollmentDoc: EnrollmentWriteInput;
 }) {
   const supabase = createSupabaseServiceClient();
-  // `enrollments.id`/`user_id` are Postgres `uuid` columns tied to
-  // `profiles(id)` (Supabase Auth). `uid` here may instead be a legacy
-  // Firebase UID (not a valid UUID) for accounts not yet migrated — those
-  // must go into `legacy_firebase_uid` instead, or the upsert throws
-  // "invalid input syntax for type uuid" and silently no-ops wherever this
-  // is wrapped in try/catch. Never invent a client-side `id`: let Postgres
-  // generate it and upsert against whichever partial unique index matches.
-  const isSupabaseUid = UUID_RE.test(uid);
-  const dataToSet: any = {
-    user_id: isSupabaseUid ? uid : null,
-    legacy_firebase_uid: isSupabaseUid ? null : uid,
+  const dataToSet = {
+    user_id: uid,
     course_id: courseId,
     status: enrollmentDoc.status,
+    user_name:
+      (enrollmentDoc.user_name as string | undefined) ?? enrollmentDoc.userName,
     payment_status:
       (enrollmentDoc as any).payment_status ?? enrollmentDoc.paymentStatus,
     payment_method:
       (enrollmentDoc as any).payment_method ?? enrollmentDoc.paymentMethod,
+    subscription_id:
+      (enrollmentDoc as any).subscription_id ?? enrollmentDoc.subscriptionId,
     source_ref: (enrollmentDoc as any).source_ref ?? enrollmentDoc.sourceRef,
-    access_until:
-      (enrollmentDoc as any).access_until ??
-      (enrollmentDoc.accessUntil instanceof Date
-        ? enrollmentDoc.accessUntil.toISOString()
-        : enrollmentDoc.accessUntil),
+    access_until: toIsoDate(
+      (enrollmentDoc as any).access_until ?? enrollmentDoc.accessUntil,
+    ),
+    enrolled_at: toIsoDate(
+      (enrollmentDoc as any).enrolled_at ?? enrollmentDoc.enrolledAt,
+    ),
     progress_summary:
       (enrollmentDoc as any).progress_summary ?? enrollmentDoc.progressSummary,
     course_version_at_enrollment:
       (enrollmentDoc as any).course_version_at_enrollment ??
       enrollmentDoc.courseVersionAtEnrollment,
-    paid_at:
-      (enrollmentDoc as any).paid_at ??
-      (enrollmentDoc.paidAt instanceof Date
-        ? enrollmentDoc.paidAt.toISOString()
-        : enrollmentDoc.paidAt),
+    course_snapshot_at_enrollment:
+      (enrollmentDoc as any).course_snapshot_at_enrollment ??
+      enrollmentDoc.courseSnapshotAtEnrollment,
+    paid_at: toIsoDate((enrollmentDoc as any).paid_at ?? enrollmentDoc.paidAt),
+    approved_by: (enrollmentDoc as any).approved_by ?? enrollmentDoc.approvedBy,
+    approved_at: toIsoDate(
+      (enrollmentDoc as any).approved_at ?? enrollmentDoc.approvedAt,
+    ),
+    rejection_reason:
+      (enrollmentDoc as any).rejection_reason ?? enrollmentDoc.rejectionReason,
+    completed_at: toIsoDate(
+      (enrollmentDoc as any).completed_at ?? enrollmentDoc.completedAt,
+    ),
+    last_accessed_at: toIsoDate(
+      (enrollmentDoc as any).last_accessed_at ?? enrollmentDoc.lastAccessedAt,
+    ),
   };
   const { error } = await supabase.from("enrollments").upsert(dataToSet, {
-    onConflict: isSupabaseUid
-      ? "user_id,course_id"
-      : "legacy_firebase_uid,course_id",
+    onConflict: "user_id,course_id",
   });
   if (error) throw error;
 }
@@ -97,20 +127,15 @@ export async function activateEnrollmentFromStripe(
   const contentRevision = courseData?.content_revision || 1;
   const totalLessons =
     (courseData?.legacy_payload as any)?.stats?.lessonsCount || 0;
-  // `enrollments.id` is a DB-generated uuid, not `${uid}_${courseId}` — look
-  // the row up by (user_id, course_id) or (legacy_firebase_uid, course_id)
-  // instead, matching the identity column writeEnrollmentMirror actually
-  // uses for this uid.
-  const isSupabaseUid = UUID_RE.test(uid);
+  // `enrollments.id` is database-generated; `(user_id, course_id)` is the
+  // canonical identity used for idempotent payment updates.
   const existingQuery = supabase
     .from("enrollments")
     .select("*")
     .eq("course_id", courseId);
-  const { data: existingRow } = await (
-    isSupabaseUid
-      ? existingQuery.eq("user_id", uid)
-      : existingQuery.eq("legacy_firebase_uid", uid)
-  ).maybeSingle();
+  const { data: existingRow } = await existingQuery
+    .eq("user_id", uid)
+    .maybeSingle();
   const existing = existingRow as any;
 
   // Idempotency: If sourceRef is the same and already active, skip
@@ -122,7 +147,6 @@ export async function activateEnrollmentFromStripe(
   }
 
   const updateData: any = {
-    user_id: uid,
     course_id: courseId,
     status: "active",
     payment_method: isSubscription ? "subscription" : "stripe",

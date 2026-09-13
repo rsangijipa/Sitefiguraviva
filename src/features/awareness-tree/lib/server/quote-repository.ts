@@ -2,175 +2,40 @@ import "server-only";
 
 import { QUOTES } from "@/features/awareness-tree/data/quotes";
 import { THEMES } from "@/features/awareness-tree/data/themes";
-import {
-  getFirebaseAdminDb,
-  isFirebaseAdminConfigured,
-} from "@/features/awareness-tree/lib/firebase/admin";
 import type {
   FavoritePayload,
   InteractionPayload,
   Quote,
-  Tone,
   ThemeFilter,
   ThemeOption,
   ThemeSlug,
 } from "@/features/awareness-tree/types/quote";
-import { TONES } from "@/features/awareness-tree/types/quote";
-
-/**
- * Estado em memoria: fallback de MODO LOCAL, usado apenas quando o Firebase
- * Admin nao esta configurado. Em runtime serverless cada instancia tem a sua
- * copia e tudo se perde no cold start — por isso nao serve como armazenamento
- * real, so mantem a aplicacao navegavel em desenvolvimento.
- */
-const interactionLog = new Map<string, InteractionPayload[]>();
-const favoritesBySession = new Map<string, Set<string>>();
-const MAX_IN_MEMORY_SESSIONS = 400;
-
-/**
- * O catalogo de frases muda raramente e e igual para todo mundo, entao vale
- * cachear por instancia. Favoritas NAO sao cacheadas: sao por usuario e mudam a
- * cada clique, e um cache por instancia devolvia lista velha por ate 30s quando
- * o POST caia em outra instancia.
- */
-const QUOTE_CACHE_TTL_MS = 60_000;
-
-/** teto de operacoes por batch do Firestore */
-const FIRESTORE_BATCH_LIMIT = 500;
-
-let firestoreQuotesCache: {
-  expiresAt: number;
-  quotes: Quote[];
-} | null = null;
-
-function trimSessionMap<T>(map: Map<string, T>, maxEntries: number) {
-  while (map.size > maxEntries) {
-    const firstKey = map.keys().next().value;
-    if (!firstKey) {
-      break;
-    }
-    map.delete(firstKey);
-  }
-}
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 
 function activeQuotes(): Quote[] {
   return QUOTES.filter((quote) => quote.active);
 }
 
 function byTheme(theme: ThemeFilter): Quote[] {
-  if (theme === "all") {
-    return activeQuotes();
-  }
-
-  return activeQuotes().filter((quote) => quote.theme === theme);
-}
-
-function toThemeSlug(value: unknown): ThemeSlug | null {
-  if (typeof value !== "string") {
-    return null;
-  }
-
-  return THEMES.some((theme) => theme.slug === value)
-    ? (value as ThemeSlug)
-    : null;
-}
-
-function toTone(value: unknown): Tone | null {
-  if (typeof value !== "string") {
-    return null;
-  }
-
-  return TONES.includes(value as Tone) ? (value as Tone) : null;
-}
-
-function firestoreQuoteToDomain(
-  docId: string,
-  data: Record<string, unknown>,
-): Quote | null {
-  const theme = toThemeSlug(data.theme);
-  const tone = toTone(data.tone);
-
-  if (!theme || !tone || typeof data.text !== "string") {
-    return null;
-  }
-
-  return {
-    id: typeof data.id === "string" ? data.id : docId,
-    text: data.text,
-    theme,
-    tone,
-    author: typeof data.author === "string" ? data.author : undefined,
-    active: typeof data.active === "boolean" ? data.active : true,
-    createdAt:
-      typeof data.createdAt === "string"
-        ? data.createdAt
-        : new Date().toISOString(),
-    updatedAt:
-      typeof data.updatedAt === "string"
-        ? data.updatedAt
-        : new Date().toISOString(),
-  };
+  return theme === "all"
+    ? activeQuotes()
+    : activeQuotes().filter((quote) => quote.theme === theme);
 }
 
 function randomFromList(quotes: Quote[], excludeId?: string): Quote | null {
   const eligible = excludeId
     ? quotes.filter((quote) => quote.id !== excludeId)
     : quotes;
-  if (eligible.length === 0) {
-    return null;
-  }
-
-  const index = Math.floor(Math.random() * eligible.length);
-  return eligible[index] ?? null;
+  if (eligible.length === 0) return null;
+  return eligible[Math.floor(Math.random() * eligible.length)] ?? null;
 }
 
 export async function listThemes(): Promise<ThemeOption[]> {
   return THEMES;
 }
 
+/** O catálogo é editorial e versionado no repositório; dados pessoais ficam no Supabase. */
 export async function listQuotes(theme: ThemeFilter): Promise<Quote[]> {
-  const db = getFirebaseAdminDb();
-
-  if (db) {
-    try {
-      const now = Date.now();
-      const cached = firestoreQuotesCache;
-      let firestoreQuotes: Quote[];
-
-      if (cached && cached.expiresAt > now) {
-        firestoreQuotes = cached.quotes;
-      } else {
-        const snapshot = await db
-          .collection("quotes")
-          .where("active", "==", true)
-          .get();
-        firestoreQuotes = snapshot.docs
-          .map((doc) =>
-            firestoreQuoteToDomain(
-              doc.id,
-              doc.data() as Record<string, unknown>,
-            ),
-          )
-          .filter((quote): quote is Quote => Boolean(quote));
-
-        firestoreQuotesCache = {
-          expiresAt: now + QUOTE_CACHE_TTL_MS,
-          quotes: firestoreQuotes,
-        };
-      }
-
-      if (firestoreQuotes.length > 0) {
-        if (theme === "all") {
-          return firestoreQuotes;
-        }
-
-        return firestoreQuotes.filter((quote) => quote.theme === theme);
-      }
-    } catch {
-      return byTheme(theme);
-    }
-  }
-
   return byTheme(theme);
 }
 
@@ -178,149 +43,64 @@ export async function randomQuote(
   theme: ThemeFilter,
   excludeId?: string,
 ): Promise<Quote | null> {
-  const quotes = await listQuotes(theme);
-  return randomFromList(quotes, excludeId);
-}
-
-export async function registerInteraction(
-  payload: InteractionPayload,
-): Promise<void> {
-  return registerInteractions([payload]);
+  return randomFromList(await listQuotes(theme), excludeId);
 }
 
 export async function registerInteractions(
   payloads: InteractionPayload[],
 ): Promise<void> {
-  if (payloads.length === 0) {
-    return;
-  }
+  if (payloads.length === 0) return;
 
-  const db = getFirebaseAdminDb();
+  const { error } = await createSupabaseServiceClient()
+    .from("awareness_interactions")
+    .insert(
+      payloads.map((payload) => ({
+        user_id: payload.sessionId,
+        action_type: payload.actionType,
+        quote_id: payload.quoteId ?? null,
+        theme: payload.theme ?? "all",
+      })),
+    );
 
-  if (db) {
-    try {
-      // O batch do Firestore rejeita mais de 500 operacoes: recortamos em
-      // blocos para que um lote grande nao derrube a rota inteira.
-      for (
-        let start = 0;
-        start < payloads.length;
-        start += FIRESTORE_BATCH_LIMIT
-      ) {
-        const chunk = payloads.slice(start, start + FIRESTORE_BATCH_LIMIT);
-        const batch = db.batch();
-
-        for (const payload of chunk) {
-          const ref = db.collection("user_interactions").doc();
-          batch.set(ref, {
-            sessionId: payload.sessionId,
-            actionType: payload.actionType,
-            quoteId: payload.quoteId ?? null,
-            theme: payload.theme ?? "all",
-            createdAt: new Date().toISOString(),
-          });
-        }
-
-        await batch.commit();
-      }
-
-      return;
-    } catch {
-      // Fallback em memoria para manter a aplicacao funcional sem Firebase.
-    }
-  }
-
-  for (const payload of payloads) {
-    const existing = interactionLog.get(payload.sessionId) ?? [];
-    const next = [...existing, payload];
-    const bounded = next.length > 200 ? next.slice(next.length - 200) : next;
-    interactionLog.set(payload.sessionId, bounded);
-  }
-
-  trimSessionMap(interactionLog, MAX_IN_MEMORY_SESSIONS);
+  if (error) throw new Error("Nao foi possivel registrar as interacoes.");
 }
 
-/**
- * Sem cache de proposito: favoritas sao por usuario e mudam a cada clique. Um
- * cache por instancia devolvia lista desatualizada por ate 30s sempre que o
- * POST era atendido por outra instancia (salvar no celular, abrir no desktop).
- */
-export async function listFavorites(sessionId: string): Promise<string[]> {
-  const db = getFirebaseAdminDb();
+export async function listFavorites(userId: string): Promise<string[]> {
+  const { data, error } = await createSupabaseServiceClient()
+    .from("awareness_favorites")
+    .select("quote_id")
+    .eq("user_id", userId);
 
-  if (db) {
-    try {
-      const snapshot = await db
-        .collection("user_favorites")
-        .doc(sessionId)
-        .get();
-      const quoteIds = snapshot.data()?.quoteIds;
-      return Array.isArray(quoteIds)
-        ? quoteIds.filter((id): id is string => typeof id === "string")
-        : [];
-    } catch {
-      // Fallback local caso o Firestore nao esteja disponivel.
-    }
-  }
-
-  trimSessionMap(favoritesBySession, MAX_IN_MEMORY_SESSIONS);
-  return [...(favoritesBySession.get(sessionId) ?? new Set<string>())];
+  if (error) throw new Error("Nao foi possivel carregar as favoritas.");
+  return data.map((favorite) => favorite.quote_id);
 }
 
 export async function saveFavorite(
   payload: FavoritePayload,
 ): Promise<string[]> {
-  const db = getFirebaseAdminDb();
-
-  if (db) {
-    const ref = db.collection("user_favorites").doc(payload.sessionId);
-
-    try {
-      const snapshot = await ref.get();
-      const existing = snapshot.data()?.quoteIds;
-      const current = Array.isArray(existing)
-        ? existing.filter((id): id is string => typeof id === "string")
-        : [];
-
-      const next = payload.isFavorite
-        ? Array.from(new Set([...current, payload.quoteId]))
-        : current.filter((id) => id !== payload.quoteId);
-
-      await ref.set(
+  const supabase = createSupabaseServiceClient();
+  const mutation = payload.isFavorite
+    ? supabase.from("awareness_favorites").upsert(
         {
-          quoteIds: next,
-          updatedAt: new Date().toISOString(),
+          user_id: payload.sessionId,
+          quote_id: payload.quoteId,
+          updated_at: new Date().toISOString(),
         },
-        { merge: true },
-      );
+        { onConflict: "user_id,quote_id" },
+      )
+    : supabase
+        .from("awareness_favorites")
+        .delete()
+        .eq("user_id", payload.sessionId)
+        .eq("quote_id", payload.quoteId);
 
-      return next;
-    } catch {
-      // Fallback local caso o Firestore nao esteja disponivel.
-    }
-  }
-
-  const sessionFavorites =
-    favoritesBySession.get(payload.sessionId) ?? new Set<string>();
-
-  if (payload.isFavorite) {
-    sessionFavorites.add(payload.quoteId);
-  } else {
-    sessionFavorites.delete(payload.quoteId);
-  }
-
-  favoritesBySession.set(payload.sessionId, sessionFavorites);
-  trimSessionMap(favoritesBySession, MAX_IN_MEMORY_SESSIONS);
-  return [...sessionFavorites.values()];
+  const { error } = await mutation;
+  if (error) throw new Error("Nao foi possivel salvar a favorita.");
+  return listFavorites(payload.sessionId);
 }
 
 export async function hasTheme(theme: string): Promise<boolean> {
-  if (theme === "all") {
-    return true;
-  }
-
-  return THEMES.some((item) => item.slug === (theme as ThemeSlug));
-}
-
-export async function isCloudRepositoryEnabled(): Promise<boolean> {
-  return isFirebaseAdminConfigured();
+  return (
+    theme === "all" || THEMES.some((item) => item.slug === (theme as ThemeSlug))
+  );
 }

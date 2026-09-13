@@ -1,9 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-import { bindAnonymousSession } from "@/features/awareness-tree/lib/firebase/client";
-import { migrateFavoritesBucket } from "@/features/awareness-tree/lib/utils/local-favorites";
 import {
   migrateLegacyStorage,
   SESSION_STORAGE_KEY,
@@ -27,39 +25,6 @@ function getOrCreateSessionId(): string {
 }
 
 export function useSessionId() {
-  const [sessionId, setSessionId] = useState(() => getOrCreateSessionId());
-
-  useEffect(() => {
-    let unsubscribe: (() => void) | null = null;
-    let cancelled = false;
-
-    void bindAnonymousSession((uid) => {
-      if (cancelled) {
-        return;
-      }
-
-      const previousSessionId =
-        window.localStorage.getItem(SESSION_STORAGE_KEY);
-      if (previousSessionId && previousSessionId !== uid) {
-        migrateFavoritesBucket(previousSessionId, uid);
-      }
-
-      window.localStorage.setItem(SESSION_STORAGE_KEY, uid);
-      setSessionId(uid);
-    }).then((nextUnsubscribe) => {
-      if (cancelled) {
-        nextUnsubscribe?.();
-        return;
-      }
-
-      unsubscribe = nextUnsubscribe;
-    });
-
-    return () => {
-      cancelled = true;
-      unsubscribe?.();
-    };
-  }, []);
-
+  const [sessionId] = useState(() => getOrCreateSessionId());
   return sessionId;
 }

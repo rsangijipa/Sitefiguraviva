@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase/admin";
 import { verifySession } from "@/lib/auth/server";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
+import type { Json } from "@/infrastructure/supabase/database.types";
 import {
   DEFAULT_FOUNDER,
   DEFAULT_INSTITUTE,
@@ -9,9 +10,6 @@ import {
 
 export async function GET(request: NextRequest) {
   try {
-    // The `session` cookie carries a Supabase JWT, not a Firebase session
-    // cookie, so admin checks go through verifySession() (Supabase-based)
-    // rather than adminAuth.verifySessionCookie, which always threw here.
     const claims = await verifySession();
     if (!claims) {
       return NextResponse.json({ error: "Unauthenticated" }, { status: 401 });
@@ -20,31 +18,39 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const batch = adminDb.batch();
-    const settingsRef = adminDb.collection("siteSettings");
+    const supabase = createSupabaseServiceClient();
+    const defaults = [
+      { key: "founder", content: DEFAULT_FOUNDER },
+      { key: "institute", content: DEFAULT_INSTITUTE },
+      { key: "seo", content: DEFAULT_SEO },
+    ];
+    const { data: existing, error: readError } = await supabase
+      .from("public_pages")
+      .select("key")
+      .in(
+        "key",
+        defaults.map((setting) => setting.key),
+      );
+    if (readError) throw readError;
 
-    // 2. Founder
-    const founderRef = settingsRef.doc("founder");
-    const founderSnap = await founderRef.get();
-    if (!founderSnap.exists) {
-      batch.set(founderRef, { ...DEFAULT_FOUNDER, seededAt: new Date() });
+    const existingKeys = new Set(
+      (existing ?? []).map((setting) => setting.key),
+    );
+    const missing = defaults
+      .filter((setting) => !existingKeys.has(setting.key))
+      .map((setting) => ({
+        key: setting.key,
+        content: setting.content as unknown as Json,
+        is_published: true,
+        published_at: new Date().toISOString(),
+      }));
+
+    if (missing.length > 0) {
+      const { error: insertError } = await supabase
+        .from("public_pages")
+        .insert(missing);
+      if (insertError) throw insertError;
     }
-
-    // 3. Institute
-    const instituteRef = settingsRef.doc("institute");
-    const instituteSnap = await instituteRef.get();
-    if (!instituteSnap.exists) {
-      batch.set(instituteRef, { ...DEFAULT_INSTITUTE, seededAt: new Date() });
-    }
-
-    // 4. SEO
-    const seoRef = settingsRef.doc("seo");
-    const seoSnap = await seoRef.get();
-    if (!seoSnap.exists) {
-      batch.set(seoRef, { ...DEFAULT_SEO, seededAt: new Date() });
-    }
-
-    await batch.commit();
 
     return NextResponse.json({
       success: true,

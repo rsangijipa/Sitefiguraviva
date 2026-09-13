@@ -182,17 +182,17 @@ export default async function InstitutePage() {
             <p className="text-xs font-bold uppercase tracking-[0.24em] text-gold">
               05 — Fundadora
             </p>
-            <h2 className="mt-4 max-w-2xl font-serif text-4xl text-primary">
+            <h2 className="mt-4 max-w-2xl font-serif text-4xl text-primary dark:text-[#173522]">
               A memória da fundadora continua abrindo caminhos.
             </h2>
-            <p className="mt-5 max-w-2xl leading-relaxed text-primary/70">
+            <p className="mt-5 max-w-2xl leading-relaxed text-primary/70 dark:text-[#31513b]">
               {founder.name
                 ? `${founder.name} conduz este campo com uma prática dedicada à formação e ao cuidado.`
                 : "Conheça quem sustenta este campo de presença, estudo e cuidado."}
             </p>
             <Link
               href="/instituto/fundadora"
-              className="mt-7 inline-flex min-h-11 items-center gap-2 font-bold uppercase tracking-widest text-primary hover:text-gold"
+              className="mt-7 inline-flex min-h-11 items-center gap-2 font-bold uppercase tracking-widest text-primary hover:text-gold dark:text-[#173522]"
             >
               Ler trajetória <ArrowRight size={15} />
             </Link>

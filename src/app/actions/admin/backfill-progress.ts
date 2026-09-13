@@ -1,56 +1,134 @@
-'use server';
+"use server";
 
-import { db, adminDb } from '@/lib/firebase/admin';
-import { progressService } from '@/lib/progress/progressService';
+import { requireAdmin } from "@/lib/auth/server";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
+import type { Json } from "@/infrastructure/supabase/database.types";
 
-/**
- * Admin Action to Backfill/Recalculate Progress for ALL enrollments.
- * Use with caution on large datasets. Run in batches if needed.
- */
+type ProgressSummary = {
+  completedLessonsCount: number;
+  totalLessons: number;
+  completedModulesCount: number;
+  totalModules: number;
+  percent: number;
+};
+
+async function recalculateEnrollmentProgress(enrollment: {
+  id: string;
+  user_id: string;
+  course_id: string;
+}): Promise<void> {
+  const supabase = createSupabaseServiceClient();
+  const [modulesResult, lessonsResult, progressResult] = await Promise.all([
+    supabase
+      .from("course_modules")
+      .select("id")
+      .eq("course_id", enrollment.course_id)
+      .eq("is_published", true),
+    supabase
+      .from("lessons")
+      .select("id, module_id")
+      .eq("course_id", enrollment.course_id)
+      .eq("is_published", true),
+    supabase
+      .from("lesson_progress")
+      .select("lesson_id")
+      .eq("user_id", enrollment.user_id)
+      .eq("course_id", enrollment.course_id)
+      .eq("status", "completed"),
+  ]);
+  if (modulesResult.error) throw modulesResult.error;
+  if (lessonsResult.error) throw lessonsResult.error;
+  if (progressResult.error) throw progressResult.error;
+
+  const publishedModuleIds = new Set(
+    (modulesResult.data ?? []).map((module) => module.id),
+  );
+  const lessonsByModule = new Map<string, string[]>();
+  for (const lesson of lessonsResult.data ?? []) {
+    if (!publishedModuleIds.has(lesson.module_id)) continue;
+    const moduleLessons = lessonsByModule.get(lesson.module_id) ?? [];
+    moduleLessons.push(lesson.id);
+    lessonsByModule.set(lesson.module_id, moduleLessons);
+  }
+
+  const completedLessonIds = new Set(
+    (progressResult.data ?? []).map((item) => item.lesson_id),
+  );
+  const publishedLessons = [...lessonsByModule.values()].flat();
+  const completedLessons = publishedLessons.filter((id) =>
+    completedLessonIds.has(id),
+  );
+  const completedModules = [...lessonsByModule.values()].filter(
+    (moduleLessons) =>
+      moduleLessons.length > 0 &&
+      moduleLessons.every((lessonId) => completedLessonIds.has(lessonId)),
+  );
+  const percent =
+    publishedLessons.length > 0
+      ? Math.round((completedLessons.length / publishedLessons.length) * 100)
+      : 0;
+  const summary: ProgressSummary = {
+    completedLessonsCount: completedLessons.length,
+    totalLessons: publishedLessons.length,
+    completedModulesCount: completedModules.length,
+    totalModules: publishedModuleIds.size,
+    percent,
+  };
+  const update: {
+    progress_summary: Json;
+    status?: "completed";
+    completed_at?: string;
+  } = { progress_summary: summary as unknown as Json };
+  if (percent === 100 && publishedLessons.length > 0) {
+    update.status = "completed";
+    update.completed_at = new Date().toISOString();
+  }
+
+  const { error: updateError } = await supabase
+    .from("enrollments")
+    .update(update)
+    .eq("id", enrollment.id);
+  if (updateError) throw updateError;
+}
+
+/** Recalculates canonical Supabase progress for every active or completed enrollment. */
 export async function backfillProgress() {
-    console.log("Starting Progress Backfill...");
+  await requireAdmin();
 
-    try {
-        const enrollmentsSnap = await adminDb.collection('enrollments')
-            .where('status', 'in', ['active', 'completed']) // Recalculate active and completed
-            .get();
+  try {
+    const supabase = createSupabaseServiceClient();
+    const { data: enrollments, error } = await supabase
+      .from("enrollments")
+      .select("id, user_id, course_id")
+      .in("status", ["active", "completed"])
+      .not("user_id", "is", null);
+    if (error) throw error;
 
-        const total = enrollmentsSnap.size;
-        console.log(`Found ${total} enrollments to process.`);
-
-        let processed = 0;
-        let errors = 0;
-
-        // Process in chunks to avoid timeout if possible, though Server Actions have timeout limits.
-        // For Vercel Pro (Serverless), limit is usually 60s. For Edge, 30s.
-        // We do it serially for safety in this script, or parallel with limit.
-
-        const results = [];
-
-        for (const doc of enrollmentsSnap.docs) {
-            const data = doc.data();
-            const { userId, courseId } = data;
-
-            if (!userId || !courseId) {
-                console.warn(`skipping invalid enrollment ${doc.id}`);
-                continue;
-            }
-
-            try {
-                await progressService.recalculateEnrollmentProgress(userId, courseId);
-                processed++;
-            } catch (err: any) {
-                console.error(`Failed to recalc ${doc.id}:`, err);
-                errors++;
-                results.push({ id: doc.id, error: err.message });
-            }
-        }
-
-        console.log(`Backfill Complete. Processed: ${processed}, Errors: ${errors}`);
-        return { success: true, processed, errors, details: results };
-
-    } catch (error: any) {
-        console.error("Backfill Fatal Error:", error);
-        return { success: false, error: error.message };
+    let processed = 0;
+    const details: Array<{ id: string; error: string }> = [];
+    for (const enrollment of enrollments ?? []) {
+      if (!enrollment.user_id) continue;
+      try {
+        await recalculateEnrollmentProgress({
+          id: enrollment.id,
+          user_id: enrollment.user_id,
+          course_id: enrollment.course_id,
+        });
+        processed += 1;
+      } catch (error) {
+        details.push({
+          id: enrollment.id,
+          error: error instanceof Error ? error.message : "Erro desconhecido",
+        });
+      }
     }
+
+    return { success: true, processed, errors: details.length, details };
+  } catch (error) {
+    console.error("Progress backfill failed:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Erro desconhecido",
+    };
+  }
 }

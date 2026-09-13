@@ -1,7 +1,3 @@
-jest.mock("@/lib/firebase/admin", () => ({
-  adminDb: {},
-}));
-
 jest.mock("@/lib/auth/server", () => ({
   requireAdmin: jest.fn().mockResolvedValue(undefined),
 }));

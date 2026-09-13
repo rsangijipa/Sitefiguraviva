@@ -1,67 +1,34 @@
-import { adminDb } from "@/lib/firebase/admin";
-import { EnrollmentDoc } from "@/types/lms";
+import "server-only";
+
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
+import type { TableRow } from "@/infrastructure/supabase/database.types";
+
+type EnrollmentRow = TableRow<"enrollments">;
 
 export type EnrollmentLookupResult = {
   id: string;
-  data: EnrollmentDoc;
-  snapshot: FirebaseFirestore.DocumentSnapshot;
+  data: EnrollmentRow;
 };
 
+/**
+ * Reads the canonical enrollment record for the authenticated Supabase user.
+ * Enrollment IDs are database-generated UUIDs; `(user_id, course_id)` is the
+ * stable business key.
+ */
 export async function findEnrollmentForCourse(
-  uid: string,
+  userId: string,
   courseId: string,
 ): Promise<EnrollmentLookupResult | null> {
-  if (!uid || !courseId) return null;
+  if (!userId || !courseId) return null;
 
-  const deterministicId = `${uid}_${courseId}`;
-  const alternateId = `${courseId}_${uid}`;
+  const supabase = createSupabaseServiceClient();
+  const { data, error } = await supabase
+    .from("enrollments")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("course_id", courseId)
+    .maybeSingle();
 
-  for (const enrollmentId of [deterministicId, alternateId]) {
-    const snapshot = await adminDb
-      .collection("enrollments")
-      .doc(enrollmentId)
-      .get();
-
-    if (snapshot.exists) {
-      return {
-        id: snapshot.id,
-        data: snapshot.data() as EnrollmentDoc,
-        snapshot,
-      };
-    }
-  }
-
-  const uidQuery = await adminDb
-    .collection("enrollments")
-    .where("uid", "==", uid)
-    .where("courseId", "==", courseId)
-    .limit(1)
-    .get();
-
-  if (!uidQuery.empty) {
-    const snapshot = uidQuery.docs[0];
-    return {
-      id: snapshot.id,
-      data: snapshot.data() as EnrollmentDoc,
-      snapshot,
-    };
-  }
-
-  const legacyUserIdQuery = await adminDb
-    .collection("enrollments")
-    .where("userId", "==", uid)
-    .where("courseId", "==", courseId)
-    .limit(1)
-    .get();
-
-  if (!legacyUserIdQuery.empty) {
-    const snapshot = legacyUserIdQuery.docs[0];
-    return {
-      id: snapshot.id,
-      data: snapshot.data() as EnrollmentDoc,
-      snapshot,
-    };
-  }
-
-  return null;
+  if (error) throw error;
+  return data ? { id: data.id, data } : null;
 }

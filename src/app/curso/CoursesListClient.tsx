@@ -66,7 +66,7 @@ export default function CoursesListClient({ courses }: { courses: any[] }) {
   );
 
   return (
-    <div className="min-h-screen bg-[#FDFCF9] pb-20">
+    <div className="min-h-screen bg-paper pb-20">
       <div className="mx-auto max-w-7xl px-6 pt-16 md:px-12">
         {featured && (
           <Link

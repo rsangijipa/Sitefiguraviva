@@ -1,6 +1,11 @@
 import { ArrowRight, ArrowUpRight, Sparkles } from "lucide-react";
+import dynamic from "next/dynamic";
 import WaveLines from "../ui/WaveLines";
-import FiguraVivaTree from "../visual/FiguraVivaTree";
+
+const EnhancedLivingTree = dynamic(
+  () => import("../visual/EnhancedLivingTree"),
+  { ssr: false },
+);
 
 export default function HeroSection({ initialData }: { initialData?: any }) {
   const data = initialData ?? {};
@@ -12,8 +17,13 @@ export default function HeroSection({ initialData }: { initialData?: any }) {
         className="pointer-events-none absolute inset-y-12 right-[-12%] z-0 w-[88%] opacity-25 sm:right-[-5%] sm:w-[70%] sm:opacity-35 lg:inset-y-5 lg:right-[1%] lg:w-[52%] lg:opacity-90"
         aria-hidden="true"
       >
-        <FiguraVivaTree
-          style={{ width: "100%", height: "100%" }}
+        <EnhancedLivingTree
+          className="h-full w-full"
+          theme="figura-viva"
+          timeOfDay="tarde"
+          windIntensity={0.48}
+          windDirection={0.35}
+          leafFlutter
           interactive={false}
         />
       </div>

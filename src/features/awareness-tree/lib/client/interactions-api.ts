@@ -1,15 +1,15 @@
-import { getSessionIdToken } from "@/features/awareness-tree/lib/firebase/client";
+import { getSupabaseSessionToken } from "@/features/awareness-tree/lib/supabase/client";
 import type {
   FavoritePayload,
   InteractionPayload,
 } from "@/features/awareness-tree/types/quote";
 
 /**
- * As rotas exigem o ID token do Firebase quando ele esta configurado: o dono das
- * favoritas passou a ser o `uid` do token, nunca o id que o cliente manda.
+ * As rotas usam o access token Supabase da sessão principal: o servidor define
+ * o dono das favoritas e nunca confia no identificador enviado pelo cliente.
  */
 async function authHeaders(): Promise<HeadersInit> {
-  const token = await getSessionIdToken();
+  const token = await getSupabaseSessionToken();
   return token
     ? { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
     : { "Content-Type": "application/json" };
@@ -111,13 +111,11 @@ export async function postFavorite(payload: FavoritePayload): Promise<void> {
 }
 
 export async function fetchFavorites(sessionId: string): Promise<string[]> {
-  const response = await fetch(
-    `/api/favorites?sessionId=${encodeURIComponent(sessionId)}`,
-    {
-      cache: "no-store",
-      headers: await authHeaders(),
-    },
-  );
+  void sessionId; // identificador local é usado só como cache do dispositivo
+  const response = await fetch("/api/favorites", {
+    cache: "no-store",
+    headers: await authHeaders(),
+  });
 
   if (!response.ok) {
     throw new Error("Nao foi possivel recuperar favoritas");

@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 
-import { verifySessionToken } from "@/features/awareness-tree/lib/firebase/admin";
 import { registerInteractions } from "@/features/awareness-tree/lib/server/quote-repository";
 import {
   INTERACTION_ACTIONS,
@@ -11,8 +10,9 @@ import type {
   InteractionPayload,
   ThemeFilter,
 } from "@/features/awareness-tree/types/quote";
+import { getBearerSupabaseUserId } from "@/lib/auth/supabase-session";
 
-/** teto de itens aceitos por requisicao (o batch do Firestore para em 500) */
+/** teto de itens aceitos por requisição */
 const MAX_ITEMS = 200;
 
 function isAction(value: unknown): value is InteractionAction {
@@ -52,8 +52,8 @@ export async function POST(request: Request) {
     );
   }
 
-  const uid = await verifySessionToken(request.headers.get("authorization"));
-  if (uid === null) {
+  const uid = await getBearerSupabaseUserId(request);
+  if (!uid) {
     return NextResponse.json(
       { error: "Sessao nao autenticada" },
       { status: 401 },
@@ -69,8 +69,8 @@ export async function POST(request: Request) {
 
     const candidate = item as Record<string, unknown>;
 
-    // allowlist de verdade: antes bastava `actionType` ser truthy e qualquer
-    // string ia parar no Firestore, poluindo a analise depois
+    // Allowlist: antes bastava `actionType` ser truthy e qualquer string
+    // chegava à persistência, poluindo a análise posterior.
     if (!isAction(candidate.actionType)) {
       return NextResponse.json(
         { error: "actionType invalido" },
@@ -89,29 +89,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "quoteId invalido" }, { status: 400 });
     }
 
-    const sessionId =
-      uid === "unverified"
-        ? typeof candidate.sessionId === "string" &&
-          candidate.sessionId.length > 0
-          ? candidate.sessionId
-          : null
-        : uid;
-
-    if (!sessionId) {
-      return NextResponse.json(
-        { error: "sessionId obrigatorio" },
-        { status: 400 },
-      );
-    }
-
     payloads.push({
-      sessionId,
+      sessionId: uid,
       actionType: candidate.actionType,
       quoteId: candidate.quoteId as string | undefined,
       theme: candidate.theme as ThemeFilter | undefined,
     });
   }
 
-  await registerInteractions(payloads);
-  return NextResponse.json({ ok: true });
+  try {
+    await registerInteractions(payloads);
+    return NextResponse.json({ ok: true });
+  } catch {
+    return NextResponse.json(
+      { error: "Nao foi possivel salvar as interacoes" },
+      { status: 503 },
+    );
+  }
 }

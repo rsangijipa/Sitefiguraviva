@@ -39,11 +39,19 @@ export default function PublicPageHero({
               {eyebrow}
             </p>
           )}
-          <h1 className="font-serif text-5xl leading-[0.98] text-primary md:text-7xl">
+          <h1
+            className={`font-serif text-5xl leading-[0.98] text-primary md:text-7xl ${
+              backgroundImage ? "dark:text-[#173522]" : ""
+            }`}
+          >
             {title}
           </h1>
           {description && (
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-primary/65 md:text-xl">
+            <p
+              className={`mt-6 max-w-2xl text-lg leading-relaxed text-primary/65 md:text-xl ${
+                backgroundImage ? "dark:text-[#31513b]" : ""
+              }`}
+            >
               {description}
             </p>
           )}

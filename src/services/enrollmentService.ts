@@ -1,14 +1,5 @@
 import { createSupabaseBrowserClient } from "@/infrastructure/supabase/client";
 
-// `enrollments.user_id` is a Postgres `uuid` column. A visitor still on a
-// legacy Firebase account (not yet migrated to Supabase Auth) has a
-// Firebase-style uid instead (e.g. "3YCwOnle2BgWqBeBMgAJ5DOsBEU2"), which
-// Postgres rejects with a 400 "invalid input syntax for type uuid" if sent
-// into `user_id`. Those rows are keyed by `legacy_firebase_uid` instead —
-// same convention as writeEnrollmentMirror in src/lib/auth/enrollment-service.ts.
-const UUID_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
 export interface Enrollment {
   id: string;
   courseId: string;
@@ -37,11 +28,10 @@ export const enrollmentService = {
     if (!userId) return [];
 
     try {
-      const idColumn = UUID_RE.test(userId) ? "user_id" : "legacy_firebase_uid";
       const { data, error } = await createSupabaseBrowserClient()
         .from("enrollments")
         .select("*")
-        .eq(idColumn, userId)
+        .eq("user_id", userId)
         .order("enrolled_at", { ascending: false });
       if (error) throw error;
       return (data ?? []).map((row: any) => ({
@@ -65,11 +55,10 @@ export const enrollmentService = {
   ): Promise<Enrollment | null> {
     if (!userId || !courseId) return null;
 
-    const idColumn = UUID_RE.test(userId) ? "user_id" : "legacy_firebase_uid";
     const { data, error } = await createSupabaseBrowserClient()
       .from("enrollments")
       .select("*")
-      .eq(idColumn, userId)
+      .eq("user_id", userId)
       .eq("course_id", courseId)
       .maybeSingle();
     if (error) throw error;

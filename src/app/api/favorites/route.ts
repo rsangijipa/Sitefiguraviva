@@ -1,26 +1,21 @@
 import { NextResponse } from "next/server";
 
-import { verifySessionToken } from "@/features/awareness-tree/lib/firebase/admin";
 import {
   listFavorites,
   saveFavorite,
 } from "@/features/awareness-tree/lib/server/quote-repository";
+import { getBearerSupabaseUserId } from "@/lib/auth/supabase-session";
 
 /**
  * Resolve de quem sao as favoritas desta requisicao.
  *
- * Regra: quando o Firebase Admin esta configurado, o dono e SEMPRE o `uid` do
- * ID token — nunca um id que o cliente mandou no corpo ou na query. Antes esta
- * rota aceitava qualquer `sessionId` em texto puro, o que permitia ler e
- * escrever as favoritas de qualquer pessoa cujo id fosse conhecido.
+ * O dono é sempre o usuário do bearer token Supabase, nunca um identificador
+ * enviado no corpo ou na query.
  */
-async function resolveOwner(
-  request: Request,
-  fallbackSessionId: string | null,
-) {
-  const uid = await verifySessionToken(request.headers.get("authorization"));
+async function resolveOwner(request: Request) {
+  const uid = await getBearerSupabaseUserId(request);
 
-  if (uid === null) {
+  if (!uid) {
     return {
       error: NextResponse.json(
         { error: "Sessao nao autenticada" },
@@ -29,35 +24,25 @@ async function resolveOwner(
     };
   }
 
-  // sem Firebase configurado o backend roda em memoria (modo local/demo)
-  if (uid === "unverified") {
-    if (!fallbackSessionId) {
-      return {
-        error: NextResponse.json(
-          { error: "sessionId obrigatorio" },
-          { status: 400 },
-        ),
-      };
-    }
-    return { ownerId: fallbackSessionId };
-  }
-
   return { ownerId: uid };
 }
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const { ownerId, error } = await resolveOwner(
-    request,
-    searchParams.get("sessionId"),
-  );
+  const { ownerId, error } = await resolveOwner(request);
 
   if (error) {
     return error;
   }
 
-  const favorites = await listFavorites(ownerId as string);
-  return NextResponse.json({ favorites });
+  try {
+    const favorites = await listFavorites(ownerId as string);
+    return NextResponse.json({ favorites });
+  } catch {
+    return NextResponse.json(
+      { error: "Nao foi possivel carregar as favoritas" },
+      { status: 503 },
+    );
+  }
 }
 
 export async function POST(request: Request) {
@@ -81,20 +66,23 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "isFavorite invalido" }, { status: 400 });
   }
 
-  const { ownerId, error } = await resolveOwner(
-    request,
-    typeof body.sessionId === "string" ? body.sessionId : null,
-  );
+  const { ownerId, error } = await resolveOwner(request);
 
   if (error) {
     return error;
   }
 
-  const favorites = await saveFavorite({
-    sessionId: ownerId as string,
-    quoteId: body.quoteId,
-    isFavorite: body.isFavorite,
-  });
-
-  return NextResponse.json({ ok: true, favorites });
+  try {
+    const favorites = await saveFavorite({
+      sessionId: ownerId as string,
+      quoteId: body.quoteId,
+      isFavorite: body.isFavorite,
+    });
+    return NextResponse.json({ ok: true, favorites });
+  } catch {
+    return NextResponse.json(
+      { error: "Nao foi possivel salvar a favorita" },
+      { status: 503 },
+    );
+  }
 }

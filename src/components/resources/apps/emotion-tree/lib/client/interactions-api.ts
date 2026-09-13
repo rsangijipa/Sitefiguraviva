@@ -1,12 +1,14 @@
-import { getSessionIdToken } from "@/components/resources/apps/emotion-tree/lib/firebase/client";
-import type { FavoritePayload, InteractionPayload } from "@/components/resources/apps/emotion-tree/types/quote";
+import { getSupabaseSessionToken } from "@/features/awareness-tree/lib/supabase/client";
+import type {
+  FavoritePayload,
+  InteractionPayload,
+} from "@/components/resources/apps/emotion-tree/types/quote";
 
 /**
- * As rotas exigem o ID token do Firebase quando ele esta configurado: o dono das
- * favoritas passou a ser o `uid` do token, nunca o id que o cliente manda.
+ * O bearer token Supabase determina o dono das favoritas no servidor.
  */
 async function authHeaders(): Promise<HeadersInit> {
-  const token = await getSessionIdToken();
+  const token = await getSupabaseSessionToken();
   return token
     ? { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
     : { "Content-Type": "application/json" };
@@ -84,7 +86,9 @@ function attachLifecycleFlushListeners() {
   });
 }
 
-export async function postInteraction(payload: InteractionPayload): Promise<void> {
+export async function postInteraction(
+  payload: InteractionPayload,
+): Promise<void> {
   attachLifecycleFlushListeners();
   interactionQueue.push(payload);
 
@@ -106,7 +110,8 @@ export async function postFavorite(payload: FavoritePayload): Promise<void> {
 }
 
 export async function fetchFavorites(sessionId: string): Promise<string[]> {
-  const response = await fetch(`/api/favorites?sessionId=${encodeURIComponent(sessionId)}`, {
+  void sessionId;
+  const response = await fetch("/api/favorites", {
     cache: "no-store",
     headers: await authHeaders(),
   });

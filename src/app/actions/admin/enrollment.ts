@@ -8,15 +8,9 @@ import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import { findOrCreateSupabaseUserByEmail } from "@/lib/auth/admin-user-lookup";
 
 /**
- * Manual/admin enrollment management. This used to be built entirely on
- * Firestore + Firebase Admin Auth (adminAuth.getUserByEmail/createUser),
- * from back when accounts were Firebase-first. Every account is now created
- * through Supabase Auth (registerForCourseAction) and the admin's user
- * picker (listUsersForAdmin) lists Supabase users, so looking a student up
- * by email in Firebase Auth here would never find them — "Nova Matrícula"
- * would either fail outright or spawn a duplicate placeholder account in a
- * system nothing else reads from. Rewritten to operate on Supabase
- * (`profiles` + `enrollments`) end to end.
+ * Manual/admin enrollment management through Supabase Auth, `profiles` and
+ * `enrollments`. The same account identity is used by the course enrollment
+ * flow and by the administrator's student picker.
  */
 
 async function assertAdmin() {
@@ -206,11 +200,8 @@ export async function approveEnrollment(uid: string, courseId: string) {
       diff: { after: { status: "active", approvedBy: adminUser.uid } },
     });
 
-    // Note: `profiles` has no phone column today, so the WhatsApp
-    // enrollment notification (previously read from a Firestore-only
-    // `phone` field) has no source to read from here — dropped rather than
-    // silently sent to a wrong/stale number. Re-add once phone capture is
-    // part of the Supabase profile.
+    // A notificação pode usar `profiles.phone_number`, preenchido no perfil,
+    // quando o canal de envio for habilitado.
 
     return { success: true };
   } catch (error: any) {

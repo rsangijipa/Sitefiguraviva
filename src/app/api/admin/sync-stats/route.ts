@@ -4,7 +4,7 @@ import { verifySession } from "@/lib/auth/server";
 
 export const dynamic = "force-dynamic";
 
-/** Recalculates canonical Supabase statistics without touching Firebase mirrors. */
+/** Recalculates canonical Supabase statistics. */
 export async function POST() {
   const claims = await verifySession();
   if (!claims)

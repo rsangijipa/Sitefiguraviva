@@ -9,8 +9,6 @@ import {
 } from "@/actions/profile";
 import { Camera, Loader2, Save, Lock } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase/client";
 import { createSupabaseBrowserClient } from "@/infrastructure/supabase/client";
 
 export function ProfileForm() {
@@ -44,23 +42,29 @@ export function ProfileForm() {
       setDisplayName(user.displayName || "");
       setPreviewUrl(user.photoURL);
 
-      // Fetch Bio from Firestore
-      getDoc(doc(db, "users", user.uid))
-        .then((snap) => {
-          if (snap.exists()) {
-            const data = snap.data();
-            setBio(data.bio || "");
-            setPhoneNumber(data.phoneNumber || "");
-            setProfession(data.profession || "");
-            setCity(data.city || "");
-            setState(data.state || "");
-            setDateOfBirth(data.dateOfBirth || "");
-            setInstagram(data.instagram || "");
-          }
-        })
-        .catch((err) => console.error(err));
+      // Fetch profile details from Supabase.
+      void (async () => {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select(
+            "bio, phone_number, profession, city, state, date_of_birth, instagram",
+          )
+          .eq("id", user.uid)
+          .maybeSingle();
+
+        if (error) throw error;
+        if (data) {
+          setBio(data.bio || "");
+          setPhoneNumber(data.phone_number || "");
+          setProfession(data.profession || "");
+          setCity(data.city || "");
+          setState(data.state || "");
+          setDateOfBirth(data.date_of_birth || "");
+          setInstagram(data.instagram || "");
+        }
+      })().catch((err) => console.error(err));
     }
-  }, [user]);
+  }, [supabase, user]);
 
   // Password State
   const [newPassword, setNewPassword] = useState("");
@@ -108,12 +112,11 @@ export function ProfileForm() {
       // 3. Update Client Context (Sync Sidebar)
       if (user) {
         try {
-          // We don't want this to block if there's a connection issue with Firebase Client SDK,
-          // since the source of truth (Firestore/Action) already succeeded.
+          // The server action is the source of truth; this keeps the local UI in sync.
           await updateProfile({ displayName, photoURL: newPhotoURL });
         } catch (e) {
           console.error(
-            "[DEBUG] Client-side updateProfile failed, but data is saved in Firestore:",
+            "[ProfileForm] Client-side profile synchronization failed after save:",
             e,
           );
         }
@@ -262,7 +265,7 @@ export function ProfileForm() {
           </div>
           <div>
             <p className="text-sm font-medium text-stone-700">Foto de Perfil</p>
-            <p className="text-xs text-stone-400">JPG, PNG ou WEBP. Máx 5MB.</p>
+            <p className="text-xs text-stone-400">JPG, PNG ou WEBP. Máx 2MB.</p>
           </div>
         </div>
 

@@ -6,9 +6,9 @@ export default function PublicSiteFrame({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-paper text-primary fx-grain">
       <Navbar />
-      <main id="public-page-content" className="outline-none" tabIndex={-1}>
+      <div id="public-page-content" className="outline-none" tabIndex={-1}>
         {children}
-      </main>
+      </div>
       <Footer />
     </div>
   );

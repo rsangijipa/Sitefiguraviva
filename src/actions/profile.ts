@@ -1,12 +1,14 @@
 "use server";
 
-import { auth, db, storage } from "@/lib/firebase/admin";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { logAudit } from "@/lib/audit";
 import { z } from "zod";
 import sharp from "sharp";
 import { logger } from "@/lib/logger";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
+import { uploadPublicAvatar } from "@/infrastructure/supabase/storage.server";
+import { getSupabaseSessionClaims } from "@/lib/auth/supabase-session";
 
 const MAX_SIZE_MB = 2; // User requested limit
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -49,8 +51,10 @@ export async function updateProfile(data: {
   if (!sessionCookie) return { error: "Unauthorized", status: 401 };
 
   try {
-    const claims = await auth.verifySessionCookie(sessionCookie, true);
+    const claims = await getSupabaseSessionClaims(sessionCookie);
+    if (!claims) return { error: "Unauthorized", status: 401 };
     const uid = claims.uid;
+    if (!claims.email) return { error: "Unauthorized", status: 401 };
 
     // 1. Validate Input (Zod)
     const parseResult = updateProfileSchema.safeParse(data);
@@ -88,33 +92,43 @@ export async function updateProfile(data: {
     const profileCompletion = Math.round((essentialCount / 6) * 100);
 
     // 2. Fetch current for diff
-    const userDocRef = db.collection("users").doc(uid);
-    const userDoc = await userDocRef.get();
-    const currentData = userDoc.data() || {};
+    const supabase = createSupabaseServiceClient();
+    const { data: currentData, error: currentProfileError } = await supabase
+      .from("profiles")
+      .select(
+        "display_name, bio, phone_number, profession, city, state, date_of_birth, instagram, profile_completion",
+      )
+      .eq("id", uid)
+      .maybeSingle();
 
-    // 3. Update Auth (DisplayName only)
-    await auth.updateUser(uid, {
-      displayName,
+    if (currentProfileError) throw currentProfileError;
+
+    // 3. Keep Supabase Auth metadata and the application profile aligned.
+    const { error: authError } = await supabase.auth.admin.updateUserById(uid, {
+      user_metadata: { display_name: displayName },
     });
+    if (authError) throw authError;
 
-    // 4. Update Firestore
-    await userDocRef.set(
+    // 4. Create missing profiles during the cutover, or update the user's row.
+    const { error: profileError } = await supabase.from("profiles").upsert(
       {
-        displayName,
+        id: uid,
+        email: claims.email,
+        display_name: displayName,
         bio: bio || "",
-        phoneNumber: normalizedPhone,
+        phone_number: normalizedPhone,
         profession: normalizedProfession,
         city: normalizedCity,
         state: normalizedState,
-        dateOfBirth: dateOfBirth || "",
+        date_of_birth: dateOfBirth || null,
         instagram: normalizedInstagram,
-        profileCompletion,
-        profileCompletedAt:
+        profile_completion: profileCompletion,
+        profile_completed_at:
           profileCompletion === 100 ? new Date().toISOString() : null,
-        updatedAt: new Date().toISOString(),
       },
-      { merge: true },
+      { onConflict: "id" },
     );
+    if (profileError) throw profileError;
 
     // 5. Audit Log (Refined Diffs)
     await logAudit({
@@ -123,15 +137,15 @@ export async function updateProfile(data: {
       target: { collection: "users", id: uid, summary: "Updated profile info" },
       diff: {
         before: {
-          displayName: currentData.displayName || "",
-          bio: currentData.bio || "",
-          phoneNumber: currentData.phoneNumber || "",
-          profession: currentData.profession || "",
-          city: currentData.city || "",
-          state: currentData.state || "",
-          dateOfBirth: currentData.dateOfBirth || "",
-          instagram: currentData.instagram || "",
-          profileCompletion: currentData.profileCompletion || 0,
+          displayName: currentData?.display_name || "",
+          bio: currentData?.bio || "",
+          phoneNumber: currentData?.phone_number || "",
+          profession: currentData?.profession || "",
+          city: currentData?.city || "",
+          state: currentData?.state || "",
+          dateOfBirth: currentData?.date_of_birth || "",
+          instagram: currentData?.instagram || "",
+          profileCompletion: currentData?.profile_completion || 0,
         },
         after: {
           displayName,
@@ -158,7 +172,7 @@ export async function updateProfile(data: {
 }
 
 /**
- * Uploads avatar image to Firebase Storage (Admin SDK) with strict sanitization (P1).
+ * Uploads a sanitized avatar through Supabase Storage.
  */
 export async function uploadAvatar(formData: FormData) {
   const cookieStore = await cookies();
@@ -166,8 +180,10 @@ export async function uploadAvatar(formData: FormData) {
   if (!sessionCookie) return { error: "Unauthorized", status: 401 };
 
   try {
-    const claims = await auth.verifySessionCookie(sessionCookie, true);
+    const claims = await getSupabaseSessionClaims(sessionCookie);
+    if (!claims) return { error: "Unauthorized", status: 401 };
     const uid = claims.uid;
+    if (!claims.email) return { error: "Unauthorized", status: 401 };
 
     const file = formData.get("file") as File;
     if (!file) return { error: "Nenhum arquivo enviado." };
@@ -214,43 +230,28 @@ export async function uploadAvatar(formData: FormData) {
       }
     }
 
-    const fileName = `avatars/${uid}/avatar.webp`;
-    const bucket = storage.bucket();
-    const fileRef = bucket.file(fileName);
-
-    await fileRef.save(sanitizedBuffer, {
-      metadata: {
-        contentType: "image/webp",
-        metadata: {
-          sanitized: "true",
-          originalSize: file.size.toString(),
-          uploadedBy: uid,
-        },
-      },
+    const publicUrl = await uploadPublicAvatar({
+      userId: uid,
+      body: sanitizedBuffer,
+      contentType: "image/webp",
     });
 
-    try {
-      await fileRef.makePublic();
-    } catch (e) {
-      logger.warn(
-        "[uploadAvatar] makePublic failed (likely Uniform Bucket Access), continuing",
-        { uid },
-      );
-    }
-    const publicUrl = fileRef.publicUrl();
-
-    // 3. Update User Record & Auth
-    await db.collection("users").doc(uid).set(
+    // 3. Update the application profile and Auth metadata.
+    const supabase = createSupabaseServiceClient();
+    const { error: profileError } = await supabase.from("profiles").upsert(
       {
-        photoURL: publicUrl,
-        updatedAt: new Date().toISOString(),
+        id: uid,
+        email: claims.email,
+        photo_url: publicUrl,
       },
-      { merge: true },
+      { onConflict: "id" },
     );
+    if (profileError) throw profileError;
 
-    await auth.updateUser(uid, {
-      photoURL: publicUrl,
+    const { error: authError } = await supabase.auth.admin.updateUserById(uid, {
+      user_metadata: { avatar_url: publicUrl },
     });
+    if (authError) throw authError;
 
     // 4. Audit Log
     await logAudit({

@@ -1,6 +1,11 @@
 import { z } from "zod";
 
-import type { Timestamp } from "firebase/firestore";
+/** Serializable timestamp shape shared by database and UI adapters. */
+export type Timestamp = {
+  seconds: number;
+  nanoseconds: number;
+  toDate?: () => Date;
+};
 
 // --- PRIMITIVES ---
 
@@ -254,7 +259,7 @@ export interface CommunityReplyDoc {
 // --- USER PROGRESS & CERTIFICATES ---
 
 export interface EnrollmentDoc {
-  uid: string; // Cannonical UID (Firebase Auth)
+  uid: string; // Canonical account identifier
   userId?: string; // Legacy/Alias
   courseId: string;
   userName?: string; // Denormalized for certificates
@@ -266,7 +271,7 @@ export interface EnrollmentDoc {
 
   enrolledAt: Timestamp;
   paidAt?: Timestamp;
-  paymentMethod?: "pix" | "stripe" | "subscription" | "free";
+  paymentMethod?: "pix" | "stripe" | "subscription" | "free" | "manual";
   sourceRef?: string; // Idempotency key (sessionId, chargeId, etc.)
   accessUntil?: Timestamp; // For subscriptions
 

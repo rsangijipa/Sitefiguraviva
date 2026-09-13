@@ -1,14 +1,15 @@
 "use server";
 
-import { adminDb, adminAuth } from "@/lib/firebase/admin";
 import { verifySession, requireAdmin } from "@/lib/auth/server";
-import { FieldValue } from "firebase-admin/firestore";
-import { EnrollmentDoc, EnrollmentStatus } from "@/types/lms";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import { logAudit } from "@/lib/audit";
 import { revalidatePath } from "next/cache";
 import { telemetry } from "@/lib/telemetry";
 import { trackFunnelEvent } from "@/actions/analytics";
-import { writeEnrollmentMirror } from "@/lib/auth/enrollment-service";
+import {
+  writeEnrollmentMirror,
+  type EnrollmentWriteInput,
+} from "@/lib/auth/enrollment-service";
 import { buildPixPayload, getPixConfig } from "@/lib/pix";
 
 /**
@@ -20,29 +21,27 @@ export async function createEnrollmentPending(courseId: string) {
   if (!session) return { success: false, error: "Unauthorized" };
   const uid = session.uid;
 
-  const enrollmentId = `${uid}_${courseId}`;
-  const enrollmentRef = adminDb.collection("enrollments").doc(enrollmentId);
-
   try {
-    const snap = await enrollmentRef.get();
+    const supabase = createSupabaseServiceClient();
+    const { data: existing, error: readError } = await supabase
+      .from("enrollments")
+      .select("status")
+      .eq("user_id", uid)
+      .eq("course_id", courseId)
+      .maybeSingle();
+    if (readError) throw readError;
 
-    if (snap.exists) {
-      const data = snap.data() as EnrollmentDoc;
-      if (data.status === "active" || data.status === "completed") {
-        // Já possui acesso ou concluiu, não faz nada
-        return { success: true };
-      }
-      if (data.status === "pending_approval") return { success: true };
+    if (
+      existing?.status === "active" ||
+      existing?.status === "completed" ||
+      existing?.status === "pending_approval"
+    ) {
+      return { success: true };
     }
 
-    const newEnrollment: Partial<EnrollmentDoc> = {
-      uid: uid,
-      userId: uid,
-      courseId: courseId,
+    const newEnrollment: EnrollmentWriteInput = {
       status: "pending_approval",
       paymentMethod: "pix",
-      createdAt: FieldValue.serverTimestamp() as any,
-      updatedAt: FieldValue.serverTimestamp() as any,
     };
 
     await writeEnrollmentMirror({
@@ -98,25 +97,28 @@ export async function approvePixEnrollment(userId: string, courseId: string) {
   if (!adminSession) return { success: false, error: "Unauthorized" };
 
   const enrollmentId = `${userId}_${courseId}`;
-  const enrollmentRef = adminDb.collection("enrollments").doc(enrollmentId);
 
   try {
-    const snap = await enrollmentRef.get();
-    if (!snap.exists) throw new Error("Enrollment not found");
-
-    const data = snap.data() as EnrollmentDoc;
+    const supabase = createSupabaseServiceClient();
+    const { data, error: readError } = await supabase
+      .from("enrollments")
+      .select("status")
+      .eq("user_id", userId)
+      .eq("course_id", courseId)
+      .maybeSingle();
+    if (readError) throw readError;
+    if (!data) throw new Error("Enrollment not found");
     if (data.status === "active") return { alreadyActive: true };
 
-    const approvalId = `pix_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const approvalId = `pix_${crypto.randomUUID()}`;
 
-    const updates: Partial<EnrollmentDoc> = {
+    const updates: EnrollmentWriteInput = {
       status: "active",
       paymentMethod: "pix",
-      paidAt: FieldValue.serverTimestamp() as any,
+      paidAt: new Date(),
       approvedBy: adminSession.uid,
-      approvedAt: FieldValue.serverTimestamp() as any,
+      approvedAt: new Date(),
       sourceRef: approvalId,
-      updatedAt: FieldValue.serverTimestamp() as any,
     };
 
     await writeEnrollmentMirror({
@@ -183,18 +185,23 @@ export async function rejectPixEnrollment(
   if (!adminSession) return { success: false, error: "Unauthorized" };
 
   const enrollmentId = `${userId}_${courseId}`;
-  const enrollmentRef = adminDb.collection("enrollments").doc(enrollmentId);
 
   try {
-    const snap = await enrollmentRef.get();
-    if (!snap.exists) throw new Error("Enrollment not found");
+    const supabase = createSupabaseServiceClient();
+    const { data, error: readError } = await supabase
+      .from("enrollments")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("course_id", courseId)
+      .maybeSingle();
+    if (readError) throw readError;
+    if (!data) throw new Error("Enrollment not found");
 
-    const updates: Partial<EnrollmentDoc> = {
+    const updates: EnrollmentWriteInput = {
       status: "canceled",
       rejectionReason: reason,
-      approvedBy: adminSession.uid, // "Decided by"
-      approvedAt: FieldValue.serverTimestamp() as any,
-      updatedAt: FieldValue.serverTimestamp() as any,
+      approvedBy: adminSession.uid,
+      approvedAt: new Date(),
     };
 
     await writeEnrollmentMirror({

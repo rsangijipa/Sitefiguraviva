@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -16,6 +16,7 @@ import {
   Users,
   Heart,
   Instagram,
+  ChevronDown,
   ChevronRight,
   type LucideIcon,
 } from "lucide-react";
@@ -34,11 +35,20 @@ const NAV_ICONS: Record<string, LucideIcon> = {
   Blog: PenTool,
 };
 
+const DESKTOP_NAVIGATION = [
+  { label: "Instituto", items: ["Instituto", "Fundadora", "Laura Perls"] },
+  { label: "Formações", href: "/formacoes" },
+  { label: "Acervo", items: ["Biblioteca", "Estante", "Galeria"] },
+  { label: "Conteúdos", items: ["Blog", "Recursos"] },
+] as const;
+
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [desktopMenuOpen, setDesktopMenuOpen] = useState<string | null>(null);
   const pathname = usePathname();
+  const desktopMenuRef = useRef<HTMLDivElement>(null);
 
   // Contador global de locks — evita que o fechamento do menu libere o
   // scroll enquanto um modal de recurso ainda estiver aberto.
@@ -60,7 +70,28 @@ export default function Navbar() {
   // Fecha o menu ao navegar para outra rota.
   useEffect(() => {
     setMobileOpen(false);
+    setDesktopMenuOpen(null);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!desktopMenuOpen) return;
+
+    const closeOnOutsideClick = (event: PointerEvent) => {
+      if (!desktopMenuRef.current?.contains(event.target as Node)) {
+        setDesktopMenuOpen(null);
+      }
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setDesktopMenuOpen(null);
+    };
+
+    document.addEventListener("pointerdown", closeOnOutsideClick);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutsideClick);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [desktopMenuOpen]);
 
   useEffect(() => {
     let lastScrollY = window.scrollY;
@@ -138,16 +169,75 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Menu */}
-          <div className="hidden xl:flex items-center gap-1 font-sans text-[11px] 2xl:text-xs font-bold tracking-[0.18em] uppercase text-text/80">
-            {navItems.map((item) => (
-              <a
-                key={item.label}
-                href={item.href}
-                className="hover:text-primary transition-colors duration-200 hover:bg-areia px-4 py-2 rounded-md min-h-[44px] flex items-center focus-visible:ring-2 focus-visible:ring-primary"
-              >
-                {item.label}
-              </a>
-            ))}
+          <div
+            ref={desktopMenuRef}
+            className="hidden xl:flex items-center gap-1 font-sans text-[11px] 2xl:text-xs font-bold tracking-[0.18em] uppercase text-text/80"
+          >
+            {DESKTOP_NAVIGATION.map((entry) => {
+              if ("href" in entry) {
+                return (
+                  <Link
+                    key={entry.label}
+                    href={entry.href}
+                    className="flex min-h-[44px] items-center rounded-md px-4 py-2 transition-colors duration-200 hover:bg-areia hover:text-primary focus-visible:ring-2 focus-visible:ring-primary"
+                  >
+                    {entry.label}
+                  </Link>
+                );
+              }
+
+              const isOpen = desktopMenuOpen === entry.label;
+              return (
+                <div key={entry.label} className="relative">
+                  <button
+                    type="button"
+                    className="flex min-h-[44px] items-center gap-1 rounded-md px-4 py-2 transition-colors duration-200 hover:bg-areia hover:text-primary focus-visible:ring-2 focus-visible:ring-primary"
+                    aria-expanded={isOpen}
+                    aria-haspopup="menu"
+                    onClick={() =>
+                      setDesktopMenuOpen(isOpen ? null : entry.label)
+                    }
+                  >
+                    {entry.label}
+                    <ChevronDown
+                      size={14}
+                      aria-hidden="true"
+                      className={cn(
+                        "transition-transform",
+                        isOpen && "rotate-180",
+                      )}
+                    />
+                  </button>
+                  {isOpen && (
+                    <ul
+                      role="menu"
+                      aria-label={entry.label}
+                      className="absolute left-0 top-full z-10 mt-2 min-w-52 rounded-md border border-border bg-surface p-1 normal-case tracking-normal shadow-lg"
+                    >
+                      {entry.items.map((itemLabel) => {
+                        const item = navItems.find(
+                          (navItem) => navItem.label === itemLabel,
+                        );
+                        if (!item) return null;
+
+                        return (
+                          <li key={item.label} role="none">
+                            <a
+                              href={item.href}
+                              role="menuitem"
+                              onClick={() => setDesktopMenuOpen(null)}
+                              className="flex min-h-11 items-center rounded-md px-3 py-2 text-sm font-medium text-primary transition-colors hover:bg-areia focus-visible:bg-areia focus-visible:outline-none"
+                            >
+                              {item.label}
+                            </a>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </div>
+              );
+            })}
 
             <div className="h-6 w-px bg-border mx-2" />
 
@@ -180,11 +270,11 @@ export default function Navbar() {
         <>
           <div
             onClick={() => setMobileOpen(false)}
-            className="fixed inset-0 z-[60] bg-[rgba(241,233,219,0.9)] backdrop-blur-sm xl:hidden"
+            className="fixed inset-0 z-[60] bg-[rgba(241,233,219,0.9)] backdrop-blur-sm dark:bg-[rgba(6,10,7,0.86)] xl:hidden"
             aria-hidden="true"
           />
           <div
-            className="fixed top-2 right-2 bottom-2 left-2 z-[70] bg-[rgba(253,250,244,0.96)] backdrop-blur-2xl rounded-[2rem] border border-fv-nevoa flex flex-col overflow-hidden xl:hidden"
+            className="fixed top-2 right-2 bottom-2 left-2 z-[70] flex flex-col overflow-hidden rounded-[2rem] border border-fv-nevoa bg-[rgba(253,250,244,0.96)] backdrop-blur-2xl dark:border-border dark:bg-[rgba(18,22,15,0.96)] xl:hidden"
             role="dialog"
             aria-modal="true"
             aria-label="Menu de navegação"

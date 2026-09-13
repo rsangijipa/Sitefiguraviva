@@ -15,7 +15,7 @@ export interface EnrollmentRecord {
   subscriptionId: string | null;
   enrolledAt: string;
   paidAt: string | null;
-  paymentMethod: "pix" | "stripe" | "subscription" | "free" | null;
+  paymentMethod: "pix" | "stripe" | "subscription" | "free" | "manual" | null;
   sourceRef: string | null;
   accessUntil: string | null;
   approvedBy: string | null;

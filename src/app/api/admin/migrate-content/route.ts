@@ -1,15 +1,12 @@
 import { NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase/admin";
-import { FieldValue } from "firebase-admin/firestore";
 import { verifySession } from "@/lib/auth/server";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
+import type { Json } from "@/infrastructure/supabase/database.types";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   try {
-    // The `session` cookie carries a Supabase JWT, not a Firebase session
-    // cookie, so admin checks go through verifySession() (Supabase-based)
-    // rather than adminAuth.verifySessionCookie, which always threw here.
     const claims = await verifySession();
     if (!claims) {
       return NextResponse.json(
@@ -24,61 +21,55 @@ export async function GET(request: Request) {
       );
     }
 
-    const coursesSnap = await adminDb.collection("courses").get();
+    const supabase = createSupabaseServiceClient();
     let migratedCount = 0;
-    const batch = adminDb.batch();
-    let batchCount = 0;
+    const pageSize = 500;
+    for (let from = 0; ; from += pageSize) {
+      const { data: lessons, error } = await supabase
+        .from("lessons")
+        .select("id, blocks, legacy_payload")
+        .order("id", { ascending: true })
+        .range(from, from + pageSize - 1);
+      if (error) throw error;
 
-    for (const courseDoc of coursesSnap.docs) {
-      const courseId = courseDoc.id;
-      const modulesSnap = await courseDoc.ref.collection("modules").get();
+      for (const lesson of lessons ?? []) {
+        const blocks = Array.isArray(lesson.blocks) ? lesson.blocks : [];
+        const legacyPayload =
+          lesson.legacy_payload && typeof lesson.legacy_payload === "object"
+            ? { ...(lesson.legacy_payload as Record<string, unknown>) }
+            : {};
+        const legacyContent = legacyPayload.content;
 
-      for (const modDoc of modulesSnap.docs) {
-        const lessonsSnap = await modDoc.ref.collection("lessons").get();
+        if (
+          blocks.length > 0 ||
+          typeof legacyContent !== "string" ||
+          !legacyContent.trim()
+        ) {
+          continue;
+        }
 
-        for (const lessonDoc of lessonsSnap.docs) {
-          const lessonData = lessonDoc.data();
-
-          // IF it has legacy string content but no blocks explicitly created yet
-          if (lessonData.content && typeof lessonData.content === "string") {
-            // Check if it already has blocks to avoid duplicating
-            const blocksSnap = await lessonDoc.ref.collection("blocks").get();
-
-            if (blocksSnap.empty) {
-              const newBlockRef = lessonDoc.ref.collection("blocks").doc();
-              batch.set(newBlockRef, {
+        delete legacyPayload.content;
+        legacyPayload.legacyContent = legacyContent;
+        const { error: updateError } = await supabase
+          .from("lessons")
+          .update({
+            blocks: [
+              {
+                id: `legacy-text-${lesson.id}`,
                 type: "text",
                 order: 1,
                 isPublished: true,
-                content: {
-                  text: lessonData.content,
-                },
-                createdAt: FieldValue.serverTimestamp(),
-              });
-
-              // Backup legacy and remove main string
-              batch.update(lessonDoc.ref, {
-                legacyContent: lessonData.content,
-                content: FieldValue.delete(),
-                updatedAt: FieldValue.serverTimestamp(),
-              });
-
-              migratedCount++;
-              batchCount += 2; // Two operations per lesson
-
-              // Commit if batch is getting large (limit is 500)
-              if (batchCount > 400) {
-                await batch.commit();
-                batchCount = 0;
-              }
-            }
-          }
-        }
+                content: { text: legacyContent },
+              },
+            ] as unknown as Json,
+            legacy_payload: legacyPayload as Json,
+          })
+          .eq("id", lesson.id);
+        if (updateError) throw updateError;
+        migratedCount += 1;
       }
-    }
 
-    if (batchCount > 0) {
-      await batch.commit();
+      if (!lessons || lessons.length < pageSize) break;
     }
 
     return NextResponse.json({

@@ -69,3 +69,24 @@ export async function getBearerSupabaseSessionClaims(
   const match = authorization?.match(/^Bearer\s+(.+)$/i);
   return getSupabaseSessionClaims(match?.[1]);
 }
+
+/** Valida um bearer token Supabase sem exigir perfil ou papel na aplicação. */
+export async function getBearerSupabaseUserId(
+  request: Request,
+): Promise<string | null> {
+  const authorization = request.headers.get("authorization");
+  const match = authorization?.match(/^Bearer\s+(.+)$/i);
+
+  if (!match?.[1]) return null;
+
+  try {
+    const supabase = createSupabaseServiceClient();
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser(match[1]);
+    return error || !user ? null : user.id;
+  } catch {
+    return null;
+  }
+}
