@@ -70,6 +70,13 @@ const resourceApps = {
   "jardim-de-pensamentos": lazy(
     () => import("./resources/apps/jardim-de-pensamentos/JardimPensamentosApp"),
   ),
+  "rio-dos-pensamentos": lazy(
+    () => import("./resources/apps/rios-dos-pensamentos/ThoughtRiverApp"),
+  ),
+  "sons-para-awareness": lazy(
+    () =>
+      import("./resources/apps/Escuta-sons-para-awareness/AwarenessSoundsApp"),
+  ),
   "sala-de-pausa": lazy(
     () => import("./resources/apps/sala-de-pausa/SalaDePausaApp"),
   ),

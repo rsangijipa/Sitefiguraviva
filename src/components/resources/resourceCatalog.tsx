@@ -56,7 +56,7 @@ export const resourceCatalog: ResourceDefinition[] = [
     category: "PERCEBER",
     duration: "2–5 min",
     icon: Sparkles,
-    status: "coming-soon",
+    status: "available",
     privacy: "private",
     persistence: "optional",
   },
