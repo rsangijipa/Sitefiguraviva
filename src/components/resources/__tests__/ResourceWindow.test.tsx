@@ -4,11 +4,10 @@ import { ResourceNavigation } from "../ResourceNavigation";
 import type { ResourceSection } from "../resourceCatalog";
 
 describe("ResourceWindow and ResourceNavigation system", () => {
-  it("renders ResourceWindow with ONLY close button and correct accessibility", () => {
-    const onClose = jest.fn();
+  it("renders ResourceWindow without a duplicate inner close button", () => {
 
     render(
-      <ResourceWindow isOpen title="SomaScan" onClose={onClose}>
+      <ResourceWindow isOpen title="SomaScan">
         <div>app content</div>
       </ResourceWindow>,
     );
@@ -17,15 +16,12 @@ describe("ResourceWindow and ResourceNavigation system", () => {
     expect(window).toBeInTheDocument();
     expect(screen.getByText("app content")).toBeInTheDocument();
 
-    // Verify ONLY close button is in the window (no Voltar button inside window)
-    const closeButton = screen.getByRole("button", { name: "Fechar SomaScan" });
-    expect(closeButton).toBeInTheDocument();
+    // Closing is owned by ResourceExperience/ResourceNavigation.
+    expect(screen.queryByRole("button", { name: "Fechar SomaScan" })).not.toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Voltar" }),
     ).not.toBeInTheDocument();
 
-    fireEvent.click(closeButton);
-    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   it("renders ResourceNavigation as header-only (back button + category + title)", () => {
