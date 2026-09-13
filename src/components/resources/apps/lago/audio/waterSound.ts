@@ -230,6 +230,29 @@ class WaterAudioEngine {
       this.reportError(error);
     }
   }
+
+  public dispose() {
+    try {
+      (this.rainNode as AudioBufferSourceNode | null)?.stop();
+    } catch (error) {
+      if (
+        !(error instanceof DOMException && error.name === "InvalidStateError")
+      ) {
+        this.reportError(error);
+      }
+    }
+    this.rainNode?.disconnect();
+    this.rainGain?.disconnect();
+    this.masterGain?.disconnect();
+    if (this.ctx && this.ctx.state !== "closed") void this.ctx.close();
+    this.ctx = null;
+    this.rainNode = null;
+    this.rainGain = null;
+    this.masterGain = null;
+    this.rainState = "none";
+    this.isMuted = true;
+    this.statusListener = null;
+  }
 }
 
 export const waterAudio = new WaterAudioEngine();

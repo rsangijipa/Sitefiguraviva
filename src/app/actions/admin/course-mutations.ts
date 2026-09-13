@@ -26,6 +26,11 @@ import {
   mirrorCourseToSupabase,
   deleteCourseFromSupabase,
 } from "@/lib/course-content/course-mirror";
+import {
+  addAdminMaterial,
+  updateAdminMaterial,
+  deleteAdminMaterial,
+} from "@/features/courses/infrastructure/supabaseAdminCourseRepository.server";
 
 type MutablePayload = Record<string, any>;
 
@@ -422,16 +427,10 @@ export async function addMaterialAction(
 ): Promise<void> {
   await requireAdmin();
   const payload = sanitizeRecord(data, "material");
-  await adminDb
-    .collection("courses")
-    .doc(courseId)
-    .collection("materials")
-    .add({
-      ...payload,
-      createdAt: FieldValue.serverTimestamp(),
-      downloadCount: 0,
-      isPublished: true,
-    });
+  await addAdminMaterial(courseId, {
+    ...payload,
+    isPublished: payload.isPublished ?? true,
+  });
 }
 
 export async function updateMaterialAction(
@@ -443,25 +442,16 @@ export async function updateMaterialAction(
   const payload = stripImmutableFields(
     sanitizeRecord(updates, "material update"),
   );
-  await adminDb
-    .collection("courses")
-    .doc(courseId)
-    .collection("materials")
-    .doc(materialId)
-    .update(payload);
+  await updateAdminMaterial(materialId, payload);
 }
 
 export async function deleteMaterialAction(
   courseId: string,
   materialId: string,
+  filePath?: string,
 ): Promise<void> {
   await requireAdmin();
-  await adminDb
-    .collection("courses")
-    .doc(courseId)
-    .collection("materials")
-    .doc(materialId)
-    .delete();
+  await deleteAdminMaterial(materialId, filePath);
 }
 
 export async function syncLessonsCountAction(

@@ -1,8 +1,10 @@
 "use server";
 
-import { auth, db } from "@/lib/firebase/admin";
-import { Timestamp } from "firebase-admin/firestore";
-import { cookies } from "next/headers";
+import { requireAdmin } from "@/lib/auth/server";
+import {
+  addAdminMaterial,
+  deleteAdminMaterial,
+} from "@/features/courses/infrastructure/supabaseAdminCourseRepository.server";
 import { revalidatePath } from "next/cache";
 
 interface AddMaterialData {
@@ -14,23 +16,12 @@ interface AddMaterialData {
 }
 
 export async function addMaterial(courseId: string, data: AddMaterialData) {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("session")?.value;
-  if (!sessionCookie) return { error: "Unauthorized" };
-
   try {
-    const claims = await auth.verifySessionCookie(sessionCookie, true);
-    if (claims.role !== "admin" && claims.admin !== true) {
-      return { error: "Forbidden" };
-    }
-
-    const ref = db.collection("courses").doc(courseId).collection("materials");
-
-    await ref.add({
-      ...data,
-      createdAt: Timestamp.now(),
-      createdBy: claims.uid,
-    });
+    await requireAdmin();
+    await addAdminMaterial(
+      courseId,
+      data as unknown as Record<string, unknown>,
+    );
 
     revalidatePath(`/admin/courses/${courseId}/materials`);
     revalidatePath(`/portal/materials`);
@@ -47,31 +38,9 @@ export async function deleteMaterial(
   materialId: string,
   filePath?: string,
 ) {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("session")?.value;
-  if (!sessionCookie) return { error: "Unauthorized" };
-
   try {
-    const claims = await auth.verifySessionCookie(sessionCookie, true);
-    if (claims.role !== "admin" && claims.admin !== true)
-      return { error: "Forbidden" };
-
-    const materialRef = db
-      .collection("courses")
-      .doc(courseId)
-      .collection("materials")
-      .doc(materialId);
-    const materialDoc = await materialRef.get();
-    const resolvedFilePath =
-      filePath || materialDoc.data()?.filePath || materialDoc.data()?.file_path;
-
-    if (resolvedFilePath) {
-      const { deleteStorageObject } =
-        await import("@/infrastructure/supabase/storage.server");
-      await deleteStorageObject({ bucket: "uploads", path: resolvedFilePath });
-    }
-
-    await materialRef.delete();
+    await requireAdmin();
+    await deleteAdminMaterial(materialId, filePath);
 
     revalidatePath(`/admin/courses/${courseId}/materials`);
     revalidatePath(`/portal/materials`);

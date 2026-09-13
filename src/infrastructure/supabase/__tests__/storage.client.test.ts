@@ -49,7 +49,7 @@ describe("uploadAdminAsset", () => {
       size: "5 B",
     });
 
-    expect(from).toHaveBeenCalledWith("uploads");
+    expect(from).toHaveBeenCalledWith("course-assets");
     expect(upload).toHaveBeenCalledWith(
       "uploads/admin/uuid-1-cover.jpg",
       expect.any(File),

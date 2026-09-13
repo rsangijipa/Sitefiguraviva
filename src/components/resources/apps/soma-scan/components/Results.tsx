@@ -12,6 +12,7 @@ interface ResultsProps {
 const Results: React.FC<ResultsProps> = ({ data, onRestart }) => {
   const [insight, setInsight] = useState<RecommendationResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const recordedRegions = Object.values(data).filter(Boolean);
 
   useEffect(() => {
     const fetchInsight = async () => {
@@ -54,7 +55,12 @@ const Results: React.FC<ResultsProps> = ({ data, onRestart }) => {
         {/* Local recommendation card */}
         <div className="w-full max-w-md space-y-8">
           {loading ? (
-            <div className="space-y-6 animate-pulse">
+            <div
+              className="space-y-6 animate-pulse"
+              role="status"
+              aria-live="polite"
+              aria-label="Preparando leitura reflexiva"
+            >
               <div className="h-4 bg-stone-200 rounded w-3/4"></div>
               <div className="h-24 bg-stone-200 rounded-xl w-full"></div>
               <div className="h-12 bg-stone-200 rounded-full w-1/2 mx-auto"></div>
@@ -80,6 +86,11 @@ const Results: React.FC<ResultsProps> = ({ data, onRestart }) => {
                 <p className="text-lg text-stone-600 font-light leading-relaxed">
                   {insight?.recommendation}
                 </p>
+                <p className="mt-4 text-xs leading-relaxed text-stone-500">
+                  Esta leitura é apenas reflexiva, não é diagnóstico. Procure
+                  atendimento profissional diante de sintomas intensos, súbitos
+                  ou persistentes.
+                </p>
                 <div className="flex gap-6 mt-8 text-sm text-stone-500 border-t border-sage/20 pt-6">
                   <span className="flex items-center gap-2">
                     <Droplet className="w-4 h-4 text-ocean" /> Hidrate-se
@@ -95,7 +106,39 @@ const Results: React.FC<ResultsProps> = ({ data, onRestart }) => {
             </>
           )}
 
+          <section
+            aria-labelledby="recorded-regions-title"
+            className="border-t border-stone-200 pt-5"
+          >
+            <h3
+              id="recorded-regions-title"
+              className="text-xs font-bold uppercase tracking-[0.16em] text-stone-500"
+            >
+              Regiões registradas
+            </h3>
+            {recordedRegions.length ? (
+              <ul className="mt-3 space-y-2 text-sm text-stone-600">
+                {recordedRegions.map((region) => (
+                  <li
+                    key={region.id}
+                    className="flex justify-between gap-4 border-b border-stone-100 pb-2"
+                  >
+                    <span>{region.label}</span>
+                    <span className="capitalize">
+                      {region.sensation} · {region.intensity}/5
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-3 text-sm text-stone-500">
+                Nenhuma região foi registrada neste scan.
+              </p>
+            )}
+          </section>
+
           <button
+            type="button"
             onClick={onRestart}
             className="w-full py-4 mt-8 flex items-center justify-center gap-2 text-stone-500 hover:text-stone-800 hover:bg-stone-100 rounded-full transition-all border border-transparent hover:border-stone-200 font-medium tracking-wide"
           >

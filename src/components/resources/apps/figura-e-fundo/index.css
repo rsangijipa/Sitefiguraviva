@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  }
+
+  h1, h2, h3, .font-serif-cormorant {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+  }
+}
+
+@keyframes subtleFloat1 {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-5px) rotate(0.4deg);
+  }
+}
+
+@keyframes subtleFloat2 {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(4px) rotate(-0.5deg);
+  }
+}
+
+@keyframes gentleSway {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  33% {
+    transform: rotate(0.8deg);
+  }
+  66% {
+    transform: rotate(-0.6deg);
+  }
+}
+
+@keyframes pulseGaze {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 0.65;
+    transform: scale(1.02);
+  }
+}
+
+.anim-float-1 {
+  animation: subtleFloat1 11s ease-in-out infinite;
+}
+
+.anim-float-2 {
+  animation: subtleFloat2 14s ease-in-out infinite;
+}
+
+.anim-sway {
+  transform-origin: 50% 90%;
+  animation: gentleSway 16s ease-in-out infinite;
+}
+
+.anim-pulse-gaze {
+  animation: pulseGaze 4s ease-in-out infinite;
+}
+
+/* Texture overlay for fine paper grain */
+.paper-texture {
+  background-color: #F8F6F0;
+  background-image: radial-gradient(#E8E4D9 0.75px, transparent 0.75px), radial-gradient(#E8E4D9 0.75px, #F8F6F0 0.75px);
+  background-size: 30px 30px;
+  background-position: 0 0, 15px 15px;
+}
