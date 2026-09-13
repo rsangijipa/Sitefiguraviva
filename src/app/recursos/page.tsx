@@ -21,6 +21,7 @@ export default function ResourcesPage() {
         eyebrow="Experiências"
         title="Recursos para a presença"
         description="Ferramentas interativas para observar, sentir e refletir. Use-as como convites de autocuidado, nunca como diagnóstico."
+        backgroundImage="/assets/fv/heroes/recursos.png"
       />
       <div className="container mx-auto max-w-6xl px-6 pt-12">
         <div className="rounded-2xl border border-gold/30 bg-gold/10 p-5 text-sm leading-relaxed text-primary/75">

@@ -101,6 +101,21 @@ const resourceApps = {
 
 const categories = ["PERCEBER", "REGULAR", "EXPERIMENTAR", "APRENDER"];
 
+const needs = [
+  {
+    category: "PERCEBER",
+    label: "Perceber",
+    prompt: "Quero observar meu corpo",
+  },
+  { category: "REGULAR", label: "Regular", prompt: "Quero desacelerar" },
+  {
+    category: "EXPERIMENTAR",
+    label: "Experimentar",
+    prompt: "Quero entender o que estou sentindo",
+  },
+  { category: "APRENDER", label: "Aprender", prompt: "Quero estudar" },
+];
+
 function ResourceCard({ resource, index }) {
   const Icon = resource.icon;
   const available = resource.status === "available";
@@ -112,7 +127,7 @@ function ResourceCard({ resource, index }) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.28, delay: Math.min(index * 0.035, 0.14) }}
         aria-label={`${resource.title}. Em preparação. ${resource.description}`}
-        className="relative min-h-52 overflow-hidden rounded-2xl border border-primary/10 bg-paper/70 p-5 text-left opacity-75"
+        className="relative min-h-52 overflow-hidden rounded-md border border-primary/10 bg-areia/60 p-5 text-left opacity-75"
       >
         <ResourceCardContent resource={resource} available={false} />
       </motion.div>
@@ -129,7 +144,7 @@ function ResourceCard({ resource, index }) {
       <Link
         href={`/recursos/${resource.slug}`}
         aria-label={`${resource.title}. ${resource.description}`}
-        className="group relative block min-h-52 overflow-hidden rounded-2xl border border-primary/15 bg-paper p-5 text-left shadow-[0_10px_30px_rgba(41,54,39,0.06)] transition duration-200 hover:-translate-y-1 hover:border-terra/45 hover:shadow-[0_16px_34px_rgba(41,54,39,0.11)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-3"
+        className="group relative block min-h-52 overflow-hidden rounded-md border border-primary/15 bg-paper p-5 text-left transition-colors duration-200 hover:border-igarape hover:bg-areia focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-3"
       >
         <ResourceCardContent resource={resource} available />
       </Link>
@@ -182,6 +197,7 @@ export default function ResourcesSection({ initialActiveSlug = null }) {
   const [activeSlug, setActiveSlug] = useState(initialActiveSlug);
   const [activeSection, setActiveSection] = useState(null);
   const [openCategories, setOpenCategories] = useState({});
+  const [needFilter, setNeedFilter] = useState(null);
 
   const resource = resourceCatalog.find((item) => item.slug === activeSlug);
   const ActiveApp = activeSlug ? resourceApps[activeSlug] : null;
@@ -208,7 +224,8 @@ export default function ResourcesSection({ initialActiveSlug = null }) {
       className="border-t border-primary/10 bg-surface py-16 sm:py-20"
     >
       <div className="container relative mx-auto max-w-7xl px-4 sm:px-6">
-        <header className="mx-auto mb-12 max-w-2xl text-center">
+        {/* O QUE VOCÊ PRECISA AGORA? */}
+        <div className="mx-auto mb-14 max-w-3xl text-center">
           <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-terra">
             <Sparkles size={14} aria-hidden="true" />
             Ferramentas de cuidado e formação
@@ -217,77 +234,135 @@ export default function ResourcesSection({ initialActiveSlug = null }) {
             id="resources-title"
             className="heading-section mt-3 text-primary"
           >
-            Recursos <span className="italic text-accent">Interativos</span>
+            O que você precisa agora?
           </h2>
-          <p className="mt-4 text-base leading-relaxed text-text/75 sm:text-lg">
-            Convites digitais para observar, sentir e refletir — no seu ritmo,
-            sem substituir acompanhamento profissional.
-          </p>
-        </header>
+
+          <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {needs.map((need) => {
+              const isActive = needFilter === need.category;
+              return (
+                <button
+                  key={need.category}
+                  type="button"
+                  aria-pressed={isActive}
+                  onClick={() => setNeedFilter(isActive ? null : need.category)}
+                  className={`rounded-md border p-4 text-left transition-colors ${
+                    isActive
+                      ? "border-primary bg-primary text-white"
+                      : "border-primary/15 bg-paper text-primary hover:border-igarape hover:bg-areia"
+                  }`}
+                >
+                  <span className="block font-serif text-lg">{need.label}</span>
+                  <span
+                    className={`mt-1 block text-xs ${isActive ? "text-white/75" : "text-primary/55"}`}
+                  >
+                    {need.prompt}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
         <div className="space-y-10">
-          {categories.map((category) => {
-            const items = resourceCatalog.filter(
-              (item) => item.category === category,
-            );
-            const isOpen = Boolean(openCategories[category]);
-            const visibleItems = isOpen ? items : items.slice(0, 4);
-            const hasHiddenItems = items.length > 4;
-            const panelId = `resources-${category.toLowerCase()}`;
-            const headingId = `category-${category.toLowerCase()}`;
+          {categories
+            .filter((category) => !needFilter || category === needFilter)
+            .map((category) => {
+              const items = resourceCatalog.filter(
+                (item) => item.category === category,
+              );
+              const available = items.filter(
+                (item) => item.status === "available",
+              );
+              const comingSoon = items.filter(
+                (item) => item.status !== "available",
+              );
+              const isOpen = Boolean(openCategories[category]);
+              const visibleAvailable = isOpen
+                ? available
+                : available.slice(0, 4);
+              const visibleComingSoon = isOpen
+                ? comingSoon
+                : comingSoon.slice(0, 4);
+              const hasHiddenItems = items.length > 4;
+              const panelId = `resources-${category.toLowerCase()}`;
+              const headingId = `category-${category.toLowerCase()}`;
 
-            return (
-              <section
-                key={category}
-                aria-labelledby={headingId}
-                className="border-b border-primary/10 pb-10"
-              >
-                <div className="mb-5 flex items-center justify-between gap-4">
-                  <div>
-                    <h3
-                      id={headingId}
-                      className="font-serif text-2xl text-primary"
-                    >
-                      {category}
-                    </h3>
-                    <p className="mt-1 text-sm text-primary/55">
-                      {items.length}{" "}
-                      {items.length === 1 ? "experiência" : "experiências"}
-                    </p>
-                  </div>
-                  {hasHiddenItems ? (
-                    <button
-                      type="button"
-                      aria-expanded={isOpen}
-                      aria-controls={panelId}
-                      onClick={() => toggleCategory(category)}
-                      className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-primary/15 px-4 text-xs font-bold uppercase tracking-widest text-primary transition hover:border-terra hover:text-terra focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
-                    >
-                      {isOpen ? "Recolher" : "Ver todos"}
-                      {isOpen ? (
-                        <ChevronUp size={18} aria-hidden="true" />
-                      ) : (
-                        <ChevronDown size={18} aria-hidden="true" />
-                      )}
-                    </button>
-                  ) : null}
-                </div>
-
-                <div
-                  id={panelId}
-                  className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
+              return (
+                <section
+                  key={category}
+                  aria-labelledby={headingId}
+                  className="border-b border-primary/10 pb-10"
                 >
-                  {visibleItems.map((item, index) => (
-                    <ResourceCard
-                      key={item.slug}
-                      resource={item}
-                      index={index}
-                    />
-                  ))}
-                </div>
-              </section>
-            );
-          })}
+                  <div className="mb-5 flex items-center justify-between gap-4">
+                    <div>
+                      <h3
+                        id={headingId}
+                        className="font-serif text-2xl text-primary"
+                      >
+                        {category}
+                      </h3>
+                      <p className="mt-1 text-sm text-primary/55">
+                        {items.length}{" "}
+                        {items.length === 1 ? "experiência" : "experiências"}
+                      </p>
+                    </div>
+                    {hasHiddenItems ? (
+                      <button
+                        type="button"
+                        aria-expanded={isOpen}
+                        aria-controls={panelId}
+                        onClick={() => toggleCategory(category)}
+                        className="inline-flex min-h-11 items-center gap-2 rounded-md border border-primary/15 px-4 text-xs font-bold uppercase tracking-widest text-primary transition hover:border-terra hover:text-terra focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+                      >
+                        {isOpen ? "Recolher" : "Ver todos"}
+                        {isOpen ? (
+                          <ChevronUp size={18} aria-hidden="true" />
+                        ) : (
+                          <ChevronDown size={18} aria-hidden="true" />
+                        )}
+                      </button>
+                    ) : null}
+                  </div>
+
+                  <div id={panelId} className="space-y-8">
+                    {visibleAvailable.length > 0 && (
+                      <div>
+                        <p className="mb-3 text-[11px] font-bold uppercase tracking-widest text-igarape">
+                          Disponível agora
+                        </p>
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                          {visibleAvailable.map((item, index) => (
+                            <ResourceCard
+                              key={item.slug}
+                              resource={item}
+                              index={index}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {visibleComingSoon.length > 0 && (
+                      <div>
+                        <p className="mb-3 text-[11px] font-bold uppercase tracking-widest text-primary/45">
+                          Em desenvolvimento
+                        </p>
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                          {visibleComingSoon.map((item, index) => (
+                            <ResourceCard
+                              key={item.slug}
+                              resource={item}
+                              index={index}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </section>
+              );
+            })}
         </div>
       </div>
 

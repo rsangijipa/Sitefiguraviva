@@ -2,18 +2,22 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  X,
-  Image as ImageIcon,
-  Search,
-  Filter,
-  ArrowRight,
-} from "lucide-react";
+import { X, Search, Filter, ArrowRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import PublicPageHero from "@/features/public-site/components/PublicPageHero";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { GalleryImage } from "@/features/public-site/gallery/GalleryImage";
 import { normalizeGalleryMedia } from "@/features/public-site/gallery/gallery-media";
+
+const CATEGORIES = [
+  "Todos",
+  "Formação",
+  "Encontros",
+  "Vivências",
+  "Comunidade",
+] as const;
+type Category = (typeof CATEGORIES)[number];
 
 export default function GalleryClient({
   initialGallery,
@@ -21,7 +25,8 @@ export default function GalleryClient({
   initialGallery: any[];
 }) {
   // Showroom State
-  const [filter, setFilter] = useState("Todos");
+  const [filter, setFilter] = useState<Category>("Todos");
+  const [showFilters, setShowFilters] = useState(false);
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("curadoria"); // curadoria | az
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(
@@ -39,39 +44,29 @@ export default function GalleryClient({
     [initialGallery],
   );
 
-  // Extract all unique tags
-  const allTags = useMemo(() => {
-    const tags = safeGallery.flatMap((photo) => {
-      if (Array.isArray(photo.tags)) return photo.tags;
-      if (typeof photo.tags === "string")
-        return photo.tags
-          .split(",")
-          .map((t: string) => t.trim())
-          .filter(Boolean);
-      return [];
-    });
-    return Array.from(new Set(tags)).sort();
-  }, [safeGallery]);
+  const featuredPhoto = safeGallery[0];
+  const restGallery = safeGallery;
 
-  // Helper to check if photo has a tag
-  const hasTag = (photo: any, targetTag: string) => {
-    if (Array.isArray(photo.tags)) return photo.tags.includes(targetTag);
-    if (typeof photo.tags === "string") {
-      return photo.tags
-        .split(",")
-        .map((t: string) => t.trim())
-        .includes(targetTag);
-    }
-    return false;
+  // Helper to check if photo belongs to an editorial category
+  const hasCategory = (photo: any, category: Category) => {
+    if (category === "Todos") return true;
+    const tagsList = Array.isArray(photo.tags)
+      ? photo.tags
+      : typeof photo.tags === "string"
+        ? photo.tags.split(",").map((t: string) => t.trim())
+        : [];
+    const haystack =
+      `${photo.title ?? ""} ${photo.caption ?? ""} ${tagsList.join(" ")}`.toLowerCase();
+    return haystack.includes(category.toLowerCase());
   };
 
   // Filtering Logic
   const filteredPhotos = useMemo(() => {
-    let result = [...safeGallery];
+    let result = [...restGallery];
 
-    // Filter by Tag
+    // Filter by Category
     if (filter !== "Todos") {
-      result = result.filter((p) => hasTag(p, filter));
+      result = result.filter((p) => hasCategory(p, filter));
     }
 
     // Filter by Search
@@ -98,7 +93,7 @@ export default function GalleryClient({
     }
 
     return result;
-  }, [filter, search, sort, safeGallery]);
+  }, [filter, search, sort, restGallery]);
 
   // Lightbox Handlers
   const openLightbox = (index: number, trigger: HTMLButtonElement) => {
@@ -143,108 +138,130 @@ export default function GalleryClient({
     <div className="fv-bg fv-bg-gallery flex min-h-screen flex-col bg-paper">
       <Navbar />
 
-      <div className="fv-container flex-1 pt-28">
+      <PublicPageHero
+        eyebrow="Confluência"
+        title="Galeria de imagens"
+        description="Um registro visual dos encontros, vivências e da beleza que floresce no Instituto Figura Viva."
+        backgroundImage="/assets/fv/heroes/galeria.png"
+      />
+
+      <div className="fv-container flex-1 pt-14">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="space-y-12"
         >
-          {/* HEADER */}
-          <header className="text-center pt-10">
-            <div className="mb-6 inline-flex items-center justify-center rounded-md bg-gold/15 p-3 text-gold-dark">
-              <ImageIcon size={32} />
-            </div>
-            <h1 className="font-serif text-4xl md:text-6xl text-primary font-bold mb-4">
-              Galeria de Imagens
-            </h1>
-            <p className="fv-lead mx-auto text-center">
-              Um registro visual dos encontros, vivências e da beleza que
-              floresce no Instituto Figura Viva.
-            </p>
-          </header>
-
-          {/* SHOWROOM CONTROLS */}
-          <section className="flex flex-col items-end justify-between gap-8 border-y border-border py-6 xl:flex-row">
-            {/* Stats & Search */}
-            <div className="w-full xl:w-auto flex-1 space-y-4">
-              <div className="flex items-center gap-4">
-                <p className="text-xs font-bold uppercase tracking-widest text-muted">
-                  {filteredPhotos.length} Registros
-                </p>
-                <div className="h-4 w-px bg-border" aria-hidden></div>
-                <div className="flex gap-4 text-xs font-bold uppercase tracking-widest text-text/70">
-                  <button
-                    onClick={() => setSort("curadoria")}
-                    className={
-                      sort === "curadoria"
-                        ? "min-h-11 text-primary underline decoration-2 underline-offset-4"
-                        : "min-h-11 hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                    }
-                  >
-                    Recentes
-                  </button>
-                  <button
-                    onClick={() => setSort("az")}
-                    className={
-                      sort === "az"
-                        ? "min-h-11 text-primary underline decoration-2 underline-offset-4"
-                        : "min-h-11 hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                    }
-                  >
-                    A-Z
-                  </button>
+          {/* MOMENTO EM DESTAQUE */}
+          {featuredPhoto && (
+            <section>
+              <p className="mb-4 text-xs font-bold uppercase tracking-[0.24em] text-gold">
+                Momento em destaque
+              </p>
+              <button
+                type="button"
+                aria-label={`Abrir imagem: ${featuredPhoto.title}`}
+                onClick={(event) =>
+                  openLightbox(
+                    filteredPhotos.indexOf(featuredPhoto) >= 0
+                      ? filteredPhotos.indexOf(featuredPhoto)
+                      : 0,
+                    event.currentTarget,
+                  )
+                }
+                className="group relative block h-[52vh] w-full overflow-hidden border border-border text-left"
+              >
+                <GalleryImage
+                  src={featuredPhoto.src}
+                  alt={featuredPhoto.title}
+                  width={featuredPhoto.width}
+                  height={featuredPhoto.height}
+                  imageClassName="opacity-95 transition-opacity group-hover:opacity-100"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-mata/80 via-transparent to-transparent p-6 flex flex-col justify-end">
+                  <h2 className="font-serif text-2xl leading-tight text-white md:text-3xl">
+                    {featuredPhoto.title}
+                  </h2>
                 </div>
-              </div>
+              </button>
+            </section>
+          )}
 
-              <div className="relative group w-full max-w-md">
-                <Search
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-muted transition-colors group-focus-within:text-primary"
-                  size={18}
-                />
-                <input
-                  type="text"
-                  aria-label="Buscar momentos"
-                  placeholder="Buscar momentos..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="h-12 w-full rounded-md border border-border bg-paper pl-12 pr-4 text-primary outline-none transition-colors placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/15"
-                />
-              </div>
-            </div>
-
-            {/* Tags Filter */}
-            <div className="w-full xl:w-auto flex flex-col items-end gap-3">
-              <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted">
-                <Filter size={10} /> Filtros
-              </div>
-              <div className="flex flex-wrap justify-end gap-2">
-                <button
-                  onClick={() => setFilter("Todos")}
-                  aria-pressed={filter === "Todos"}
-                  className={`min-h-11 rounded-sm border px-4 py-2 text-[10px] font-bold uppercase tracking-wider transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
-                    filter === "Todos"
-                      ? "border-primary bg-primary text-white"
-                      : "border-border bg-paper text-text/70 hover:border-igarape hover:bg-areia hover:text-primary"
-                  }`}
-                >
-                  Todos
-                </button>
-                {allTags.map((tag: any) => (
+          {/* CATEGORIAS + FILTRAR */}
+          <section className="flex flex-col gap-6 border-y border-border py-6">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex flex-wrap gap-2">
+                {CATEGORIES.map((cat) => (
                   <button
-                    key={tag}
-                    onClick={() => setFilter(tag)}
-                    aria-pressed={filter === tag}
+                    key={cat}
+                    onClick={() => setFilter(cat)}
+                    aria-pressed={filter === cat}
                     className={`min-h-11 rounded-sm border px-4 py-2 text-[10px] font-bold uppercase tracking-wider transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
-                      filter === tag
+                      filter === cat
                         ? "border-primary bg-primary text-white"
                         : "border-border bg-paper text-text/70 hover:border-igarape hover:bg-areia hover:text-primary"
                     }`}
                   >
-                    {tag}
+                    {cat}
                   </button>
                 ))}
               </div>
+
+              <button
+                type="button"
+                onClick={() => setShowFilters((v) => !v)}
+                aria-expanded={showFilters}
+                className="inline-flex min-h-11 items-center gap-2 rounded-sm border border-border px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-text/70 transition-colors hover:border-igarape hover:bg-areia hover:text-primary"
+              >
+                <Filter size={12} /> Filtrar
+              </button>
             </div>
+
+            {showFilters && (
+              <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="relative group w-full max-w-md">
+                  <Search
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-muted transition-colors group-focus-within:text-primary"
+                    size={18}
+                  />
+                  <input
+                    type="text"
+                    aria-label="Buscar momentos"
+                    placeholder="Buscar momentos..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="h-12 w-full rounded-md border border-border bg-paper pl-12 pr-4 text-primary outline-none transition-colors placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/15"
+                  />
+                </div>
+                <div className="flex items-center gap-4">
+                  <p className="text-xs font-bold uppercase tracking-widest text-muted">
+                    {filteredPhotos.length} Registros
+                  </p>
+                  <div className="h-4 w-px bg-border" aria-hidden></div>
+                  <div className="flex gap-4 text-xs font-bold uppercase tracking-widest text-text/70">
+                    <button
+                      onClick={() => setSort("curadoria")}
+                      className={
+                        sort === "curadoria"
+                          ? "min-h-11 text-primary underline decoration-2 underline-offset-4"
+                          : "min-h-11 hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                      }
+                    >
+                      Recentes
+                    </button>
+                    <button
+                      onClick={() => setSort("az")}
+                      className={
+                        sort === "az"
+                          ? "min-h-11 text-primary underline decoration-2 underline-offset-4"
+                          : "min-h-11 hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                      }
+                    >
+                      A-Z
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </section>
 
           {/* GRID CONTENT */}
@@ -298,7 +315,7 @@ export default function GalleryClient({
             {filteredPhotos.length === 0 && (
               <div className="col-span-full rounded-md border border-dashed border-border bg-areia/50 py-20">
                 <EmptyState
-                  icon={ImageIcon}
+                  icon={Search}
                   title="Nenhum Momento Encontrado"
                   description="Não encontramos imagens para os filtros selecionados. Tente ajustar sua busca ou categoria."
                   className="bg-transparent border-none shadow-none"
@@ -318,7 +335,7 @@ export default function GalleryClient({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4"
+            className="fixed inset-0 z-[100] bg-mata/95 flex items-center justify-center p-4"
             onClick={closeLightbox}
             role="dialog"
             aria-modal="true"

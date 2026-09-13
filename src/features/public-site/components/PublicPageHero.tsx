@@ -6,6 +6,7 @@ interface PublicPageHeroProps {
   description?: string;
   actions?: ReactNode;
   visual?: ReactNode;
+  backgroundImage?: string;
 }
 
 export default function PublicPageHero({
@@ -14,10 +15,23 @@ export default function PublicPageHero({
   description,
   actions,
   visual,
+  backgroundImage,
 }: PublicPageHeroProps) {
   return (
     <header className="relative isolate overflow-hidden border-b border-primary/10 bg-paper px-6 pb-16 pt-32 md:pb-20 md:pt-40">
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_80%_20%,rgba(212,175,55,0.14),transparent_34%),linear-gradient(120deg,rgba(255,255,255,0.62),transparent_62%)]" />
+      {backgroundImage && (
+        <div
+          className="absolute inset-0 -z-20 bg-cover bg-right"
+          style={{ backgroundImage: `url(${backgroundImage})` }}
+        />
+      )}
+      <div
+        className={
+          backgroundImage
+            ? "absolute inset-0 -z-10 bg-[linear-gradient(100deg,rgba(253,251,246,0.97)_0%,rgba(253,251,246,0.88)_38%,rgba(253,251,246,0.55)_62%,rgba(253,251,246,0.2)_100%)]"
+            : "absolute inset-0 -z-10 bg-[radial-gradient(circle_at_80%_20%,rgba(212,175,55,0.14),transparent_34%),linear-gradient(120deg,rgba(255,255,255,0.62),transparent_62%)]"
+        }
+      />
       <div className="container relative z-10 mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.72fr)]">
         <div className="max-w-3xl">
           {eyebrow && (
