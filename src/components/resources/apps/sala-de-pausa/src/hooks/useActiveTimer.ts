@@ -4,7 +4,7 @@
  * Medição precisa via performance.now(), segmentos de tempo ativo e congelamento em background/pausa.
  */
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from "react";
 
 export interface UseActiveTimerOptions {
   plannedDurationSeconds: number;
@@ -31,27 +31,41 @@ export interface ActiveTimerState {
   reset: (newPlannedDuration?: number) => void;
 }
 
-export function useActiveTimer(options: UseActiveTimerOptions): ActiveTimerState {
+export function useActiveTimer(
+  options: UseActiveTimerOptions,
+): ActiveTimerState {
   const { plannedDurationSeconds, onComplete, onPauseByVisibility } = options;
 
   const [isActive, setIsActive] = useState<boolean>(false);
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [isCompleted, setIsCompleted] = useState<boolean>(false);
-  const [isOpenEnded, setIsOpenEnded] = useState<boolean>(plannedDurationSeconds === 0);
+  const [isOpenEnded, setIsOpenEnded] = useState<boolean>(
+    plannedDurationSeconds === 0,
+  );
   const [hideCountdown, setHideCountdown] = useState<boolean>(false);
-  const [plannedSeconds, setPlannedSeconds] = useState<number>(plannedDurationSeconds);
+  const [plannedSeconds, setPlannedSeconds] = useState<number>(
+    plannedDurationSeconds,
+  );
 
   // Estados acumuladores em milissegundos
   const [activeSeconds, setActiveSeconds] = useState<number>(0);
-  const [remainingSeconds, setRemainingSeconds] = useState<number>(plannedDurationSeconds);
+  const [remainingSeconds, setRemainingSeconds] = useState<number>(
+    plannedDurationSeconds,
+  );
 
   // Refs monotônicas
   const accumulatedActiveMsRef = useRef<number>(0);
   const currentSegmentStartRef = useRef<number | null>(null);
   const onCompleteRef = useRef(onComplete);
-  onCompleteRef.current = onComplete;
   const onPauseByVisibilityRef = useRef(onPauseByVisibility);
-  onPauseByVisibilityRef.current = onPauseByVisibility;
+
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
+
+  useEffect(() => {
+    onPauseByVisibilityRef.current = onPauseByVisibility;
+  }, [onPauseByVisibility]);
 
   // Atualiza plannedSeconds quando options mudar
   useEffect(() => {
@@ -73,7 +87,8 @@ export function useActiveTimer(options: UseActiveTimerOptions): ActiveTimerState
 
   const pause = useCallback(() => {
     if (currentSegmentStartRef.current !== null) {
-      accumulatedActiveMsRef.current += performance.now() - currentSegmentStartRef.current;
+      accumulatedActiveMsRef.current +=
+        performance.now() - currentSegmentStartRef.current;
       currentSegmentStartRef.current = null;
     }
     setIsActive(false);
@@ -97,7 +112,8 @@ export function useActiveTimer(options: UseActiveTimerOptions): ActiveTimerState
 
   const stop = useCallback(() => {
     if (currentSegmentStartRef.current !== null) {
-      accumulatedActiveMsRef.current += performance.now() - currentSegmentStartRef.current;
+      accumulatedActiveMsRef.current +=
+        performance.now() - currentSegmentStartRef.current;
       currentSegmentStartRef.current = null;
     }
     setIsActive(false);
@@ -110,21 +126,24 @@ export function useActiveTimer(options: UseActiveTimerOptions): ActiveTimerState
     resume();
   }, [resume]);
 
-  const reset = useCallback((newPlanned?: number) => {
-    accumulatedActiveMsRef.current = 0;
-    currentSegmentStartRef.current = null;
-    const target = newPlanned ?? plannedDurationSeconds;
-    setPlannedSeconds(target);
-    setActiveSeconds(0);
-    setRemainingSeconds(target);
-    setIsActive(false);
-    setIsPaused(false);
-    setIsCompleted(false);
-    setIsOpenEnded(false);
-  }, [plannedDurationSeconds]);
+  const reset = useCallback(
+    (newPlanned?: number) => {
+      accumulatedActiveMsRef.current = 0;
+      currentSegmentStartRef.current = null;
+      const target = newPlanned ?? plannedDurationSeconds;
+      setPlannedSeconds(target);
+      setActiveSeconds(0);
+      setRemainingSeconds(target);
+      setIsActive(false);
+      setIsPaused(false);
+      setIsCompleted(false);
+      setIsOpenEnded(false);
+    },
+    [plannedDurationSeconds],
+  );
 
   const toggleHideCountdown = useCallback(() => {
-    setHideCountdown(prev => !prev);
+    setHideCountdown((prev) => !prev);
   }, []);
 
   // Monitora visibilidade da aba: ao ocultar, congela automaticamente
@@ -138,9 +157,9 @@ export function useActiveTimer(options: UseActiveTimerOptions): ActiveTimerState
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [isActive, pause]);
 
@@ -160,7 +179,8 @@ export function useActiveTimer(options: UseActiveTimerOptions): ActiveTimerState
         if (remaining <= 0 && !isCompleted) {
           // Timer planejado finalizado
           if (currentSegmentStartRef.current !== null) {
-            accumulatedActiveMsRef.current += performance.now() - currentSegmentStartRef.current;
+            accumulatedActiveMsRef.current +=
+              performance.now() - currentSegmentStartRef.current;
             currentSegmentStartRef.current = null;
           }
           setIsActive(false);
@@ -176,11 +196,16 @@ export function useActiveTimer(options: UseActiveTimerOptions): ActiveTimerState
     return () => {
       window.clearInterval(intervalId);
     };
-  }, [isActive, isOpenEnded, plannedSeconds, isCompleted, getCalculatedActiveMs]);
+  }, [
+    isActive,
+    isOpenEnded,
+    plannedSeconds,
+    isCompleted,
+    getCalculatedActiveMs,
+  ]);
 
-  const progressFraction = plannedSeconds > 0
-    ? Math.min(1, activeSeconds / plannedSeconds)
-    : 0;
+  const progressFraction =
+    plannedSeconds > 0 ? Math.min(1, activeSeconds / plannedSeconds) : 0;
 
   return {
     isActive,

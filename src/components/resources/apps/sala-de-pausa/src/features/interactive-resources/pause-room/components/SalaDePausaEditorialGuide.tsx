@@ -4,36 +4,47 @@
  * Apresentação detalhada dos roteiros, diretrizes éticas e versionamento das práticas.
  */
 
-import React, { useState } from 'react';
-import { BookOpen, Wind, Eye, Headphones, Activity, Coffee, ShieldCheck, CheckCircle2 } from 'lucide-react';
-import { PAUSE_PRACTICES, PRACTICE_ORDER } from '../editorialData';
-import { PausePracticeId } from '../../../../types';
+import React, { useState } from "react";
+import {
+  BookOpen,
+  Wind,
+  Eye,
+  Headphones,
+  Activity,
+  Coffee,
+  ShieldCheck,
+  CheckCircle2,
+} from "lucide-react";
+import { PAUSE_PRACTICES, PRACTICE_ORDER } from "../editorialData";
+import { PausePracticeId } from "../../../../types";
+
+const PRACTICE_ICONS = {
+  breathing: Wind,
+  observing: Eye,
+  listening: Headphones,
+  movement: Activity,
+  slowing: Coffee,
+} as const;
 
 interface SalaDePausaEditorialGuideProps {
   onSelectPracticeToStart?: (practiceId: PausePracticeId) => void;
 }
 
-export const SalaDePausaEditorialGuide: React.FC<SalaDePausaEditorialGuideProps> = ({
-  onSelectPracticeToStart,
-}) => {
-  const [selectedPracticeId, setSelectedPracticeId] = useState<PausePracticeId>('breathing');
+export const SalaDePausaEditorialGuide: React.FC<
+  SalaDePausaEditorialGuideProps
+> = ({ onSelectPracticeToStart }) => {
+  const [selectedPracticeId, setSelectedPracticeId] =
+    useState<PausePracticeId>("breathing");
 
   const selectedPractice = PAUSE_PRACTICES[selectedPracticeId];
 
-  const getIcon = (id: PausePracticeId) => {
-    switch (id) {
-      case 'breathing': return Wind;
-      case 'observing': return Eye;
-      case 'listening': return Headphones;
-      case 'movement': return Activity;
-      case 'slowing': return Coffee;
-    }
-  };
-
-  const SelectedIcon = getIcon(selectedPracticeId);
+  const SelectedIcon = PRACTICE_ICONS[selectedPracticeId];
 
   return (
-    <div id="sala-de-pausa-editorial-guide" className="w-full max-w-4xl mx-auto py-4 sm:py-6 text-left">
+    <div
+      id="sala-de-pausa-editorial-guide"
+      className="w-full max-w-4xl mx-auto py-4 sm:py-6 text-left"
+    >
       <div className="mb-6 text-center">
         <span className="text-xs uppercase tracking-wider text-[#96551F] font-bold">
           Diretrizes & Princípios Confluência
@@ -42,7 +53,9 @@ export const SalaDePausaEditorialGuide: React.FC<SalaDePausaEditorialGuideProps>
           Guia Editorial dos Roteiros da Sala de Pausa
         </h2>
         <p className="text-sm text-[#4B4B49] mt-2 max-w-lg mx-auto leading-relaxed">
-          Cada texto da Sala de Pausa foi redigido com cuidado editorial para convidar sem impor, sem diagnósticos clínicos e sem cobrança de produtividade.
+          Cada texto da Sala de Pausa foi redigido com cuidado editorial para
+          convidar sem impor, sem diagnósticos clínicos e sem cobrança de
+          produtividade.
         </p>
       </div>
 
@@ -51,7 +64,7 @@ export const SalaDePausaEditorialGuide: React.FC<SalaDePausaEditorialGuideProps>
         {PRACTICE_ORDER.map((id) => {
           const practice = PAUSE_PRACTICES[id];
           const isCurrent = selectedPracticeId === id;
-          const Icon = getIcon(id);
+          const Icon = PRACTICE_ICONS[id];
 
           return (
             <button
@@ -60,8 +73,8 @@ export const SalaDePausaEditorialGuide: React.FC<SalaDePausaEditorialGuideProps>
               onClick={() => setSelectedPracticeId(id)}
               className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all min-h-[44px] whitespace-nowrap ${
                 isCurrent
-                  ? 'bg-[#005A1F] text-[#FDFAF4] shadow-xs'
-                  : 'bg-[#FDFAF4] border-2 border-[#D8CFBE] text-[#4B4B49] hover:bg-[#F1E9DB]'
+                  ? "bg-[#005A1F] text-[#FDFAF4] shadow-xs"
+                  : "bg-[#FDFAF4] border-2 border-[#D8CFBE] text-[#4B4B49] hover:bg-[#F1E9DB]"
               }`}
             >
               <Icon className="w-4 h-4 text-inherit" strokeWidth={2} />
@@ -129,25 +142,33 @@ export const SalaDePausaEditorialGuide: React.FC<SalaDePausaEditorialGuideProps>
               <li className="flex items-start gap-2">
                 <CheckCircle2 className="w-4 h-4 text-[#005A1F] shrink-0 mt-0.5" />
                 <span>
-                  <strong>Durações suportadas:</strong> 2 min (120s), 3 min (180s), 5 min (300s) e modo aberto.
+                  <strong>Durações suportadas:</strong> 2 min (120s), 3 min
+                  (180s), 5 min (300s) e modo aberto.
                 </span>
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle2 className="w-4 h-4 text-[#005A1F] shrink-0 mt-0.5" />
                 <span>
-                  <strong>Acessibilidade alternativa:</strong> {selectedPractice.capabilities.staticAlternative ? 'Alternativa estática disponível para redução de estímulos.' : 'Interface textual completa sem dependência motora.'}
+                  <strong>Acessibilidade alternativa:</strong>{" "}
+                  {selectedPractice.capabilities.staticAlternative
+                    ? "Alternativa estática disponível para redução de estímulos."
+                    : "Interface textual completa sem dependência motora."}
                 </span>
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle2 className="w-4 h-4 text-[#005A1F] shrink-0 mt-0.5" />
                 <span>
-                  <strong>Áudio:</strong> {selectedPractice.capabilities.audio ? 'Áudio ambiente opcional de igarapé gerado sinteticamente.' : 'Sem áudio obrigatório; repouso auditivo.'}
+                  <strong>Áudio:</strong>{" "}
+                  {selectedPractice.capabilities.audio
+                    ? "Áudio ambiente opcional de igarapé gerado sinteticamente."
+                    : "Sem áudio obrigatório; repouso auditivo."}
                 </span>
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle2 className="w-4 h-4 text-[#005A1F] shrink-0 mt-0.5" />
                 <span>
-                  <strong>Autonomia:</strong> Usuário pode pausar, trocar de prática ou finalizar a qualquer segundo.
+                  <strong>Autonomia:</strong> Usuário pode pausar, trocar de
+                  prática ou finalizar a qualquer segundo.
                 </span>
               </li>
             </ul>
@@ -157,19 +178,26 @@ export const SalaDePausaEditorialGuide: React.FC<SalaDePausaEditorialGuideProps>
 
       {/* Princípios Editoriais Fundamentais */}
       <div className="p-5 rounded-[24px] bg-[#F1E9DB] border-2 border-[#D8CFBE] flex items-start gap-4">
-        <ShieldCheck className="w-6 h-6 text-[#005A1F] shrink-0 mt-0.5" strokeWidth={2} />
+        <ShieldCheck
+          className="w-6 h-6 text-[#005A1F] shrink-0 mt-0.5"
+          strokeWidth={2}
+        />
         <div className="text-xs space-y-1">
           <h4 className="font-serif font-bold text-sm text-[#005A1F]">
             Compromisso Editorial do Instituto Figura Viva
           </h4>
           <p className="text-[#4B4B49] leading-relaxed">
-            1. <strong>Não-prescrição:</strong> Não há afirmações de cura, diagnósticos médicos ou recomendações terapêuticas individuais.
+            1. <strong>Não-prescrição:</strong> Não há afirmações de cura,
+            diagnósticos médicos ou recomendações terapêuticas individuais.
           </p>
           <p className="text-[#4B4B49] leading-relaxed">
-            2. <strong>Linguagem aberta:</strong> Usamos verbos de convite ("perceba", "note", "se for confortável") em vez de ordens imperativas estritas.
+            2. <strong>Linguagem aberta:</strong> Usamos verbos de convite
+            ("perceba", "note", "se for confortável") em vez de ordens
+            imperativas estritas.
           </p>
           <p className="text-[#4B4B49] leading-relaxed">
-            3. <strong>Sem vigilância:</strong> Professores e coordenadores não recebem relatórios de frequência de pausas dos alunos.
+            3. <strong>Sem vigilância:</strong> Professores e coordenadores não
+            recebem relatórios de frequência de pausas dos alunos.
           </p>
         </div>
       </div>
