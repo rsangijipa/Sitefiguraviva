@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import HomeClient from "@/components/HomeClient";
 
@@ -85,15 +86,26 @@ const posts = Array.from({ length: 5 }, (_, index) => ({
 }));
 
 describe("focused homepage", () => {
+  const renderHome = () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    return render(
+      <QueryClientProvider client={queryClient}>
+        <HomeClient initialData={{ courses, posts, gallery: [] }} />
+      </QueryClientProvider>,
+    );
+  };
+
   it("caps formations and recent content at three cards each", () => {
-    render(<HomeClient initialData={{ courses, posts, gallery: [] }} />);
+    renderHome();
 
     expect(screen.getAllByTestId("formation-card")).toHaveLength(3);
     expect(screen.getAllByTestId("content-card")).toHaveLength(3);
   });
 
   it("does not mount long-form or interactive homepage sections", () => {
-    render(<HomeClient initialData={{ courses, posts, gallery: [] }} />);
+    renderHome();
 
     expect(screen.queryByText("Manifesto completo")).not.toBeInTheDocument();
     expect(
