@@ -2,11 +2,10 @@
 
 import { requireAdmin } from "@/lib/auth/server";
 import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
-import { UserRole, UserStatus } from "@/types/user";
+import type { UserRole, UserStatus } from "@/types/user";
 import { revalidatePath } from "next/cache";
 
 import { auditService } from "@/lib/audit";
-import { deepSafeSerialize } from "@/lib/utils";
 
 /**
  * User accounts are created exclusively through Supabase Auth
@@ -174,44 +173,44 @@ export async function listUsersForAdmin(
     const page = pageToken ? parseInt(pageToken, 10) || 1 : 1;
     const perPage = Math.min(pageSize, 1000);
 
-    const [
-      { data: authPage, error: authError },
-      { data: profiles, error: profileError },
-    ] = await Promise.all([
-      supabase.auth.admin.listUsers({ page, perPage }),
-      supabase.from("profiles").select("*"),
-    ]);
+    // `profiles` is the canonical source for platform accounts, roles and
+    // status. Listing through auth.admin made this screen depend on a second
+    // Supabase API even when all required data was already in this table.
+    const from = (page - 1) * perPage;
+    const to = from + perPage - 1;
+    const { data: profiles, error: profileError } = await supabase
+      .from("profiles")
+      .select(
+        "id, email, display_name, photo_url, role, is_active, created_at, last_login_at",
+      )
+      .order("created_at", { ascending: false })
+      .range(from, to);
 
-    if (authError) throw authError;
     if (profileError) throw profileError;
 
-    const profileMap = new Map((profiles || []).map((p) => [p.id, p]));
-
-    const merged = (authPage?.users || []).map((u) => {
-      const p = profileMap.get(u.id);
-      const isActive = p?.is_active ?? true;
+    const users = (profiles || []).map((profile) => {
+      const isActive = profile.is_active ?? true;
       return {
-        id: u.id,
-        uid: u.id,
-        email: u.email || p?.email || null,
-        displayName:
-          p?.display_name || (u.user_metadata as any)?.full_name || null,
-        photoURL: p?.photo_url || null,
-        role: normalizeRole(p?.role),
+        id: profile.id,
+        uid: profile.id,
+        email: profile.email || null,
+        displayName: profile.display_name || null,
+        photoURL: profile.photo_url || null,
+        role: normalizeRole(profile.role),
         isActive,
         status: isActive ? "active" : "disabled",
-        profileCompletion: 0,
-        phoneNumber: (u.user_metadata as any)?.phone || null,
-        createdAt: p?.created_at || u.created_at || null,
-        lastLogin: p?.last_login_at || u.last_sign_in_at || null,
+        profileCompletion: profile.display_name && profile.email ? 100 : 0,
+        phoneNumber: null,
+        createdAt: profile.created_at || null,
+        lastLogin: profile.last_login_at || null,
       };
     });
 
-    const hasNextPage = (authPage?.users?.length || 0) >= perPage;
+    const hasNextPage = users.length === perPage;
 
     return {
       success: true,
-      users: deepSafeSerialize(merged),
+      users,
       nextPageToken: hasNextPage ? String(page + 1) : null,
     };
   } catch (error) {

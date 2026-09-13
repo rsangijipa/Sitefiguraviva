@@ -1,8 +1,7 @@
 import { updateLessonProgress } from "@/app/actions/progress";
 import { assertCanAccessCourse } from "@/lib/auth/access-gate";
 import { verifySession } from "@/lib/auth/server";
-import { progressService } from "@/lib/progress/progressService";
-import { gamificationService } from "@/lib/gamification/gamificationService";
+import { recordLessonProgress } from "@/features/progress/application/recordLessonProgress.server";
 import { revalidatePath } from "next/cache";
 
 jest.mock("next/headers", () => ({
@@ -28,17 +27,15 @@ jest.mock("@/lib/auth/access-gate", () => ({
   assertCanAccessCourse: jest.fn(),
 }));
 
-jest.mock("@/lib/progress/progressService", () => ({
-  progressService: {
-    updateLessonProgress: jest.fn(),
-  },
-}));
-
-jest.mock("@/lib/gamification/gamificationService", () => ({
-  gamificationService: {
-    onLessonCompletion: jest.fn(),
-  },
-}));
+jest.mock(
+  "@/features/progress/application/recordLessonProgress.server",
+  () => ({
+    lessonProgressInput: { parse: jest.fn((value) => value) },
+    recordLessonProgress: jest.fn(),
+    recordLessonAccess: jest.fn(),
+    recalculateCourseProgress: jest.fn(),
+  }),
+);
 
 describe("updateLessonProgress action", () => {
   beforeEach(() => {
@@ -57,12 +54,11 @@ describe("updateLessonProgress action", () => {
       enrollmentId: "user123_c1",
       paymentMethod: "pix",
     });
-    (progressService.updateLessonProgress as jest.Mock).mockResolvedValue(
-      undefined,
-    );
-    (gamificationService.onLessonCompletion as jest.Mock).mockResolvedValue(
-      undefined,
-    );
+    (recordLessonProgress as jest.Mock).mockResolvedValue({
+      transitionedToCompleted: false,
+      courseCompleted: false,
+      coursePercent: 42,
+    });
   });
 
   it("returns unauthenticated when session cookie is missing", async () => {
@@ -96,27 +92,27 @@ describe("updateLessonProgress action", () => {
     });
 
     expect(result).toEqual({ success: true });
-    expect(progressService.updateLessonProgress).toHaveBeenCalledWith(
-      "user123",
-      "c1",
-      "m1",
-      "l1",
-      { status: "in_progress", percent: 42, maxWatchedSecond: 38 },
-    );
-    expect(gamificationService.onLessonCompletion).not.toHaveBeenCalled();
+    expect(recordLessonProgress).toHaveBeenCalledWith("user123", {
+      courseId: "c1",
+      moduleId: "m1",
+      lessonId: "l1",
+      status: "in_progress",
+      percent: 42,
+      maxWatchedSecond: 38,
+    });
   });
 
   it("triggers completion side effects when lesson is completed", async () => {
+    (recordLessonProgress as jest.Mock).mockResolvedValueOnce({
+      transitionedToCompleted: true,
+      courseCompleted: false,
+      coursePercent: 42,
+    });
     const result = await updateLessonProgress("c1", "m1", "l1", {
       status: "completed",
     });
 
     expect(result).toEqual({ success: true });
-    expect(gamificationService.onLessonCompletion).toHaveBeenCalledWith(
-      "user123",
-      "c1",
-      "l1",
-    );
     expect(revalidatePath).toHaveBeenCalledWith("/portal/course/c1");
     expect(revalidatePath).toHaveBeenCalledWith("/admin/enrollments");
   });

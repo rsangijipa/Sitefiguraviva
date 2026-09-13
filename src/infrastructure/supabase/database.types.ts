@@ -254,6 +254,7 @@ export interface Database {
           code: string;
           issued_at: string;
           metadata: Json;
+          event_key: string | null;
           legacy_payload: Json;
         };
         Insert: Partial<Database["public"]["Tables"]["certificates"]["Row"]> & {
@@ -497,6 +498,31 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["public_pages"]["Row"]>;
         Relationships: [];
       };
+      public_documents: {
+        Row: {
+          id: string;
+          title: string;
+          category: string;
+          file_url: string;
+          file_path: string | null;
+          file_size: string | null;
+          file_type: string;
+          is_published: boolean;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<
+          Database["public"]["Tables"]["public_documents"]["Row"]
+        > & {
+          title: string;
+          file_url: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["public_documents"]["Row"]
+        >;
+        Relationships: [];
+      };
       posts: {
         Row: {
           id: string;
@@ -685,6 +711,10 @@ export interface Database {
     };
     Views: Record<string, never>;
     Functions: {
+      bump_course_content_revision: {
+        Args: { p_course_id: string };
+        Returns: number;
+      };
       save_lesson_content: {
         Args: {
           p_course_id: string;
@@ -693,6 +723,20 @@ export interface Database {
           p_blocks: Json;
         };
         Returns: undefined;
+      };
+      grant_xp_idempotent: {
+        Args: {
+          p_user_id: string;
+          p_amount: number;
+          p_reason: string;
+          p_event_key: string;
+          p_metadata?: Json;
+        };
+        Returns: {
+          new_total_xp: number;
+          new_level: number;
+          awarded: boolean;
+        }[];
       };
     };
     Enums: {

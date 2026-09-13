@@ -1,7 +1,9 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   ChevronDown,
@@ -99,20 +101,47 @@ const resourceApps = {
 
 const categories = ["PERCEBER", "REGULAR", "EXPERIMENTAR", "APRENDER"];
 
-function ResourceCard({ resource, index, onOpen }) {
+function ResourceCard({ resource, index }) {
   const Icon = resource.icon;
   const available = resource.status === "available";
 
+  if (!available) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.28, delay: Math.min(index * 0.035, 0.14) }}
+        aria-label={`${resource.title}. Em preparação. ${resource.description}`}
+        className="relative min-h-52 overflow-hidden rounded-2xl border border-primary/10 bg-paper/70 p-5 text-left opacity-75"
+      >
+        <ResourceCardContent resource={resource} available={false} />
+      </motion.div>
+    );
+  }
+
   return (
-    <motion.button
-      type="button"
+    <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.28, delay: Math.min(index * 0.035, 0.14) }}
-      onClick={() => onOpen(resource.slug)}
-      aria-label={`${resource.title}. ${resource.description}`}
-      className="group relative min-h-52 overflow-hidden rounded-2xl border border-primary/15 bg-paper p-5 text-left shadow-[0_10px_30px_rgba(41,54,39,0.06)] transition duration-200 hover:-translate-y-1 hover:border-terra/45 hover:shadow-[0_16px_34px_rgba(41,54,39,0.11)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-3"
+      className="min-h-52"
     >
+      <Link
+        href={`/recursos/${resource.slug}`}
+        aria-label={`${resource.title}. ${resource.description}`}
+        className="group relative block min-h-52 overflow-hidden rounded-2xl border border-primary/15 bg-paper p-5 text-left shadow-[0_10px_30px_rgba(41,54,39,0.06)] transition duration-200 hover:-translate-y-1 hover:border-terra/45 hover:shadow-[0_16px_34px_rgba(41,54,39,0.11)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-3"
+      >
+        <ResourceCardContent resource={resource} available />
+      </Link>
+    </motion.div>
+  );
+}
+
+function ResourceCardContent({ resource, available }) {
+  const Icon = resource.icon;
+
+  return (
+    <>
       <span className="absolute inset-x-0 top-0 h-1 bg-terra/0 transition-colors group-hover:bg-terra/70" />
       <span className="flex items-start justify-between gap-4">
         <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-primary/10 bg-areia text-primary transition group-hover:border-terra/25 group-hover:text-terra">
@@ -144,27 +173,26 @@ function ResourceCard({ resource, index, onOpen }) {
           </span>
         ) : null}
       </span>
-    </motion.button>
+    </>
   );
 }
 
-export default function ResourcesSection() {
-  const [activeSlug, setActiveSlug] = useState(null);
+export default function ResourcesSection({ initialActiveSlug = null }) {
+  const router = useRouter();
+  const [activeSlug, setActiveSlug] = useState(initialActiveSlug);
   const [activeSection, setActiveSection] = useState(null);
   const [openCategories, setOpenCategories] = useState({});
 
   const resource = resourceCatalog.find((item) => item.slug === activeSlug);
   const ActiveApp = activeSlug ? resourceApps[activeSlug] : null;
 
-  const handleOpen = (slug) => {
-    setActiveSlug(slug);
-    const found = resourceCatalog.find((item) => item.slug === slug);
-    if (found?.sections?.[0]) {
-      setActiveSection(found.sections[0].id);
+  useEffect(() => {
+    if (resource?.sections?.[0]) {
+      setActiveSection(resource.sections[0].id);
     } else {
       setActiveSection(null);
     }
-  };
+  }, [resource?.slug]);
 
   const toggleCategory = (category) => {
     setOpenCategories((current) => ({
@@ -254,7 +282,6 @@ export default function ResourcesSection() {
                       key={item.slug}
                       resource={item}
                       index={index}
-                      onOpen={handleOpen}
                     />
                   ))}
                 </div>
@@ -268,7 +295,10 @@ export default function ResourcesSection() {
         isOpen={Boolean(resource)}
         title={resource?.title ?? "Recurso interativo"}
         category={resource ? `${resource.category} · Figura Viva` : undefined}
-        onClose={() => setActiveSlug(null)}
+        onClose={() => {
+          setActiveSlug(null);
+          router.push("/recursos");
+        }}
         sections={resource?.sections}
         activeSection={activeSection}
         onSectionChange={setActiveSection}

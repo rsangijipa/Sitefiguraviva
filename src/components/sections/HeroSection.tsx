@@ -4,7 +4,7 @@ import FiguraVivaTree from "../visual/FiguraVivaTree";
 
 export default function HeroSection({ initialData }: { initialData?: any }) {
   const data = initialData ?? {};
-  const whatsappNumber = data.phone?.replace(/\D/g, "") || "11999999999";
+  const whatsappNumber = data.phone?.replace(/\D/g, "") || "";
 
   return (
     <header className="fv-bg fv-bg-hero relative flex min-h-[min(820px,90vh)] items-center overflow-hidden bg-paper px-6 pt-32 pb-24 md:pt-40 md:pb-32">
@@ -42,22 +42,34 @@ export default function HeroSection({ initialData }: { initialData?: any }) {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-6">
-              <a
-                href={`https://wa.me/55${whatsappNumber}?text=Olá! Gostaria de informações sobre as formações do Instituto Figura Viva.`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group relative flex items-center justify-center gap-4 overflow-hidden rounded-md bg-primary px-10 py-5 text-white transition-colors hover:bg-primary-dark active:scale-[0.98]"
-              >
-                <div className="relative z-10 flex items-center gap-3">
+              {whatsappNumber ? (
+                <a
+                  href={`https://wa.me/55${whatsappNumber}?text=Olá! Gostaria de informações sobre as formações do Instituto Figura Viva.`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group relative flex items-center justify-center gap-4 overflow-hidden rounded-md bg-primary px-10 py-5 text-white transition-colors hover:bg-primary-dark active:scale-[0.98]"
+                >
+                  <div className="relative z-10 flex items-center gap-3">
+                    <span className="font-bold uppercase tracking-[0.15em] text-[13px]">
+                      Falar com Consultora
+                    </span>
+                    <ArrowRight
+                      size={20}
+                      className="group-hover:translate-x-1.5 transition-transform duration-300"
+                    />
+                  </div>
+                </a>
+              ) : (
+                <a
+                  href="/contato"
+                  className="group relative flex items-center justify-center gap-4 overflow-hidden rounded-md bg-primary px-10 py-5 text-white transition-colors hover:bg-primary-dark active:scale-[0.98]"
+                >
                   <span className="font-bold uppercase tracking-[0.15em] text-[13px]">
-                    Falar com Consultora
+                    Entrar em contato
                   </span>
-                  <ArrowRight
-                    size={20}
-                    className="group-hover:translate-x-1.5 transition-transform duration-300"
-                  />
-                </div>
-              </a>
+                  <ArrowRight size={20} aria-hidden="true" />
+                </a>
+              )}
 
               <a
                 href="/formacoes"

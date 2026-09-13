@@ -5,8 +5,7 @@ import { Timestamp } from "firebase-admin/firestore";
 import { cookies } from "next/headers";
 import { rateLimit, RateLimitPresets } from "@/lib/rateLimit";
 import type { AssessmentSubmissionDoc } from "@/types/assessment";
-import { gamificationService } from "@/lib/gamification/gamificationService";
-import { XP_VALUES } from "@/lib/gamification";
+import { awardCanonicalCompletion } from "@/features/gamification/application/awardCanonicalGamification.server";
 
 /**
  * Manual grading for essay and practical questions
@@ -159,15 +158,11 @@ export async function manualGradeSubmission(
 
     // Award XP if passed
     if (passed) {
-      await gamificationService.awardXp(
-        submission.userId,
-        XP_VALUES.QUIZ_PASSED,
-        "quiz_passed",
-        {
-          assessmentId: submission.assessmentId,
-          courseId: submission.courseId,
-        },
-      );
+      await awardCanonicalCompletion(submission.userId, {
+        kind: "quiz",
+        courseId: submission.courseId,
+        submissionId,
+      });
     }
 
     return {

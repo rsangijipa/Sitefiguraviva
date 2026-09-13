@@ -12,14 +12,32 @@ import { z } from "zod";
 // action used to write to Firestore while both public blog pages and the
 // admin list/delete actions already read/wrote Supabase, so anything
 // created or edited here silently diverged from what the site showed.
-const blogPostSchema = z.object({
-  title: z.string().min(1, "Título é obrigatório"),
-  excerpt: z.string().optional(),
-  content: z.string().min(1, "Conteúdo é obrigatório"),
-  type: z.enum(["blog", "news", "announcement", "library"]).default("blog"),
-  image: z.string().url().or(z.literal("")).optional(),
-  pdf_url: z.string().url().or(z.literal("")).optional(),
-});
+const blogPostSchema = z
+  .object({
+    title: z.string().min(1, "Título é obrigatório"),
+    excerpt: z.string().optional(),
+    content: z.string().optional().default(""),
+    type: z.enum(["blog", "news", "announcement", "library"]).default("blog"),
+    image: z.string().url().or(z.literal("")).optional(),
+    pdf_url: z.string().url().or(z.literal("")).optional(),
+  })
+  .superRefine((value, context) => {
+    if (value.type === "library" && !value.pdf_url) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["pdf_url"],
+        message: "Um arquivo PDF é obrigatório para materiais da biblioteca",
+      });
+    }
+
+    if (value.type !== "library" && !value.content.trim()) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["content"],
+        message: "Conteúdo é obrigatório",
+      });
+    }
+  });
 
 function slugify(title: string): string {
   return title

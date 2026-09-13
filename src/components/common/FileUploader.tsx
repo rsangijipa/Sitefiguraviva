@@ -5,25 +5,37 @@ import { useToast } from "@/context/ToastContext";
 import { Upload, FileText, X, Loader2, CheckCircle } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
+export interface AssessmentAttachment {
+  storagePath: string;
+  fileName: string;
+  mimeType: string;
+  size: number;
+}
+
 interface FileUploaderProps {
-  onUpload: (fileUrl: string) => void;
+  onUpload: (file: AssessmentAttachment | null) => void;
+  submissionId: string;
+  answerId: string;
   acceptedTypes?: string[];
   maxSizeMB?: number;
-  currentFileUrl?: string;
+  currentFile?: AssessmentAttachment;
 }
 
 export default function FileUploader({
   onUpload,
   acceptedTypes = [".pdf", ".doc", ".docx", ".jpg", ".png", ".mp4"],
   maxSizeMB = 10,
-  currentFileUrl,
+  submissionId,
+  answerId,
+  currentFile,
 }: FileUploaderProps) {
   const { addToast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [uploading, setUploading] = useState(false);
-  const [fileUrl, setFileUrl] = useState(currentFileUrl || "");
-  const [fileName, setFileName] = useState("");
+  const [attachment, setAttachment] = useState<AssessmentAttachment | null>(
+    currentFile || null,
+  );
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -47,15 +59,16 @@ export default function FileUploader({
     }
 
     setUploading(true);
-    setFileName(file.name);
 
     try {
       // Create FormData
       const formData = new FormData();
       formData.append("file", file);
+      formData.append("submissionId", submissionId);
+      formData.append("answerId", answerId);
 
       // Upload to server
-      const response = await fetch("/api/upload", {
+      const response = await fetch("/api/assessment-files", {
         method: "POST",
         body: formData,
       });
@@ -66,8 +79,8 @@ export default function FileUploader({
 
       const data = await response.json();
 
-      setFileUrl(data.fileUrl);
-      onUpload(data.fileUrl);
+      setAttachment(data);
+      onUpload(data);
       addToast("Arquivo enviado com sucesso!", "success");
     } catch (error) {
       console.error("Upload Error:", error);
@@ -78,15 +91,14 @@ export default function FileUploader({
   };
 
   const handleRemove = () => {
-    setFileUrl("");
-    setFileName("");
-    onUpload("");
+    setAttachment(null);
+    onUpload(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
 
-  if (fileUrl) {
+  if (attachment) {
     return (
       <div className="bg-green-50 border-2 border-green-200 rounded-xl p-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -95,14 +107,7 @@ export default function FileUploader({
             <div className="font-bold text-green-800 text-sm">
               Arquivo enviado
             </div>
-            <a
-              href={fileUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-green-600 hover:underline"
-            >
-              {fileName || "Visualizar arquivo"}
-            </a>
+            <div className="text-xs text-green-600">{attachment.fileName}</div>
           </div>
         </div>
         <button

@@ -21,10 +21,13 @@ import {
 import PageShell from "@/components/ui/PageShell";
 import { useFounderSettings } from "@/hooks/useSiteSettings";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import NotificationBell from "@/components/layout/NotificationBell";
 import {
   ADMIN_NAVIGATION_GROUPS,
   isAdminRouteActive,
 } from "@/config/admin-navigation";
+
+const ADMIN_NAV_ITEMS = ADMIN_NAVIGATION_GROUPS.flatMap((group) => group.items);
 
 export default function AdminShell({
   children,
@@ -48,19 +51,17 @@ export default function AdminShell({
 
   const isLoginPage = pathname?.startsWith("/admin/login");
 
+  const suggestions = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return ADMIN_NAV_ITEMS.slice(0, 6);
+    return ADMIN_NAV_ITEMS.filter((item) =>
+      item.label.toLowerCase().includes(q),
+    ).slice(0, 8);
+  }, [searchQuery]);
+
   if (isLoginPage) {
     return <>{children}</>;
   }
-
-  const navItems = ADMIN_NAVIGATION_GROUPS.flatMap((group) => group.items);
-
-  const suggestions = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) return navItems.slice(0, 6);
-    return navItems
-      .filter((item) => item.label.toLowerCase().includes(q))
-      .slice(0, 8);
-  }, [searchQuery]);
 
   const goTo = (path: string) => {
     setSearchOpen(false);
@@ -92,11 +93,23 @@ export default function AdminShell({
                 sizes="40px"
               />
             </div>
-            <h1 className={`font-serif text-xl text-primary tracking-tight ${isSidebarCollapsed ? "lg:hidden" : ""}`}>
+            <h1
+              className={`font-serif text-xl text-primary tracking-tight ${isSidebarCollapsed ? "lg:hidden" : ""}`}
+            >
               Figura <span className="font-light text-gold italic">Viva</span>
             </h1>
           </div>
-          <button onClick={() => setIsSidebarCollapsed((value) => !value)} className="hidden lg:grid h-8 w-8 place-items-center rounded-md text-stone-500 hover:bg-stone-100" aria-label={isSidebarCollapsed ? "Expandir menu" : "Recolher menu"}>{isSidebarCollapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}</button>
+          <button
+            onClick={() => setIsSidebarCollapsed((value) => !value)}
+            className="hidden lg:grid h-8 w-8 place-items-center rounded-md text-stone-500 hover:bg-stone-100"
+            aria-label={isSidebarCollapsed ? "Expandir menu" : "Recolher menu"}
+          >
+            {isSidebarCollapsed ? (
+              <PanelLeftOpen size={16} />
+            ) : (
+              <PanelLeftClose size={16} />
+            )}
+          </button>
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
             <span className="text-[9px] uppercase tracking-[0.25em] font-bold text-stone-400">
@@ -111,7 +124,9 @@ export default function AdminShell({
         >
           {ADMIN_NAVIGATION_GROUPS.map((group) => (
             <section key={group.label} aria-label={group.label}>
-              <h2 className={`px-3 pb-1 pt-3 text-[9px] font-bold uppercase tracking-[0.18em] text-stone-400 ${isSidebarCollapsed ? "lg:hidden" : ""}`}>
+              <h2
+                className={`px-3 pb-1 pt-3 text-[9px] font-bold uppercase tracking-[0.18em] text-stone-400 ${isSidebarCollapsed ? "lg:hidden" : ""}`}
+              >
                 {group.label}
               </h2>
               <div className="space-y-2">
@@ -146,31 +161,39 @@ export default function AdminShell({
           ))}
         </nav>
 
-        <div className="space-y-3 border-t border-border p-6">
+        <div
+          className={`space-y-3 border-t border-border p-6 ${isSidebarCollapsed ? "lg:px-3" : ""}`}
+        >
           <Link
             href="/"
+            title={isSidebarCollapsed ? "Ir para o site" : undefined}
             className="group flex w-full items-center justify-center gap-3 rounded-md border border-border bg-paper px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-text transition-colors hover:border-igarape hover:text-primary"
           >
             <Home
               size={16}
               className="group-hover:scale-110 transition-transform"
             />
-            Ir para o Site
+            <span className={isSidebarCollapsed ? "lg:hidden" : ""}>
+              Ir para o Site
+            </span>
           </Link>
 
           <button
             onClick={() => signOut()}
+            title={isSidebarCollapsed ? "Sair" : undefined}
             className="group flex w-full items-center justify-center gap-3 rounded-md px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-muted transition-colors hover:bg-error/10 hover:text-error"
           >
             <LogOut
               size={16}
               className="group-hover:-translate-x-1 transition-transform"
             />
-            Sair
+            <span className={isSidebarCollapsed ? "lg:hidden" : ""}>Sair</span>
           </button>
 
-          <p className="text-center text-[9px] text-stone-300 font-bold tracking-widest pt-2 opacity-60">
-            © 2024 INSTITUTO FIGURA VIVA
+          <p
+            className={`text-center text-[9px] text-stone-300 font-bold tracking-widest pt-2 opacity-60 ${isSidebarCollapsed ? "lg:hidden" : ""}`}
+          >
+            © {new Date().getFullYear()} INSTITUTO FIGURA VIVA
           </p>
         </div>
       </aside>
@@ -220,21 +243,12 @@ export default function AdminShell({
           </div>
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto animate-fade-in-up">
-          <Breadcrumbs />
-          <header className="mb-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
-            <div className="flex items-center gap-4">
-              <div className="hidden sm:block">
-                  <h2 className="font-serif text-xl md:text-2xl text-primary mb-0.5 tracking-tight">
-                  Painel de Controle
-                </h2>
-                <p className="text-stone-400 text-[9px] md:text-[10px] font-bold uppercase tracking-[0.15em]">
-                  Gestão Institucional
-                </p>
-              </div>
+        <div className="relative z-10 mx-auto max-w-7xl animate-fade-in-up">
+          <header className="mb-6 flex flex-col gap-3 rounded-2xl border border-stone-200 bg-white/85 px-4 py-3 shadow-sm backdrop-blur-md md:flex-row md:items-center md:justify-between">
+            <div className="min-w-0">
+              <Breadcrumbs className="!mb-0" />
             </div>
-
-            <div className="w-full md:w-auto flex items-center gap-3">
+            <div className="flex w-full items-center gap-3 md:w-auto">
               <div className="relative flex-1 md:flex-none md:w-64">
                 <div className="flex items-center gap-2 rounded-md border border-border bg-paper px-3 py-1.5">
                   <Search size={14} className="text-stone-400" />
@@ -246,7 +260,7 @@ export default function AdminShell({
                     }}
                     onFocus={() => setSearchOpen(true)}
                     onBlur={() => setTimeout(() => setSearchOpen(false), 120)}
-                    placeholder="Pesquisar..."
+                    placeholder="Ir para uma área…"
                     className="w-full bg-transparent text-xs text-stone-700 outline-none placeholder:text-stone-400"
                   />
                 </div>
@@ -272,6 +286,10 @@ export default function AdminShell({
                     )}
                   </div>
                 )}
+              </div>
+
+              <div className="shrink-0 rounded-full border border-stone-200 bg-white shadow-sm">
+                <NotificationBell />
               </div>
 
               <div className="flex items-center gap-2 bg-white/60 backdrop-blur-md p-1 pr-1.5 rounded-full border border-white/50 shadow-sm">

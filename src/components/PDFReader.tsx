@@ -2,7 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Download, ExternalLink, FileText, Loader2, X } from "lucide-react";
+import {
+  ArrowLeft,
+  Download,
+  ExternalLink,
+  FileText,
+  Loader2,
+  X,
+} from "lucide-react";
 import Tooltip from "./ui/Tooltip";
 import { SafeHtml } from "./SafeHtml";
 
@@ -21,7 +28,10 @@ const PDFReader = ({ isOpen, onClose, article }: PDFReaderProps) => {
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
   const pdfUrl = article?.pdf_url || article?.pdfUrl || "";
-  const viewerUrl = pdfUrl ? `${pdfUrl}#toolbar=1&navpanes=0&view=FitH` : "";
+  // Firefox honors toolbar=0; Chromium keeps its native controls. The site
+  // chrome therefore only provides context and a return action, while file
+  // controls stay in one place: the document viewer.
+  const viewerUrl = pdfUrl ? `${pdfUrl}#toolbar=0&navpanes=0&view=FitH` : "";
 
   const handleFrameLoad = (event: React.SyntheticEvent<HTMLIFrameElement>) => {
     // Supabase Storage returns JSON errors with HTTP 4xx inside an iframe.
@@ -57,43 +67,24 @@ const PDFReader = ({ isOpen, onClose, article }: PDFReaderProps) => {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex flex-col bg-[#f4efe3] text-primary">
-          <div className="z-10 flex shrink-0 items-center justify-between gap-4 border-b border-primary/10 bg-primary px-4 py-3 text-white shadow-lg md:px-8">
-            <div className="min-w-0">
-              <h2 className="mb-1 text-xs font-bold uppercase tracking-widest text-gold md:text-sm">
-                Biblioteca Figura Viva
-              </h2>
-              <p className="max-w-[58vw] truncate text-sm text-white/75 md:max-w-3xl">
-                {article.title}
+        <div className="fixed inset-0 z-[100] flex flex-col bg-paper text-primary">
+          <header className="z-10 flex shrink-0 items-center gap-3 border-b border-primary/10 bg-primary px-4 py-3 text-white shadow-sm md:px-8">
+            <button
+              onClick={onClose}
+              className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-md px-2 text-xs font-bold uppercase tracking-wider text-white/85 transition hover:bg-white/10 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              <ArrowLeft size={17} />
+              <span className="hidden sm:inline">Biblioteca</span>
+            </button>
+            <div className="min-w-0 flex-1 border-l border-white/20 pl-3">
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">
+                Leitura
               </p>
+              <h2 className="truncate font-serif text-base font-semibold text-white md:text-lg">
+                {article.title}
+              </h2>
             </div>
-
             <div className="flex shrink-0 items-center gap-2">
-              {pdfUrl && (
-                <>
-                  <Tooltip content="Abrir em nova aba">
-                    <a
-                      href={pdfUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      aria-label="Abrir PDF em nova aba"
-                      className="inline-flex size-10 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                    >
-                      <ExternalLink size={18} />
-                    </a>
-                  </Tooltip>
-                  <Tooltip content="Baixar documento">
-                    <a
-                      href={pdfUrl}
-                      download
-                      aria-label="Baixar PDF"
-                      className="inline-flex size-10 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                    >
-                      <Download size={18} />
-                    </a>
-                  </Tooltip>
-                </>
-              )}
               <Tooltip content="Fechar Leitor">
                 <button
                   onClick={onClose}
@@ -104,11 +95,11 @@ const PDFReader = ({ isOpen, onClose, article }: PDFReaderProps) => {
                 </button>
               </Tooltip>
             </div>
-          </div>
+          </header>
 
-          <div className="relative flex min-h-0 flex-1 overflow-hidden bg-[radial-gradient(circle_at_top_left,rgba(182,143,77,0.16),transparent_34%),linear-gradient(180deg,#f7f1e6,#eee3d0)] p-3 md:p-8">
+          <div className="relative flex min-h-0 flex-1 overflow-hidden bg-areia/60 p-3 md:p-6">
             {pdfUrl && !failed ? (
-              <div className="relative mx-auto flex h-full w-full max-w-6xl flex-col overflow-hidden rounded-md border border-primary/15 bg-white shadow-2xl">
+              <div className="relative mx-auto flex h-full w-full max-w-7xl flex-col overflow-hidden rounded-lg border border-primary/15 bg-white shadow-lg">
                 {loading && (
                   <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-paper/95 px-6 text-center text-primary">
                     <Loader2 className="animate-spin text-gold" size={28} />

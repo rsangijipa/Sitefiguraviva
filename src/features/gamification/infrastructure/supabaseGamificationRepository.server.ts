@@ -1,10 +1,13 @@
-import { randomUUID } from "crypto";
-import { createSupabaseBrowserClient } from "@/infrastructure/supabase/client";
+import "server-only";
+
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import type { TableRow } from "@/infrastructure/supabase/database.types";
+import type { Json } from "@/infrastructure/supabase/database.types";
 
 type ProfileRow = TableRow<"gamification_profiles">;
 type TransactionRow = TableRow<"xp_transactions">;
 type BadgeRow = TableRow<"earned_badges">;
+export type GamificationReason = TransactionRow["reason"];
 
 export interface GamificationProfileRecord {
   userId: string;
@@ -34,7 +37,7 @@ function mapProfileRow(row: ProfileRow): GamificationProfileRecord {
 
 export async function getProfile(
   userId: string,
-  supabase = createSupabaseBrowserClient(),
+  supabase = createSupabaseServiceClient(),
 ): Promise<GamificationProfileRecord> {
   const { data, error } = await supabase
     .from("gamification_profiles")
@@ -61,7 +64,7 @@ export async function getProfile(
 }
 
 export async function listProfiles(
-  supabase = createSupabaseBrowserClient(),
+  supabase = createSupabaseServiceClient(),
 ): Promise<GamificationProfileRecord[]> {
   const { data, error } = await supabase
     .from("gamification_profiles")
@@ -72,51 +75,41 @@ export async function listProfiles(
   return (data ?? []).map((row) => mapProfileRow(row as ProfileRow));
 }
 
+/** Trusted-only atomic award. The caller creates a deterministic event key. */
 export async function awardXp(
-  userId: string,
-  amount: number,
-  reason: TransactionRow["reason"],
-  metadata?: Record<string, unknown>,
-  supabase = createSupabaseBrowserClient(),
+  input: {
+    userId: string;
+    amount: number;
+    reason: GamificationReason;
+    eventKey: string;
+    metadata?: Record<string, unknown>;
+  },
+  supabase = createSupabaseServiceClient(),
 ): Promise<{
   newTotalXp: number;
   newLevel: number;
   leveledUp: boolean;
-} | void> {
-  if (!userId || amount <= 0) return;
-
-  const profile = await getProfile(userId, supabase);
-  const newTotalXp = profile.totalXp + amount;
-  const newLevel = Math.max(1, Math.floor(newTotalXp / 100) + 1);
-
-  const profileUpdate = {
-    user_id: userId,
-    total_xp: newTotalXp,
-    level: newLevel,
-    updated_at: new Date().toISOString(),
-  };
-
-  const { error: updateError } = await supabase
-    .from("gamification_profiles")
-    .upsert(profileUpdate);
-
-  if (updateError) throw updateError;
-
-  const { error: txError } = await supabase.from("xp_transactions").insert({
-    id: randomUUID(),
-    user_id: userId,
-    amount,
-    reason,
-    metadata: (metadata || {}) as any,
-    timestamp: new Date().toISOString(),
+  awarded: boolean;
+}> {
+  if (!input.userId || input.amount <= 0 || !input.eventKey)
+    throw new Error("Invalid gamification award");
+  const previous = await getProfile(input.userId, supabase);
+  const { data, error } = await supabase.rpc("grant_xp_idempotent", {
+    p_user_id: input.userId,
+    p_amount: input.amount,
+    p_reason: input.reason,
+    p_event_key: input.eventKey,
+    p_metadata: (input.metadata ?? {}) as Json,
   });
-
-  if (txError) throw txError;
-
+  if (error) throw error;
+  const result = data?.[0];
+  if (!result)
+    throw new Error("Gamification ledger did not return an award result");
   return {
-    newTotalXp,
-    newLevel,
-    leveledUp: newLevel > profile.level,
+    newTotalXp: result.new_total_xp,
+    newLevel: result.new_level,
+    leveledUp: result.new_level > previous.level,
+    awarded: result.awarded,
   };
 }
 
@@ -124,7 +117,7 @@ export async function awardBadge(
   userId: string,
   badgeId: string,
   courseId?: string,
-  supabase = createSupabaseBrowserClient(),
+  supabase = createSupabaseServiceClient(),
 ): Promise<void> {
   if (!userId || !badgeId) return;
 
@@ -143,7 +136,6 @@ export async function awardBadge(
   if (profileError) throw profileError;
 
   const { error: badgeError } = await supabase.from("earned_badges").insert({
-    id: randomUUID(),
     user_id: userId,
     badge_id: badgeId,
     course_id: courseId || null,
@@ -155,7 +147,7 @@ export async function awardBadge(
 
 export async function updateStreak(
   userId: string,
-  supabase = createSupabaseBrowserClient(),
+  supabase = createSupabaseServiceClient(),
 ): Promise<void> {
   if (!userId) return;
   const profile = await getProfile(userId, supabase);

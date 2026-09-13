@@ -32,7 +32,12 @@ export function ResourceExperience({
   if (!isOpen) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} ariaLabel={title}>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      ariaLabel={title}
+      variant="fullscreen"
+    >
       <ModalContent
         size="full"
         className="flex h-[100dvh] max-h-[100dvh] w-screen max-w-none flex-col min-h-0 bg-paper p-0 m-0 overflow-hidden"
@@ -53,7 +58,10 @@ export function ResourceExperience({
               scrollKey={activeSection}
             >
               {sections && sections.length > 0 && (
-                <nav aria-label="Seções do recurso" className="sticky top-0 z-10 border-b border-primary/10 bg-paper">
+                <nav
+                  aria-label="Seções do recurso"
+                  className="sticky top-0 z-10 border-b border-primary/10 bg-paper"
+                >
                   <div className="flex gap-1 overflow-x-auto scrollbar-none px-4 py-2">
                     {sections.map((section) => {
                       const Icon = section.icon;

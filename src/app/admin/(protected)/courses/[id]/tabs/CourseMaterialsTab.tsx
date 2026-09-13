@@ -14,8 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 import Button from "@/components/ui/Button";
 import { useToast } from "@/context/ToastContext";
-import ImageUpload from "@/components/admin/ImageUpload"; // Using for file upload? No, likely just URL for now or need a FileUpload component.
-// Assuming we input URLs only for now as requested in previous conversations ("links, PDFs").
+import FileUpload from "@/components/admin/FileUpload";
 
 export default function CourseMaterialsTab({ courseId }: { courseId: string }) {
   const { addToast } = useToast();
@@ -104,8 +103,15 @@ export default function CourseMaterialsTab({ courseId }: { courseId: string }) {
 
   return (
     <div className="space-y-6 animate-in fade-in">
-      <div className="flex justify-between items-center">
-        <h3 className="font-bold text-stone-700">Materiais Complementares</h3>
+      <section className="flex flex-col gap-4 rounded-2xl border border-stone-200 bg-white p-5 shadow-sm sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h3 className="font-serif text-xl font-semibold text-primary">
+            Materiais complementares
+          </h3>
+          <p className="mt-1 text-sm text-stone-500">
+            Anexe PDFs do curso ou informe um link externo para a turma.
+          </p>
+        </div>
         <Button
           size="sm"
           onClick={() => setIsCreating(!isCreating)}
@@ -113,10 +119,10 @@ export default function CourseMaterialsTab({ courseId }: { courseId: string }) {
         >
           {isCreating ? "Cancelar" : "Adicionar Material"}
         </Button>
-      </div>
+      </section>
 
       {isCreating && (
-        <div className="bg-stone-50 p-4 rounded-xl border border-stone-200 animate-in slide-in-from-top-2 space-y-4">
+        <div className="animate-in space-y-4 rounded-2xl border border-primary/20 bg-primary/5 p-5 slide-in-from-top-2">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-2">
               <label className="text-xs font-bold text-stone-500 uppercase">
@@ -183,22 +189,40 @@ export default function CourseMaterialsTab({ courseId }: { courseId: string }) {
               </select>
             </div>
           </div>
-          <div>
-            <label className="text-xs font-bold text-stone-500 uppercase">
-              URL do Arquivo
-            </label>
-            <input
-              value={newMaterial.url}
-              onChange={(e) =>
-                setNewMaterial({ ...newMaterial, url: e.target.value })
-              }
-              className="w-full p-2 rounded border-stone-200 font-mono text-xs"
-              placeholder="https://..."
-            />
-            <p className="text-[10px] text-stone-400 mt-1">
-              Cole o link direto do Firebase Storage ou Google Drive.
-            </p>
-          </div>
+          {newMaterial.type === "pdf" ? (
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase text-stone-500">
+                Arquivo PDF
+              </label>
+              <FileUpload
+                folder={`courses/${courseId}/materials`}
+                onUpload={(file) =>
+                  setNewMaterial((previous) => ({
+                    ...previous,
+                    title: previous.title || file.name.replace(/\.pdf$/i, ""),
+                    url: file.url,
+                  }))
+                }
+              />
+            </div>
+          ) : (
+            <div>
+              <label className="text-xs font-bold text-stone-500 uppercase">
+                URL do Arquivo
+              </label>
+              <input
+                value={newMaterial.url}
+                onChange={(e) =>
+                  setNewMaterial({ ...newMaterial, url: e.target.value })
+                }
+                className="w-full rounded-lg border border-stone-200 bg-white p-2.5 font-mono text-xs outline-none focus:border-primary"
+                placeholder="https://..."
+              />
+              <p className="mt-1 text-[10px] text-stone-400">
+                Use um endereço público e confiável.
+              </p>
+            </div>
+          )}
           <div className="flex justify-end">
             <Button size="sm" onClick={handleCreate}>
               Salvar Material
@@ -207,7 +231,7 @@ export default function CourseMaterialsTab({ courseId }: { courseId: string }) {
         </div>
       )}
 
-      <div className="bg-white rounded-xl border border-stone-100 overflow-hidden divide-y divide-stone-50">
+      <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white divide-y divide-stone-100 shadow-sm">
         {materials.map((item) => (
           <div
             key={item.id}

@@ -131,7 +131,12 @@ export interface StudentAnswer {
 
   // Dissertativa / Prática
   textAnswer?: string;
+  /** Legacy public/signed URL. New answers must use attachment metadata. */
   fileUrl?: string;
+  storagePath?: string;
+  fileName?: string;
+  mimeType?: string;
+  fileSize?: number;
 
   // Auto-grading
   isCorrect?: boolean;

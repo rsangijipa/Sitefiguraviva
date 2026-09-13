@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Compass, HeartHandshake, Leaf } from "lucide-react";
-import { db } from "@/lib/firebase/admin";
+import { getPublicPage } from "@/features/public-site/infrastructure/supabasePublicPagesRepository.server";
+import { DEFAULT_FOUNDER, DEFAULT_INSTITUTE } from "@/lib/siteSettings";
 import PublicPageHero from "@/features/public-site/components/PublicPageHero";
 import PublicSiteFrame from "@/features/public-site/components/PublicSiteFrame";
 
@@ -17,15 +18,11 @@ export const metadata: Metadata = {
 };
 
 async function getInstituteData() {
-  try {
-    const [institute, founder] = await Promise.all([
-      db.collection("siteSettings").doc("institute").get(),
-      db.collection("siteSettings").doc("founder").get(),
-    ]);
-    return { institute: institute.data() || {}, founder: founder.data() || {} };
-  } catch {
-    return { institute: {}, founder: {} };
-  }
+  const [institute, founder] = await Promise.all([
+    getPublicPage("institute", DEFAULT_INSTITUTE),
+    getPublicPage("founder", DEFAULT_FOUNDER),
+  ]);
+  return { institute, founder };
 }
 
 export default async function InstitutePage() {

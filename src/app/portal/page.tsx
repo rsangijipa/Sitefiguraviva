@@ -341,6 +341,43 @@ export default function PortalDashboard() {
         </div>
       )}
 
+      <section
+        aria-labelledby="resume-learning-title"
+        className="editorial-card relative overflow-hidden p-6"
+      >
+        <div className="absolute right-0 top-0 h-40 w-40 -translate-y-1/3 translate-x-1/3 rounded-full bg-agedGold/10 blur-3xl" />
+        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-agedGold">
+              Continue de onde parou
+            </p>
+            <h2
+              id="resume-learning-title"
+              className="mt-1 text-2xl font-serif text-ink"
+            >
+              {lastCourse?.courseTitle || "Encontre sua próxima formação"}
+            </h2>
+            <p className="mt-1 text-sm text-stone-500">
+              {lastCourse?.lessonTitle ||
+                "Explore os cursos disponíveis para começar seu percurso."}
+            </p>
+          </div>
+          <Link
+            href={
+              lastCourse
+                ? lastCourse.action === "review"
+                  ? `/portal/course/${lastCourse.courseId}`
+                  : `/portal/course/${lastCourse.courseId}${lastCourse.lessonId ? `/lesson/${lastCourse.lessonId}` : ""}`
+                : "/portal/courses"
+            }
+            className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-sm bg-ink px-5 text-xs font-bold uppercase tracking-widest text-agedGold transition hover:bg-agedGold hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          >
+            <Play size={14} className="fill-current" aria-hidden="true" />
+            {lastCourse ? "Continuar" : "Ver cursos"}
+          </Link>
+        </div>
+      </section>
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <section
           className="editorial-card lg:col-span-8 p-6"

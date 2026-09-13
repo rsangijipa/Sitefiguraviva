@@ -1,10 +1,21 @@
 import { SidebarNav } from "./SidebarNav";
-import { Menu, Search, ArrowRight } from "lucide-react";
+import {
+  Menu,
+  Search,
+  ArrowRight,
+  BookOpen,
+  Compass,
+  House,
+  MessageCircle,
+  UserRound,
+} from "lucide-react";
 import { FormEvent, useMemo, useState } from "react";
 import NotificationBell from "@/components/layout/NotificationBell";
 import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { ROUTES } from "@/lib/routes";
+import { cn } from "@/lib/utils";
 
 import { UserXPBadge } from "@/components/gamification/UserXPBadge";
 
@@ -47,6 +58,7 @@ export const DashboardShell = ({ children }: { children: React.ReactNode }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
 
   const suggestions = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -177,13 +189,49 @@ export const DashboardShell = ({ children }: { children: React.ReactNode }) => {
 
         {/* Page Content */}
         <main
-          className="flex-1 overflow-y-auto p-4 lg:p-8 scroll-smooth"
+          className="flex-1 overflow-y-auto p-4 pb-24 lg:p-8 scroll-smooth"
           data-lenis-prevent
         >
           <div className="max-w-7xl mx-auto space-y-8 animate-fade-in-up">
             {children}
           </div>
         </main>
+
+        <nav
+          aria-label="Navegação principal do portal"
+          className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-stone-200 bg-white/95 px-1 pb-[max(0.25rem,env(safe-area-inset-bottom))] pt-1 backdrop-blur lg:hidden"
+        >
+          {[
+            { href: ROUTES.portal, label: "Início", icon: House },
+            { href: ROUTES.courses, label: "Cursos", icon: BookOpen },
+            { href: "/recursos", label: "Recursos", icon: Compass },
+            {
+              href: ROUTES.community,
+              label: "Comunidade",
+              icon: MessageCircle,
+            },
+            { href: ROUTES.settings, label: "Perfil", icon: UserRound },
+          ].map(({ href, label, icon: Icon }) => {
+            const active =
+              href === ROUTES.portal
+                ? pathname === href
+                : pathname.startsWith(href);
+            return (
+              <Link
+                key={href}
+                href={href}
+                aria-current={active ? "page" : undefined}
+                className={cn(
+                  "flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-lg text-[10px] font-semibold",
+                  active ? "text-primary" : "text-stone-500",
+                )}
+              >
+                <Icon size={19} aria-hidden="true" />
+                <span>{label}</span>
+              </Link>
+            );
+          })}
+        </nav>
       </div>
     </div>
   );

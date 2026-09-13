@@ -425,8 +425,25 @@ export default function QuizTaker({
                       </div>
                     )}
                     <FileUploader
-                      onUpload={(fileUrl) =>
-                        handleAnswerChange(question.id, { fileUrl })
+                      submissionId={currentSubmissionId}
+                      answerId={question.id}
+                      onUpload={(file) =>
+                        handleAnswerChange(
+                          question.id,
+                          file
+                            ? {
+                                storagePath: file.storagePath,
+                                fileName: file.fileName,
+                                mimeType: file.mimeType,
+                                fileSize: file.size,
+                              }
+                            : {
+                                storagePath: undefined,
+                                fileName: undefined,
+                                mimeType: undefined,
+                                fileSize: undefined,
+                              },
+                        )
                       }
                       acceptedTypes={
                         question.acceptedFileTypes || [
@@ -439,7 +456,20 @@ export default function QuizTaker({
                         ]
                       }
                       maxSizeMB={question.maxFileSize || 10}
-                      currentFileUrl={answers[question.id]?.fileUrl}
+                      currentFile={
+                        answers[question.id]?.storagePath
+                          ? {
+                              storagePath: answers[question.id].storagePath!,
+                              fileName:
+                                answers[question.id].fileName ||
+                                "Arquivo enviado",
+                              mimeType:
+                                answers[question.id].mimeType ||
+                                "application/octet-stream",
+                              size: answers[question.id].fileSize || 0,
+                            }
+                          : undefined
+                      }
                     />
                   </div>
                 )}

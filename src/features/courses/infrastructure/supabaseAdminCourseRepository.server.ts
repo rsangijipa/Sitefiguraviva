@@ -384,6 +384,25 @@ export async function updateAdminCourse(
   if (error) throw error;
 }
 
+/**
+ * The revision is the canonical content-version used by enrollments and
+ * certificates.  It is incremented in Postgres so concurrent admin edits
+ * cannot overwrite each other with a stale client-side number.
+ */
+export async function bumpAdminCourseRevision(
+  courseId: string,
+): Promise<number> {
+  const supabase = createSupabaseServiceClient();
+  const { data, error } = await supabase.rpc("bump_course_content_revision", {
+    p_course_id: courseId,
+  });
+
+  if (error) throw error;
+  if (typeof data !== "number")
+    throw new Error("Course revision was not returned.");
+  return data;
+}
+
 export async function deleteAdminCourse(courseId: string): Promise<void> {
   const supabase = createSupabaseServiceClient();
   const { error } = await supabase.from("courses").delete().eq("id", courseId);
@@ -723,4 +742,19 @@ export async function syncAdminLessonsCount(courseId: string): Promise<number> {
 
   if (updateError) throw updateError;
   return totalPublished;
+}
+
+export async function getAdminPublishingSnapshot(courseId: string): Promise<{
+  course: CourseDoc | null;
+  modules: ModuleDoc[];
+  lessons: LessonDoc[];
+}> {
+  const [course, modules] = await Promise.all([
+    getAdminCourse(courseId),
+    listAdminModules(courseId),
+  ]);
+  const lessonGroups = await Promise.all(
+    modules.map((module) => listAdminLessons(courseId, module.id)),
+  );
+  return { course, modules, lessons: lessonGroups.flat() };
 }

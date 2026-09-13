@@ -1,5 +1,4 @@
 import { Metadata, Viewport } from "next";
-import Script from "next/script";
 import { Fraunces, Karla } from "next/font/google";
 import "./globals.css";
 import "@/components/resources/apps/emotion-tree/emotion-tree.css";
@@ -97,8 +96,6 @@ export const viewport = {
   userScalable: true,
 };
 
-import { cookies } from "next/headers";
-import ImpersonationBanner from "@/components/admin/ImpersonationBanner";
 import { WebVitalsReporter } from "@/components/system/WebVitalsReporter";
 import LenisProvider from "@/components/providers/LenisProvider";
 import JsonLd from "@/components/system/JsonLd";
@@ -107,18 +104,16 @@ import CookieConsent from "@/components/system/CookieConsent";
 import BackToTop from "@/components/system/BackToTop";
 import { themeInitScript } from "@/components/providers/ThemeProvider";
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cookieStore = await cookies();
-  const isImpersonating = cookieStore.has("admin_session_backup");
-
   return (
     <html
       lang="pt-BR"
       className={`${fraunces.variable} ${karla.variable}`}
+      data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
       <head>
@@ -131,22 +126,6 @@ export default async function RootLayout({
           Pular para o conteúdo principal
         </a>
         <Providers>
-          <Script
-            id="unregister-sw"
-            strategy="afterInteractive"
-            dangerouslySetInnerHTML={{
-              __html: `
-                if (window.navigator && window.navigator.serviceWorker) {
-                  window.navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                    for (let registration of registrations) {
-                      registration.unregister();
-                      console.error('Old Service Worker unregistered');
-                    }
-                  });
-                }
-              `,
-            }}
-          />
           <JsonLd
             data={{
               "@context": "https://schema.org",
@@ -173,7 +152,6 @@ export default async function RootLayout({
           >
             <LenisProvider>{children}</LenisProvider>
           </main>
-          {isImpersonating && <ImpersonationBanner />}
           <BackToTop />
         </Providers>
       </body>

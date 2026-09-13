@@ -13,9 +13,17 @@ const routeLabels: Record<string, string> = {
   profile: "Perfil",
   settings: "Configurações",
   support: "Suporte",
+  admin: "Admin",
+  users: "Usuários e permissões",
+  enrollments: "Alunos e matrículas",
+  applications: "Interessados e inscrições",
 };
 
-export default function Breadcrumbs() {
+export default function Breadcrumbs({
+  className = "",
+}: {
+  className?: string;
+}) {
   const pathname = usePathname();
 
   if (!pathname || pathname === "/portal") return null;
@@ -46,18 +54,18 @@ export default function Breadcrumbs() {
   return (
     <nav
       aria-label="Breadcrumb"
-      className="mb-4 hidden md:flex items-center space-x-2 text-sm"
+      className={`mb-4 hidden items-center space-x-2 text-sm md:flex ${className}`}
     >
       <Link
-        href="/portal"
+        href={pathname.startsWith("/admin") ? "/admin" : "/portal"}
         className="text-stone-500 hover:text-stone-800 transition-colors flex items-center"
       >
         <Home size={14} className="mr-1" />
       </Link>
 
       {items.map((item, index) => {
-        // Skip the initial "portal" part since we already have the Home icon pointing to it
-        if (item.href === "/portal") return null;
+        // The home icon already represents the first application segment.
+        if (item.href === "/portal" || item.href === "/admin") return null;
 
         return (
           <React.Fragment key={item.href}>

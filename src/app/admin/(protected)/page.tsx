@@ -19,6 +19,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { runEnrollmentMigration } from "@/app/actions/admin/maintenance";
 import { useToast } from "@/context/ToastContext";
+import { SupabaseSyncHealth } from "@/components/admin/SupabaseSyncHealth";
 
 export default function AdminDashboard() {
   const { addToast } = useToast();
@@ -231,6 +232,10 @@ export default function AdminDashboard() {
             </Card>
           </motion.div>
         ))}
+      </div>
+
+      <div className="mb-8">
+        <SupabaseSyncHealth />
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">

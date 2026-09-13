@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 
 // import { useApp } from '../context/AppContext'; (Removed)
@@ -10,8 +9,6 @@ import AlertBar from "./AlertBar";
 import HeroSection from "./sections/HeroSection";
 import CoursesSection from "./sections/CoursesSection";
 import FloatingControls from "./ui/FloatingControls";
-import { useTheme } from "./providers/ThemeProvider";
-import { useUI } from "@/context/UIContext";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Image as ImageIcon } from "lucide-react";
 import Image from "next/image";
@@ -67,17 +64,6 @@ export default function HomeClient({ initialData }: HomeClientProps = {}) {
     initialData: initialData?.gallery,
   });
 
-  const { showAlert } = useUI();
-  const { setPreference } = useTheme();
-
-  useEffect(() => {
-    setPreference("light");
-  }, [setPreference]);
-
-  useEffect(() => {
-    // Set initial alert if needed, or fetch from DB
-    showAlert("Bem-vindos ao Instituto Figura Viva");
-  }, []);
   const searchParams = useSearchParams();
   const router = useRouter();
 

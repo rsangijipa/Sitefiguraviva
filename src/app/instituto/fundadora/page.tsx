@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { db } from "@/lib/firebase/admin";
+import { getPublicPage } from "@/features/public-site/infrastructure/supabasePublicPagesRepository.server";
+import { DEFAULT_FOUNDER } from "@/lib/siteSettings";
 import PublicPageHero from "@/features/public-site/components/PublicPageHero";
 import PublicSiteFrame from "@/features/public-site/components/PublicSiteFrame";
 
@@ -18,12 +19,7 @@ export const metadata: Metadata = {
 };
 
 async function getFounder() {
-  try {
-    const snap = await db.collection("siteSettings").doc("founder").get();
-    return snap.data() || {};
-  } catch {
-    return {};
-  }
+  return getPublicPage("founder", DEFAULT_FOUNDER);
 }
 
 export default async function FounderPage() {

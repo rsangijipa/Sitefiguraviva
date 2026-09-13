@@ -1,7 +1,5 @@
 "use server";
 
-import { adminDb } from "@/lib/firebase/admin";
-import { Timestamp } from "firebase-admin/firestore";
 import { revalidatePath } from "next/cache";
 
 /**
@@ -10,38 +8,30 @@ import { revalidatePath } from "next/cache";
  */
 import { requireAdmin } from "@/lib/auth/server";
 import { z } from "zod";
+import {
+  upsertPublicPage,
+  type PublicPageKey,
+} from "@/features/public-site/infrastructure/supabasePublicPagesRepository.server";
 
 const siteSettingsSchema = z.record(z.string(), z.any());
 
-export async function updateSiteSettings(
-  key: "founder" | "institute" | "seo" | "team" | "legal" | "config",
-  data: any,
-) {
+export async function updateSiteSettings(key: PublicPageKey, data: unknown) {
   try {
     const user = await requireAdmin();
 
     // Basic structural validation
     const validatedData = siteSettingsSchema.parse(data);
-    const updatedAt = Timestamp.now();
-
-    await adminDb
-      .collection("siteSettings")
-      .doc(key)
-      .set(
-        {
-          ...validatedData,
-          updatedAt,
-          updatedBy: user.email,
-        },
-        { merge: true },
-      );
+    const updatedAt = await upsertPublicPage(key, {
+      ...validatedData,
+      updatedBy: user.email ?? "admin",
+    });
 
     revalidatePath("/");
     revalidatePath("/", "layout");
     revalidatePath("/admin/settings", "page");
     revalidatePath("/public-library", "page");
     revalidatePath("/public-gallery", "page");
-    return { success: true, updatedAt: updatedAt.toDate().toISOString() };
+    return { success: true, updatedAt };
   } catch (error: any) {
     console.error(`Error updating settings/${key}:`, error);
     return { success: false, error: error.message };
@@ -51,7 +41,6 @@ export async function updateSiteSettings(
 export async function seedSiteSettingsAction() {
   try {
     await requireAdmin();
-    const batch = adminDb.batch();
 
     // Import defaults from a place that doesn't trigger client-side firebase
     // For now, let's just use the ones already here and add legal
@@ -112,38 +101,11 @@ export async function seedSiteSettingsAction() {
       },
     };
 
-    const founderRef = adminDb.collection("siteSettings").doc("founder");
-    const instituteRef = adminDb.collection("siteSettings").doc("institute");
-    const seoRef = adminDb.collection("siteSettings").doc("seo");
-    const legalRef = adminDb.collection("siteSettings").doc("legal");
-    const configRef = adminDb.collection("siteSettings").doc("config");
-
-    const [fSnap, iSnap, sSnap, lSnap, cSnap] = await Promise.all([
-      founderRef.get(),
-      instituteRef.get(),
-      seoRef.get(),
-      legalRef.get(),
-      configRef.get(),
-    ]);
-
-    if (!fSnap.exists)
-      batch.set(founderRef, {
-        ...defaults.founder,
-        updatedAt: Timestamp.now(),
-      });
-    if (!iSnap.exists)
-      batch.set(instituteRef, {
-        ...defaults.institute,
-        updatedAt: Timestamp.now(),
-      });
-    if (!sSnap.exists)
-      batch.set(seoRef, { ...defaults.seo, updatedAt: Timestamp.now() });
-    if (!lSnap.exists)
-      batch.set(legalRef, { ...defaults.legal, updatedAt: Timestamp.now() });
-    if (!cSnap.exists)
-      batch.set(configRef, { ...defaults.config, updatedAt: Timestamp.now() });
-
-    await batch.commit();
+    await Promise.all(
+      Object.entries(defaults).map(([key, value]) =>
+        upsertPublicPage(key as PublicPageKey, value),
+      ),
+    );
     revalidatePath("/");
     revalidatePath("/", "layout");
     return { success: true };

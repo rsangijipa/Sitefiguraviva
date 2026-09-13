@@ -1,12 +1,15 @@
-import {
-  awardBadge,
-  awardXp,
-  getProfile as getProfileFromRepo,
-  listProfiles,
-  updateStreak as updateStreakFromRepo,
-  type GamificationProfileRecord,
-} from "@/features/gamification/infrastructure/supabaseGamificationRepository.server";
 import { logger } from "@/lib/logger";
+
+type GamificationProfileRecord = {
+  userId: string;
+  totalXp: number;
+  level: number;
+  currentStreak: number;
+  longestStreak: number;
+  lastActivityDate: string | null;
+  badges: string[];
+  updatedAt: string;
+};
 
 export interface ClientGamificationProfile {
   uid: string;
@@ -42,7 +45,10 @@ export const gamificationService = {
     if (!userId) return null;
 
     try {
-      const profile = await getProfileFromRepo(userId);
+      const { getMyGamificationProfile } =
+        await import("@/app/actions/gamification-read");
+      const profile = await getMyGamificationProfile();
+      if (!profile || profile.userId !== userId) return null;
       return mapGamificationProfileToClient(profile);
     } catch (error) {
       logger.error("Error fetching gamification profile", error, { userId });

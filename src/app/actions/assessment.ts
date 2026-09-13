@@ -10,8 +10,7 @@ import {
   TrueFalseQuestion,
 } from "@/types/assessment";
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
-import { gamificationService } from "@/lib/gamification/gamificationService";
-import { XP_VALUES } from "@/lib/gamification";
+import { awardCanonicalCompletion } from "@/features/gamification/application/awardCanonicalGamification.server";
 
 // Helper: Verify Auth
 async function getAuthenticatedUser() {
@@ -201,12 +200,11 @@ export async function submitAssessment(
 
   // 6. Award XP if passed and auto-graded
   if (passed && !requiresManualGrading) {
-    await gamificationService.awardXp(
-      uid,
-      XP_VALUES.QUIZ_PASSED,
-      "quiz_passed",
-      { assessmentId, courseId: assessment.courseId },
-    );
+    await awardCanonicalCompletion(uid, {
+      kind: "quiz",
+      courseId: assessment.courseId,
+      submissionId,
+    });
   }
 
   return {

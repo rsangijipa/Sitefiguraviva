@@ -1,8 +1,6 @@
 "use server";
 
-import { adminDb } from "@/lib/firebase/admin";
 import { requireAdmin } from "@/lib/auth/server";
-import { FieldValue } from "firebase-admin/firestore";
 import {
   CommunityThreadDoc,
   CourseDoc,
@@ -13,23 +11,30 @@ import {
 } from "@/types/lms";
 import { revalidatePath } from "next/cache";
 import {
-  getCourse,
-  listCourseEnrollments,
-  listCourseThreads,
-  listCourses,
-  listLessons,
-  listMaterials,
-  listModules,
-} from "@/lib/repositories/courseRepository.server";
-import { touchCourseRevision } from "@/lib/course-content/revision";
-import {
-  mirrorCourseToSupabase,
-  deleteCourseFromSupabase,
-} from "@/lib/course-content/course-mirror";
-import {
   addAdminMaterial,
-  updateAdminMaterial,
+  bumpAdminCourseRevision,
+  createAdminCourse,
+  createAdminModule,
+  createAdminLesson,
+  deleteAdminCourse,
+  deleteAdminLesson,
   deleteAdminMaterial,
+  deleteAdminModule,
+  deleteAdminThread,
+  getAdminCourse,
+  listAdminCourseEnrollments,
+  listAdminCourseThreads,
+  listAdminCourses,
+  listAdminLessons,
+  listAdminMaterials,
+  listAdminModules,
+  syncAdminLessonsCount,
+  toggleAdminEnrollmentStatus,
+  updateAdminCourse,
+  updateAdminLesson,
+  updateAdminMaterial,
+  updateAdminModule,
+  updateAdminThread,
 } from "@/features/courses/infrastructure/supabaseAdminCourseRepository.server";
 
 type MutablePayload = Record<string, any>;
@@ -57,19 +62,19 @@ function getStringField(payload: MutablePayload, key: string): string {
 
 export async function getAllCoursesAction(): Promise<CourseDoc[]> {
   await requireAdmin();
-  return listCourses();
+  return listAdminCourses();
 }
 
 export async function getCourseAction(
   courseId: string,
 ): Promise<CourseDoc | null> {
   await requireAdmin();
-  return getCourse(courseId);
+  return getAdminCourse(courseId);
 }
 
 export async function getModulesAction(courseId: string): Promise<ModuleDoc[]> {
   await requireAdmin();
-  return listModules(courseId);
+  return listAdminModules(courseId);
 }
 
 export async function getLessonsAction(
@@ -77,28 +82,28 @@ export async function getLessonsAction(
   moduleId: string,
 ): Promise<LessonDoc[]> {
   await requireAdmin();
-  return listLessons(courseId, moduleId);
+  return listAdminLessons(courseId, moduleId);
 }
 
 export async function getCourseEnrollmentsAction(
   courseId: string,
 ): Promise<Array<EnrollmentDoc & { id: string }>> {
   await requireAdmin();
-  return listCourseEnrollments(courseId);
+  return listAdminCourseEnrollments(courseId);
 }
 
 export async function getCourseThreadsAction(
   courseId: string,
 ): Promise<CommunityThreadDoc[]> {
   await requireAdmin();
-  return listCourseThreads(courseId);
+  return listAdminCourseThreads(courseId);
 }
 
 export async function getMaterialsAction(
   courseId: string,
 ): Promise<MaterialDoc[]> {
   await requireAdmin();
-  return listMaterials(courseId);
+  return listAdminMaterials(courseId);
 }
 
 // --- COURSES ---
@@ -111,16 +116,7 @@ export async function createCourseAction(
   const coverImage =
     getStringField(payload, "coverImage") || getStringField(payload, "image");
 
-  const docRef = await adminDb.collection("courses").add({
-    ...payload,
-    image: coverImage,
-    coverImage,
-    status: "draft",
-    isPublished: false,
-    createdAt: FieldValue.serverTimestamp(),
-    updatedAt: FieldValue.serverTimestamp(),
-  });
-  await mirrorCourseToSupabase(docRef.id, {
+  const courseId = await createAdminCourse({
     ...payload,
     image: coverImage,
     coverImage,
@@ -128,22 +124,17 @@ export async function createCourseAction(
     isPublished: false,
   });
   revalidatePath("/admin/courses");
-  return docRef.id;
+  return courseId;
 }
 
 export async function updateCourseAction(
   courseId: string,
   data: Partial<CourseDoc>,
 ): Promise<void> {
-  const actor = await requireAdmin();
-  const docRef = adminDb.collection("courses").doc(courseId);
+  await requireAdmin();
   const payload = sanitizeRecord(data, "course update");
 
-  // Convert to regular payload without functions
-  const updatePayload = stripImmutableFields({
-    ...payload,
-    updatedAt: FieldValue.serverTimestamp(),
-  });
+  const updatePayload = stripImmutableFields({ ...payload });
 
   delete updatePayload.status;
   delete updatePayload.isPublished;
@@ -153,9 +144,8 @@ export async function updateCourseAction(
   if (payload.coverImage) updatePayload.image = payload.coverImage;
   if (payload.image) updatePayload.coverImage = payload.image;
 
-  await docRef.update(updatePayload);
-  await touchCourseRevision(courseId, "course-updated", actor);
-  await mirrorCourseToSupabase(courseId, updatePayload);
+  await updateAdminCourse(courseId, updatePayload);
+  await bumpAdminCourseRevision(courseId);
   revalidatePath("/admin/courses");
   revalidatePath(`/admin/courses/${courseId}`);
   revalidatePath("/");
@@ -166,39 +156,7 @@ export async function updateCourseAction(
 export async function deleteCourseAction(courseId: string): Promise<void> {
   await requireAdmin();
 
-  const modulesRef = adminDb
-    .collection("courses")
-    .doc(courseId)
-    .collection("modules");
-  const modulesSnap = await modulesRef.get();
-
-  const batch = adminDb.batch();
-
-  for (const modDoc of modulesSnap.docs) {
-    const lessonsRef = modDoc.ref.collection("lessons");
-    const lessonsSnap = await lessonsRef.get();
-    lessonsSnap.docs.forEach((l) => batch.delete(l.ref));
-    batch.delete(modDoc.ref);
-  }
-
-  const materialsRef = adminDb
-    .collection("courses")
-    .doc(courseId)
-    .collection("materials");
-  const materialsSnap = await materialsRef.get();
-  materialsSnap.docs.forEach((m) => batch.delete(m.ref));
-
-  const threadsRef = adminDb
-    .collection("courses")
-    .doc(courseId)
-    .collection("communityThreads");
-  const threadsSnap = await threadsRef.get();
-  threadsSnap.docs.forEach((t) => batch.delete(t.ref));
-
-  batch.delete(adminDb.collection("courses").doc(courseId));
-
-  await batch.commit();
-  await deleteCourseFromSupabase(courseId);
+  await deleteAdminCourse(courseId);
   revalidatePath("/admin/courses");
   revalidatePath("/");
   revalidatePath("/curso");
@@ -211,20 +169,10 @@ export async function createModuleAction(
   title: string,
   order: number,
 ): Promise<string> {
-  const actor = await requireAdmin();
-  const docRef = await adminDb
-    .collection("courses")
-    .doc(courseId)
-    .collection("modules")
-    .add({
-      title,
-      order,
-      isPublished: false,
-      createdAt: FieldValue.serverTimestamp(),
-      updatedAt: FieldValue.serverTimestamp(),
-    });
-  await touchCourseRevision(courseId, "module-created", actor);
-  return docRef.id;
+  await requireAdmin();
+  const moduleId = await createAdminModule(courseId, title, order);
+  await bumpAdminCourseRevision(courseId);
+  return moduleId;
 }
 
 export async function updateModuleAction(
@@ -232,61 +180,18 @@ export async function updateModuleAction(
   moduleId: string,
   data: Partial<ModuleDoc>,
 ): Promise<void> {
-  const actor = await requireAdmin();
-  const payload = sanitizeRecord(data, "module update");
-  const docRef = adminDb
-    .collection("courses")
-    .doc(courseId)
-    .collection("modules")
-    .doc(moduleId);
-
-  const updatePayload = stripImmutableFields({
-    ...payload,
-    updatedAt: FieldValue.serverTimestamp(),
-  });
-
-  await docRef.update(updatePayload);
-  await touchCourseRevision(courseId, "module-updated", actor);
-
-  if (payload.isPublished !== undefined) {
-    await syncLessonsCountAction(courseId);
-  }
+  await requireAdmin();
+  await updateAdminModule(moduleId, sanitizeRecord(data, "module update"));
+  await bumpAdminCourseRevision(courseId);
 }
 
 export async function deleteModuleAction(
   courseId: string,
   moduleId: string,
 ): Promise<void> {
-  const actor = await requireAdmin();
-
-  const batch = adminDb.batch();
-  const lessonsRef = adminDb
-    .collection("courses")
-    .doc(courseId)
-    .collection("modules")
-    .doc(moduleId)
-    .collection("lessons");
-  const lessonsSnap = await lessonsRef.get();
-
-  lessonsSnap.docs.forEach((l) => batch.delete(l.ref));
-  batch.delete(
-    adminDb
-      .collection("courses")
-      .doc(courseId)
-      .collection("modules")
-      .doc(moduleId),
-  );
-
-  if (lessonsSnap.size > 0) {
-    const courseRef = adminDb.collection("courses").doc(courseId);
-    batch.update(courseRef, {
-      "stats.lessonsCount": FieldValue.increment(-lessonsSnap.size),
-      updatedAt: FieldValue.serverTimestamp(),
-    });
-  }
-
-  await batch.commit();
-  await touchCourseRevision(courseId, "module-deleted", actor);
+  await requireAdmin();
+  await deleteAdminModule(moduleId);
+  await bumpAdminCourseRevision(courseId);
 }
 
 // --- LESSONS ---
@@ -297,30 +202,10 @@ export async function createLessonAction(
   title: string,
   order: number,
 ): Promise<string> {
-  const actor = await requireAdmin();
-  const lessonsCol = adminDb
-    .collection("courses")
-    .doc(courseId)
-    .collection("modules")
-    .doc(moduleId)
-    .collection("lessons");
-  const newLessonRef = lessonsCol.doc();
-
-  await newLessonRef.set({
-    title,
-    order,
-    moduleId,
-    courseId,
-    type: "text",
-    isPublished: false,
-    status: "draft",
-    createdAt: FieldValue.serverTimestamp(),
-    updatedAt: FieldValue.serverTimestamp(),
-  });
-
-  await touchCourseRevision(courseId, "lesson-created", actor);
-
-  return newLessonRef.id;
+  await requireAdmin();
+  const lessonId = await createAdminLesson(courseId, moduleId, title, order);
+  await bumpAdminCourseRevision(courseId);
+  return lessonId;
 }
 
 export async function updateLessonAction(
@@ -329,27 +214,9 @@ export async function updateLessonAction(
   lessonId: string,
   data: Partial<LessonDoc>,
 ): Promise<void> {
-  const actor = await requireAdmin();
-  const payload = sanitizeRecord(data, "lesson update");
-  const docRef = adminDb
-    .collection("courses")
-    .doc(courseId)
-    .collection("modules")
-    .doc(moduleId)
-    .collection("lessons")
-    .doc(lessonId);
-
-  const updatePayload = stripImmutableFields({
-    ...payload,
-    updatedAt: FieldValue.serverTimestamp(),
-  });
-
-  await docRef.update(updatePayload);
-  await touchCourseRevision(courseId, "lesson-updated", actor);
-
-  if (payload.isPublished !== undefined) {
-    await syncLessonsCountAction(courseId);
-  }
+  await requireAdmin();
+  await updateAdminLesson(lessonId, sanitizeRecord(data, "lesson update"));
+  await bumpAdminCourseRevision(courseId);
 }
 
 export async function deleteLessonAction(
@@ -357,24 +224,9 @@ export async function deleteLessonAction(
   moduleId: string,
   lessonId: string,
 ): Promise<void> {
-  const actor = await requireAdmin();
-  const lessonRef = adminDb
-    .collection("courses")
-    .doc(courseId)
-    .collection("modules")
-    .doc(moduleId)
-    .collection("lessons")
-    .doc(lessonId);
-
-  const snap = await lessonRef.get();
-  const wasPublished = snap.exists && snap.data()?.isPublished === true;
-
-  await lessonRef.delete();
-  await touchCourseRevision(courseId, "lesson-deleted", actor);
-
-  if (wasPublished) {
-    await syncLessonsCountAction(courseId);
-  }
+  await requireAdmin();
+  await deleteAdminLesson(lessonId);
+  await bumpAdminCourseRevision(courseId);
 }
 
 // --- OTHER ENTITIES ---
@@ -384,11 +236,7 @@ export async function toggleEnrollmentStatusAction(
   currentStatus: string,
 ): Promise<void> {
   await requireAdmin();
-  const newStatus = currentStatus === "active" ? "cancelled" : "active";
-  await adminDb
-    .collection("enrollments")
-    .doc(enrollmentId)
-    .update({ status: newStatus });
+  await toggleAdminEnrollmentStatus(enrollmentId, currentStatus);
 }
 
 export async function updateThreadAction(
@@ -400,12 +248,7 @@ export async function updateThreadAction(
   const payload = stripImmutableFields(
     sanitizeRecord(updates, "thread update"),
   );
-  await adminDb
-    .collection("courses")
-    .doc(courseId)
-    .collection("communityThreads")
-    .doc(threadId)
-    .update(payload);
+  await updateAdminThread(threadId, payload);
 }
 
 export async function deleteThreadAction(
@@ -413,12 +256,7 @@ export async function deleteThreadAction(
   threadId: string,
 ): Promise<void> {
   await requireAdmin();
-  await adminDb
-    .collection("courses")
-    .doc(courseId)
-    .collection("communityThreads")
-    .doc(threadId)
-    .delete();
+  await deleteAdminThread(threadId);
 }
 
 export async function addMaterialAction(
@@ -458,32 +296,5 @@ export async function syncLessonsCountAction(
   courseId: string,
 ): Promise<number> {
   await requireAdmin();
-  const modulesSnap = await adminDb
-    .collection("courses")
-    .doc(courseId)
-    .collection("modules")
-    .get();
-  let totalPublished = 0;
-
-  for (const modDoc of modulesSnap.docs) {
-    const mData = modDoc.data();
-    if (mData.isPublished === true) {
-      const lessonsSnap = await adminDb
-        .collection("courses")
-        .doc(courseId)
-        .collection("modules")
-        .doc(modDoc.id)
-        .collection("lessons")
-        .where("isPublished", "==", true)
-        .get();
-      totalPublished += lessonsSnap.size;
-    }
-  }
-
-  await adminDb.collection("courses").doc(courseId).update({
-    "stats.lessonsCount": totalPublished,
-    updatedAt: FieldValue.serverTimestamp(),
-  });
-
-  return totalPublished;
+  return syncAdminLessonsCount(courseId);
 }

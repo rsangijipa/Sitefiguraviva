@@ -13,6 +13,10 @@
     "seed": "node scripts/sync_data.mjs",
     "test": "jest",
     "test:e2e": "playwright test",
+    "test:rules": "firebase emulators:exec --only firestore \"jest src/security/__tests__/firestore.rules.security.test.ts --runInBand\"",
+    "audit:no-firebase": "node scripts/check-no-firebase.mjs",
+    "audit:firebase": "node scripts/check-firebase-migration-status.mjs",
+    "migrate:assessment-attachments": "node scripts/migrate-assessment-attachments.mjs",
     "test:watch": "jest --watch",
     "typecheck": "tsc --noEmit",
     "prepare": "husky"

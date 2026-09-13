@@ -33,7 +33,7 @@ type AdminUser = {
   role?: string;
   isActive?: boolean;
   status?: string;
-  createdAt?: { seconds?: number };
+  createdAt?: string | null;
   profileCompletion?: number;
   phoneNumber?: string | null;
 };
@@ -163,7 +163,7 @@ export default function UsersManager() {
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <section className="flex flex-col gap-4 rounded-2xl border border-stone-200 bg-white p-5 shadow-sm md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-3xl font-serif text-primary">
             Gerenciar Usuários
@@ -180,7 +180,7 @@ export default function UsersManager() {
         >
           Atualizar
         </Button>
-      </header>
+      </section>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div className="bg-white border border-stone-100 rounded-xl px-4 py-3">
@@ -338,10 +338,10 @@ export default function UsersManager() {
                           </td>
                           <td className="p-4">
                             <p className="text-xs text-stone-500">
-                              {user.createdAt?.seconds
-                                ? new Date(
-                                    user.createdAt.seconds * 1000,
-                                  ).toLocaleDateString("pt-BR")
+                              {user.createdAt
+                                ? new Date(user.createdAt).toLocaleDateString(
+                                    "pt-BR",
+                                  )
                                 : "---"}
                             </p>
                           </td>

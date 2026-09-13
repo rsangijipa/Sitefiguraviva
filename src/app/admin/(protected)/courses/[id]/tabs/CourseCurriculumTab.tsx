@@ -6,11 +6,12 @@ import { adminCourseService } from "@/services/adminCourseService";
 import { ModuleDoc, LessonDoc } from "@/types/lms";
 import {
   Plus,
-  GripVertical,
   Trash2,
   Edit,
   ChevronDown,
   ChevronRight,
+  ArrowDown,
+  ArrowUp,
   FileText,
   Video,
 } from "lucide-react";
@@ -38,6 +39,13 @@ export default function CourseCurriculumTab({
   const [expandedModules, setExpandedModules] = useState<
     Record<string, boolean>
   >({});
+  const [isCreatingModule, setIsCreatingModule] = useState(false);
+  const [newModuleTitle, setNewModuleTitle] = useState("");
+  const [lessonFormModuleId, setLessonFormModuleId] = useState<string | null>(
+    null,
+  );
+  const [newLessonTitle, setNewLessonTitle] = useState("");
+  const [isReordering, setIsReordering] = useState(false);
 
   // Fetch Structure
   useEffect(() => {
@@ -77,11 +85,16 @@ export default function CourseCurriculumTab({
   };
 
   const handleCreateModule = async () => {
-    const title = prompt("Nome do novo módulo:");
-    if (!title) return;
+    const title = newModuleTitle.trim();
+    if (!title) {
+      addToast("Informe o nome do módulo", "error");
+      return;
+    }
     try {
       await adminCourseService.createModule(courseId, title, modules.length);
       addToast("Módulo criado", "success");
+      setNewModuleTitle("");
+      setIsCreatingModule(false);
       loadModules();
     } catch (e) {
       addToast("Erro ao criar módulo", "error");
@@ -89,7 +102,7 @@ export default function CourseCurriculumTab({
   };
 
   const handleCreateLesson = async (moduleId: string) => {
-    const title = prompt("Título da nova aula:");
+    const title = newLessonTitle.trim();
     if (!title) return;
     try {
       const currentCount = lessonsMap[moduleId]?.length || 0;
@@ -100,6 +113,8 @@ export default function CourseCurriculumTab({
         currentCount,
       );
       addToast("Aula criada", "success");
+      setNewLessonTitle("");
+      setLessonFormModuleId(null);
       loadModules(); // Or just reload that module's lessons
     } catch (e) {
       addToast("Erro ao criar aula", "error");
@@ -116,6 +131,73 @@ export default function CourseCurriculumTab({
     }
   };
 
+  const moveModule = async (index: number, direction: -1 | 1) => {
+    const nextIndex = index + direction;
+    if (nextIndex < 0 || nextIndex >= modules.length || isReordering) return;
+    const reordered = [...modules];
+    [reordered[index], reordered[nextIndex]] = [
+      reordered[nextIndex],
+      reordered[index],
+    ];
+    const normalized = reordered.map((module, order) => ({ ...module, order }));
+    setModules(normalized);
+    setIsReordering(true);
+    try {
+      await Promise.all([
+        adminCourseService.updateModule(courseId, normalized[index].id, {
+          order: index,
+        }),
+        adminCourseService.updateModule(courseId, normalized[nextIndex].id, {
+          order: nextIndex,
+        }),
+      ]);
+    } catch {
+      addToast("Não foi possível reordenar os módulos", "error");
+      loadModules();
+    } finally {
+      setIsReordering(false);
+    }
+  };
+
+  const moveLesson = async (
+    moduleId: string,
+    index: number,
+    direction: -1 | 1,
+  ) => {
+    const lessons = lessonsMap[moduleId] || [];
+    const nextIndex = index + direction;
+    if (nextIndex < 0 || nextIndex >= lessons.length || isReordering) return;
+    const reordered = [...lessons];
+    [reordered[index], reordered[nextIndex]] = [
+      reordered[nextIndex],
+      reordered[index],
+    ];
+    const normalized = reordered.map((lesson, order) => ({ ...lesson, order }));
+    setLessonsMap((previous) => ({ ...previous, [moduleId]: normalized }));
+    setIsReordering(true);
+    try {
+      await Promise.all([
+        adminCourseService.updateLesson(
+          courseId,
+          moduleId,
+          normalized[index].id,
+          { order: index },
+        ),
+        adminCourseService.updateLesson(
+          courseId,
+          moduleId,
+          normalized[nextIndex].id,
+          { order: nextIndex },
+        ),
+      ]);
+    } catch {
+      addToast("Não foi possível reordenar as aulas", "error");
+      loadModules();
+    } finally {
+      setIsReordering(false);
+    }
+  };
+
   // Navigate to the Block Editor
   const handleEditLesson = (moduleId: string, lessonId: string) => {
     router.push(`/admin/courses/${courseId}/lessons/${lessonId}`);
@@ -128,43 +210,132 @@ export default function CourseCurriculumTab({
       </div>
     );
 
+  const lessons = Object.values(lessonsMap).flat();
+  const publishedModules = modules.filter(
+    (module) => module.isPublished,
+  ).length;
+  const publishedLessons = lessons.filter(
+    (lesson) => lesson.isPublished,
+  ).length;
+
   return (
-    <div className="space-y-8 animate-in fade-in">
-      <div className="flex justify-between items-center">
-        <h3 className="font-bold text-stone-700">Estrutura do Curso</h3>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={async () => {
-              setLoading(true);
-              try {
-                await adminCourseService.syncLessonsCount(courseId);
-                addToast("Estatísticas sincronizadas", "success");
-                loadModules();
-              } catch (e) {
-                addToast("Erro ao sincronizar", "error");
-              } finally {
-                setLoading(false);
-              }
-            }}
-          >
-            Sincronizar Contagem
-          </Button>
-          <Button onClick={handleCreateModule} leftIcon={<Plus size={16} />}>
-            Adicionar Módulo
-          </Button>
+    <div className="space-y-6 animate-in fade-in">
+      <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <h3 className="font-serif text-xl font-semibold text-primary">
+              Currículo do curso
+            </h3>
+            <p className="mt-1 text-sm text-stone-500">
+              Organize módulos, aulas e o que ficará visível para a turma.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                setLoading(true);
+                try {
+                  await adminCourseService.syncLessonsCount(courseId);
+                  addToast("Estatísticas sincronizadas", "success");
+                  loadModules();
+                } catch (e) {
+                  addToast("Erro ao sincronizar", "error");
+                } finally {
+                  setLoading(false);
+                }
+              }}
+            >
+              Sincronizar Contagem
+            </Button>
+            <Button
+              onClick={() => setIsCreatingModule((value) => !value)}
+              leftIcon={<Plus size={16} />}
+            >
+              Adicionar Módulo
+            </Button>
+          </div>
         </div>
-      </div>
+        <dl className="mt-5 grid grid-cols-3 gap-3 border-t border-stone-100 pt-5">
+          <div className="rounded-xl bg-stone-50 px-3 py-2">
+            <dt className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+              Módulos
+            </dt>
+            <dd className="mt-1 font-semibold text-stone-800">
+              {modules.length}{" "}
+              <span className="text-xs font-normal text-stone-400">
+                / {publishedModules} publicados
+              </span>
+            </dd>
+          </div>
+          <div className="rounded-xl bg-stone-50 px-3 py-2">
+            <dt className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+              Aulas
+            </dt>
+            <dd className="mt-1 font-semibold text-stone-800">
+              {lessons.length}{" "}
+              <span className="text-xs font-normal text-stone-400">
+                / {publishedLessons} publicadas
+              </span>
+            </dd>
+          </div>
+          <div className="rounded-xl bg-stone-50 px-3 py-2">
+            <dt className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+              Próximo passo
+            </dt>
+            <dd className="mt-1 text-sm font-semibold text-stone-700">
+              {modules.length ? "Revise publicações" : "Crie um módulo"}
+            </dd>
+          </div>
+        </dl>
+        {isCreatingModule && (
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              handleCreateModule();
+            }}
+            className="mt-5 flex flex-col gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4 sm:flex-row"
+          >
+            <label className="sr-only" htmlFor="new-module-title">
+              Nome do módulo
+            </label>
+            <input
+              id="new-module-title"
+              autoFocus
+              value={newModuleTitle}
+              onChange={(event) => setNewModuleTitle(event.target.value)}
+              placeholder="Ex.: Fundamentos e referências"
+              className="min-w-0 flex-1 rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
+            />
+            <div className="flex gap-2">
+              <Button type="submit" size="sm">
+                Criar módulo
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setIsCreatingModule(false);
+                  setNewModuleTitle("");
+                }}
+              >
+                Cancelar
+              </Button>
+            </div>
+          </form>
+        )}
+      </section>
 
       <div className="space-y-4">
         {modules.map((module, idx) => (
           <div
             key={module.id}
-            className="bg-white border border-stone-200 rounded-xl overflow-hidden shadow-sm"
+            className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm"
           >
             {/* Module Header */}
-            <div className="bg-stone-50 p-4 flex items-center gap-3 border-b border-stone-100 group">
+            <div className="group flex flex-wrap items-center gap-3 border-b border-stone-100 bg-stone-50 p-4">
               <button
                 onClick={() => toggleModule(module.id)}
                 className="p-1 hover:bg-stone-200 rounded text-stone-400"
@@ -225,15 +396,33 @@ export default function CourseCurriculumTab({
                 {module.isPublished ? "Publicado" : "Rascunho"}
               </button>
 
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+              <div className="ml-auto flex gap-1">
+                <div className="flex rounded-lg border border-stone-200 bg-white">
+                  <button
+                    type="button"
+                    disabled={idx === 0 || isReordering}
+                    onClick={() => moveModule(idx, -1)}
+                    aria-label={`Mover ${module.title} para cima`}
+                    className="rounded-l-lg p-2 text-stone-500 hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <ArrowUp size={14} />
+                  </button>
+                  <button
+                    type="button"
+                    disabled={idx === modules.length - 1 || isReordering}
+                    onClick={() => moveModule(idx, 1)}
+                    aria-label={`Mover ${module.title} para baixo`}
+                    className="rounded-r-lg border-l border-stone-200 p-2 text-stone-500 hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <ArrowDown size={14} />
+                  </button>
+                </div>
                 <button
                   onClick={() => handleDeleteModule(module.id)}
-                  className="p-2 text-stone-400 hover:text-red-500 hover:bg-red-50 rounded"
+                  aria-label={`Excluir ${module.title}`}
+                  className="rounded-lg p-2 text-stone-400 hover:bg-red-50 hover:text-red-500"
                 >
                   <Trash2 size={14} />
-                </button>
-                <button className="cursor-move p-2 text-stone-400 hover:text-stone-600">
-                  <GripVertical size={14} />
                 </button>
               </div>
             </div>
@@ -251,7 +440,7 @@ export default function CourseCurriculumTab({
                     {(lessonsMap[module.id] || []).map((lesson, lIdx) => (
                       <div
                         key={lesson.id}
-                        className="p-3 pl-12 flex items-center gap-4 hover:bg-blue-50/30 transition-colors group"
+                        className="group flex flex-wrap items-center gap-3 px-4 py-3 sm:pl-12 hover:bg-primary/5 transition-colors"
                       >
                         <span className="text-stone-300 font-mono text-xs">
                           {lIdx + 1}.
@@ -313,7 +502,31 @@ export default function CourseCurriculumTab({
                           </button>
                         </div>
 
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+                        <div className="ml-auto flex gap-2">
+                          <div className="flex rounded-lg border border-stone-200 bg-white">
+                            <button
+                              type="button"
+                              disabled={lIdx === 0 || isReordering}
+                              onClick={() => moveLesson(module.id, lIdx, -1)}
+                              aria-label={`Mover ${lesson.title} para cima`}
+                              className="rounded-l-lg p-1.5 text-stone-500 hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-40"
+                            >
+                              <ArrowUp size={13} />
+                            </button>
+                            <button
+                              type="button"
+                              disabled={
+                                lIdx ===
+                                  (lessonsMap[module.id] || []).length - 1 ||
+                                isReordering
+                              }
+                              onClick={() => moveLesson(module.id, lIdx, 1)}
+                              aria-label={`Mover ${lesson.title} para baixo`}
+                              className="rounded-r-lg border-l border-stone-200 p-1.5 text-stone-500 hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-40"
+                            >
+                              <ArrowDown size={13} />
+                            </button>
+                          </div>
                           <Button
                             size="sm"
                             variant="outline"
@@ -328,13 +541,59 @@ export default function CourseCurriculumTab({
                       </div>
                     ))}
                   </div>
-                  <div className="p-2 pl-12">
-                    <button
-                      onClick={() => handleCreateLesson(module.id)}
-                      className="w-full py-2 border-2 border-dashed border-stone-100 rounded-lg text-stone-400 text-xs font-bold uppercase hover:border-primary/20 hover:text-primary hover:bg-primary/5 transition-all flex items-center justify-center gap-2"
-                    >
-                      <Plus size={14} /> Adicionar Aula
-                    </button>
+                  <div className="border-t border-stone-100 p-3 sm:pl-12">
+                    {lessonFormModuleId === module.id ? (
+                      <form
+                        onSubmit={(event) => {
+                          event.preventDefault();
+                          handleCreateLesson(module.id);
+                        }}
+                        className="flex flex-col gap-2 sm:flex-row"
+                      >
+                        <label
+                          className="sr-only"
+                          htmlFor={`new-lesson-${module.id}`}
+                        >
+                          Título da aula
+                        </label>
+                        <input
+                          id={`new-lesson-${module.id}`}
+                          autoFocus
+                          value={newLessonTitle}
+                          onChange={(event) =>
+                            setNewLessonTitle(event.target.value)
+                          }
+                          placeholder="Título da nova aula"
+                          className="min-w-0 flex-1 rounded-lg border border-stone-200 px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
+                        />
+                        <div className="flex gap-2">
+                          <Button type="submit" size="sm">
+                            Criar aula
+                          </Button>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              setLessonFormModuleId(null);
+                              setNewLessonTitle("");
+                            }}
+                          >
+                            Cancelar
+                          </Button>
+                        </div>
+                      </form>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setLessonFormModuleId(module.id);
+                          setNewLessonTitle("");
+                        }}
+                        className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-stone-200 py-2.5 text-xs font-bold uppercase tracking-wide text-stone-500 transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary"
+                      >
+                        <Plus size={14} /> Adicionar Aula
+                      </button>
+                    )}
                   </div>
                 </motion.div>
               )}

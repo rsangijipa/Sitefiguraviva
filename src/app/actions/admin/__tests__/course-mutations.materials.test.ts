@@ -17,6 +17,7 @@ jest.mock("next/cache", () => ({
 }));
 
 const addAdminMaterial = jest.fn();
+const bumpAdminCourseRevision = jest.fn();
 const deleteAdminMaterial = jest.fn();
 const listAdminMaterials = jest.fn();
 const createAdminCourse = jest.fn();
@@ -51,6 +52,8 @@ jest.mock(
   "@/features/courses/infrastructure/supabaseAdminCourseRepository.server",
   () => ({
     addAdminMaterial: (...args: unknown[]) => addAdminMaterial(...args),
+    bumpAdminCourseRevision: (...args: unknown[]) =>
+      bumpAdminCourseRevision(...args),
     createAdminCourse: (...args: unknown[]) => createAdminCourse(...args),
     createAdminLesson: (...args: unknown[]) => createAdminLesson(...args),
     createAdminModule: (...args: unknown[]) => createAdminModule(...args),
@@ -90,7 +93,9 @@ jest.mock(
 
 import {
   addMaterialAction,
+  createCourseAction,
   deleteMaterialAction,
+  updateCourseAction,
 } from "@/app/actions/admin/course-mutations";
 
 describe("course-mutations material actions", () => {
@@ -129,5 +134,29 @@ describe("course-mutations material actions", () => {
       "material-1",
       "uploads/admin/uuid-guide.pdf",
     );
+  });
+
+  it("creates courses only through the canonical Supabase repository", async () => {
+    createAdminCourse.mockResolvedValue("course-1");
+    await expect(
+      createCourseAction({ title: "Curso", image: "/cover.jpg" }),
+    ).resolves.toBe("course-1");
+    expect(createAdminCourse).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "Curso",
+        image: "/cover.jpg",
+        coverImage: "/cover.jpg",
+        status: "draft",
+        isPublished: false,
+      }),
+    );
+  });
+
+  it("increments the canonical revision after a course edit", async () => {
+    await updateCourseAction("course-1", { title: "Novo título" });
+    expect(updateAdminCourse).toHaveBeenCalledWith("course-1", {
+      title: "Novo título",
+    });
+    expect(bumpAdminCourseRevision).toHaveBeenCalledWith("course-1");
   });
 });

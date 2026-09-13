@@ -35,7 +35,7 @@ export default function LibraryClient({
       try {
         await processGamificationEvent({
           actionType: "library_view",
-          metadata: { title: item.title, itemId: item.id },
+          resourceId: String(item.id),
         });
       } catch (e) {
         console.error("Gamification error", e);

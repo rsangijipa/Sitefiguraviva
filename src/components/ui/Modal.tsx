@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { motion, AnimatePresence, HTMLMotionProps } from "framer-motion";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -18,9 +18,26 @@ export interface ModalProps {
   onClose: () => void;
   children: React.ReactNode;
   ariaLabel?: string;
+  variant?: "default" | "fullscreen";
 }
 
-export function Modal({ isOpen, onClose, children, ariaLabel }: ModalProps) {
+function getFocusable(container: HTMLElement) {
+  return Array.from(
+    container.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled]), textarea, input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    ),
+  ).filter((element) => !element.hasAttribute("aria-hidden"));
+}
+
+export function Modal({
+  isOpen,
+  onClose,
+  children,
+  ariaLabel,
+  variant = "default",
+}: ModalProps) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const openerRef = useRef<HTMLElement | null>(null);
   // Close on ESC
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
@@ -30,15 +47,53 @@ export function Modal({ isOpen, onClose, children, ariaLabel }: ModalProps) {
     return () => window.removeEventListener("keydown", handleEsc);
   }, [isOpen, onClose]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    openerRef.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+    const timer = window.setTimeout(
+      () => getFocusable(dialogRef.current!).at(0)?.focus(),
+      0,
+    );
+    return () => {
+      window.clearTimeout(timer);
+      openerRef.current?.focus();
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleTab = (event: KeyboardEvent) => {
+      if (event.key !== "Tab" || !dialogRef.current) return;
+      const focusable = getFocusable(dialogRef.current);
+      if (!focusable.length) {
+        event.preventDefault();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable.at(-1)!;
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", handleTab);
+    return () => document.removeEventListener("keydown", handleTab);
+  }, [isOpen]);
+
   // Lock body scroll
   useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
     if (isOpen) {
       document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
     }
     return () => {
-      document.body.style.overflow = "unset";
+      document.body.style.overflow = originalOverflow;
     };
   }, [isOpen]);
 
@@ -49,6 +104,7 @@ export function Modal({ isOpen, onClose, children, ariaLabel }: ModalProps) {
       <AnimatePresence>
         {isOpen && (
           <div
+            ref={dialogRef}
             className="fixed inset-0 z-[100] flex items-center justify-center"
             role="dialog"
             aria-modal="true"
@@ -65,7 +121,12 @@ export function Modal({ isOpen, onClose, children, ariaLabel }: ModalProps) {
             />
 
             {/* Content Layer */}
-            <div className="relative z-10 w-full h-full flex items-center justify-center p-4 sm:p-6 pointer-events-none">
+            <div
+              className={cn(
+                "relative z-10 w-full h-full flex items-center justify-center pointer-events-none",
+                variant === "fullscreen" ? "p-0" : "p-4 sm:p-6",
+              )}
+            >
               <div className="pointer-events-auto w-full flex justify-center items-center mobile-app-safe-area">
                 {children}
               </div>

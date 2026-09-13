@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import LibraryClient from "./LibraryClient";
 import type { Metadata } from "next";
 import { listPublishedContent } from "@/features/content/infrastructure/supabaseContentRepository";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 
 export const metadata: Metadata = {
   title: "Biblioteca Pública",
@@ -19,25 +20,30 @@ export const revalidate = 3600; // Revalidate every hour
 
 async function getLibraryData() {
   try {
-    const items = await listPublishedContent("publicLibrary");
-    const localDocumentUrl =
-      "/documents/As%20polaridades%20do%20feminino%20na%20contemporaneidade%20e%20a%20depress%C3%A3o%20p%C3%B3s-parto%20uma%20vis%C3%A3o%20gest%C3%A1ltica.pdf";
+    const [posts, documentsResult] = await Promise.all([
+      listPublishedContent("publicLibrary"),
+      createSupabaseServiceClient()
+        .from("public_documents")
+        .select("id, title, category, file_url, file_size, created_at")
+        .eq("is_published", true)
+        .order("created_at", { ascending: false }),
+    ]);
 
-    return items.map((item) => {
-      const searchableTitle = String(item.title || "").toLowerCase();
-      const isPolaridadesDocument =
-        searchableTitle.includes("polaridades") &&
-        searchableTitle.includes("depress") &&
-        searchableTitle.includes("pós-parto");
-      const pointsToMissingBucket =
-        /supabase\.co\/storage\/v1\/object\/(public|sign)\/(uploads|documents)\//i.test(
-          String(item.pdfUrl || item.pdf_url || ""),
-        );
+    if (documentsResult.error) throw documentsResult.error;
 
-      return isPolaridadesDocument || pointsToMissingBucket
-        ? { ...item, pdfUrl: localDocumentUrl, pdf_url: localDocumentUrl }
-        : item;
-    });
+    const documents = (documentsResult.data ?? []).map((document) => ({
+      id: `document-${document.id}`,
+      title: document.title,
+      subtitle: `${document.category} · PDF${document.file_size ? ` · ${document.file_size}` : ""}`,
+      type: "library",
+      tags: [document.category],
+      pdfUrl: document.file_url,
+      pdf_url: document.file_url,
+      createdAt: document.created_at,
+      isPublished: true,
+    }));
+
+    return [...documents, ...posts];
   } catch (error) {
     console.error("Error fetching library data:", error);
     return [];

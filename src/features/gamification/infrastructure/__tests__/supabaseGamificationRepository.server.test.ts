@@ -2,8 +2,8 @@ import { describe, expect, it, jest, beforeEach } from "@jest/globals";
 import { createSupabaseChainMock } from "@/test-utils/supabaseMock";
 
 const from = jest.fn();
-jest.mock("@/infrastructure/supabase/client", () => ({
-  createSupabaseBrowserClient: () => ({ from }),
+jest.mock("@/infrastructure/supabase/server", () => ({
+  createSupabaseServiceClient: () => ({ from }),
 }));
 
 import {
@@ -32,7 +32,7 @@ describe("supabaseGamificationRepository", () => {
     );
   });
 
-  it("writes an xp transaction and updates the profile", async () => {
+  it("awards through the atomic ledger RPC with a deterministic key", async () => {
     const profileChain = createSupabaseChainMock({
       data: {
         user_id: "user-1",
@@ -46,26 +46,40 @@ describe("supabaseGamificationRepository", () => {
         updated_at: "2026-09-05T10:00:00.000Z",
       },
     });
-    const txChain = createSupabaseChainMock({ data: { id: "tx-1" } });
     from.mockImplementation((table) => {
       if (table === "gamification_profiles") return profileChain;
-      if (table === "xp_transactions") return txChain;
       if (table === "earned_badges")
         return createSupabaseChainMock({ data: { id: "badge-1" } });
       throw new Error(`unexpected table ${table}`);
     });
 
-    const client = { from } as any;
+    const rpc = jest.fn().mockResolvedValue({
+      data: [{ new_total_xp: 35, new_level: 1, awarded: true }],
+      error: null,
+    });
+    const client = { from, rpc } as any;
 
     await expect(
-      awardXp("user-1", 25, "daily_login", { source: "test" }, client),
+      awardXp(
+        {
+          userId: "user-1",
+          amount: 25,
+          reason: "daily_login",
+          eventKey: "daily-login:2026-09-13",
+          metadata: { source: "test" },
+        },
+        client,
+      ),
     ).resolves.toEqual(
       expect.objectContaining({
         newTotalXp: 35,
       }),
     );
 
-    expect(from).toHaveBeenCalledWith("xp_transactions");
+    expect(rpc).toHaveBeenCalledWith(
+      "grant_xp_idempotent",
+      expect.objectContaining({ p_event_key: "daily-login:2026-09-13" }),
+    );
   });
 
   it("lists profiles by xp", async () => {

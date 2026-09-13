@@ -481,9 +481,10 @@ export async function buildAdminDashboardKPIs(): Promise<
           .limit(5),
         supabase
           .from("enrollments")
-          .select(
-            "id,user_id,course_id,status,enrolled_at,profiles(display_name,email),courses(title)",
-          )
+          // Do not rely on implicit PostgREST relationship names here. This
+          // query powers the Admin landing page and must work while schemas
+          // are migrated or relationship metadata is reloaded.
+          .select("id,user_id,course_id,status,enrolled_at")
           .eq("status", "pending_approval")
           .order("enrolled_at", { ascending: false })
           .limit(5),
@@ -497,6 +498,30 @@ export async function buildAdminDashboardKPIs(): Promise<
       recentUsers.error ||
       pending.error;
     if (error) throw error;
+    const pendingRows = pending.data ?? [];
+    const pendingUserIds = pendingRows
+      .map((row) => row.user_id)
+      .filter((id): id is string => Boolean(id));
+    const pendingCourseIds = pendingRows.map((row) => row.course_id);
+    const [pendingProfiles, pendingCourses] = await Promise.all([
+      pendingUserIds.length
+        ? supabase
+            .from("profiles")
+            .select("id,display_name,email")
+            .in("id", pendingUserIds)
+        : Promise.resolve({ data: [], error: null }),
+      pendingCourseIds.length
+        ? supabase.from("courses").select("id,title").in("id", pendingCourseIds)
+        : Promise.resolve({ data: [], error: null }),
+    ]);
+    if (pendingProfiles.error) throw pendingProfiles.error;
+    if (pendingCourses.error) throw pendingCourses.error;
+    const profileById = new Map(
+      (pendingProfiles.data ?? []).map((profile) => [profile.id, profile]),
+    );
+    const courseById = new Map(
+      (pendingCourses.data ?? []).map((course) => [course.id, course]),
+    );
     return {
       success: true,
       data: {
@@ -506,7 +531,16 @@ export async function buildAdminDashboardKPIs(): Promise<
         libraryDocs: documents.count ?? 0,
         totalAuditLogs: audits.count ?? 0,
         recentUsers: recentUsers.data ?? [],
-        pendingEnrollments: pending.data ?? [],
+        pendingEnrollments: pendingRows.map((enrollment) => ({
+          ...enrollment,
+          userName: enrollment.user_id
+            ? (profileById.get(enrollment.user_id)?.display_name ?? null)
+            : null,
+          email: enrollment.user_id
+            ? (profileById.get(enrollment.user_id)?.email ?? null)
+            : null,
+          courseTitle: courseById.get(enrollment.course_id)?.title ?? "Curso",
+        })),
       },
       source: dataSource,
       updatedAt,

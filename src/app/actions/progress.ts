@@ -1,13 +1,15 @@
 "use server";
 
-import { adminDb } from "@/lib/firebase/admin";
-import { FieldValue } from "firebase-admin/firestore";
-import { progressService } from "@/lib/progress/progressService";
 import { assertCanAccessCourse } from "@/lib/auth/access-gate";
 import { verifySession } from "@/lib/auth/server";
 import { revalidatePath } from "next/cache";
-
-import { gamificationService } from "@/lib/gamification/gamificationService";
+import {
+  recalculateCourseProgress,
+  recordLessonAccess,
+  recordLessonProgress,
+  lessonProgressInput,
+} from "@/features/progress/application/recordLessonProgress.server";
+import { awardCanonicalCompletion } from "@/features/gamification/application/awardCanonicalGamification.server";
 
 /**
  * Validates user session and enrollment, then marks lesson as complete.
@@ -26,17 +28,21 @@ export async function markLessonCompleted(
     // This ensures only enrolled students with active status can progress.
     await assertCanAccessCourse(uid, courseId);
 
-    // 3. Service Call (Idempotent)
-    // Note: progressService.markLessonCompleted already awards XP and the
-    // "first_steps" badge internally (see lib/progress/progressService.ts).
-    // Do not call gamificationService.onLessonCompletion here as well —
-    // that duplicated XP for every lesson completion.
-    await progressService.markLessonCompleted(
-      uid,
+    const result = await recordLessonProgress(uid, {
       courseId,
       moduleId,
       lessonId,
-    );
+      status: "completed",
+      percent: 100,
+    });
+    if (result.transitionedToCompleted)
+      await awardCanonicalCompletion(uid, {
+        kind: "lesson",
+        courseId,
+        lessonId,
+      });
+    if (result.courseCompleted)
+      await awardCanonicalCompletion(uid, { kind: "course", courseId });
 
     // 4. Revalidate to show new progress in UI
     revalidatePath(`/portal/course/${courseId}`);
@@ -57,7 +63,11 @@ export async function updateLessonProgress(
   courseId: string,
   moduleId: string,
   lessonId: string,
-  data: { status: string; percent?: number; maxWatchedSecond?: number },
+  data: {
+    status: "in_progress" | "completed";
+    percent?: number;
+    maxWatchedSecond?: number;
+  },
 ) {
   try {
     const session = await verifySession();
@@ -66,17 +76,22 @@ export async function updateLessonProgress(
 
     await assertCanAccessCourse(uid, courseId);
 
-    await progressService.updateLessonProgress(
-      uid,
+    const input = lessonProgressInput.parse({
       courseId,
       moduleId,
       lessonId,
-      data,
-    );
+      ...data,
+    });
+    const result = await recordLessonProgress(uid, input);
 
-    if (data.status === "completed") {
-      // Award XP
-      await gamificationService.onLessonCompletion(uid, courseId, lessonId);
+    if (result.transitionedToCompleted) {
+      await awardCanonicalCompletion(uid, {
+        kind: "lesson",
+        courseId,
+        lessonId,
+      });
+      if (result.courseCompleted)
+        await awardCanonicalCompletion(uid, { kind: "course", courseId });
       revalidatePath(`/portal/course/${courseId}`);
       revalidatePath(`/admin/enrollments`);
     }
@@ -99,19 +114,7 @@ export async function updateLessonLastAccess(
 
     await assertCanAccessCourse(uid, courseId);
 
-    await adminDb
-      .collection("progress")
-      .doc(`${uid}_${courseId}_${lessonId}`)
-      .set(
-        {
-          userId: uid,
-          courseId,
-          lessonId,
-          lastAccessedAt: FieldValue.serverTimestamp(),
-          updatedAt: FieldValue.serverTimestamp(),
-        },
-        { merge: true },
-      );
+    await recordLessonAccess(uid, courseId, lessonId);
 
     return { success: true };
   } catch (error: any) {
@@ -152,8 +155,7 @@ export async function recalculateProgress(
       await assertCanAccessCourse(uid, courseId);
     }
 
-    // Perform Canonical Recalculation
-    await progressService.recalculateEnrollmentProgress(uid, courseId);
+    await recalculateCourseProgress(uid, courseId);
 
     // Revalidate relevant paths
     revalidatePath(`/portal/course/${courseId}`);

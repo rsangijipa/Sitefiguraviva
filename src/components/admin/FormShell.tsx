@@ -26,21 +26,28 @@ interface FormSectionProps {
   title: string;
   description?: string;
   children: React.ReactNode;
+  className?: string;
 }
 
 export function FormSection({
   title,
   description,
   children,
+  className,
 }: FormSectionProps) {
   return (
-    <div className="space-y-4 pb-6 border-b border-stone-100 last:border-0">
+    <section
+      className={cn(
+        "space-y-4 pb-6 border-b border-stone-100 last:border-0",
+        className,
+      )}
+    >
       <div className="mb-4">
         <h3 className="text-lg font-bold text-stone-800">{title}</h3>
         {description && <p className="text-sm text-stone-500">{description}</p>}
       </div>
       <div className="space-y-4">{children}</div>
-    </div>
+    </section>
   );
 }
 
