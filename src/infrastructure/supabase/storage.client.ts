@@ -15,6 +15,7 @@ interface UploadAdminAssetOptions {
   maxBytes?: number;
   mimeTypes?: string[];
   kind?: UploadKind;
+  bucket?: string;
 }
 
 interface UploadAdminAssetResult {
@@ -98,13 +99,14 @@ export async function uploadAdminAsset(
     maxBytes: options.maxBytes ?? 0,
     mimeTypes: options.mimeTypes ?? [],
     kind: options.kind ?? "generic",
+    bucket: options.bucket ?? STORAGE_BUCKET,
   } as const;
 
   validateUploadFile(file, normalizedOptions);
 
   const path = buildStoragePath(normalizedOptions.folder, file.name);
   const supabase = createSupabaseBrowserClient();
-  const storage = supabase.storage.from(STORAGE_BUCKET);
+  const storage = supabase.storage.from(normalizedOptions.bucket);
   const { error } = await storage.upload(path, file, {
     cacheControl: "3600",
     upsert: true,

@@ -708,12 +708,45 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["announcements"]["Row"]>;
         Relationships: [];
       };
+      book_recommendations: {
+        Row: {
+          id: string;
+          title: string;
+          author: string;
+          description: string;
+          cover_image_url: string;
+          cover_storage_path: string;
+          purchase_url: string;
+          is_published: boolean;
+          sort_order: number;
+          updated_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<
+          Database["public"]["Tables"]["book_recommendations"]["Row"]
+        > & {
+          title: string;
+          author: string;
+          cover_image_url: string;
+          cover_storage_path: string;
+          purchase_url: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["book_recommendations"]["Row"]
+        >;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
       bump_course_content_revision: {
         Args: { p_course_id: string };
         Returns: number;
+      };
+      reorder_book_recommendations: {
+        Args: { p_ids: string[] };
+        Returns: undefined;
       };
       save_lesson_content: {
         Args: {

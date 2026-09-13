@@ -1,38 +1,26 @@
-"use client";
-
+import Image from "next/image";
 import { ExternalLink } from "lucide-react";
 
 /**
- * "Estante de preferidos" — item 10 do plano editorial.
- *
- * Duas decisões que valem a explicação:
- *
- * 1. **Sem capa.** O Design System lembra que capa de livro é obra protegida:
- *    pode ser citada como referência bibliográfica, não reproduzida nem
- *    alterada. Então a estante é tipográfica — a lombada é o próprio título,
- *    em Fraunces, sobre Areia. Nada de imagem de capa, nem gerada por IA.
- *
- * 2. **Sem conteúdo inventado.** A lista vem do acervo que a instituição já
- *    mantém (`publicLibrary`, itens marcados como livro). Se ainda não há
- *    nenhum, a seção não renderiza — uma estante com títulos que o Instituto
- *    nunca indicou seria pior que estante nenhuma.
+ * Estante pública — curadoria administrada em /admin/books.
+ * Capas só existem aqui quando a equipe confirma autorização de uso no
+ * formulário do Admin; o componente em si não valida isso, apenas exibe
+ * o que já foi aprovado editorialmente.
  */
 export interface Livro {
   id: string;
   title: string;
-  /** Autoria, editora, ano — o que existir. Exibido como referência. */
-  subtitle?: string;
-  /** Link externo opcional (catálogo, editora). Nunca um arquivo da obra. */
-  url?: string;
+  author: string;
+  description?: string;
+  coverImageUrl: string;
+  purchaseUrl: string;
 }
 
 export default function BookshelfSection({ livros }: { livros: Livro[] }) {
-  if (!livros?.length) return null;
-
   return (
     <section
       aria-labelledby="estante-titulo"
-      className="fv-section fv-section--cream fv-bg fv-bg-bookshelf border-t border-border"
+      className="fv-section fv-section--cream fv-bg border-t border-border"
     >
       <div className="fv-container">
         <div className="mb-12 max-w-2xl">
@@ -47,52 +35,54 @@ export default function BookshelfSection({ livros }: { livros: Livro[] }) {
           </p>
         </div>
 
-        <ul className="book-grid grid gap-px overflow-hidden rounded-md border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
-          {livros.map((livro) => {
-            const conteudo = (
-              <>
-                {/* A "lombada": faixa Areia com o título em serifa, girado no
-                    desktop para sugerir o livro em pé na prateleira sem
-                    desenhar nenhuma capa. */}
-                <div className="book-card__cover flex min-h-[7rem] items-end bg-areia p-6 transition-colors group-hover:bg-nevoa">
-                  <span className="font-serif text-xl font-semibold leading-snug text-primary">
-                    {livro.title}
-                  </span>
-                </div>
-                <div className="book-card__meta flex flex-1 flex-col p-6">
-                  {livro.subtitle && (
-                    <p className="text-sm leading-relaxed text-text/75">
-                      {livro.subtitle}
-                    </p>
-                  )}
-                  {livro.url && (
-                    <span className="mt-auto flex items-center gap-2 pt-6 text-[10px] font-bold uppercase tracking-widest text-primary">
-                      Ver referência
+        {livros.length === 0 ? (
+          <div className="rounded-md border border-dashed border-border bg-paper px-6 py-16 text-center">
+            <p className="fv-lead text-text/60">Estante em preparação.</p>
+          </div>
+        ) : (
+          <ul className="book-shelf grid grid-cols-2 gap-x-6 gap-y-12 sm:grid-cols-3 lg:grid-cols-4">
+            {livros.map((livro) => (
+              <li key={livro.id} className="book-card group flex flex-col">
+                <a
+                  href={livro.purchaseUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Ver onde encontrar ${livro.title}, de ${livro.author} (abre em nova aba)`}
+                  className="flex flex-col rounded-sm outline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+                >
+                  <div className="relative aspect-[2/3] w-full overflow-hidden rounded-sm border border-border bg-areia shadow-sm transition-transform duration-300 group-hover:-translate-y-1 group-hover:shadow-lg">
+                    <Image
+                      src={livro.coverImageUrl}
+                      alt={`Capa do livro ${livro.title}`}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 22vw"
+                    />
+                  </div>
+
+                  {/* Sombra discreta sob a capa, sugerindo a prateleira sem desenhar uma. */}
+                  <div className="mx-2 h-2 rounded-b-sm bg-gradient-to-b from-border/60 to-transparent" />
+
+                  <div className="mt-4 flex flex-1 flex-col gap-1">
+                    <span className="font-serif text-base font-semibold leading-snug text-primary">
+                      {livro.title}
+                    </span>
+                    <span className="text-sm text-text/70">{livro.author}</span>
+                    {livro.description && (
+                      <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-text/60">
+                        {livro.description}
+                      </p>
+                    )}
+                    <span className="mt-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-primary">
+                      Onde encontrar
                       <ExternalLink size={12} aria-hidden />
                     </span>
-                  )}
-                </div>
-              </>
-            );
-
-            return (
-              <li key={livro.id} className="book-card group flex bg-paper">
-                {livro.url ? (
-                  <a
-                    href={livro.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex w-full flex-col transition-colors hover:bg-areia/40"
-                  >
-                    {conteudo}
-                  </a>
-                ) : (
-                  <div className="flex w-full flex-col">{conteudo}</div>
-                )}
+                  </div>
+                </a>
               </li>
-            );
-          })}
-        </ul>
+            ))}
+          </ul>
+        )}
       </div>
     </section>
   );

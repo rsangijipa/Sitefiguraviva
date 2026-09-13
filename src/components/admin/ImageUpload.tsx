@@ -6,8 +6,9 @@ import Image from "next/image";
 import { uploadAdminAsset } from "@/infrastructure/supabase/storage.client";
 
 interface ImageUploadProps {
-  onUpload: (url: string) => void;
+  onUpload: (url: string, path: string) => void;
   folder?: string;
+  bucket?: string;
   defaultImage?: string;
   className?: string;
 }
@@ -15,6 +16,7 @@ interface ImageUploadProps {
 export default function ImageUpload({
   onUpload,
   folder = "uploads/admin",
+  bucket,
   defaultImage,
   className = "",
 }: ImageUploadProps) {
@@ -50,13 +52,14 @@ export default function ImageUpload({
     try {
       const result = await uploadAdminAsset(file, {
         folder,
+        bucket,
         kind: "image",
         maxBytes: 5 * 1024 * 1024,
         mimeTypes: ["image/png", "image/jpeg", "image/webp"],
       });
 
       setPreview(result.url);
-      onUpload(result.url);
+      onUpload(result.url, result.path);
     } catch (err: any) {
       console.error("Upload failed", err);
       setError("Falha no upload. Tente novamente.");
@@ -67,16 +70,16 @@ export default function ImageUpload({
 
   const clearImage = () => {
     setPreview(null);
-    onUpload(""); // Clear in parent
+    onUpload("", ""); // Clear in parent
     const input = document.getElementById("image-upload") as HTMLInputElement;
     if (input) input.value = "";
   };
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative ${className || "h-40 w-full"}`}>
       {preview ? (
-        <div className="relative rounded-lg overflow-hidden border border-stone-200 group">
-          <div className="relative aspect-video w-full bg-stone-100">
+        <div className="absolute inset-0 overflow-hidden rounded-lg border border-stone-200 group">
+          <div className="relative h-full w-full bg-stone-100">
             <Image
               src={preview}
               alt="Preview"
@@ -97,7 +100,7 @@ export default function ImageUpload({
         <label
           htmlFor="image-upload"
           className={`
-                    flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-stone-300 rounded-lg cursor-pointer bg-stone-50 hover:bg-stone-100 transition-colors
+                    absolute inset-0 flex flex-col items-center justify-center border-2 border-dashed border-stone-300 rounded-lg cursor-pointer bg-stone-50 hover:bg-stone-100 transition-colors
                     ${error ? "border-red-300 bg-red-50" : ""}
                 `}
         >

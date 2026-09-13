@@ -16,7 +16,6 @@ import PDFReader from "@/components/PDFReader";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useAuth } from "@/context/AuthContext";
 import { processGamificationEvent } from "@/actions/gamification";
-import BookshelfSection from "@/components/sections/BookshelfSection";
 
 export default function LibraryClient({
   initialItems,
@@ -51,25 +50,6 @@ export default function LibraryClient({
       filter === "Todos" || (item.tags && item.tags.includes(filter));
     return matchesSearch && matchesFilter;
   });
-
-  // Itens do acervo que sao livro, nao artigo. Vao para a estante em vez da
-  // grade de leitura - a Biblioteca abre PDF, a estante aponta referencia.
-  const livros = initialItems
-    .filter((item) => {
-      const tipo = String(item.type || "").toLowerCase();
-      const tags = (item.tags || []).map((t: string) =>
-        String(t).toLowerCase(),
-      );
-      return (
-        tipo === "livro" || tags.includes("livro") || tags.includes("livros")
-      );
-    })
-    .map((item) => ({
-      id: item.id,
-      title: item.title,
-      subtitle: item.subtitle,
-      url: item.externalUrl || undefined,
-    }));
 
   const categories = [
     "Todos",
@@ -182,8 +162,6 @@ export default function LibraryClient({
           </div>
         </motion.div>
       </div>
-
-      <BookshelfSection livros={livros} />
 
       <Footer />
 
