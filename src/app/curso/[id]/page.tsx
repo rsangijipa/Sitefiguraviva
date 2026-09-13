@@ -1,9 +1,39 @@
 import { Suspense } from "react";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import CourseDetailClient from "./CourseDetailClient";
 
 import { getCourseById } from "@/data/courses";
 import { deepSafeSerialize } from "@/lib/utils";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const course = await getCourseById(id);
+
+  if (!course) {
+    return { title: "Curso não encontrado" };
+  }
+
+  const title = course.title;
+  const subtitle = course.subtitle as string | null | undefined;
+  const description =
+    subtitle || (course.description as string | null | undefined) || undefined;
+  const coverImage = course.coverImage as string | null | undefined;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: coverImage ? [coverImage] : undefined,
+    },
+  };
+}
 
 async function CourseContent({ id }: { id: string }) {
   try {

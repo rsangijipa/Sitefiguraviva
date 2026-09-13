@@ -8,7 +8,7 @@ export function WhySheMatters() {
   const { whySheMatters } = lauraPerlsContent;
 
   return (
-    <section className="py-8 md:py-10 bg-[#1b140d] relative overflow-hidden">
+    <section className="py-14 md:py-24 bg-[#1b140d] relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5">
         <svg className="w-full h-full" viewBox="0 0 100 100">

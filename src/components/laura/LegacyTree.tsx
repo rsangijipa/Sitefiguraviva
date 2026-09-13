@@ -10,7 +10,7 @@ export function LegacyTree() {
   const founder = legacyTree[0];
 
   return (
-    <section className="py-8 md:py-10 bg-[#241b12] relative overflow-hidden">
+    <section className="py-14 md:py-24 bg-[#241b12] relative overflow-hidden">
       {/* Decorative Elements */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#4a3c28] to-transparent" />
       <div className="absolute inset-0 opacity-[0.02] pointer-events-none">

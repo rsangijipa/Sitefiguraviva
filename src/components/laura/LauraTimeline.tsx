@@ -10,7 +10,7 @@ export function LauraTimeline() {
   return (
     <section
       id="timeline"
-      className="py-8 md:py-10 bg-[#241b12] overflow-hidden relative"
+      className="py-14 md:py-24 bg-[#241b12] overflow-hidden relative"
     >
       {/* Decorative Elements */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#4a3c28]/50 to-transparent" />
@@ -65,7 +65,7 @@ export function LauraTimeline() {
                     {event.year}
                   </span>
                   <span
-                    className={`absolute ${index % 2 === 0 ? "left-0" : "right-0"} bottom-0 font-serif text-xl md:text-2xl text-[#e6d7bd] font-bold`}
+                    className={`absolute ${index % 2 === 0 ? "left-0" : "right-0"} bottom-0 font-serif text-xl md:text-2xl text-[#96551F] font-bold`}
                   >
                     {event.year}
                   </span>

@@ -9,7 +9,7 @@ export function LauraGallery() {
   const { gallery } = lauraPerlsContent;
 
   return (
-    <section className="py-8 md:py-10 bg-[#241b12] border-t border-[#4a3c28] relative overflow-hidden">
+    <section className="py-14 md:py-24 bg-[#241b12] border-t border-[#4a3c28] relative overflow-hidden">
       {/* Decorative Top Border */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#4a3c28] to-transparent" />
 

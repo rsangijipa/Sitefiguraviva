@@ -66,7 +66,7 @@ export const GestaltCardView: React.FC<GestaltCardViewProps> = ({
   // Dimensions based on size
   const dimensionClasses =
     size === "preview"
-      ? "w-[320px] h-[450px]"
+      ? "w-full max-w-[320px] h-[450px]"
       : size === "compact"
         ? "w-full h-[480px]"
         : "w-full max-w-[420px] h-[540px] sm:h-[570px]";

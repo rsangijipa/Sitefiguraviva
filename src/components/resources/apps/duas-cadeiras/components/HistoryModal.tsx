@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { ReflectionSession } from "../types";
 import { X, Trash2, ExternalLink, Calendar, MessageSquare } from "lucide-react";
 
@@ -17,6 +17,19 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
   onSelectSession,
   onDeleteSession,
 }) => {
+  useEffect(() => {
+    if (!isOpen) return;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      previouslyFocused?.focus();
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (

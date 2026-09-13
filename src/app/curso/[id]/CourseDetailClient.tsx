@@ -82,7 +82,7 @@ export default function CourseDetailClient({ course }: { course: any }) {
               className="space-y-8"
             >
               <span className="bg-gold/10 text-gold px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-[0.2em]">
-                {course.status || "Aberto"}
+                {course.enrollmentOpen ? "Matrículas Abertas" : "Em Breve"}
               </span>
 
               <div>

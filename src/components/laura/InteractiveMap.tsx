@@ -8,7 +8,7 @@ export function InteractiveMap() {
   const { journeyMap } = lauraPerlsContent;
 
   return (
-    <section className="py-8 md:py-10 bg-[#0d0906] relative overflow-hidden">
+    <section className="py-14 md:py-24 bg-[#0d0906] relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <svg className="w-full h-full" viewBox="0 0 800 400">
@@ -28,30 +28,18 @@ export function InteractiveMap() {
         </svg>
       </div>
 
-      {/* Connecting Lines */}
-      <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">
-        <path
-          d="M 200,150 Q 300,100 400,120 T 600,100"
-          fill="none"
-          stroke="#c9a768"
-          strokeWidth="2"
-          strokeDasharray="10,10"
-          className="animate-pulse"
-        />
-      </svg>
-
       <div className="max-w-6xl mx-auto px-6 relative z-10">
         {/* Section Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-3 mb-6">
             <div className="h-px w-12 bg-[#c9a768]/60" />
             <span className="w-12 h-12 rounded-full bg-[#241b12] flex items-center justify-center">
-              <Globe size={24} className="text-[#f5ecd9]" />
+              <Globe size={24} className="text-[#262B22]" />
             </span>
             <div className="h-px w-12 bg-[#c9a768]/60" />
           </div>
 
-          <span className="text-[11px] tracking-[0.3em] uppercase font-bold text-[#c7b89a] block mb-4">
+          <span className="text-xs tracking-[0.18em] uppercase font-bold text-[#e6d7bd] block mb-4">
             Jornada Global
           </span>
           <h2 className="font-serif text-3xl md:text-4xl text-[#e8e4db] leading-tight">
@@ -61,6 +49,27 @@ export function InteractiveMap() {
             </span>
           </h2>
         </div>
+
+        {/* Decorative Connecting Line: sits in normal flow, between the
+            header and the cards, so it can never overlap the title text
+            regardless of viewport (it used to be `absolute inset-0` over the
+            whole section with hardcoded pixel coordinates, which cut
+            straight through "Jornada Global" once the section got taller). */}
+        <svg
+          className="mx-auto -mb-2 hidden h-10 w-full max-w-md pointer-events-none md:block"
+          viewBox="0 0 600 60"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <path
+            d="M 20,50 Q 200,5 300,30 T 580,10"
+            fill="none"
+            stroke="#c9a768"
+            strokeWidth="2"
+            strokeDasharray="10,10"
+            className="animate-pulse"
+          />
+        </svg>
 
         {/* Map Cards */}
         <div className="grid md:grid-cols-3 gap-4 md:gap-5">
@@ -79,10 +88,12 @@ export function InteractiveMap() {
               )}
 
               {/* Country Card */}
-              <div className="bg-[#241b12] rounded-md border border-[#4a3c28] overflow-hidden h-full">
+              <div className="laura-card-lift bg-[#241b12] rounded-lg border border-[#4a3c28] overflow-hidden h-full transition-all duration-300 hover:-translate-y-1 hover:border-[#c9a768]/60">
                 {/* Header */}
                 <div className="bg-[#3a2d1c] px-5 py-3 flex items-center gap-3">
-                  <span className="text-2xl">{country.flag}</span>
+                  <span className="text-2xl text-[#e8e4db]">
+                    {country.flag}
+                  </span>
                   <h3 className="font-serif text-xl text-[#e8e4db]">
                     {country.country}
                   </h3>
@@ -99,18 +110,18 @@ export function InteractiveMap() {
                       <div className="absolute -left-[5px] top-2 w-2.5 h-2.5 rounded-full bg-[#c9a768]" />
 
                       <div className="flex items-center gap-2 mb-1">
-                        <MapPin size={12} className="text-[#a9987d]" />
-                        <span className="font-bold text-[#e6d7bd]">
+                        <MapPin size={12} className="text-[#6B6B63]" />
+                        <span className="font-bold text-[#262B22]">
                           {city.name}
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-2 text-xs text-[#8f7c64] mb-2">
+                      <div className="flex items-center gap-2 text-xs text-[#6B6B63] mb-2 font-medium">
                         <Calendar size={10} />
                         <span>{city.year}</span>
                       </div>
 
-                      <p className="text-sm text-[#cbb896] font-serif italic">
+                      <p className="text-sm text-[#262B22] font-serif italic">
                         {city.description}
                       </p>
                     </div>
@@ -154,10 +165,10 @@ export function InteractiveMap() {
               className="text-center p-3 bg-[#241b12]/10 rounded-md border border-[#c9a768]/30"
             >
               <span className="text-2xl block mb-1">{stat.icon}</span>
-              <span className="font-serif text-2xl text-[#e8e4db] font-bold">
+              <span className="font-serif text-2xl text-[#262B22] font-bold">
                 {stat.value}
               </span>
-              <span className="block text-xs text-[#c7b89a] uppercase tracking-widest mt-1">
+              <span className="block text-xs text-[#6B6B63] uppercase tracking-widest mt-1">
                 {stat.label}
               </span>
             </div>

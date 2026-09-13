@@ -50,7 +50,7 @@ export function Quiz() {
   const percentage = Math.round((score.correct / score.total) * 100);
 
   return (
-    <section className="py-8 md:py-10 bg-[#0d0906] relative overflow-hidden">
+    <section className="py-14 md:py-24 bg-[#0d0906] relative overflow-hidden">
       {/* Decorative Background */}
       <div className="absolute inset-0 opacity-5 pointer-events-none">
         <svg className="w-full h-full" viewBox="0 0 100 100">

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { AlertTriangle, Trash2, X } from "lucide-react";
 
 interface ConfirmDeleteModalProps {
@@ -16,6 +16,19 @@ export const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
   title = "Apagar sessão?",
   description = "Esta ação é definitiva. Todas as falas registradas nesta sessão serão removidas permanentemente do seu dispositivo.",
 }) => {
+  useEffect(() => {
+    if (!isOpen) return;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      previouslyFocused?.focus();
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (

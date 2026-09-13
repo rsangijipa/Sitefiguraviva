@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
-  ArrowUp,
   MessageCircle,
   MonitorSmartphone,
   Moon,
@@ -21,17 +20,10 @@ const whatsappMessage =
   "Olá! Gostaria de saber mais sobre as formações do Instituto Figura Viva.";
 
 export default function FloatingControls() {
-  const [showScrollTop, setShowScrollTop] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const { theme, preference, setPreference, mounted } = useTheme();
-
-  useEffect(() => {
-    const handleScroll = () => setShowScrollTop(window.scrollY > 400);
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   const themeLabel =
     preference === "system"
@@ -140,19 +132,6 @@ export default function FloatingControls() {
             }
           />
         </button>
-
-        {showScrollTop && (
-          <button
-            type="button"
-            data-secondary-floating-control="true"
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            aria-label="Voltar ao topo"
-            title="Voltar ao topo"
-            className={controlClass}
-          >
-            <ArrowUp size={20} aria-hidden="true" />
-          </button>
-        )}
       </div>
     </div>
   );

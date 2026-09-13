@@ -1615,7 +1615,24 @@ html[data-cookie-consent="pending"] [data-floating-whatsapp] {
 .laura-viva [class*="text-[#d4b578]"] { color: #96551F !important; }
 .laura-viva [class*="bg-[#0d0906]"] [class*="text-[#e8e4db]"],
 .laura-viva [class*="bg-[#0d0906]"] [class*="text-[#f5ecd9]"] { color: #FDFAF4 !important; }
-.laura-viva [class*="shadow-"] { box-shadow: none; }
+/* bg-[#0d0906] is the one dark background that stays dark after the remap
+   above (it becomes verde-raiz, not a light tone), so every "light on dark"
+   text variant nested inside it — not just the two exempted above — still
+   needs to read light instead of falling through to the generic dark-gray
+   rules meant for light backgrounds. */
+.laura-viva [class*="bg-[#0d0906]"] [class*="text-[#e6d7bd]"],
+.laura-viva [class*="bg-[#0d0906]"] [class*="text-[#cbb896]"],
+.laura-viva [class*="bg-[#0d0906]"] [class*="text-[#c7b89a]"],
+.laura-viva [class*="bg-[#0d0906]"] [class*="text-[#a9987d]"],
+.laura-viva [class*="bg-[#0d0906]"] [class*="text-[#8f7c64]"] { color: #D8CEBE !important; }
+/* The dark-archive components use plenty of shadow-* utilities for depth.
+   Killing them outright (as this used to do) left the whole page looking
+   flat by accident, since the intended shadows never rendered against the
+   new light palette either — they just needed lighter, palette-appropriate
+   values instead of none. Static shadow-* gets a soft resting shadow;
+   hover:shadow-* gets a stronger one so hover states still read as "lifting". */
+.laura-viva [class*="shadow-"] { box-shadow: 0 2px 10px rgba(38, 43, 34, 0.10) !important; }
+.laura-viva [class*="hover:shadow-"]:hover { box-shadow: 0 14px 30px rgba(38, 43, 34, 0.18) !important; }
 
 /* Cartão do quiz fica sobre a superfície clara: evita herdar o texto claro da
    seção verde e mantém leitura nítida durante toda a interação. */
@@ -1629,4 +1646,19 @@ html[data-cookie-consent="pending"] [data-floating-whatsapp] {
   .laura-viva [class*="grid"] { gap: 1rem; }
   .laura-viva [class*="p-8"],
   .laura-viva [class*="p-10"] { padding: 1.25rem; }
+}
+
+/* Card hover lift for InteractiveMap and ConceptsDeepDive: a dedicated class
+   (rather than shadow-md/hover:shadow-lg) so its resting/hover shadow values
+   are chosen independently of the shadow-* remap above. */
+.laura-card-lift {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+.laura-card-lift:hover {
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.16);
+}
+@media (prefers-reduced-motion: reduce) {
+  .laura-card-lift {
+    transition: none !important;
+  }
 }

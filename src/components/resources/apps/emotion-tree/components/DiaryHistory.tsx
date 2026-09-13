@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Bookmark,
   Calendar,
@@ -31,6 +31,19 @@ export const DiaryHistory: React.FC<DiaryHistoryProps> = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFamilyFilter, setSelectedFamilyFilter] =
     useState<string>("all");
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      previouslyFocused?.focus();
+    };
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 

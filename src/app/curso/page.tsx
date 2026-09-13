@@ -34,16 +34,7 @@ export default async function CoursesPage() {
         description="Cursos, grupos de estudos e vivências para habitar a Gestalt-terapia com rigor, sensibilidade e presença."
       />
       <div className="min-h-screen bg-[#FDFCF9] pb-20">
-        <div className="max-w-7xl mx-auto px-6 md:px-12">
-          <header className="mb-16 text-center">
-            <h1 className="font-serif text-4xl md:text-5xl text-primary mb-4">
-              Nossas Formações
-            </h1>
-            <p className="text-stone-500 font-light max-w-2xl mx-auto text-lg">
-              Cursos, grupos de estudos e vivências em Gestalt-Terapia.
-            </p>
-          </header>
-
+        <div className="max-w-7xl mx-auto px-6 md:px-12 pt-16">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {courses.map((course) => (
               <Link

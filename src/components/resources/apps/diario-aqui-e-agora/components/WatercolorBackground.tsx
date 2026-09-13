@@ -26,7 +26,7 @@ export const WatercolorBackground: React.FC<WatercolorBackgroundProps> = ({
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none fixed inset-0 z-0 overflow-hidden select-none"
+      className="pointer-events-none absolute inset-0 z-0 overflow-hidden select-none"
     >
       {/* Base warm rice-paper subtle gradient */}
       <div className="absolute inset-0 bg-[#fbf9f5] opacity-95 transition-colors duration-1000" />

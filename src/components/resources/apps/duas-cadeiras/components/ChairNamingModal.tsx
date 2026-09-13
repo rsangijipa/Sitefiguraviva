@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ChairConfig } from "../types";
 import { Sparkles, Edit3, X, Check } from "lucide-react";
 
@@ -59,6 +59,19 @@ export const ChairNamingModal: React.FC<ChairNamingModalProps> = ({
   const [subA, setSubA] = useState(chairA.sublabel);
   const [nameB, setNameB] = useState(chairB.name);
   const [subB, setSubB] = useState(chairB.sublabel);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      previouslyFocused?.focus();
+    };
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 

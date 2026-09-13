@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import "./styles.css";
 import { ViewState } from "./types";
 import { cases, themes } from "./data/cases";
 import HomeView from "./pages/HomeView";

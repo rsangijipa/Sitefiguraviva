@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { X, RotateCcw } from "lucide-react";
 import { FilterState, CardType, CardCategory } from "../types";
 
@@ -23,6 +23,19 @@ export const FilterDrawer: React.FC<FilterDrawerProps> = ({
   decks,
   activeFilterCount,
 }) => {
+  useEffect(() => {
+    if (!isOpen) return;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      previouslyFocused?.focus();
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const categories: CardCategory[] = [

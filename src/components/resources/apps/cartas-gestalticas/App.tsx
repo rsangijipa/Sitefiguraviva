@@ -11,6 +11,7 @@ import { HistoryView } from "./components/HistoryView";
 import { AdminView } from "./components/AdminView";
 import { useAuth } from "@/context/AuthContext";
 import { useResourceWindowScrollReset } from "../../ResourceWindow";
+import "./card-flip.css";
 
 interface AppProps {
   activeSection: ViewMode;

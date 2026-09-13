@@ -103,7 +103,7 @@ export const RandomView: React.FC<RandomViewProps> = ({
           </div>
         ) : (
           /* Drawn Card View */
-          <div className="flex flex-col items-center">
+          <div className="flex w-full flex-col items-center">
             <GestaltCardView
               card={selectedCard}
               isFlipped={isFlipped}

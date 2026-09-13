@@ -16,7 +16,7 @@ export function ConceptsDeepDive() {
   ];
 
   return (
-    <section className="py-8 md:py-10 bg-[#241b12] relative overflow-hidden">
+    <section className="py-14 md:py-24 bg-[#241b12] relative overflow-hidden">
       {/* Decorative Background */}
       <div className="absolute top-0 left-0 w-96 h-96 bg-[#c9a768]/5 rounded-full blur-3xl" />
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#c9a768]/5 rounded-full blur-3xl" />
@@ -59,7 +59,7 @@ export function ConceptsDeepDive() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="overflow-hidden rounded-lg border border-[#4a3c28] shadow-md hover:shadow-lg transition-shadow duration-500"
+                className="laura-card-lift overflow-hidden rounded-lg border border-[#4a3c28] transition-all duration-500"
               >
                 {/* Header - Always Visible */}
                 <button

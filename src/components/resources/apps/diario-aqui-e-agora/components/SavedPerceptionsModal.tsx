@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   X,
@@ -28,6 +28,19 @@ export const SavedPerceptionsModal: React.FC<SavedPerceptionsModalProps> = ({
   const [selectedItem, setSelectedItem] = useState<SavedPerception | null>(
     null,
   );
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      previouslyFocused?.focus();
+    };
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -89,6 +102,7 @@ export const SavedPerceptionsModal: React.FC<SavedPerceptionsModalProps> = ({
               id="btn-close-saved-modal"
               type="button"
               onClick={onClose}
+              aria-label="Fechar"
               className="p-2 rounded-full hover:bg-[#eee5d8] text-[#6b645c] transition-colors"
             >
               <X className="w-5 h-5" />

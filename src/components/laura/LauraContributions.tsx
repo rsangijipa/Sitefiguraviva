@@ -8,7 +8,7 @@ export function LauraContributions() {
   const { contributions } = lauraPerlsContent;
 
   return (
-    <section className="py-8 md:py-10 bg-[#1b140d] relative overflow-hidden">
+    <section className="py-14 md:py-24 bg-[#1b140d] relative overflow-hidden">
       {/* Decorative Pattern */}
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
         <div

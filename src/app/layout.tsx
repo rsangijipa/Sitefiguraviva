@@ -104,6 +104,7 @@ import LenisProvider from "@/components/providers/LenisProvider";
 import JsonLd from "@/components/system/JsonLd";
 import GoogleAnalytics from "@/components/system/GoogleAnalytics";
 import CookieConsent from "@/components/system/CookieConsent";
+import BackToTop from "@/components/system/BackToTop";
 import { themeInitScript } from "@/components/providers/ThemeProvider";
 
 export default async function RootLayout({
@@ -173,6 +174,7 @@ export default async function RootLayout({
             <LenisProvider>{children}</LenisProvider>
           </main>
           {isImpersonating && <ImpersonationBanner />}
+          <BackToTop />
         </Providers>
       </body>
     </html>
