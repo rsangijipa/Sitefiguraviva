@@ -15,6 +15,9 @@ const customJestConfig = {
     "<rootDir>/.worktrees/",
     "<rootDir>/.claude/worktrees/",
   ],
+  // Node's built-in test runner files are executed with `node --test`, not Jest.
+  // Restrict Jest to its supported JS/TS test extensions.
+  testMatch: ["<rootDir>/**/?(*.)+(test|spec).[jt]s?(x)"],
   moduleNameMapper: {
     // Handle module aliases (this will be automatically configured for you soon)
     "^@/(.*)$": "<rootDir>/src/$1",
