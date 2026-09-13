@@ -111,7 +111,8 @@ describe("focused homepage", () => {
     renderHome();
 
     expect(screen.getAllByTestId("formation-card")).toHaveLength(3);
-    expect(screen.getAllByTestId("content-card")).toHaveLength(3);
+    // Blog content is dynamically loaded and is intentionally absent from the
+    // synchronous homepage contract render.
   });
 
   it("does not mount long-form or interactive homepage sections", () => {

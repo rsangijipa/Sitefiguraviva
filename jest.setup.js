@@ -1,5 +1,13 @@
 import "@testing-library/jest-dom";
 
+if (typeof globalThis.IntersectionObserver === "undefined") {
+  globalThis.IntersectionObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+}
+
 process.env.NEXT_PUBLIC_SUPABASE_URL =
   process.env.NEXT_PUBLIC_SUPABASE_URL || "https://example.supabase.co";
 process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY =
