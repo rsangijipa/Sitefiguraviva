@@ -12,10 +12,26 @@ jest.mock("@/context/UIContext", () => ({
 jest.mock("@/components/providers/ThemeProvider", () => ({
   useTheme: () => ({ setPreference: jest.fn() }),
 }));
-jest.mock("@/components/motion/ScrollProgressBar", () => () => null);
-jest.mock("@/components/motion/Reveal", () => ({ children }: { children: React.ReactNode }) => <>{children}</>);
-jest.mock("@/components/sections/CoursesSection", () => ({ courses = [] }: { courses?: Array<{ id: string; title: string }> }) => <section>{courses.map((course) => <article data-testid="formation-card" key={course.id}>{course.title}</article>)}</section>);
-jest.mock("@/components/sections/BlogSection", () => ({ blogPosts = [] }: { blogPosts?: Array<{ id: string; title: string }> }) => <section>{blogPosts.slice(0, 3).map((post) => <article data-testid="content-card" key={post.id}>{post.title}</article>)}</section>);
+jest.mock("@/components/motion/ScrollProgressBar", () => {
+  function MockScrollProgressBar() { return null; }
+  return MockScrollProgressBar;
+});
+jest.mock("@/components/motion/Reveal", () => {
+  function MockReveal({ children }: { children: React.ReactNode }) { return <>{children}</>; }
+  return MockReveal;
+});
+jest.mock("@/components/sections/CoursesSection", () => {
+  function MockCoursesSection({ courses = [] }: { courses?: Array<{ id: string; title: string }> }) {
+    return <section>{courses.map((course) => <article data-testid="formation-card" key={course.id}>{course.title}</article>)}</section>;
+  }
+  return MockCoursesSection;
+});
+jest.mock("@/components/sections/BlogSection", () => {
+  function MockBlogSection({ blogPosts = [] }: { blogPosts?: Array<{ id: string; title: string }> }) {
+    return <section>{blogPosts.slice(0, 3).map((post) => <article data-testid="content-card" key={post.id}>{post.title}</article>)}</section>;
+  }
+  return MockBlogSection;
+});
 
 jest.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
