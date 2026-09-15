@@ -8,27 +8,23 @@ export function Testimonials() {
   const { testimonials } = lauraPerlsContent;
 
   return (
-    <section className="py-14 bg-[#1b140d] relative overflow-hidden">
-      {/* Decorative Elements */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#4a3c28] to-transparent" />
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#4a3c28] to-transparent" />
-
+    <section className="py-16 md:py-24 bg-[#FDFAF4] relative overflow-hidden border-t border-[#D8CFBE]">
       <div className="max-w-5xl mx-auto px-6 relative z-10">
         {/* Section Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-3 mb-6">
-            <div className="h-px w-12 bg-[#c9a768]/60" />
-            <div className="w-10 h-10 rounded-full bg-[#c9a768] border-2 border-[#c9a768] flex items-center justify-center">
-              <MessageCircle size={20} className="text-[#e8e4db]" />
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center gap-3 mb-4">
+            <div className="h-px w-10 bg-[#96551F]/30" />
+            <div className="w-10 h-10 rounded-full bg-[#005A1F]/10 border border-[#005A1F]/20 flex items-center justify-center">
+              <MessageCircle size={20} className="text-[#005A1F]" />
             </div>
-            <div className="h-px w-12 bg-[#c9a768]/60" />
+            <div className="h-px w-10 bg-[#96551F]/30" />
           </div>
 
-          <span className="text-[11px] tracking-[0.3em] uppercase font-bold text-[#8f7c64] block mb-4">
+          <span className="text-xs tracking-[0.2em] uppercase font-bold text-[#96551F] block mb-2">
             O Que Dizem
           </span>
-          <h2 className="font-serif text-4xl md:text-5xl text-[#f5ecd9] leading-tight">
-            <span className="italic text-[#cbb896] font-light">
+          <h2 className="font-serif text-3xl md:text-5xl text-[#005A1F] leading-tight">
+            <span className="italic text-[#96551F] font-light">
               Depoimentos
             </span>{" "}
             de Terapeutas
@@ -36,25 +32,25 @@ export function Testimonials() {
         </div>
 
         {/* Testimonials Grid */}
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-3 gap-6">
           {testimonials.map((testimonial, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.15 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
               className="relative"
             >
               {/* Quote Icon */}
-              <div className="absolute -top-3 left-6 w-10 h-10 rounded-full bg-[#c9a768] flex items-center justify-center z-10 shadow-lg">
-                <Quote size={18} className="text-[#e8e4db]" />
+              <div className="absolute -top-3 left-6 w-9 h-9 rounded-full bg-[#005A1F] flex items-center justify-center z-10 shadow-xs border border-white">
+                <Quote size={16} className="text-[#FDFAF4]" />
               </div>
 
               {/* Card */}
-              <div className="bg-[#241b12] rounded-lg shadow-lg border border-[#4a3c28] p-6 pt-10 h-full flex flex-col">
+              <div className="bg-white rounded-2xl shadow-xs border border-[#D8CFBE] p-6 pt-9 h-full flex flex-col">
                 {/* Quote */}
-                <p className="font-serif text-[#e6d7bd] italic leading-relaxed mb-6 flex-1">
+                <p className="font-serif text-[#262B22]/85 italic leading-relaxed mb-6 flex-1 text-sm">
                   "{testimonial.text}"
                 </p>
 

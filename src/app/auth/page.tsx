@@ -12,7 +12,7 @@ import PageShell from "@/components/ui/PageShell";
 import { createSupabaseBrowserClient } from "@/infrastructure/supabase/client";
 import { ensureUserProfileAction } from "@/app/actions/auth";
 import { registerForCourseAction } from "@/app/actions/signup";
-import { getRedirectPathForRole } from "@/lib/auth/authService";
+import { getRedirectPathForRole, isAdminEmail } from "@/lib/auth/authService";
 import { getAuthIntent, getSafeNextPath } from "@/features/auth/auth-intent";
 
 // Error mapping
@@ -40,7 +40,7 @@ const getFriendlyErrorMessage = (code: string) => {
 };
 
 function AuthContent() {
-  const { signIn, user } = useAuth();
+  const { signIn, user, role, isAdmin, loading: authLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   // Helper hook for content (if used)
@@ -72,13 +72,38 @@ function AuthContent() {
     setError("");
   }, [mode]);
 
+  // Se o usuário já estiver autenticado e acessar a tela de auth diretamente,
+  // encaminha para seu respectivo destino (/admin para admins).
+  useEffect(() => {
+    if (!authLoading && user && searchParams.get("oauth") !== "google") {
+      const isUserAdmin =
+        isAdmin || role === "admin" || isAdminEmail(user.email);
+      const userRole = isUserAdmin ? "admin" : role || "student";
+      const targetPath = isUserAdmin
+        ? next?.startsWith("/admin")
+          ? next
+          : "/admin"
+        : searchParams.has("next")
+          ? getSafeNextPath(next, userRole)
+          : getRedirectPathForRole(userRole, user.email);
+      router.push(targetPath);
+    }
+  }, [user, isAdmin, role, authLoading, next, router, searchParams]);
+
   const handleSuccess = async (preferredPath?: string) => {
     try {
       // The httpOnly session cookie is already synced by this point: signIn()
       // (email/password) and finishGoogleSignIn() (OAuth) both await the
       // Supabase-token POST to /api/auth/login before calling handleSuccess.
-      // Enforce Profile Sync (SSoT)
-      const syncResult = await ensureUserProfileAction();
+      const supabase = createSupabaseBrowserClient();
+      const {
+        data: { session: currentSession },
+      } = await supabase.auth.getSession();
+
+      // Enforce Profile Sync (SSoT) with token fallback
+      const syncResult = await ensureUserProfileAction(
+        currentSession?.access_token,
+      );
       if (!syncResult.success) {
         // Falling back to "student" here used to silently send an admin
         // whose profile-sync failed into the student portal instead of
@@ -93,19 +118,28 @@ function AuthContent() {
       }
 
       // Get role from sync result or default
-      const userRole = syncResult.user?.role || "student";
+      const resolvedEmail = syncResult.user?.email || email;
+      const isUserAdmin =
+        syncResult.user?.role === "admin" || isAdminEmail(resolvedEmail);
+      const userRole = isUserAdmin
+        ? "admin"
+        : syncResult.user?.role || "student";
 
       // D. Redirect Logic
-      // Priority 0: Continue the enrollment the account was created for.
-      if (preferredPath) {
+      // Priority 0: Continue the enrollment the account was created for (students only).
+      if (preferredPath && !isUserAdmin) {
         router.refresh();
         router.push(preferredPath);
         return;
       }
 
-      const targetPath = searchParams.has("next")
-        ? getSafeNextPath(next, userRole)
-        : getRedirectPathForRole(userRole);
+      const targetPath = isUserAdmin
+        ? next?.startsWith("/admin")
+          ? next
+          : "/admin"
+        : searchParams.has("next")
+          ? getSafeNextPath(next, userRole)
+          : getRedirectPathForRole(userRole, resolvedEmail);
 
       // The target layout is a server component gated on the session cookie
       // (requireAdmin/requireSession). A plain client-side push can reuse the

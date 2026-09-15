@@ -76,6 +76,7 @@ export const ADMIN_NAVIGATION_GROUPS: AdminNavigationGroup[] = [
   {
     label: "Operação",
     items: [
+      { icon: Calendar, label: "Calendário", path: "/admin/calendar" },
       { icon: Calendar, label: "Eventos Ao Vivo", path: "/admin/events" },
       { icon: Trophy, label: "Gamificação", path: "/admin/gamification" },
       { icon: Globe, label: "Google Suite", path: "/admin/google" },

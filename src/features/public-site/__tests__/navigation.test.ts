@@ -10,6 +10,7 @@ describe("public navigation", () => {
       { label: "Laura Perls", href: "/instituto/laura-perls" },
       { label: "Formações", href: "/formacoes" },
       { label: "Biblioteca", href: "/public-library" },
+      { label: "Estante", href: "/estante" },
       { label: "Galeria", href: "/public-gallery" },
       { label: "Blog", href: "/blog" },
       { label: "Recursos", href: "/recursos" },

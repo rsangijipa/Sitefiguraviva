@@ -32,5 +32,9 @@ export function getSafeNextPath(
     return "/portal";
   }
 
+  if (role === "admin" && !nextPath.startsWith("/admin")) {
+    return "/admin";
+  }
+
   return nextPath;
 }

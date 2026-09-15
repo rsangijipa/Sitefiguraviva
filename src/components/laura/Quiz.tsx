@@ -50,43 +50,24 @@ export function Quiz() {
   const percentage = Math.round((score.correct / score.total) * 100);
 
   return (
-    <section className="py-14 md:py-24 bg-[#0d0906] relative overflow-hidden">
-      {/* Decorative Background */}
-      <div className="absolute inset-0 opacity-5 pointer-events-none">
-        <svg className="w-full h-full" viewBox="0 0 100 100">
-          <defs>
-            <pattern
-              id="quizPattern"
-              x="0"
-              y="0"
-              width="30"
-              height="30"
-              patternUnits="userSpaceOnUse"
-            >
-              <circle cx="15" cy="15" r="2" fill="#e8e4db" />
-            </pattern>
-          </defs>
-          <rect fill="url(#quizPattern)" width="100%" height="100%" />
-        </svg>
-      </div>
-
+    <section className="py-16 md:py-24 bg-[#FDFAF4] relative overflow-hidden border-t border-[#D8CFBE]">
       <div className="max-w-3xl mx-auto px-6 relative z-10">
         {/* Section Header */}
-        <div className="text-center mb-7">
-          <div className="inline-flex items-center gap-3 mb-6">
-            <div className="h-px w-12 bg-[#c9a768]/60" />
-            <span className="w-10 h-10 rounded-full bg-[#241b12] flex items-center justify-center">
-              <Trophy size={20} className="text-[#f5ecd9]" />
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center gap-3 mb-4">
+            <div className="h-px w-10 bg-[#96551F]/30" />
+            <span className="w-10 h-10 rounded-full bg-[#005A1F]/10 border border-[#005A1F]/20 flex items-center justify-center">
+              <Trophy size={20} className="text-[#005A1F]" />
             </span>
-            <div className="h-px w-12 bg-[#c9a768]/60" />
+            <div className="h-px w-10 bg-[#96551F]/30" />
           </div>
 
-          <span className="text-[11px] tracking-[0.3em] uppercase font-bold text-[#c7b89a] block mb-4">
+          <span className="text-xs tracking-[0.2em] uppercase font-bold text-[#96551F] block mb-2">
             Teste Seu Conhecimento
           </span>
-          <h2 className="font-serif text-3xl md:text-4xl text-[#e8e4db] leading-tight">
+          <h2 className="font-serif text-3xl md:text-5xl text-[#005A1F] leading-tight">
             Qual Conceito de Laura{" "}
-            <span className="italic text-[#d4b578] font-light">Você É?</span>
+            <span className="italic text-[#96551F] font-light">Você É?</span>
           </h2>
         </div>
 
@@ -95,15 +76,15 @@ export function Quiz() {
           {!finished ? (
             <motion.div
               key={currentQuestion}
-              initial={{ opacity: 0, x: 50 }}
+              initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
-              className="laura-quiz-card bg-[#241b12] rounded-md border border-[#c9a768]/40 overflow-hidden"
+              exit={{ opacity: 0, x: -30 }}
+              className="bg-white rounded-2xl border border-[#D8CFBE] shadow-xs overflow-hidden"
             >
               {/* Progress Bar */}
-              <div className="h-2 bg-[#3a2d1c]">
+              <div className="h-2 bg-[#D8CFBE]/40">
                 <motion.div
-                  className="h-full bg-[#c9a768]"
+                  className="h-full bg-[#005A1F]"
                   initial={{
                     width: `${(currentQuestion / quiz.length) * 100}%`,
                   }}
@@ -115,17 +96,17 @@ export function Quiz() {
               </div>
 
               {/* Question */}
-              <div className="p-5 md:p-6">
+              <div className="p-6 md:p-8">
                 <div className="flex justify-between items-center mb-4">
-                  <span className="text-sm text-[#8f7c64] font-bold uppercase tracking-widest">
+                  <span className="text-xs text-[#96551F] font-bold uppercase tracking-wider">
                     Pergunta {currentQuestion + 1} de {quiz.length}
                   </span>
-                  <span className="text-sm text-[#d4b578] font-bold">
+                  <span className="text-xs text-[#005A1F] font-bold">
                     {score.correct} corretas
                   </span>
                 </div>
 
-                <h3 className="font-serif text-xl md:text-2xl text-[#f5ecd9] mb-5 leading-relaxed">
+                <h3 className="font-serif text-xl md:text-2xl font-bold text-[#005A1F] mb-6 leading-relaxed">
                   {quiz[currentQuestion].question}
                 </h3>
 
@@ -136,29 +117,35 @@ export function Quiz() {
                       key={index}
                       onClick={() => handleAnswer(index)}
                       disabled={showResult}
-                      className={`w-full p-3.5 rounded-md border-2 text-left transition-all duration-300 ${
+                      className={`w-full p-4 rounded-xl border text-left transition-all duration-200 cursor-pointer ${
                         showResult
                           ? option.correct
-                            ? "border-green-500 bg-green-50"
+                            ? "border-[#005A1F] bg-[#005A1F]/10 text-[#005A1F] font-semibold"
                             : selectedOption === index
-                              ? "border-red-500 bg-red-50"
-                              : "border-[#4a3c28] opacity-50"
+                              ? "border-red-400 bg-red-50 text-red-800"
+                              : "border-[#D8CFBE] opacity-40 text-stone-500"
                           : selectedOption === index
-                            ? "border-[#6b5636] bg-[#1b140d]"
-                            : "border-[#4a3c28] hover:border-[#c9a768] hover:bg-[#150f09]"
+                            ? "border-[#005A1F] bg-[#FDFAF4] text-[#005A1F]"
+                            : "border-[#D8CFBE] hover:border-[#005A1F]/50 hover:bg-[#FDFAF4] text-[#262B22]"
                       }`}
                     >
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium text-[#e6d7bd]">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="font-medium text-sm">
                           {option.text}
                         </span>
                         {showResult && option.correct && (
-                          <CheckCircle size={20} className="text-green-500" />
+                          <CheckCircle
+                            size={18}
+                            className="text-[#005A1F] shrink-0"
+                          />
                         )}
                         {showResult &&
                           selectedOption === index &&
                           !option.correct && (
-                            <XCircle size={20} className="text-red-500" />
+                            <XCircle
+                              size={18}
+                              className="text-red-500 shrink-0"
+                            />
                           )}
                       </div>
                     </button>
@@ -172,9 +159,9 @@ export function Quiz() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
-                      className="mt-4 p-4 bg-[#1b140d] border-l-4 border-[#c9a768] rounded-r-sm"
+                      className="mt-5 p-4 bg-[#FDFAF4] border-l-4 border-l-[#96551F] border border-[#D8CFBE] rounded-xl"
                     >
-                      <p className="font-serif italic text-[#e6d7bd]">
+                      <p className="font-serif italic text-sm text-[#262B22] leading-relaxed">
                         {quiz[currentQuestion].explanation}
                       </p>
                     </motion.div>
@@ -187,11 +174,11 @@ export function Quiz() {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="px-5 py-3 bg-[#1b140d] border-t border-[#4a3c28]"
+                  className="px-6 py-4 bg-[#FDFAF4] border-t border-[#D8CFBE]"
                 >
                   <button
                     onClick={nextQuestion}
-                    className="w-full px-8 py-3 bg-[#c9a768] text-[#e8e4db] font-bold uppercase tracking-widest text-xs rounded-sm hover:bg-[#0d0906] transition-colors"
+                    className="w-full py-3 bg-[#005A1F] text-[#FDFAF4] font-bold uppercase tracking-widest text-xs rounded-full hover:bg-[#07614C] transition-colors shadow-xs cursor-pointer"
                   >
                     {currentQuestion < quiz.length - 1
                       ? "Próxima Pergunta"
@@ -203,31 +190,31 @@ export function Quiz() {
           ) : (
             /* Final Result */
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
+              initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="laura-quiz-card bg-[#241b12] rounded-md border border-[#c9a768]/40 p-6 text-center"
+              className="bg-white rounded-2xl border border-[#D8CFBE] p-8 text-center shadow-xs"
             >
-              <div className="mb-8">
-                <div className="w-32 h-32 mx-auto rounded-full bg-[#c9a768] flex items-center justify-center mb-6">
-                  <Trophy size={56} className="text-[#d4b578]" />
+              <div className="mb-6">
+                <div className="w-20 h-20 mx-auto rounded-full bg-[#005A1F]/10 border border-[#005A1F]/20 flex items-center justify-center mb-4">
+                  <Trophy size={36} className="text-[#005A1F]" />
                 </div>
 
-                <h3 className="font-serif text-3xl text-[#f5ecd9] mb-2">
+                <h3 className="font-serif text-2xl font-bold text-[#005A1F] mb-1">
                   Resultado Final
                 </h3>
 
-                <div className="text-6xl font-serif font-bold text-[#e6d7bd] mb-2">
+                <div className="text-6xl font-serif font-bold text-[#005A1F] my-3">
                   {percentage}%
                 </div>
 
-                <p className="text-[#a9987d] font-serif italic">
+                <p className="text-xs uppercase tracking-wider font-semibold text-[#96551F]">
                   {score.correct} de {score.total} perguntas corretas
                 </p>
               </div>
 
               {/* Message based on score */}
-              <div className="mb-8 p-4 bg-[#1b140d] rounded-lg">
-                <p className="font-serif text-[#f5ecd9]">
+              <div className="mb-6 p-4 bg-[#FDFAF4] border border-[#D8CFBE] rounded-xl">
+                <p className="font-serif text-[#262B22] text-sm leading-relaxed italic">
                   {percentage >= 75
                     ? "Excelente! Você realmente conhece o legado de Laura Perls."
                     : percentage >= 50
@@ -238,9 +225,9 @@ export function Quiz() {
 
               <button
                 onClick={resetQuiz}
-                className="inline-flex items-center gap-2 px-8 py-3 bg-[#c9a768] text-[#f5ecd9] font-bold uppercase tracking-widest text-xs rounded-sm hover:bg-[#d4b578] transition-colors"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-[#005A1F] text-[#FDFAF4] font-bold uppercase tracking-widest text-xs rounded-full hover:bg-[#07614C] transition-colors shadow-xs cursor-pointer"
               >
-                <RefreshCw size={16} />
+                <RefreshCw size={15} />
                 Tentar Novamente
               </button>
             </motion.div>

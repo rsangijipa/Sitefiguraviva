@@ -2,9 +2,14 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { Calendar, Clock, ArrowRight } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { CourseCover } from "@/components/courses/CourseCover";
+
+const CalendarModal = dynamic(() => import("@/components/CalendarModal"), {
+  ssr: false,
+});
 
 const FILTERS = [
   "Todos",
@@ -41,7 +46,7 @@ function EnrollmentBadge() {
 
 function CourseMeta({ course }: { course: any }) {
   return (
-    <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] font-bold uppercase tracking-widest text-primary/45">
+    <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] font-bold uppercase tracking-widest text-primary/45">
       {course.date && (
         <span className="flex items-center gap-1.5">
           <Calendar size={12} /> {course.date}
@@ -58,6 +63,7 @@ function CourseMeta({ course }: { course: any }) {
 
 export default function CoursesListClient({ courses }: { courses: any[] }) {
   const [filter, setFilter] = useState<Filter>("Todos");
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const [featured, ...rest] = courses;
   const filtered = useMemo(
@@ -67,31 +73,31 @@ export default function CoursesListClient({ courses }: { courses: any[] }) {
 
   return (
     <div className="min-h-screen bg-paper pb-20">
-      <div className="mx-auto max-w-7xl px-6 pt-16 md:px-12">
+      <div className="mx-auto max-w-7xl px-6 pt-12 md:px-12">
         {featured && (
           <Link
             href={`/curso/${featured.slug || featured.id}`}
-            className="group mb-14 block"
+            className="group mb-10 block max-w-4xl mx-auto"
           >
-            <Card className="grid overflow-hidden md:grid-cols-[1.1fr_1fr]">
-              <div className="relative h-64 bg-stone-100 md:h-full">
+            <Card className="grid overflow-hidden md:grid-cols-[280px_1fr] border border-[#D8CFBE]/60 bg-white/70">
+              <div className="relative h-48 bg-stone-100 md:h-full min-h-[200px]">
                 <CourseCover src={featured.image} alt={featured.title} />
                 {featured.enrollmentOpen && <EnrollmentBadge />}
               </div>
-              <div className="flex flex-col justify-center p-8 md:p-12">
+              <div className="flex flex-col justify-center p-5 md:p-7">
                 {featured.category && (
-                  <p className="text-xs font-bold uppercase tracking-widest text-gold">
+                  <p className="text-xs font-bold uppercase tracking-widest text-[#96551F]">
                     {featured.category}
                   </p>
                 )}
-                <h2 className="mt-3 font-serif text-3xl leading-tight text-primary group-hover:text-gold transition-colors md:text-4xl">
+                <h2 className="mt-2 font-serif text-2xl leading-tight text-primary group-hover:text-[#005A1F] transition-colors md:text-3xl">
                   {featured.title}
                 </h2>
-                <p className="mt-4 line-clamp-3 text-sm font-light text-stone-500">
+                <p className="mt-3 line-clamp-2 text-xs md:text-sm font-light text-stone-600">
                   {featured.description}
                 </p>
                 <CourseMeta course={featured} />
-                <div className="mt-6 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary group-hover:translate-x-1 transition-transform">
+                <div className="mt-5 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary group-hover:translate-x-1 transition-transform">
                   Saiba mais <ArrowRight size={14} />
                 </div>
               </div>
@@ -99,21 +105,32 @@ export default function CoursesListClient({ courses }: { courses: any[] }) {
           </Link>
         )}
 
-        <div className="mb-10 flex flex-wrap gap-2">
-          {FILTERS.map((option) => (
-            <button
-              key={option}
-              type="button"
-              onClick={() => setFilter(option)}
-              className={`rounded-full border px-4 py-2 text-[11px] font-bold uppercase tracking-widest transition-colors ${
-                filter === option
-                  ? "border-primary bg-primary text-white"
-                  : "border-stone-200 text-primary/60 hover:border-primary/40"
-              }`}
-            >
-              {option}
-            </button>
-          ))}
+        <div className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex flex-wrap gap-2">
+            {FILTERS.map((option) => (
+              <button
+                key={option}
+                type="button"
+                onClick={() => setFilter(option)}
+                className={`rounded-full border px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-widest transition-colors ${
+                  filter === option
+                    ? "border-[#005A1F] bg-[#005A1F] text-[#FDFAF4]"
+                    : "border-[#D8CFBE] text-[#262B22]/70 hover:border-[#005A1F]/50 bg-white/50"
+                }`}
+              >
+                {option}
+              </button>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsCalendarOpen(true)}
+            className="inline-flex items-center gap-2 self-start md:self-auto rounded-full border border-[#005A1F]/30 bg-[#005A1F]/10 hover:bg-[#005A1F]/15 px-4 py-2 text-xs font-semibold text-[#005A1F] transition-all hover:scale-[1.02] shadow-sm cursor-pointer"
+          >
+            <Calendar size={14} className="text-[#07614C]" />
+            <span>Ver Calendário de Atividades</span>
+          </button>
         </div>
 
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -160,6 +177,12 @@ export default function CoursesListClient({ courses }: { courses: any[] }) {
           </div>
         )}
       </div>
+
+      <CalendarModal
+        isOpen={isCalendarOpen}
+        onClose={() => setIsCalendarOpen(false)}
+        courses={courses}
+      />
     </div>
   );
 }

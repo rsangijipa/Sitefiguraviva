@@ -1,7 +1,13 @@
 "use server";
 
-import { verifySession } from "@/lib/auth/server";
+import { cookies } from "next/headers";
+import { verifySession, type ServerAuthContext } from "@/lib/auth/server";
 import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
+import { isAdminEmail } from "@/lib/auth/authService";
+import {
+  getSupabaseSessionClaims,
+  readTokenExpirySeconds,
+} from "@/lib/auth/supabase-session";
 
 interface UserProfile {
   uid: string;
@@ -11,13 +17,44 @@ interface UserProfile {
   role: string;
 }
 
-export async function ensureUserProfileAction(): Promise<{
+export async function ensureUserProfileAction(providedToken?: string): Promise<{
   success: boolean;
   user?: UserProfile;
   error?: string;
 }> {
   try {
-    const session = await verifySession();
+    let session: ServerAuthContext | null = await verifySession();
+
+    if (!session && providedToken) {
+      const claims = await getSupabaseSessionClaims(providedToken);
+      if (claims) {
+        session = {
+          uid: claims.uid,
+          email: claims.email,
+          role: claims.role,
+          isAdmin: claims.admin,
+          isStaff: claims.admin || claims.tutor,
+          isActive: claims.isActive,
+        };
+
+        try {
+          const maxAge = readTokenExpirySeconds(providedToken) ?? 60 * 60;
+          const cookieStore = await cookies();
+          cookieStore.set("session", providedToken, {
+            maxAge,
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            path: "/",
+            sameSite: "lax",
+          });
+        } catch (cookieErr) {
+          console.warn(
+            "[ensureUserProfileAction] Could not set session cookie:",
+            cookieErr,
+          );
+        }
+      }
+    }
 
     if (!session) {
       return { success: false, error: "Unauthenticated" };
@@ -27,6 +64,7 @@ export async function ensureUserProfileAction(): Promise<{
 
     if (!email) return { success: false, error: "No email provided" };
 
+    const isAdmin = isAdminEmail(email);
     const supabase = createSupabaseServiceClient();
 
     // Fetch or create profile in Supabase PostgreSQL
@@ -36,18 +74,18 @@ export async function ensureUserProfileAction(): Promise<{
       .eq("id", uid)
       .maybeSingle();
 
-    let finalRole = role;
+    let finalRole = isAdmin ? "admin" : profile?.role || role;
     let displayName: string | null = null;
     let photoURL: string | null = null;
 
     if (profile) {
-      finalRole = profile.role || role;
       displayName = profile.display_name || null;
       photoURL = profile.photo_url || null;
 
       await supabase
         .from("profiles")
         .update({
+          ...(isAdmin && profile.role !== "admin" ? { role: "admin" } : {}),
           last_login_at: new Date().toISOString(),
         })
         .eq("id", uid);
@@ -55,7 +93,7 @@ export async function ensureUserProfileAction(): Promise<{
       await supabase.from("profiles").upsert({
         id: uid,
         email,
-        role: "student",
+        role: isAdmin ? "admin" : "student",
         is_active: true,
         last_login_at: new Date().toISOString(),
       });

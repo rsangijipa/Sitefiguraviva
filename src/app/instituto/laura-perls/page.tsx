@@ -27,17 +27,15 @@ export const metadata: Metadata = {
 
 export default function LauraPerlsPage() {
   return (
-    <div className="laura-viva fv-bg fv-bg-laura-archive relative min-h-screen bg-[#FDFAF4] text-[#262B22] dark:bg-[#0d0906] dark:text-[#f5ecd9]">
+    <div className="laura-viva fv-bg fv-bg-laura-archive relative min-h-screen bg-[#FDFAF4] text-[#262B22]">
       <div
-        className="fixed inset-0 z-[9999] pointer-events-none opacity-[0.035]"
+        className="fixed inset-0 z-[9999] pointer-events-none opacity-[0.025]"
         style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
         }}
       />
-      <div className="fixed left-10 top-20 z-0 h-32 w-32 rounded-full bg-[#FE538B]/10 blur-2xl pointer-events-none" />
-      <div className="fixed bottom-40 right-20 z-0 h-48 w-48 rounded-full bg-[#01C94D]/10 blur-3xl pointer-events-none" />
       <Navbar />
-      <div className="relative font-sans selection:bg-[#FED701]/45">
+      <div className="relative font-sans selection:bg-[#005A1F]/20 selection:text-[#005A1F]">
         <LauraHero />
         <WhySheMatters />
         <InteractiveMap />

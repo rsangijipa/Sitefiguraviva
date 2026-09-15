@@ -1,0 +1,6 @@
+{
+  "name": "Árvore Viva - Arte Orgânica e Fluidez",
+  "description": "Uma experiência visual refinada da Árvore Figura Viva com física orgânica de vento, detalhes botânicos, folhagem em camadas e pétalas flutuantes.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

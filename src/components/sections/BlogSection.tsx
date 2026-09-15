@@ -1,13 +1,14 @@
 "use client";
 
-import { useRef } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, ArrowUpRight, FileText } from "lucide-react";
+import { ArrowRight, BookOpen, FileText } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { Skeleton } from "../ui/Skeleton";
 import { Card, CardContent } from "../ui/Card";
 import { EmptyState } from "../ui/EmptyState";
+import SectionShell from "../ui/SectionShell";
 
 interface BlogPost {
   id: string | number;
@@ -17,235 +18,184 @@ interface BlogPost {
   image?: string;
   type?: string;
   category?: string;
+  slug?: string;
 }
 
 interface BlogSectionProps {
   blogPosts: BlogPost[];
-  onSelectPost: (post: BlogPost) => void;
+  onSelectPost?: (post: BlogPost) => void;
   loading?: boolean;
 }
 
-const getDynamicStyle = (title: string, index: number) => {
-  const gradients = [
-    "bg-gradient-to-br from-amber-100 to-orange-50 text-amber-900",
-    "bg-gradient-to-br from-blue-100 to-indigo-50 text-blue-900",
-    "bg-gradient-to-br from-emerald-100 to-teal-50 text-emerald-900",
-    "bg-gradient-to-br from-rose-100 to-pink-50 text-rose-900",
-    "bg-gradient-to-br from-violet-100 to-purple-50 text-violet-900",
-    "bg-gradient-to-br from-cyan-100 to-sky-50 text-cyan-900",
-    "bg-gradient-to-br from-fuchsia-100 to-pink-50 text-fuchsia-900",
-    "bg-gradient-to-br from-lime-100 to-green-50 text-lime-900",
-  ];
-  // Use title + index to ensure consistent distribution but unique feel
-  const hash =
-    title.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) + index;
-  return gradients[hash % gradients.length];
-};
-
-import SectionShell from "../ui/SectionShell";
-
 export default function BlogSection({
   blogPosts = [],
-  onSelectPost,
   loading = false,
 }: BlogSectionProps) {
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [activeTab, setActiveTab] = useState<"blog" | "biblioteca">("blog");
+
+  // Filtra de acordo com a aba selecionada
+  const filteredPosts = blogPosts.filter((post) => {
+    const isLibrary =
+      post.type === "library" ||
+      post.category?.toLowerCase() === "biblioteca" ||
+      post.category?.toLowerCase() === "artigo acadêmico" ||
+      !post.image;
+    return activeTab === "biblioteca" ? isLibrary : !isLibrary;
+  });
+
+  // Se o filtro específico estiver vazio, usa os posts disponíveis
+  const displayPosts = (
+    filteredPosts.length > 0 ? filteredPosts : blogPosts
+  ).slice(0, 3);
 
   return (
     <SectionShell
       id="blog"
-      className="fv-bg fv-bg-articles bg-paper border-t border-border/60"
+      className="fv-bg fv-bg-articles bg-paper border-t border-border/60 py-16 md:py-20"
     >
-      <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
-        <div className="max-w-xl">
-          <span className="fv-eyebrow mb-4">Reflexões & Saberes</span>
-          <h2 className="heading-section text-primary">Blog Figura Viva</h2>
-          <p className="fv-lead mt-4">
-            Artigos, ensaios e pílulas de awareness sobre a clínica, a vida e o
-            encontro.
-          </p>
+      <div className="text-center max-w-2xl mx-auto mb-10">
+        <span className="fv-eyebrow mb-2">Reflexões & Saberes</span>
+        <h2 className="heading-section text-primary mb-2">
+          {activeTab === "blog" ? "Blog Figura Viva" : "Biblioteca Figura Viva"}
+        </h2>
+        <p className="text-sm md:text-base text-primary/70 font-light leading-relaxed">
+          blog e biblioteca figura viva.
+        </p>
+
+        {/* Seletor centralizado */}
+        <div className="inline-flex items-center gap-1.5 p-1 mt-6 rounded-full border border-border bg-areia/70">
+          <button
+            onClick={() => setActiveTab("blog")}
+            className={`rounded-full px-6 py-2 text-xs font-bold uppercase tracking-widest transition-all ${
+              activeTab === "blog"
+                ? "bg-primary text-white shadow-xs"
+                : "text-primary/70 hover:text-primary"
+            }`}
+          >
+            Blog
+          </button>
+          <button
+            onClick={() => setActiveTab("biblioteca")}
+            className={`rounded-full px-6 py-2 text-xs font-bold uppercase tracking-widest transition-all ${
+              activeTab === "biblioteca"
+                ? "bg-primary text-white shadow-xs"
+                : "text-primary/70 hover:text-primary"
+            }`}
+          >
+            Biblioteca
+          </button>
         </div>
       </div>
 
-      <div
-        ref={scrollContainerRef}
-        className="flex overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-3 gap-6 md:gap-12 pb-8 -mx-6 px-6 md:mx-0 md:px-0 scrollbar-hide"
-      >
+      {/* Grid de 1 linha de 3 cards compactos */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {loading ? (
           [1, 2, 3].map((i) => (
-            <div key={i}>
-              <Skeleton className="mb-8 aspect-[16/10] w-full rounded-md" />
-              <div className="space-y-4">
-                <div className="flex gap-3">
-                  <Skeleton className="h-3 w-1/4 rounded" />
-                  <Skeleton className="h-3 w-1/5 rounded" />
-                </div>
-                <Skeleton className="h-8 w-3/4 rounded" />
-                <div className="space-y-2">
-                  <Skeleton className="h-4 w-full rounded" />
-                  <Skeleton className="h-4 w-2/3 rounded" />
-                </div>
-              </div>
+            <div key={i} className="space-y-3">
+              <Skeleton className="aspect-[16/9] w-full rounded-md" />
+              <Skeleton className="h-4 w-3/4 rounded" />
+              <Skeleton className="h-3 w-1/2 rounded" />
             </div>
           ))
+        ) : displayPosts.length === 0 ? (
+          <div className="col-span-full">
+            <EmptyState
+              icon={activeTab === "blog" ? FileText : BookOpen}
+              title={
+                activeTab === "blog"
+                  ? "Nenhum artigo encontrado"
+                  : "Nenhum documento encontrado"
+              }
+              description="Nosso acervo está sendo atualizado. Volte em breve para novos conteúdos."
+            />
+          </div>
         ) : (
-          <>
-            {blogPosts.map((post, index) => {
-              const isPdf =
-                post.type === "library" ||
-                post.category === "Biblioteca" ||
-                !post.image;
-              const dynamicStyle = getDynamicStyle(post.title, index);
+          displayPosts.map((post, index) => {
+            const targetHref =
+              activeTab === "biblioteca"
+                ? `/public-library`
+                : `/blog/${post.slug || post.id}`;
 
-              return (
-                <motion.div
-                  key={post.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  className="snap-center sm:w-[350px] md:w-auto w-[85vw] flex-shrink-0 h-full"
+            return (
+              <motion.div
+                key={post.id || index}
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.08 }}
+              >
+                <Link
+                  href={targetHref}
+                  className="group flex flex-col h-full rounded-lg border border-border bg-white p-3.5 transition-all hover:border-primary/40 hover:shadow-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 >
-                  <div
-                    onClick={() => onSelectPost(post)}
-                    className="group block h-full cursor-pointer"
-                  >
-                    {isPdf ? (
-                      <Card className="group flex h-full flex-col overflow-hidden">
-                        <div
-                          className={`h-64 ${dynamicStyle} flex items-center justify-center relative overflow-hidden p-8 shrink-0`}
-                        >
-                          <span className="absolute left-6 top-6 z-10 rounded-sm bg-paper/85 px-3 py-1 text-[8px] font-bold uppercase tracking-widest text-primary backdrop-blur-sm">
-                            {post.category || "Biblioteca"}
-                          </span>
-
-                          {/* Decorative Background Letters */}
-                          <div className="absolute -right-4 -bottom-8 opacity-10 font-serif text-[10rem] leading-none select-none pointer-events-none truncate max-w-full">
-                            {post.title.charAt(0)}
-                          </div>
-
-                          {/* Main Typography */}
-                          <div className="relative z-10 w-full text-center">
-                            <h3 className="font-serif text-3xl md:text-4xl leading-tight font-bold mix-blend-overlay opacity-90 break-words line-clamp-3">
-                              {post.title}
-                            </h3>
-                          </div>
-                        </div>
-                        <CardContent className="p-8 flex flex-col flex-1">
-                          <div className="mb-4 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-terra">
-                            <FileText size={14} />{" "}
-                            {post.category || "Biblioteca"}
-                          </div>
-                          <h4 className="font-serif text-2xl text-primary leading-tight mb-4 group-hover:text-gold transition-colors line-clamp-2 min-h-[3.5rem]">
-                            {post.title}
-                          </h4>
-                          <p className="mb-8 line-clamp-3 text-sm leading-relaxed text-text/75">
-                            {post.excerpt ||
-                              "Clique para acessar este conteúdo."}
-                          </p>
-                          <span className="mt-auto text-primary font-bold text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 hover:text-gold transition-colors">
-                            Acessar Conteúdo <ArrowRight size={14} />
-                          </span>
-                        </CardContent>
-                      </Card>
+                  <div className="relative aspect-[16/10] w-full shrink-0 overflow-hidden rounded-md bg-areia mb-3">
+                    {post.image ? (
+                      <Image
+                        src={post.image}
+                        alt={post.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
                     ) : (
-                      <Card className="flex h-full flex-col overflow-hidden p-0">
-                        <div className="relative mb-6 aspect-[16/10] shrink-0 overflow-hidden border-b border-border/70 bg-areia">
-                          <Image
-                            src={
-                              post.image ||
-                              `https://source.unsplash.com/random/800x600?nature,sig=${index}`
-                            }
-                            alt={post.title}
-                            fill
-                            sizes="(max-width: 768px) 100vw, 33vw"
-                            className="object-cover transition-transform duration-700 group-hover:scale-110"
-                          />
-                          <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
-                            <span className="rounded-md bg-paper/95 px-6 py-2 text-xs font-bold uppercase tracking-widest text-primary backdrop-blur">
-                              Ler Artigo
-                            </span>
-                          </div>
-                        </div>
-                        <CardContent className="p-6 pt-0 flex flex-col flex-1">
-                          <div className="space-y-4 flex flex-col flex-1">
-                            <div className="flex items-center gap-3">
-                              <span className="text-[10px] font-bold tracking-widest uppercase text-gold">
-                                {post.category || "Gestalt-Terapia"}
-                              </span>
-                              <span
-                                className="h-1 w-1 rounded-full bg-nevoa"
-                                aria-hidden
-                              ></span>
-                              <span className="text-[10px] font-bold uppercase tracking-widest text-terra">
-                                {post.date}
-                              </span>
-                            </div>
-                            <h3 className="font-serif text-2xl text-primary leading-snug group-hover:text-gold transition-colors duration-300 line-clamp-2 min-h-[3.5rem]">
-                              {post.title}
-                            </h3>
-                            <p className="mb-4 line-clamp-3 flex-1 text-sm leading-relaxed text-text/75">
-                              {post.excerpt}
-                            </p>
-                            <div className="pt-2 flex items-center gap-2 text-primary font-bold text-[10px] uppercase tracking-widest group-hover:gap-3 transition-all mt-auto">
-                              Continuar Lendo <ArrowUpRight size={12} />
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
+                      <div className="w-full h-full flex flex-col items-center justify-center p-4 bg-gradient-to-br from-areia to-paper text-primary/60">
+                        <BookOpen
+                          size={28}
+                          className="mb-2 text-fv-terra-barro"
+                        />
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-center line-clamp-2">
+                          {post.category || "Biblioteca"}
+                        </span>
+                      </div>
                     )}
+                    <span className="absolute top-2 left-2 rounded-sm bg-paper/90 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary backdrop-blur-xs">
+                      {post.category ||
+                        (activeTab === "blog" ? "Blog" : "Biblioteca")}
+                    </span>
                   </div>
-                </motion.div>
-              );
-            })}
-            {blogPosts.length === 0 && (
-              <div className="col-span-full">
-                <EmptyState
-                  icon={FileText}
-                  title="Nenhum artigo encontrado"
-                  description="Nossa biblioteca está sendo atualizada. Volte em breve para novas reflexões."
-                />
-              </div>
-            )}
-          </>
+
+                  <div className="flex flex-col flex-1">
+                    <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-fv-terra-barro font-semibold mb-1.5">
+                      <span>{post.date || "Atualizado"}</span>
+                    </div>
+
+                    <h3 className="font-serif text-base font-bold text-primary leading-snug group-hover:text-gold transition-colors line-clamp-2 mb-1.5">
+                      {post.title}
+                    </h3>
+
+                    <p className="text-xs text-primary/70 leading-relaxed line-clamp-2 mb-3 font-light">
+                      {post.excerpt ||
+                        "Clique para acessar este conteúdo na íntegra."}
+                    </p>
+
+                    <div className="mt-auto pt-2 border-t border-border/50 flex items-center justify-between text-[11px] font-bold uppercase tracking-widest text-primary group-hover:text-fv-verde-raiz transition-colors">
+                      <span>
+                        {activeTab === "blog" ? "Ler Artigo" : "Acessar Acervo"}
+                      </span>
+                      <ArrowRight
+                        size={12}
+                        className="group-hover:translate-x-1 transition-transform"
+                      />
+                    </div>
+                  </div>
+                </Link>
+              </motion.div>
+            );
+          })
         )}
       </div>
 
-      {/* Scroll Controls (Desktop/Mobile) - Consistent Style */}
-      <div className="flex items-center justify-center gap-6 mt-6 opacity-70 hover:opacity-100 transition-opacity md:hidden">
-        <button
-          onClick={() => {
-            if (scrollContainerRef.current) {
-              scrollContainerRef.current.scrollBy({
-                left: -300,
-                behavior: "smooth",
-              });
-            }
-          }}
-          className="min-h-11 min-w-11 rounded-full border border-transparent p-3 text-muted transition-colors hover:border-border hover:bg-areia hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-          aria-label="Artigo anterior"
+      {/* Botão de destino completo */}
+      <div className="mt-10 text-center">
+        <Link
+          href={activeTab === "blog" ? "/blog" : "/public-library"}
+          className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-fv-verde-raiz border-b border-fv-verde-raiz/30 pb-1 hover:text-gold hover:border-gold transition-colors"
         >
-          <ArrowLeft size={24} />
-        </button>
-
-        {/* Régua estática. A barra que percorria o trilho em laço não media
-            nada: não acompanhava o scroll, só se movia. */}
-        <div className="h-px w-32 bg-border" aria-hidden />
-
-        <button
-          onClick={() => {
-            if (scrollContainerRef.current) {
-              scrollContainerRef.current.scrollBy({
-                left: 300,
-                behavior: "smooth",
-              });
-            }
-          }}
-          className="min-h-11 min-w-11 rounded-full border border-transparent p-3 text-muted transition-colors hover:border-border hover:bg-areia hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-          aria-label="Próximo artigo"
-        >
-          <ArrowRight size={24} />
-        </button>
+          {activeTab === "blog"
+            ? "Ver Todas as Publicações do Blog"
+            : "Explorar Todo o Acervo da Biblioteca"}{" "}
+          →
+        </Link>
       </div>
     </SectionShell>
   );

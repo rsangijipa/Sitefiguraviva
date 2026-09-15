@@ -1,5 +1,6 @@
 import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import { DomainEvent, publishEvent } from "../bus";
+import { issueCertificateSupabase } from "@/features/certificates/infrastructure/supabaseCertificateIssuer.server";
 
 export async function handleProgressUpdate(event: DomainEvent) {
   const { actorUserId, context } = event;
@@ -51,35 +52,21 @@ export async function handleProgressUpdate(event: DomainEvent) {
     })
     .eq("id", enrollment.id);
   if (percent < 100) return;
-  const { data: existing } = await supabase
-    .from("certificates")
-    .select("id")
-    .eq("user_id", actorUserId)
-    .eq("course_id", context.courseId)
-    .limit(1)
-    .maybeSingle();
-  if (existing) return;
-  const code = `FV-${Math.random().toString(36).slice(2, 6).toUpperCase()}-${Date.now().toString().slice(-6)}`;
-  const { data: certificate, error } = await supabase
-    .from("certificates")
-    .insert({
-      user_id: actorUserId,
-      course_id: context.courseId,
-      code,
-      metadata: {
-        studentName: enrollment.user_name ?? "Aluno Figura Viva",
-        courseTitle: course.title,
-        workloadMinutes: course.workload_minutes,
-      },
-    })
-    .select("id")
-    .single();
-  if (error) throw error;
-  await publishEvent({
-    type: "CERTIFICATE_ISSUED",
+
+  const certResult = await issueCertificateSupabase(
+    context.courseId,
     actorUserId,
-    targetId: certificate.id,
-    context: { courseId: context.courseId },
-    payload: { code },
-  });
+    actorUserId,
+    true,
+  );
+
+  if (certResult.success && certResult.certificateId) {
+    await publishEvent({
+      type: "CERTIFICATE_ISSUED",
+      actorUserId,
+      targetId: certResult.certificateId,
+      context: { courseId: context.courseId },
+      payload: { code: certResult.verificationCode },
+    });
+  }
 }

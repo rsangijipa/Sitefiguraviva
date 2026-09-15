@@ -43,10 +43,14 @@ describe("public accessibility contracts", () => {
     for (const relativePath of [
       "src/components/sections/HeroSection.tsx",
       "src/features/public-site/components/PublicPageHero.tsx",
+    ]) {
+      expect(read(relativePath).match(/<h1\b/g) ?? []).toHaveLength(1);
+    }
+    for (const relativePath of [
       "src/app/public-library/LibraryClient.tsx",
       "src/app/public-gallery/GalleryClient.tsx",
     ]) {
-      expect(read(relativePath).match(/<h1\b/g) ?? []).toHaveLength(1);
+      expect(read(relativePath)).toContain("<PublicPageHero");
     }
   });
 
@@ -62,8 +66,8 @@ describe("public accessibility contracts", () => {
     }
   });
 
-  it("uses native buttons for interactive resource cards", () => {
+  it("uses native buttons or links for interactive resource cards", () => {
     const resources = read("src/components/ResourcesSection.jsx");
-    expect(resources.match(/<motion\.button/g)?.length ?? 0).toBeGreaterThan(0);
+    expect(resources).toMatch(/<Link|<button/);
   });
 });

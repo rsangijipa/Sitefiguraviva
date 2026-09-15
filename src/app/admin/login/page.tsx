@@ -9,6 +9,8 @@ import { ArrowLeft } from "lucide-react";
 
 import { useAuth } from "@/context/AuthContext";
 import { ensureUserProfileAction } from "@/app/actions/auth";
+import { isAdminEmail } from "@/lib/auth/authService";
+import { createSupabaseBrowserClient } from "@/infrastructure/supabase/client";
 
 export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
@@ -17,16 +19,17 @@ export default function AdminLogin() {
   const router = useRouter();
 
   const isAuthenticated = !!user;
+  const isUserAdmin = isAdmin || isAdminEmail(user?.email);
 
   // Auto-redirect to dashboard if authenticated AND admin
   useEffect(() => {
-    if (!authLoading && isAuthenticated && isAdmin) {
+    if (!authLoading && isAuthenticated && isUserAdmin) {
       router.push("/admin");
-    } else if (!authLoading && isAuthenticated && !isAdmin) {
+    } else if (!authLoading && isAuthenticated && !isUserAdmin) {
       addToast("Acesso negado: Você não é administrador.", "error");
       // Optionally logout
     }
-  }, [isAuthenticated, isAdmin, authLoading, router]);
+  }, [isAuthenticated, isUserAdmin, authLoading, router, addToast]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -44,7 +47,11 @@ export default function AdminLogin() {
         addToast(`Falha no login: ${error.message || error}`, "error");
       } else {
         // Ensure profile sync
-        const sync = await ensureUserProfileAction();
+        const supabase = createSupabaseBrowserClient();
+        const {
+          data: { session: sbSession },
+        } = await supabase.auth.getSession();
+        const sync = await ensureUserProfileAction(sbSession?.access_token);
         if (!sync.success) {
           console.error("Admin profile sync failed:", sync.error);
         }

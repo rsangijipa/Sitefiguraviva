@@ -15,9 +15,6 @@ import Image from "next/image";
 
 const BlogSection = dynamic(() => import("./sections/BlogSection"));
 const InstagramSection = dynamic(() => import("./InstagramSection"));
-const TestimonialsSection = dynamic(
-  () => import("./sections/TestimonialsSection"),
-);
 const FAQSection = dynamic(() => import("./sections/FAQSection"));
 
 const GalleryModal = dynamic(() => import("./GalleryModal"), { ssr: false });
@@ -105,7 +102,7 @@ export default function HomeClient({ initialData }: HomeClientProps = {}) {
   };
 
   const selectCourse = (course: any) => {
-    router.push(`/?modal=course&courseId=${course.id}`, { scroll: false });
+    router.push(`/curso/${course.slug || course.id}`);
   };
 
   const selectPost = (post: any) => {
@@ -136,10 +133,6 @@ export default function HomeClient({ initialData }: HomeClientProps = {}) {
             onOpenCalendar={() => openModal("calendar")}
             onSelectCourse={selectCourse}
           />
-        </Reveal>
-
-        <Reveal variant="soft">
-          <TestimonialsSection />
         </Reveal>
 
         <Reveal variant="medium">

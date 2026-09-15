@@ -34,7 +34,7 @@ const faqs = [
 ];
 
 export default function FAQSection() {
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
     <section className="fv-section fv-section--cream fv-bg fv-bg-faq border-t border-border/60">

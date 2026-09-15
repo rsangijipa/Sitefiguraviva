@@ -1,6 +1,7 @@
 "use server";
 
 import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
+import { isAdminEmail } from "@/lib/auth/authService";
 
 export interface UserAuthContextInput {
   uid: string;
@@ -25,11 +26,12 @@ export async function ensureUserDoc(decodedToken: UserAuthContextInput) {
   const photoUrl = decodedToken.picture || decodedToken.photoURL || null;
 
   try {
+    const isAdmin = isAdminEmail(email);
     const supabase = createSupabaseServiceClient();
 
     const { data: existingProfile } = await supabase
       .from("profiles")
-      .select("id")
+      .select("id, role")
       .eq("id", uid)
       .maybeSingle();
 
@@ -40,7 +42,7 @@ export async function ensureUserDoc(decodedToken: UserAuthContextInput) {
         email,
         display_name: displayName,
         photo_url: photoUrl,
-        role: "student",
+        role: isAdmin ? "admin" : "student",
         is_active: true,
         last_login_at: new Date().toISOString(),
       });
@@ -48,6 +50,9 @@ export async function ensureUserDoc(decodedToken: UserAuthContextInput) {
       await supabase
         .from("profiles")
         .update({
+          ...(isAdmin && existingProfile.role !== "admin"
+            ? { role: "admin" }
+            : {}),
           last_login_at: new Date().toISOString(),
         })
         .eq("id", uid);

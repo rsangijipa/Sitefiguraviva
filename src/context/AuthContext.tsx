@@ -6,6 +6,7 @@ import { createSupabaseBrowserClient } from "@/infrastructure/supabase/client";
 import { UserRole, UserStatus } from "@/types/user";
 import { useRouter } from "next/navigation";
 import { logger } from "@/lib/logger";
+import { isAdminEmail } from "@/lib/auth/authService";
 
 export interface User {
   uid: string;
@@ -156,11 +157,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           const mappedUser = mapSupabaseUser(currentUser, profile);
           setUser(mappedUser);
 
-          let userRole: UserRole = "student";
+          const emailIsAdmin = isAdminEmail(currentUser.email);
+          let userRole: UserRole = emailIsAdmin ? "admin" : "student";
           let isActive = true;
 
           if (profile) {
-            if (profile.role) {
+            if (profile.role && !emailIsAdmin) {
               userRole = profile.role as UserRole;
             }
             isActive = profile.is_active !== false;
@@ -188,21 +190,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           const normalizedRole = userRole.toLowerCase().trim();
           setRole(userRole);
           setStatus(userStatus);
-          setIsAdmin(normalizedRole === "admin");
+          setIsAdmin(normalizedRole === "admin" || emailIsAdmin);
 
           logger.info("[AuthContext] Final state:", {
             role: userRole,
             status: userStatus,
             tenantId: resolvedTenant,
-            isAdmin: normalizedRole === "admin",
+            isAdmin: normalizedRole === "admin" || emailIsAdmin,
           });
         } catch (error) {
           logger.error("Error fetching user data:", error);
+          const emailIsAdmin = isAdminEmail(currentUser.email);
           setUser(mapSupabaseUser(currentUser));
-          setRole("student");
+          setRole(emailIsAdmin ? "admin" : "student");
           setStatus("active");
           setTenantId("viva");
-          setIsAdmin(false);
+          setIsAdmin(emailIsAdmin);
         }
       } else {
         setUser(null);

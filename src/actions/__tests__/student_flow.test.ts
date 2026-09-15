@@ -7,6 +7,7 @@ import { gamificationService } from "@/lib/gamification/gamificationService";
 import { assertCanAccessCourse } from "@/lib/auth/access-gate";
 import { verifySession } from "@/lib/auth/server";
 import { CertificateIssuer } from "@/lib/certificates/issuer";
+import { awardXp } from "@/features/gamification/infrastructure/supabaseGamificationRepository.server";
 
 jest.mock("next/headers", () => ({
   cookies: jest.fn(() =>
@@ -88,8 +89,85 @@ jest.mock(
     createNotification: jest.fn().mockResolvedValue(undefined),
   }),
 );
+const mockLessonsData = [
+  {
+    id: "lesson1",
+    course_id: "course1",
+    module_id: "module1",
+    is_published: true,
+  },
+];
+const mockModulesData = [
+  { id: "module1", course_id: "course1", is_published: true },
+];
+
+function createMockSupabaseQuery(data: any = null) {
+  const query: any = {
+    select: jest.fn(() => query),
+    eq: jest.fn(() => query),
+    order: jest.fn(() => query),
+    update: jest.fn(() => query),
+    upsert: jest.fn(() => query),
+    maybeSingle: jest.fn(async () => ({ data, error: null })),
+    single: jest.fn(async () => ({ data, error: null })),
+    then: (resolve: any) =>
+      Promise.resolve({ data, error: null }).then(resolve),
+  };
+  return query;
+}
+
+jest.mock("@/lib/auth/supabase-session", () => ({
+  getSupabaseSessionClaims: jest.fn().mockResolvedValue({
+    uid: "student1",
+    email: "student1@figura.viva",
+    role: "student",
+  }),
+}));
+
+jest.mock("@/infrastructure/supabase/storage.server", () => ({
+  uploadPublicAvatar: jest
+    .fn()
+    .mockResolvedValue(
+      "https://example.supabase.co/storage/v1/object/public/avatars/avatar.jpg",
+    ),
+}));
+
+jest.mock(
+  "@/features/gamification/infrastructure/supabaseGamificationRepository.server",
+  () => ({
+    awardXp: jest.fn().mockResolvedValue({ awarded: true, amount: 50 }),
+  }),
+);
+
 jest.mock("@/infrastructure/supabase/server", () => ({
-  createSupabaseServiceClient: jest.fn(() => ({})),
+  createSupabaseServiceClient: jest.fn(() => ({
+    from: jest.fn((table: string) => {
+      if (table === "lessons") {
+        const q = createMockSupabaseQuery(mockLessonsData[0]);
+        q.then = (resolve: any) =>
+          Promise.resolve({ data: mockLessonsData, error: null }).then(resolve);
+        return q;
+      }
+      if (table === "course_modules") {
+        return createMockSupabaseQuery(mockModulesData[0]);
+      }
+      if (table === "lesson_progress") {
+        const q = createMockSupabaseQuery(null);
+        q.then = (resolve: any) =>
+          Promise.resolve({
+            data: [{ lesson_id: "lesson1" }],
+            error: null,
+          }).then(resolve);
+        return q;
+      }
+      return createMockSupabaseQuery({});
+    }),
+    auth: {
+      admin: {
+        updateUserById: jest.fn().mockResolvedValue({ error: null }),
+      },
+    },
+  })),
 }));
 
 jest.mock("@/lib/firebase/admin", () => {
@@ -212,11 +290,6 @@ describe("Student Flow Smoke", () => {
       success: true,
       url: expect.stringContaining("avatar.jpg"),
     });
-    expect(storage.bucket).toHaveBeenCalled();
-    expect(auth.updateUser).toHaveBeenCalledWith(
-      "student1",
-      expect.objectContaining({ photoURL: expect.any(String) }),
-    );
 
     const updateRes = await updateProfile({
       displayName: "New Name",
@@ -224,7 +297,6 @@ describe("Student Flow Smoke", () => {
     });
 
     expect(updateRes).toEqual({ success: true });
-    expect(db.collection).toHaveBeenCalledWith("users");
   });
 
   it("updates lesson progress and marks completion", async () => {
@@ -249,9 +321,12 @@ describe("Student Flow Smoke", () => {
       },
     );
     expect(completed).toEqual({ success: true });
-
-    expect(progressService.updateLessonProgress).toHaveBeenCalledTimes(2);
-    expect(gamificationService.onLessonCompletion).toHaveBeenCalledTimes(1);
+    expect(awardXp).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: "student1",
+        reason: "lesson_completed",
+      }),
+    );
   });
 
   it("issues certificate", async () => {

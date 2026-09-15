@@ -10,49 +10,29 @@ export function LegacyTree() {
   const founder = legacyTree[0];
 
   return (
-    <section className="py-14 md:py-24 bg-[#241b12] relative overflow-hidden">
-      {/* Decorative Elements */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#4a3c28] to-transparent" />
-      <div className="absolute inset-0 opacity-[0.02] pointer-events-none">
-        <svg className="w-full h-full" viewBox="0 0 100 100">
-          <defs>
-            <pattern
-              id="leafPattern"
-              x="0"
-              y="0"
-              width="20"
-              height="20"
-              patternUnits="userSpaceOnUse"
-            >
-              <path d="M10,0 Q15,10 10,20 Q5,10 10,0" fill="#e6d7bd" />
-            </pattern>
-          </defs>
-          <rect fill="url(#leafPattern)" width="100%" height="100%" />
-        </svg>
-      </div>
-
+    <section className="py-16 md:py-24 bg-[#F1E9DB]/60 relative overflow-hidden border-t border-[#D8CFBE]">
       <div className="max-w-6xl mx-auto px-6 relative z-10">
         {/* Section Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-3 mb-6">
-            <div className="h-px w-12 bg-[#c9a768]/60" />
-            <span className="w-10 h-10 rounded-full bg-[#c9a768] flex items-center justify-center">
-              <Users size={20} className="text-[#e8e4db]" />
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center gap-3 mb-4">
+            <div className="h-px w-10 bg-[#96551F]/30" />
+            <span className="w-10 h-10 rounded-full bg-[#005A1F]/10 border border-[#005A1F]/20 flex items-center justify-center">
+              <Users size={20} className="text-[#005A1F]" />
             </span>
-            <div className="h-px w-12 bg-[#c9a768]/60" />
+            <div className="h-px w-10 bg-[#96551F]/30" />
           </div>
 
-          <span className="text-[11px] tracking-[0.3em] uppercase font-bold text-[#8f7c64] block mb-4">
+          <span className="text-xs tracking-[0.2em] uppercase font-bold text-[#96551F] block mb-2">
             Linhagem Terapêutica
           </span>
-          <h2 className="font-serif text-3xl md:text-4xl text-[#f5ecd9] leading-tight">
+          <h2 className="font-serif text-3xl md:text-5xl text-[#005A1F] leading-tight">
             A{" "}
-            <span className="italic text-[#cbb896] font-light">
+            <span className="italic text-[#96551F] font-light">
               Árvore do Legado
             </span>{" "}
             de Laura
           </h2>
-          <p className="mt-4 text-sm text-[#e6d7bd] font-serif italic max-w-2xl mx-auto">
+          <p className="mt-4 text-sm md:text-base text-[#262B22]/80 font-serif italic max-w-2xl mx-auto">
             O pensamento de Laura Perls continua florescendo através de gerações
             de terapeutas que levaram seu trabalho para o mundo inteiro.
           </p>
@@ -65,74 +45,76 @@ export function LegacyTree() {
             initial={{ opacity: 0, scaleY: 0 }}
             whileInView={{ opacity: 1, scaleY: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 0.6 }}
             className="relative flex flex-col items-center"
           >
             {/* Founder */}
-            <div className="relative z-20">
-              <div className="w-20 h-20 rounded-full bg-[#c9a768] flex flex-col items-center justify-center border-4 border-[#e8e4db]">
-                <span className="font-serif text-2xl text-[#e8e4db] font-bold">
+            <div className="relative z-20 flex flex-col items-center">
+              <div className="w-20 h-20 rounded-full bg-[#005A1F] flex flex-col items-center justify-center border-4 border-white shadow-xs">
+                <span className="font-serif text-2xl text-[#FDFAF4] font-bold">
                   {founder.name
                     .split(" ")
                     .map((n) => n[0])
                     .join("")}
                 </span>
-                <span className="text-[9px] text-[#3a2d1c] uppercase tracking-widest mt-1">
+                <span className="text-[9px] text-[#D8CFBE] uppercase tracking-widest font-semibold mt-0.5">
                   Fundadora
                 </span>
               </div>
-              <h3 className="text-center font-serif text-xl text-[#f5ecd9] mt-4 font-bold">
+              <h3 className="text-center font-serif text-xl font-bold text-[#005A1F] mt-3">
                 {founder.name}
               </h3>
             </div>
 
             {/* Branches */}
-            <div className="flex flex-wrap justify-center gap-5 mt-8">
+            <div className="flex flex-wrap justify-center gap-6 mt-10">
               {founder.students.map((student, index) => (
                 <motion.div
                   key={index}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
+                  transition={{ duration: 0.5, delay: 0.15 + index * 0.1 }}
                   className="relative"
                 >
                   {/* Branch Line */}
-                  <div className="absolute -top-5 left-1/2 -translate-x-1/2 w-px h-5 bg-[#c9a768]" />
+                  <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-px h-6 bg-[#96551F]/40" />
 
                   {/* Student Card */}
-                  <div className="w-64 bg-[#1b140d] rounded-md border border-[#4a3c28] overflow-hidden">
+                  <div className="w-72 bg-white rounded-2xl border border-[#D8CFBE] shadow-xs overflow-hidden h-full flex flex-col justify-between">
                     {/* Student Header */}
-                    <div className="bg-[#c9a768] px-4 py-3">
+                    <div className="bg-[#005A1F] px-5 py-3 text-[#FDFAF4]">
                       <div className="flex items-center gap-2">
-                        <Globe size={14} className="text-[#d4b578]" />
-                        <span className="font-bold text-[#e8e4db] text-sm">
+                        <Globe size={14} className="text-[#D8CFBE]" />
+                        <span className="font-bold text-sm font-serif">
                           {student.name}
                         </span>
                       </div>
                     </div>
 
                     {/* Student Content */}
-                    <div className="p-4 space-y-3">
-                      <p className="text-xs text-[#a9987d] uppercase tracking-wider font-bold">
-                        {student.role}
-                      </p>
+                    <div className="p-5 space-y-3 flex-1 flex flex-col justify-between">
+                      <div>
+                        <p className="text-[10px] text-[#96551F] uppercase tracking-wider font-bold mb-1.5">
+                          {student.role}
+                        </p>
 
-                      <p className="text-sm text-[#e6d7bd] font-serif italic">
-                        "{student.contribution}"
-                      </p>
+                        <p className="text-xs text-[#262B22]/85 font-serif italic leading-relaxed">
+                          "{student.contribution}"
+                        </p>
+                      </div>
 
                       {/* Followers */}
                       {student.followers && student.followers.length > 0 && (
-                        <div className="pt-3 border-t border-[#4a3c28]">
-                          <p className="text-[10px] uppercase tracking-widest text-[#8f7c64] mb-2">
-                            Continuidores
+                        <div className="pt-3 border-t border-[#D8CFBE]/60 mt-3">
+                          <p className="text-[10px] uppercase tracking-widest text-[#6B6B63] font-semibold mb-2">
+                            Continuadores
                           </p>
-                          <div className="flex flex-wrap gap-2">
+                          <div className="flex flex-wrap gap-1.5">
                             {student.followers.map((follower, fIndex) => (
                               <span
                                 key={fIndex}
-                                className="px-2 py-1 bg-[#c9a768]/20 text-[#f5ecd9] text-[10px] rounded-full"
+                                className="px-2.5 py-0.5 bg-[#005A1F]/10 border border-[#005A1F]/20 text-[#005A1F] text-[10px] font-medium rounded-full"
                               >
                                 {"name" in follower ? follower.name : follower}
                               </span>
@@ -141,9 +123,6 @@ export function LegacyTree() {
                         </div>
                       )}
                     </div>
-
-                    {/* Decorative Arrow */}
-                    <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-[#1b140d] rotate-45 border-r border-b border-[#4a3c28]" />
                   </div>
                 </motion.div>
               ))}
@@ -156,22 +135,22 @@ export function LegacyTree() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4"
+          className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4"
         >
           {[
             { label: "Terapeutas Diretos", value: "3+" },
-            { label: "Continuidores", value: "50+" },
+            { label: "Continuadores", value: "50+" },
             { label: "Países", value: "15+" },
             { label: "Anos de Influência", value: "70+" },
           ].map((stat, index) => (
             <div
               key={index}
-              className="text-center p-4 bg-[#0d0906] rounded-md"
+              className="text-center p-4 bg-white border border-[#D8CFBE] rounded-2xl shadow-xs"
             >
-              <span className="block font-serif text-3xl text-[#d4b578] font-bold">
+              <span className="block font-serif text-3xl text-[#005A1F] font-bold">
                 {stat.value}
               </span>
-              <span className="text-xs text-[#c7b89a] uppercase tracking-widest">
+              <span className="text-[10px] text-[#6B6B63] uppercase tracking-widest font-semibold mt-1">
                 {stat.label}
               </span>
             </div>
@@ -183,19 +162,19 @@ export function LegacyTree() {
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.3 }}
-          className="mt-8 text-center"
+          transition={{ delay: 0.2 }}
+          className="mt-10 text-center"
         >
-          <div className="inline-flex items-center gap-4 px-8 py-4 bg-[#1b140d] border border-[#4a3c28] rounded-lg shadow-md">
-            <span className="text-[#e6d7bd] font-serif italic">
+          <div className="inline-flex flex-col sm:flex-row items-center gap-4 px-6 py-3.5 bg-white border border-[#D8CFBE] rounded-full shadow-xs">
+            <span className="text-[#262B22] font-serif italic text-sm">
               Faça parte dessa linhagem terapêutica
             </span>
             <Link
-              href="/inscricao"
-              className="flex items-center gap-2 px-6 py-2 bg-[#c9a768] text-[#e8e4db] font-bold uppercase tracking-widest text-xs rounded-sm hover:bg-[#0d0906] transition-colors"
+              href="/formacoes"
+              className="flex items-center gap-2 px-5 py-2 bg-[#005A1F] text-[#FDFAF4] font-bold uppercase tracking-widest text-xs rounded-full hover:bg-[#07614C] transition-colors"
             >
-              Inscrever-se
-              <ArrowRight size={14} />
+              Conhecer Formações
+              <ArrowRight size={13} />
             </Link>
           </div>
         </motion.div>

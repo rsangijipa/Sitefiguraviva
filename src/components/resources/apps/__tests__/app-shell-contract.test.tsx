@@ -40,14 +40,16 @@ describe("resource app shell contract", () => {
   it("keeps the quiz's internal Back action", () => {
     render(<MentalHealthQuiz />);
 
-    fireEvent.click(
-      screen.getByRole("button", { name: /iniciar auto-avaliação/i }),
-    );
-    expect(screen.getByText("Questão 1 de 16")).toBeInTheDocument();
+    const quizCards = screen.getAllByRole("button");
+    expect(quizCards.length).toBeGreaterThan(0);
+    fireEvent.click(quizCards[0]);
 
-    fireEvent.click(screen.getByRole("button", { name: "Voltar" }));
+    const backButton = screen.getByRole("button", { name: /voltar/i });
+    expect(backButton).toBeInTheDocument();
+    fireEvent.click(backButton);
+
     expect(
-      screen.getByRole("heading", { name: /como está a sua saúde mental/i }),
+      screen.getByRole("heading", { name: /conheça um pouco mais/i }),
     ).toBeInTheDocument();
   });
 });

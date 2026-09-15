@@ -37,6 +37,13 @@ jest.mock(
   }),
 );
 
+jest.mock(
+  "@/features/gamification/application/awardCanonicalGamification.server",
+  () => ({
+    awardCanonicalCompletion: jest.fn().mockResolvedValue(undefined),
+  }),
+);
+
 describe("updateLessonProgress action", () => {
   beforeEach(() => {
     jest.clearAllMocks();
