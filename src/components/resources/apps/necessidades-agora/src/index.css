@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+@theme {
+  --color-creme-papel: #FDFAF4;
+  --color-areia: #F1E9DB;
+  --color-verde-raiz: #005A1F;
+  --color-verde-igarape: #07614C;
+  --color-terra-barro: #96551F;
+  --color-mata: #262B22;
+  --color-nevoa: #D8CFBE;
+  --color-pedra: #6B6B63;
+  --color-grafite: #4B4B49;
+  --color-aurora: #FE538B;
+  --color-vazante: #FED701;
+  --color-broto: #01C94D;
+
+  --font-fraunces: 'Fraunces', Georgia, serif;
+  --font-karla: 'Karla', system-ui, -apple-system, sans-serif;
+}
+
+:root {
+  --color-creme-papel: #FDFAF4;
+  --color-areia: #F1E9DB;
+  --color-verde-raiz: #005A1F;
+  --color-verde-igarape: #07614C;
+  --color-terra-barro: #96551F;
+  --color-mata: #262B22;
+  --color-nevoa: #D8CFBE;
+  --color-pedra: #6B6B63;
+  --color-grafite: #4B4B49;
+  --color-aurora: #FE538B;
+  --color-vazante: #FED701;
+  --color-broto: #01C94D;
+}
+
+body {
+  font-family: var(--font-karla), system-ui, sans-serif;
+  color: #262B22;
+  background-color: #FDFAF4;
+}
+
+h1, h2, h3, .font-heading {
+  font-family: var(--font-fraunces), serif;
+}
+
+/* Confluência Gradient: Aurora -> Vazante -> Broto (strictly non-inverted, subtle line/accent) */
+.gradient-confluencia-line {
+  background: linear-gradient(90deg, #FE538B 0%, #FED701 50%, #01C94D 100%);
+}
+
+/* Accessible focus styling */
+:focus-visible {
+  outline: 2px solid #005A1F;
+  outline-offset: 2px;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

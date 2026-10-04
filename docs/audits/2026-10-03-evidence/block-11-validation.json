@@ -1,0 +1,205 @@
+{
+  "block": 11,
+  "date": "2026-10-04",
+  "runtime": {
+    "os": "Windows",
+    "node": "v26.5.0",
+    "ciNodeTarget": 24,
+    "cleanLocalInstall": "npm ci --ignore-scripts --no-audit --no-fund",
+    "ownNodeModules": true
+  },
+  "audit": {
+    "before": {
+      "info": 0,
+      "low": 1,
+      "moderate": 9,
+      "high": 7,
+      "critical": 0,
+      "total": 17
+    },
+    "after": {
+      "info": 0,
+      "low": 0,
+      "moderate": 8,
+      "high": 0,
+      "critical": 0,
+      "total": 8
+    },
+    "remainingEntries": [
+      "@google-cloud/firestore",
+      "@google-cloud/storage",
+      "firebase-admin",
+      "gaxios",
+      "google-gax",
+      "retry-request",
+      "teeny-request",
+      "uuid"
+    ],
+    "counterMeans": "dependency entries, not unique advisories",
+    "highOrCriticalFoundAfter": false,
+    "remainingModerateWarnings": true
+  },
+  "checks": {
+    "initialCheckSummary": [
+      {
+        "check": "lint",
+        "exitCode": 0
+      },
+      {
+        "check": "scripts",
+        "exitCode": 0
+      },
+      {
+        "check": "unit",
+        "exitCode": 0
+      },
+      {
+        "check": "types",
+        "exitCode": 0
+      },
+      {
+        "check": "build",
+        "exitCode": 0
+      }
+    ],
+    "finalChecks": [
+      {
+        "check": "lint",
+        "exitCode": 0
+      },
+      {
+        "check": "unit",
+        "exitCode": 0
+      },
+      {
+        "check": "types",
+        "exitCode": 0
+      },
+      {
+        "check": "build",
+        "exitCode": 0
+      },
+      {
+        "check": "smoke",
+        "exitCode": 1
+      }
+    ],
+    "correctedPublicChecks": [
+      {
+        "check": "lint",
+        "exitCode": 0
+      },
+      {
+        "check": "types",
+        "exitCode": 0
+      },
+      {
+        "check": "smoke",
+        "exitCode": 0
+      }
+    ],
+    "initialPublicFailure": {
+      "testFailed": 1,
+      "reason": "Subpixel measurement 43.999999523 instead of 44; assertion now waits for animation and rounds pixels"
+    },
+    "nodeTestsPassed": 14,
+    "jestTestsPassed": 465,
+    "jestSuitesPassed": 106,
+    "jestTestsSkipped": 7,
+    "jestSuitesSkipped": 1,
+    "nativeBuildExit": 0,
+    "initialCompiledSeconds": 89,
+    "finalCompiledSeconds": 46,
+    "staticPages": 44,
+    "publicBrowser": {
+      "passed": 5,
+      "failed": 0,
+      "seconds": 21.4,
+      "browser": "Chromium 153, local adapter only",
+      "standardPlaywrightBrowserStillPending": true
+    },
+    "dependencySmoke": {
+      "sharpVersion": "0.35.5",
+      "grpcVersion": "1.13.6",
+      "dompurifyVersion": "3.4.16",
+      "adminFirestoreRead": true,
+      "firebaseNodeFirestoreRead": true,
+      "adminReads": 1,
+      "webReads": 1,
+      "imageConversion": true,
+      "htmlSanitization": true,
+      "scope": "read-only local gRPC fixture; no external service"
+    },
+    "source": {
+      "currentFilesChecked": 1313,
+      "snapshotCodeFiles": 1310,
+      "differences": [
+        "src\\app\\globals.css",
+        "src\\app\\layout.tsx",
+        "src\\app\\recursos\\arvore-da-awareness\\page.tsx",
+        "src\\app\\recursos\\[slug]\\page.tsx",
+        "src\\components\\providers\\ThemeProvider.tsx",
+        "src\\components\\resources\\apps\\body-map\\BodyMapApp.tsx",
+        "src\\components\\resources\\apps\\breathing\\BreathingAnimation.jsx",
+        "src\\components\\resources\\apps\\breathing\\BreathingApp.jsx",
+        "src\\components\\resources\\apps\\breathing\\PaperCard.jsx",
+        "src\\components\\resources\\apps\\diario-aqui-e-agora\\App.tsx",
+        "src\\components\\resources\\apps\\diario-aqui-e-agora\\components\\OrganicBranch.tsx",
+        "src\\components\\resources\\apps\\diario-aqui-e-agora\\components\\QuestionCard.tsx",
+        "src\\components\\resources\\apps\\diario-aqui-e-agora\\data\\questions.ts",
+        "src\\components\\resources\\apps\\emotion-tree\\components\\ui\\LeafMessageCard.tsx",
+        "src\\components\\resources\\apps\\EmotionWheel\\EmotionWheelApp.tsx",
+        "src\\components\\resources\\apps\\EmotionWheel\\ExplorationPanel.tsx",
+        "src\\components\\resources\\apps\\EmotionWheel\\localDiary.ts",
+        "src\\components\\resources\\apps\\EmotionWheel\\RodaDasEmocoes.tsx",
+        "src\\components\\resources\\apps\\EmotionWheel\\__tests__\\localDiary.test.ts",
+        "src\\components\\resources\\apps\\lago\\components\\PondControls.tsx",
+        "src\\components\\resources\\apps\\sala-de-pausa\\ConsolidatedPauseApp.tsx",
+        "src\\components\\resources\\resourceCatalog.tsx",
+        "src\\components\\resources\\ResourceExperience.tsx",
+        "src\\components\\resources\\__tests__\\resource-deep-links.test.ts",
+        "src\\components\\resources\\__tests__\\ResourceWindow.test.tsx",
+        "src\\components\\ResourcesSection.jsx",
+        "src\\components\\ui\\FloatingControls.tsx",
+        "src\\features\\interactive-resources\\clinicalToolsRegistry.ts"
+      ],
+      "ownedFiles": [
+        "src/components/system/JsonLd.tsx",
+        "src/components/system/__tests__/JsonLd.test.tsx",
+        "e2e/resources-smoke.spec.ts"
+      ],
+      "ownedFilesMatch": true,
+      "packagesEqual": true,
+      "wholeCurrentWorkspaceValidated": false,
+      "browserConfigRestored": true
+    },
+    "changedLockEntries": 34,
+    "removedLockEntries": 0,
+    "parallelInterfaceChangesPreservedAndRetested": [
+      "src/components/resources/ResourceNavigation.tsx",
+      "src/components/ui/Modal.tsx"
+    ]
+  },
+  "operations": {
+    "hosting": "Vercel, reported by user",
+    "domainRegistrar": "UOL, reported by user",
+    "pixBank": "not provided",
+    "staging": "not confirmed",
+    "historicalRevocation": "not confirmed",
+    "accessibleProjectCount": 3,
+    "oldProjectNotInCurrentIntegration": true,
+    "absenceDoesNotProveDeletion": true,
+    "noCredentialRotation": true,
+    "noProductionDeployment": true,
+    "noDatabaseMutation": true
+  },
+  "logs": {
+    "initialValidation": "candidate-validation.log",
+    "finalValidation": "final-validation.log",
+    "correctedPublicValidation": "public-browser-final.log",
+    "browserBeforeParallelEdits": "public-browser.log",
+    "dependencies": "dependency-smoke-final.log",
+    "install": "npm-ci.log",
+    "workspaceInstall": "workspace-install.log"
+  }
+}

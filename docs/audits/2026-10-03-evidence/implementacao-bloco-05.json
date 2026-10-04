@@ -1,0 +1,110 @@
+{
+  "checkedAt": "2026-10-04T00:52:30.461Z",
+  "scope": "Commercial catalogue; live schema checks and isolated behavior tests; existing offers and financial values unchanged",
+  "migration": {
+    "version": "20261004003242",
+    "applied": true,
+    "registered": true
+  },
+  "liveVerification": {
+    "commercial_columns": [
+      {
+        "name": "installment_count",
+        "nullable": "YES",
+        "type": "integer"
+      },
+      {
+        "name": "total_price_cents",
+        "nullable": "YES",
+        "type": "integer"
+      }
+    ],
+    "commercial_constraints": 2,
+    "configured_installments": 0,
+    "configured_total_prices": 0,
+    "course_count": 2,
+    "public_policy": {
+      "command": "SELECT",
+      "qual": "((is_published = true) AND (status = ANY (ARRAY['open'::course_status, 'closed'::course_status])))",
+      "roles": [
+        "anon",
+        "authenticated"
+      ]
+    },
+    "rls_enabled": true,
+    "rpc": {
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "security_definer": false,
+      "service_execute": true
+    },
+    "version_registered": true
+  },
+  "tests": {
+    "jest": {
+      "passed": 335,
+      "failed": 0,
+      "skipped": 7,
+      "passedSuites": 92,
+      "skippedSuites": 1
+    },
+    "types": {
+      "passed": true,
+      "exitCode": 0,
+      "elapsedSeconds": 39
+    },
+    "sql": {
+      "passed": true,
+      "count": 19,
+      "checks": [
+        "migration applied with actual course_status enum",
+        "nonadmin and inactive actor denied",
+        "incomplete commercial offer denied",
+        "archived offer not silently restored",
+        "unsupported command denied",
+        "hidden offer cannot accept enrollment",
+        "publish without EAD creates visible closed offer",
+        "publication replay does not bump revision",
+        "missing initial charge blocks opening",
+        "opening independent of absent modules and lessons",
+        "closing preserves public visibility",
+        "closed offer still rejects new application",
+        "visitor reads published closed offer",
+        "visitor cannot read draft or archived offers",
+        "anon cannot call commercial state RPC",
+        "authenticated cannot call commercial state RPC",
+        "price and installment constraints enforced",
+        "unpublished offer hidden again",
+        "new RPC is security invoker"
+      ],
+      "engine": "PGlite isolated PostgreSQL",
+      "liveBusinessWrites": false
+    },
+    "lint": {
+      "passed": true,
+      "scope": "26 changed source/test files"
+    },
+    "build": {
+      "passed": true,
+      "exitCode": 0,
+      "elapsedSeconds": 148,
+      "environment": "Official Next 15.5.25 WASM; dummy credentials; read-only local empty Supabase fixture; no real services."
+    }
+  },
+  "securityAdvisors": {
+    "warningCount": 14,
+    "counts": {
+      "function_search_path_mutable": 1,
+      "anon_security_definer_function_executable": 6,
+      "authenticated_security_definer_function_executable": 6,
+      "auth_leaked_password_protection": 1
+    },
+    "remaining": "Existing functions/triggers and leaked-password protection"
+  },
+  "publication": {
+    "frontendPublished": false,
+    "realCommercialStateChanges": false,
+    "realPaymentsCreated": false,
+    "emailEndToEndTest": false
+  }
+}

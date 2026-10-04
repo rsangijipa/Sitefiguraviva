@@ -1,0 +1,386 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import { adminCourseService } from "@/services/adminCourseService";
+import {
+  FileText,
+  Link as LinkIcon,
+  Download,
+  Trash2,
+  Eye,
+  EyeOff,
+  Plus,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import Button from "@/components/ui/Button";
+import { useToast } from "@/context/ToastContext";
+import FileUpload from "@/components/admin/FileUpload";
+
+export default function CourseMaterialsTab({ courseId }: { courseId: string }) {
+  const { addToast } = useToast();
+  const [materials, setMaterials] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+
+  // New Material State
+  const [newMaterial, setNewMaterial] = useState({
+    title: "",
+    url: "",
+    filePath: "",
+    fileBucket: "",
+    type: "pdf",
+    visibility: "enrolled",
+    tags: "",
+    moduleId: "",
+  });
+  const [modules, setModules] = useState<any[]>([]);
+
+  const loadModules = useCallback(async () => {
+    const mods = await adminCourseService.getModules(courseId);
+    setModules(mods);
+  }, [courseId]);
+
+  const loadMaterials = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await adminCourseService.getMaterials(courseId);
+      const sorted = data.sort((a, b) => {
+        const dateA = a.createdAt?.seconds || 0;
+        const dateB = b.createdAt?.seconds || 0;
+        return dateB - dateA;
+      });
+      setMaterials(sorted);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  }, [courseId]);
+
+  useEffect(() => {
+    loadMaterials();
+    loadModules();
+  }, [loadMaterials, loadModules]);
+
+  const handleCreate = async () => {
+    if (
+      !newMaterial.title ||
+      (newMaterial.type === "pdf" ? !newMaterial.filePath : !newMaterial.url)
+    ) {
+      addToast("Preencha o título e envie o PDF ou informe o link", "error");
+      return;
+    }
+    if (saving) return;
+    setSaving(true);
+    try {
+      await adminCourseService.addMaterial(courseId, newMaterial);
+      addToast("Material adicionado", "success");
+      setNewMaterial({
+        title: "",
+        url: "",
+        filePath: "",
+        fileBucket: "",
+        type: "pdf",
+        visibility: "enrolled",
+        tags: "",
+        moduleId: "",
+      });
+      setIsCreating(false);
+      loadMaterials();
+    } catch (e) {
+      addToast("Erro ao criar", "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Excluir material?")) return;
+    try {
+      await adminCourseService.deleteMaterial(courseId, id);
+      addToast("Material removido", "success");
+      loadMaterials();
+    } catch (e) {
+      addToast("Erro ao remover", "error");
+    }
+  };
+
+  if (loading)
+    return (
+      <div className="p-8 text-center text-stone-400">
+        Carregando materiais...
+      </div>
+    );
+
+  return (
+    <div className="space-y-6 animate-in fade-in">
+      <section className="flex flex-col gap-4 rounded-2xl border border-stone-200 bg-white p-5 shadow-sm sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h3 className="font-serif text-xl font-semibold text-primary">
+            Materiais complementares
+          </h3>
+          <p className="mt-1 text-sm text-stone-500">
+            Anexe PDFs do curso ou informe um link externo para a turma.
+          </p>
+        </div>
+        <Button
+          size="sm"
+          onClick={() => setIsCreating(!isCreating)}
+          leftIcon={isCreating ? undefined : <Plus size={16} />}
+        >
+          {isCreating ? "Cancelar" : "Adicionar Material"}
+        </Button>
+      </section>
+
+      {isCreating && (
+        <div className="animate-in space-y-4 rounded-2xl border border-primary/20 bg-primary/5 p-5 slide-in-from-top-2">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="md:col-span-2">
+              <label className="text-xs font-bold text-stone-500 uppercase">
+                Título
+              </label>
+              <input
+                value={newMaterial.title}
+                onChange={(e) =>
+                  setNewMaterial({ ...newMaterial, title: e.target.value })
+                }
+                className="w-full p-2 rounded border-stone-200"
+                placeholder="Ex: E-book do Módulo 1"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-bold text-stone-500 uppercase">
+                Tipo
+              </label>
+              <select
+                value={newMaterial.type}
+                onChange={(e) =>
+                  setNewMaterial({
+                    ...newMaterial,
+                    type: e.target.value,
+                    url: "",
+                    filePath: "",
+                    fileBucket: "",
+                  })
+                }
+                className="w-full p-2 rounded border-stone-200"
+              >
+                <option value="pdf">PDF</option>
+                <option value="link">Link Externo</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-bold text-stone-500 uppercase">
+                Visibilidade
+              </label>
+              <select
+                value={newMaterial.visibility}
+                onChange={(e) =>
+                  setNewMaterial({ ...newMaterial, visibility: e.target.value })
+                }
+                className="w-full p-2 rounded border-stone-200"
+              >
+                <option value="enrolled">Alunos (Matriculados)</option>
+                <option value="after_completion">Após Conclusão</option>
+                <option value="team_only">Equipe (Team Role)</option>
+              </select>
+            </div>
+            <div className="md:col-span-3">
+              <label className="text-xs font-bold text-stone-500 uppercase">
+                Vincular a Módulo (Opcional)
+              </label>
+              <select
+                value={newMaterial.moduleId}
+                onChange={(e) =>
+                  setNewMaterial({ ...newMaterial, moduleId: e.target.value })
+                }
+                className="w-full p-2 rounded border-stone-200"
+              >
+                <option value="">Geral (Todo o Curso)</option>
+                {modules.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          {newMaterial.type === "pdf" ? (
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase text-stone-500">
+                Arquivo PDF
+              </label>
+              <FileUpload
+                privateCourseId={courseId}
+                onUpload={(file) =>
+                  setNewMaterial((previous) => ({
+                    ...previous,
+                    title: previous.title || file.name.replace(/\.pdf$/i, ""),
+                    url: file.url,
+                    filePath: file.path,
+                    fileBucket: file.bucket || "",
+                  }))
+                }
+              />
+            </div>
+          ) : (
+            <div>
+              <label className="text-xs font-bold text-stone-500 uppercase">
+                URL do Arquivo
+              </label>
+              <input
+                value={newMaterial.url}
+                onChange={(e) =>
+                  setNewMaterial({ ...newMaterial, url: e.target.value })
+                }
+                className="w-full rounded-lg border border-stone-200 bg-white p-2.5 font-mono text-xs outline-none focus:border-primary"
+                placeholder="https://..."
+              />
+              <p className="mt-1 text-[10px] text-stone-400">
+                Links externos dependem das regras de acesso do provedor. Para
+                conteúdo restrito, envie um PDF.
+              </p>
+            </div>
+          )}
+          <div className="flex justify-end">
+            <Button size="sm" onClick={handleCreate} disabled={saving}>
+              Salvar Material
+            </Button>
+          </div>
+        </div>
+      )}
+
+      <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white divide-y divide-stone-100 shadow-sm">
+        {materials.map((item) => (
+          <div
+            key={item.id}
+            className="p-4 flex items-center justify-between hover:bg-stone-50 transition-colors group"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 bg-blue-50 text-blue-500 rounded-lg flex items-center justify-center shrink-0">
+                {item.type === "link" ? (
+                  <LinkIcon size={20} />
+                ) : (
+                  <FileText size={20} />
+                )}
+              </div>
+              <div>
+                <h4 className="font-bold text-stone-700 text-sm">
+                  {item.title}
+                </h4>
+                <a
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-stone-400 hover:text-primary truncate max-w-[200px] block font-mono"
+                >
+                  {item.url}
+                </a>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="flex flex-col items-end gap-1">
+                <button
+                  disabled={saving}
+                  onClick={async () => {
+                    if (saving) return;
+                    const states = [
+                      "enrolled",
+                      "after_completion",
+                      "team_only",
+                    ];
+                    const next =
+                      states[
+                        (states.indexOf(item.visibility || "enrolled") + 1) %
+                          states.length
+                      ];
+                    setSaving(true);
+                    try {
+                      await adminCourseService.updateMaterial(
+                        courseId,
+                        item.id,
+                        { visibility: next },
+                      );
+                      await loadMaterials();
+                    } catch {
+                      addToast(
+                        "Não foi possível alterar a visibilidade.",
+                        "error",
+                      );
+                    } finally {
+                      setSaving(false);
+                    }
+                  }}
+                  className={cn(
+                    "px-2 py-0.5 rounded text-[10px] font-bold uppercase border cursor-pointer hover:bg-white transition-all",
+                    item.visibility === "team_only"
+                      ? "bg-purple-50 text-purple-600 border-purple-100"
+                      : item.visibility === "after_completion"
+                        ? "bg-orange-50 text-orange-600 border-orange-100"
+                        : "bg-green-50 text-green-600 border-green-100",
+                  )}
+                >
+                  {item.visibility === "team_only"
+                    ? "Equipe"
+                    : item.visibility === "after_completion"
+                      ? "Pós-Curso"
+                      : "Alunos"}
+                </button>
+                {item.moduleId && (
+                  <span className="text-[10px] text-stone-400 border border-stone-100 px-1 rounded truncate max-w-[100px]">
+                    {modules.find((m) => m.id === item.moduleId)?.title ||
+                      "Módulo"}
+                  </span>
+                )}
+                <span className="text-xs text-stone-300 font-mono bg-stone-100 px-2 py-1 rounded">
+                  {item.type}
+                </span>
+              </div>
+              <button
+                disabled={saving}
+                title={
+                  item.isPublished === false
+                    ? "Publicar material"
+                    : "Ocultar material"
+                }
+                onClick={async () => {
+                  if (saving) return;
+                  setSaving(true);
+                  try {
+                    await adminCourseService.updateMaterial(courseId, item.id, {
+                      isPublished: item.isPublished === false,
+                    });
+                    await loadMaterials();
+                  } catch {
+                    addToast("Não foi possível alterar a publicação.", "error");
+                  } finally {
+                    setSaving(false);
+                  }
+                }}
+                className="p-2 text-stone-400 hover:text-primary"
+              >
+                {item.isPublished === false ? (
+                  <EyeOff size={16} />
+                ) : (
+                  <Eye size={16} />
+                )}
+              </button>
+              <button
+                onClick={() => handleDelete(item.id)}
+                className="p-2 text-stone-300 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+              >
+                <Trash2 size={16} />
+              </button>
+            </div>
+          </div>
+        ))}
+        {materials.length === 0 && !isCreating && (
+          <div className="text-center py-12 text-stone-400">
+            Nenhum material cadastrado.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

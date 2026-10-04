@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-03",
+  "block": "03",
+  "codePublished": false,
+  "remoteMutations": false,
+  "realAccountsCreated": false,
+  "emailSentInValidation": false,
+  "publicAuthSettings": {
+    "project": "jdxorryvmcvtqsddkpdm.supabase.co",
+    "checkedAt": "2026-10-03T22:31:13.711Z",
+    "emailEnabled": true,
+    "signupEnabled": true,
+    "requiresEmailConfirmation": true
+  },
+  "build": {
+    "passed": true,
+    "seconds": 246,
+    "environment": "Official Next 15.5.25 WASM; dummy credentials; read-only local empty Supabase fixture; no real services."
+  },
+  "types": {
+    "passed": true
+  },
+  "jest": {
+    "passedSuites": 83,
+    "skippedSuites": 1,
+    "passedTests": 295,
+    "failedTests": 0,
+    "skippedTests": 7
+  },
+  "lint": {
+    "passed": true,
+    "files": 14
+  },
+  "pending": [
+    "SMTP and external delivery",
+    "Auth redirect allowlist and templates",
+    "Email confirmation and recovery E2E in staging",
+    "Concurrent session synchronization",
+    "CAPTCHA/distributed production limits"
+  ]
+}

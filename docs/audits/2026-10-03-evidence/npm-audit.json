@@ -1,0 +1,573 @@
+{
+  "auditReportVersion": 2,
+  "vulnerabilities": {
+    "@fastify/busboy": {
+      "name": "@fastify/busboy",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1240981,
+          "name": "@fastify/busboy",
+          "dependency": "@fastify/busboy",
+          "title": "@fastify/busboy vulnerable to Denial of Service via oversized multipart boundary",
+          "url": "https://github.com/advisories/GHSA-xjh9-v7x6-24jw",
+          "severity": "high",
+          "cwe": [
+            "CWE-835",
+            "CWE-1322"
+          ],
+          "cvss": {
+            "score": 7.5,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+          },
+          "range": ">=3.1.0 <3.2.1"
+        },
+        {
+          "source": 1240982,
+          "name": "@fastify/busboy",
+          "dependency": "@fastify/busboy",
+          "title": "@fastify/busboy vulnerable to Denial of Service via prototype-named multipart part header",
+          "url": "https://github.com/advisories/GHSA-x8mw-p69m-v3mx",
+          "severity": "high",
+          "cwe": [
+            "CWE-754"
+          ],
+          "cvss": {
+            "score": 7.5,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+          },
+          "range": ">=1.0.0 <3.2.1"
+        }
+      ],
+      "effects": [
+        "firebase-admin"
+      ],
+      "range": "",
+      "nodes": [
+        "node_modules/@fastify/busboy"
+      ],
+      "fixAvailable": false
+    },
+    "@firebase/firestore": {
+      "name": "@firebase/firestore",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        "@grpc/grpc-js"
+      ],
+      "effects": [
+        "@firebase/firestore-compat",
+        "firebase"
+      ],
+      "range": "",
+      "nodes": [
+        "node_modules/@firebase/firestore"
+      ],
+      "fixAvailable": false
+    },
+    "@firebase/firestore-compat": {
+      "name": "@firebase/firestore-compat",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        "@firebase/firestore"
+      ],
+      "effects": [],
+      "range": "",
+      "nodes": [
+        "node_modules/@firebase/firestore-compat"
+      ],
+      "fixAvailable": true
+    },
+    "@google-cloud/firestore": {
+      "name": "@google-cloud/firestore",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        "google-gax"
+      ],
+      "effects": [],
+      "range": "",
+      "nodes": [
+        "node_modules/@google-cloud/firestore"
+      ],
+      "fixAvailable": true
+    },
+    "@google-cloud/storage": {
+      "name": "@google-cloud/storage",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        "gaxios",
+        "google-auth-library",
+        "retry-request",
+        "teeny-request"
+      ],
+      "effects": [],
+      "range": "",
+      "nodes": [
+        "node_modules/@google-cloud/storage"
+      ],
+      "fixAvailable": true
+    },
+    "@grpc/grpc-js": {
+      "name": "@grpc/grpc-js",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1240623,
+          "name": "@grpc/grpc-js",
+          "dependency": "@grpc/grpc-js",
+          "title": "@grpc/grpc-js: In certain configurations, getAuthContext can return unauthorized certificates as though they were authorized",
+          "url": "https://github.com/advisories/GHSA-m9gg-hp2v-232j",
+          "severity": "high",
+          "cwe": [
+            "CWE-295"
+          ],
+          "cvss": {
+            "score": 7.4,
+            "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N"
+          },
+          "range": "<1.13.6"
+        },
+        {
+          "source": 1240625,
+          "name": "@grpc/grpc-js",
+          "dependency": "@grpc/grpc-js",
+          "title": "@grpc/grpc-js: The server transmits some error messages thrown by method handlers to the client in status messages",
+          "url": "https://github.com/advisories/GHSA-f596-whhp-79r4",
+          "severity": "low",
+          "cwe": [
+            "CWE-550"
+          ],
+          "cvss": {
+            "score": 3.7,
+            "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N"
+          },
+          "range": "<1.13.6"
+        }
+      ],
+      "effects": [
+        "@firebase/firestore"
+      ],
+      "range": "",
+      "nodes": [
+        "node_modules/@grpc/grpc-js"
+      ],
+      "fixAvailable": false
+    },
+    "@sentry/nextjs": {
+      "name": "@sentry/nextjs",
+      "severity": "moderate",
+      "isDirect": true,
+      "via": [
+        "next"
+      ],
+      "effects": [],
+      "range": "",
+      "nodes": [
+        "node_modules/@sentry/nextjs"
+      ],
+      "fixAvailable": false
+    },
+    "dompurify": {
+      "name": "dompurify",
+      "severity": "low",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1240621,
+          "name": "dompurify",
+          "dependency": "dompurify",
+          "title": "DOMPurify: IN_PLACE: node-removing afterSanitize hook leaves detached subtree event handlers armed, causing DOM XSS",
+          "url": "https://github.com/advisories/GHSA-p98j-92pf-mc4p",
+          "severity": "low",
+          "cwe": [
+            "CWE-79"
+          ],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": ">=3.4.13 <=3.4.15"
+        }
+      ],
+      "effects": [
+        "jspdf"
+      ],
+      "range": "",
+      "nodes": [
+        "node_modules/dompurify"
+      ],
+      "fixAvailable": false
+    },
+    "firebase": {
+      "name": "firebase",
+      "severity": "high",
+      "isDirect": true,
+      "via": [
+        "@firebase/firestore",
+        "@firebase/firestore-compat"
+      ],
+      "effects": [],
+      "range": "",
+      "nodes": [
+        "node_modules/firebase"
+      ],
+      "fixAvailable": false
+    },
+    "firebase-admin": {
+      "name": "firebase-admin",
+      "severity": "high",
+      "isDirect": true,
+      "via": [
+        "@fastify/busboy",
+        "@google-cloud/firestore",
+        "@google-cloud/storage"
+      ],
+      "effects": [],
+      "range": "",
+      "nodes": [
+        "node_modules/firebase-admin"
+      ],
+      "fixAvailable": false
+    },
+    "gaxios": {
+      "name": "gaxios",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        "uuid"
+      ],
+      "effects": [
+        "@google-cloud/storage",
+        "gcp-metadata",
+        "google-auth-library",
+        "gtoken"
+      ],
+      "range": "",
+      "nodes": [
+        "node_modules/gaxios"
+      ],
+      "fixAvailable": true
+    },
+    "gcp-metadata": {
+      "name": "gcp-metadata",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        "gaxios"
+      ],
+      "effects": [],
+      "range": "",
+      "nodes": [
+        "node_modules/gcp-metadata"
+      ],
+      "fixAvailable": true
+    },
+    "google-auth-library": {
+      "name": "google-auth-library",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        "gaxios",
+        "gcp-metadata",
+        "gtoken"
+      ],
+      "effects": [],
+      "range": "",
+      "nodes": [
+        "node_modules/google-auth-library"
+      ],
+      "fixAvailable": true
+    },
+    "google-gax": {
+      "name": "google-gax",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        "google-auth-library",
+        "retry-request",
+        "uuid"
+      ],
+      "effects": [
+        "@google-cloud/firestore"
+      ],
+      "range": "",
+      "nodes": [
+        "node_modules/google-gax"
+      ],
+      "fixAvailable": true
+    },
+    "gtoken": {
+      "name": "gtoken",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        "gaxios"
+      ],
+      "effects": [],
+      "range": "",
+      "nodes": [
+        "node_modules/gtoken"
+      ],
+      "fixAvailable": true
+    },
+    "jspdf": {
+      "name": "jspdf",
+      "severity": "low",
+      "isDirect": true,
+      "via": [
+        "dompurify"
+      ],
+      "effects": [],
+      "range": "",
+      "nodes": [
+        "node_modules/jspdf"
+      ],
+      "fixAvailable": false
+    },
+    "next": {
+      "name": "next",
+      "severity": "high",
+      "isDirect": true,
+      "via": [
+        "postcss",
+        "sharp"
+      ],
+      "effects": [
+        "@sentry/nextjs",
+        "next-view-transitions"
+      ],
+      "range": "",
+      "nodes": [
+        "node_modules/next"
+      ],
+      "fixAvailable": false
+    },
+    "next-view-transitions": {
+      "name": "next-view-transitions",
+      "severity": "moderate",
+      "isDirect": true,
+      "via": [
+        "next"
+      ],
+      "effects": [],
+      "range": "",
+      "nodes": [
+        "node_modules/next-view-transitions"
+      ],
+      "fixAvailable": false
+    },
+    "postcss": {
+      "name": "postcss",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1117015,
+          "name": "postcss",
+          "dependency": "postcss",
+          "title": "PostCSS has XSS via Unescaped </style> in its CSS Stringify Output",
+          "url": "https://github.com/advisories/GHSA-qx2v-qp2m-jg93",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-79"
+          ],
+          "cvss": {
+            "score": 6.1,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N"
+          },
+          "range": "<8.5.10"
+        },
+        {
+          "source": 1124252,
+          "name": "postcss",
+          "dependency": "postcss",
+          "title": "PostCSS: Arbitrary file read and information disclosure via attacker-controlled sourceMappingURL in CSS comments",
+          "url": "https://github.com/advisories/GHSA-6g55-p6wh-862q",
+          "severity": "high",
+          "cwe": [
+            "CWE-22",
+            "CWE-200"
+          ],
+          "cvss": {
+            "score": 7.5,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N"
+          },
+          "range": "<=8.5.11"
+        },
+        {
+          "source": 1130709,
+          "name": "postcss",
+          "dependency": "postcss",
+          "title": "PostCSS: incomplete fix of GHSA-6g55-p6wh-862q — attacker-controlled sourceMappingURL reads arbitrary .map files when `from` is unset",
+          "url": "https://github.com/advisories/GHSA-fxqj-rqcc-2cmp",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-22",
+            "CWE-200"
+          ],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": "<=8.5.22"
+        },
+        {
+          "source": 1139510,
+          "name": "postcss",
+          "dependency": "postcss",
+          "title": "PostCSS: Path Traversal in Previous Source Map Auto-Loading (sourceMappingURL) leads to Arbitrary .map File Disclosure",
+          "url": "https://github.com/advisories/GHSA-r28c-9q8g-f849",
+          "severity": "high",
+          "cwe": [
+            "CWE-22"
+          ],
+          "cvss": {
+            "score": 7.5,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N"
+          },
+          "range": "<=8.5.17"
+        }
+      ],
+      "effects": [
+        "next"
+      ],
+      "range": "",
+      "nodes": [
+        "node_modules/next/node_modules/postcss"
+      ],
+      "fixAvailable": false
+    },
+    "retry-request": {
+      "name": "retry-request",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        "teeny-request"
+      ],
+      "effects": [],
+      "range": "",
+      "nodes": [
+        "node_modules/retry-request"
+      ],
+      "fixAvailable": true
+    },
+    "sharp": {
+      "name": "sharp",
+      "severity": "high",
+      "isDirect": true,
+      "via": [
+        {
+          "source": 1124066,
+          "name": "sharp",
+          "dependency": "sharp",
+          "title": "sharp inherited vulnerabilities in libvips: CVE-2026-33327, CVE-2026-33328, CVE-2026-35590, CVE-2026-35591",
+          "url": "https://github.com/advisories/GHSA-f88m-g3jw-g9cj",
+          "severity": "high",
+          "cwe": [
+            "CWE-1395"
+          ],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": "<0.35.0"
+        },
+        {
+          "source": 1193725,
+          "name": "sharp",
+          "dependency": "sharp",
+          "title": "sharp: Vulnerabilities in libheif: GHSA-g89c-p67h-r497 and GHSA-2jg2-4ch7-h545",
+          "url": "https://github.com/advisories/GHSA-rgj7-g3m4-5g8c",
+          "severity": "high",
+          "cwe": [
+            "CWE-122"
+          ],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": "<0.35.4"
+        }
+      ],
+      "effects": [],
+      "range": "",
+      "nodes": [
+        "node_modules/sharp"
+      ],
+      "fixAvailable": false
+    },
+    "teeny-request": {
+      "name": "teeny-request",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        "uuid"
+      ],
+      "effects": [
+        "retry-request"
+      ],
+      "range": "",
+      "nodes": [
+        "node_modules/teeny-request"
+      ],
+      "fixAvailable": true
+    },
+    "uuid": {
+      "name": "uuid",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1119441,
+          "name": "uuid",
+          "dependency": "uuid",
+          "title": "uuid: Missing buffer bounds check in v3/v5/v6 when buf is provided",
+          "url": "https://github.com/advisories/GHSA-w5hq-g745-h8pq",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-787",
+            "CWE-1285"
+          ],
+          "cvss": {
+            "score": 7.5,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N"
+          },
+          "range": "<11.1.1"
+        }
+      ],
+      "effects": [
+        "gaxios",
+        "google-gax",
+        "teeny-request"
+      ],
+      "range": "",
+      "nodes": [
+        "node_modules/uuid"
+      ],
+      "fixAvailable": true
+    }
+  },
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 2,
+      "moderate": 12,
+      "high": 9,
+      "critical": 0,
+      "total": 23
+    },
+    "dependencies": {
+      "prod": 663,
+      "dev": 642,
+      "optional": 163,
+      "peer": 40,
+      "peerOptional": 0,
+      "total": 1483
+    }
+  }
+}

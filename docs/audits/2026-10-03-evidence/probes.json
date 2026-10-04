@@ -1,0 +1,47 @@
+[
+  {
+    "probe": "signup-and-admin-email",
+    "scope": "mocked service, not production",
+    "signupSuccess": true,
+    "emailConfirmedWithoutEmailDelivery": true,
+    "profileRole": "student",
+    "resolvedAdmin": true,
+    "expectedAdmin": false
+  },
+  {
+    "probe": "ensureUserDoc-trusts-supplied-identity",
+    "scope": "direct function invocation; HTTP exposure unverified",
+    "writesWithoutSessionCheck": [
+      {
+        "kind": "profiles.update",
+        "role": "admin"
+      }
+    ]
+  },
+  {
+    "probe": "requireSession-disabled-profile",
+    "scope": "mocked service",
+    "returnedSession": true,
+    "isActive": false,
+    "expectedReturnedSession": false
+  },
+  {
+    "probe": "getLessonContent-without-session",
+    "scope": "mocked repository; HTTP exposure depends on action manifest",
+    "returnedUnpublishedLesson": true,
+    "returnedPrivateBlocks": true,
+    "expectedReturnedPrivateBlocks": false
+  },
+  {
+    "probe": "webhook-stripe-metadata-mapping",
+    "scope": "mocked repository",
+    "writtenSubscriptionId": null,
+    "expectedSubscriptionId": "sub_LOCAL_TEST"
+  },
+  {
+    "probe": "pix-reference-collision",
+    "scope": "fake Pix key, no QR displayed or payment",
+    "samePayloadForDifferentCourses": true,
+    "expectedSamePayload": false
+  }
+]

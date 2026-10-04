@@ -1,0 +1,67 @@
+{
+    "name": "Instituto Figura Viva",
+    "short_name": "Figura Viva",
+    "description": "Plataforma de ensino em Gestalt-terapia e Psicologia Humanista.",
+    "start_url": "/portal",
+    "display": "standalone",
+    "background_color": "#FDFCF9",
+    "theme_color": "#D4AF37",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "/android-chrome-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/android-chrome-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "/android-chrome-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/android-chrome-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Meus Cursos",
+            "short_name": "Cursos",
+            "url": "/portal/courses",
+            "icons": [
+                {
+                    "src": "/android-chrome-192x192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "Comunidade",
+            "short_name": "Comunidade",
+            "url": "/portal/community",
+            "icons": [
+                {
+                    "src": "/android-chrome-192x192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        }
+    ],
+    "categories": [
+        "education",
+        "medical"
+    ],
+    "lang": "pt-BR",
+    "dir": "ltr",
+    "prefer_related_applications": false
+}

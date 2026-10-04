@@ -1,0 +1,399 @@
+{
+  "block": 7,
+  "date": "2026-10-03",
+  "timezone": "America/Manaus",
+  "migration": {
+    "path": "supabase/migrations/20261004014441_block_07_private_course_materials.sql",
+    "sha256": "88b913f5d722f691902e28ff61592296c244fa5402827ecdd85b58146a9f2111",
+    "applied": true,
+    "registered": true,
+    "projectRef": "jdxorryvmcvtqsddkpdm"
+  },
+  "validation": {
+    "jest": {
+      "passed": 408,
+      "failed": 0,
+      "skipped": 7,
+      "suites": 100
+    },
+    "sql": {
+      "passed": true,
+      "count": 32,
+      "checks": [
+        "migration applied to old schema without removing existing objects",
+        "active enrollment sees only published enrolled materials",
+        "global tutor without assignment cannot access materials",
+        "assigned course team can preview private unpublished and restricted materials",
+        "active administrator can preview draft course",
+        "inactive administrator denied",
+        "completion unlocks after-completion but not team material",
+        "expired completed enrollment denied",
+        "pending_approval enrollment denied",
+        "canceled enrollment denied",
+        "refunded enrollment denied",
+        "disabled student denied with active enrollment",
+        "unpublished course denied to enrolled student",
+        "closed published course preserves enrolled access",
+        "list exposes metadata without bearer or external URLs",
+        "resolve rejects unavailable and missing material",
+        "resolve returns private reference only for eligible identity",
+        "new PDF cannot use public URL",
+        "partial nullable storage reference rejected",
+        "cross-course storage path rejected",
+        "cross-course module rejected",
+        "cross-course lesson rejected",
+        "non-HTTPS links rejected",
+        "restrictive metadata policy defeats broad legacy read",
+        "authenticated predicate rejects impersonation",
+        "broad storage policy cannot expose private materials or uploads",
+        "authenticated private upload denied despite broad policy",
+        "legacy public material upload denied",
+        "administrator retains legacy uploads but must use server for private material",
+        "resolve and list RPC are server only",
+        "all new routines use SECURITY INVOKER",
+        "legacy files preserved"
+      ],
+      "engine": "isolated PostgreSQL PGlite",
+      "liveBusinessWrites": false
+    },
+    "types": {
+      "mode": "baseline",
+      "check": "types",
+      "appOnly": false,
+      "fixWasmAliases": false,
+      "normalized": false,
+      "resolverOnly": false,
+      "exitCode": 0,
+      "signal": null,
+      "elapsedSeconds": 34,
+      "logPath": "C:\\Users\\aless\\.codex\\visualizations\\2026\\10\\03\\01a10335-acef-7420-876c-e473e31d8446\\validation-block-07\\baseline-types.log",
+      "environment": "Official Next 15.5.25 WASM; dummy credentials; read-only local empty Supabase fixture; no real services."
+    },
+    "build": {
+      "mode": "baseline",
+      "check": "build",
+      "appOnly": false,
+      "fixWasmAliases": false,
+      "normalized": false,
+      "resolverOnly": false,
+      "exitCode": 0,
+      "signal": null,
+      "elapsedSeconds": 137,
+      "logPath": "C:\\Users\\aless\\.codex\\visualizations\\2026\\10\\03\\01a10335-acef-7420-876c-e473e31d8446\\validation-block-07\\baseline-build.log",
+      "environment": "Official Next 15.5.25 WASM; dummy credentials; read-only local empty Supabase fixture; no real services."
+    },
+    "lint": {
+      "passed": true,
+      "files": 24
+    },
+    "sourceIntegrity": {
+      "filesCompared": 1298,
+      "changes": [],
+      "passed": true,
+      "scope": "Final baseline snapshot versus workspace code/content/tests; no .env; no remote services"
+    }
+  },
+  "live": {
+    "passed": true,
+    "advisorWarnings": 14,
+    "advisorSetUnchanged": true,
+    "verification": {
+      "active_admins": 1,
+      "admin_events": 0,
+      "applications": 2,
+      "buckets": [
+        {
+          "id": "assessment-submissions",
+          "mime_types": [
+            "application/pdf",
+            "application/msword",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "image/jpeg",
+            "image/png",
+            "video/mp4",
+            "video/quicktime"
+          ],
+          "objects": 0,
+          "public": false,
+          "size_limit": 10485760
+        },
+        {
+          "id": "course-assets",
+          "mime_types": [
+            "application/pdf",
+            "image/jpeg",
+            "image/png",
+            "image/webp",
+            "image/avif"
+          ],
+          "objects": 6,
+          "public": true,
+          "size_limit": 10485760
+        },
+        {
+          "id": "course-materials",
+          "mime_types": [
+            "application/pdf"
+          ],
+          "objects": 0,
+          "public": false,
+          "size_limit": 10485760
+        },
+        {
+          "id": "figura",
+          "mime_types": null,
+          "objects": 0,
+          "public": false,
+          "size_limit": null
+        },
+        {
+          "id": "pix-receipts",
+          "mime_types": [
+            "image/jpeg",
+            "image/png",
+            "application/pdf"
+          ],
+          "objects": 0,
+          "public": false,
+          "size_limit": 5242880
+        },
+        {
+          "id": "public-avatars",
+          "mime_types": [
+            "image/jpeg",
+            "image/png",
+            "image/webp",
+            "image/avif"
+          ],
+          "objects": 0,
+          "public": true,
+          "size_limit": 5242880
+        },
+        {
+          "id": "public-book-covers",
+          "mime_types": [
+            "image/jpeg",
+            "image/png",
+            "image/webp",
+            "image/avif"
+          ],
+          "objects": 2,
+          "public": true,
+          "size_limit": 5242880
+        },
+        {
+          "id": "uploads",
+          "mime_types": null,
+          "objects": 2,
+          "public": false,
+          "size_limit": null
+        }
+      ],
+      "inactive_profiles_with_active_enrollment": 0,
+      "legacy_public_material_paths": 0,
+      "legacy_public_pdfs": 3,
+      "material_columns": [
+        "module_id",
+        "storage_bucket",
+        "storage_path",
+        "visibility"
+      ],
+      "material_rls": true,
+      "material_total": 0,
+      "metadata_unsafe_privileges": {
+        "anon_truncate": false,
+        "authenticated_references": false,
+        "authenticated_trigger": false,
+        "authenticated_truncate": false
+      },
+      "pix_events": 0,
+      "pix_orders": 0,
+      "restrictive_policies": [
+        {
+          "command": "ALL",
+          "name": "course_materials_no_direct_access",
+          "permissive": "RESTRICTIVE",
+          "roles": [
+            "anon",
+            "authenticated"
+          ],
+          "table": "objects"
+        },
+        {
+          "command": "INSERT",
+          "name": "course_materials_not_public_insert",
+          "permissive": "RESTRICTIVE",
+          "roles": [
+            "anon",
+            "authenticated"
+          ],
+          "table": "objects"
+        },
+        {
+          "command": "UPDATE",
+          "name": "course_materials_not_public_update",
+          "permissive": "RESTRICTIVE",
+          "roles": [
+            "anon",
+            "authenticated"
+          ],
+          "table": "objects"
+        },
+        {
+          "command": "SELECT",
+          "name": "lesson_materials_restricted_read",
+          "permissive": "RESTRICTIVE",
+          "roles": [
+            "authenticated"
+          ],
+          "table": "lesson_materials"
+        },
+        {
+          "command": "ALL",
+          "name": "uploads_admin_only",
+          "permissive": "RESTRICTIVE",
+          "roles": [
+            "anon",
+            "authenticated"
+          ],
+          "table": "objects"
+        }
+      ],
+      "routines": [
+        {
+          "anon_execute": false,
+          "authenticated_execute": true,
+          "name": "can_user_read_course_material",
+          "security_definer": false,
+          "service_execute": true
+        },
+        {
+          "anon_execute": false,
+          "authenticated_execute": false,
+          "name": "enforce_material_file_reference",
+          "security_definer": false,
+          "service_execute": true
+        },
+        {
+          "anon_execute": false,
+          "authenticated_execute": false,
+          "name": "list_readable_course_materials",
+          "security_definer": false,
+          "service_execute": true
+        },
+        {
+          "anon_execute": false,
+          "authenticated_execute": false,
+          "name": "resolve_course_material",
+          "security_definer": false,
+          "service_execute": true
+        }
+      ]
+    }
+  },
+  "files": [
+    {
+      "file": "src/lib/course-materials.ts",
+      "sha256": "7b0878063317b5ea6b8a016db3ec6cb049986c14fe718ebee039c873acbe0371"
+    },
+    {
+      "file": "src/components/admin/FileUpload.tsx",
+      "sha256": "53d66f4989d33043f2ce23a9bf1b5eed89ce46975293c01d3ffef1b487e59294"
+    },
+    {
+      "file": "src/infrastructure/supabase/storage.client.ts",
+      "sha256": "39d5f5979bfc6650bfadb87f9c2bb3167aee44b66fda30da1256aec47ab70b1d"
+    },
+    {
+      "file": "src/infrastructure/supabase/storage.server.ts",
+      "sha256": "90822ed3646e04ebde99f76cff19408661bdd09f32b5c9cd62163651a9e580f7"
+    },
+    {
+      "file": "src/infrastructure/supabase/material-upload.client.ts",
+      "sha256": "1666230b24fa946090af484054106cd4a0677cdd723826f3aec3e17a2892f94d"
+    },
+    {
+      "file": "src/services/uploadService.ts",
+      "sha256": "0364f47ce0dc5f65a16ff310a5e6a2e7ee5cc449e1d1429c76241e4835fcad48"
+    },
+    {
+      "file": "src/components/admin/MaterialsManager.tsx",
+      "sha256": "78663be63fe1cd5eac8524efae8bffc9a55951a44ce71aae3a051642b6389704"
+    },
+    {
+      "file": "src/app/actions/admin/course-mutations.ts",
+      "sha256": "9f6b61441ccaf9a4ddefd7ba58d13451b8c3c2fabab55691806361f6633cf27a"
+    },
+    {
+      "file": "src/app/actions/course-materials.ts",
+      "sha256": "032a052b2e5fef957506b9c092a2ed35e2d63452c976bc0ea339d7bd90b110e7"
+    },
+    {
+      "file": "src/app/actions/course-data.ts",
+      "sha256": "74bd0da43068e79b5b59b443efa4d8f06ed4b3966f06bbda0d8877d00eb9ce8f"
+    },
+    {
+      "file": "src/services/courseService.ts",
+      "sha256": "a971908d9779f3e88c75f5e2fc357cc174312634f405b83dce610bd537802cf2"
+    },
+    {
+      "file": "src/features/courses/infrastructure/supabaseAdminCourseRepository.server.ts",
+      "sha256": "38606e513959710241d3ad70aa6351717b3a523307f2d9f71b5ecee13108bb0e"
+    },
+    {
+      "file": "src/app/admin/(protected)/courses/[id]/tabs/CourseMaterialsTab.tsx",
+      "sha256": "2b9a6dd8094e3b849c7c48d1180ea41892847c0d30e0f67ce61e89b507b88df5"
+    },
+    {
+      "file": "src/lib/presenters/types.ts",
+      "sha256": "3b3b3ca5a72d0b909fb42a1aa17d3dac8857942b116f1543db5e34515ff31cd8"
+    },
+    {
+      "file": "src/types/lms.ts",
+      "sha256": "0621061f15bb736e09802165e23b84d629c733be856235310312a70b30b9252e"
+    },
+    {
+      "file": "src/infrastructure/supabase/database.types.ts",
+      "sha256": "6e31e0560a8ffe816d66de1a59aa2b7a63997f08ed5a4696226124917e310218"
+    },
+    {
+      "file": "src/app/api/admin/materials/upload/route.ts",
+      "sha256": "668ee7bfce3ad5c9dcbf9173c3bff55452d275105d663e797eb6f13fac7f70b8"
+    },
+    {
+      "file": "src/app/api/materials/[materialId]/route.ts",
+      "sha256": "2092972c2f6a2c92d93699461aff53f65bae30144248497f214fb1ed97fb344f"
+    },
+    {
+      "file": "src/app/api/admin/materials/upload/__tests__/route.test.ts",
+      "sha256": "a8dad677af983cf9365a5be14f4b886bcbccca57b2886b1b7460591c5e5cc970"
+    },
+    {
+      "file": "src/app/api/materials/[materialId]/__tests__/route.test.ts",
+      "sha256": "09bec87afcd6388beb9a204853805c6c63145b32f6d8f31847274da59e6b6008"
+    },
+    {
+      "file": "src/features/courses/infrastructure/__tests__/private-materials.test.ts",
+      "sha256": "5ec976c306691a0c4a99950c6ab2008d5add64fcdff5cee17b3ec2d0cb92d46a"
+    },
+    {
+      "file": "src/app/actions/admin/__tests__/course-mutations.materials.test.ts",
+      "sha256": "be3e255e178e3d104437c7859cbe7eeb6da15d1f2568fbfb0409db6b14e185dd"
+    },
+    {
+      "file": "src/app/admin/(protected)/courses/[id]/tabs/__tests__/CourseMaterialsTab.test.tsx",
+      "sha256": "86666eb6a14a60645821695c99b49c0291df20ec24a1ca4e7c3e53a7936c2bee"
+    },
+    {
+      "file": "src/app/portal/course/[courseId]/page.tsx",
+      "sha256": "f1b40730bc8a6d44cf51ab005ed8dc3167269f5288b7063ee0a212882101cce4"
+    }
+  ],
+  "limits": [
+    "Frontend local; no deploy.",
+    "No live uploads/downloads or changes to accounts/payments.",
+    "Three preexisting public PDFs still require purpose classification.",
+    "No EAD-wide release certification.",
+    "205 deletion candidates preserved."
+  ]
+}

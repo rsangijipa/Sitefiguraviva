@@ -1,0 +1,141 @@
+import { Instagram, Mail, MapPin, Phone, ArrowRight } from "lucide-react";
+import CookiePreferencesButton from "@/components/system/CookiePreferencesButton";
+import Link from "next/link";
+import { PUBLIC_NAV_ITEMS } from "@/features/public-site/content/navigation";
+
+const explorar = PUBLIC_NAV_ITEMS.filter((item) => item.label !== "Instituto");
+
+const institucional = [
+  { label: "Instituto", href: "/instituto" },
+  { label: "Fundadora", href: "/instituto/fundadora" },
+  { label: "Manifesto", href: "/instituto/manifesto" },
+  { label: "Privacidade", href: "/privacidade" },
+  { label: "Termos", href: "/termos" },
+];
+
+export default function Footer() {
+  const address = "Rua Santos Dumont, 156 - Ouro Preto D'Oeste - RO";
+  const phone = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "5569992481585";
+  const mapsHref = `https://maps.google.com/?q=${encodeURIComponent(address)}`;
+
+  return (
+    <footer className="fv-bg fv-bg-footer relative overflow-hidden bg-primary-solid pb-4 pt-6 text-paper md:pb-5 md:pt-8">
+      <div className="fv-container relative z-10">
+        <div className="mb-5 grid gap-5 border-b border-paper/15 pb-5 md:mb-6 md:grid-cols-12 md:gap-8">
+          <div className="md:col-span-5 lg:col-span-5">
+            <h3 className="mb-2 font-serif text-2xl md:text-3xl">
+              Figura <span className="font-light text-gold italic">Viva</span>
+            </h3>
+            <p className="mb-3 max-w-sm text-sm leading-relaxed text-paper/70">
+              Habitando a fronteira do encontro, cultivando awareness e
+              transformando vidas através da Gestalt-Terapia.
+            </p>
+            <div className="flex items-center gap-4">
+              <a
+                href="https://www.instagram.com/institutofiguraviva/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex h-10 w-10 items-center justify-center rounded-full border border-paper/25 transition-soft hover:bg-paper hover:text-primary"
+              >
+                <Instagram
+                  size={18}
+                  className="group-hover:scale-110 transition-transform"
+                />
+              </a>
+            </div>
+          </div>
+
+          <nav
+            aria-label="Explorar o site"
+            className="md:col-span-3 lg:col-span-2"
+          >
+            <h4 className="mb-2 font-sans text-[10px] font-bold uppercase tracking-[0.3em] text-gold-light">
+              Explorar
+            </h4>
+            <ul className="space-y-0.5 text-sm text-paper/75">
+              {explorar.map((item) => (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    className="flex min-h-9 items-center py-0.5 transition-soft hover:text-gold-light"
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          <nav
+            aria-label="Informações institucionais"
+            className="md:col-span-4 lg:col-span-2"
+          >
+            <h4 className="mb-2 font-sans text-[10px] font-bold uppercase tracking-[0.3em] text-gold-light">
+              Institucional
+            </h4>
+            <ul className="space-y-0.5 text-sm text-paper/75">
+              {institucional.map((item) => (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    className="flex min-h-9 items-center py-0.5 transition-soft hover:text-gold-light"
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+              <li className="flex min-h-9 items-center">
+                <CookiePreferencesButton />
+              </li>
+            </ul>
+          </nav>
+
+          <div className="md:col-span-12 lg:col-span-3">
+            <h4 className="mb-2 font-sans text-[10px] font-bold uppercase tracking-[0.3em] text-gold-light">
+              Contato
+            </h4>
+            <div className="space-y-1.5 text-sm text-paper/75">
+              <p className="flex items-start gap-3 whitespace-pre-line leading-relaxed">
+                <MapPin size={16} className="mt-1 shrink-0 text-gold-light" />
+                {address}
+              </p>
+              <a
+                href="mailto:contato@figuraviva.com.br"
+                className="flex items-center gap-3 transition-soft hover:text-gold-light"
+              >
+                <Mail size={16} className="shrink-0 text-gold-light" />
+                contato@figuraviva.com.br
+              </a>
+              {phone && (
+                <a
+                  href={`https://wa.me/${phone.replace(/\D/g, "")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 transition-soft hover:text-gold-light"
+                >
+                  <Phone size={16} className="shrink-0 text-gold-light" />
+                  WhatsApp do Instituto
+                </a>
+              )}
+              <a
+                href={mapsHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-1 inline-flex items-center gap-2 rounded-md border border-paper/25 px-4 py-2 text-xs font-bold uppercase tracking-widest transition-soft hover:border-paper hover:bg-paper hover:text-primary"
+              >
+                Traçar Rota <ArrowRight size={14} aria-hidden />
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-center justify-between gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-paper/45 md:flex-row">
+          <p>
+            &copy; {new Date().getFullYear()} Instituto Figura Viva &bull; Todos
+            os direitos reservados
+          </p>
+        </div>
+      </div>
+    </footer>
+  );
+}

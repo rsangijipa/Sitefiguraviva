@@ -1,0 +1,33 @@
+name: Authenticated staging E2E
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  e2e:
+    environment: homologacao
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      BASE_URL: ${{ vars.E2E_BASE_URL }}
+      E2E_REMOTE: "1"
+      E2E_ISOLATED_ENVIRONMENT: ${{ vars.E2E_ISOLATED_ENVIRONMENT }}
+      E2E_ALLOW_MUTATIONS: ${{ vars.E2E_ALLOW_MUTATIONS }}
+      E2E_SUPABASE_PROJECT_REF: ${{ vars.E2E_SUPABASE_PROJECT_REF }}
+      ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
+      ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
+      STUDENT_EMAIL: ${{ secrets.E2E_STUDENT_EMAIL }}
+      STUDENT_PASSWORD: ${{ secrets.E2E_STUDENT_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run test:e2e:preflight
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e -- --project=chromium
+      # Authenticated traces/storageState may contain session tokens. Keep them off artifacts.

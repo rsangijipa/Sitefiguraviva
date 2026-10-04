@@ -1,0 +1,1736 @@
+{
+  "checkedAt": "2026-10-03T19:37:21.659Z",
+  "scope": "Anonymous GET/navigation only; no business flow completed",
+  "results": [
+    {
+      "route": "/",
+      "status": 200,
+      "finalUrl": "https://www.institutofiguraviva.com.br/",
+      "title": "Instituto Figura Viva | Gestalt-Terapia",
+      "h1": [
+        "Instituto de Gestalt-terapia de RondôniaFigura Viva"
+      ],
+      "canonical": "https://figuraviva.com.br",
+      "mainCount": 2,
+      "mainIdCount": 2,
+      "courseLinks": [
+        "/curso/Ti8sjbPwhL9j7E9KLCHc",
+        "/curso/VtOJYjX6DXXMmoZHTIIL"
+      ],
+      "navigation": [
+        {
+          "domContentLoadedMs": 2652,
+          "transferSize": 6539
+        }
+      ],
+      "resources": [
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/media/b7ae23d8a9c319da-s.p.woff2",
+          "transferSize": 32496,
+          "durationMs": 100
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/css/8cb4b604171168bd.css",
+          "transferSize": 977,
+          "durationMs": 240
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/css/cfb3fa1c83438e64.css",
+          "transferSize": 41782,
+          "durationMs": 241
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/media/cb9f64d62d112b41-s.p.woff2",
+          "transferSize": 121100,
+          "durationMs": 239
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/css/7dfe3efa269f4a88.css",
+          "transferSize": 1490,
+          "durationMs": 240
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/main-app-6d8906c961b36281.js",
+          "transferSize": 2033,
+          "durationMs": 334
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/3018-b5ca1968cedcbd0c.js",
+          "transferSize": 2964,
+          "durationMs": 336
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/2619-f041c42bd2893293.js",
+          "transferSize": 2211,
+          "durationMs": 338
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/webpack-dea4a56893dca95c.js",
+          "transferSize": 4354,
+          "durationMs": 339
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/6407-85d5b4d11aeb1177.js",
+          "transferSize": 45582,
+          "durationMs": 344
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/4bd1b696-6a28f52e8a823540.js",
+          "transferSize": 56055,
+          "durationMs": 345
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/305-49cc39ccde9fc3c1.js",
+          "transferSize": 126360,
+          "durationMs": 415
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/6743-25b744092c15c352.js",
+          "transferSize": 5641,
+          "durationMs": 337
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/634-2e4ba6cdd42f8e9b.js",
+          "transferSize": 12925,
+          "durationMs": 343
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/1356-e2835bff0afd1987.js",
+          "transferSize": 5831,
+          "durationMs": 342
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/9779-4cae9c9ea55ee419.js",
+          "transferSize": 9284,
+          "durationMs": 347
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/error-988a9f52fdea752c.js",
+          "transferSize": 3957,
+          "durationMs": 407
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/not-found-7cb863a57a169f71.js",
+          "transferSize": 884,
+          "durationMs": 409
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/layout-9afb36820e3acbfe.js",
+          "transferSize": 5157,
+          "durationMs": 410
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/global-error-6deaff8cf3bbb555.js",
+          "transferSize": 3132,
+          "durationMs": 414
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/7878-f01cebbece7dab29.js",
+          "transferSize": 9348,
+          "durationMs": 408
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/44530001-5f61fde00ca5f6d5.js",
+          "transferSize": 15262,
+          "durationMs": 406
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/6650-8469040ccbbd3875.js",
+          "transferSize": 44449,
+          "durationMs": 414
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/755-2d404b905489c9ee.js",
+          "transferSize": 5071,
+          "durationMs": 350
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/167-e22489908c74ba68.js",
+          "transferSize": 10470,
+          "durationMs": 403
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/2454-f2584ea1e56e1393.js",
+          "transferSize": 3898,
+          "durationMs": 406
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/page-fad75786e07a1868.js",
+          "transferSize": 11448,
+          "durationMs": 406
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/image",
+          "transferSize": 976,
+          "durationMs": 89
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/4259.88e29b93afe84ce9.js",
+          "transferSize": 10703,
+          "durationMs": 87
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/image",
+          "transferSize": 54360,
+          "durationMs": 93
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/6957.7a9da2a7f47267a3.js",
+          "transferSize": 2726,
+          "durationMs": 85
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/favicon.ico",
+          "transferSize": 9609,
+          "durationMs": 83
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/privacidade",
+          "transferSize": 6274,
+          "durationMs": 123
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/165.7ff71b4c12018371.js",
+          "transferSize": 2145,
+          "durationMs": 85
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/privacidade/page-0c5bf203d66326e1.js",
+          "transferSize": 2364,
+          "durationMs": 81
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/2860.9d169b3f96d0148b.js",
+          "transferSize": 1042,
+          "durationMs": 81
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/3245.650f169a15ffe698.js",
+          "transferSize": 4409,
+          "durationMs": 84
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/assets/audio/meditation.mp3",
+          "transferSize": 300,
+          "durationMs": 174
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/2931-8034a89c29ab7f12.js",
+          "transferSize": 9478,
+          "durationMs": 82
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/4302.4622e26da4c91cea.js",
+          "transferSize": 3571,
+          "durationMs": 82
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/1122-3ebaafb78ecdca5c.js",
+          "transferSize": 3519,
+          "durationMs": 82
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/7854.4e819f1a87325dbb.js",
+          "transferSize": 3919,
+          "durationMs": 164
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/6983.e67ccabbe489150d.js",
+          "transferSize": 919,
+          "durationMs": 82
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/6912.c95ad8b97f70bbb2.js",
+          "transferSize": 5355,
+          "durationMs": 82
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/579.d6d25f969582ec80.js",
+          "transferSize": 5887,
+          "durationMs": 164
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/assets/fv/backgrounds/hero.avif",
+          "transferSize": 774,
+          "durationMs": 258
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/assets/fv/backgrounds/formations.avif",
+          "transferSize": 774,
+          "durationMs": 360
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/assets/fv/backgrounds/articles.avif",
+          "transferSize": 774,
+          "durationMs": 358
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/assets/fv/backgrounds/faq.avif",
+          "transferSize": 774,
+          "durationMs": 356
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/assets/fv/backgrounds/footer.avif",
+          "transferSize": 774,
+          "durationMs": 352
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/image",
+          "transferSize": 57206,
+          "durationMs": 289
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/formacoes",
+          "transferSize": 8685,
+          "durationMs": 286
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/portal",
+          "transferSize": 4136,
+          "durationMs": 468
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/curso/Ti8sjbPwhL9j7E9KLCHc",
+          "transferSize": 444,
+          "durationMs": 322
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/curso/VtOJYjX6DXXMmoZHTIIL",
+          "transferSize": 447,
+          "durationMs": 329
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/1224-3dd44c332302de91.js",
+          "transferSize": 3423,
+          "durationMs": 162
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/formacoes/page-0b0e97d2bf29a654.js",
+          "transferSize": 2849,
+          "durationMs": 90
+        }
+      ]
+    },
+    {
+      "route": "/formacoes",
+      "status": 200,
+      "finalUrl": "https://www.institutofiguraviva.com.br/formacoes",
+      "title": "Formações | Instituto Figura Viva",
+      "h1": [
+        "Ciclos de aprendizagem"
+      ],
+      "canonical": "https://figuraviva.com.br/formacoes",
+      "mainCount": 1,
+      "mainIdCount": 1,
+      "courseLinks": [
+        "/curso/VtOJYjX6DXXMmoZHTIIL",
+        "/curso/Ti8sjbPwhL9j7E9KLCHc"
+      ],
+      "navigation": [
+        {
+          "domContentLoadedMs": 157,
+          "transferSize": 13074
+        }
+      ],
+      "resources": [
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/media/b7ae23d8a9c319da-s.p.woff2",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/media/cb9f64d62d112b41-s.p.woff2",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/image",
+          "transferSize": 300,
+          "durationMs": 91
+        },
+        {
+          "url": "https://jdxorryvmcvtqsddkpdm.supabase.co/storage/v1/object/public/course-assets/courses/co-visar/capa.jpeg",
+          "transferSize": 0,
+          "durationMs": 743
+        },
+        {
+          "url": "https://jdxorryvmcvtqsddkpdm.supabase.co/storage/v1/object/public/course-assets/courses/iii-formacao-clinica-em-gestalt-terapia/capa.jpeg",
+          "transferSize": 0,
+          "durationMs": 921
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/css/8cb4b604171168bd.css",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/css/cfb3fa1c83438e64.css",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/css/7dfe3efa269f4a88.css",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/webpack-dea4a56893dca95c.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/4bd1b696-6a28f52e8a823540.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/305-49cc39ccde9fc3c1.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/main-app-6d8906c961b36281.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/2619-f041c42bd2893293.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/6407-85d5b4d11aeb1177.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/3018-b5ca1968cedcbd0c.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/6743-25b744092c15c352.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/634-2e4ba6cdd42f8e9b.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/layout-9afb36820e3acbfe.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/9779-4cae9c9ea55ee419.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/1356-e2835bff0afd1987.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/error-988a9f52fdea752c.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/1224-3dd44c332302de91.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/755-2d404b905489c9ee.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/formacoes/page-0b0e97d2bf29a654.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/global-error-6deaff8cf3bbb555.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/assets/fv/heroes/formacoes.png",
+          "transferSize": 2003116,
+          "durationMs": 114
+        },
+        {
+          "url": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/7854.4e819f1a87325dbb.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/",
+          "transferSize": 4822,
+          "durationMs": 111
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/portal",
+          "transferSize": 300,
+          "durationMs": 206
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/curso/VtOJYjX6DXXMmoZHTIIL",
+          "transferSize": 447,
+          "durationMs": 313
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/curso/Ti8sjbPwhL9j7E9KLCHc",
+          "transferSize": 444,
+          "durationMs": 308
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/privacidade",
+          "transferSize": 6274,
+          "durationMs": 114
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/not-found-7cb863a57a169f71.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/44530001-5f61fde00ca5f6d5.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/7878-f01cebbece7dab29.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/6650-8469040ccbbd3875.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/2454-f2584ea1e56e1393.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/167-e22489908c74ba68.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/page-fad75786e07a1868.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/privacidade/page-0c5bf203d66326e1.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/auth/layout-adc2db6da32eac7a.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/7681-dc1194b978d7c29a.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/auth/page-6f1e7dfe1001b9bb.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/favicon.ico",
+          "transferSize": 300,
+          "durationMs": 88
+        }
+      ]
+    },
+    {
+      "route": "/auth",
+      "status": 200,
+      "finalUrl": "https://www.institutofiguraviva.com.br/auth",
+      "title": "Instituto Figura Viva | Gestalt-Terapia & Formação",
+      "h1": [
+        "Bem-vindo(a)"
+      ],
+      "mainCount": 1,
+      "mainIdCount": 1,
+      "courseLinks": [],
+      "navigation": [
+        {
+          "domContentLoadedMs": 177,
+          "transferSize": 5792
+        }
+      ],
+      "resources": [
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/media/b7ae23d8a9c319da-s.p.woff2",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/media/cb9f64d62d112b41-s.p.woff2",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/css/8cb4b604171168bd.css",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/css/cfb3fa1c83438e64.css",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/css/7dfe3efa269f4a88.css",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/webpack-dea4a56893dca95c.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/4bd1b696-6a28f52e8a823540.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/305-49cc39ccde9fc3c1.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/main-app-6d8906c961b36281.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/2619-f041c42bd2893293.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/6407-85d5b4d11aeb1177.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/3018-b5ca1968cedcbd0c.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/6743-25b744092c15c352.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/634-2e4ba6cdd42f8e9b.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/layout-9afb36820e3acbfe.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/9779-4cae9c9ea55ee419.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/1356-e2835bff0afd1987.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/error-988a9f52fdea752c.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/not-found-7cb863a57a169f71.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/global-error-6deaff8cf3bbb555.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/44530001-5f61fde00ca5f6d5.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/7878-f01cebbece7dab29.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/6650-8469040ccbbd3875.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/auth/layout-adc2db6da32eac7a.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/2454-f2584ea1e56e1393.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/7681-dc1194b978d7c29a.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/auth/page-6f1e7dfe1001b9bb.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/favicon.ico",
+          "transferSize": 300,
+          "durationMs": 96
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/assets/logo.jpeg",
+          "transferSize": 177868,
+          "durationMs": 92
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/assets/fv/backgrounds/login.avif",
+          "transferSize": 774,
+          "durationMs": 83
+        },
+        {
+          "url": "https://jdxorryvmcvtqsddkpdm.supabase.co/rest/v1/courses",
+          "transferSize": 0,
+          "durationMs": 181
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/privacidade",
+          "transferSize": 6274,
+          "durationMs": 106
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/",
+          "transferSize": 4822,
+          "durationMs": 111
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/auth/reset-password",
+          "transferSize": 4137,
+          "durationMs": 126
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/755-2d404b905489c9ee.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/privacidade/page-0c5bf203d66326e1.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/167-e22489908c74ba68.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/page-fad75786e07a1868.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/auth/reset-password/page-3561e842d3ce8489.js",
+          "transferSize": 6793,
+          "durationMs": 82
+        }
+      ]
+    },
+    {
+      "route": "/privacidade",
+      "status": 200,
+      "finalUrl": "https://www.institutofiguraviva.com.br/privacidade",
+      "title": "Política de Privacidade | Instituto Figura Viva",
+      "h1": [
+        "Política de Privacidade"
+      ],
+      "canonical": "https://figuraviva.com.br/privacidade",
+      "mainCount": 2,
+      "mainIdCount": 1,
+      "courseLinks": [],
+      "navigation": [
+        {
+          "domContentLoadedMs": 131,
+          "transferSize": 10003
+        }
+      ],
+      "resources": [
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/media/b7ae23d8a9c319da-s.p.woff2",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/media/cb9f64d62d112b41-s.p.woff2",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/image",
+          "transferSize": 300,
+          "durationMs": 87
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/css/8cb4b604171168bd.css",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/css/cfb3fa1c83438e64.css",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/css/7dfe3efa269f4a88.css",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/webpack-dea4a56893dca95c.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/4bd1b696-6a28f52e8a823540.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/305-49cc39ccde9fc3c1.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/main-app-6d8906c961b36281.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/2619-f041c42bd2893293.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/6407-85d5b4d11aeb1177.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/3018-b5ca1968cedcbd0c.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/6743-25b744092c15c352.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/634-2e4ba6cdd42f8e9b.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/layout-9afb36820e3acbfe.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/9779-4cae9c9ea55ee419.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/1356-e2835bff0afd1987.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/error-988a9f52fdea752c.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/755-2d404b905489c9ee.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/privacidade/page-0c5bf203d66326e1.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/global-error-6deaff8cf3bbb555.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/",
+          "transferSize": 4822,
+          "durationMs": 106
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/formacoes",
+          "transferSize": 8685,
+          "durationMs": 106
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/portal",
+          "transferSize": 300,
+          "durationMs": 211
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/termos",
+          "transferSize": 6182,
+          "durationMs": 255
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/instituto/fundadora",
+          "transferSize": 6934,
+          "durationMs": 111
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/favicon.ico",
+          "transferSize": 300,
+          "durationMs": 82
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/not-found-7cb863a57a169f71.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/44530001-5f61fde00ca5f6d5.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/7878-f01cebbece7dab29.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/6650-8469040ccbbd3875.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/2454-f2584ea1e56e1393.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/167-e22489908c74ba68.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/page-fad75786e07a1868.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/instituto/laura-perls",
+          "transferSize": 7138,
+          "durationMs": 116
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/1224-3dd44c332302de91.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/formacoes/page-0b0e97d2bf29a654.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/public-library",
+          "transferSize": 4661,
+          "durationMs": 246
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/instituto/fundadora/page-5f00b8424bdc2faa.js",
+          "transferSize": 2380,
+          "durationMs": 85
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/estante",
+          "transferSize": 7362,
+          "durationMs": 105
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/auth/layout-adc2db6da32eac7a.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/7681-dc1194b978d7c29a.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/auth/page-6f1e7dfe1001b9bb.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/public-gallery",
+          "transferSize": 4841,
+          "durationMs": 286
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/estante/page-21bd3f626810b8f2.js",
+          "transferSize": 3994,
+          "durationMs": 82
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/blog",
+          "transferSize": 6306,
+          "durationMs": 277
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/7057-f6f47b2759af4552.js",
+          "transferSize": 5925,
+          "durationMs": 82
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/instituto/laura-perls/page-e6173412042fbaf1.js",
+          "transferSize": 15821,
+          "durationMs": 83
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/recursos",
+          "transferSize": 6306,
+          "durationMs": 107
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/instituto",
+          "transferSize": 7437,
+          "durationMs": 106
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/3425-9f0baea004b11937.js",
+          "transferSize": 3113,
+          "durationMs": 84
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/8411-24289546476195b1.js",
+          "transferSize": 5058,
+          "durationMs": 86
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/5815-077b3ed2bb7db33f.js",
+          "transferSize": 11633,
+          "durationMs": 92
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/recursos/page-9fce58154a4ab241.js",
+          "transferSize": 867,
+          "durationMs": 85
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/media/46bdd75a3ff56824-s.p.woff2",
+          "transferSize": 74872,
+          "durationMs": 87
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/media/636a5ac981f94f8b-s.p.woff2",
+          "transferSize": 27572,
+          "durationMs": 92
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/media/7b89a4fd5e90ede0-s.p.woff2",
+          "transferSize": 38076,
+          "durationMs": 153
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/media/eaead17c7dbfcd5d-s.p.woff2",
+          "transferSize": 38760,
+          "durationMs": 154
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/css/da7743c4f96171fb.css",
+          "transferSize": 1510,
+          "durationMs": 155
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/instituto/manifesto",
+          "transferSize": 6826,
+          "durationMs": 156
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/2931-8034a89c29ab7f12.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/1122-3ebaafb78ecdca5c.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/public-library/page-69234d1fa3a3abe1.js",
+          "transferSize": 7889,
+          "durationMs": 136
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/public-gallery/page-55f816375d068a86.js",
+          "transferSize": 7545,
+          "durationMs": 83
+        }
+      ]
+    },
+    {
+      "route": "/termos",
+      "status": 200,
+      "finalUrl": "https://www.institutofiguraviva.com.br/termos",
+      "title": "Termos de Uso | Instituto Figura Viva",
+      "h1": [
+        "Termos de Uso"
+      ],
+      "canonical": "https://figuraviva.com.br/termos",
+      "mainCount": 2,
+      "mainIdCount": 1,
+      "courseLinks": [],
+      "navigation": [
+        {
+          "domContentLoadedMs": 274,
+          "transferSize": 9935
+        }
+      ],
+      "resources": [
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/media/b7ae23d8a9c319da-s.p.woff2",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/media/cb9f64d62d112b41-s.p.woff2",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/image",
+          "transferSize": 300,
+          "durationMs": 86
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/css/8cb4b604171168bd.css",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/css/cfb3fa1c83438e64.css",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/css/7dfe3efa269f4a88.css",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/webpack-dea4a56893dca95c.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/4bd1b696-6a28f52e8a823540.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/305-49cc39ccde9fc3c1.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/main-app-6d8906c961b36281.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/2619-f041c42bd2893293.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/6407-85d5b4d11aeb1177.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/3018-b5ca1968cedcbd0c.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/6743-25b744092c15c352.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/634-2e4ba6cdd42f8e9b.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/layout-9afb36820e3acbfe.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/9779-4cae9c9ea55ee419.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/1356-e2835bff0afd1987.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/error-988a9f52fdea752c.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/755-2d404b905489c9ee.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/termos/page-0e14f1f0e8cebc5d.js",
+          "transferSize": 2365,
+          "durationMs": 84
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/global-error-6deaff8cf3bbb555.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/",
+          "transferSize": 4822,
+          "durationMs": 107
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/formacoes",
+          "transferSize": 8685,
+          "durationMs": 105
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/portal",
+          "transferSize": 300,
+          "durationMs": 230
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/privacidade",
+          "transferSize": 6274,
+          "durationMs": 103
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/instituto/fundadora",
+          "transferSize": 6934,
+          "durationMs": 107
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/favicon.ico",
+          "transferSize": 300,
+          "durationMs": 83
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/instituto/laura-perls",
+          "transferSize": 7138,
+          "durationMs": 108
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/1224-3dd44c332302de91.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/formacoes/page-0b0e97d2bf29a654.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/public-library",
+          "transferSize": 4661,
+          "durationMs": 105
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/not-found-7cb863a57a169f71.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/44530001-5f61fde00ca5f6d5.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/7878-f01cebbece7dab29.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/6650-8469040ccbbd3875.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/2454-f2584ea1e56e1393.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/167-e22489908c74ba68.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/page-fad75786e07a1868.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/estante",
+          "transferSize": 7362,
+          "durationMs": 103
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/instituto/fundadora/page-5f00b8424bdc2faa.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/public-gallery",
+          "transferSize": 4841,
+          "durationMs": 110
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/public-library/layout-f664d8572cecb9ed.js",
+          "transferSize": 3034,
+          "durationMs": 241
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/2931-8034a89c29ab7f12.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/1122-3ebaafb78ecdca5c.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/public-library/page-69234d1fa3a3abe1.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/blog",
+          "transferSize": 6306,
+          "durationMs": 103
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/7057-f6f47b2759af4552.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/instituto/laura-perls/page-e6173412042fbaf1.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/recursos",
+          "transferSize": 6306,
+          "durationMs": 113
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/estante/page-21bd3f626810b8f2.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/instituto",
+          "transferSize": 7437,
+          "durationMs": 109
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/public-gallery/page-55f816375d068a86.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/instituto/manifesto",
+          "transferSize": 6826,
+          "durationMs": 105
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/auth/layout-adc2db6da32eac7a.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/7681-dc1194b978d7c29a.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/auth/page-6f1e7dfe1001b9bb.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/3425-9f0baea004b11937.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/8411-24289546476195b1.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/5815-077b3ed2bb7db33f.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/recursos/page-9fce58154a4ab241.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/media/46bdd75a3ff56824-s.p.woff2",
+          "transferSize": 0,
+          "durationMs": 1
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/media/636a5ac981f94f8b-s.p.woff2",
+          "transferSize": 0,
+          "durationMs": 1
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/media/7b89a4fd5e90ede0-s.p.woff2",
+          "transferSize": 0,
+          "durationMs": 1
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/css/da7743c4f96171fb.css",
+          "transferSize": 0,
+          "durationMs": 2
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/media/eaead17c7dbfcd5d-s.p.woff2",
+          "transferSize": 0,
+          "durationMs": 1
+        }
+      ]
+    },
+    {
+      "route": "/contato",
+      "status": 404,
+      "finalUrl": "https://www.institutofiguraviva.com.br/contato",
+      "title": "Instituto Figura Viva | Gestalt-Terapia & Formação",
+      "h1": [
+        "404"
+      ],
+      "mainCount": 1,
+      "mainIdCount": 1,
+      "courseLinks": [],
+      "navigation": [
+        {
+          "domContentLoadedMs": 127,
+          "transferSize": 5503
+        }
+      ],
+      "resources": [
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/media/b7ae23d8a9c319da-s.p.woff2",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/media/cb9f64d62d112b41-s.p.woff2",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/css/8cb4b604171168bd.css",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/css/cfb3fa1c83438e64.css",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/css/7dfe3efa269f4a88.css",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/webpack-dea4a56893dca95c.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/4bd1b696-6a28f52e8a823540.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/305-49cc39ccde9fc3c1.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/main-app-6d8906c961b36281.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/2619-f041c42bd2893293.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/6407-85d5b4d11aeb1177.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/3018-b5ca1968cedcbd0c.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/6743-25b744092c15c352.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/634-2e4ba6cdd42f8e9b.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/layout-9afb36820e3acbfe.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/9779-4cae9c9ea55ee419.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/1356-e2835bff0afd1987.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/error-988a9f52fdea752c.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/not-found-7cb863a57a169f71.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/global-error-6deaff8cf3bbb555.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/favicon.ico",
+          "transferSize": 300,
+          "durationMs": 93
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/",
+          "transferSize": 4822,
+          "durationMs": 112
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/privacidade",
+          "transferSize": 6274,
+          "durationMs": 106
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/44530001-5f61fde00ca5f6d5.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/7878-f01cebbece7dab29.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/6650-8469040ccbbd3875.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/2454-f2584ea1e56e1393.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/167-e22489908c74ba68.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/755-2d404b905489c9ee.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/page-fad75786e07a1868.js",
+          "transferSize": 0,
+          "durationMs": 0
+        },
+        {
+          "url": "https://www.institutofiguraviva.com.br/_next/static/chunks/app/privacidade/page-0c5bf203d66326e1.js",
+          "transferSize": 0,
+          "durationMs": 0
+        }
+      ]
+    },
+    {
+      "route": "/curso/Ti8sjbPwhL9j7E9KLCHc",
+      "status": 200,
+      "h1": [
+        "III Formação Clínica em Gestalt-Terapia"
+      ],
+      "enrollmentButtons": [
+        "Fazer Inscrição"
+      ],
+      "enrollmentLinks": []
+    },
+    {
+      "route": "/curso/VtOJYjX6DXXMmoZHTIIL",
+      "status": 200,
+      "h1": [
+        "Supervisão Clínica: CO-VISAR"
+      ],
+      "enrollmentButtons": [
+        "Fazer Inscrição"
+      ],
+      "enrollmentLinks": []
+    },
+    {
+      "route": "/inscricao/Ti8sjbPwhL9j7E9KLCHc",
+      "status": 200,
+      "finalUrl": "https://www.institutofiguraviva.com.br/inscricao/Ti8sjbPwhL9j7E9KLCHc",
+      "h1": [
+        "III Formação Clínica em Gestalt-Terapia"
+      ],
+      "buttons": [
+        "Recusar",
+        "Aceitar",
+        "Já possuo conta",
+        "Criar nova conta"
+      ],
+      "bodyText": "Pular para o conteúdo principal\nCookies e privacidade\n\nUsamos cookies necessários para o site funcionar. Com sua autorização, medimos a audiência; você pode mudar essa escolha no rodapé e consultar nossa Política de Privacidade.\n\nRECUSAR\nACEITAR\nINSCRIÇÃO\nIII Formação Clínica em Gestalt-Terapia\n\nUma Perspectiva de Travessia Decolonial\n\nFormação clínica em Gestalt-Terapia e Abordagem Gestáltica com perspectiva de travessia decolonial, organizada em três eixos (bases, processos clínicos e produção de desvios), com 400 horas e início em abril de 2026.\n\nINÍCIO\nInício das aulas: 25 e 26 de abril 2026\nDURAÇÃO\n40h\n← VOLTAR PARA HOME\nIII Formação Clínica em Gestalt-Terapia\n\nComplete sua inscrição para garantir sua vaga.\n\nEtapa 1 de 4 (atual)\n1\nEtapa 2 de 4\n2\nEtapa 3 de 4\n3\nEtapa 4 de 4\n4\nPrimeiro, identifique-se\n\nPara se inscrever, você precisa entrar com sua conta ou criar uma nova.\n\nJÁ POSSUO CONTA\nCRIAR NOVA CONTA"
+    },
+    {
+      "route": "/inscricao/VtOJYjX6DXXMmoZHTIIL",
+      "status": 200,
+      "finalUrl": "https://www.institutofiguraviva.com.br/inscricao/VtOJYjX6DXXMmoZHTIIL",
+      "h1": [
+        "Supervisão Clínica: CO-VISAR"
+      ],
+      "buttons": [
+        "Recusar",
+        "Aceitar",
+        "Já possuo conta",
+        "Criar nova conta"
+      ],
+      "bodyText": "Pular para o conteúdo principal\nCookies e privacidade\n\nUsamos cookies necessários para o site funcionar. Com sua autorização, medimos a audiência; você pode mudar essa escolha no rodapé e consultar nossa Política de Privacidade.\n\nRECUSAR\nACEITAR\nINSCRIÇÃO\nSupervisão Clínica: CO-VISAR\n\nGrupo e Individual\n\nUm espaço de co-visão para alinhar a sensibilidade e verificar a qualidade da relação terapêutica a partir da intercorporeidade.\n\nINÍCIO\nEncontros Quinzenais | On-line (Zoom)\n← VOLTAR PARA HOME\nSupervisão Clínica: CO-VISAR\n\nComplete sua inscrição para garantir sua vaga.\n\nEtapa 1 de 4 (atual)\n1\nEtapa 2 de 4\n2\nEtapa 3 de 4\n3\nEtapa 4 de 4\n4\nPrimeiro, identifique-se\n\nPara se inscrever, você precisa entrar com sua conta ou criar uma nova.\n\nJÁ POSSUO CONTA\nCRIAR NOVA CONTA"
+    },
+    {
+      "route": "/portal",
+      "status": 200,
+      "finalUrl": "https://www.institutofiguraviva.com.br/auth?next=%2Fportal",
+      "h1": [
+        "Bem-vindo(a)"
+      ],
+      "buttons": [
+        "Recusar",
+        "Aceitar",
+        "Continuar com Google",
+        "Entrar",
+        "Não tem conta? Cadastre-se"
+      ],
+      "bodyText": "Pular para o conteúdo principal\nCookies e privacidade\n\nUsamos cookies necessários para o site funcionar. Com sua autorização, medimos a audiência; você pode mudar essa escolha no rodapé e consultar nossa Política de Privacidade.\n\nRECUSAR\nACEITAR\nVOLTAR AO INÍCIO\nINSTITUTO FIGURA VIVA\n\nUm espaço de estudo dedicado à profundidade da relação.\n\nSua área de aluno reúne as formações em andamento, o material de cada encontro, os certificados e a comunidade do Instituto.\n\nBem-vindo(a)\n\nINSTITUTO FIGURA VIVA\n\nContinuar com Google\nOU\nE-mail\nSenha\nESQUECEU A SENHA?\nENTRAR\nNão tem conta? Cadastre-se\nACESSO ADMINISTRATIVO"
+    },
+    {
+      "route": "/admin",
+      "status": 200,
+      "finalUrl": "https://www.institutofiguraviva.com.br/auth?next=%2Fadmin",
+      "h1": [
+        "Acesso administrativo"
+      ],
+      "buttons": [
+        "Recusar",
+        "Aceitar",
+        "Continuar com Google",
+        "Entrar",
+        "Não tem conta? Cadastre-se"
+      ],
+      "bodyText": "Pular para o conteúdo principal\nCookies e privacidade\n\nUsamos cookies necessários para o site funcionar. Com sua autorização, medimos a audiência; você pode mudar essa escolha no rodapé e consultar nossa Política de Privacidade.\n\nRECUSAR\nACEITAR\nVOLTAR AO INÍCIO\nINSTITUTO FIGURA VIVA\n\nGestão cuidadosa para uma experiência que permanece humana.\n\nEntre com a conta autorizada para acompanhar conteúdos, turmas e operações do Instituto.\n\nAcesso administrativo\n\nPAINEL DE GESTÃO\n\nContinuar com Google\nOU\nE-mail\nSenha\nESQUECEU A SENHA?\nENTRAR\nNão tem conta? Cadastre-se\nACESSO DE ALUNO"
+    }
+  ],
+  "errors": []
+}

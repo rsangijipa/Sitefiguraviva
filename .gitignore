@@ -1,0 +1,135 @@
+# Dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# Testing
+/coverage
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.auth/
+
+# Next.js
+/.next/
+/.next-resources-verification/
+/\.next-build-check*/
+/out/
+
+# Production
+/build
+
+# Misc
+.DS_Store
+*.pem
+*.p12
+*.key
+*.pfx
+creds.json
+serviceAccountKey.json
+auth_key.json
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Env Files
+.env*
+!.env.example
+**/.env*
+!**/.env.example
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+
+# Vercel
+.vercel
+
+# Local agent state, abandoned checkouts and generated compiler metadata
+/.worktrees/
+/.superpowers/
+/.claude/
+/.kiro/
+/.swc/
+/supabase/.temp/
+
+# Firebase
+.firebase
+.firebaserc
+firebase-debug.log
+ui-debug.log
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/settings.json
+.idea
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+Desktop.ini
+
+# Logs and Debug Files
+/docs/debug/
+*.log
+*.txt
+debug_cert*
+test_*
+tsc_errors.txt
+results.json
+admin_error.txt
+build_*
+test_failure*
+test_smoke*
+
+# Scripts
+# Keep maintenance tools private by default; admit reviewed commands only.
+/scripts/*
+!/scripts/check-no-firebase.mjs
+!/scripts/check-firebase-migration-status.mjs
+!/scripts/check-auth-email-settings.mjs
+!/scripts/check-public-budgets.mjs
+!/scripts/sync_data.mjs
+!/scripts/migrate-assessment-attachments.mjs
+!/scripts/upload-course-covers.mjs
+!/scripts/upload-course-covers-lib.mjs
+!/scripts/upload-course-covers.test.mjs
+!/scripts/upload-course-covers-lib.test.mjs
+!/scripts/check-ci.mjs
+!/scripts/ci-fixture.mjs
+!/scripts/e2e-preflight.mjs
+!/scripts/e2e-preflight.test.mjs
+/*.js
+!/next.config.mjs
+!/eslint.config.mjs
+!/jest.config.js
+!/jest.setup.js
+!/postcss.config.js
+!/tailwind.config.js
+!/debug-courses.js
+!/fix-env.js
+!/test-admin.js
+
+# System Map
+/system_map.md
+
+public/sw.js.map
+public/workbox-*.js
+public/workbox-*.js.map

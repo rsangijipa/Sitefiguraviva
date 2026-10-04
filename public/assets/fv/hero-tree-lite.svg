@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 900" role="presentation">
+  <defs>
+    <linearGradient id="trunk" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#56371f"/>
+      <stop offset="0.52" stop-color="#91623b"/>
+      <stop offset="1" stop-color="#382719"/>
+    </linearGradient>
+    <radialGradient id="canopy" cx="48%" cy="40%" r="62%">
+      <stop offset="0" stop-color="#7eb575"/>
+      <stop offset="0.62" stop-color="#287342"/>
+      <stop offset="1" stop-color="#07552f"/>
+    </radialGradient>
+    <linearGradient id="goldLeaf" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f4db66"/>
+      <stop offset="1" stop-color="#b58d35"/>
+    </linearGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="10"/>
+    </filter>
+  </defs>
+
+  <ellipse cx="390" cy="826" rx="210" ry="28" fill="#005a1f" opacity=".14" filter="url(#soft)"/>
+
+  <g fill="none" stroke="url(#trunk)" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M356 824C343 719 365 641 353 557C346 510 314 467 289 417" stroke-width="58"/>
+    <path d="M360 650C420 591 453 523 467 441" stroke-width="31"/>
+    <path d="M339 592C283 548 239 493 218 431" stroke-width="25"/>
+    <path d="M367 544C395 470 390 393 366 326" stroke-width="22"/>
+    <path d="M298 437C255 390 210 362 161 351" stroke-width="18"/>
+    <path d="M449 477C497 426 543 399 592 387" stroke-width="18"/>
+    <path d="M366 382C416 339 447 296 460 249" stroke-width="16"/>
+    <path d="M349 370C312 321 281 288 237 267" stroke-width="15"/>
+  </g>
+
+  <g fill="url(#canopy)">
+    <ellipse cx="177" cy="356" rx="118" ry="105" transform="rotate(-14 177 356)"/>
+    <ellipse cx="255" cy="248" rx="128" ry="112" transform="rotate(9 255 248)"/>
+    <ellipse cx="377" cy="199" rx="142" ry="127"/>
+    <ellipse cx="502" cy="257" rx="133" ry="116" transform="rotate(-8 502 257)"/>
+    <ellipse cx="568" cy="378" rx="115" ry="102" transform="rotate(13 568 378)"/>
+    <ellipse cx="441" cy="382" rx="145" ry="126" transform="rotate(7 441 382)"/>
+    <ellipse cx="296" cy="392" rx="143" ry="123" transform="rotate(-7 296 392)"/>
+  </g>
+
+  <g fill="#66a76a" opacity=".88">
+    <ellipse cx="139" cy="301" rx="42" ry="27" transform="rotate(-28 139 301)"/>
+    <ellipse cx="207" cy="214" rx="48" ry="29" transform="rotate(21 207 214)"/>
+    <ellipse cx="317" cy="126" rx="50" ry="31" transform="rotate(-11 317 126)"/>
+    <ellipse cx="462" cy="142" rx="48" ry="29" transform="rotate(22 462 142)"/>
+    <ellipse cx="574" cy="296" rx="48" ry="29" transform="rotate(-19 574 296)"/>
+    <ellipse cx="520" cy="430" rx="48" ry="29" transform="rotate(24 520 430)"/>
+    <ellipse cx="229" cy="444" rx="46" ry="28" transform="rotate(-19 229 444)"/>
+  </g>
+
+  <g fill="url(#goldLeaf)">
+    <ellipse cx="263" cy="307" rx="24" ry="13" transform="rotate(-35 263 307)"/>
+    <ellipse cx="392" cy="112" rx="25" ry="14" transform="rotate(12 392 112)"/>
+    <ellipse cx="498" cy="304" rx="24" ry="13" transform="rotate(34 498 304)"/>
+    <ellipse cx="359" cy="424" rx="23" ry="13" transform="rotate(-18 359 424)"/>
+    <ellipse cx="586" cy="365" rx="21" ry="12" transform="rotate(-9 586 365)"/>
+  </g>
+
+  <g fill="#96551f" opacity=".72">
+    <ellipse cx="204" cy="378" rx="17" ry="10" transform="rotate(24 204 378)"/>
+    <ellipse cx="439" cy="232" rx="18" ry="10" transform="rotate(-27 439 232)"/>
+    <ellipse cx="537" cy="338" rx="17" ry="10" transform="rotate(18 537 338)"/>
+  </g>
+</svg>

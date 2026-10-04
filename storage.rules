@@ -1,0 +1,112 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // --- Helpers ---
+
+    function isAdmin() {
+      return request.auth != null &&
+        (request.auth.token.admin == true ||
+         request.auth.token.role in ['admin', 'administrador', 'ADMIN']) &&
+        request.auth.token.isActive != false;
+    }
+
+    function isStaff() {
+      return isAdmin() || (
+        request.auth != null &&
+        request.auth.token.role == 'tutor' &&
+        request.auth.token.isActive != false
+      );
+    }
+
+    function isEnrolledActive(courseId) {
+       let enrollmentId = request.auth.uid + '_' + courseId;
+       return request.auth != null && 
+               ((firestore.exists(/databases/(default)/documents/enrollments/$(enrollmentId)) &&
+                firestore.get(/databases/(default)/documents/enrollments/$(enrollmentId)).data.status in ['active', 'completed']));
+    }
+
+    function isBelowMaxSize(sizeMB) {
+      let limit = sizeMB == null ? 100 : sizeMB;
+      return request.resource.size < limit * 1024 * 1024;
+    }
+
+    function isAcademicContentType() {
+      return request.resource.contentType == 'application/pdf' ||
+             request.resource.contentType.matches('video/.*') ||
+             request.resource.contentType.matches('audio/.*') ||
+             request.resource.contentType.matches('image/.*');
+    }
+
+    // --- Public Assets ---
+
+    match /public-library/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /public-gallery/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /blog/{allPaths=**} {
+      allow read: if true;
+      allow write: if isStaff() && isBelowMaxSize(10);
+    }
+
+    match /library/{allPaths=**} {
+      allow read: if true;
+      allow write: if isStaff() && isBelowMaxSize(50);
+    }
+    
+    match /gallery/{allPaths=**} {
+      allow read: if true;
+      allow write: if isStaff() && request.resource.contentType.matches('image/.*') && isBelowMaxSize(10);
+    }
+
+    match /courses/covers/{allPaths=**} {
+      allow read: if true;
+      allow write: if isStaff() && request.resource.contentType.matches('image/.*') && isBelowMaxSize(5);
+    }
+
+    match /courses/content/{allPaths=**} {
+      allow read: if isStaff();
+      allow write: if isStaff() && isBelowMaxSize(10);
+    }
+
+    match /public/docs/{allPaths=**} {
+       allow read: if true;
+       allow write: if isStaff() && isBelowMaxSize(20);
+    }
+
+    // --- Restricted Academic/Course Content ---
+
+    match /lesson-files/{courseId}/{lessonId}/{allPaths=**} {
+      allow read: if isAdmin() || isEnrolledActive(courseId);
+      allow write: if isAdmin() && isAcademicContentType() && isBelowMaxSize(50);
+    }
+
+    match /course-assets/{courseId}/{allPaths=**} {
+      allow read: if isAdmin() || isEnrolledActive(courseId);
+      allow write: if isAdmin() && isAcademicContentType() && isBelowMaxSize(50);
+    }
+
+    match /courses/{courseId}/materials/{allPaths=**} {
+      allow read: if isStaff() || (request.auth != null && isEnrolledActive(courseId));
+      allow write: if isStaff() && isAcademicContentType() && isBelowMaxSize(50);
+    }
+
+    // General User Uploads
+    match /uploads/{userId}/{allPaths=**} {
+       allow read: if isAdmin() || (request.auth != null && request.auth.uid == userId);
+       allow write: if (isAdmin() || (request.auth != null && request.auth.uid == userId)) && isBelowMaxSize(10);
+    }
+
+    // --- CATCH-ALL ---
+    match /{allPaths=**} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+  }
+}

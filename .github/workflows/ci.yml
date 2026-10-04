@@ -1,0 +1,51 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened]
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build-and-test:
+    name: Build and tests without service credentials
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run check:ci -- lint scripts unit types build smoke
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: public-smoke-report
+          path: playwright-report/
+          retention-days: 7
+  firestore-rules:
+    name: Legacy Firestore emulator rules
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - run: npm ci
+      - run: npx --yes firebase-tools@15.32.1 emulators:exec --project demo-sitefiguraviva --only firestore "npm run test:unit -- src/security/__tests__/firestore.rules.security.test.ts"

@@ -1,0 +1,188 @@
+"use client";
+
+import dynamic from "next/dynamic";
+
+// import { useApp } from '../context/AppContext'; (Removed)
+import Navbar from "./Navbar";
+import Footer from "./Footer";
+import AlertBar from "./AlertBar";
+import HeroSection from "./sections/HeroSection";
+import CoursesSection from "./sections/CoursesSection";
+import FloatingControls from "./ui/FloatingControls";
+import { useSearchParams, useRouter } from "next/navigation";
+import { Image as ImageIcon } from "lucide-react";
+import Image from "next/image";
+
+const BlogSection = dynamic(() => import("./sections/BlogSection"));
+const InstagramSection = dynamic(() => import("./InstagramSection"));
+const FAQSection = dynamic(() => import("./sections/FAQSection"));
+
+const GalleryModal = dynamic(() => import("./GalleryModal"), { ssr: false });
+const CalendarModal = dynamic(() => import("./CalendarModal"), { ssr: false });
+const PDFReader = dynamic(() => import("./PDFReader"), { ssr: false });
+const CourseModal = dynamic(() => import("./CourseModal"), { ssr: false });
+const BlogPostModal = dynamic(() => import("./BlogPostModal"), {
+  ssr: false,
+});
+const LegalModal = dynamic(() => import("./LegalModal"), { ssr: false });
+
+// interface HomeClientProps removed
+
+import {
+  useCourses,
+  useBlogPosts,
+  usePublicGallery,
+} from "../hooks/useContent";
+
+interface HomeClientProps {
+  initialData?: {
+    courses: any[];
+    posts: any[];
+    gallery: any[];
+    founder?: any;
+    institute?: any;
+    seo?: any;
+    team?: any;
+  };
+}
+
+import methodology from "./sections/MethodologySection";
+import ScrollProgressBar from "./motion/ScrollProgressBar";
+import Reveal from "./motion/Reveal";
+
+export default function HomeClient({ initialData }: HomeClientProps = {}) {
+  const { data: courses = [] } = useCourses(false, {
+    initialData: initialData?.courses,
+    scope: "preview",
+  });
+  const { data: blogPosts = [] } = useBlogPosts(false, {
+    initialData: initialData?.posts,
+    scope: "preview",
+  });
+  const { data: gallery = [] } = usePublicGallery({
+    initialData: initialData?.gallery?.length ? initialData.gallery : undefined,
+  });
+
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  // Modal states derived from URL
+  const modalType = searchParams.get("modal");
+  const isCalendarOpen = modalType === "calendar";
+  const isReaderOpen = modalType === "reader";
+  const isGalleryOpen = modalType === "gallery";
+
+  // New Modal types for Course and Blog
+  const isCourseOpen = modalType === "course";
+  const isBlogOpen = modalType === "blog";
+  const isPrivacyOpen = modalType === "privacy";
+  const isTermsOpen = modalType === "terms";
+  const legalType = isPrivacyOpen ? "privacy" : isTermsOpen ? "terms" : null;
+
+  // Item IDs
+  const articleId = searchParams.get("articleId");
+  const courseId = searchParams.get("courseId");
+  const postId = searchParams.get("postId");
+
+  // Resolve selections
+  const selectedArticle = articleId
+    ? blogPosts.find((p: any) => String(p.id) === String(articleId))
+    : null;
+  const selectedCourse = courseId
+    ? courses.find((c: any) => String(c.id) === String(courseId))
+    : null;
+  const selectedPost = postId
+    ? blogPosts.find((p: any) => String(p.id) === String(postId))
+    : null;
+
+  const closeModals = () => {
+    router.push("/", { scroll: false });
+  };
+
+  const openModal = (name: string) => {
+    router.push(`/?modal=${name}`, { scroll: false });
+  };
+
+  const selectCourse = (course: any) => {
+    router.push(`/curso/${course.slug || course.id}`);
+  };
+
+  const selectPost = (post: any) => {
+    if (post.type === "library") {
+      router.push(`/?modal=reader&articleId=${post.id}`, { scroll: false });
+    } else {
+      router.push(`/?modal=blog&postId=${post.id}`, { scroll: false });
+    }
+  };
+
+  return (
+    <div className="bg-paper min-h-screen flex flex-col font-sans text-primary overflow-hidden fx-grain">
+      <ScrollProgressBar />
+      <AlertBar />
+      <Navbar />
+
+      <main
+        id="main-content"
+        role="main"
+        tabIndex={-1}
+        className="outline-none"
+      >
+        <HeroSection initialData={initialData?.institute} />
+
+        <Reveal variant="medium">
+          <CoursesSection
+            courses={courses.slice(0, 3)}
+            onOpenCalendar={() => openModal("calendar")}
+            onSelectCourse={selectCourse}
+          />
+        </Reveal>
+
+        <Reveal variant="medium">
+          <BlogSection blogPosts={blogPosts} onSelectPost={selectPost} />
+        </Reveal>
+
+        <Reveal variant="soft">
+          <FAQSection />
+        </Reveal>
+
+        <Reveal variant="soft">
+          <InstagramSection />
+        </Reveal>
+      </main>
+
+      <Footer />
+      <FloatingControls />
+
+      {/* MODALS */}
+
+      <CourseModal
+        isOpen={isCourseOpen}
+        onClose={closeModals}
+        course={selectedCourse}
+      />
+
+      <BlogPostModal
+        isOpen={isBlogOpen}
+        onClose={closeModals}
+        post={selectedPost}
+      />
+
+      <PDFReader
+        isOpen={isReaderOpen}
+        onClose={closeModals}
+        article={selectedArticle}
+      />
+      <CalendarModal
+        isOpen={isCalendarOpen}
+        onClose={closeModals}
+        courses={courses}
+      />
+      <GalleryModal
+        isOpen={isGalleryOpen}
+        onClose={closeModals}
+        gallery={gallery}
+      />
+      <LegalModal isOpen={!!legalType} onClose={closeModals} type={legalType} />
+    </div>
+  );
+}

@@ -1,0 +1,338 @@
+import React, { useState, useRef, useCallback, useEffect } from "react";
+import { PondCanvas, PondCanvasHandle } from "./components/PondCanvas";
+import { PondControls } from "./components/PondControls";
+import { LoadingScreen } from "./components/LoadingScreen";
+import { WaterSimConfig } from "./types";
+import { Sparkles, Info, X, Droplets } from "lucide-react";
+
+export default function LagoApp() {
+  const pondRef = useRef<PondCanvasHandle | null>(null);
+  const infoOpenerRef = useRef<HTMLButtonElement | null>(null);
+  const infoDialogRef = useRef<HTMLDivElement | null>(null);
+  const infoCloseRef = useRef<HTMLButtonElement | null>(null);
+  const wasInfoOpenRef = useRef(false);
+  const [showInfo, setShowInfo] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [webglError, setWebglError] = useState<string | null>(null);
+  const [audioStatus, setAudioStatus] = useState({
+    available: true,
+    error: null as string | null,
+  });
+  const [interactionStatus, setInteractionStatus] = useState(
+    "Use os controles ou as teclas C e P para interagir.",
+  );
+
+  const [config, setConfig] = useState<WaterSimConfig>({
+    damping: 0.991,
+    refractionStrength: 0.034,
+    sunlightIntensity: 0.85,
+    causticsIntensity: 0.75,
+    rainIntensity: "none",
+    showFish: true,
+    showLeaves: true,
+    ambient: "day",
+    soundEnabled: false,
+    mode: "ripple",
+    windActive: false,
+    quality: "balanced",
+  });
+
+  const handleClearLake = () => {
+    pondRef.current?.clearLake();
+    setInteractionStatus("A superfície do lago foi serenada.");
+  };
+
+  const handleTossStoneBurst = () => {
+    pondRef.current?.tossRandomStone();
+    setInteractionStatus("Uma pedra criou novas ondas no lago.");
+  };
+
+  useEffect(() => {
+    const handleShortcut = (event: KeyboardEvent) => {
+      if (showInfo || event.ctrlKey || event.metaKey || event.altKey) return;
+      const target = event.target as HTMLElement | null;
+      if (target?.matches("input, textarea, select, [contenteditable=true]"))
+        return;
+      if (event.key.toLowerCase() === "c") {
+        event.preventDefault();
+        handleClearLake();
+      }
+      if (event.key.toLowerCase() === "p") {
+        event.preventDefault();
+        handleTossStoneBurst();
+      }
+    };
+    window.addEventListener("keydown", handleShortcut);
+    return () => window.removeEventListener("keydown", handleShortcut);
+  }, [showInfo]);
+
+  // Called by PondCanvas as each init stage completes
+  const handleLoadProgress = useCallback((progress: number) => {
+    setLoadingProgress(progress);
+  }, []);
+
+  const handleLoadComplete = useCallback(() => {
+    setIsLoaded(true);
+  }, []);
+
+  const handleWebGLError = useCallback(
+    (message: string | null) => setWebglError(message),
+    [],
+  );
+  const handleAudioStatus = useCallback(
+    (status: { available: boolean; error: string | null }) =>
+      setAudioStatus(status),
+    [],
+  );
+
+  useEffect(() => {
+    if (showInfo) {
+      infoCloseRef.current?.focus();
+    } else if (wasInfoOpenRef.current) {
+      infoOpenerRef.current?.focus();
+    }
+    wasInfoOpenRef.current = showInfo;
+  }, [showInfo]);
+
+  useEffect(() => {
+    if (!showInfo) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setShowInfo(false);
+      }
+      if (event.key === "Tab" && infoDialogRef.current) {
+        const focusable = Array.from(
+          infoDialogRef.current.querySelectorAll(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+          ) as NodeListOf<HTMLElement>,
+        ).filter((element) => !element.hasAttribute("disabled"));
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [showInfo]);
+
+  const modeHints: Record<WaterSimConfig["mode"], string> = {
+    ripple: "Toque ou arraste para ondular",
+    stone: "Clique para atirar pedras",
+    feed: "Toque para alimentar as carpas",
+    wind: "Clique e arraste para soprar o vento",
+  };
+
+  const ambientLabel: Record<WaterSimConfig["ambient"], string> = {
+    day: "Dia",
+    sunset: "Entardecer",
+    night: "Noite",
+  };
+
+  return (
+    <main className="lago-app relative h-full min-h-0 w-full overflow-hidden bg-slate-950 font-sans select-none">
+      {/* Loading Screen — overlaid until sim is ready */}
+      <LoadingScreen progress={loadingProgress} onComplete={() => {}} />
+
+      {/* WebGL Canvas Layer */}
+      <PondCanvas
+        ref={pondRef}
+        config={config}
+        onLoadProgress={handleLoadProgress}
+        onLoadComplete={handleLoadComplete}
+        onWebGLError={handleWebGLError}
+        onAudioStatus={handleAudioStatus}
+      />
+
+      <p className="sr-only" role="status" aria-live="polite">
+        {interactionStatus}
+      </p>
+
+      {webglError && (
+        <div
+          className="absolute inset-x-4 top-20 z-20 mx-auto max-w-lg rounded-xl border border-warning/30 bg-white/95 p-4 text-sm text-text shadow-xl"
+          role="alert"
+        >
+          <strong className="block text-warning">
+            Visualização indisponível
+          </strong>
+          <span>{webglError}</span>
+        </div>
+      )}
+
+      {/* Top bar — fades in after load */}
+      <header
+        className={`absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none z-20
+          transition-opacity duration-700 ${isLoaded ? "opacity-100" : "opacity-0"}`}
+      >
+        <div className="pointer-events-auto flex items-center gap-3 bg-white/90 backdrop-blur-md border border-stone-200 px-3.5 py-1.5 rounded-full shadow-lg">
+          <Droplets className="w-3.5 h-3.5 text-accent" aria-hidden="true" />
+          <span className="text-[11px] text-text/60 leading-none">
+            {modeHints[config.mode]}
+          </span>
+        </div>
+
+        <div className="pointer-events-auto flex items-center gap-2">
+          {/* Ambient badge */}
+          <span className="hidden sm:flex items-center gap-1.5 bg-white/80 backdrop-blur-md border border-stone-200 px-2.5 py-1 rounded-full text-[10px] text-text/60 tracking-wider select-none">
+            <span
+              className={`w-1.5 h-1.5 rounded-full ${
+                config.ambient === "day"
+                  ? "bg-sky-400"
+                  : config.ambient === "sunset"
+                    ? "bg-orange-400"
+                    : "bg-indigo-400"
+              }`}
+            />
+            {ambientLabel[config.ambient]}
+          </span>
+
+          <button
+            id="btn-open-info"
+            type="button"
+            ref={infoOpenerRef}
+            onClick={() => setShowInfo(true)}
+            className="bg-white/90 backdrop-blur-md border border-stone-200 p-2 rounded-full text-text/60 hover:text-primary hover:border-stone-300 transition-all shadow-lg"
+            title="Sobre a Simulação"
+            aria-label="Abrir informações sobre a simulação"
+          >
+            <Info className="w-4 h-4" />
+          </button>
+        </div>
+      </header>
+
+      <div
+        className={`absolute left-3 top-14 z-20 hidden rounded-full border border-white/20 bg-slate-950/55 px-3 py-1.5 text-[11px] text-white/80 backdrop-blur-md transition-opacity sm:block ${isLoaded ? "opacity-100" : "opacity-0"}`}
+      >
+        Teclado: <kbd className="font-semibold text-white">P</kbd> pedra ·{" "}
+        <kbd className="font-semibold text-white">C</kbd> serenar
+      </div>
+
+      {/* Controls — fades in after load */}
+      <div
+        className={`transition-opacity duration-700 delay-200 ${isLoaded ? "opacity-100" : "opacity-0"}`}
+      >
+        <PondControls
+          config={config}
+          onChangeConfig={setConfig}
+          onClearLake={handleClearLake}
+          onTossStoneBurst={handleTossStoneBurst}
+          audioStatus={audioStatus}
+        />
+      </div>
+
+      {/* Info Modal */}
+      {showInfo && (
+        <div
+          className="absolute inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-title"
+        >
+          <div
+            id="modal-info"
+            ref={infoDialogRef}
+            tabIndex={-1}
+            className="w-full max-w-md bg-white border border-stone-200 rounded-2xl p-6 text-text shadow-2xl space-y-4 animate-modal-in"
+          >
+            <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+              <div className="flex items-center gap-2">
+                <Sparkles
+                  className="w-4.5 h-4.5 text-accent"
+                  aria-hidden="true"
+                />
+                <h2
+                  id="modal-title"
+                  className="text-sm font-semibold text-primary tracking-wide"
+                >
+                  Sobre o Lago WebGL
+                </h2>
+              </div>
+              <button
+                id="btn-close-info"
+                type="button"
+                ref={infoCloseRef}
+                onClick={() => setShowInfo(false)}
+                className="p-1.5 rounded-lg text-text/50 hover:text-primary hover:bg-stone-100 transition-colors"
+                aria-label="Fechar modal"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <p className="text-sm text-text/80 leading-relaxed">
+              Uma experiência sensorial de águas calmas simulada em tempo real
+              com equações de onda em{" "}
+              <span className="text-accent font-medium">WebGL</span>.
+            </p>
+
+            <ul className="space-y-2 pt-0.5">
+              {[
+                {
+                  color: "bg-cyan-400",
+                  label: "Toques na água",
+                  desc: "Ondas concêntricas que se propagam e amortecem suavemente.",
+                },
+                {
+                  color: "bg-amber-400",
+                  label: "Carpas Koi",
+                  desc: "Peixes que nadam organicamente e reagem às perturbações.",
+                },
+                {
+                  color: "bg-emerald-400",
+                  label: "Nenúfares & Folhas",
+                  desc: "Vegetação flutuante que oscila com as marolas.",
+                },
+                {
+                  color: "bg-blue-400",
+                  label: "Chuva & Pedras",
+                  desc: "Gotas suaves ou impacto de seixos atirados.",
+                },
+                {
+                  color: "bg-violet-400",
+                  label: "Cáusticas & Reflexos",
+                  desc: "Refração do leito de pedras e reflexo do céu.",
+                },
+                {
+                  color: "bg-rose-400",
+                  label: "Vento",
+                  desc: "Rajadas que criam ondas suaves em toda a superfície.",
+                },
+              ].map(({ color, label, desc }) => (
+                <li
+                  key={label}
+                  className="flex items-start gap-2.5 text-xs text-text/80"
+                >
+                  <span
+                    className={`mt-0.5 flex-none w-1.5 h-1.5 rounded-full ${color}`}
+                    aria-hidden="true"
+                  />
+                  <span>
+                    <strong className="text-text">{label}:</strong> {desc}
+                  </span>
+                </li>
+              ))}
+            </ul>
+
+            <button
+              id="btn-understand-info"
+              type="button"
+              onClick={() => setShowInfo(false)}
+              className="w-full py-2.5 px-4 bg-accent hover:bg-accent-light active:scale-[0.98] text-white font-semibold text-xs rounded-xl transition-all shadow-md"
+            >
+              Retornar ao Lago
+            </button>
+          </div>
+        </div>
+      )}
+    </main>
+  );
+}

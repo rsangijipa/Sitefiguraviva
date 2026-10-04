@@ -1,0 +1,122 @@
+﻿.result-card {
+  background-color: var(--fv-creme-papel);
+  border: 1.5px solid var(--fv-nevoa);
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-lg);
+  transition: border-color var(--transition-fast);
+}
+
+/* ── Cabeçalho ── */
+.result-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-sm);
+  gap: var(--space-sm);
+}
+
+.result-card__title {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--fv-verde-raiz);
+  text-transform: capitalize;
+  line-height: 1.2;
+}
+
+.result-card__percentage {
+  font-family: var(--font-body);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--fv-terra-barro);
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Barra ── */
+.result-card__bar {
+  width: 100%;
+  height: 8px;
+  background-color: var(--fv-areia);
+  border-radius: 99px;
+  overflow: hidden;
+  margin-bottom: var(--space-md);
+}
+
+.result-card__bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 700ms cubic-bezier(0.4, 0, 0.2, 1);
+  background-image: linear-gradient(
+    90deg,
+    var(--fv-verde-raiz) 0%,
+    var(--fv-verde-igarape) 100%
+  );
+}
+
+.result-card__bar-fill--high {
+  background-image: linear-gradient(
+    90deg,
+    var(--fv-terra-barro) 0%,
+    #b8681e 100%
+  );
+}
+
+.result-card__bar-fill--moderate {
+  background-image: linear-gradient(
+    90deg,
+    var(--fv-verde-raiz) 0%,
+    var(--fv-verde-igarape) 100%
+  );
+}
+
+.result-card__bar-fill--low {
+  background-color: var(--fv-nevoa);
+  background-image: none;
+}
+
+/* ── Descrição ── */
+.result-card__description {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--fv-pedra);
+  line-height: 1.5;
+  margin-bottom: var(--space-sm);
+}
+
+/* ── Label com indicador ── */
+.result-card__label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.result-card__indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.result-card__indicator--high     { background-color: var(--fv-terra-barro); }
+.result-card__indicator--moderate { background-color: var(--fv-verde-raiz); }
+.result-card__indicator--low      { background-color: var(--fv-nevoa); }
+
+.result-card__label-text {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--fv-pedra);
+  text-transform: capitalize;
+  letter-spacing: 0.02em;
+}
+
+@media (max-width: 640px) {
+  .result-card {
+    padding: var(--space-md);
+  }
+
+  .result-card__percentage {
+    font-size: 17px;
+  }
+}

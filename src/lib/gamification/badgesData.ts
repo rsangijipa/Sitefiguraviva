@@ -1,0 +1,77 @@
+export const badges = [
+  {
+    id: "pioneer_student",
+    title: "Pioneiro",
+    description:
+      "Um dos primeiros alunos a se juntar à comunidade Figura Viva.",
+    type: "special",
+    iconName: "flag",
+    order: 1,
+  },
+  {
+    id: "course_completion_1",
+    title: "Primeiro Passo",
+    description: "Concluiu seu primeiro curso completo.",
+    type: "bronze",
+    iconName: "award",
+    order: 2,
+  },
+  {
+    id: "dedicated_learner",
+    title: "Dedicado",
+    description: "Manteve uma frequência de estudos por 7 dias seguidos.",
+    type: "silver",
+    iconName: "flame",
+    order: 3,
+  },
+  {
+    id: "gestalt_master",
+    title: "Mestre da Gestalt",
+    description: "Concluiu a Formação Completa em Gestalt-Terapia.",
+    type: "gold",
+    iconName: "crown",
+    order: 4,
+  },
+  {
+    id: "community_voice",
+    title: "Voz da Comunidade",
+    description: "Contribuiu com 10 comentários relevantes nas discussões.",
+    type: "silver",
+    iconName: "message-circle",
+    order: 5,
+  },
+  {
+    id: "clinical_explorer",
+    title: "Explorador Clínico",
+    description: "Concluiu todos os casos clínicos de um módulo.",
+    type: "bronze",
+    iconName: "search",
+    order: 6,
+  },
+  {
+    id: "theory_anchor",
+    title: "Âncora Teórica",
+    description: "Alcançou nota máxima em 5 avaliações teóricas.",
+    type: "silver",
+    iconName: "book",
+    order: 7,
+  },
+  {
+    id: "phenomenology_master",
+    title: "Mestre da Fenomenologia",
+    description:
+      "Demonstrou domínio avançado nos conceitos de campo e contato.",
+    type: "gold",
+    iconName: "target",
+    order: 8,
+  },
+  {
+    id: "library_patron",
+    title: "Patrono da Biblioteca",
+    description:
+      "Acessou mais de 20 materiais complementares na biblioteca pública.",
+    type: "bronze",
+    iconName: "library",
+    order: 9,
+  },
+];

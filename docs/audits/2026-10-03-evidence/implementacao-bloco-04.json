@@ -1,0 +1,154 @@
+{
+  "checkedAt": "2026-10-03T23:46:21.355Z",
+  "scope": "Block 04 manual Pix first payment; live catalog verification and isolated tests; no real payments or records created",
+  "migration": {
+    "version": "20261003225204",
+    "applied": true,
+    "registered": true
+  },
+  "liveVerification": {
+    "audit_service_can_update": false,
+    "event_count": 0,
+    "financial_guard_exists": true,
+    "order_count": 0,
+    "priced_courses": 0,
+    "receipt_bucket": {
+      "mime_types": [
+        "image/jpeg",
+        "image/png",
+        "application/pdf"
+      ],
+      "public": false,
+      "size_limit": 5242880
+    },
+    "rls": [
+      {
+        "enabled": true,
+        "table": "pix_order_events"
+      },
+      {
+        "enabled": true,
+        "table": "pix_orders"
+      }
+    ],
+    "rpcs": [
+      {
+        "anon_execute": false,
+        "authenticated_execute": false,
+        "name": "create_manual_pix_order",
+        "security_definer": false,
+        "service_execute": true
+      },
+      {
+        "anon_execute": false,
+        "authenticated_execute": false,
+        "name": "review_manual_pix_order",
+        "security_definer": false,
+        "service_execute": true
+      },
+      {
+        "anon_execute": false,
+        "authenticated_execute": false,
+        "name": "submit_course_application",
+        "security_definer": false,
+        "service_execute": true
+      },
+      {
+        "anon_execute": false,
+        "authenticated_execute": false,
+        "name": "submit_manual_pix_receipt",
+        "security_definer": false,
+        "service_execute": true
+      }
+    ],
+    "storage_restriction": {
+      "check": "(bucket_id <> 'pix-receipts'::text)",
+      "permissive": "RESTRICTIVE",
+      "qual": "(bucket_id <> 'pix-receipts'::text)"
+    },
+    "version_registered": true
+  },
+  "tests": {
+    "jest": {
+      "passed": 317,
+      "failed": 0,
+      "skipped": 7,
+      "passedSuites": 87,
+      "skippedSuites": 1
+    },
+    "types": {
+      "passed": true,
+      "exitCode": 0,
+      "elapsedSeconds": 90
+    },
+    "sql": {
+      "passed": true,
+      "count": 36,
+      "checks": [
+        "migration applied",
+        "closed course denied",
+        "inactive profile denied",
+        "empty answers denied",
+        "application replay idempotent",
+        "client price tampering denied",
+        "server price snapshotted",
+        "order replay preserves identity",
+        "price edit preserves existing order amount",
+        "generic approval bypass denied",
+        "other user receipt denied",
+        "receipt does not confirm funds",
+        "approval without bank reference denied",
+        "nonadmin reviewer denied",
+        "received amount must match the saved initial charge",
+        "approval activates and marks initial payment paid",
+        "repeated approval has one financial event",
+        "different reconciliation cannot overwrite paid order",
+        "application resend does not regress enrollment",
+        "bank reference reuse rolls entire transaction back",
+        "rejection requires reason",
+        "rejection cancels without paid state",
+        "rejected order cannot be approved",
+        "service role cannot rewrite audit events",
+        "anon denied submit_course_application",
+        "anon denied create_manual_pix_order",
+        "anon denied submit_manual_pix_receipt",
+        "anon denied review_manual_pix_order",
+        "authenticated denied submit_course_application",
+        "authenticated denied create_manual_pix_order",
+        "authenticated denied submit_manual_pix_receipt",
+        "authenticated denied review_manual_pix_order",
+        "RLS student reads only own order",
+        "restrictive policy blocks broad legacy Storage read",
+        "direct authenticated receipt upload denied",
+        "inactive user sees no orders"
+      ],
+      "engine": "PGlite isolated PostgreSQL",
+      "liveBusinessWrites": false
+    },
+    "lint": {
+      "passed": true,
+      "scope": "25 changed source/test paths"
+    },
+    "build": {
+      "passed": true,
+      "exitCode": 0,
+      "elapsedSeconds": 315,
+      "environment": "Official Next 15.5.25 WASM; dummy credentials; read-only local empty Supabase fixture; no real services."
+    }
+  },
+  "securityAdvisors": {
+    "warningCount": 14,
+    "counts": {
+      "function_search_path_mutable": 1,
+      "anon_security_definer_function_executable": 6,
+      "authenticated_security_definer_function_executable": 6,
+      "auth_leaked_password_protection": 1
+    },
+    "remaining": "Existing functions/triggers and leaked-password protection; not closed by this block"
+  },
+  "publication": {
+    "frontendPublished": false,
+    "realBankTest": false,
+    "emailEndToEndTest": false
+  }
+}

@@ -1,0 +1,260 @@
+{
+  "block": 9,
+  "generatedAt": "2026-10-04T03:37:13.209Z",
+  "scope": "Course/lesson authorization, SSR projection and private columns",
+  "projectRef": "jdxorryvmcvtqsddkpdm",
+  "frontendDeployed": false,
+  "migration": {
+    "file": "supabase/migrations/20261004031548_block_09_private_lesson_access.sql",
+    "sha256": "606c1aac2a64d46791cb3fd9c840dd47c6f3bf178ec498fced16a5158bac50f5",
+    "applied": true,
+    "registered": true
+  },
+  "validation": {
+    "jest": {
+      "passed": 463,
+      "failed": 0,
+      "passedSuites": 105,
+      "skipped": 7,
+      "skippedSuites": 1
+    },
+    "types": {
+      "mode": "baseline",
+      "check": "types",
+      "appOnly": false,
+      "fixWasmAliases": false,
+      "normalized": false,
+      "resolverOnly": false,
+      "exitCode": 0,
+      "signal": null,
+      "elapsedSeconds": 68,
+      "logPath": "C:\\Users\\aless\\.codex\\visualizations\\2026\\10\\03\\01a10335-acef-7420-876c-e473e31d8446\\validation-block-09\\baseline-types.log",
+      "environment": "Official Next 15.5.25 WASM; dummy credentials; read-only local empty Supabase fixture; no real services."
+    },
+    "build": {
+      "mode": "baseline",
+      "check": "build",
+      "appOnly": false,
+      "fixWasmAliases": false,
+      "normalized": false,
+      "resolverOnly": false,
+      "exitCode": 0,
+      "signal": null,
+      "elapsedSeconds": 269,
+      "logPath": "C:\\Users\\aless\\.codex\\visualizations\\2026\\10\\03\\01a10335-acef-7420-876c-e473e31d8446\\validation-block-09\\baseline-build.log",
+      "environment": "Official Next 15.5.25 WASM; dummy credentials; read-only local empty Supabase fixture; no real services."
+    },
+    "sql": {
+      "passed": true,
+      "count": 52,
+      "checks": [
+        "migration applied to old schema without removing existing objects",
+        "active enrollment sees only published enrolled materials",
+        "global tutor without assignment cannot access materials",
+        "assigned course team can preview private unpublished and restricted materials",
+        "active administrator can preview draft course",
+        "inactive administrator denied",
+        "completion unlocks after-completion but not team material",
+        "expired completed enrollment denied",
+        "pending_approval enrollment denied",
+        "canceled enrollment denied",
+        "refunded enrollment denied",
+        "disabled student denied with active enrollment",
+        "unpublished course denied to enrolled student",
+        "closed published course preserves enrolled access",
+        "list exposes metadata without bearer or external URLs",
+        "resolve rejects unavailable and missing material",
+        "resolve returns private reference only for eligible identity",
+        "new PDF cannot use public URL",
+        "partial nullable storage reference rejected",
+        "cross-course storage path rejected",
+        "cross-course module rejected",
+        "cross-course lesson rejected",
+        "non-HTTPS links rejected",
+        "restrictive metadata policy defeats broad legacy read",
+        "authenticated predicate rejects impersonation",
+        "broad storage policy cannot expose private materials or uploads",
+        "authenticated private upload denied despite broad policy",
+        "legacy public material upload denied",
+        "administrator retains legacy uploads but must use server for private material",
+        "resolve and list RPC are server only",
+        "all new routines use SECURITY INVOKER",
+        "legacy files preserved",
+        "student metadata excludes draft and foreign modules despite broad policies",
+        "student metadata excludes draft lessons and draft parents despite broad policies",
+        "sensitive column denied: blocks",
+        "sensitive column denied: video_url",
+        "sensitive column denied: legacy_payload",
+        "select star cannot bypass column protection",
+        "browser writes and truncate denied for lessons",
+        "browser writes and truncate denied for course_modules",
+        "expired enrollment cannot see lesson metadata",
+        "inactive profile with active enrollment denied",
+        "course draft cannot be read by student",
+        "closed course retains legitimate student access",
+        "unassigned tutor cannot read draft or published lessons",
+        "assigned tutor previews metadata including drafts",
+        "active admin previews metadata",
+        "visitor has no direct outline access",
+        "server retains full content reads",
+        "new read predicate uses SECURITY INVOKER",
+        "visitor cannot execute predicate",
+        "read-only role verification script passes in isolated database"
+      ],
+      "engine": "isolated PostgreSQL PGlite",
+      "liveBusinessWrites": false
+    },
+    "lint": {
+      "files": 17,
+      "exitCode": 0
+    },
+    "sourceIntegrity": {
+      "count": 1305,
+      "differences": [],
+      "excludedEnvironmentFiles": [
+        "src\\components\\resources\\apps\\necessidades-agora\\.env.example"
+      ],
+      "passed": true
+    },
+    "actionManifest": {
+      "nodeActions": 125,
+      "edgeActions": 0,
+      "forbiddenHelpers": [
+        "assertCanAccessCourse",
+        "assertCurrentCourseAccess",
+        "getCourseData",
+        "getLessonContent",
+        "saveLessonContent",
+        "getReadableCourseOutline",
+        "assertCanAuthorCourse",
+        "verifySession",
+        "requireAdmin",
+        "requireStaff"
+      ],
+      "exposedHelpers": [],
+      "protectedLessonReadPresent": true,
+      "passed": true,
+      "previousGuardEntries": [
+        {
+          "filename": "../C:\\Users\\aless\\.codex\\visualizations\\2026\\10\\03\\01a10335-acef-7420-876c-e473e31d8446\\validation-block-08\\baseline\\src\\lib\\auth\\access-gate.ts",
+          "exportedName": "assertCanAccessCourse"
+        }
+      ]
+    }
+  },
+  "live": {
+    "passed": true,
+    "contentPreserved": true,
+    "counts": {
+      "cross_course_parents": 0,
+      "lessons": 13,
+      "modules": 7
+    },
+    "grants": {
+      "anon_lesson_id": false,
+      "auth_blocks": false,
+      "auth_legacy": false,
+      "auth_lesson_id": true,
+      "auth_lesson_write": false,
+      "auth_module_write": false,
+      "auth_video": false,
+      "service_read": true
+    },
+    "rls": [
+      {
+        "enabled": true,
+        "table": "course_modules"
+      },
+      {
+        "enabled": true,
+        "table": "lessons"
+      }
+    ],
+    "predicate": {
+      "anon_exec": false,
+      "auth_exec": true,
+      "definer": false
+    },
+    "inactive_profiles_with_active_enrollment": 0,
+    "advisorWarnings": 14,
+    "newAdvisorWarnings": 0,
+    "readOnlyRoleTest": true
+  },
+  "files": [
+    {
+      "file": "src/lib/auth/access-gate.ts",
+      "sha256": "8bc1c4a421e8766dd3576c04f2e5c4f8fb89aab05428e6311069efd72d640df1"
+    },
+    {
+      "file": "src/lib/auth/access-types.ts",
+      "sha256": "49505ad40623165b137d01f3d97df3412c0857df6595e02f7ef4dd6862c1f726"
+    },
+    {
+      "file": "src/lib/auth/access-policy.ts",
+      "sha256": "02c4bee0fdcb5631dec2aad824b127f35942bb9253a8db428a143c2f3f2b16d8"
+    },
+    {
+      "file": "src/lib/auth/server.ts",
+      "sha256": "3982e2d6492eaeb7b421ec8d395d1ee61c192af338735b4f9c0a6ab131dc9e94"
+    },
+    {
+      "file": "src/lib/auth/authoring-gate.ts",
+      "sha256": "4ca358ecd86c8c5afac88e6108b4298d579e535b6fb3fe8418469e8408c1f153"
+    },
+    {
+      "file": "src/lib/courseService.ts",
+      "sha256": "45d2267b852fab170909b63dbf416d8c74c9639026be024f6626b677db74e820"
+    },
+    {
+      "file": "src/lib/course-content.server.ts",
+      "sha256": "f5aa038a3b6588aa47957d19400f5e3bfc8d457c8c4a4fbd3de3678bf6c080ef"
+    },
+    {
+      "file": "src/app/actions/lms.ts",
+      "sha256": "8ca7ee7c711fd3d19075b42a5b4f9dc9d167a2729d3a95cd751e82a3584a1868"
+    },
+    {
+      "file": "src/app/actions/admin-publishing.ts",
+      "sha256": "e8277387ead889593f9a952ab486c60be342d554fe51d7d4943d01972829a038"
+    },
+    {
+      "file": "src/app/portal/course/[courseId]/lesson/[lessonId]/page.tsx",
+      "sha256": "c406bba671a67b02882687cfa48543af0910da8c3aeaf7022066a0ad7d084644"
+    },
+    {
+      "file": "src/infrastructure/supabase/database.types.ts",
+      "sha256": "83c8f4dfceeeb6ef11ebd448b5277ab37c28c39fbfbe38e695fcef40a6288452"
+    },
+    {
+      "file": "src/lib/auth/__tests__/access-gate.integration.test.ts",
+      "sha256": "0b48c2188f2aecd3f2a46d78a62f02abc5209a23d08603b6273aa1f1380bdaaf"
+    },
+    {
+      "file": "src/lib/auth/__tests__/authoring-gate.test.ts",
+      "sha256": "3a59c0ef74a2a0c62f4a2e65f0d9f50bbd088789114b0dd0ccbfab040e3fc4d6"
+    },
+    {
+      "file": "src/lib/__tests__/courseService.test.ts",
+      "sha256": "9b2dcfbea36d06fd987e20908393969fcd921c907844d26b30e774540151f871"
+    },
+    {
+      "file": "src/lib/__tests__/course-content.test.ts",
+      "sha256": "0b82f20b0b1cf1c8ccec77cdf52a2f7d1e16e6e5f0303400e67232aa887998f0"
+    },
+    {
+      "file": "src/app/actions/__tests__/admin-publishing.test.ts",
+      "sha256": "23ca91fac2a57762f4a1b2c897e9d65c62813965d8c4f5226e49cbf76f13f5c7"
+    },
+    {
+      "file": "src/app/actions/__tests__/lms-access.test.ts",
+      "sha256": "ae03ff42e737ae25ab426ef68cca457ca6625fbf25ee101d58ca749fd6be5c61"
+    }
+  ],
+  "limitations": [
+    "No frontend deployment or HTTP exploitation demonstration on published site",
+    "No real emails, uploads, enrollment/payment writes or deletions",
+    "PostgreSQL fixture and SDK mocks do not prove real browser journeys",
+    "Native CI, full privileged-action review, historic credential revocation and EAD assessments/certificates remain pending",
+    "All 205 deletion candidates preserved; pruned build not rerun in this block"
+  ]
+}

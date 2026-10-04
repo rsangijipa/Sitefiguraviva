@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Fraunces", serif;
+  --font-sans: "Karla", sans-serif;
+
+  --color-creme: #FDFAF4;
+  --color-areia: #F1E9DB;
+  --color-verde-raiz: #005A1F;
+  --color-verde-igarape: #07614C;
+  --color-terra-barro: #96551F;
+  --color-mata: #262B22;
+  --color-nevoa: #D8CFBE;
+  --color-pedra: #6B6B63;
+  --color-grafite: #4B4B49;
+  --color-aurora: #FE538B;
+  --color-vazante: #FED701;
+  --color-broto: #01C94D;
+}
+
+:root {
+  font-family: "Karla", sans-serif;
+  color: #262B22;
+  background-color: #FDFAF4;
+}
+
+h1, h2, h3, h4, .font-fraunces {
+  font-family: "Fraunces", serif;
+}
+
+/* Confluência Subtle Accent Gradient (Aurora -> Vazante -> Broto) */
+.gradient-confluencia {
+  background-image: linear-gradient(90deg, #FE538B 0%, #FED701 50%, #01C94D 100%);
+}
+
+/* Interactive focus ring complying with WCAG AA */
+*:focus-visible {
+  outline: 2px solid #005A1F;
+  outline-offset: 2px;
+}
+
+/* Animações Botânicas Orgânicas Confluência */
+@keyframes botanical-sway-slow {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(2deg); }
+}
+
+@keyframes botanical-sway-rev {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-2.4deg); }
+}
+
+@keyframes water-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 0.8; }
+}
+
+.animate-sway-slow {
+  transform-origin: bottom center;
+  animation: botanical-sway-slow 7s ease-in-out infinite;
+}
+
+.animate-sway-rev {
+  transform-origin: bottom center;
+  animation: botanical-sway-rev 8.5s ease-in-out infinite;
+}
+
+.animate-water-pulse {
+  animation: water-pulse 6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-sway-slow,
+  .animate-sway-rev,
+  .animate-water-pulse {
+    animation: none !important;
+  }
+}
+

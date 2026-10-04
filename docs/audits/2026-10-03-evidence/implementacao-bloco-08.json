@@ -1,0 +1,262 @@
+{
+  "block": 8,
+  "date": "2026-10-03",
+  "timezone": "America/Manaus",
+  "migration": {
+    "path": "supabase/migrations/20261004022802_block_08_applications_shared_rate_limit.sql",
+    "sha256": "935fdb36131173dd03ea067c28c10dd60c776b9d973a10bbeedfc9d83fcd10a2",
+    "applied": true,
+    "registered": true,
+    "projectRef": "jdxorryvmcvtqsddkpdm"
+  },
+  "validation": {
+    "jest": {
+      "passed": 435,
+      "failed": 0,
+      "skipped": 7,
+      "suites": 102
+    },
+    "sql": {
+      "total": 55,
+      "applicationsAndLimits": {
+        "passed": true,
+        "count": 25,
+        "checks": [
+          "migration upgrades old policies and preserves existing applications",
+          "active student can read only own application despite broad policy",
+          "browser denied insert",
+          "browser denied update",
+          "browser denied delete",
+          "browser denied truncate",
+          "active administrator can read applications",
+          "administrator browser cannot bypass validated server writes",
+          "unassigned global tutor cannot read student applications",
+          "inactive administrator cannot read applications",
+          "student token loses read access after profile disabled",
+          "visitor cannot read or write applications",
+          "backend retains CRUD for enrollment RPCs without deleting history",
+          "new shared counter starts with one consumed request",
+          "subsequent requests retain fixed reset time",
+          "shared counter denies requests beyond threshold",
+          "denied hit count is capped without overflow",
+          "expired window resets atomically",
+          "queued concurrent isolated requests share one allowance",
+          "different hashed key has separate allowance",
+          "invalid or raw identifiers and configurations rejected",
+          "bounded housekeeping removes stale counters",
+          "limiter uses SECURITY INVOKER",
+          "counter table and RPC inaccessible to public clients",
+          "shared counter has RLS enabled"
+        ],
+        "engine": "isolated PGlite PostgreSQL",
+        "concurrency": "Promises queued on one isolated connection; independent connection race remains for homologation",
+        "liveBusinessWrites": false
+      },
+      "priorFlowCompatibility": {
+        "passed": true,
+        "count": 30,
+        "checks": [
+          "blocks 04,06,08 coexist with role and enrollment enums",
+          "nonadmin cannot govern",
+          "self demotion and disabling denied",
+          "last active administrator protected against direct disable demotion deletion",
+          "invalid role and missing target denied",
+          "role change commits with audit",
+          "governance replay has no duplicate event",
+          "bulk administrator removal rolls back",
+          "another administrator can be demoted while one remains",
+          "manual grant requires active administrator and student",
+          "manual grant rejects missing course",
+          "manual access uses actual row UUID without asserting payment",
+          "manual grant replay preserves existing access",
+          "revoke missing enrollment cannot create phantom row",
+          "access operation cannot simulate refund",
+          "completed access cannot regress to pending",
+          "contact timestamp does not change application eligibility",
+          "conversion rejects unauthorized reviewer and wrong amount",
+          "failed conversion rolls legacy status normalization back",
+          "canonical conversion prepares pending Pix without payment confirmation",
+          "conversion replay restores same order",
+          "manual actions cannot override pending Pix",
+          "application with enrollment preserved",
+          "dependent profile blocked before cascading delete",
+          "unconverted application can be deleted with retained audit",
+          "Auth cascade can delete profile without business history using Auth-only role",
+          "Auth cascade preserves dependent student and last administrator atomically",
+          "all seven RPCs deny anon and authenticated execution",
+          "new routines use security invoker",
+          "audit cannot be rewritten by application service"
+        ],
+        "engine": "PGlite isolated PostgreSQL",
+        "liveBusinessWrites": false
+      }
+    },
+    "types": {
+      "mode": "baseline",
+      "check": "types",
+      "appOnly": false,
+      "fixWasmAliases": false,
+      "normalized": false,
+      "resolverOnly": false,
+      "exitCode": 0,
+      "signal": null,
+      "elapsedSeconds": 25,
+      "logPath": "C:\\Users\\aless\\.codex\\visualizations\\2026\\10\\03\\01a10335-acef-7420-876c-e473e31d8446\\validation-block-08\\baseline-types.log",
+      "environment": "Official Next 15.5.25 WASM; dummy credentials; read-only local empty Supabase fixture; no real services."
+    },
+    "build": {
+      "mode": "baseline",
+      "check": "build",
+      "appOnly": false,
+      "fixWasmAliases": false,
+      "normalized": false,
+      "resolverOnly": false,
+      "exitCode": 0,
+      "signal": null,
+      "elapsedSeconds": 138,
+      "logPath": "C:\\Users\\aless\\.codex\\visualizations\\2026\\10\\03\\01a10335-acef-7420-876c-e473e31d8446\\validation-block-08\\baseline-build.log",
+      "environment": "Official Next 15.5.25 WASM; dummy credentials; read-only local empty Supabase fixture; no real services."
+    },
+    "lint": {
+      "passed": true,
+      "files": 15
+    },
+    "sourceIntegrity": {
+      "filesCompared": 1301,
+      "changes": [],
+      "passed": true,
+      "scope": "Final baseline snapshot versus workspace code/content/tests; no .env"
+    }
+  },
+  "live": {
+    "passed": true,
+    "verification": {
+      "active_admins": 1,
+      "admin_events": 0,
+      "application_permissions": {
+        "anon_select": false,
+        "authenticated_delete": false,
+        "authenticated_insert": false,
+        "authenticated_select": true,
+        "authenticated_truncate": false,
+        "authenticated_update": false,
+        "service_delete": true,
+        "service_insert": true,
+        "service_update": true
+      },
+      "application_policies": [
+        {
+          "command": "SELECT",
+          "name": "applications_read_own_or_admin",
+          "permissive": "PERMISSIVE",
+          "roles": [
+            "authenticated"
+          ]
+        },
+        {
+          "command": "SELECT",
+          "name": "applications_restricted_read",
+          "permissive": "RESTRICTIVE",
+          "roles": [
+            "authenticated"
+          ]
+        }
+      ],
+      "application_rls": true,
+      "applications": 2,
+      "inactive_profiles_with_active_enrollment": 0,
+      "limiter_function": {
+        "anon_execute": false,
+        "authenticated_execute": false,
+        "security_definer": false,
+        "service_execute": true
+      },
+      "pix_events": 0,
+      "pix_orders": 0,
+      "rate_limit_permissions": {
+        "anon_select": false,
+        "authenticated_insert": false,
+        "authenticated_select": false,
+        "service_delete": true,
+        "service_insert": true,
+        "service_select": true,
+        "service_update": true
+      },
+      "rate_limit_rls": true,
+      "rate_limit_rows": 0
+    },
+    "advisorWarnings": 14,
+    "advisorSetUnchanged": true,
+    "liveLimiterRollbackPassed": true
+  },
+  "files": [
+    {
+      "file": "src/lib/rateLimit.ts",
+      "sha256": "b5f9d317251001c36faca86494f61aa8fbcb2fa3a422fbdb97242d0ed4dee54c"
+    },
+    {
+      "file": "src/lib/__tests__/rateLimit.test.ts",
+      "sha256": "4edcc01ba4935013338db6a5493f879fff98971b1ef8b358512b87cf57407825"
+    },
+    {
+      "file": "src/app/actions/password-reset.ts",
+      "sha256": "69885deb97563e557506a566654b62b01676a5d576f59bddfd65daa712d79554"
+    },
+    {
+      "file": "src/app/actions/__tests__/password-reset.test.ts",
+      "sha256": "38eba4991a03acd098df6f329f17d976742f1996586eb32aa278da8feef58f60"
+    },
+    {
+      "file": "src/app/actions/signup.ts",
+      "sha256": "3e3d01eba0f3c07d517bdb4e6c72c1a89775a9610340204dd466a101ac1b3c69"
+    },
+    {
+      "file": "src/context/AuthContext.tsx",
+      "sha256": "c1dfaba68e0c9352984cd7e08dc8ade236e75d7152e6b365315012e9558f5932"
+    },
+    {
+      "file": "src/context/__tests__/AuthContext.test.tsx",
+      "sha256": "f00a984b358addb0f58f72b8b62fe2158f2525c768478a29d312ea8b7dccccd8"
+    },
+    {
+      "file": "src/app/api/auth/login/route.ts",
+      "sha256": "00c94ff915b7da66d62715b0257f94c0493d591e2178bd7decf548c1f74dc4e0"
+    },
+    {
+      "file": "src/app/api/applications/submit/route.ts",
+      "sha256": "78b929e0b082a465db1221061c2fee959d3eccb1a1404fe874f2e24d91e64fe4"
+    },
+    {
+      "file": "src/app/api/admin/materials/upload/route.ts",
+      "sha256": "a5243c43790c1910a87ff7971286da68b523ca89cb8e45aec0cbd36ab40b0ced"
+    },
+    {
+      "file": "src/app/api/pix/receipt/route.ts",
+      "sha256": "a4e5d2abced16cc7deb5173bf44efba04fdfe7a4202ed3574da687196ac853ca"
+    },
+    {
+      "file": "src/infrastructure/supabase/database.types.ts",
+      "sha256": "47e41a0843ae5ed9d3402748035e8e0b3173c051d9da30e135aaf0cf2057cdae"
+    },
+    {
+      "file": "src/app/api/auth/login/__tests__/route.test.ts",
+      "sha256": "1028bcdc6a4f2da363807963abfe7ccbe5568197b67bbdcca3a60e2e499854bb"
+    },
+    {
+      "file": "src/app/api/admin/materials/upload/__tests__/route.test.ts",
+      "sha256": "a9223cff44ec7579de7da7843e845655400b4356814cd10181ef33cd8c3d0352"
+    },
+    {
+      "file": "src/app/api/pix/receipt/__tests__/route.test.ts",
+      "sha256": "4c572d5d1e599c18e0d19265562f7c1bf1512ef00fbc33d10950af92c4e7cefa"
+    }
+  ],
+  "limits": [
+    "Frontend local; no deploy.",
+    "Hosting and trusted IP header not confirmed.",
+    "SMTP and native Auth limits/CAPTCHA pending homologation.",
+    "Independent database connections and published instances need concurrency test.",
+    "No changes to real accounts, applications or payments; fictitious rate-counter test rolled back.",
+    "205 deletion candidates preserved."
+  ]
+}

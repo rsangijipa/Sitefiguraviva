@@ -1,0 +1,53 @@
+.disclaimer {
+  display: flex;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-md);
+  border-left: 3px solid;
+  align-items: flex-start;
+}
+
+.disclaimer__icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+  opacity: 0.8;
+}
+
+.disclaimer__text {
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.55;
+  margin: 0;
+  opacity: 0.9;
+}
+
+/* ── Tipos ── */
+.disclaimer--clinical {
+  background-color: var(--fv-areia);
+  border-left-color: var(--fv-terra-barro);
+  color: var(--fv-grafite);
+}
+
+.disclaimer--clinical .disclaimer__icon { color: var(--fv-terra-barro); }
+
+.disclaimer--warning {
+  background-color: rgba(254, 215, 1, 0.12);
+  border-left-color: #c9a800;
+  color: var(--fv-mata);
+}
+
+.disclaimer--warning .disclaimer__icon { color: #c9a800; }
+
+.disclaimer--info {
+  background-color: rgba(7, 97, 76, 0.06);
+  border-left-color: var(--fv-verde-igarape);
+  color: var(--fv-mata);
+}
+
+.disclaimer--info .disclaimer__icon { color: var(--fv-verde-igarape); }
+
+@media (max-width: 640px) {
+  .disclaimer {
+    padding: var(--space-sm) var(--space-md);
+  }
+}

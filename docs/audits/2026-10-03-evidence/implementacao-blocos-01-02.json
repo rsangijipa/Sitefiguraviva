@@ -1,0 +1,70 @@
+{
+  "checked_at": "2026-10-03T22:06:57.048622+00:00",
+  "project_ref": "jdxorryvmcvtqsddkpdm",
+  "passed": true,
+  "rpcs": [
+    {
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "name": "bump_course_content_revision",
+      "security_definer": false,
+      "service_execute": true
+    },
+    {
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "name": "process_gamification_event",
+      "security_definer": true,
+      "service_execute": true
+    },
+    {
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "name": "reorder_book_recommendations",
+      "security_definer": false,
+      "service_execute": true
+    },
+    {
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "name": "save_lesson_content",
+      "security_definer": false,
+      "service_execute": true
+    }
+  ],
+  "migration_versions": [
+    "20261003214215",
+    "20261003220157",
+    "20261003221246"
+  ],
+  "unique_indexes": [
+    {
+      "indexdef": "CREATE UNIQUE INDEX enrollments_user_course_uidx ON public.enrollments USING btree (user_id, course_id)",
+      "indexname": "enrollments_user_course_uidx",
+      "tablename": "enrollments"
+    },
+    {
+      "indexdef": "CREATE UNIQUE INDEX lesson_progress_user_lesson_uidx ON public.lesson_progress USING btree (user_id, course_id, lesson_id)",
+      "indexname": "lesson_progress_user_lesson_uidx",
+      "tablename": "lesson_progress"
+    }
+  ],
+  "course_access_requires_active_profile": true,
+  "inactive_profiles_with_active_enrollment": 0,
+  "tests": {
+    "jest": {
+      "passed": 281,
+      "failed": 0,
+      "skipped": 7,
+      "passed_suites": 80,
+      "skipped_suites": 1
+    },
+    "sql_rpc_checks": 13,
+    "sql_enrollment_checks": 9,
+    "legacy_rpc_acl_checks": 4,
+    "build": "passed with official Next WASM and dummy-service fixtures",
+    "typecheck": "passed",
+    "lint": "17 edited source/test files: no errors or warnings"
+  },
+  "remaining_security_advisor_warnings": 14
+}

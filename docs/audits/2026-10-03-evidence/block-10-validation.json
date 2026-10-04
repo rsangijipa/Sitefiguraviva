@@ -1,0 +1,130 @@
+{
+  "block": 10,
+  "date": "2026-10-04",
+  "scope": "local isolated validation; no deployment or Supabase changes",
+  "runtime": {
+    "os": "Windows",
+    "node": "26.5.0",
+    "ciTargetNode": "24",
+    "dependencies": "shared node_modules; npm ci on GitHub still pending"
+  },
+  "checks": {
+    "lint": true,
+    "lintChangedFiles": true,
+    "nodeTests": {
+      "passed": 14,
+      "failed": 0
+    },
+    "jest": {
+      "passedTests": 463,
+      "passedSuites": 105,
+      "skippedTests": 7,
+      "skippedSuites": 1
+    },
+    "types": true,
+    "selection": {
+      "count": 106,
+      "preservedAllPreviousSuites": true,
+      "nodeAndPlaywrightExcluded": true
+    },
+    "source": {
+      "checked": 1309,
+      "differences": [],
+      "changedConfigDifferences": [],
+      "temporaryBrowserOverrideRestored": true,
+      "lockfileUnchanged": true
+    },
+    "scriptContract": {
+      "passed": true,
+      "checks": [
+        {
+          "file": "scripts/sync_data.mjs",
+          "exists": true,
+          "ignored": false
+        },
+        {
+          "file": "scripts/check-no-firebase.mjs",
+          "exists": true,
+          "ignored": false
+        },
+        {
+          "file": "scripts/check-firebase-migration-status.mjs",
+          "exists": true,
+          "ignored": false
+        },
+        {
+          "file": "scripts/migrate-assessment-attachments.mjs",
+          "exists": true,
+          "ignored": false
+        },
+        {
+          "file": "scripts/upload-course-covers.test.mjs",
+          "exists": true,
+          "ignored": false
+        },
+        {
+          "file": "scripts/upload-course-covers-lib.test.mjs",
+          "exists": true,
+          "ignored": false
+        },
+        {
+          "file": "scripts/e2e-preflight.test.mjs",
+          "exists": true,
+          "ignored": false
+        },
+        {
+          "file": "scripts/check-ci.mjs",
+          "exists": true,
+          "ignored": false
+        },
+        {
+          "file": "scripts/e2e-preflight.mjs",
+          "exists": true,
+          "ignored": false
+        }
+      ]
+    },
+    "buildAndBrowser": {
+      "nativeBuildExitCode": 0,
+      "compiledMinutes": 4.1,
+      "staticPages": 44,
+      "publicBrowserPassed": 5,
+      "publicBrowserFailed": 0,
+      "publicBrowserSeconds": 19.3,
+      "localBrowserVersion": "153.0.8010.12",
+      "scope": "Native build and corrected public suite validated separately; default Playwright Chromium not installed locally",
+      "fixture": "Same dummy HTTP port restored from compiled fixture URL; no production endpoint"
+    }
+  },
+  "limitations": [
+    "No authenticated E2E",
+    "No Firestore emulator run",
+    "No GitHub clean installation run",
+    "Local Chromium 153 temporarily overrides Playwright default only in lab; expected browser extraction stalled",
+    "Candidate deletions preserved; pruned build not repeated in block 10"
+  ],
+  "logs": {
+    "nativeJest": "native-unit.log",
+    "scripts": "node-tests.log",
+    "lint": "lint-before.log",
+    "lintChanged": "lint-changes-final.log",
+    "finalBuildBrowser": "native-build-browser.log",
+    "publicBrowserFinal": "public-browser-final.log"
+  },
+  "changedFiles": [
+    "package.json",
+    "jest.config.js",
+    "playwright.config.ts",
+    "e2e/auth.setup.ts",
+    "e2e/smoke.spec.ts",
+    "scripts/ci-fixture.mjs",
+    "scripts/check-ci.mjs",
+    "scripts/e2e-preflight.mjs",
+    "scripts/e2e-preflight.test.mjs",
+    ".github/workflows/ci.yml",
+    ".github/workflows/e2e-playwright.yml",
+    ".gitignore",
+    ".nvmrc",
+    "e2e/resources-smoke.spec.ts"
+  ]
+}

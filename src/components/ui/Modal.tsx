@@ -1,0 +1,251 @@
+"use client";
+
+import React, { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence, HTMLMotionProps } from "framer-motion";
+import { X } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { createPortal } from "react-dom";
+
+/* --- CONTEXT --- */
+interface ModalContextProps {
+  onClose: () => void;
+}
+const ModalContext = React.createContext<ModalContextProps | null>(null);
+
+/* --- ROOT --- */
+export interface ModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  children: React.ReactNode;
+  ariaLabel?: string;
+  variant?: "default" | "fullscreen";
+}
+
+function getFocusable(container: HTMLElement) {
+  return Array.from(
+    container.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled]), textarea, input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    ),
+  ).filter((element) => !element.closest('[hidden], [inert], [aria-hidden="true"]'));
+}
+
+export function Modal({
+  isOpen,
+  onClose,
+  children,
+  ariaLabel,
+  variant = "default",
+}: ModalProps) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+  const openerRef = useRef<HTMLElement | null>(null);
+  // Close on ESC
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    if (isOpen) window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [isOpen, onClose]);
+
+  useEffect(() => {
+    if (!isOpen || !mounted) return;
+    openerRef.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+    const timer = window.setTimeout(
+      () => { if (dialogRef.current) getFocusable(dialogRef.current).at(0)?.focus(); },
+      0,
+    );
+    return () => {
+      window.clearTimeout(timer);
+      openerRef.current?.focus();
+    };
+  }, [isOpen, mounted]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleTab = (event: KeyboardEvent) => {
+      if (event.key !== "Tab" || !dialogRef.current) return;
+      const focusable = getFocusable(dialogRef.current);
+      if (!focusable.length) {
+        event.preventDefault();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable.at(-1)!;
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", handleTab);
+    return () => document.removeEventListener("keydown", handleTab);
+  }, [isOpen]);
+
+  // Lock body scroll
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    }
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isOpen]);
+
+  if (!mounted) return null;
+
+  return createPortal(
+    <ModalContext.Provider value={{ onClose }}>
+      <AnimatePresence>
+        {isOpen && (
+          <div
+            ref={dialogRef}
+            className="fixed inset-0 z-[100] flex items-center justify-center"
+            role="dialog"
+            aria-modal="true"
+            aria-label={ariaLabel}
+          >
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={onClose}
+              className="absolute inset-0 bg-primary/40 backdrop-blur-md transition-all active:backdrop-blur-sm"
+              aria-hidden="true"
+            />
+
+            {/* Content Layer */}
+            <div
+              className={cn(
+                "relative z-10 w-full h-full flex items-center justify-center pointer-events-none",
+                variant === "fullscreen" ? "p-0" : "p-4 sm:p-6",
+              )}
+            >
+              <div className="pointer-events-auto w-full flex justify-center items-center mobile-app-safe-area">
+                {children}
+              </div>
+            </div>
+          </div>
+        )}
+      </AnimatePresence>
+    </ModalContext.Provider>,
+    document.body,
+  );
+}
+
+/* --- CONTENT --- */
+interface ModalContentProps extends HTMLMotionProps<"div"> {
+  size?: "sm" | "md" | "lg" | "xl" | "full";
+}
+
+export function ModalContent({
+  children,
+  className,
+  size = "md",
+  ...props
+}: ModalContentProps) {
+  const sizes = {
+    sm: "max-w-md",
+    md: "max-w-2xl",
+    lg: "max-w-4xl",
+    xl: "max-w-6xl",
+    full: "max-w-full h-full rounded-none",
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95, y: 20 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95, y: 20 }}
+      className={cn(
+        "relative w-full bg-white rounded-[2rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] border border-transparent",
+        sizes[size],
+        className,
+      )}
+      onClick={(e) => e.stopPropagation()}
+      {...props}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+/* --- HEADER --- */
+export function ModalHeader({
+  children,
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
+  const { onClose } = React.useContext(ModalContext)!;
+  return (
+    <div
+      className={cn(
+        "p-5 md:p-8 border-b border-gray-100 flex items-start justify-between bg-stone-50 shrink-0",
+        className,
+      )}
+      {...props}
+    >
+      <div className="flex-1">{children}</div>
+      <button
+        onClick={onClose}
+        className="group flex items-center gap-2 bg-white border border-gray-200 pl-3 pr-2 py-2 rounded-full text-primary hover:bg-primary hover:text-white transition-all focus:outline-none focus:ring-2 focus:ring-primary ml-4 shadow-sm hover:translate-y-[-1px]"
+        aria-label="Close"
+      >
+        <span className="text-[10px] font-bold uppercase tracking-widest opacity-0 w-0 group-hover:w-auto group-hover:opacity-100 transition-all duration-300 overflow-hidden whitespace-nowrap">
+          Fechar
+        </span>
+        <div className="w-6 h-6 flex items-center justify-center rounded-full bg-stone-100 group-hover:bg-white/20 transition-colors">
+          <X size={14} />
+        </div>
+      </button>
+    </div>
+  );
+}
+
+/* --- BODY --- */
+export function ModalBody({
+  children,
+  className,
+  noPadding = false,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement> & { noPadding?: boolean }) {
+  return (
+    <div
+      className={cn(
+        "overflow-y-auto custom-scrollbar flex-1 relative bg-white",
+        className,
+      )}
+      data-lenis-prevent
+      {...props}
+    >
+      <div className={noPadding ? "" : "p-5 md:p-8"}>{children}</div>
+    </div>
+  );
+}
+
+/* --- FOOTER --- */
+export function ModalFooter({
+  children,
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div
+      className={cn(
+        "p-5 md:p-8 border-t border-gray-100 bg-stone-50 shrink-0",
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+}

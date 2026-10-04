@@ -1,0 +1,206 @@
+{
+  "generatedAt": "2026-10-04T01:40:28.721Z",
+  "block": 6,
+  "scope": "Local frontend/backend changes; additive production database governance migration; no real account, application, enrollment, email or payment operations exercised.",
+  "migration": {
+    "file": "supabase/migrations/20261004005913_block_06_admin_governance_enrollment.sql",
+    "version": "20261004005913",
+    "projectRef": "jdxorryvmcvtqsddkpdm",
+    "applied": true,
+    "registered": true,
+    "sha256": "06e0230a155d41a3a2f1448e4a243a36bac739a2c6ce547e37733a28cefe63e0"
+  },
+  "verification": {
+    "active_admins": 1,
+    "applications": 2,
+    "applications_contacted": 0,
+    "audit_events": 0,
+    "audit_rls": true,
+    "audit_service_delete": false,
+    "audit_service_update": false,
+    "courses": 2,
+    "enrollment_status_counts": {
+      "active": 3,
+      "canceled": 3,
+      "pending_approval": 1
+    },
+    "inactive_profiles_with_active_enrollment": 0,
+    "pix_events": 0,
+    "pix_orders": 0,
+    "profile_guards": [
+      "profiles_protect_history",
+      "profiles_protect_last_active_admin"
+    ],
+    "routines": [
+      {
+        "anon_execute": false,
+        "authenticated_execute": false,
+        "name": "delete_unconverted_application",
+        "security_definer": false,
+        "service_execute": true
+      },
+      {
+        "anon_execute": false,
+        "authenticated_execute": false,
+        "name": "grant_manual_course_access",
+        "security_definer": false,
+        "service_execute": true
+      },
+      {
+        "anon_execute": false,
+        "authenticated_execute": false,
+        "name": "mark_application_contacted",
+        "security_definer": false,
+        "service_execute": true
+      },
+      {
+        "anon_execute": false,
+        "authenticated_execute": false,
+        "name": "prepare_application_pix",
+        "security_definer": false,
+        "service_execute": true
+      },
+      {
+        "anon_execute": false,
+        "authenticated_execute": false,
+        "name": "profile_has_dependencies",
+        "security_definer": false,
+        "service_execute": true
+      },
+      {
+        "anon_execute": false,
+        "authenticated_execute": false,
+        "name": "set_admin_profile_governance",
+        "security_definer": false,
+        "service_execute": true
+      },
+      {
+        "anon_execute": false,
+        "authenticated_execute": false,
+        "name": "set_enrollment_admin_state",
+        "security_definer": false,
+        "service_execute": true
+      }
+    ]
+  },
+  "validation": {
+    "jest": {
+      "success": true,
+      "passedTests": 377,
+      "failedTests": 0,
+      "skippedTests": 7,
+      "passedSuites": 97,
+      "skippedSuites": 1
+    },
+    "postgres": {
+      "passed": true,
+      "count": 30,
+      "checks": [
+        "migration applied with role and enrollment enums",
+        "nonadmin cannot govern",
+        "self demotion and disabling denied",
+        "last active administrator protected against direct disable demotion deletion",
+        "invalid role and missing target denied",
+        "role change commits with audit",
+        "governance replay has no duplicate event",
+        "bulk administrator removal rolls back",
+        "another administrator can be demoted while one remains",
+        "manual grant requires active administrator and student",
+        "manual grant rejects missing course",
+        "manual access uses actual row UUID without asserting payment",
+        "manual grant replay preserves existing access",
+        "revoke missing enrollment cannot create phantom row",
+        "access operation cannot simulate refund",
+        "completed access cannot regress to pending",
+        "contact timestamp does not change application eligibility",
+        "conversion rejects unauthorized reviewer and wrong amount",
+        "failed conversion rolls legacy status normalization back",
+        "canonical conversion prepares pending Pix without payment confirmation",
+        "conversion replay restores same order",
+        "manual actions cannot override pending Pix",
+        "application with enrollment preserved",
+        "dependent profile blocked before cascading delete",
+        "unconverted application can be deleted with retained audit",
+        "Auth cascade can delete profile without business history using Auth-only role",
+        "Auth cascade preserves dependent student and last administrator atomically",
+        "all seven RPCs deny anon and authenticated execution",
+        "new routines use security invoker",
+        "audit cannot be rewritten by application service"
+      ],
+      "engine": "PGlite isolated PostgreSQL",
+      "liveBusinessWrites": false
+    },
+    "typecheck": {
+      "mode": "baseline",
+      "check": "types",
+      "appOnly": false,
+      "fixWasmAliases": false,
+      "normalized": false,
+      "resolverOnly": false,
+      "exitCode": 0,
+      "signal": null,
+      "elapsedSeconds": 69,
+      "logPath": "C:\\Users\\aless\\.codex\\visualizations\\2026\\10\\03\\01a10335-acef-7420-876c-e473e31d8446\\validation-block-06\\baseline-types.log",
+      "environment": "Official Next 15.5.25 WASM; dummy credentials; read-only local empty Supabase fixture; no real services."
+    },
+    "lint": {
+      "exitCode": 0,
+      "files": 16
+    },
+    "build": {
+      "mode": "baseline",
+      "check": "build",
+      "appOnly": false,
+      "fixWasmAliases": false,
+      "normalized": false,
+      "resolverOnly": false,
+      "exitCode": 0,
+      "signal": null,
+      "elapsedSeconds": 384,
+      "logPath": "C:\\Users\\aless\\.codex\\visualizations\\2026\\10\\03\\01a10335-acef-7420-876c-e473e31d8446\\validation-block-06\\baseline-build.log",
+      "environment": "Official Next 15.5.25 WASM; dummy credentials; read-only local empty Supabase fixture; no real services."
+    },
+    "sourceIntegrity": {
+      "sourceDiffCount": 0,
+      "changed": [],
+      "verifiedSourceHashes": {
+        "src/app/actions/user-management.ts": "f18f63a256609f456f67b576b99e5507243b9583397252860676cd5c94687084",
+        "src/app/actions/admin/enrollment.ts": "f9f1c3f85454233681ec389b03ab82f315907b519a3091c65ef19588dce433b2",
+        "src/app/actions/admin/applications.ts": "f4eb9c6da462f17e0ab903f3b8b50756351987f2de23aa595f83a85d7da0d57d",
+        "src/actions/adminEnrollment.ts": "a6f43022d3cb6f4bbba12b9073329bca6c304ac86b9cde0cfd53198aebd00233",
+        "src/lib/auth/admin-user-lookup.ts": "54d03860a5a285e623b62d1dc0e779a871aaf2ab6af10765210253decbac3d73",
+        "src/infrastructure/supabase/database.types.ts": "d21631cf474437464d64264032cfbad9d3738ef5b4bbbfd6c2c3dc3aa2d84fb0",
+        "src/app/admin/(protected)/applications/page.tsx": "5ff1260851e6085d76f7cd98a259363ff1ca989e45df45a6f80de7115eef9a8b",
+        "src/app/admin/(protected)/users/page.tsx": "68305d8b828b9ff37c223074ebc92538afbb89c80fc274610e08ad0af24d9b5d",
+        "src/app/admin/(protected)/enrollments/page.tsx": "8062fcd3386a0719f214819cfb41c35ff21aaf2b82378b3eab3b195b8af22938",
+        "src/app/admin/(protected)/enrollments/BatchEnrollModal.tsx": "809dedccde5292409435492b55071a0c66630863c333d3d24a503c28bf186394",
+        "src/app/admin/(protected)/enrollments/EnrollmentCard.tsx": "0eaaaf70c348e0a9f93611a1e385f10450cf15b991df85247464a5b7ea9d95b0",
+        "src/app/actions/__tests__/user-management.test.ts": "d48e959263199f6cf811a7c882fbae80638d997ef8350966fcc24354f06cc505",
+        "src/app/actions/__tests__/admin-enrollment.test.ts": "8980a5269f12229480d1b724ab3e30896431f31d0c142180b557f838d0ab2e29",
+        "src/actions/__tests__/adminEnrollment.test.ts": "cd2faa68b4773b5bf9836f3a5c4cdb796951476a1cb1335c47a864ccd8cd7c3a",
+        "src/lib/auth/__tests__/admin-user-lookup.test.ts": "1c0da3d85125c202e81cb6b635b50a83432b165e67b4aff1764258720d34ac87",
+        "src/app/admin/(protected)/enrollments/__tests__/EnrollmentCard.test.tsx": "8cc55b2b4df531583248bbd39f91ca78adbe4669943dcc8dd80256484df1f6ca"
+      }
+    }
+  },
+  "securityAdvisor": {
+    "total": 14,
+    "counts": {
+      "function_search_path_mutable": 1,
+      "anon_security_definer_function_executable": 6,
+      "authenticated_security_definer_function_executable": 6,
+      "auth_leaked_password_protection": 1
+    },
+    "priorWarningsNotResolved": true
+  },
+  "limitations": [
+    "Frontend not deployed",
+    "SMTP templates, redirect allow-list and actual email delivery not tested",
+    "No real concurrent multi-connection transaction testing",
+    "No real account blocked/deleted or real Pix operation",
+    "Existing applications policy versioning pending",
+    "Immediate invalidation of existing access JWTs not demonstrated",
+    "Native CI, full E2E and restore rehearsal pending"
+  ],
+  "candidateFilesRemoved": 0
+}

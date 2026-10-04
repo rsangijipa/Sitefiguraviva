@@ -1,0 +1,1055 @@
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[];
+
+export type AppRole = "admin" | "tutor" | "student";
+export type CourseStatus = "draft" | "open" | "closed" | "archived";
+export type BillingType = "subscription" | "one_time" | "free";
+export type LessonType = "video" | "text" | "quiz" | "library" | "live";
+export type EnrollmentStatus =
+  | "pending_approval"
+  | "active"
+  | "completed"
+  | "canceled"
+  | "refunded"
+  | "pending"
+  | "expired"
+  | "locked"
+  | "awaiting_payment"
+  | "awaiting_approval"
+  | "blocked"
+  | "past_due"
+  | "rejected";
+export type PaymentStatus = "paid" | "pending" | "failed";
+export type ProgressStatus = "completed" | "in_progress";
+
+export type PixOrderRow = {
+  id: string;
+  user_id: string;
+  course_id: string;
+  enrollment_id: string;
+  amount_cents: number;
+  txid: string;
+  payload: string;
+  merchant_name: string;
+  charge_label: string;
+  status: "pending" | "paid" | "rejected";
+  receipt_path: string | null;
+  declared_at: string | null;
+  bank_reference: string | null;
+  received_at: string | null;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  rejection_reason: string | null;
+  created_at: string;
+};
+
+export interface Database {
+  public: {
+    Tables: {
+      admin_operation_events: {
+        Row: {
+          id: string;
+          actor_id: string;
+          target_id: string;
+          action: string;
+          details: Json;
+          created_at: string;
+        };
+        Insert: {
+          actor_id: string;
+          target_id: string;
+          action: string;
+          details?: Json;
+          id?: string;
+          created_at?: string;
+        };
+        Update: never;
+        Relationships: [];
+      };
+      profiles: {
+        Row: {
+          id: string;
+          legacy_firebase_uid: string | null;
+          email: string;
+          display_name: string | null;
+          photo_url: string | null;
+          role: AppRole;
+          is_active: boolean;
+          stripe_customer_id: string | null;
+          bio: string | null;
+          phone_number: string | null;
+          profession: string | null;
+          city: string | null;
+          state: string | null;
+          date_of_birth: string | null;
+          instagram: string | null;
+          profile_completion: number;
+          profile_completed_at: string | null;
+          created_at: string;
+          updated_at: string;
+          last_login_at: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["profiles"]["Row"]> & {
+          id: string;
+          email: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["profiles"]["Row"]>;
+        Relationships: [];
+      };
+      need_records: {
+        Row: {
+          id: string;
+          user_id: string;
+          client_request_id: string;
+          schema_version: number;
+          content_version: string;
+          state: "selected" | "unsure";
+          entries: Json;
+          ordered: boolean;
+          focus_entry_id: string | null;
+          small_step: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["need_records"]["Row"]> & {
+          user_id: string;
+          client_request_id: string;
+          content_version: string;
+          state: "selected" | "unsure";
+        };
+        Update: Partial<Database["public"]["Tables"]["need_records"]["Row"]>;
+        Relationships: [];
+      };
+      awareness_interactions: {
+        Row: {
+          id: string;
+          user_id: string;
+          action_type: "click" | "favorite" | "random" | "theme_filter";
+          quote_id: string | null;
+          theme: string;
+          created_at: string;
+        };
+        Insert: Partial<
+          Database["public"]["Tables"]["awareness_interactions"]["Row"]
+        > & {
+          user_id: string;
+          action_type: "click" | "favorite" | "random" | "theme_filter";
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["awareness_interactions"]["Row"]
+        >;
+        Relationships: [];
+      };
+      awareness_favorites: {
+        Row: {
+          user_id: string;
+          quote_id: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<
+          Database["public"]["Tables"]["awareness_favorites"]["Row"]
+        > & {
+          user_id: string;
+          quote_id: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["awareness_favorites"]["Row"]
+        >;
+        Relationships: [];
+      };
+      applications: {
+        Row: {
+          contacted_at: string | null;
+          id: string;
+          user_id: string;
+          course_id: string;
+          answers: Json;
+          consent: Json;
+          status: string;
+          source: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["applications"]["Row"]> & {
+          id: string;
+          user_id: string;
+          course_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["applications"]["Row"]>;
+        Relationships: [];
+      };
+      pix_orders: {
+        Row: PixOrderRow;
+        Insert: Partial<PixOrderRow>;
+        Update: Partial<PixOrderRow>;
+        Relationships: [];
+      };
+      pix_order_events: {
+        Row: {
+          id: string;
+          order_id: string;
+          actor_id: string;
+          event: string;
+          details: Json;
+          created_at: string;
+        };
+        Insert: {
+          order_id: string;
+          actor_id: string;
+          event: string;
+          details?: Json;
+        };
+        Update: { details?: Json };
+        Relationships: [];
+      };
+      courses: {
+        Row: {
+          id: string;
+          title: string;
+          subtitle: string | null;
+          slug: string | null;
+          description: string | null;
+          cover_image_url: string | null;
+          image_url: string | null;
+          thumbnail_url: string | null;
+          instructor_name: string | null;
+          instructor_title: string | null;
+          workload_minutes: number | null;
+          duration_label: string | null;
+          level: string | null;
+          category: string | null;
+          is_published: boolean;
+          status: CourseStatus;
+          content_revision: number;
+          billing_type: BillingType;
+          pix_price_cents: number | null;
+          total_price_cents: number | null;
+          installment_count: number | null;
+          stripe_price_id: string | null;
+          stripe_product_id: string | null;
+          tags: string[];
+          details: Json;
+          team: Json;
+          stats: Json;
+          community_enabled: boolean;
+          certificate_rules: Json;
+          legacy_payload: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["courses"]["Row"]> & {
+          id: string;
+          title: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["courses"]["Row"]>;
+        Relationships: [];
+      };
+      course_modules: {
+        Row: {
+          id: string;
+          course_id: string;
+          title: string;
+          description: string | null;
+          sort_order: number;
+          is_published: boolean;
+          slug: string | null;
+          legacy_payload: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<
+          Database["public"]["Tables"]["course_modules"]["Row"]
+        > & {
+          id: string;
+          course_id: string;
+          title: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["course_modules"]["Row"]>;
+        Relationships: [];
+      };
+      lessons: {
+        Row: {
+          id: string;
+          course_id: string;
+          module_id: string;
+          title: string;
+          description: string | null;
+          sort_order: number;
+          is_published: boolean;
+          slug: string | null;
+          type: LessonType;
+          duration_minutes: number | null;
+          video_url: string | null;
+          thumbnail_url: string | null;
+          blocks: Json;
+          is_free_preview: boolean;
+          legacy_payload: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["lessons"]["Row"]> & {
+          id: string;
+          course_id: string;
+          module_id: string;
+          title: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["lessons"]["Row"]>;
+        Relationships: [];
+      };
+      lesson_materials: {
+        Row: {
+          id: string;
+          course_id: string;
+          lesson_id: string | null;
+          title: string;
+          type: "pdf" | "link" | "archive";
+          url: string;
+          visibility: "enrolled" | "after_completion" | "team_only";
+          storage_bucket: string | null;
+          storage_path: string | null;
+          module_id: string | null;
+          description: string | null;
+          is_published: boolean;
+          download_count: number;
+          legacy_payload: Json;
+          created_at: string;
+        };
+        Insert: Partial<
+          Database["public"]["Tables"]["lesson_materials"]["Row"]
+        > & {
+          id: string;
+          course_id: string;
+          title: string;
+          type: "pdf" | "link" | "archive";
+          url: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["lesson_materials"]["Row"]
+        >;
+        Relationships: [];
+      };
+      enrollments: {
+        Row: {
+          id: string;
+          user_id: string | null;
+          legacy_firebase_uid: string | null;
+          course_id: string;
+          user_name: string | null;
+          status: EnrollmentStatus;
+          payment_status: PaymentStatus | null;
+          subscription_id: string | null;
+          enrolled_at: string;
+          paid_at: string | null;
+          payment_method:
+            | "pix"
+            | "stripe"
+            | "subscription"
+            | "free"
+            | "manual"
+            | null;
+          source_ref: string | null;
+          access_until: string | null;
+          approved_by: string | null;
+          approved_at: string | null;
+          rejection_reason: string | null;
+          course_version_at_enrollment: number | null;
+          course_snapshot_at_enrollment: Json;
+          completed_at: string | null;
+          last_accessed_at: string | null;
+          progress_summary: Json;
+          legacy_payload: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["enrollments"]["Row"]> & {
+          course_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["enrollments"]["Row"]>;
+        Relationships: [];
+      };
+      lesson_progress: {
+        Row: {
+          id: string;
+          user_id: string | null;
+          legacy_firebase_uid: string | null;
+          course_id: string;
+          lesson_id: string;
+          status: ProgressStatus;
+          percent: number;
+          max_watched_second: number;
+          completed_at: string | null;
+          updated_at: string;
+        };
+        Insert: Partial<
+          Database["public"]["Tables"]["lesson_progress"]["Row"]
+        > & {
+          course_id: string;
+          lesson_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["lesson_progress"]["Row"]>;
+        Relationships: [];
+      };
+      certificates: {
+        Row: {
+          id: string;
+          user_id: string | null;
+          legacy_firebase_uid: string | null;
+          course_id: string;
+          code: string;
+          issued_at: string;
+          metadata: Json;
+          event_key: string | null;
+          legacy_payload: Json;
+        };
+        Insert: Partial<Database["public"]["Tables"]["certificates"]["Row"]> & {
+          course_id: string;
+          code: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["certificates"]["Row"]>;
+        Relationships: [];
+      };
+      community_threads: {
+        Row: {
+          id: string;
+          course_id: string;
+          author_id: string | null;
+          legacy_author_firebase_uid: string | null;
+          title: string;
+          content: string;
+          author_name: string;
+          author_avatar_url: string | null;
+          reply_count: number;
+          like_count: number;
+          view_count: number;
+          is_pinned: boolean;
+          is_locked: boolean;
+          is_deleted: boolean;
+          last_reply_at: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<
+          Database["public"]["Tables"]["community_threads"]["Row"]
+        > & {
+          id: string;
+          course_id: string;
+          title: string;
+          content: string;
+          author_name: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["community_threads"]["Row"]
+        >;
+        Relationships: [];
+      };
+      community_replies: {
+        Row: {
+          id: string;
+          thread_id: string;
+          author_id: string | null;
+          legacy_author_firebase_uid: string | null;
+          content: string;
+          author_name: string;
+          author_avatar_url: string | null;
+          like_count: number;
+          is_deleted: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<
+          Database["public"]["Tables"]["community_replies"]["Row"]
+        > & {
+          thread_id: string;
+          content: string;
+          author_name: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["community_replies"]["Row"]
+        >;
+        Relationships: [];
+      };
+      events: {
+        Row: {
+          id: string;
+          title: string;
+          description: string | null;
+          starts_at: string;
+          ends_at: string | null;
+          status: "scheduled" | "live" | "ended" | "cancelled";
+          is_public: boolean;
+          course_id: string | null;
+          type: "webinar" | "in_person" | "hybrid";
+          join_url: string | null;
+          location: string | null;
+          cover_image: string | null;
+          check_in_code: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["events"]["Row"]> & {
+          title: string;
+          starts_at: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["events"]["Row"]>;
+        Relationships: [];
+      };
+      event_attendance: {
+        Row: {
+          id: string;
+          event_id: string;
+          user_id: string | null;
+          timestamp: string;
+          method: string;
+        };
+        Insert: Partial<
+          Database["public"]["Tables"]["event_attendance"]["Row"]
+        > & {
+          event_id: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["event_attendance"]["Row"]
+        >;
+        Relationships: [];
+      };
+      notifications: {
+        Row: {
+          id: string;
+          user_id: string;
+          type: string;
+          title: string;
+          body: string | null;
+          link: string;
+          is_read: boolean;
+          read_at: string | null;
+          metadata: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<
+          Database["public"]["Tables"]["notifications"]["Row"]
+        > & {
+          user_id: string;
+          type: string;
+          title: string;
+          link: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["notifications"]["Row"]>;
+        Relationships: [];
+      };
+      gamification_profiles: {
+        Row: {
+          user_id: string;
+          total_xp: number;
+          level: number;
+          current_streak: number;
+          longest_streak: number;
+          last_activity_date: string | null;
+          badges: string[];
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<
+          Database["public"]["Tables"]["gamification_profiles"]["Row"]
+        > & {
+          user_id: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["gamification_profiles"]["Row"]
+        >;
+        Relationships: [];
+      };
+      xp_transactions: {
+        Row: {
+          id: string;
+          user_id: string;
+          amount: number;
+          reason:
+            | "lesson_completed"
+            | "quiz_passed"
+            | "course_completed"
+            | "daily_login"
+            | "bonus"
+            | "admin_reward";
+          metadata: Json;
+          timestamp: string;
+        };
+        Insert: Partial<
+          Database["public"]["Tables"]["xp_transactions"]["Row"]
+        > & {
+          user_id: string;
+          amount: number;
+          reason:
+            | "lesson_completed"
+            | "quiz_passed"
+            | "course_completed"
+            | "daily_login"
+            | "bonus"
+            | "admin_reward";
+        };
+        Update: Partial<Database["public"]["Tables"]["xp_transactions"]["Row"]>;
+        Relationships: [];
+      };
+      earned_badges: {
+        Row: {
+          id: string;
+          user_id: string;
+          badge_id: string;
+          course_id: string | null;
+          earned_at: string;
+        };
+        Insert: Partial<
+          Database["public"]["Tables"]["earned_badges"]["Row"]
+        > & {
+          user_id: string;
+          badge_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["earned_badges"]["Row"]>;
+        Relationships: [];
+      };
+      audit_logs: {
+        Row: {
+          id: string;
+          event_type: string;
+          actor_user_id: string | null;
+          actor_email: string | null;
+          actor_role: string | null;
+          target_collection: string;
+          target_id: string;
+          payload: Json | null;
+          diff: Json | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["audit_logs"]["Row"]> & {
+          event_type: string;
+          target_collection: string;
+          target_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["audit_logs"]["Row"]>;
+        Relationships: [];
+      };
+      public_pages: {
+        Row: {
+          key: string;
+          content: Json;
+          is_published: boolean;
+          published_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["public_pages"]["Row"]> & {
+          key: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["public_pages"]["Row"]>;
+        Relationships: [];
+      };
+      public_documents: {
+        Row: {
+          id: string;
+          title: string;
+          category: string;
+          file_url: string;
+          file_path: string | null;
+          file_size: string | null;
+          file_type: string;
+          is_published: boolean;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<
+          Database["public"]["Tables"]["public_documents"]["Row"]
+        > & {
+          title: string;
+          file_url: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["public_documents"]["Row"]
+        >;
+        Relationships: [];
+      };
+      posts: {
+        Row: {
+          id: string;
+          title: string;
+          slug: string | null;
+          subtitle: string | null;
+          excerpt: string | null;
+          content: string;
+          type: string;
+          image_url: string | null;
+          external_url: string | null;
+          pdf_url: string | null;
+          tags: string[];
+          is_published: boolean;
+          published_at: string | null;
+          legacy_payload: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["posts"]["Row"]> & {
+          id: string;
+          title: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["posts"]["Row"]>;
+        Relationships: [];
+      };
+      gallery_items: {
+        Row: {
+          id: string;
+          image_url: string;
+          title: string | null;
+          caption: string | null;
+          tags: string[];
+          width: number | null;
+          height: number | null;
+          is_published: boolean;
+          legacy_payload: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<
+          Database["public"]["Tables"]["gallery_items"]["Row"]
+        > & {
+          id: string;
+          image_url: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["gallery_items"]["Row"]>;
+        Relationships: [];
+      };
+      team_members: {
+        Row: {
+          id: string;
+          name: string;
+          role: string | null;
+          bio: string | null;
+          image_url: string | null;
+          sort_order: number;
+          is_published: boolean;
+          legacy_payload: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["team_members"]["Row"]> & {
+          id: string;
+          name: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["team_members"]["Row"]>;
+        Relationships: [];
+      };
+      site_content: {
+        Row: {
+          key: string;
+          content: Json;
+          is_published: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["site_content"]["Row"]> & {
+          key: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["site_content"]["Row"]>;
+        Relationships: [];
+      };
+      assessments: {
+        Row: {
+          id: string;
+          course_id: string;
+          lesson_id: string | null;
+          title: string;
+          description: string | null;
+          passing_score: number;
+          total_points: number;
+          questions: Json;
+          status: "draft" | "published" | "archived";
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["assessments"]["Row"]> & {
+          course_id: string;
+          title: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["assessments"]["Row"]>;
+        Relationships: [];
+      };
+      assessment_submissions: {
+        Row: {
+          id: string;
+          assessment_id: string;
+          user_id: string | null;
+          legacy_firebase_uid: string | null;
+          course_id: string;
+          attempt_number: number;
+          answers: Json;
+          score: number;
+          percentage: number;
+          passed: boolean;
+          status: "pending" | "submitted" | "graded";
+          feedback: string | null;
+          graded_by: string | null;
+          started_at: string;
+          submitted_at: string | null;
+          graded_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<
+          Database["public"]["Tables"]["assessment_submissions"]["Row"]
+        > & {
+          assessment_id: string;
+          course_id: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["assessment_submissions"]["Row"]
+        >;
+        Relationships: [];
+      };
+      assessment_progress: {
+        Row: {
+          id: string;
+          assessment_id: string;
+          user_id: string | null;
+          legacy_firebase_uid: string | null;
+          course_id: string;
+          attempts: number;
+          best_score: number;
+          best_percentage: number;
+          passed: boolean;
+          last_attempt_at: string | null;
+          submissions: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<
+          Database["public"]["Tables"]["assessment_progress"]["Row"]
+        > & {
+          assessment_id: string;
+          course_id: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["assessment_progress"]["Row"]
+        >;
+        Relationships: [];
+      };
+      announcements: {
+        Row: {
+          id: string;
+          title: string;
+          content: string;
+          course_id: string | null;
+          author_id: string | null;
+          is_pinned: boolean;
+          target_audience: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<
+          Database["public"]["Tables"]["announcements"]["Row"]
+        > & {
+          title: string;
+          content: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["announcements"]["Row"]>;
+        Relationships: [];
+      };
+      book_recommendations: {
+        Row: {
+          id: string;
+          title: string;
+          author: string;
+          description: string;
+          cover_image_url: string;
+          cover_storage_path: string;
+          purchase_url: string;
+          publication_year: number | null;
+          is_published: boolean;
+          sort_order: number;
+          updated_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<
+          Database["public"]["Tables"]["book_recommendations"]["Row"]
+        > & {
+          title: string;
+          author: string;
+          cover_image_url: string;
+          cover_storage_path: string;
+          purchase_url: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["book_recommendations"]["Row"]
+        >;
+        Relationships: [];
+      };
+    };
+    Views: Record<string, never>;
+    Functions: {
+      can_current_user_read_course_outline: {
+        Args: { p_course: string; p_published: boolean };
+        Returns: boolean;
+      };
+      consume_request_rate_limit: {
+        Args: { p_key: string; p_max: number; p_window_ms: number };
+        Returns: Json;
+      };
+      list_readable_course_materials: {
+        Args: { p_user: string; p_course: string };
+        Returns: Json;
+      };
+      can_user_read_course_material: {
+        Args: {
+          p_user: string;
+          p_course: string;
+          p_visibility: string;
+          p_published: boolean;
+          p_module: string | null;
+          p_lesson: string | null;
+        };
+        Returns: boolean;
+      };
+      resolve_course_material: {
+        Args: { p_user: string; p_material: string };
+        Returns: Json;
+      };
+      set_admin_profile_governance: {
+        Args: {
+          p_actor: string;
+          p_target: string;
+          p_role: string | null;
+          p_active: boolean | null;
+        };
+        Returns: Json;
+      };
+      profile_has_dependencies: {
+        Args: { p_target: string };
+        Returns: boolean;
+      };
+      grant_manual_course_access: {
+        Args: { p_actor: string; p_user: string; p_course: string };
+        Returns: Json;
+      };
+      prepare_application_pix: {
+        Args: {
+          p_actor: string;
+          p_application: string;
+          p_id: string;
+          p_amount: number;
+          p_txid: string;
+          p_payload: string;
+          p_merchant: string;
+        };
+        Returns: Json;
+      };
+      mark_application_contacted: {
+        Args: { p_actor: string; p_application: string };
+        Returns: undefined;
+      };
+      delete_unconverted_application: {
+        Args: { p_actor: string; p_application: string };
+        Returns: undefined;
+      };
+      set_enrollment_admin_state: {
+        Args: {
+          p_actor: string;
+          p_user: string;
+          p_course: string;
+          p_status: string;
+        };
+        Returns: Json;
+      };
+      set_course_commercial_state: {
+        Args: { p_actor: string; p_course: string; p_command: string };
+        Returns: Json;
+      };
+      bump_course_content_revision: {
+        Args: { p_course_id: string };
+        Returns: number;
+      };
+      reorder_book_recommendations: {
+        Args: { p_ids: string[] };
+        Returns: undefined;
+      };
+      save_lesson_content: {
+        Args: {
+          p_course_id: string;
+          p_module_id: string;
+          p_lesson_id: string;
+          p_blocks: Json;
+        };
+        Returns: undefined;
+      };
+      submit_course_application: {
+        Args: { p_user: string; p_course: string; p_answers: Json };
+        Returns: Json;
+      };
+      create_manual_pix_order: {
+        Args: {
+          p_user: string;
+          p_course: string;
+          p_id: string;
+          p_amount: number;
+          p_txid: string;
+          p_payload: string;
+          p_merchant: string;
+        };
+        Returns: Json;
+      };
+      submit_manual_pix_receipt: {
+        Args: { p_user: string; p_order: string; p_path: string };
+        Returns: undefined;
+      };
+      review_manual_pix_order: {
+        Args: {
+          p_admin: string;
+          p_user: string;
+          p_course: string;
+          p_approve: boolean;
+          p_bank_reference: string | null;
+          p_received_at: string | null;
+          p_received_amount: number | null;
+          p_reason: string | null;
+        };
+        Returns: Json;
+      };
+      grant_xp_idempotent: {
+        Args: {
+          p_user_id: string;
+          p_amount: number;
+          p_reason: string;
+          p_event_key: string;
+          p_metadata?: Json;
+        };
+        Returns: {
+          new_total_xp: number;
+          new_level: number;
+          awarded: boolean;
+        }[];
+      };
+    };
+    Enums: {
+      app_role: AppRole;
+      course_status: CourseStatus;
+      billing_type: BillingType;
+      lesson_type: LessonType;
+      enrollment_status: EnrollmentStatus;
+      payment_status: PaymentStatus;
+      progress_status: ProgressStatus;
+    };
+    CompositeTypes: Record<string, never>;
+  };
+}
+
+export type TableName = keyof Database["public"]["Tables"];
+export type TableRow<TTable extends TableName> =
+  Database["public"]["Tables"][TTable]["Row"];
+export type TableInsert<TTable extends TableName> =
+  Database["public"]["Tables"][TTable]["Insert"];
+export type TableUpdate<TTable extends TableName> =
+  Database["public"]["Tables"][TTable]["Update"];
