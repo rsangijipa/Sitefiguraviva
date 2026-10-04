@@ -1,0 +1,65 @@
+{
+  "date": "2026-10-04",
+  "baseCommit": "8cc63b166bbc297077228fb12d5f6167871e9442",
+  "authorizedBy": "Explicit yes to applying session migration",
+  "migration": {
+    "version": "20261004163454",
+    "project": "jdxorryvmcvtqsddkpdm",
+    "applied": true,
+    "historyRegistered": true,
+    "publicRestrictivePolicies": 42,
+    "storageRestrictivePolicies": 1,
+    "activeSessionsPreserved": 6,
+    "leftoverTestUsers": 0,
+    "rollbackTests": 9,
+    "parametrizedRpc": {
+      "anonExecute": false,
+      "authenticatedExecute": false,
+      "serviceRoleExecute": true
+    }
+  },
+  "application": {
+    "default": "enforce",
+    "vercelProduction": "mandatory, even if mode=profile",
+    "runtime": "v26.5.0",
+    "sourceFiles": 1097,
+    "sourceSha256": "2702301b29bcaef0748f1cfd94b9059ed53f4dc99902272e8e1efa71826b9a96",
+    "snapshotMatches": true
+  },
+  "checks": [
+    {
+      "check": "lint",
+      "exitCode": 0
+    },
+    {
+      "check": "scripts",
+      "exitCode": 0
+    },
+    {
+      "check": "unit",
+      "exitCode": 0
+    },
+    {
+      "check": "types",
+      "exitCode": 0
+    },
+    {
+      "check": "build",
+      "exitCode": 0
+    }
+  ],
+  "tests": {
+    "unitPassed": 617,
+    "unitSkipped": 7,
+    "scriptsPassed": 32,
+    "browserPassed": 7,
+    "httpChecks": 6
+  },
+  "browser": {
+    "exitCode": 0,
+    "seconds": 17,
+    "browser": "Local Chromium 153; CI uses Playwright-pinned Chromium",
+    "fixture": "Read-only local HTTP, fake credentials; no remote calls"
+  },
+  "remaining": "Real authenticated role/Storage journey and operational homologation; advisors documented in activation report"
+}

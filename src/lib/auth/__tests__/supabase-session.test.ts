@@ -5,7 +5,8 @@ import {
 import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 
 const rpc = jest.fn();
-const token = `header.${Buffer.from(JSON.stringify({ session_id: "00000000-0000-4000-8000-000000000001" })).toString("base64url")}.signature`;
+const sessionId = "00000000-0000-4000-8000-000000000001";
+const token = `header.${Buffer.from(JSON.stringify({ session_id: sessionId })).toString("base64url")}.signature`;
 const getUser = jest.fn();
 const maybeSingle = jest.fn();
 const eq = jest.fn(() => ({ maybeSingle }));
@@ -124,4 +125,39 @@ it("rejects revoked sessions and session verification failure", async () => {
 
 afterAll(() => {
   delete process.env.AUTH_SESSION_CHECK_MODE;
+});
+
+it("enforces session revocation by default when the mode is absent", async () => {
+  jest.clearAllMocks();
+  delete process.env.AUTH_SESSION_CHECK_MODE;
+  (createSupabaseServiceClient as jest.Mock).mockReturnValue({
+    auth: { getUser },
+    from,
+    rpc,
+  });
+  getUser.mockResolvedValue({ data: { user: { id: "user-1" } }, error: null });
+  rpc.mockResolvedValueOnce({ data: false, error: null });
+  expect(await getSupabaseSessionClaims(token)).toBeNull();
+  expect(rpc).toHaveBeenCalledWith("is_auth_session_active", {
+    p_user: "user-1",
+    p_session: sessionId,
+  });
+});
+
+it("does not allow profile mode to bypass revocation in Vercel Production", async () => {
+  const previousEnvironment = process.env.VERCEL_ENV;
+  process.env.VERCEL_ENV = "production";
+  process.env.AUTH_SESSION_CHECK_MODE = "profile";
+  try {
+    getUser.mockResolvedValue({
+      data: { user: { id: "user-1" } },
+      error: null,
+    });
+    rpc.mockResolvedValueOnce({ data: false, error: null });
+    expect(await getSupabaseSessionClaims(token)).toBeNull();
+  } finally {
+    if (previousEnvironment === undefined) delete process.env.VERCEL_ENV;
+    else process.env.VERCEL_ENV = previousEnvironment;
+    process.env.AUTH_SESSION_CHECK_MODE = "enforce";
+  }
 });

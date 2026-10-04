@@ -14,7 +14,7 @@ Confirme em homologação: troca de conta, refresh durante login, sair durante s
 
 O perfil visual usa profiles como fonte canônica. Verifique nome/avatar após salvar, recarregar e trocar de conta, inclusive com conexão interrompida.
 
-A migração 20261004163454_block_17_session_revocation.sql ainda NÃO foi aplicada no projeto real. AUTH_SESSION_CHECK_MODE deve continuar ausente/profile até autorização e verificação da migração. Depois, em homologação, testar JWT real com session_id: dono/admin/tutor, logout, bloqueio e reativação, mudança de cargo e uma sessão nova. Só habilitar enforce no ambiente após confirmar esses fluxos. A aplicação introduz políticas RLS restritivas nas tabelas públicas protegidas e Storage; tokens sem sessão válida perdem acesso authenticated.
+A migração 20261004163454_block_17_session_revocation.sql foi aplicada com autorização do proprietário. O modo padrão agora verifica sessão; use AUTH_SESSION_CHECK_MODE=enforce. Na Vercel Production a checagem é obrigatória mesmo com configuração profile. Em homologação, testar JWT real com session_id: dono/admin/tutor, logout, bloqueio e reativação, mudança de cargo e uma sessão nova. As políticas RLS restritivas protegem tabelas públicas e Storage; tokens sem sessão válida perdem acesso authenticated. As seis sessões ativas foram preservadas na verificação da instalação.
 
 ## Analytics
 

@@ -1,14 +1,14 @@
-# Quanto falta do relatório — após o bloco 17
+# Quanto falta do relatório — após o bloco 17 e ativação de sessões
 
 Data: 04/10/2026. Base: 45 itens; a classificação mede a correção principal, não prazo, esforço ou aprovação de lançamento.
 
-**16 principais implementados, 20 parciais e 9 ainda não executados. 29 itens permanecem com trabalho, decisão ou verificação pendente.** Mesmo os implementados exigem homologação adequada.
+**17 principais implementados, 19 parciais e 9 ainda não executados. 28 itens permanecem com trabalho, decisão ou verificação pendente.** Mesmo os implementados exigem homologação adequada.
 
-Dos 22 parciais anteriores, todos foram revisados nesta rodada: SITE-02 e SITE-04 passam a implementados. Os 20 restantes têm sua entrega e pendência individual em [Bloco 17](2026-10-04-implementacao-bloco-17.md). Sessões/RLS têm migração pronta, testada com rollback, mas ainda não aplicada; aguardam autorização específica. Banco Pix, SMTP, ambiente separado e revogação no provedor dependem do proprietário.
+Dos 22 parciais anteriores, todos foram revisados nesta rodada: SITE-02, SITE-04 e AUTH-02 passam a implementados. Os 19 restantes têm sua entrega e pendência individual em [Bloco 17](2026-10-04-implementacao-bloco-17.md). A migração de sessões/RLS foi autorizada, aplicada e verificada; AUTH-02 passa a principal implementado. [Registro da ativação](2026-10-04-ativacao-sessoes.md). Banco Pix, SMTP, ambiente separado e revogação no provedor dependem do proprietário.
 
 | Área | Total | Implementados | Parciais | Não executados |
 |---|---:|---:|---:|---:|
-| Segurança, banco e operação | 18 | 7 | 10 | 1 |
+| Segurança, banco e operação | 18 | 8 | 9 | 1 |
 | Site e cadastro | 10 | 4 | 4 | 2 |
 | Inscrição e Pix | 6 | 3 | 3 | 0 |
 | Organização, desempenho e SEO | 6 | 2 | 2 | 2 |
@@ -27,7 +27,7 @@ Prioridade: sessões/SMTP/antiabuso e credenciais; Pix e jornada comercial real;
 | AUTH-01 | Principal implementado | Implementado local: promoção por e-mail removida e cadastro público exige confirmação; publicação, SMTP, CAPTCHA e E2E pendentes |
 | DATA-01 | Principal implementado | Implementado no Supabase: dois índices compatíveis com onConflict; jornada completa em homologação pendente |
 | DATA-02 | Principal implementado | Implementado local e no Supabase: ações protegidas, políticas de leitura por dono/admin ativo versionadas e gravação do navegador revogada; teste por papel aprovado; publicação e homologação pendentes |
-| AUTH-02 | Parcial | Parcial: Migração preparada para invalidar sessões anteriores a mudanças de cargo/bloqueio; testes de sessão e RLS passaram com rollback. Verificação no servidor protegida por flag. Pendente: Autorização para aplicar no Supabase real e habilitar AUTH_SESSION_CHECK_MODE=enforce; migração NÃO aplicada. |
+| AUTH-02 | Principal implementado | Implementado principal: sessão canônica obrigatória por padrão e na Vercel Production; revogação por bloqueio/cargo, 42 gates RLS públicos e Storage aplicados e registrados no Supabase; nove testes com rollback passaram e seis sessões reais preservadas; homologação autenticada completa pendente |
 | AUTH-03 | Parcial | Parcial: Removida autenticação Firebase alternativa; leitura privada de certificado exige dono/admin; avaliações exigem publicação e acesso canônico ao curso antes de gravação. Inventário de 129 ações exportadas. Pendente: Homologação autenticada de ponta a ponta e manifest compilado; inventário estático não comprova sozinho autorização completa. |
 | OPS-01 | Parcial | Parcial: Mantidas proteções de concorrência, falhas Auth e configuração CAS dos blocos anteriores; sincronização de sessão agora tem timeout. Pendente: Exercitar falhas e operações administrativas concorrentes no ambiente separado. |
 | OPS-02 | Parcial | Parcial: Lint, scripts, Jest, tipos e build são executados sem .env real; CI recebe scanner e auditoria de produção. Pendente: Confirmar execução Linux/Node 24 no GitHub e recuperação operacional. |
@@ -67,4 +67,4 @@ Prioridade: sessões/SMTP/antiabuso e credenciais; Pix e jornada comercial real;
 | EAD-05 | Ainda não executado | Planejado; nenhuma correção aplicada |
 | STR-01 | Parcial | Parcial: Mantida contenção: Stripe desativado por padrão e respostas 503; produção e eventos live recusados. Pendente: Integração financeira canônica posterior ao lançamento Pix manual, conforme prioridade definida. |
 
-[Backlog completo](2026-10-03-backlog-revisado.csv) · [Contagem](2026-10-03-evidence/progress-block-17.json) · [Validação](2026-10-03-evidence/validation-block-17.json)
+[Backlog completo](2026-10-03-backlog-revisado.csv) · [Contagem](2026-10-03-evidence/progress-session-activation.json) · [Validação](2026-10-03-evidence/validation-block-17.json)

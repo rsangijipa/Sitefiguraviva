@@ -36,7 +36,10 @@ export async function getSupabaseSessionClaims(
 
     if (userError || !user) return null;
 
-    if (process.env.AUTH_SESSION_CHECK_MODE === "enforce") {
+    if (
+      process.env.AUTH_SESSION_CHECK_MODE !== "profile" ||
+      process.env.VERCEL_ENV === "production"
+    ) {
       // Parse only after Auth verified the token. Existence is checked in auth.sessions;
       // JWT signature/expiry alone cannot detect logout or an administrative block.
       let sessionId: string;
