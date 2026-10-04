@@ -6,6 +6,7 @@ import type {
 } from "@/infrastructure/supabase/database.types";
 
 export interface CourseRecord {
+  mediators?: import("@/utils/mediators").Mediator[];
   pixPriceCents?: number | null;
   totalPriceCents?: number | null;
   installments?: number | null;

@@ -55,3 +55,18 @@ it("formats long legacy curricula without changing their content", () => {
     "Docência.",
   ]);
 });
+it("prefers shared profiles over stale embedded copies and preserves registry IDs", () => {
+  const current = {
+    id: "registered",
+    name: "Ana",
+    role: "Psicóloga",
+    image: "/current.jpg",
+    bio: "Atual",
+  };
+  expect(
+    getCourseMediators({ mediators: [{ ...current, bio: "Antigo" }] }, {}, {}, [
+      { mediator: current },
+    ]),
+  ).toEqual([current]);
+  expect(getCourseMediators({ mediators: [current] }, {}, {}, [])).toEqual([]);
+});

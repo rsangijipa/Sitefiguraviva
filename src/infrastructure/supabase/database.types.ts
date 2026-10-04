@@ -51,6 +51,47 @@ export type PixOrderRow = {
 export interface Database {
   public: {
     Tables: {
+      mediators: {
+        Row: {
+          id: string;
+          name: string;
+          role: string;
+          image: string;
+          bio: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          role?: string;
+          image?: string;
+          bio?: string;
+          created_at?: string;
+        };
+        Update: { name?: string; role?: string; image?: string; bio?: string };
+        Relationships: [];
+      };
+      course_mediators: {
+        Row: { course_id: string; mediator_id: string };
+        Insert: { course_id: string; mediator_id: string };
+        Update: { course_id?: string; mediator_id?: string };
+        Relationships: [
+          {
+            foreignKeyName: "course_mediators_course_id_fkey";
+            columns: ["course_id"];
+            isOneToOne: false;
+            referencedRelation: "courses";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "course_mediators_mediator_id_fkey";
+            columns: ["mediator_id"];
+            isOneToOne: false;
+            referencedRelation: "mediators";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       admin_operation_events: {
         Row: {
           id: string;

@@ -116,7 +116,6 @@ export default function CourseEditorClient({
   };
 
   const [isSaving, setIsSaving] = useState(false);
-  const [uploadingMediator, setUploadingMediator] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
 
   // Track changes
@@ -127,10 +126,6 @@ export default function CourseEditorClient({
 
   // Save handler
   const handleSaveCourse = async () => {
-    if (uploadingMediator) {
-      addToast("Aguarde o envio da foto da mediadora.", "error");
-      return;
-    }
     if (course.mediators?.some((m) => !m.name.trim())) {
       addToast("Informe o nome de cada mediadora.", "error");
       return;
@@ -230,7 +225,7 @@ export default function CourseEditorClient({
             <Button
               onClick={handleSaveCourse}
               isLoading={isSaving}
-              disabled={uploadingMediator}
+              disabled={isSaving}
               size="sm"
               className="shadow-lg shadow-primary/20"
             >
@@ -379,8 +374,7 @@ export default function CourseEditorClient({
                       <MediatorsEditor
                         value={course.mediators || []}
                         onChange={(mediators) => updateCourse({ mediators })}
-                        onUploadingChange={setUploadingMediator}
-                        disabled={isSaving || uploadingMediator}
+                        disabled={isSaving}
                       />
                     </div>
                     <FormSection

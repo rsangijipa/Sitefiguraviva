@@ -122,7 +122,13 @@ function mapCourseRow(row: CourseRow): CourseDoc {
     },
     tags: row.tags,
     details: row.details as CourseDoc["details"],
-    mediators: getCourseMediators(row.details, legacy, row.team),
+    mediators: getCourseMediators(
+      row.details,
+      legacy,
+      row.team,
+      (row as CourseRow & { course_mediators?: { mediator: unknown }[] })
+        .course_mediators,
+    ),
     syllabus: Array.isArray((row.details as any)?.syllabus)
       ? (row.details as any).syllabus
       : Array.isArray(legacy.syllabus)
@@ -266,20 +272,6 @@ function mapThreadRow(row: ThreadRow): CommunityThreadDoc {
   };
 }
 
-const mediatorSchema = z.object({
-  name: z.string().trim().min(1, "Informe o nome de cada mediadora.").max(200),
-  role: z.string().trim().max(300),
-  image: z
-    .string()
-    .max(2000)
-    .refine(
-      (value) =>
-        !value || /^\/(?!\/)/.test(value) || /^https?:\/\//i.test(value),
-      "URL da foto inválida.",
-    ),
-  bio: z.string().trim().max(20000),
-});
-
 function courseDetails(payload: MutablePayload) {
   const details = { ...payload.details };
   let changed = payload.details !== undefined;
@@ -306,10 +298,15 @@ function courseDetails(payload: MutablePayload) {
     changed = true;
   }
   if (payload.mediators !== undefined) {
-    details.mediators = z
-      .array(mediatorSchema)
+    details.mediatorIds = z
+      .array(
+        z
+          .string({ error: "Selecione mediadores cadastrados." })
+          .uuid("Selecione mediadores cadastrados."),
+      )
       .max(50)
-      .parse(payload.mediators);
+      .parse(payload.mediators.map((member: { id?: string }) => member.id));
+    delete details.mediators;
     changed = true;
   }
   return changed ? details : undefined;
@@ -361,7 +358,10 @@ function coursePayloadToInsert(
       enabled: false,
       minProgressPercent: 100,
     }),
-    legacy_payload: asJson(payload, {}),
+    legacy_payload: asJson(
+      { ...payload, mediators: undefined, details: undefined },
+      {},
+    ),
   } as TableInsert<"courses">);
 }
 
@@ -412,7 +412,7 @@ export async function listAdminCourses(): Promise<CourseDoc[]> {
   const supabase = createSupabaseServiceClient();
   const { data, error } = await supabase
     .from("courses")
-    .select("*")
+    .select("*, course_mediators(mediator:mediators(id,name,role,image,bio))")
     .order("created_at", { ascending: false });
 
   if (error) throw error;
@@ -425,7 +425,7 @@ export async function getAdminCourse(
   const supabase = createSupabaseServiceClient();
   const { data, error } = await supabase
     .from("courses")
-    .select("*")
+    .select("*, course_mediators(mediator:mediators(id,name,role,image,bio))")
     .eq("id", courseId)
     .maybeSingle();
 

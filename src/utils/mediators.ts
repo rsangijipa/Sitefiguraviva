@@ -1,4 +1,5 @@
 export interface Mediator {
+  id?: string;
   name: string;
   role: string;
   image: string;
@@ -21,6 +22,7 @@ export function getMediatorDetails(value: unknown): Mediator | null {
     return "";
   };
   return {
+    ...(typeof item.id === "string" ? { id: item.id } : {}),
     name: item.name.trim(),
     role: text("role", "title") || "Mediadora",
     image: text("image", "imageUrl", "photoURL", "photo"),
@@ -33,7 +35,16 @@ export function getCourseMediators(
   details: unknown,
   legacy: unknown,
   team: unknown,
+  links?: unknown,
 ): Mediator[] {
+  if (Array.isArray(links)) {
+    return links
+      .map((link) => getMediatorDetails(link.mediator))
+      .filter((item): item is Mediator => item !== null)
+      .sort((a, b) =>
+        a.name.localeCompare(b.name, "pt-BR", { sensitivity: "base" }),
+      );
+  }
   const saved = (details as Record<string, unknown> | null)?.mediators;
   const old = (legacy as Record<string, unknown> | null)?.mediators;
   const source = Array.isArray(saved)

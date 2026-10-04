@@ -29,7 +29,6 @@ export default function CourseCreateClient() {
   const router = useRouter();
   const { addToast } = useToast();
   const [isCreating, setIsCreating] = useState(false);
-  const [uploadingMediator, setUploadingMediator] = useState(false);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -82,10 +81,6 @@ export default function CourseCreateClient() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (uploadingMediator) {
-      addToast("Aguarde o envio da foto da mediadora.", "error");
-      return;
-    }
     if (formData.mediators.some((m) => !m.name.trim())) {
       addToast("Informe o nome de cada mediadora.", "error");
       return;
@@ -163,7 +158,7 @@ export default function CourseCreateClient() {
           <Button
             onClick={handleSubmit}
             isLoading={isCreating}
-            disabled={uploadingMediator}
+            disabled={isCreating}
             size="sm"
             className="shadow-lg shadow-primary/20"
           >
@@ -363,8 +358,7 @@ export default function CourseCreateClient() {
                   onChange={(mediators) =>
                     setFormData((prev) => ({ ...prev, mediators }))
                   }
-                  onUploadingChange={setUploadingMediator}
-                  disabled={isCreating || uploadingMediator}
+                  disabled={isCreating}
                 />
               </div>
               <FormSection

@@ -83,7 +83,16 @@ export function mapPublicCourse(row: TableRow<"courses">): ContentRecord {
     tags: row.tags,
     details: row.details,
     team: row.team,
-    mediators: getCourseMediators(row.details, legacy, row.team),
+    mediators: getCourseMediators(
+      row.details,
+      legacy,
+      row.team,
+      (
+        row as TableRow<"courses"> & {
+          course_mediators?: { mediator: unknown }[];
+        }
+      ).course_mediators,
+    ),
     date: details.date ?? legacy.date ?? row.duration_label,
     frequency: details.frequency ?? legacy.frequency ?? null,
     syllabus: Array.isArray(details.syllabus)
@@ -170,7 +179,11 @@ export async function listContent(
   const supabase = createSupabaseBrowserClient();
 
   if (kind === "courses") {
-    let query = supabase.from("courses").select("*");
+    let query = supabase
+      .from("courses")
+      .select(
+        "*, course_mediators(mediator:mediators(id,name,role,image,bio))",
+      );
     if (publishedOnly) {
       query = query.eq("is_published", true).in("status", ["open", "closed"]);
     }
@@ -240,7 +253,7 @@ export async function getPublishedCourseByField(
 ): Promise<ContentRecord | null> {
   const { data, error } = await createSupabaseBrowserClient()
     .from("courses")
-    .select("*")
+    .select("*, course_mediators(mediator:mediators(id,name,role,image,bio))")
     .eq("is_published", true)
     .in("status", ["open", "closed"])
     .eq(field, value)

@@ -9,6 +9,7 @@ import { adminCourseService } from "@/services/adminCourseService";
 import { CourseDoc } from "@/types/lms";
 import { useToast } from "@/context/ToastContext";
 import { AdminPageShell } from "@/components/admin/AdminPageShell";
+import MediatorsRegistry from "@/components/admin/courses/MediatorsRegistry";
 
 export default function CoursesPage() {
   const router = useRouter();
@@ -95,6 +96,7 @@ export default function CoursesPage() {
       }
     >
       {/* Filters */}
+      <MediatorsRegistry />
       <div className="flex gap-4 items-center bg-white p-2 pl-4 rounded-xl border border-stone-100 w-full md:w-fit">
         <Search size={18} className="text-stone-400" />
         <input
@@ -231,7 +233,6 @@ export default function CoursesPage() {
           ))}
         </div>
       )}
-
     </AdminPageShell>
   );
 }

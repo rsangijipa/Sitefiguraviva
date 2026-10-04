@@ -1,4 +1,5 @@
 import "server-only";
+import { getCourseMediators } from "@/utils/mediators";
 
 import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import type { TableRow } from "@/infrastructure/supabase/database.types";
@@ -40,6 +41,13 @@ function mapCourse(row: CourseRow): CourseRecord {
     stripeProductId: row.stripe_product_id,
     tags: row.tags,
     details: row.details,
+    mediators: getCourseMediators(
+      row.details,
+      row.legacy_payload,
+      row.team,
+      (row as CourseRow & { course_mediators?: { mediator: unknown }[] })
+        .course_mediators,
+    ),
     team: row.team,
     stats: row.stats,
     communityEnabled: row.community_enabled,
@@ -88,7 +96,7 @@ export async function listPublishedCourses(): Promise<CourseRecord[]> {
   const supabase = createSupabaseServiceClient();
   const { data, error } = await supabase
     .from("courses")
-    .select("*")
+    .select("*, course_mediators(mediator:mediators(id,name,role,image,bio))")
     .eq("is_published", true)
     .eq("status", "open")
     .order("created_at", { ascending: false });
@@ -103,7 +111,7 @@ export async function getCourseById(
   const supabase = createSupabaseServiceClient();
   const { data, error } = await supabase
     .from("courses")
-    .select("*")
+    .select("*, course_mediators(mediator:mediators(id,name,role,image,bio))")
     .eq("id", courseId)
     .maybeSingle();
 
@@ -121,7 +129,11 @@ export async function getCourseOutlineById(
     { data: modules, error: modulesError },
     { data: lessons, error: lessonsError },
   ] = await Promise.all([
-    supabase.from("courses").select("*").eq("id", courseId).maybeSingle(),
+    supabase
+      .from("courses")
+      .select("*, course_mediators(mediator:mediators(id,name,role,image,bio))")
+      .eq("id", courseId)
+      .maybeSingle(),
     supabase
       .from("course_modules")
       .select("*")

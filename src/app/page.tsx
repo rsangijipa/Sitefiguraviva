@@ -44,7 +44,9 @@ async function getHomeData() {
     const [{ data: courseRows }, { data: postRows }] = await Promise.all([
       supabase
         .from("courses")
-        .select("*")
+        .select(
+          "*, course_mediators(mediator:mediators(id,name,role,image,bio))",
+        )
         .eq("is_published", true)
         .in("status", ["open", "closed"])
         .order("created_at", { ascending: false })
