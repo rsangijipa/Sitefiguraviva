@@ -83,9 +83,9 @@ export default async function InstitutePage() {
           </p>
           <div>
             <h2 className="font-serif text-4xl leading-tight text-primary md:text-5xl">
-              Presença que se torna prática.
+              {institute.manifesto_title}
             </h2>
-            <p className="mt-6 text-lg leading-relaxed text-primary/70">
+            <p className="mt-6 whitespace-pre-line text-lg leading-relaxed text-primary/70">
               {manifesto}
             </p>
           </div>

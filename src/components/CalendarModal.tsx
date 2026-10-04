@@ -1,3 +1,4 @@
+import { usePublicContact } from "@/features/public-site/components/PublicContactProvider";
 import {
   Modal,
   ModalContent,
@@ -30,6 +31,7 @@ export default function CalendarModal({
   onClose,
   courses,
 }: CalendarModalProps) {
+  const contact = usePublicContact();
   const MONTHS: Record<string, number> = {
     jan: 0,
     fev: 1,
@@ -226,7 +228,7 @@ export default function CalendarModal({
         </ModalBody>
         <ModalFooter className="bg-stone-50 border-t border-stone-100 text-center">
           <a
-            href="https://wa.me/5569992481585"
+            href={`https://wa.me/${contact.whatsappNumber}?text=${encodeURIComponent(contact.whatsappMessage)}`}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary hover:text-gold transition-colors"

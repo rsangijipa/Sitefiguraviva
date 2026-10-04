@@ -38,14 +38,11 @@ jest.mock("@/lib/audit", () => ({
   logAudit: jest.fn(),
 }));
 
-jest.mock("sharp", () => {
-  const mockSharp = jest.fn(() => ({
-    resize: jest.fn().mockReturnThis(),
-    webp: jest.fn().mockReturnThis(),
-    toBuffer: jest.fn().mockResolvedValue(Buffer.from("mock-sanitized-buffer")),
-  }));
-  return mockSharp;
-});
+jest.mock("@/lib/image-compression.server", () => ({
+  compressImage: jest
+    .fn()
+    .mockResolvedValue({ body: Buffer.from("mock-sanitized-buffer") }),
+}));
 
 jest.mock("@/lib/auth/server", () => ({
   verifySession: jest.fn(),

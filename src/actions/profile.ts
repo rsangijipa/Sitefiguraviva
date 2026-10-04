@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { logAudit } from "@/lib/audit";
 import { z } from "zod";
-import sharp from "sharp";
+import { compressImage } from "@/lib/image-compression.server";
 import { logger } from "@/lib/logger";
 import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import { uploadPublicAvatar } from "@/infrastructure/supabase/storage.server";
@@ -196,38 +196,23 @@ export async function uploadAvatar(formData: FormData) {
       return { error: `Arquivo muito grande. Máximo ${MAX_SIZE_MB}MB.` };
     }
 
-    // 2. Multi-step Sanitization (P1)
+    // 2. Sanitize and compress with the same pipeline used by the upload API.
     const rawBuffer = Buffer.from(await file.arrayBuffer());
-
-    // Sanitization must never be skippable in production: this flag exists
-    // only to speed up local development when Sharp's native binary isn't
-    // available, and is hard-disabled outside development regardless of the
-    // env value (see P1-04 in docs/RELATORIO_AUDITORIA_COMPLETA_2026-09-04.md).
-    const BYPASS_SHARP =
-      process.env.NODE_ENV !== "production" &&
-      process.env.DEBUG_BYPASS_SHARP === "true";
     let sanitizedBuffer: Buffer;
-
-    if (BYPASS_SHARP) {
-      logger.warn("[uploadAvatar] Sharp sanitization bypassed (dev only)");
-      sanitizedBuffer = rawBuffer;
-    } else {
-      // Remove EXIF, resize to 512px, convert to WebP for optimization
-      try {
-        sanitizedBuffer = await sharp(rawBuffer)
-          .resize(512, 512, {
-            fit: "cover",
-            position: "center",
-          })
-          .webp({ quality: 85 })
-          .toBuffer();
-      } catch (sharpError: any) {
-        logger.error("[uploadAvatar] Sharp sanitization failed", {
-          uid,
-          message: sharpError.message,
-        });
-        return { error: "Falha no processamento da imagem." };
-      }
+    try {
+      sanitizedBuffer = (
+        await compressImage(rawBuffer, file.type, {
+          avatar: true,
+          quality: 85,
+          maxBytes: MAX_SIZE_MB * 1024 * 1024,
+        })
+      ).body;
+    } catch (sharpError: any) {
+      logger.error("[uploadAvatar] Sharp sanitization failed", {
+        uid,
+        message: sharpError.message,
+      });
+      return { error: "Falha no processamento da imagem." };
     }
 
     const publicUrl = await uploadPublicAvatar({

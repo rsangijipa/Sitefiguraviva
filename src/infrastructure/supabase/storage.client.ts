@@ -114,6 +114,25 @@ export async function uploadAdminAsset(
   }
   validateUploadFile(file, normalizedOptions);
 
+  if (file.type.startsWith("image/")) {
+    const { data, error } =
+      await createSupabaseBrowserClient().auth.getSession();
+    if (error || !data.session) throw new Error("Faça login novamente.");
+    const form = new FormData();
+    form.set("file", file);
+    form.set("folder", normalizedOptions.folder.replace(/^\/+|\/+$/g, ""));
+    form.set("bucket", normalizedOptions.bucket);
+    const response = await fetch("/api/admin/images/upload", {
+      method: "POST",
+      body: form,
+      headers: { Authorization: `Bearer ${data.session.access_token}` },
+    });
+    const result = await response.json();
+    if (!response.ok)
+      throw new Error(result.error || "Não foi possível enviar a imagem.");
+    return result;
+  }
+
   const path = buildStoragePath(normalizedOptions.folder, file.name);
   const supabase = createSupabaseBrowserClient();
   const storage = supabase.storage.from(normalizedOptions.bucket);

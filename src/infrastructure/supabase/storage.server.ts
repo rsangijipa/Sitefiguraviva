@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createSupabaseServiceClient } from "./server";
+import { compressImage } from "@/lib/image-compression.server";
 
 const PUBLIC_COURSE_ASSETS_BUCKET = "course-assets";
 const PUBLIC_AVATARS_BUCKET = "public-avatars";
@@ -22,13 +23,20 @@ export async function uploadPublicCourseAsset(input: {
   body: Buffer;
   contentType: string;
 }): Promise<string> {
+  const image = input.contentType.startsWith("image/")
+    ? await compressImage(input.body, input.contentType, { format: "source" })
+    : null;
   const storage = createSupabaseServiceClient().storage.from(
     PUBLIC_COURSE_ASSETS_BUCKET,
   );
-  const { error } = await storage.upload(input.path, input.body, {
-    contentType: input.contentType,
-    upsert: true,
-  });
+  const { error } = await storage.upload(
+    input.path,
+    image?.body ?? input.body,
+    {
+      contentType: image?.contentType ?? input.contentType,
+      upsert: true,
+    },
+  );
 
   if (error) {
     throw error;

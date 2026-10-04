@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { Mediator } from "@/utils/mediators";
 
 /** Serializable timestamp shape shared by database and UI adapters. */
 export type Timestamp = {
@@ -75,6 +76,7 @@ export interface CourseDoc {
   level?: string;
   category?: string;
   syllabus?: string[]; // Basic curriculum/ementa shown to prospective students before enrollment
+  mediators?: Mediator[];
 
   // Status & Visibility
   isPublished: boolean;
@@ -91,6 +93,7 @@ export interface CourseDoc {
   // Metadata
   tags?: string[];
   details?: {
+    mediators?: Mediator[];
     syllabus?: string[];
     intro?: string; // Short intro text
     duration?: string; // "10 semanas"

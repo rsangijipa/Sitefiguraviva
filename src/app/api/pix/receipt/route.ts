@@ -5,6 +5,8 @@ import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import { MAX_PIX_RECEIPT_BYTES, pixReceiptType } from "@/lib/pix-receipt";
 import { rateLimit, RateLimitPresets } from "@/lib/rateLimit";
 import { revalidatePath } from "next/cache";
+import { compressImage } from "@/lib/image-compression.server";
+export const runtime = "nodejs";
 export async function POST(req: NextRequest) {
   const claims = await getBearerSupabaseSessionClaims(req);
   if (!claims?.isActive)
@@ -107,10 +109,17 @@ export async function POST(req: NextRequest) {
       );
     const objectPath =
       claims.uid + "/" + orderId + "/" + randomUUID() + "." + type.extension;
+    const image = type.contentType.startsWith("image/")
+      ? await compressImage(bytes, type.contentType, {
+          format: "source",
+          maxDimension: 2560,
+          quality: 88,
+        })
+      : null;
     const { error: uploadError } = await db.storage
       .from("pix-receipts")
-      .upload(objectPath, bytes, {
-        contentType: type.contentType,
+      .upload(objectPath, image?.body ?? bytes, {
+        contentType: image?.contentType ?? type.contentType,
         upsert: false,
       });
     if (uploadError) throw uploadError;

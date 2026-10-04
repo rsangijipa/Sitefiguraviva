@@ -1,10 +1,12 @@
 import { createClient } from "@supabase/supabase-js";
+import { validateSupabaseKey } from "../src/infrastructure/supabase/environment.js";
 import dotenv from "dotenv";
 import { access, readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { updateCourseCover } from "./upload-course-covers-lib.mjs";
+import { compressImage } from "../src/lib/image-compression.js";
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(scriptDirectory, "..");
@@ -22,13 +24,14 @@ if (unknownArguments.length > 0) {
   process.exit(1);
 }
 
-const requiredEnvironment = [
-  "NEXT_PUBLIC_SUPABASE_URL",
-  "SUPABASE_SERVICE_ROLE_KEY",
-];
+const requiredEnvironment = ["NEXT_PUBLIC_SUPABASE_URL"];
+const serviceKey =
+  process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
 const missingEnvironment = requiredEnvironment.filter(
   (name) => !process.env[name],
 );
+if (!serviceKey)
+  missingEnvironment.push("SUPABASE_SECRET_KEY or SUPABASE_SERVICE_ROLE_KEY");
 
 if (missingEnvironment.length > 0) {
   console.error(
@@ -59,9 +62,14 @@ const courseCovers = [
   },
 ];
 
+validateSupabaseKey(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  serviceKey,
+  "service",
+);
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
+  serviceKey,
   {
     auth: {
       persistSession: false,
@@ -107,11 +115,16 @@ async function resolveCourse({ slug, title }) {
 
 async function uploadCover(cover, course) {
   const body = await readFile(path.join(projectRoot, cover.localPath));
+  const image = await compressImage(body, "image/jpeg", { format: "source" });
   const storage = supabase.storage.from("course-assets");
-  const { error: uploadError } = await storage.upload(cover.objectPath, body, {
-    contentType: "image/jpeg",
-    upsert: true,
-  });
+  const { error: uploadError } = await storage.upload(
+    cover.objectPath,
+    image.body,
+    {
+      contentType: image.contentType,
+      upsert: true,
+    },
+  );
 
   if (uploadError) {
     throw uploadError;

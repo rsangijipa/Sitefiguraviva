@@ -1,39 +1,17 @@
 "use client";
 
+import { DEFAULT_HOME, type HomeSettings } from "@/lib/site-content";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const faqs = [
-  {
-    question: "Os cursos possuem certificado?",
-    answer:
-      "Sim. Todos os nossos cursos e vivências emitem certificado digital de participação e conclusão, válidos como horas complementares e atualização profissional.",
-  },
-  {
-    question: "As aulas são ao vivo ou gravadas?",
-    answer:
-      "Oferecemos um modelo híbrido. A base teórica está disponível em aulas gravadas de alta qualidade para você assistir quando quiser, complementada por encontros ao vivo para dúvidas e práticas.",
-  },
-  {
-    question: "Preciso ser psicólogo para participar?",
-    answer:
-      "Nossos cursos de Introdução são abertos a todos interessados no desenvolvimento humano. Já as Formações Clínicas são exclusivas para psicólogos e estudantes de psicologia a partir do 7º período.",
-  },
-  {
-    question: "Como funciona o acesso à plataforma?",
-    answer:
-      "O acesso é imediato após a confirmação da matrícula. Você terá um login exclusivo em nossa Área do Aluno, onde encontrará todo o material, comunidade e suporte.",
-  },
-  {
-    question: "E se eu não me adaptar à metodologia?",
-    answer:
-      "Prezamos pela sua satisfação. Oferecemos uma garantia incondicional de 7 dias. Se sentir que não é o momento, devolvemos seu investimento integralmente.",
-  },
-];
-
-export default function FAQSection() {
+export default function FAQSection({
+  content = DEFAULT_HOME,
+}: {
+  content?: HomeSettings;
+}) {
+  const faqs = content.faqs;
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
@@ -41,7 +19,7 @@ export default function FAQSection() {
       <div className="fv-container max-w-4xl">
         <div className="text-center mb-16">
           <span className="fv-eyebrow mb-4">Dúvidas Comuns</span>
-          <h2 className="heading-section">Perguntas Frequentes</h2>
+          <h2 className="heading-section">{content.faqTitle}</h2>
         </div>
 
         <div className="border-t border-border">

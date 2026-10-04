@@ -1,0 +1,82 @@
+{
+  "date": "2026-10-04",
+  "snapshotFrozenAt": "2026-10-04T07:03:57.995Z",
+  "snapshotFileCount": 1212,
+  "checks": [
+    {
+      "name": "lint",
+      "exitCode": 0
+    },
+    {
+      "name": "scripts",
+      "exitCode": 0,
+      "passed": 30
+    },
+    {
+      "name": "Jest",
+      "exitCode": 0,
+      "passed": 528,
+      "skipped": 7,
+      "suitesPassed": 120,
+      "suitesSkipped": 1
+    },
+    {
+      "name": "types",
+      "exitCode": 0
+    },
+    {
+      "name": "build",
+      "exitCode": 0
+    }
+  ],
+  "routes": {
+    "appRouterEntries": 115,
+    "added": [
+      "/api/admin/images/upload/route"
+    ],
+    "removed": []
+  },
+  "scope": {
+    "platform": "Windows, Node 26.5.0; native compiler",
+    "dependencies": "Workspace node_modules junction; installed versions unchanged",
+    "environment": "Local fake fixtures; no .env or operational credentials",
+    "remoteWrites": false,
+    "productionHomologation": false
+  },
+  "afterFreeze": {
+    "checkedAt": "2026-10-04T07:16:07.832Z",
+    "changedFiles": [
+      "src/app/admin/(protected)/courses/[id]/page.tsx",
+      "src/components/admin/ImageUpload.tsx",
+      "src/components/admin/__tests__/ImageUpload.test.tsx",
+      "src/components/sections/HeroSection.tsx",
+      "src/features/courses/infrastructure/__tests__/supabaseAdminCourseRepository.test.ts",
+      "next.config.mjs",
+      "tsconfig.json",
+      "next-env.d.ts"
+    ],
+    "scope": "Later parallel edits preserved; not covered by the frozen build/browser verification"
+  },
+  "attempts": [
+    {
+      "snapshot": "initial",
+      "result": "lint/scripts/types/build passed; two Jest regressions found and fixed"
+    },
+    {
+      "snapshot": "second",
+      "result": "Jest runner failed during parallel upload/test transition; stopped scoped process tree, log retained"
+    },
+    {
+      "snapshot": "consolidated",
+      "result": "lint/scripts/Jest/types/build passed"
+    }
+  ],
+  "browser": {
+    "exitCode": 0,
+    "seconds": 151,
+    "browser": "Local Chromium 153; CI uses Playwright-pinned Chromium",
+    "fixture": "Read-only local HTTP, fake credentials; no remote calls",
+    "passed": 5
+  },
+  "manifestSha256": "6617323d2b6976cfa04c7b4bf8c491a6c38605fb1f18aa8be891f6d7dcedf82b"
+}

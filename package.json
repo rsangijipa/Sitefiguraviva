@@ -21,7 +21,7 @@
     "typecheck": "tsc --noEmit",
     "prepare": "husky",
     "test:unit": "jest --runInBand",
-    "test:scripts": "node --test scripts/upload-course-covers.test.mjs scripts/upload-course-covers-lib.test.mjs scripts/e2e-preflight.test.mjs",
+    "test:scripts": "node --test scripts/upload-course-covers.test.mjs scripts/upload-course-covers-lib.test.mjs scripts/e2e-preflight.test.mjs scripts/supabase-environment.test.mjs",
     "check:ci": "node scripts/check-ci.mjs",
     "test:e2e:preflight": "node scripts/e2e-preflight.mjs"
   },

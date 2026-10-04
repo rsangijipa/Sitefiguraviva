@@ -116,6 +116,7 @@ test_smoke*
 !/scripts/ci-fixture.mjs
 !/scripts/e2e-preflight.mjs
 !/scripts/e2e-preflight.test.mjs
+!/scripts/supabase-environment.test.mjs
 /*.js
 !/next.config.mjs
 !/eslint.config.mjs

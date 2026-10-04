@@ -3,10 +3,12 @@
  * Run with DRY_RUN=1 first, then `npm run migrate:assessment-attachments`.
  */
 import { createClient } from "@supabase/supabase-js";
+import { validateSupabaseKey } from "../src/infrastructure/supabase/environment.js";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-if (!url || !key) throw new Error("NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required");
+const key = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+if (!url || !key) throw new Error("Supabase URL and a server-only secret/service-role key are required");
+validateSupabaseKey(url, key, "service");
 const supabase = createClient(url, key, { auth: { persistSession: false } });
 const dryRun = process.env.DRY_RUN === "1";
 const publicPrefix = "/storage/v1/object/public/course-assets/";

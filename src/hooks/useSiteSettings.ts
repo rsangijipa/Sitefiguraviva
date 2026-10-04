@@ -16,6 +16,7 @@ export const useFounderSettings = (initialData?: FounderSettings) => {
     queryKey: ["siteSettings", "founder"],
     queryFn: () => getSiteSettings<FounderSettings>("founder", DEFAULT_FOUNDER),
     initialData: initialData ?? DEFAULT_FOUNDER,
+    initialDataUpdatedAt: initialData ? Date.now() : 0,
     staleTime: 1000 * 60, // 1 minute
   });
 };
@@ -26,6 +27,7 @@ export const useInstituteSettings = (initialData?: InstituteSettings) => {
     queryFn: () =>
       getSiteSettings<InstituteSettings>("institute", DEFAULT_INSTITUTE),
     initialData: initialData ?? DEFAULT_INSTITUTE,
+    initialDataUpdatedAt: initialData ? Date.now() : 0,
     staleTime: 1000 * 60,
   });
 };
@@ -35,6 +37,7 @@ export const useSEOSettings = (initialData?: SEOSettings) => {
     queryKey: ["siteSettings", "seo"],
     queryFn: () => getSiteSettings<SEOSettings>("seo", DEFAULT_SEO),
     initialData: initialData ?? DEFAULT_SEO,
+    initialDataUpdatedAt: initialData ? Date.now() : 0,
     staleTime: 1000 * 60 * 60, // 1 hour
   });
 };
@@ -44,6 +47,7 @@ export const useConfigSettings = (initialData?: ConfigSettings) => {
     queryKey: ["siteSettings", "config"],
     queryFn: () => getSiteSettings<ConfigSettings>("config", DEFAULT_CONFIG),
     initialData: initialData ?? DEFAULT_CONFIG,
+    initialDataUpdatedAt: initialData ? Date.now() : 0,
     staleTime: 1000 * 60,
   });
 };
@@ -60,6 +64,7 @@ export const useTeamSettings = (initialData?: TeamSettings) => {
     queryKey: ["siteSettings", "team"],
     queryFn: () => getSiteSettings<TeamSettings>("team", DEFAULT_TEAM),
     initialData: initialData ?? DEFAULT_TEAM,
+    initialDataUpdatedAt: initialData ? Date.now() : 0,
     staleTime: 1000 * 60 * 5,
   });
 };
@@ -72,6 +77,7 @@ export const useLegalSettings = (options?: {
     queryKey: ["siteSettings", "legal"],
     queryFn: () => getSiteSettings<LegalSettings>("legal", DEFAULT_LEGAL),
     initialData: options?.initialData ?? DEFAULT_LEGAL,
+    initialDataUpdatedAt: options?.initialData ? Date.now() : 0,
     staleTime: options?.aggressiveRefresh ? 0 : 1000 * 60,
     refetchOnMount: "always",
     refetchOnWindowFocus: true,

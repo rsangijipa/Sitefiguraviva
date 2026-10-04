@@ -30,6 +30,14 @@ Um Preview só serve como homologação se também usa Auth, banco, Storage e co
 
 O domínio registrado na UOL não muda a configuração das chaves Supabase. Não há necessidade de alterar DNS para revogar credenciais. SMTP, destinatários permitidos e dados bancários/Pix continuam dependendo de configuração e teste reais.
 
+## Bloqueio no código — bloco 13
+
+A build verifica as variáveis públicas antes da compilação. Os clientes e os scripts de manutenção revisados recusam URLs/chaves dos dois projetos históricos e a combinação de URL/chave legada de projetos diferentes. Chaves sb_secret_ e JWTs service_role são recusados no navegador; o cliente privilegiado não aceita chave pública como substituta. Erros não mostram os valores das chaves.
+
+O navegador aceita NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ou NEXT_PUBLIC_SUPABASE_ANON_KEY. No servidor, SUPABASE_SECRET_KEY tem precedência sobre SUPABASE_SERVICE_ROLE_KEY. As duas aliases configuradas são verificadas na build: retire valores antigos não utilizados em vez de deixá-los ao lado da chave nova. RATE_LIMIT_HASH_SECRET pode manter a identidade dos contadores durante rotação; sua mudança também precisa ser coordenada. Não há necessidade de trocar as chaves atuais somente para usar estas proteções.
+
+Este bloqueio reconhece os formatos conhecidos e verifica coerência de configuração. A API Supabase ainda valida a credencial; o código não verifica assinaturas JWT nem comprova revogação. O histórico principal foi substituído e seu backup privado preservado no bloco 12; cópias, PRs, forks e caches anteriores podem continuar existindo.
+
 ## Confirmação que falta
 
 Informar apenas: projeto antigo encontrado/excluído; categorias de credenciais revogadas e data; endereço de homologação com banco separado; banco recebedor Pix. Não é necessário enviar valores secretos.

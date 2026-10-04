@@ -1,0 +1,94 @@
+[
+  {
+    "name": "desktop",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "scroll": {
+      "top": 0,
+      "height": 694,
+      "full": 1005,
+      "prevent": true
+    },
+    "scrollAfterWheel": 311,
+    "backgroundMovementPx": 0,
+    "bodyLocked": true,
+    "keyboardClose": true,
+    "focusRestored": true,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "mobile",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "scroll": {
+      "top": 0,
+      "height": 646,
+      "full": 1643,
+      "prevent": true
+    },
+    "scrollAfterWheel": 480,
+    "backgroundMovementPx": 0,
+    "bodyLocked": true,
+    "keyboardClose": true,
+    "focusRestored": true,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "small-mobile",
+    "viewport": {
+      "width": 320,
+      "height": 740
+    },
+    "scroll": {
+      "top": 0,
+      "height": 558,
+      "full": 1995,
+      "prevent": true
+    },
+    "scrollAfterWheel": 480,
+    "backgroundMovementPx": 0,
+    "bodyLocked": true,
+    "keyboardClose": true,
+    "focusRestored": true,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "path": "/",
+    "status": 200,
+    "h1": [
+      "Figura Viva"
+    ],
+    "errors": []
+  },
+  {
+    "path": "/instituto",
+    "status": 200,
+    "h1": [
+      "O Instituto Figura Viva"
+    ],
+    "errors": []
+  },
+  {
+    "path": "/instituto/fundadora",
+    "status": 200,
+    "h1": [
+      "Lilian Vanessa Nicacio Gusmão"
+    ],
+    "errors": []
+  },
+  {
+    "path": "/instituto/manifesto",
+    "status": 200,
+    "h1": [
+      "Habitar a Fronteira"
+    ],
+    "errors": []
+  }
+]

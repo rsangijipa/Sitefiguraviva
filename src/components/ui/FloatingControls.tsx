@@ -1,5 +1,6 @@
 "use client";
 
+import { usePublicContact } from "@/features/public-site/components/PublicContactProvider";
 import { useEffect, useRef, useState } from "react";
 import {
   MessageCircle,
@@ -13,13 +14,10 @@ import {
 
 import { useTheme } from "@/components/providers/ThemeProvider";
 
-const whatsappNumber =
-  process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "5569992481585";
-const whatsappMessage =
-  process.env.NEXT_PUBLIC_WHATSAPP_MESSAGE ||
-  "Olá! Gostaria de saber mais sobre as formações do Instituto Figura Viva.";
-
 export default function FloatingControls() {
+  const config = usePublicContact();
+  const whatsappNumber = config.whatsappNumber || "";
+  const whatsappMessage = config.whatsappMessage || "";
   const [isPlaying, setIsPlaying] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -33,9 +31,7 @@ export default function FloatingControls() {
         : "Tema claro";
 
   const cyclePreference = () => {
-    setPreference(
-      preference === "light" ? "dark" : "light",
-    );
+    setPreference(preference === "light" ? "dark" : "light");
   };
 
   const toggleAudio = async () => {
@@ -51,12 +47,14 @@ export default function FloatingControls() {
 
   return (
     <div className="pointer-events-none fixed bottom-6 right-6 z-[100] flex flex-col items-end">
-      <audio
-        ref={audioRef}
-        src="/assets/audio/meditation.mp3"
-        preload="metadata"
-        loop
-      />
+      {config.showAudioControl && (
+        <audio
+          ref={audioRef}
+          src="/assets/audio/meditation.mp3"
+          preload="metadata"
+          loop
+        />
+      )}
       <div className="pointer-events-auto flex flex-col items-end gap-3">
         <a
           data-floating-whatsapp="true"
@@ -92,21 +90,23 @@ export default function FloatingControls() {
                 <Sun size={18} aria-hidden="true" />
               )}
             </button>
-            <button
-              type="button"
-              onClick={toggleAudio}
-              aria-label={
-                isPlaying ? "Pausar som ambiente" : "Tocar som ambiente"
-              }
-              title={isPlaying ? "Pausar som ambiente" : "Tocar som ambiente"}
-              className={controlClass}
-            >
-              {isPlaying ? (
-                <Pause size={18} aria-hidden="true" />
-              ) : (
-                <Music size={18} aria-hidden="true" />
-              )}
-            </button>
+            {config.showAudioControl && (
+              <button
+                type="button"
+                onClick={toggleAudio}
+                aria-label={
+                  isPlaying ? "Pausar som ambiente" : "Tocar som ambiente"
+                }
+                title={isPlaying ? "Pausar som ambiente" : "Tocar som ambiente"}
+                className={controlClass}
+              >
+                {isPlaying ? (
+                  <Pause size={18} aria-hidden="true" />
+                ) : (
+                  <Music size={18} aria-hidden="true" />
+                )}
+              </button>
+            )}
           </div>
         )}
 

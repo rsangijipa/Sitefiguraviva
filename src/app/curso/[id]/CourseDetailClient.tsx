@@ -3,13 +3,24 @@
 import { useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Calendar, MapPin, ArrowLeft, ExternalLink, X } from "lucide-react";
+import {
+  Calendar,
+  MapPin,
+  ArrowLeft,
+  ExternalLink,
+  X,
+  Pointer,
+  Clock,
+} from "lucide-react";
 import { getMediatorDetails } from "@/utils/mediators";
 import { getImageSrc } from "@/lib/imageUtils";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import MediatorDialog from "@/components/MediatorDialog";
+import { usePublicContact } from "@/features/public-site/components/PublicContactProvider";
 
 export default function CourseDetailClient({ course }: { course: any }) {
+  const config = usePublicContact();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -25,20 +36,23 @@ export default function CourseDetailClient({ course }: { course: any }) {
     if (course.mediators && Array.isArray(course.mediators)) {
       const foundInCourse = course.mediators.find((m: any) => {
         if (typeof m === "string") return m === mediatorParam;
-        return m.name === mediatorParam;
+        return m?.name === mediatorParam;
       });
       if (foundInCourse) {
         selectedMediator = getMediatorDetails(foundInCourse);
       }
     }
-    if (!selectedMediator) {
-      selectedMediator = getMediatorDetails(mediatorParam);
-    }
   }
 
-  // Empty fallback so a portrait from the suspended legacy bucket falls back
-  // to the initials placeholder instead of rendering a broken image.
-  const selectedMediatorImage = getImageSrc(selectedMediator?.image, "");
+  const closeMediator = () => {
+    const current = new URLSearchParams(searchParams.toString());
+    current.delete("mediator");
+    window.history.replaceState(
+      null,
+      "",
+      `${pathname}${current.size ? `?${current.toString()}` : ""}${window.location.hash}`,
+    );
+  };
 
   const getCoverImage = () => {
     if (!course) return "";
@@ -65,7 +79,7 @@ export default function CourseDetailClient({ course }: { course: any }) {
   return (
     <div className="bg-paper min-h-screen">
       <Navbar />
-      <div className="pt-32 pb-20 md:pt-40">
+      <div className="pt-32 pb-20 md:pt-40 outline-none">
         <div className="container mx-auto px-6 max-w-6xl relative">
           <button
             onClick={() => router.push("/curso")}
@@ -75,7 +89,7 @@ export default function CourseDetailClient({ course }: { course: any }) {
             <ArrowLeft size={16} /> Voltar para Formações
           </button>
 
-          <div className="grid lg:grid-cols-2 gap-16 items-start mb-24">
+          <div className="grid lg:grid-cols-2 gap-8 md:gap-12 items-start mb-12 md:mb-20">
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
@@ -102,9 +116,12 @@ export default function CourseDetailClient({ course }: { course: any }) {
                 Array.isArray(course.mediators) &&
                 course.mediators.length > 0 && (
                   <div className="border-l-4 border-accent/20 pl-6 py-2">
-                    <h4 className="text-xs font-bold uppercase tracking-widest text-accent mb-3">
+                    <h2 className="text-xs font-bold uppercase tracking-widest text-accent mb-3">
                       Mediadoras
-                    </h4>
+                    </h2>
+                    <p className="mb-4 text-sm text-primary/70">
+                      Toque no nome para ver a foto e o currículo.
+                    </p>
                     <div className="flex flex-wrap gap-4">
                       {course.mediators.map((mediator: any, index: number) => {
                         const details = getMediatorDetails(mediator);
@@ -122,9 +139,15 @@ export default function CourseDetailClient({ course }: { course: any }) {
                                 Array.from(searchParams.entries()),
                               );
                               current.set("mediator", name);
-                              router.push(`${pathname}?${current.toString()}`);
+                              window.history.pushState(
+                                null,
+                                "",
+                                `${pathname}?${current.toString()}${window.location.hash}`,
+                              );
                             }}
-                            className="flex items-center gap-3 bg-white p-2 pr-4 rounded-full shadow-sm hover:shadow-md transition-all border border-transparent hover:border-gold/30 group"
+                            aria-haspopup="dialog"
+                            aria-label={`Ver currículo de ${details.name}`}
+                            className="flex min-h-12 max-w-full items-center gap-3 bg-white p-2 pr-4 rounded-2xl shadow-sm transition-colors border border-primary/20 hover:border-gold group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
                           >
                             <div className="w-10 h-10 rounded-full bg-stone-100 overflow-hidden shrink-0 border border-stone-200">
                               {avatarSrc ? (
@@ -139,9 +162,14 @@ export default function CourseDetailClient({ course }: { course: any }) {
                                 </div>
                               )}
                             </div>
-                            <span className="text-sm font-bold text-primary group-hover:text-gold transition-colors">
+                            <span className="text-left text-sm font-bold text-primary group-hover:text-gold transition-colors">
                               {details.name}
                             </span>
+                            <Pointer
+                              size={18}
+                              className="shrink-0 text-gold"
+                              aria-hidden="true"
+                            />
                           </button>
                         );
                       })}
@@ -149,15 +177,44 @@ export default function CourseDetailClient({ course }: { course: any }) {
                   </div>
                 )}
 
-              <div className="space-y-4 pt-4">
-                <div className="flex items-center gap-4 text-primary/70">
-                  <Calendar className="text-gold shrink-0" size={20} />
-                  <span className="font-light text-lg">{course.date}</span>
-                </div>
-                <div className="flex items-center gap-4 text-primary/70">
-                  <MapPin className="text-gold shrink-0" size={20} />
-                  <span className="font-light text-lg">Online via Zoom</span>
-                </div>
+              <div className="space-y-4 rounded-2xl border border-primary/15 bg-white p-5">
+                <h2 className="text-xs font-bold uppercase tracking-widest text-primary/70">
+                  Informações do curso
+                </h2>
+                <dl className="grid gap-4 sm:grid-cols-2">
+                  {course.date && (
+                    <div>
+                      <dt className="flex items-center gap-2 text-sm font-semibold text-primary">
+                        <Calendar size={17} className="text-gold" /> Período
+                      </dt>
+                      <dd className="mt-1 text-base text-primary/75">
+                        {course.date}
+                      </dd>
+                    </div>
+                  )}
+                  {course.durationLabel &&
+                    course.durationLabel !== course.date && (
+                      <div>
+                        <dt className="flex items-center gap-2 text-sm font-semibold text-primary">
+                          <Clock size={17} className="text-gold" /> Duração
+                        </dt>
+                        <dd className="mt-1 text-base text-primary/75">
+                          {course.durationLabel}
+                        </dd>
+                      </div>
+                    )}
+                  {course.details?.location && (
+                    <div>
+                      <dt className="flex items-center gap-2 text-sm font-semibold text-primary">
+                        <MapPin size={17} className="text-gold" /> Local /
+                        modalidade
+                      </dt>
+                      <dd className="mt-1 text-base text-primary/75">
+                        {course.details.location}
+                      </dd>
+                    </div>
+                  )}
+                </dl>
                 {course.tags && Array.isArray(course.tags) && (
                   <div className="flex flex-wrap gap-2 pt-2">
                     {(Array.isArray(course.tags)
@@ -177,30 +234,48 @@ export default function CourseDetailClient({ course }: { course: any }) {
                 )}
               </div>
 
-              {course.totalPriceCents != null && (
-                <p>
-                  Valor integral:{" "}
-                  {(course.totalPriceCents / 100).toLocaleString("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                  })}
-                </p>
-              )}
-              {course.installments > 1 && (
-                <p>
-                  Parcelamento informado: até {course.installments} parcelas.
-                  Confirme as condições com o instituto.
-                </p>
-              )}
-              {course.pixPriceCents > 0 && (
-                <p>
-                  Matrícula ou primeira parcela:{" "}
-                  {(course.pixPriceCents / 100).toLocaleString("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                  })}{" "}
-                  via Pix.
-                </p>
+              {(course.totalPriceCents != null || course.pixPriceCents > 0) && (
+                <section className="rounded-2xl border border-primary/15 bg-primary/5 p-5">
+                  <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-primary/70">
+                    Investimento
+                  </h2>
+                  {course.totalPriceCents != null && (
+                    <div className="mb-3">
+                      <p className="text-sm text-primary/70">
+                        Valor integral do curso
+                      </p>
+                      <p className="font-serif text-3xl text-primary">
+                        {course.totalPriceCents === 0
+                          ? "Gratuito"
+                          : (course.totalPriceCents / 100).toLocaleString(
+                              "pt-BR",
+                              { style: "currency", currency: "BRL" },
+                            )}
+                      </p>
+                    </div>
+                  )}
+                  {course.installments > 1 && (
+                    <p className="mb-3 text-sm leading-relaxed text-primary/75">
+                      Até {course.installments} parcelas. Confirme as condições
+                      com o instituto.
+                    </p>
+                  )}
+                  {course.pixPriceCents > 0 && (
+                    <div className="border-t border-primary/15 pt-3">
+                      <p className="text-sm font-semibold text-primary">
+                        Pix na inscrição:{" "}
+                        {(course.pixPriceCents / 100).toLocaleString("pt-BR", {
+                          style: "currency",
+                          currency: "BRL",
+                        })}
+                      </p>
+                      <p className="mt-1 text-sm leading-relaxed text-primary/70">
+                        Corresponde à matrícula ou à primeira parcela. As
+                        parcelas seguintes são combinadas com o instituto.
+                      </p>
+                    </div>
+                  )}
+                </section>
               )}
               {course.enrollmentOpen ? (
                 <button
@@ -212,17 +287,22 @@ export default function CourseDetailClient({ course }: { course: any }) {
                   Fazer Inscrição <ExternalLink size={14} />
                 </button>
               ) : (
-                <p role="status">
+                <p
+                  role="status"
+                  className="rounded-xl border border-primary/15 bg-white p-4 text-sm leading-relaxed text-primary/75"
+                >
                   Novas inscrições estão encerradas. Alunos matriculados podem
                   acompanhar sua inscrição e acessar o portal.
                 </p>
               )}
             </motion.div>
 
-            <motion.div
+            <motion.button
+              type="button"
+              aria-label="Ampliar capa do curso"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="relative cursor-pointer group"
+              className="relative cursor-pointer group w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold rounded-[3rem]"
               onClick={() => openLightbox(0)}
             >
               <div className="aspect-[4/5] rounded-[3rem] overflow-hidden shadow-[0_40px_80px_-20px_rgba(0,0,0,0.1)] border-8 border-white bg-white">
@@ -232,15 +312,15 @@ export default function CourseDetailClient({ course }: { course: any }) {
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
               </div>
-            </motion.div>
+            </motion.button>
           </div>
 
           <div className="grid md:grid-cols-12 gap-12">
             <div className="md:col-span-8 space-y-16">
               <section>
-                <h3 className="font-serif text-3xl text-primary mb-6">
+                <h2 className="font-serif text-3xl text-primary mb-6">
                   O que você vai vivenciar
-                </h3>
+                </h2>
                 <p className="text-lg text-primary/70 font-light leading-relaxed whitespace-pre-line">
                   {course.details?.intro || course.description}
                 </p>
@@ -248,9 +328,9 @@ export default function CourseDetailClient({ course }: { course: any }) {
 
               {course.details?.format && (
                 <section className="bg-white p-8 rounded-2xl border border-stone-100 shadow-sm">
-                  <h3 className="font-serif text-2xl text-primary mb-6">
+                  <h2 className="font-serif text-2xl text-primary mb-6">
                     Como funciona
-                  </h3>
+                  </h2>
                   <div className="text-primary/70 leading-relaxed space-y-4">
                     {Array.isArray(course.details.format) ? (
                       <ul className="space-y-4">
@@ -275,9 +355,9 @@ export default function CourseDetailClient({ course }: { course: any }) {
               {Array.isArray((course as any).syllabus) &&
                 (course as any).syllabus.length > 0 && (
                   <section className="bg-white p-8 rounded-2xl border border-stone-100 shadow-sm">
-                    <h3 className="font-serif text-2xl text-primary mb-6">
+                    <h2 className="font-serif text-2xl text-primary mb-6">
                       Ementa
-                    </h3>
+                    </h2>
                     <ul className="space-y-4">
                       {(course as any).syllabus.map(
                         (topic: string, i: number) => (
@@ -354,7 +434,7 @@ export default function CourseDetailClient({ course }: { course: any }) {
                       Tem alguma dúvida?
                     </p>
                     <a
-                      href="https://wa.me/5569992481585"
+                      href={`https://wa.me/${config.whatsappNumber}?text=${encodeURIComponent(config.whatsappMessage)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="block w-full py-3 border border-green-200 bg-green-50 text-green-700 font-bold uppercase tracking-widest text-[10px] rounded-lg hover:bg-green-100 transition-colors"
@@ -396,70 +476,7 @@ export default function CourseDetailClient({ course }: { course: any }) {
         )}
       </AnimatePresence>
 
-      <AnimatePresence>
-        {selectedMediator && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <div
-              className="absolute inset-0 bg-primary/40 backdrop-blur-sm"
-              onClick={() => {
-                const current = new URLSearchParams(
-                  Array.from(searchParams.entries()),
-                );
-                current.delete("mediator");
-                router.push(`${pathname}?${current.toString()}`);
-              }}
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-white max-w-2xl w-full rounded-3xl relative z-10 shadow-2xl max-h-[90vh] flex flex-col overflow-hidden"
-            >
-              <button
-                onClick={() => {
-                  const current = new URLSearchParams(
-                    Array.from(searchParams.entries()),
-                  );
-                  current.delete("mediator");
-                  router.push(`${pathname}?${current.toString()}`);
-                }}
-                className="absolute top-6 right-6 text-gray-400 hover:text-primary transition-colors z-20"
-                aria-label="Fechar detalhes da mediadora"
-              >
-                <X size={24} />
-              </button>
-
-              <div className="overflow-y-auto p-8">
-                <div className="flex flex-col md:flex-row gap-8 items-start">
-                  <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-stone-100 overflow-hidden shrink-0 border-4 border-white shadow-lg mx-auto md:mx-0">
-                    {selectedMediatorImage ? (
-                      <img
-                        src={selectedMediatorImage}
-                        alt={selectedMediator.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-stone-300 text-4xl font-serif">
-                        {selectedMediator.name.charAt(0)}
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-serif text-primary mb-2 text-center md:text-left">
-                      {selectedMediator.name}
-                    </h3>
-                    <div className="w-10 h-1 bg-gold/30 mb-6 mx-auto md:mx-0 rounded-full" />
-                    <p className="text-lg text-gray-600 leading-relaxed font-light whitespace-pre-line text-center md:text-left">
-                      {selectedMediator.bio || "Sem biografia disponível."}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      <MediatorDialog mediator={selectedMediator} onClose={closeMediator} />
     </div>
   );
 }

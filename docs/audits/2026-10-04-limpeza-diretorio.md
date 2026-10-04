@@ -1,6 +1,6 @@
-# Limpeza do diretório e preparação de histórico único
+# Limpeza do diretório e histórico único concluídos
 
-Data: 04/10/2026. A solicitação autoriza retirar arquivos inúteis e substituir o histórico remoto por uma única versão limpa. Este documento registra a versão preparada; o recibo da publicação e os backups são preservados fora do repositório.
+Data: 04/10/2026. A solicitação autoriza retirar arquivos inúteis e substituir o histórico remoto por uma única versão limpa. A execução da limpeza foi concluída com a base main 1e61f151ec12f440a9aa5e1dd860029daaaa19c4, sem tags; a Vercel confirmou sucesso dessa versão. As atualizações seguintes usam commits normais a partir dessa base, sem restaurar o histórico antigo. Recibos e backups são preservados fora do repositório.
 
 Foram retirados **199 arquivos**: 157 dos 205 candidatos de código originais, nove configurações de protótipos, 25 scripts antigos sem consumo pelos comandos atuais, sete relatórios/geradores antigos e um template de ambiente de aplicativo independente. As pastas antigas **.worktrees** e **.superpowers** foram arquivadas fora do diretório, incluindo os seus arquivos; não entram no total de 199. A cópia de cada arquivo retirado foi conferida por SHA-256 antes da exclusão.
 
@@ -18,12 +18,12 @@ Execução local em Windows/Node 26 e Chromium 153 instalado; CI usa Linux/Node 
 
 A nova base inclui as correções anteriores, as migrações e os scripts admitidos pela CI. Exclui arquivos de ambiente reais, caches, dependências instaladas, metadados locais de agentes, o gitlink de .worktrees e backups. README e DEPLOY foram atualizados para orientar a estrutura atual e distinguir Supabase de consumidores Firebase ainda existentes.
 
-A substituição exige um commit sem pai, proteção contra alterações remotas concorrentes e retirada das branches/tags que apontam para o histórico anterior. O backup GitHub verificado contém 14 branches e 22 tags; existe também um backup do histórico local. Nenhum desses backups deve ser enviado ao GitHub. Uma atualização de main pode acionar publicação automática pela Vercel.
+A substituição usou um commit sem pai e uma atualização atômica protegida por leases dos refs anteriores. Foram retiradas 13 branches antigas e 22 tags. O backup GitHub verificado preserva as 14 branches e 22 tags anteriores; o histórico e o índice locais também foram preservados. Nenhum desses backups deve ser enviado ao GitHub.
 
 A substituição das branches/tags não revoga chaves e não garante apagar objetos de caches, pull requests ou forks. [Orientação oficial do GitHub](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository). As credenciais antigas continuam pendentes conforme [roteiro operacional](../operations/credenciais-e-vercel.md).
 
 ## Recuperação e próximos passos
 
-Os arquivos retirados, checkouts antigos, manifests e bundles de recuperação estão no laboratório privado cleanup-2026-10-04, fora deste projeto. Antes de novos pushes, sincronizar a base local com o commit novo; não mesclar o histórico antigo. Alterações posteriores feitas por outra tarefa precisam ser preservadas e verificadas antes da publicação seguinte.
+Os arquivos retirados, checkouts antigos, manifests e bundles de recuperação estão no laboratório privado cleanup-2026-10-04, fora deste projeto. A base local foi sincronizada com o commit novo e possui somente um commit. Não mesclar nem reenviar o histórico antigo. Alterações posteriores feitas por outra tarefa precisam ser preservadas e verificadas antes da publicação seguinte.
 
-ORG-01: arquivo de checkout antigo/gitlink retirado da versão preparada. ORG-03: limpeza por lote executada; revisão do código preservado e consolidação de contratos ainda têm trabalho. Permanecem as pendências operacionais e comerciais do [relatório de progresso](2026-10-04-progresso-relatorio.md).
+ORG-01: checkout antigo/gitlink retirado e base local/remota limpa verificada. ORG-03: limpeza por lote executada; revisão do código preservado e consolidação de contratos ainda têm trabalho. Permanecem as pendências operacionais e comerciais do [relatório de progresso](2026-10-04-progresso-relatorio.md).

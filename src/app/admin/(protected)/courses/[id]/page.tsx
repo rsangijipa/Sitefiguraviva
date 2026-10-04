@@ -1,7 +1,7 @@
 import CourseEditorClient from "./CourseEditorClient";
 import { deepSafeSerialize } from "@/lib/utils";
 import { logger } from "@/lib/logger";
-import { getCourse } from "@/lib/repositories/courseRepository.server";
+import { getAdminCourse } from "@/features/courses/infrastructure/supabaseAdminCourseRepository.server";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +15,7 @@ export default async function AdminCourseEditorPage({
   let course;
 
   try {
-    course = await getCourse(id);
+    course = await getAdminCourse(id);
 
     if (!course) {
       logger.warn("[AdminCourseEditorPage] Course not found", { id });

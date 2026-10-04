@@ -32,6 +32,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import ImageUpload from "@/components/admin/ImageUpload";
 import SyllabusEditor from "@/components/admin/courses/SyllabusEditor";
+import MediatorsEditor from "@/components/admin/courses/MediatorsEditor";
 import { useToast } from "@/context/ToastContext";
 import { adminCourseService } from "@/services/adminCourseService";
 import { motion, AnimatePresence } from "framer-motion";
@@ -115,6 +116,7 @@ export default function CourseEditorClient({
   };
 
   const [isSaving, setIsSaving] = useState(false);
+  const [uploadingMediator, setUploadingMediator] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
 
   // Track changes
@@ -125,6 +127,14 @@ export default function CourseEditorClient({
 
   // Save handler
   const handleSaveCourse = async () => {
+    if (uploadingMediator) {
+      addToast("Aguarde o envio da foto da mediadora.", "error");
+      return;
+    }
+    if (course.mediators?.some((m) => !m.name.trim())) {
+      addToast("Informe o nome de cada mediadora.", "error");
+      return;
+    }
     setIsSaving(true);
     try {
       await adminCourseService.updateCourse(course.id, course);
@@ -220,6 +230,7 @@ export default function CourseEditorClient({
             <Button
               onClick={handleSaveCourse}
               isLoading={isSaving}
+              disabled={uploadingMediator}
               size="sm"
               className="shadow-lg shadow-primary/20"
             >
@@ -364,6 +375,14 @@ export default function CourseEditorClient({
 
                   {/* Right Column - Main Info */}
                   <div className="lg:col-span-2 space-y-6">
+                    <div className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
+                      <MediatorsEditor
+                        value={course.mediators || []}
+                        onChange={(mediators) => updateCourse({ mediators })}
+                        onUploadingChange={setUploadingMediator}
+                        disabled={isSaving || uploadingMediator}
+                      />
+                    </div>
                     <FormSection
                       title="Dados Gerais"
                       description="Como o curso aparece no portal"

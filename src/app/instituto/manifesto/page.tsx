@@ -1,3 +1,5 @@
+import { getPublicPage } from "@/features/public-site/infrastructure/supabasePublicPagesRepository.server";
+import { DEFAULT_INSTITUTE } from "@/lib/siteSettings";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -11,45 +13,28 @@ export const metadata: Metadata = {
   alternates: { canonical: "/instituto/manifesto" },
 };
 
-export default function ManifestoPage() {
+export default async function ManifestoPage() {
+  const institute = await getPublicPage("institute", DEFAULT_INSTITUTE);
   return (
     <PublicSiteFrame>
       <PublicPageHero
         eyebrow="Manifesto Figura Viva"
-        title="Habitar a fronteira."
-        description="A vida acontece no contato: entre o que sentimos e o que podemos criar, entre a história que nos trouxe e a presença que escolhemos cultivar."
+        title={institute.manifesto_title}
+        description={institute.manifesto_description}
       />
 
       <article className="fv-bg fv-bg-manifesto py-20 md:py-28">
         <div className="fv-container max-w-4xl">
           <div className="space-y-8 font-serif text-2xl leading-[1.65] text-primary/90 md:text-3xl">
-            <p>
-              Na Gestalt, a vida acontece na fronteira entre organismo e
-              ambiente, entre o que sinto e o que digo, entre o que foi e o que
-              pode nascer agora.
-            </p>
-            <p>
-              No Figura Viva, levamos esse encontro a sério — com rigor, ética e
-              humanidade. Não oferecemos fórmulas para caber em pessoas. Criamos
-              condições para que cada pessoa perceba como está no mundo e
-              reconheça novas possibilidades de escolha.
-            </p>
-            <p>
-              Aprender, para nós, é uma experiência inteira. O corpo participa.
-              A história participa. O território participa. A diferença
-              participa. Teoria e prática se encontram quando o conhecimento
-              transforma a qualidade da presença.
-            </p>
-            <p>
-              Sustentamos uma clínica situada, atenta às relações de poder e
-              comprometida com modos de cuidado que não apagam singularidades.
-              Acolher não é suavizar a realidade: é criar apoio para
-              atravessá-la com consciência.
-            </p>
+            {institute.manifesto_body.split(/\n\s*\n/).map((paragraph, i) => (
+              <p key={i} className="whitespace-pre-line">
+                {paragraph}
+              </p>
+            ))}
           </div>
 
           <blockquote className="my-16 border-l-2 border-terra py-3 pl-8 font-serif text-3xl italic leading-snug text-primary md:text-5xl">
-            “O encontro é a fronteira onde a vida se renova.”
+            “{institute.quote}”
           </blockquote>
 
           <p className="max-w-2xl text-lg leading-relaxed text-text/75">

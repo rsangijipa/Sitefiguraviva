@@ -1,3 +1,5 @@
+import { getPublicPage } from "@/features/public-site/infrastructure/supabasePublicPagesRepository.server";
+import { DEFAULT_HOME, DEFAULT_CONFIG } from "@/lib/siteSettings";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
@@ -7,7 +9,6 @@ import {
 } from "@/features/content/infrastructure/supabaseContentRepository";
 import HomeClient from "@/components/HomeClient";
 import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
-import { deepSafeSerialize } from "@/lib/utils";
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
@@ -15,6 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
       .from("public_pages")
       .select("content")
       .eq("key", "seo")
+      .eq("is_published", true)
       .maybeSingle();
     const seo = data?.content as any;
 
@@ -39,27 +41,21 @@ export const revalidate = 3600;
 async function getHomeData() {
   try {
     const supabase = createSupabaseServiceClient();
-    const [{ data: courseRows }, { data: postRows }, { data: instituteRow }] =
-      await Promise.all([
-        supabase
-          .from("courses")
-          .select("*")
-          .eq("is_published", true)
-          .in("status", ["open", "closed"])
-          .order("created_at", { ascending: false })
-          .limit(3),
-        supabase
-          .from("posts")
-          .select("*")
-          .eq("is_published", true)
-          .order("created_at", { ascending: false })
-          .limit(3),
-        supabase
-          .from("public_pages")
-          .select("content")
-          .eq("key", "institute")
-          .maybeSingle(),
-      ]);
+    const [{ data: courseRows }, { data: postRows }] = await Promise.all([
+      supabase
+        .from("courses")
+        .select("*")
+        .eq("is_published", true)
+        .in("status", ["open", "closed"])
+        .order("created_at", { ascending: false })
+        .limit(3),
+      supabase
+        .from("posts")
+        .select("*")
+        .eq("is_published", true)
+        .order("created_at", { ascending: false })
+        .limit(3),
+    ]);
 
     const courses = (courseRows ?? []).map(mapPublicCourse);
     const posts = (postRows ?? []).map(mapPublicPost);
@@ -68,18 +64,19 @@ async function getHomeData() {
       courses,
       posts,
       gallery: [],
-      institute: instituteRow?.content
-        ? deepSafeSerialize(instituteRow.content)
-        : undefined,
     };
   } catch (error) {
     console.error("Error fetching home data:", error);
-    return { courses: [], posts: [], gallery: [], institute: undefined };
+    return { courses: [], posts: [], gallery: [] };
   }
 }
 
 export default async function Home() {
-  const data = await getHomeData();
+  const [data, home, config] = await Promise.all([
+    getHomeData(),
+    getPublicPage("home", DEFAULT_HOME).catch(() => DEFAULT_HOME),
+    getPublicPage("config", DEFAULT_CONFIG).catch(() => DEFAULT_CONFIG),
+  ]);
 
   return (
     <Suspense
@@ -92,7 +89,7 @@ export default async function Home() {
         </div>
       }
     >
-      <HomeClient initialData={data} />
+      <HomeClient initialData={{ ...data, home, config }} />
     </Suspense>
   );
 }

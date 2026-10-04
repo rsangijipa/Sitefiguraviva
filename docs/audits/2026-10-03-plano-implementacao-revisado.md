@@ -1,5 +1,7 @@
 # Revisão da auditoria e plano de implementação — Instituto Figura Viva
 
+> Blocos 12–13: limpeza por lote e histórico único concluídos; bloqueio de credenciais no código e correções de integração do site implementados localmente. Homologação, revogação no provedor, SMTP e banco Pix continuam pendentes. Consulte [bloco 13](2026-10-04-implementacao-bloco-13.md) e [progresso dos 45 itens](2026-10-04-progresso-relatorio.md).
+
 > Bloco 11: dependências corrigidas e JSON-LD protegido; auditoria de produção de 17 entradas/sete altas para oito moderadas/nenhuma alta. Instalação isolada, testes e build do snapshot passaram; alterações paralelas posteriores requerem validação consolidada; Vercel/Node 24/Linux e homologação pendentes. Consulte [o relatório do bloco 11](2026-10-04-implementacao-bloco-11.md) e [a comparação dos 45 itens](2026-10-04-progresso-relatorio.md).
 
 > Bloco 10: runners separados, CI sem credenciais, scripts necessários admitidos no versionamento e homologação autenticada manual configurados. Testes locais aprovados; execução no GitHub, ambiente separado e publicação pendentes. Consulte [o relatório do bloco 10](2026-10-04-implementacao-bloco-10.md).

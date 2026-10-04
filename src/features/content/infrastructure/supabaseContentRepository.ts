@@ -1,4 +1,5 @@
 import { createSupabaseBrowserClient } from "@/infrastructure/supabase/client";
+import { getCourseMediators } from "@/utils/mediators";
 import type { Json, TableRow } from "@/infrastructure/supabase/database.types";
 
 export type ContentKind =
@@ -82,7 +83,7 @@ export function mapPublicCourse(row: TableRow<"courses">): ContentRecord {
     tags: row.tags,
     details: row.details,
     team: row.team,
-    mediators: legacy.mediators ?? (Array.isArray(row.team) ? row.team : []),
+    mediators: getCourseMediators(row.details, legacy, row.team),
     date: legacy.date ?? details.date ?? row.duration_label,
     frequency: legacy.frequency ?? details.frequency ?? null,
     syllabus: Array.isArray(details.syllabus)

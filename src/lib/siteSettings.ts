@@ -1,4 +1,9 @@
+import { DEFAULT_PUBLIC_CONTACT } from "@/features/public-site/content/contact";
 import { createSupabaseBrowserClient } from "@/infrastructure/supabase/client";
+
+import { DEFAULT_MANIFESTO_BODY } from "./site-content";
+export { DEFAULT_HOME } from "./site-content";
+export type { HomeSettings } from "./site-content";
 
 // --- Types ---
 
@@ -18,6 +23,8 @@ export interface InstituteSettings {
   subtitle: string;
   manifesto_title: string;
   manifesto_text: string;
+  manifesto_body: string;
+  manifesto_description: string;
   quote: string;
   address: string;
   phone: string;
@@ -62,20 +69,21 @@ export const DEFAULT_INSTITUTE: InstituteSettings = {
   manifesto_title: "Habitar a Fronteira",
   manifesto_text:
     "Na Gestalt, a vida acontece no contato: na fronteira entre organismo e ambiente, entre o que sinto e o que digo, entre o que foi e o que pode nascer agora. No Figura Viva, a gente leva isso a sério — com rigor, com ética e com humanidade.",
+  manifesto_body: DEFAULT_MANIFESTO_BODY,
+  manifesto_description:
+    "A vida acontece no contato: entre o que sentimos e o que podemos criar, entre a história que nos trouxe e a presença que escolhemos cultivar.",
   quote: "O encontro é a fronteira onde a vida se renova.",
-  address:
-    "Rua Santos Dumont, 156 - Uniao, Ouro Preto D'Oeste - RO - CEP 76920-000",
-  phone: "(69) 99248-1585",
-  whatsapp: "5569992481585",
+  address: DEFAULT_PUBLIC_CONTACT.address,
+  phone: DEFAULT_PUBLIC_CONTACT.phone,
+  whatsapp: DEFAULT_PUBLIC_CONTACT.whatsappNumber,
 };
 
 export const DEFAULT_CONFIG: ConfigSettings = {
   enableParticles: true,
   visualMode: "modern",
-  showAudioControl: true,
-  whatsappNumber: "5569992481585",
-  whatsappMessage:
-    "Olá! Gostaria de saber mais sobre as formações do Instituto Figura Viva.",
+  showAudioControl: DEFAULT_PUBLIC_CONTACT.showAudioControl,
+  whatsappNumber: DEFAULT_PUBLIC_CONTACT.whatsappNumber,
+  whatsappMessage: DEFAULT_PUBLIC_CONTACT.whatsappMessage,
 };
 
 export const DEFAULT_SEO: SEOSettings = {
@@ -119,8 +127,9 @@ export type {
 // --- Fetchers (Client-Safe) ---
 
 export async function getSiteSettings<T>(
-  key: "founder" | "institute" | "seo" | "team" | "legal" | "config",
+  key: "founder" | "institute" | "seo" | "team" | "legal" | "config" | "home",
   fallback: T,
+  throwOnError = false,
 ): Promise<T> {
   try {
     const { data, error } = await createSupabaseBrowserClient()
@@ -134,6 +143,7 @@ export async function getSiteSettings<T>(
       ? ({ ...fallback, ...(data.content as object) } as T)
       : fallback;
   } catch (error) {
+    if (throwOnError) throw error;
     console.error(`Error fetching siteSettings/${key}:`, error);
     return fallback;
   }

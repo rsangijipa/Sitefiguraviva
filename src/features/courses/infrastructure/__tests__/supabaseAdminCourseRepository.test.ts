@@ -89,3 +89,101 @@ it("preserves a historical syllabus when normalized details are not yet filled",
     syllabus: ["Tema histórico"],
   });
 });
+
+const mediator = {
+  name: "Ana",
+  role: "Psicóloga",
+  image: "/ana.jpg",
+  bio: "Formação clínica.\n\nExperiência docente.",
+};
+it("persists mediator portraits and curricula without changing course permissions", async () => {
+  await createAdminCourse({
+    title: "Curso",
+    mediators: [mediator],
+    details: { syllabus: ["Tema"] },
+  });
+  expect(query.insert).toHaveBeenCalledWith(
+    expect.objectContaining({
+      details: { syllabus: ["Tema"], mediators: [mediator] },
+      team: {},
+    }),
+  );
+});
+it("updates mediator profiles and preserves unrelated course details", async () => {
+  await updateAdminCourse("course", { mediators: [mediator] });
+  expect(query.update).toHaveBeenCalledWith(
+    expect.objectContaining({
+      details: { syllabus: ["Tema"], mediators: [mediator] },
+    }),
+  );
+  expect(query.update.mock.calls[0][0]).not.toHaveProperty("team");
+});
+it("allows removing all mediators and rejects unnamed profiles", async () => {
+  await updateAdminCourse("course", { mediators: [] });
+  expect(query.update).toHaveBeenCalledWith(
+    expect.objectContaining({ details: { syllabus: ["Tema"], mediators: [] } }),
+  );
+  await expect(
+    createAdminCourse({ mediators: [{ ...mediator, name: " " }] }),
+  ).rejects.toThrow();
+});
+it("restores legacy mediator curricula and photos into the course editor", async () => {
+  query.maybeSingle.mockResolvedValue({
+    data: {
+      id: "course",
+      title: "Curso",
+      details: {},
+      team: { tutor: { role: "tutor" } },
+      legacy_payload: { mediators: [mediator] },
+    },
+    error: null,
+  });
+  expect(await getAdminCourse("course")).toMatchObject({
+    mediators: [mediator],
+    team: { tutor: { role: "tutor" } },
+  });
+});
+
+it("normalizes historical photo-only mediator records before saving an uploaded portrait", async () => {
+  query.maybeSingle.mockResolvedValue({
+    data: {
+      id: "course",
+      title: "Curso",
+      details: { syllabus: ["Tema"] },
+      legacy_payload: {
+        mediators: [{ name: "Ana", photo: "/old-photo.jpg", bio: "Currículo" }],
+      },
+    },
+    error: null,
+  });
+  const loaded = await getAdminCourse("course");
+  expect(loaded?.mediators).toEqual([
+    {
+      name: "Ana",
+      role: "Mediadora",
+      image: "/old-photo.jpg",
+      bio: "Currículo",
+    },
+  ]);
+  const updated = {
+    ...loaded,
+    mediators: loaded!.mediators!.map((member) => ({
+      ...member,
+      image:
+        "https://example.supabase.co/storage/v1/object/public/public-avatars/mediators/new.webp",
+    })),
+  };
+  await expect(updateAdminCourse("course", updated)).resolves.toBeUndefined();
+  expect(query.update).toHaveBeenCalledWith(
+    expect.objectContaining({
+      details: expect.objectContaining({
+        mediators: [
+          expect.objectContaining({
+            role: "Mediadora",
+            image: expect.stringContaining("new.webp"),
+          }),
+        ],
+      }),
+    }),
+  );
+});

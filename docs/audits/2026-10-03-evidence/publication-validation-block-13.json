@@ -1,0 +1,42 @@
+{
+  "date": "2026-10-04",
+  "scope": "Final source prepared for the user-requested commit and normal push to main",
+  "sourceFrozenAt": "2026-10-04T07:20:29.545Z",
+  "validatedFiles": 1385,
+  "sourceManifestSha256": "051e38726ae9465c0a53b269707e075d1f4343eeb9b5bfc7564fa4aabc2118e7",
+  "checks": [
+    {
+      "check": "lint",
+      "exitCode": 0
+    },
+    {
+      "check": "scripts",
+      "exitCode": 0
+    },
+    {
+      "check": "unit",
+      "exitCode": 0
+    },
+    {
+      "check": "types",
+      "exitCode": 0
+    },
+    {
+      "check": "build",
+      "exitCode": 0
+    }
+  ],
+  "tests": {
+    "jestPassed": 532,
+    "jestSuitesPassed": 121,
+    "jestSkipped": 7,
+    "jestSuitesSkipped": 1,
+    "scriptsPassed": 30
+  },
+  "nativeCompiler": true,
+  "platform": "Windows / Node 26.5.0",
+  "realEnvironmentFilesIncluded": false,
+  "operationalCredentialsUsed": false,
+  "credentialScan": "Zero findings in targeted literal scan; not a complete external secret audit",
+  "limits": "No real banking, SMTP or authenticated production writes; previous public browser smoke is recorded separately"
+}

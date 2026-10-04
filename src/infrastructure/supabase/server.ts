@@ -2,6 +2,7 @@ import "server-only";
 
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "./database.types";
+import { validateSupabaseKey, validateSupabaseUrl } from "./environment";
 
 let serviceClient: SupabaseClient<Database> | null = null;
 let anonServerClient: SupabaseClient<Database> | null = null;
@@ -11,7 +12,7 @@ function requireSupabaseUrl() {
   if (!url) {
     throw new Error("NEXT_PUBLIC_SUPABASE_URL is required to use Supabase.");
   }
-  return url;
+  return validateSupabaseUrl(url).url;
 }
 
 export function createSupabaseServiceClient() {
@@ -22,16 +23,19 @@ export function createSupabaseServiceClient() {
   // downgrading it to the anon key would make those reads subject to RLS and
   // lock admins out (or, with a permissive policy, expose roles publicly)
   // with no error to explain why.
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const key =
+    process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!key) {
     throw new Error(
-      "SUPABASE_SERVICE_ROLE_KEY is required for server-side Supabase access. " +
+      "SUPABASE_SECRET_KEY or SUPABASE_SERVICE_ROLE_KEY is required for server-side Supabase access. " +
         "Use createSupabaseAnonServerClient() for requests that should honour RLS.",
     );
   }
 
-  serviceClient = createClient<Database>(requireSupabaseUrl(), key, {
+  const url = requireSupabaseUrl();
+  validateSupabaseKey(url, key, "service");
+  serviceClient = createClient<Database>(url, key, {
     auth: {
       persistSession: false,
       autoRefreshToken: false,
@@ -59,7 +63,9 @@ export function createSupabaseAnonServerClient() {
     );
   }
 
-  anonServerClient = createClient<Database>(requireSupabaseUrl(), anonKey, {
+  const url = requireSupabaseUrl();
+  validateSupabaseKey(url, anonKey, "public");
+  anonServerClient = createClient<Database>(url, anonKey, {
     auth: {
       persistSession: false,
       autoRefreshToken: false,
@@ -75,7 +81,9 @@ export function createSupabaseAuthServerClient() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   if (!key) throw new Error("Supabase public key is required for Auth.");
-  return createClient<Database>(requireSupabaseUrl(), key, {
+  const url = requireSupabaseUrl();
+  validateSupabaseKey(url, key, "public");
+  return createClient<Database>(url, key, {
     auth: {
       persistSession: false,
       autoRefreshToken: false,

@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "./database.types";
+import { validateSupabaseKey } from "./environment";
 
 let browserClient: SupabaseClient<Database> | null = null;
 
@@ -15,6 +16,7 @@ function requirePublicSupabaseEnv() {
     );
   }
 
+  validateSupabaseKey(url, anonKey, "public");
   return { url, anonKey };
 }
 

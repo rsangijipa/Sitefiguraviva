@@ -117,3 +117,38 @@ describe("private Pix receipt upload", () => {
     expect(rpc).not.toHaveBeenCalled();
   });
 });
+
+it("compresses a real Pix image in its original format inside the private bucket", async () => {
+  const sharp = (await import("sharp")).default;
+  const image = await sharp({
+    create: { width: 3000, height: 2000, channels: 3, background: "#285936" },
+  })
+    .jpeg({ quality: 100 })
+    .toBuffer();
+  const form = new FormData();
+  form.set("orderId", orderId);
+  form.set(
+    "receipt",
+    new Blob([new Uint8Array(image)], { type: "image/jpeg" }),
+    "receipt.jpg",
+  );
+  const req = new NextRequest("https://example.com/api/pix/receipt", {
+    method: "POST",
+    body: form,
+  });
+  claims.mockResolvedValue({ uid: "verified-user", isActive: true });
+  limit.mockResolvedValue({ allowed: true });
+  read.mockResolvedValue({
+    data: { id: orderId, status: "pending", course_id: "course-a" },
+    error: null,
+  });
+  upload.mockResolvedValue({ error: null });
+  rpc.mockResolvedValue({ error: null });
+  expect((await POST(req)).status).toBe(200);
+  const stored = upload.mock.calls.at(-1)[1];
+  expect(stored.length).toBeLessThan(image.length);
+  expect(await sharp(stored).metadata()).toMatchObject({
+    format: "jpeg",
+    width: 2560,
+  });
+});

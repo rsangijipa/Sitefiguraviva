@@ -28,6 +28,7 @@ beforeEach(() => {
     "UPSTASH_REDIS_REST_TOKEN",
     "RATE_LIMIT_HASH_SECRET",
     "SUPABASE_SERVICE_ROLE_KEY",
+    "SUPABASE_SECRET_KEY",
     "VERCEL",
     "RATE_LIMIT_IP_HEADER",
   ])
@@ -211,4 +212,18 @@ it.each([
     (await load()).rateLimit("id", "signup", invalid),
   ).rejects.toThrow("Invalid rate limit configuration");
   expect(rpc).not.toHaveBeenCalled();
+});
+
+it("uses a server secret key for rate-limit hashing without a legacy service key", async () => {
+  delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+  process.env.SUPABASE_SECRET_KEY =
+    "sb_secret_fake-with-at-least-32-characters";
+  const { rateLimit } = await load();
+  await expect(
+    rateLimit("person@example.com", "signup", config),
+  ).resolves.toMatchObject({ allowed: true });
+  expect(rpc).toHaveBeenCalledWith(
+    "consume_request_rate_limit",
+    expect.objectContaining({ p_key: expect.stringMatching(/^[0-9a-f]{64}$/) }),
+  );
 });

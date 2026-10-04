@@ -17,6 +17,8 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import ImageUpload from "@/components/admin/ImageUpload";
 import SyllabusEditor from "@/components/admin/courses/SyllabusEditor";
+import MediatorsEditor from "@/components/admin/courses/MediatorsEditor";
+import type { Mediator } from "@/utils/mediators";
 import { useToast } from "@/context/ToastContext";
 import { adminCourseService } from "@/services/adminCourseService";
 import { AdminPageShell } from "@/components/admin/AdminPageShell";
@@ -27,6 +29,7 @@ export default function CourseCreateClient() {
   const router = useRouter();
   const { addToast } = useToast();
   const [isCreating, setIsCreating] = useState(false);
+  const [uploadingMediator, setUploadingMediator] = useState(false);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -47,6 +50,7 @@ export default function CourseCreateClient() {
     price: "",
     installments: 1,
     topics: [] as string[],
+    mediators: [] as Mediator[],
     status: "draft" as const,
     isPublished: false,
   });
@@ -74,6 +78,14 @@ export default function CourseCreateClient() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (uploadingMediator) {
+      addToast("Aguarde o envio da foto da mediadora.", "error");
+      return;
+    }
+    if (formData.mediators.some((m) => !m.name.trim())) {
+      addToast("Informe o nome de cada mediadora.", "error");
+      return;
+    }
     if (!formData.title.trim()) {
       addToast("O título do curso é obrigatório", "error");
       return;
@@ -93,6 +105,7 @@ export default function CourseCreateClient() {
         coverImage: formData.coverImage || "",
         image: formData.coverImage || "",
         syllabus: formData.topics,
+        mediators: formData.mediators,
         details: { syllabus: formData.topics } as CourseDoc["details"],
         totalPriceCents:
           formData.billingType === "free"
@@ -141,6 +154,7 @@ export default function CourseCreateClient() {
           <Button
             onClick={handleSubmit}
             isLoading={isCreating}
+            disabled={uploadingMediator}
             size="sm"
             className="shadow-lg shadow-primary/20"
           >
@@ -311,6 +325,16 @@ export default function CourseCreateClient() {
 
             {/* Coluna Direita: Dados Básicos, Preço e Ementa */}
             <div className="lg:col-span-2 space-y-6">
+              <div className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
+                <MediatorsEditor
+                  value={formData.mediators}
+                  onChange={(mediators) =>
+                    setFormData((prev) => ({ ...prev, mediators }))
+                  }
+                  onUploadingChange={setUploadingMediator}
+                  disabled={isCreating || uploadingMediator}
+                />
+              </div>
               <FormSection
                 title="Dados Principais"
                 description="Título, identificador e descrição da proposta"

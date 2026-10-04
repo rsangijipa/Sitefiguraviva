@@ -12,7 +12,7 @@ export async function uploadFiles(
             folder,
             kind: "image",
             maxBytes: 5 * 1024 * 1024,
-            mimeTypes: ["image/jpeg", "image/png", "image/webp", "image/avif"],
+            mimeTypes: ["image/jpeg", "image/png", "image/webp"],
           })
         ).url,
     ),

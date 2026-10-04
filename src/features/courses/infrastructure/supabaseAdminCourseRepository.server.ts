@@ -1,4 +1,6 @@
 import "server-only";
+import { z } from "zod";
+import { getCourseMediators } from "@/utils/mediators";
 import { validateCommercialFields } from "@/features/courses/domain/course-offer";
 
 import { randomUUID } from "crypto";
@@ -114,6 +116,7 @@ function mapCourseRow(row: CourseRow): CourseDoc {
     },
     tags: row.tags,
     details: row.details as CourseDoc["details"],
+    mediators: getCourseMediators(row.details, legacy, row.team),
     syllabus: Array.isArray((row.details as any)?.syllabus)
       ? (row.details as any).syllabus
       : Array.isArray(legacy.syllabus)
@@ -257,6 +260,26 @@ function mapThreadRow(row: ThreadRow): CommunityThreadDoc {
   };
 }
 
+const mediatorSchema = z.object({
+  name: z.string().trim().min(1, "Informe o nome de cada mediadora.").max(200),
+  role: z.string().trim().max(300),
+  image: z
+    .string()
+    .max(2000)
+    .refine(
+      (value) =>
+        !value || /^\/(?!\/)/.test(value) || /^https?:\/\//i.test(value),
+      "URL da foto inválida.",
+    ),
+  bio: z.string().trim().max(20000),
+});
+
+function courseDetails(payload: MutablePayload) {
+  if (payload.mediators === undefined) return payload.details;
+  const mediators = z.array(mediatorSchema).max(50).parse(payload.mediators);
+  return { ...payload.details, mediators };
+}
+
 function coursePayloadToInsert(
   data: Partial<CourseDoc>,
 ): TableInsert<"courses"> {
@@ -295,7 +318,7 @@ function coursePayloadToInsert(
     stripe_price_id: billing.priceId,
     stripe_product_id: billing.productId,
     tags: Array.isArray(payload.tags) ? payload.tags : [],
-    details: asJson(payload.details, {}),
+    details: asJson(courseDetails(payload), {}),
     team: asJson(payload.team, {}),
     stats: asJson(payload.stats, { lessonsCount: 0, studentsCount: 0 }),
     community_enabled: getBoolean(payload, "communityEnabled") ?? false,
@@ -342,7 +365,7 @@ function coursePayloadToUpdate(
     stripe_price_id: billing.priceId,
     stripe_product_id: billing.productId,
     tags: Array.isArray(payload.tags) ? payload.tags : undefined,
-    details: payload.details as Json | undefined,
+    details: courseDetails(payload) as Json | undefined,
     team: payload.team as Json | undefined,
     stats: payload.stats as Json | undefined,
     community_enabled: getBoolean(payload, "communityEnabled"),
@@ -396,6 +419,22 @@ export async function updateAdminCourse(
   data: Partial<CourseDoc>,
 ): Promise<void> {
   const supabase = createSupabaseServiceClient();
+  if (data.mediators !== undefined) {
+    const { data: existing, error: readError } = await supabase
+      .from("courses")
+      .select("details")
+      .eq("id", courseId)
+      .maybeSingle();
+    if (readError) throw readError;
+    if (!existing) throw new Error("Curso não encontrado.");
+    data = {
+      ...data,
+      details: {
+        ...(existing.details as CourseDoc["details"]),
+        ...data.details,
+      },
+    };
+  }
   const { data: updated, error } = await supabase
     .from("courses")
     .update(coursePayloadToUpdate(data))

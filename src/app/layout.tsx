@@ -3,6 +3,8 @@ import { Fraunces, Karla } from "next/font/google";
 import "./globals.css";
 import "@/components/resources/apps/emotion-tree/emotion-tree.css";
 import Providers from "./providers";
+import { PublicContactProvider } from "@/features/public-site/components/PublicContactProvider";
+import { getPublicContact } from "@/features/public-site/infrastructure/publicContact.server";
 
 /**
  * As duas famílias do Design System v1 (seção 3.2).
@@ -101,11 +103,12 @@ import CookieConsent from "@/components/system/CookieConsent";
 import BackToTop from "@/components/system/BackToTop";
 import { themeInitScript } from "@/components/providers/ThemeProvider";
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const contact = await getPublicContact();
   return (
     <html
       lang="pt-BR"
@@ -123,33 +126,35 @@ export default function RootLayout({
           Pular para o conteúdo principal
         </a>
         <Providers>
-          <JsonLd
-            data={{
-              "@context": "https://schema.org",
-              "@type": "Organization",
-              name: "Instituto Figura Viva",
-              url: "https://figuraviva.com.br",
-              logo: "https://figuraviva.com.br/icon-512x512.png",
-              sameAs: ["https://www.instagram.com/institutofiguraviva/"],
-              address: {
-                "@type": "PostalAddress",
-                addressLocality: "Ouro Preto do Oeste",
-                addressRegion: "RO",
-                addressCountry: "BR",
-              },
-            }}
-          />
-          <WebVitalsReporter />
-          <GoogleAnalytics />
-          <CookieConsent />
-          <main
-            id="main-content"
-            className="flex-1 w-full outline-none"
-            tabIndex={-1}
-          >
-            <LenisProvider>{children}</LenisProvider>
-          </main>
-          <BackToTop />
+          <PublicContactProvider value={contact}>
+            <JsonLd
+              data={{
+                "@context": "https://schema.org",
+                "@type": "Organization",
+                name: "Instituto Figura Viva",
+                url: "https://figuraviva.com.br",
+                logo: "https://figuraviva.com.br/icon-512x512.png",
+                sameAs: ["https://www.instagram.com/institutofiguraviva/"],
+                address: {
+                  "@type": "PostalAddress",
+                  addressLocality: "Ouro Preto do Oeste",
+                  addressRegion: "RO",
+                  addressCountry: "BR",
+                },
+              }}
+            />
+            <WebVitalsReporter />
+            <GoogleAnalytics />
+            <CookieConsent />
+            <main
+              id="main-content"
+              className="flex-1 w-full outline-none"
+              tabIndex={-1}
+            >
+              <LenisProvider>{children}</LenisProvider>
+            </main>
+            <BackToTop />
+          </PublicContactProvider>
         </Providers>
       </body>
     </html>

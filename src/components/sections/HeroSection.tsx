@@ -1,4 +1,6 @@
-import { ArrowRight, ArrowUpRight, Sparkles } from "lucide-react";
+import { DEFAULT_HOME, type HomeSettings } from "@/lib/site-content";
+import { DEFAULT_CONFIG, type ConfigSettings } from "@/lib/siteSettings";
+import { ArrowRight, Sparkles } from "lucide-react";
 import dynamic from "next/dynamic";
 import WaveLines from "../ui/WaveLines";
 
@@ -7,9 +9,14 @@ const EnhancedLivingTree = dynamic(
   { ssr: false },
 );
 
-export default function HeroSection({ initialData }: { initialData?: any }) {
-  const data = initialData ?? {};
-  const whatsappNumber = data.phone?.replace(/\D/g, "") || "";
+export default function HeroSection({
+  content = DEFAULT_HOME,
+  config = DEFAULT_CONFIG,
+}: {
+  content?: HomeSettings;
+  config?: ConfigSettings;
+}) {
+  const whatsappNumber = (config.whatsappNumber || "").replace(/\D/g, "");
 
   return (
     <header className="fv-bg fv-bg-hero relative flex min-h-[min(680px,80vh)] items-center overflow-hidden bg-paper px-6 pt-24 pb-14 md:pt-28 md:pb-18">
@@ -36,22 +43,23 @@ export default function HeroSection({ initialData }: { initialData?: any }) {
           <div className="text-left">
             {/* O nome da instituição é o título */}
             <h1 className="font-serif font-bold text-primary mb-6 text-balance tracking-tight leading-[1.08] text-[clamp(1.85rem,3.8vw,2.9rem)] max-w-[15ch]">
-              Instituto de Gestalt-terapia de Rondônia
-              <span className="mt-2 block text-gold font-light italic text-[0.82em]">
-                Figura Viva
-              </span>
+              {content.heroTitle}
+              {content.heroAccent &&
+                content.heroAccent.trim() !== content.heroTitle.trim() && (
+                  <span className="mt-2 block text-gold font-light italic text-[0.82em]">
+                    {content.heroAccent}
+                  </span>
+                )}
             </h1>
 
             <p className="mb-8 max-w-xl text-lg font-light leading-relaxed text-text/75 md:text-xl">
-              Transforme sua percepção e prática através da{" "}
-              <span className="font-medium text-primary">Gestalt-Terapia</span>.
-              Um espaço de estudo dedicado à profundidade da relação.
+              {content.heroDescription}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-5">
               {whatsappNumber ? (
                 <a
-                  href={`https://wa.me/55${whatsappNumber}?text=Olá! Gostaria de informações sobre as formações do Instituto Figura Viva.`}
+                  href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(config.whatsappMessage || "")}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group relative flex items-center justify-center gap-4 overflow-hidden rounded-md bg-primary px-8 py-4 text-white transition-colors hover:bg-primary-dark active:scale-[0.98]"
@@ -68,11 +76,11 @@ export default function HeroSection({ initialData }: { initialData?: any }) {
                 </a>
               ) : (
                 <a
-                  href="/contato"
+                  href="/formacoes"
                   className="group relative flex items-center justify-center gap-4 overflow-hidden rounded-md bg-primary px-8 py-4 text-white transition-colors hover:bg-primary-dark active:scale-[0.98]"
                 >
                   <span className="font-bold uppercase tracking-[0.15em] text-[13px]">
-                    Entrar em contato
+                    Conhecer as formações
                   </span>
                   <ArrowRight size={20} aria-hidden="true" />
                 </a>

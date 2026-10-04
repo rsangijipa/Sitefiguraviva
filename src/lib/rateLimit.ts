@@ -74,7 +74,9 @@ export async function rateLimit(
     throw new Error("Invalid rate limit configuration");
   const production = process.env.NODE_ENV === "production";
   const secret =
-    process.env.RATE_LIMIT_HASH_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY;
+    process.env.RATE_LIMIT_HASH_SECRET ||
+    process.env.SUPABASE_SECRET_KEY ||
+    process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (production && (!secret || secret.length < 32))
     throw new RateLimitUnavailableError();
   const key = createHmac("sha256", secret || "local-development-rate-limit")

@@ -1,8 +1,5 @@
 "use client";
-
 import { Save, User, X, Loader2 } from "lucide-react";
-import Image from "next/image";
-
 interface FounderSettingsProps {
   founderForm: any;
   setFounderForm: (value: any) => void;
@@ -24,123 +21,117 @@ export default function FounderSettings({
   loading,
 }: FounderSettingsProps) {
   return (
-    <div className="bg-white p-8 rounded-2xl shadow-sm border border-stone-100 max-w-2xl animate-fade-in-up">
-      <h3 className="font-serif text-2xl text-primary mb-6">
-        Editar Fundadora
-      </h3>
-      <div className="space-y-6">
-        <div>
-          <label className="block text-xs font-bold uppercase tracking-widest text-primary/60 mb-2">
-            Nome
+    <div className="max-w-4xl space-y-6 rounded-2xl border border-stone-200 bg-white p-5 sm:p-8">
+      <h2 className="font-serif text-2xl text-primary">Fundadora</h2>
+      {[
+        { key: "name", label: "Nome" },
+        { key: "role", label: "Título profissional" },
+        { key: "bio", label: "Biografia e trajetória" },
+        { key: "link", label: "Link do currículo Lattes" },
+      ].map((field) => (
+        <div key={field.key}>
+          <label
+            htmlFor={field.key}
+            className="mb-2 block text-sm font-semibold text-primary"
+          >
+            {field.label}
           </label>
-          <input
-            className="w-full p-3 bg-stone-50 border border-stone-200 rounded-lg"
-            value={founderForm.name || ""}
-            onChange={(e) =>
-              setFounderForm({ ...founderForm, name: e.target.value })
-            }
-          />
+          {field.key === "bio" ? (
+            <textarea
+              id={field.key}
+              rows={8}
+              value={founderForm[field.key] || ""}
+              onChange={(e) =>
+                setFounderForm({ ...founderForm, [field.key]: e.target.value })
+              }
+              className="w-full rounded-lg border border-stone-200 p-3 leading-relaxed"
+            />
+          ) : (
+            <input
+              id={field.key}
+              value={founderForm[field.key] || ""}
+              onChange={(e) =>
+                setFounderForm({ ...founderForm, [field.key]: e.target.value })
+              }
+              className="w-full rounded-lg border border-stone-200 p-3"
+            />
+          )}
         </div>
-        <div>
-          <label className="block text-xs font-bold uppercase tracking-widest text-primary/60 mb-2">
-            Papel/Cargo
-          </label>
-          <input
-            className="w-full p-3 bg-stone-50 border border-stone-200 rounded-lg"
-            value={founderForm.role || ""}
-            onChange={(e) =>
-              setFounderForm({ ...founderForm, role: e.target.value })
-            }
-          />
-        </div>
-        <div>
-          <label className="block text-xs font-bold uppercase tracking-widest text-primary/60 mb-2">
-            Bio
-          </label>
-          <textarea
-            className="w-full p-3 bg-stone-50 border border-stone-200 rounded-lg h-32"
-            value={founderForm.bio || ""}
-            onChange={(e) =>
-              setFounderForm({ ...founderForm, bio: e.target.value })
-            }
-          />
-        </div>
-        <div>
-          <label className="block text-xs font-bold uppercase tracking-widest text-primary/60 mb-2">
-            Link Lattes
-          </label>
-          <input
-            className="w-full p-3 bg-stone-50 border border-stone-200 rounded-lg"
-            value={founderForm.link || ""}
-            onChange={(e) =>
-              setFounderForm({ ...founderForm, link: e.target.value })
-            }
-          />
-        </div>
-        <div>
-          <label className="block text-xs font-bold uppercase tracking-widest text-primary/60 mb-2">
-            Foto da Fundadora
-          </label>
-          <div className="flex gap-6 items-start">
-            <div className="w-32 h-32 rounded-full overflow-hidden bg-stone-100 border relative group">
-              {founderForm.image ? (
-                <div className="w-full h-full relative">
-                  <Image
-                    src={founderForm.image}
-                    alt="Founder"
-                    fill
-                    className="object-cover"
-                  />
-                  <button
-                    onClick={() =>
-                      setFounderForm({ ...founderForm, image: "" })
-                    }
-                    className="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
-                  >
-                    <X size={20} />
-                  </button>
-                </div>
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-stone-300">
-                  <User size={32} />
-                </div>
-              )}
-              <input
-                type="file"
-                accept="image/*"
-                className="absolute inset-0 opacity-0 cursor-pointer"
-                onChange={(e) => handleFileUpload(e, "founder")}
-                disabled={uploading}
-              />
-              {uploading && (
-                <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
-                  <Loader2 className="animate-spin" size={20} />
-                </div>
-              )}
+      ))}
+      <div className="flex flex-col gap-5 sm:flex-row">
+        <div className="h-36 w-36 shrink-0 overflow-hidden rounded-full border border-primary/20 bg-stone-100">
+          {founderForm.image ? (
+            <img
+              src={founderForm.image}
+              alt="Retrato da fundadora"
+              className="h-full w-full object-cover object-top"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center text-primary/40">
+              <User size={40} />
             </div>
-            <div className="flex-1">
-              <p className="text-sm text-stone-500 mb-2">
-                Clique na imagem para alterar a foto (Upload).
-              </p>
-              <input
-                className="w-full p-3 bg-stone-50 border border-stone-200 rounded-lg text-xs"
-                value={founderForm.image || ""}
-                onChange={(e) =>
-                  setFounderForm({ ...founderForm, image: e.target.value })
-                }
-                placeholder="Ou cole uma URL aqui..."
-              />
-            </div>
-          </div>
+          )}
         </div>
-        <button
-          onClick={handleFounderSave}
-          disabled={loading}
-          className="bg-primary text-white px-6 py-3 rounded-lg font-bold uppercase tracking-widest text-xs flex items-center gap-2 hover:bg-gold transition-colors"
-        >
-          <Save size={16} /> Salvar Alterações
-        </button>
+        <div className="min-w-0 flex-1 space-y-3">
+          <label
+            htmlFor="founder-photo"
+            className="block text-sm font-semibold text-primary"
+          >
+            Alterar foto da fundadora
+          </label>
+          <input
+            id="founder-photo"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={(e) => handleFileUpload(e, "founder")}
+            disabled={uploading || loading}
+            className="block w-full text-sm text-primary"
+          />
+          <p className="text-sm text-stone-500">
+            JPG, PNG ou WEBP até 5 MB. Salve para publicar a nova foto.
+          </p>
+          {uploading && (
+            <p
+              role="status"
+              className="flex items-center gap-2 text-sm text-primary"
+            >
+              <Loader2 size={18} className="animate-spin" /> Enviando foto…
+            </p>
+          )}
+          <label
+            htmlFor="founder-image-url"
+            className="block text-sm font-medium text-primary"
+          >
+            Ou informe a URL da foto
+          </label>
+          <input
+            id="founder-image-url"
+            value={founderForm.image || ""}
+            onChange={(e) =>
+              setFounderForm({ ...founderForm, image: e.target.value })
+            }
+            className="w-full rounded-lg border border-stone-200 p-3 text-sm"
+          />
+          {founderForm.image && (
+            <button
+              type="button"
+              onClick={() => setFounderForm({ ...founderForm, image: "" })}
+              className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-primary/20 px-3 text-sm text-primary"
+            >
+              <X size={16} /> Remover foto
+            </button>
+          )}
+        </div>
       </div>
+      <button
+        type="button"
+        onClick={handleFounderSave}
+        disabled={loading || uploading}
+        className="inline-flex min-h-12 items-center gap-2 rounded-lg bg-primary px-6 text-sm font-semibold text-white hover:bg-gold"
+      >
+        <Save size={18} />
+        {loading ? "Salvando…" : "Salvar e publicar"}
+      </button>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { DEFAULT_HOME, type HomeSettings } from "@/lib/site-content";
 import React, { useRef } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -35,6 +36,7 @@ interface Course {
 }
 
 interface CoursesSectionProps {
+  content?: HomeSettings;
   courses: Course[];
   onOpenCalendar: () => void;
   onSelectCourse: (course: Course) => void;
@@ -48,6 +50,7 @@ export default function CoursesSection({
   onOpenCalendar,
   onSelectCourse,
   loading = false,
+  content = DEFAULT_HOME,
 }: CoursesSectionProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -73,13 +76,10 @@ export default function CoursesSection({
         <div className="max-w-2xl">
           <span className="fv-eyebrow mb-4">Formação & Estudos</span>
           <h2 className="heading-section text-primary">
-            Ciclos de{" "}
-            <span className="italic text-gold font-light">Aprendizagem</span>
+            {content.coursesTitle}
           </h2>
           <p className="text-lg text-primary/70 leading-relaxed font-light text-balance">
-            Nossos percursos formativos são convites para habitar a
-            Gestalt-terapia com rigor ético, densidade teórica e sensibilidade
-            clínica.
+            {content.coursesDescription}
           </p>
         </div>
       </motion.div>

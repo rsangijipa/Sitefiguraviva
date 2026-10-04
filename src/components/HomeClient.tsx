@@ -3,6 +3,8 @@
 import dynamic from "next/dynamic";
 
 // import { useApp } from '../context/AppContext'; (Removed)
+import { DEFAULT_HOME, type HomeSettings } from "@/lib/site-content";
+import { DEFAULT_CONFIG, type ConfigSettings } from "@/lib/siteSettings";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import AlertBar from "./AlertBar";
@@ -10,8 +12,6 @@ import HeroSection from "./sections/HeroSection";
 import CoursesSection from "./sections/CoursesSection";
 import FloatingControls from "./ui/FloatingControls";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Image as ImageIcon } from "lucide-react";
-import Image from "next/image";
 
 const BlogSection = dynamic(() => import("./sections/BlogSection"));
 const InstagramSection = dynamic(() => import("./InstagramSection"));
@@ -39,14 +39,11 @@ interface HomeClientProps {
     courses: any[];
     posts: any[];
     gallery: any[];
-    founder?: any;
-    institute?: any;
-    seo?: any;
-    team?: any;
+    home?: HomeSettings;
+    config?: ConfigSettings;
   };
 }
 
-import methodology from "./sections/MethodologySection";
 import ScrollProgressBar from "./motion/ScrollProgressBar";
 import Reveal from "./motion/Reveal";
 
@@ -63,6 +60,8 @@ export default function HomeClient({ initialData }: HomeClientProps = {}) {
     initialData: initialData?.gallery?.length ? initialData.gallery : undefined,
   });
 
+  const home = { ...DEFAULT_HOME, ...initialData?.home };
+  const config = { ...DEFAULT_CONFIG, ...initialData?.config };
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -127,22 +126,27 @@ export default function HomeClient({ initialData }: HomeClientProps = {}) {
         tabIndex={-1}
         className="outline-none"
       >
-        <HeroSection initialData={initialData?.institute} />
+        <HeroSection content={home} config={config} />
 
         <Reveal variant="medium">
           <CoursesSection
             courses={courses.slice(0, 3)}
+            content={home}
             onOpenCalendar={() => openModal("calendar")}
             onSelectCourse={selectCourse}
           />
         </Reveal>
 
         <Reveal variant="medium">
-          <BlogSection blogPosts={blogPosts} onSelectPost={selectPost} />
+          <BlogSection
+            content={home}
+            blogPosts={blogPosts}
+            onSelectPost={selectPost}
+          />
         </Reveal>
 
         <Reveal variant="soft">
-          <FAQSection />
+          <FAQSection content={home} />
         </Reveal>
 
         <Reveal variant="soft">

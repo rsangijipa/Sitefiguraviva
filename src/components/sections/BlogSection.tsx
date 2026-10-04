@@ -1,5 +1,6 @@
 "use client";
 
+import { DEFAULT_HOME, type HomeSettings } from "@/lib/site-content";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, BookOpen, FileText } from "lucide-react";
@@ -22,6 +23,7 @@ interface BlogPost {
 }
 
 interface BlogSectionProps {
+  content?: HomeSettings;
   blogPosts: BlogPost[];
   onSelectPost?: (post: BlogPost) => void;
   loading?: boolean;
@@ -30,6 +32,7 @@ interface BlogSectionProps {
 export default function BlogSection({
   blogPosts = [],
   loading = false,
+  content = DEFAULT_HOME,
 }: BlogSectionProps) {
   const [activeTab, setActiveTab] = useState<"blog" | "biblioteca">("blog");
 
@@ -56,10 +59,10 @@ export default function BlogSection({
       <div className="text-center max-w-2xl mx-auto mb-10">
         <span className="fv-eyebrow mb-2">Reflexões & Saberes</span>
         <h2 className="heading-section text-primary mb-2">
-          {activeTab === "blog" ? "Blog Figura Viva" : "Biblioteca Figura Viva"}
+          {activeTab === "blog" ? content.blogTitle : content.libraryTitle}
         </h2>
         <p className="text-sm md:text-base text-primary/70 font-light leading-relaxed">
-          blog e biblioteca figura viva.
+          {content.blogDescription}
         </p>
 
         {/* Seletor centralizado */}

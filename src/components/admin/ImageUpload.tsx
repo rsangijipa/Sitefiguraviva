@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useId, useEffect, useRef } from "react";
 import { Loader2, UploadCloud, X } from "lucide-react";
 import Image from "next/image";
+import { getImageSrc } from "@/lib/imageUtils";
 import { uploadAdminAsset } from "@/infrastructure/supabase/storage.client";
 
 interface ImageUploadProps {
   onUpload: (url: string, path: string) => void;
+  onUploadingChange?: (uploading: boolean) => void;
   folder?: string;
   bucket?: string;
   defaultImage?: string;
@@ -15,14 +17,22 @@ interface ImageUploadProps {
 
 export default function ImageUpload({
   onUpload,
+  onUploadingChange,
   folder = "uploads/admin",
   bucket,
   defaultImage,
   className = "",
 }: ImageUploadProps) {
+  const inputId = useId();
+  const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
-  const [preview, setPreview] = useState<string | null>(defaultImage || null);
+  const [preview, setPreview] = useState<string | null>(
+    getImageSrc(defaultImage, "") || null,
+  );
   const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    setPreview(getImageSrc(defaultImage, "") || null);
+  }, [defaultImage]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -44,6 +54,7 @@ export default function ImageUpload({
     }
 
     setUploading(true);
+    onUploadingChange?.(true);
 
     // Create local preview
     const objectUrl = URL.createObjectURL(file);
@@ -62,16 +73,24 @@ export default function ImageUpload({
       onUpload(result.url, result.path);
     } catch (err: any) {
       console.error("Upload failed", err);
-      setError("Falha no upload. Tente novamente.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Falha no upload. Tente novamente.",
+      );
+      setPreview(getImageSrc(defaultImage, "") || null);
     } finally {
+      URL.revokeObjectURL(objectUrl);
+      if (inputRef.current) inputRef.current.value = "";
       setUploading(false);
+      onUploadingChange?.(false);
     }
   };
 
   const clearImage = () => {
     setPreview(null);
     onUpload("", ""); // Clear in parent
-    const input = document.getElementById("image-upload") as HTMLInputElement;
+    const input = inputRef.current;
     if (input) input.value = "";
   };
 
@@ -82,6 +101,13 @@ export default function ImageUpload({
           <div className="relative h-full w-full bg-stone-100">
             <Image
               src={preview}
+              unoptimized
+              onError={() => {
+                setPreview(null);
+                setError(
+                  "Não foi possível carregar a foto. Envie uma nova imagem.",
+                );
+              }}
               alt="Preview"
               fill
               className="object-cover"
@@ -91,6 +117,8 @@ export default function ImageUpload({
           <button
             type="button"
             onClick={clearImage}
+            disabled={uploading}
+            aria-label="Remover imagem"
             className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full shadow-md hover:bg-red-600 transition-colors"
           >
             <X size={16} />
@@ -98,7 +126,7 @@ export default function ImageUpload({
         </div>
       ) : (
         <label
-          htmlFor="image-upload"
+          htmlFor={inputId}
           className={`
                     absolute inset-0 flex flex-col items-center justify-center border-2 border-dashed border-stone-300 rounded-lg cursor-pointer bg-stone-50 hover:bg-stone-100 transition-colors
                     ${error ? "border-red-300 bg-red-50" : ""}
@@ -115,13 +143,17 @@ export default function ImageUpload({
                   arraste
                 </p>
                 <p className="text-xs text-stone-400">
-                  PNG, JPG or WEBP (Max. 5MB)
+                  PNG, JPG ou WEBP (máx. 5 MB)
+                </p>
+                <p className="mt-1 text-xs text-stone-400">
+                  A imagem será compactada automaticamente.
                 </p>
               </>
             )}
           </div>
           <input
-            id="image-upload"
+            id={inputId}
+            ref={inputRef}
             type="file"
             className="hidden"
             onChange={handleFileChange}

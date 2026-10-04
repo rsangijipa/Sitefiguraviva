@@ -1,6 +1,14 @@
 jest.mock("../server", () => ({
   createSupabaseServiceClient: jest.fn(),
 }));
+jest.mock("@/lib/image-compression.server", () => ({
+  compressImage: jest
+    .fn()
+    .mockResolvedValue({
+      body: Buffer.from("compressed"),
+      contentType: "image/jpeg",
+    }),
+}));
 
 import { createSupabaseServiceClient } from "../server";
 import {
@@ -47,7 +55,7 @@ describe("uploadPublicCourseAsset", () => {
     expect(from).toHaveBeenCalledWith("course-assets");
     expect(upload).toHaveBeenCalledWith(
       "courses/co-visar/capa.jpeg",
-      Buffer.from("cover"),
+      Buffer.from("compressed"),
       { contentType: "image/jpeg", upsert: true },
     );
     expect(getPublicUrl).toHaveBeenCalledWith("courses/co-visar/capa.jpeg");

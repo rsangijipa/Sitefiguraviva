@@ -3,6 +3,12 @@ import { z } from "zod";
 import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import { getSupabaseSessionClaims } from "@/lib/auth/supabase-session";
 import { rateLimit, getClientIdentifier } from "@/lib/rateLimit";
+import {
+  compressImage,
+  ImageCompressionError,
+} from "@/lib/image-compression.server";
+
+export const runtime = "nodejs";
 
 const bucket = "assessment-submissions";
 const acceptedFiles = {
@@ -82,20 +88,37 @@ export async function POST(request: NextRequest) {
       );
 
     const filename = file.name.replace(/[^A-Za-z0-9._-]/g, "_").slice(-120);
+    const rawBytes = Buffer.from(await file.arrayBuffer());
+    const image = file.type.startsWith("image/")
+      ? await compressImage(rawBytes, file.type, {
+          format: "source",
+          maxBytes: 10 * 1024 * 1024,
+          maxDimension: 2560,
+          quality: 88,
+        })
+      : null;
+    const bytes = image?.body ?? rawBytes;
     const storagePath = `${claims.uid}/${submission.id}/${parsed.data.answerId}/${crypto.randomUUID()}-${filename}`;
     const { error: uploadError } = await supabase.storage
       .from(bucket)
-      .upload(storagePath, Buffer.from(await file.arrayBuffer()), {
-        contentType: file.type,
+      .upload(storagePath, bytes, {
+        contentType: image?.contentType ?? file.type,
         upsert: false,
       });
     if (uploadError) throw uploadError;
 
     return NextResponse.json(
-      { storagePath, fileName: filename, mimeType: file.type, size: file.size },
+      {
+        storagePath,
+        fileName: filename,
+        mimeType: image?.contentType ?? file.type,
+        size: bytes.length,
+      },
       { status: 201 },
     );
   } catch (error) {
+    if (error instanceof ImageCompressionError)
+      return NextResponse.json({ error: error.message }, { status: 400 });
     console.error("Assessment file upload failed", error);
     return NextResponse.json({ error: "Upload failed" }, { status: 500 });
   }
