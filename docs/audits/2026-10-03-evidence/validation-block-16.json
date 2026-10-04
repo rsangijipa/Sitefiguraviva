@@ -1,0 +1,79 @@
+{
+  "date": "2026-10-04",
+  "block": 16,
+  "scope": "local isolated fixtures; no deployment or real database writes",
+  "checks": {
+    "lint": 0,
+    "scripts": {
+      "passed": 30,
+      "exitCode": 0
+    },
+    "unit": {
+      "passed": 601,
+      "skipped": 7,
+      "suitesPassed": 130,
+      "exitCode": 0
+    },
+    "types": 0,
+    "build": 0,
+    "publicBrowser": {
+      "passed": 5,
+      "exitCode": 0
+    },
+    "http": {
+      "passed": 6
+    }
+  },
+  "runtimeManifest": {
+    "files": 1073,
+    "sha256": "8d1ead9297a2851d9b6a697f01d77d0d28821dbc724d996b99393d57de681505",
+    "rootMatchesSnapshot": true
+  },
+  "database": {
+    "project": "jdxorryvmcvtqsddkpdm",
+    "readOnly": true,
+    "verified": [
+      "public_pages key and updated_at NOT NULL",
+      "public_pages_set_updated_at trigger",
+      "config contact field names",
+      "set_enrollment_admin_state Pix/manual guards"
+    ],
+    "advisors": [
+      {
+        "name": "rls_enabled_no_policy",
+        "level": "INFO",
+        "count": 2,
+        "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy"
+      },
+      {
+        "name": "function_search_path_mutable",
+        "level": "WARN",
+        "count": 1,
+        "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0011_function_search_path_mutable"
+      },
+      {
+        "name": "anon_security_definer_function_executable",
+        "level": "WARN",
+        "count": 6,
+        "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable"
+      },
+      {
+        "name": "authenticated_security_definer_function_executable",
+        "level": "WARN",
+        "count": 6,
+        "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable"
+      },
+      {
+        "name": "auth_leaked_password_protection",
+        "level": "WARN",
+        "count": 1,
+        "remediation": "https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection"
+      }
+    ]
+  },
+  "limitations": [
+    "No authenticated staging E2E, real SMTP, bank or Google service verification",
+    "Concurrent updates to same field use last successful save",
+    "No schema/policy changes, commit, push or deployment"
+  ]
+}

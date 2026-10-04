@@ -101,6 +101,12 @@ function mapCourseRow(row: CourseRow): CourseDoc {
     instructorTitle: row.instructor_title || undefined,
     workload: row.workload_minutes || undefined,
     duration: row.duration_label || undefined,
+    frequency: (row.details as any)?.frequency ?? legacy.frequency,
+    date: (row.details as any)?.date ?? legacy.date,
+    time: (row.details as any)?.time ?? legacy.time,
+    location: (row.details as any)?.location ?? legacy.location,
+    format: (row.details as any)?.format ?? legacy.format,
+    introVideoUrl: (row.details as any)?.introVideoUrl ?? legacy.introVideoUrl,
     level: row.level || undefined,
     category: row.category || undefined,
     isPublished: row.is_published,
@@ -275,9 +281,38 @@ const mediatorSchema = z.object({
 });
 
 function courseDetails(payload: MutablePayload) {
-  if (payload.mediators === undefined) return payload.details;
-  const mediators = z.array(mediatorSchema).max(50).parse(payload.mediators);
-  return { ...payload.details, mediators };
+  const details = { ...payload.details };
+  let changed = payload.details !== undefined;
+  for (const key of [
+    "frequency",
+    "date",
+    "time",
+    "location",
+    "format",
+    "introVideoUrl",
+  ] as const) {
+    if (payload[key] === undefined) continue;
+    details[key] =
+      key === "format" && Array.isArray(payload[key])
+        ? z.array(z.string().trim().max(500)).max(30).parse(payload[key])
+        : z.string().trim().max(2000).parse(payload[key]);
+    changed = true;
+  }
+  if (payload.syllabus !== undefined) {
+    details.syllabus = z
+      .array(z.string().trim().max(2000))
+      .max(200)
+      .parse(payload.syllabus);
+    changed = true;
+  }
+  if (payload.mediators !== undefined) {
+    details.mediators = z
+      .array(mediatorSchema)
+      .max(50)
+      .parse(payload.mediators);
+    changed = true;
+  }
+  return changed ? details : undefined;
 }
 
 function coursePayloadToInsert(
@@ -419,7 +454,7 @@ export async function updateAdminCourse(
   data: Partial<CourseDoc>,
 ): Promise<void> {
   const supabase = createSupabaseServiceClient();
-  if (data.mediators !== undefined) {
+  if (courseDetails(data) !== undefined) {
     const { data: existing, error: readError } = await supabase
       .from("courses")
       .select("details")

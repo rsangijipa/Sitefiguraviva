@@ -1,5 +1,6 @@
 "use client";
 
+import { PUBLIC_CONTACT_EMAIL } from "@/features/public-site/content/contact";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { LifeBuoy } from "lucide-react";
 import Button from "@/components/ui/Button";
@@ -18,9 +19,7 @@ export default function SupportPage() {
           description="Nossa central de suporte está sendo finalizada. Enquanto isso, entre em contato diretamente pelo nosso email."
           action={
             <Button
-              onClick={() =>
-                window.open("mailto:contato@institutofiguraviva.com.br")
-              }
+              onClick={() => window.open(`mailto:${PUBLIC_CONTACT_EMAIL}`)}
             >
               Fale Conosco
             </Button>

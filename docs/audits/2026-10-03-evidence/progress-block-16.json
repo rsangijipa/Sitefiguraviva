@@ -1,0 +1,327 @@
+{
+  "date": "2026-10-04",
+  "basis": "45 corrective backlog items; technical implementation, not effort percentage or launch approval",
+  "blocks": "01–16",
+  "totals": {
+    "total": 45,
+    "implemented": 14,
+    "partial": 22,
+    "planned": 9
+  },
+  "categories": [
+    {
+      "name": "Segurança, banco e operação",
+      "total": 18,
+      "implemented": 7,
+      "partial": 10,
+      "planned": 1
+    },
+    {
+      "name": "Site e cadastro",
+      "total": 10,
+      "implemented": 2,
+      "partial": 6,
+      "planned": 2
+    },
+    {
+      "name": "Inscrição e Pix",
+      "total": 6,
+      "implemented": 3,
+      "partial": 3,
+      "planned": 0
+    },
+    {
+      "name": "Organização, desempenho e SEO",
+      "total": 6,
+      "implemented": 2,
+      "partial": 2,
+      "planned": 2
+    },
+    {
+      "name": "EAD posterior",
+      "total": 4,
+      "implemented": 0,
+      "partial": 0,
+      "planned": 4
+    },
+    {
+      "name": "Stripe posterior",
+      "total": 1,
+      "implemented": 0,
+      "partial": 1,
+      "planned": 0
+    }
+  ],
+  "items": [
+    {
+      "id": "SEC-01",
+      "state": "partial",
+      "stage": "Segurança, banco e operação",
+      "status": "Parcial: projetos históricos bloqueados nos clientes/build, chaves privilegiadas públicas recusadas e histórico principal substituído; revogação/exclusão no provedor e varredura completa pendentes"
+    },
+    {
+      "id": "SEC-02",
+      "state": "implemented",
+      "stage": "Segurança, banco e operação",
+      "status": "Implementado no Supabase; quatro RPCs restritas ao backend; permissões conferidas"
+    },
+    {
+      "id": "OPS-05",
+      "state": "partial",
+      "stage": "Segurança, banco e operação",
+      "status": "Parcial: commit limpo 1e61f15 publicado, Vercel confirmou sucesso e backups Git/arquivos verificados; homologação separada, responsáveis e recuperação banco/Storage pendentes"
+    },
+    {
+      "id": "AUTH-01",
+      "state": "implemented",
+      "stage": "Segurança, banco e operação",
+      "status": "Implementado local: promoção por e-mail removida e cadastro público exige confirmação; publicação, SMTP, CAPTCHA e E2E pendentes"
+    },
+    {
+      "id": "DATA-01",
+      "state": "implemented",
+      "stage": "Segurança, banco e operação",
+      "status": "Implementado no Supabase: dois índices compatíveis com onConflict; jornada completa em homologação pendente"
+    },
+    {
+      "id": "DATA-02",
+      "state": "implemented",
+      "stage": "Segurança, banco e operação",
+      "status": "Implementado local e no Supabase: ações protegidas, políticas de leitura por dono/admin ativo versionadas e gravação do navegador revogada; teste por papel aprovado; publicação e homologação pendentes"
+    },
+    {
+      "id": "AUTH-02",
+      "state": "partial",
+      "stage": "Segurança, banco e operação",
+      "status": "Parcial: perfil ativo e acesso ao curso protegidos; erros de banimento/desbloqueio tratados; publicação, E2E e invalidação de sessões/tabelas auxiliares pendentes"
+    },
+    {
+      "id": "AUTH-03",
+      "state": "partial",
+      "stage": "Segurança, banco e operação",
+      "status": "Parcial: helpers privilegiados server-only e autorização pela sessão; restauração legada exige admin ativo e cookie limitado ao token; revisão das demais ações e homologação pendentes"
+    },
+    {
+      "id": "OPS-01",
+      "state": "partial",
+      "stage": "Segurança, banco e operação",
+      "status": "Parcial: governança no banco e erros Auth tratados; salvamento de perfil exige linha atualizada, falhas de saída visíveis e login admin não informa sucesso após falha de perfil; concorrência administrativa e operações reais exigem homologação"
+    },
+    {
+      "id": "OPS-02",
+      "state": "partial",
+      "stage": "Segurança, banco e operação",
+      "status": "Parcial: CI e validação nativa local implementadas; CI no GitHub/Node 24/Linux, E2E autenticado e ensaio de restauração banco/Storage pendentes"
+    },
+    {
+      "id": "OPS-03",
+      "state": "partial",
+      "stage": "Segurança, banco e operação",
+      "status": "Parcial: Sharp, DOMPurify, busboy, gRPC e PostCSS corrigidos com lockfile validado; oito entradas moderadas na cadeia Firebase/uuid, Linux/Vercel e homologação pendentes"
+    },
+    {
+      "id": "SEC-04",
+      "state": "implemented",
+      "stage": "Segurança, banco e operação",
+      "status": "Implementado local: login exige Origin e JSON, logout exige mesma origem e remove cookie de impersonação; publicação e E2E pendentes"
+    },
+    {
+      "id": "SEC-05",
+      "state": "partial",
+      "stage": "Segurança, banco e operação",
+      "status": "Parcial: signup público verificado, limite compartilhado em produção via Supabase ou Redis, falhas/timeouts negados e recuperação por origem/destino; configuração da hospedagem, Auth nativo/CAPTCHA e homologação distribuída pendentes"
+    },
+    {
+      "id": "PED-01",
+      "state": "planned",
+      "stage": "Segurança, banco e operação",
+      "status": "Planejado; nenhuma correção aplicada"
+    },
+    {
+      "id": "SEC-03",
+      "state": "partial",
+      "stage": "Segurança, banco e operação",
+      "status": "Parcial: novo fluxo PDF privado, autorização no download, visibilidade/publicação e avatares corrigidos; migração aplicada e verificada; três PDFs públicos antigos, consumidores históricos e homologação pendentes"
+    },
+    {
+      "id": "QA-01",
+      "state": "partial",
+      "stage": "Segurança, banco e operação",
+      "status": "Parcial: runners e workflows corrigidos; CI limpa Node 24, emulador e homologação autenticada pendentes"
+    },
+    {
+      "id": "ORG-02",
+      "state": "implemented",
+      "stage": "Segurança, banco e operação",
+      "status": "Implementado: scripts revisados admitidos no versionamento e presentes na base limpa publicada; execução GitHub/Node 24 pendente"
+    },
+    {
+      "id": "EAD-01",
+      "state": "implemented",
+      "stage": "Segurança, banco e operação",
+      "status": "Implementado local e no Supabase para aulas/módulos: sessão e matrícula verificadas, tutor limitado à equipe do curso, rascunhos filtrados no conteúdo e SSR, colunas privadas e gravação do navegador recusadas; 52 verificações SQL aprovadas; publicação/homologação pendentes"
+    },
+    {
+      "id": "AUTH-04",
+      "state": "partial",
+      "stage": "Site e cadastro",
+      "status": "Parcial local: sincronização de cookie ordenada entre tokens/logout, perfis atrasados descartados e falhas de inicialização/salvamento/saída tratadas; recuperação e primeiro acesso existentes; E2E autenticado e SMTP pendentes"
+    },
+    {
+      "id": "SITE-01",
+      "state": "implemented",
+      "stage": "Site e cadastro",
+      "status": "Implementado local e RPC no Supabase: publicação comercial separada da abertura de inscrições, sem requisito EAD; publicação e E2E pendentes"
+    },
+    {
+      "id": "SITE-02",
+      "state": "partial",
+      "stage": "Site e cadastro",
+      "status": "Parcial: valor integral em centavos, limite de parcelas, Pix inicial e ementa persistidos e recuperados; demais campos comerciais e condições reais pendentes"
+    },
+    {
+      "id": "SITE-03",
+      "state": "implemented",
+      "stage": "Site e cadastro",
+      "status": "Implementado local e RLS no Supabase: detalhe direto por ID/slug e ofertas fechadas publicadas; nova inscrição negada; publicação e E2E pendentes"
+    },
+    {
+      "id": "PRIV-01",
+      "state": "partial",
+      "stage": "Site e cadastro",
+      "status": "Parcial local: GA bloqueado sem aceite, ID validado, revogação imediata com ga-disable e limpeza de cookies, publicidade negada e troca entre abas tratada; testes de rede com GA real e homologação pendentes"
+    },
+    {
+      "id": "COM-01",
+      "state": "planned",
+      "stage": "Site e cadastro",
+      "status": "Planejado; nenhuma correção aplicada"
+    },
+    {
+      "id": "SITE-04",
+      "state": "partial",
+      "stage": "Site e cadastro",
+      "status": "Parcial: cache de preview separado, DTOs iniciais de cursos/posts completos e galeria sem cache vazio; demais modais e E2E pendentes"
+    },
+    {
+      "id": "SITE-05",
+      "state": "partial",
+      "stage": "Site e cadastro",
+      "status": "Parcial local: origem oficial por ambiente, canonical de cursos/artigos, sitemap comercial com slug e falha segura, robots e cartão social alinhados; navegação mobile, landmarks restantes e homologação pendentes"
+    },
+    {
+      "id": "SITE-06",
+      "state": "planned",
+      "stage": "Site e cadastro",
+      "status": "Planejado; nenhuma correção aplicada"
+    },
+    {
+      "id": "OPS-06",
+      "state": "partial",
+      "stage": "Site e cadastro",
+      "status": "Parcial local: contato/WhatsApp por DTO do servidor, domínio oficial nos metadados e e-mail confirmado pelo proprietário unificados; demais valores oficiais, publicação e homologação pendentes"
+    },
+    {
+      "id": "ENR-01",
+      "state": "implemented",
+      "stage": "Inscrição e Pix",
+      "status": "Implementado local e esquema no Supabase: cobrança persistida, comprovante privado e estado em análise; publicação e E2E pendentes"
+    },
+    {
+      "id": "ENR-02",
+      "state": "partial",
+      "stage": "Inscrição e Pix",
+      "status": "Parcial: aprovação Pix unificada e transacional, protegida no banco; aprovação comum limitada a manual/free na ação e interface, demais métodos recusados; homologação e exceções financeiras pendentes"
+    },
+    {
+      "id": "ENR-03",
+      "state": "implemented",
+      "stage": "Inscrição e Pix",
+      "status": "Implementado local e esquema no Supabase: TXID exclusivo, valor inicial servidor e Copia e Cola; configuração e teste bancário pendentes"
+    },
+    {
+      "id": "ENR-04",
+      "state": "implemented",
+      "stage": "Inscrição e Pix",
+      "status": "Implementado local e RPC no Supabase: campos, aceite explícito, disponibilidade e estado final preservado; RLS versionada e E2E pendentes"
+    },
+    {
+      "id": "ENR-05",
+      "state": "partial",
+      "stage": "Inscrição e Pix",
+      "status": "Parcial: ficha usa user_id canônico e prepara Pix pendente; convites e reenvio de acesso implementados localmente; SMTP, entrega de e-mail e E2E pendentes"
+    },
+    {
+      "id": "PIX-01",
+      "state": "partial",
+      "stage": "Inscrição e Pix",
+      "status": "Parcial: conferência explícita de crédito, valor, data e referência única; exceções financeiras, parcelas seguintes e teste bancário pendentes"
+    },
+    {
+      "id": "OPS-04",
+      "state": "implemented",
+      "stage": "Organização, desempenho e SEO",
+      "status": "Implementado local: editores Google e contato usam merge autorizado com controle de updated_at e repetição limitada; descartar restaura valores salvos, falha de leitura bloqueia gravação e teste simulado removido; publicação e homologação pendentes"
+    },
+    {
+      "id": "ORG-01",
+      "state": "implemented",
+      "stage": "Organização, desempenho e SEO",
+      "status": "Implementado: .worktrees e .superpowers arquivados fora do projeto, gitlink removido e Git local/remoto com uma única base limpa verificados"
+    },
+    {
+      "id": "ORG-03",
+      "state": "partial",
+      "stage": "Organização, desempenho e SEO",
+      "status": "Parcial: 199 arquivos retirados, incluindo 157 dos 205 candidatos; 48 conservados por consumidores ou edições recentes; build/tipos/rotas/testes preservados; revisão de contratos e assets dinâmicos pendente"
+    },
+    {
+      "id": "ORG-04",
+      "state": "planned",
+      "stage": "Organização, desempenho e SEO",
+      "status": "Planejado; nenhuma correção aplicada"
+    },
+    {
+      "id": "SEO-01",
+      "state": "planned",
+      "stage": "Organização, desempenho e SEO",
+      "status": "Planejado; nenhuma correção aplicada"
+    },
+    {
+      "id": "SEC-06",
+      "state": "partial",
+      "stage": "Organização, desempenho e SEO",
+      "status": "Parcial: JSON-LD corrigido e testado localmente; nonce/CSP completo, publicação e homologação pendentes"
+    },
+    {
+      "id": "EAD-02",
+      "state": "planned",
+      "stage": "EAD posterior",
+      "status": "Planejado; nenhuma correção aplicada"
+    },
+    {
+      "id": "EAD-03",
+      "state": "planned",
+      "stage": "EAD posterior",
+      "status": "Planejado; nenhuma correção aplicada"
+    },
+    {
+      "id": "EAD-04",
+      "state": "planned",
+      "stage": "EAD posterior",
+      "status": "Planejado; nenhuma correção aplicada"
+    },
+    {
+      "id": "EAD-05",
+      "state": "planned",
+      "stage": "EAD posterior",
+      "status": "Planejado; nenhuma correção aplicada"
+    },
+    {
+      "id": "STR-01",
+      "state": "partial",
+      "stage": "Stripe posterior",
+      "status": "Parcial local: checkout, portal, webhook e SDK Stripe desativados por padrão; somente opt-in test com chave test fora de Vercel Production, evento live negado; integração financeira canônica e homologação posteriores"
+    }
+  ]
+}

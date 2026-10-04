@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { protectedContentSecurityPolicy } from "@/lib/security-policy";
 
 export async function middleware(request: NextRequest) {
   const { pathname, search, searchParams } = request.nextUrl;
@@ -29,12 +30,28 @@ export async function middleware(request: NextRequest) {
   }
 
   // 3. Multi-tenant Context Extraction (v3)
-  const host = request.headers.get("host") || "";
-  const isSubdomain = host.includes(".") && !host.startsWith("www");
-  let tenantId = isSubdomain ? host.split(".")[0] : "viva";
+  const tenantId = "viva";
 
   // Inject tenantId header for downstream services
-  const response = NextResponse.next();
+  const protectedPage =
+    /^(?:\/auth(?:\/|$)|\/admin(?:\/|$)|\/portal(?:\/|$)|\/inscricao(?:\/|$))/.test(
+      pathname,
+    );
+  const nonce = btoa(crypto.randomUUID());
+  const policy = protectedPage
+    ? protectedContentSecurityPolicy(
+        nonce,
+        process.env.NODE_ENV !== "production",
+      )
+    : null;
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.delete("x-nonce");
+  if (policy) {
+    requestHeaders.set("x-nonce", nonce);
+    requestHeaders.set("Content-Security-Policy", policy);
+  }
+  const response = NextResponse.next({ request: { headers: requestHeaders } });
+  if (policy) response.headers.set("Content-Security-Policy", policy);
   response.headers.set("x-tenant-id", tenantId);
 
   // 4. Protected Routes Guard (Edge filtering)

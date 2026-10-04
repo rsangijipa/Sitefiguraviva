@@ -2,12 +2,19 @@ jest.mock("@/lib/auth/server", () => ({ requireAdmin: jest.fn() }));
 jest.mock("next/cache", () => ({ revalidatePath: jest.fn() }));
 jest.mock(
   "@/features/public-site/infrastructure/supabasePublicPagesRepository.server",
-  () => ({ upsertPublicPage: jest.fn() }),
+  () => ({
+    upsertPublicPage: jest.fn(),
+    patchPublicConfig: jest.fn(),
+    getPublicPage: jest.fn(),
+  }),
 );
 import { requireAdmin } from "@/lib/auth/server";
 import { revalidatePath } from "next/cache";
-import { upsertPublicPage } from "@/features/public-site/infrastructure/supabasePublicPagesRepository.server";
-import { updateSiteSettings } from "../siteSettings";
+import {
+  upsertPublicPage,
+  patchPublicConfig,
+} from "@/features/public-site/infrastructure/supabasePublicPagesRepository.server";
+import { updateSiteSettings, updateGoogleSettings } from "../siteSettings";
 import { DEFAULT_HOME } from "@/lib/site-content";
 beforeEach(() => {
   jest.clearAllMocks();
@@ -15,6 +22,7 @@ beforeEach(() => {
     .mocked(requireAdmin)
     .mockResolvedValue({ email: "admin@example.com" } as any);
   jest.mocked(upsertPublicPage).mockResolvedValue("now");
+  jest.mocked(patchPublicConfig).mockResolvedValue("now");
 });
 it("publishes homepage content and revalidates the actual institutional routes", async () => {
   expect(await updateSiteSettings("home", DEFAULT_HOME)).toEqual({
@@ -66,10 +74,42 @@ it("does not persist retired visual settings", async () => {
       enableParticles: false,
     }),
   ).toMatchObject({ success: true });
-  expect(jest.mocked(upsertPublicPage).mock.calls[0][1]).not.toHaveProperty(
+  expect(jest.mocked(patchPublicConfig).mock.calls[0][0]).not.toHaveProperty(
     "visualMode",
   );
-  expect(upsertPublicPage.mock.calls[0][1]).not.toHaveProperty(
+  expect(patchPublicConfig.mock.calls[0][0]).not.toHaveProperty(
     "enableParticles",
   );
+});
+
+it("validates Google fields and sends only its namespace to the merge", async () => {
+  expect(
+    await updateGoogleSettings({
+      calendarId: "calendar",
+      driveFolderId: "folder",
+      formsUrl: "https://forms.gle/abc",
+      youtubeId: "@channel",
+      whatsappNumber: "overwrite",
+    }),
+  ).toMatchObject({ success: true });
+  expect(patchPublicConfig).toHaveBeenCalledWith(
+    expect.objectContaining({ calendarId: "calendar" }),
+  );
+  expect(patchPublicConfig.mock.calls[0][0]).not.toHaveProperty(
+    "whatsappNumber",
+  );
+});
+it("rejects unsafe Forms links and unauthorized Google saves", async () => {
+  const values = {
+    calendarId: "",
+    driveFolderId: "",
+    formsUrl: "javascript:alert(1)",
+    youtubeId: "",
+  };
+  expect(await updateGoogleSettings(values)).toMatchObject({ success: false });
+  jest.mocked(requireAdmin).mockRejectedValue(new Error("denied"));
+  expect(await updateGoogleSettings({ ...values, formsUrl: "" })).toMatchObject(
+    { success: false },
+  );
+  expect(patchPublicConfig).not.toHaveBeenCalled();
 });

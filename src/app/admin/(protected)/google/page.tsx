@@ -1,8 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createSupabaseBrowserClient } from "@/infrastructure/supabase/client";
-import { CheckCircle, AlertCircle, ExternalLink, Save } from "lucide-react";
+import {
+  getGoogleSettings,
+  updateGoogleSettings,
+} from "@/app/actions/siteSettings";
+import { CheckCircle, AlertCircle, Save } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function GoogleIntegrations() {
@@ -12,33 +15,39 @@ export default function GoogleIntegrations() {
     formsUrl: "",
     youtubeId: "",
   });
-  // Default empty config for discard action
-  const emptyConfig = {
-    calendarId: "",
-    driveFolderId: "",
-    formsUrl: "",
-    youtubeId: "",
-  };
+  const [savedConfig, setSavedConfig] = useState(config);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error";
   } | null>(null);
 
   useEffect(() => {
-    const fetchConfig = async () => {
-      try {
-        const { data, error } = await createSupabaseBrowserClient()
-          .from("public_pages")
-          .select("content")
-          .eq("key", "config")
-          .maybeSingle();
-        if (error) throw error;
-        if (data?.content) setConfig(data.content as typeof config);
-      } catch (e) {
-        console.error("Error fetching config", e);
-      }
+    let disposed = false;
+    getGoogleSettings()
+      .then((values) => {
+        if (disposed) return;
+        setConfig(values);
+        setSavedConfig(values);
+      })
+      .catch(() => {
+        if (!disposed) {
+          setLoadFailed(true);
+          setToast({
+            message:
+              "Não foi possível carregar. Recarregue a página antes de editar.",
+            type: "error",
+          });
+        }
+      })
+      .finally(() => {
+        if (!disposed) setLoading(false);
+      });
+    return () => {
+      disposed = true;
     };
-    fetchConfig();
   }, []);
 
   const showToast = (
@@ -50,22 +59,20 @@ export default function GoogleIntegrations() {
   };
 
   const handleSave = async () => {
+    if (loading || loadFailed || saving) return;
+    setSaving(true);
     try {
-      const { error } = await createSupabaseBrowserClient()
-        .from("public_pages")
-        .upsert(
-          {
-            key: "config",
-            content: config,
-            is_published: true,
-          },
-          { onConflict: "key" },
-        );
-      if (error) throw error;
-      showToast("Configurações salvas e aplicadas com sucesso!");
-    } catch (e) {
-      console.error(e);
-      showToast("Erro ao salvar.", "error");
+      const result = await updateGoogleSettings(config);
+      if (!result.success) throw new Error(result.error);
+      setSavedConfig({ ...config });
+      showToast("Configurações salvas com sucesso!");
+    } catch (error) {
+      showToast(
+        error instanceof Error ? error.message : "Erro ao salvar.",
+        "error",
+      );
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -133,8 +140,8 @@ export default function GoogleIntegrations() {
           <div>
             <h3 className="font-serif text-2xl mb-2">Integrações Google</h3>
             <p className="text-primary/40 text-sm max-w-lg">
-              Conecte os serviços do Google para automatizar o conteúdo do site.
-              As alterações refletem imediatamente.
+              Cadastre referências dos serviços Google. Salvar um endereço não
+              verifica a conexão nem configura permissões no serviço.
             </p>
           </div>
         </header>
@@ -142,32 +149,28 @@ export default function GoogleIntegrations() {
         <div className="grid gap-8">
           {integrationFields.map((field) => (
             <div key={field.key} className="group">
-              <label className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.2em] text-primary/60 mb-3 ml-2">
+              <label
+                htmlFor={field.key}
+                className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.2em] text-primary/60 mb-3 ml-2"
+              >
                 <span className="flex items-center gap-2">{field.label}</span>
                 {config[field.key] && (
                   <span className="text-green-500 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <CheckCircle size={10} /> Conectado
+                    <CheckCircle size={10} /> Cadastrado
                   </span>
                 )}
               </label>
               <div className="relative">
                 <input
                   type="text"
+                  id={field.key}
+                  disabled={loading || loadFailed || saving}
                   name={field.key}
                   value={config[field.key] || ""}
                   onChange={handleChange}
                   placeholder={field.placeholder}
                   className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-gold/20 focus:border-gold transition-all font-mono text-sm text-primary"
                 />
-                {config[field.key] && (
-                  <button
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-primary/30 hover:text-gold transition-colors"
-                    title="Testar Link"
-                    onClick={() => showToast("Validando conexão... (Simulado)")}
-                  >
-                    <ExternalLink size={16} />
-                  </button>
-                )}
               </div>
               <p className="mt-2 ml-2 text-xs text-primary/30 font-light">
                 {field.help}
@@ -178,12 +181,14 @@ export default function GoogleIntegrations() {
 
         <div className="mt-12 pt-8 border-t border-gray-100 flex justify-end gap-4">
           <button
-            onClick={() => setConfig(emptyConfig)}
+            disabled={loading || loadFailed || saving}
+            onClick={() => setConfig({ ...savedConfig })}
             className="px-8 py-4 rounded-xl text-[10px] font-bold uppercase tracking-widest text-primary/40 hover:bg-gray-50 transition-colors"
           >
             Descartar
           </button>
           <button
+            disabled={loading || loadFailed || saving}
             onClick={handleSave}
             className="px-8 py-4 bg-primary text-paper rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-gold transition-soft hover:shadow-lg flex items-center gap-2"
           >

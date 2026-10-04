@@ -131,3 +131,16 @@ describe("manual Pix actions", () => {
     expect(result.error).not.toContain("sensitive");
   });
 });
+
+it("rejects bank credit dated in the future before calling reconciliation", async () => {
+  admin.mockResolvedValue({ uid: "admin" });
+  rpc.mockClear();
+  const result = await approvePixEnrollment("student", "course", {
+    bankReference: "REF123456",
+    receivedAt: new Date(Date.now() + 3600000).toISOString(),
+    receivedConfirmed: true,
+    receivedAmountCents: 100,
+  });
+  expect(result.success).toBe(false);
+  expect(rpc).not.toHaveBeenCalled();
+});

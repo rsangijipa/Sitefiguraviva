@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { CONSENT_EVENT, CONSENT_STORAGE_KEY } from "./consent.constants";
+import { disableAnalytics } from "./analytics-consent";
 
 /**
  * Cookie consent (LGPD).
@@ -15,6 +16,7 @@ import { CONSENT_EVENT, CONSENT_STORAGE_KEY } from "./consent.constants";
 export type ConsentState = "granted" | "denied";
 
 const STORAGE_KEY = CONSENT_STORAGE_KEY;
+let fallbackConsent: ConsentState | null | undefined;
 const FLOATING_CONTROL_SELECTOR =
   "[data-secondary-floating-control], [data-floating-whatsapp]";
 
@@ -38,6 +40,7 @@ function coordinateConsentSurface(
 
 export function readConsent(): ConsentState | null {
   if (typeof window === "undefined") return null;
+  if (fallbackConsent !== undefined) return fallbackConsent;
   try {
     const value = window.localStorage.getItem(STORAGE_KEY);
     return value === "granted" || value === "denied" ? value : null;
@@ -52,8 +55,11 @@ function broadcast() {
 }
 
 export function setConsent(state: ConsentState) {
+  if (state !== "granted") disableAnalytics();
+  fallbackConsent = state;
   try {
     window.localStorage.setItem(STORAGE_KEY, state);
+    fallbackConsent = undefined;
   } catch {
     // Ignore: the banner will simply ask again next visit.
   }
@@ -61,8 +67,11 @@ export function setConsent(state: ConsentState) {
 }
 
 export function resetConsent() {
+  disableAnalytics();
+  fallbackConsent = null;
   try {
     window.localStorage.removeItem(STORAGE_KEY);
+    fallbackConsent = undefined;
   } catch {
     // Ignore.
   }
@@ -79,16 +88,25 @@ export function useCookieConsent() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const sync = () => setConsentState(readConsent());
+    const sync = () => {
+      const value = readConsent();
+      if (value !== "granted") disableAnalytics();
+      setConsentState(value);
+    };
 
     sync();
     setReady(true);
 
     window.addEventListener(CONSENT_EVENT, sync);
-    window.addEventListener("storage", sync);
+    const syncStorage = (event: StorageEvent) => {
+      if (event.key !== STORAGE_KEY && event.key !== null) return;
+      fallbackConsent = undefined;
+      sync();
+    };
+    window.addEventListener("storage", syncStorage);
     return () => {
       window.removeEventListener(CONSENT_EVENT, sync);
-      window.removeEventListener("storage", sync);
+      window.removeEventListener("storage", syncStorage);
     };
   }, []);
 

@@ -29,7 +29,7 @@ export default function CourseModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={onClose} ariaLabel="Detalhes do curso">
       <ModalContent size="xl" className="bg-paper p-0">
         {/* Close Button - Premium Style */}
         <button

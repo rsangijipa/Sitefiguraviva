@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isSameOriginRequest } from "@/lib/auth/request-origin";
 import { cookies } from "next/headers";
 import {
   rateLimit,
@@ -41,7 +42,7 @@ function readTokenExpirySeconds(accessToken: string): number | null {
 export async function POST(request: Request) {
   // Browsers can send cross-site text/plain POSTs without a CORS preflight.
   // Reject them before token validation or writing a session cookie.
-  if (request.headers.get("origin") !== new URL(request.url).origin) {
+  if (!isSameOriginRequest(request)) {
     return NextResponse.json({ error: "Forbidden origin" }, { status: 403 });
   }
   if (

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { useToast } from "@/context/ToastContext";
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 import Image from "next/image";
@@ -34,6 +35,7 @@ export default function AdminShell({
 }: {
   children: React.ReactNode;
 }) {
+  const { addToast } = useToast();
   const { signOut, user, role } = useAuth(); // Get current user and role
   const { data: founderData } = useFounderSettings();
   const router = useRouter();
@@ -179,7 +181,16 @@ export default function AdminShell({
           </Link>
 
           <button
-            onClick={() => signOut()}
+            onClick={() =>
+              void signOut().catch((error) =>
+                addToast(
+                  error instanceof Error
+                    ? error.message
+                    : "Não foi possível sair. Tente novamente.",
+                  "error",
+                ),
+              )
+            }
             title={isSidebarCollapsed ? "Sair" : undefined}
             className="group flex w-full items-center justify-center gap-3 rounded-md px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-muted transition-colors hover:bg-error/10 hover:text-error"
           >
@@ -212,7 +223,7 @@ export default function AdminShell({
       </AnimatePresence>
 
       {/* Main Content */}
-      <main
+      <div
         className={`panel-surface flex-1 p-4 md:p-6 lg:p-7 min-h-screen relative ${isSidebarCollapsed ? "lg:ml-20" : "lg:ml-72"}`}
       >
         {/* Sticky Mobile Tracker/Header background */}
@@ -335,7 +346,7 @@ export default function AdminShell({
 
           {children}
         </div>
-      </main>
+      </div>
     </PageShell>
   );
 }

@@ -26,19 +26,25 @@ function getFocusable(container: HTMLElement) {
     container.querySelectorAll<HTMLElement>(
       'a[href], button:not([disabled]), textarea, input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
     ),
-  ).filter((element) => !element.closest('[hidden], [inert], [aria-hidden="true"]'));
+  ).filter(
+    (element) =>
+      element.tabIndex >= 0 &&
+      !element.closest('[hidden], [inert], [aria-hidden="true"]'),
+  );
 }
 
 export function Modal({
   isOpen,
   onClose,
   children,
-  ariaLabel,
+  ariaLabel = "Janela de conteúdo",
   variant = "default",
 }: ModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const openerRef = useRef<HTMLElement | null>(null);
   // Close on ESC
   useEffect(() => {
@@ -55,10 +61,10 @@ export function Modal({
       document.activeElement instanceof HTMLElement
         ? document.activeElement
         : null;
-    const timer = window.setTimeout(
-      () => { if (dialogRef.current) getFocusable(dialogRef.current).at(0)?.focus(); },
-      0,
-    );
+    const timer = window.setTimeout(() => {
+      if (dialogRef.current)
+        (getFocusable(dialogRef.current).at(0) ?? dialogRef.current).focus();
+    }, 0);
     return () => {
       window.clearTimeout(timer);
       openerRef.current?.focus();
@@ -69,6 +75,10 @@ export function Modal({
     if (!isOpen) return;
     const handleTab = (event: KeyboardEvent) => {
       if (event.key !== "Tab" || !dialogRef.current) return;
+      const dialogs = document.querySelectorAll(
+        '[role="dialog"][aria-modal="true"]',
+      );
+      if (dialogs.item(dialogs.length - 1) !== dialogRef.current) return;
       const focusable = getFocusable(dialogRef.current);
       if (!focusable.length) {
         event.preventDefault();
@@ -76,7 +86,10 @@ export function Modal({
       }
       const first = focusable[0];
       const last = focusable.at(-1)!;
-      if (event.shiftKey && document.activeElement === first) {
+      if (!dialogRef.current.contains(document.activeElement)) {
+        event.preventDefault();
+        first.focus();
+      } else if (event.shiftKey && document.activeElement === first) {
         event.preventDefault();
         last.focus();
       } else if (!event.shiftKey && document.activeElement === last) {
@@ -110,6 +123,7 @@ export function Modal({
             className="fixed inset-0 z-[100] flex items-center justify-center"
             role="dialog"
             aria-modal="true"
+            tabIndex={-1}
             aria-label={ariaLabel}
           >
             {/* Backdrop */}
@@ -197,7 +211,7 @@ export function ModalHeader({
       <button
         onClick={onClose}
         className="group flex items-center gap-2 bg-white border border-gray-200 pl-3 pr-2 py-2 rounded-full text-primary hover:bg-primary hover:text-white transition-all focus:outline-none focus:ring-2 focus:ring-primary ml-4 shadow-sm hover:translate-y-[-1px]"
-        aria-label="Close"
+        aria-label="Fechar"
       >
         <span className="text-[10px] font-bold uppercase tracking-widest opacity-0 w-0 group-hover:w-auto group-hover:opacity-100 transition-all duration-300 overflow-hidden whitespace-nowrap">
           Fechar

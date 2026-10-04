@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import CourseDetailClient from "./CourseDetailClient";
 
 import { getCourseById } from "@/data/courses";
+import { publicContentPath } from "@/lib/public-site-url";
 import { deepSafeSerialize } from "@/lib/utils";
 
 export async function generateMetadata({
@@ -15,7 +16,10 @@ export async function generateMetadata({
   const course = await getCourseById(id);
 
   if (!course) {
-    return { title: "Curso não encontrado" };
+    return {
+      title: "Curso não encontrado",
+      robots: { index: false, follow: false },
+    };
   }
 
   const title = course.title;
@@ -27,7 +31,9 @@ export async function generateMetadata({
   return {
     title,
     description,
+    alternates: { canonical: publicContentPath("curso", course) },
     openGraph: {
+      url: publicContentPath("curso", course),
       title,
       description,
       images: coverImage ? [coverImage] : undefined,

@@ -57,6 +57,13 @@ export default function ApprovalsPage() {
       addToast("Use o formulário de conferência Pix deste pedido.", "info");
       return;
     }
+    if (!["manual", "free"].includes(enrollment.paymentMethod)) {
+      addToast(
+        "Esta matrícula exige revisão do fluxo de pagamento correspondente.",
+        "error",
+      );
+      return;
+    }
     if (!confirm(`Confirmar aprovação para ${enrollment.uid}?`)) return;
     setProcessingId(enrollment.id);
 
@@ -197,7 +204,10 @@ export default function ApprovalsPage() {
                           )
                         }
                         onClick={() => handleApprove(en)}
-                        disabled={processingId === en.id}
+                        disabled={
+                          processingId === en.id ||
+                          !["manual", "free"].includes(en.paymentMethod)
+                        }
                       >
                         {processingId === en.id
                           ? "Processando..."

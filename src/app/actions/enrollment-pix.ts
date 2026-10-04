@@ -87,7 +87,13 @@ export interface PixReconciliation {
 }
 const reviewSchema = z.object({
   bankReference: z.string().trim().min(6).max(120),
-  receivedAt: z.string().datetime({ offset: true }),
+  receivedAt: z
+    .string()
+    .datetime({ offset: true })
+    .refine(
+      (value) => Date.parse(value) <= Date.now() + 60000,
+      "Data do recebimento não pode ser futura.",
+    ),
   receivedConfirmed: z.literal(true),
   receivedAmountCents: z.number().int().positive().max(2147483647),
 });

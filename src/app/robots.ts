@@ -1,5 +1,7 @@
 import { MetadataRoute } from "next";
 
+import { getPublicSiteOrigin } from "@/lib/public-site-url";
+
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
@@ -7,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: ["/admin/", "/portal/", "/api/"],
     },
-    sitemap: "https://figuraviva.com.br/sitemap.xml",
+    sitemap: `${getPublicSiteOrigin()}/sitemap.xml`,
   };
 }

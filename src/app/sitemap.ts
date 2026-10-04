@@ -1,42 +1,52 @@
 import { MetadataRoute } from "next";
 import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
+import { getPublicSiteOrigin, publicContentPath } from "@/lib/public-site-url";
+
+export const revalidate = 300;
+
+type Entry = { id: string; slug?: string | null; updated_at?: string | null };
+
+// Fail independently: an unavailable catalog must not hide the institutional pages.
+async function publishedEntries(table: "courses" | "posts"): Promise<Entry[]> {
+  try {
+    const supabase = createSupabaseServiceClient();
+    const query =
+      table === "courses"
+        ? supabase
+            .from("courses")
+            .select("id, slug, updated_at")
+            .eq("is_published", true)
+            .in("status", ["open", "closed"])
+        : supabase
+            .from("posts")
+            .select("id, slug, updated_at")
+            .eq("is_published", true);
+    const { data, error } = await query.abortSignal(AbortSignal.timeout(1500));
+    return error ? [] : (data ?? []);
+  } catch {
+    return [];
+  }
+}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://figuraviva.com.br";
-
-  const supabase = createSupabaseServiceClient();
-  const safeQuery = async (query: PromiseLike<{ data: any[] | null }>) =>
-    Promise.race([
-      query,
-      new Promise<{ data: any[] | null }>((resolve) =>
-        setTimeout(() => resolve({ data: null }), 1500),
-      ),
-    ]);
-  const [{ data: courses }, { data: posts }] = await Promise.all([
-    safeQuery(
-      supabase
-        .from("courses")
-        .select("id, updated_at")
-        .eq("is_published", true),
-    ),
-    safeQuery(
-      supabase.from("posts").select("id, updated_at").eq("is_published", true),
-    ),
+  const baseUrl = getPublicSiteOrigin();
+  const [courses, posts] = await Promise.all([
+    publishedEntries("courses"),
+    publishedEntries("posts"),
   ]);
-
-  const courseRoutes = (courses ?? []).map((course) => ({
-    url: `${baseUrl}/curso/${course.id}`,
-    lastModified: course.updated_at ? new Date(course.updated_at) : new Date(),
-    changeFrequency: "weekly" as const,
-    priority: 0.8,
-  }));
-  const postRoutes = (posts ?? []).map((post) => ({
-    url: `${baseUrl}/blog/${post.id}`,
-    lastModified: post.updated_at ? new Date(post.updated_at) : new Date(),
-    changeFrequency: "monthly" as const,
-    priority: 0.6,
-  }));
-
+  const contentRoutes = (entries: Entry[], kind: "curso" | "blog") =>
+    entries.map((entry) => {
+      const date = entry.updated_at ? new Date(entry.updated_at) : undefined;
+      return {
+        url: baseUrl + publicContentPath(kind, entry),
+        ...(date && Number.isFinite(date.getTime())
+          ? { lastModified: date }
+          : {}),
+        changeFrequency:
+          kind === "curso" ? ("weekly" as const) : ("monthly" as const),
+        priority: kind === "curso" ? 0.8 : 0.6,
+      };
+    });
   const routes = [
     "",
     "/instituto",
@@ -47,12 +57,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/public-gallery",
     "/blog",
     "/privacidade",
+    "/termos",
   ].map((route) => ({
-    url: `${baseUrl}${route}`,
-    lastModified: new Date(),
-    changeFrequency: "daily" as const,
+    url: baseUrl + route,
+    changeFrequency: "weekly" as const,
     priority: route === "" ? 1.0 : 0.7,
   }));
-
-  return [...routes, ...courseRoutes, ...postRoutes];
+  return [
+    ...routes,
+    ...contentRoutes(courses, "curso"),
+    ...contentRoutes(posts, "blog"),
+  ];
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { PUBLIC_CONTACT_EMAIL } from "@/features/public-site/content/contact";
 import { usePublicContact } from "@/features/public-site/components/PublicContactProvider";
 import { Instagram, Mail, MapPin, Phone, ArrowRight } from "lucide-react";
 import CookiePreferencesButton from "@/components/system/CookiePreferencesButton";
@@ -98,12 +99,12 @@ export default function Footer() {
                 <span className="min-w-0 break-words">{address}</span>
               </p>
               <a
-                href="mailto:contato@figuraviva.com.br"
+                href={`mailto:${PUBLIC_CONTACT_EMAIL}`}
                 className="flex min-h-8 items-center gap-2 transition-soft hover:text-gold-light"
               >
                 <Mail size={16} className="shrink-0 text-gold-light" />
                 <span className="min-w-0 break-all">
-                  contato@figuraviva.com.br
+                  {PUBLIC_CONTACT_EMAIL}
                 </span>
               </a>
               {phone && (

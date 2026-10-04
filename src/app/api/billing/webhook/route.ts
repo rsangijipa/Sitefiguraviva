@@ -1,4 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import {
+  isStripeTestBillingEnabled,
+  STRIPE_DISABLED_MESSAGE,
+} from "@/lib/billing-mode";
 import { getStripe } from "@/lib/stripe";
 import { adminDb } from "@/lib/firebase/admin";
 import { FieldValue } from "firebase-admin/firestore";
@@ -21,6 +25,11 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
+  if (!isStripeTestBillingEnabled())
+    return NextResponse.json(
+      { error: STRIPE_DISABLED_MESSAGE },
+      { status: 503 },
+    );
   const stripe = getStripe();
   const body = await req.text();
   const signature = req.headers.get("stripe-signature") as string;
@@ -44,6 +53,12 @@ export async function POST(req: NextRequest) {
     });
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
+
+  if (event.livemode)
+    return NextResponse.json(
+      { error: "Live billing is disabled" },
+      { status: 403 },
+    );
 
   const eventId = event.id;
   const eventRef = adminDb.collection("stripe_events").doc(eventId);

@@ -200,12 +200,11 @@ export function getAdminStorage(): admin.storage.Storage {
 /**
  * The browser authenticates through Supabase, while some legacy services still
  * store data in Firebase. Keep those services working by validating the
- * Supabase cookie and exposing equivalent, server-derived claims. Firebase
- * session cookies remain supported for existing back-office sessions.
+ * Supabase cookie and exposing equivalent, server-derived claims. All application sessions use the canonical Supabase identity.
  */
 async function verifyPlatformSessionCookie(
   sessionCookie: string,
-  checkRevoked?: boolean,
+  _checkRevoked?: boolean,
 ): Promise<admin.auth.DecodedIdToken> {
   const claims = await getSupabaseSessionClaims(sessionCookie);
 
@@ -229,7 +228,7 @@ async function verifyPlatformSessionCookie(
     } as unknown as admin.auth.DecodedIdToken;
   }
 
-  return getAdminAuth().verifySessionCookie(sessionCookie, checkRevoked);
+  throw new Error("auth/invalid-session-cookie");
 }
 
 // Proxies for Lazy Initialization to prevent build-time crashes if envs are missing in some CI contexts,

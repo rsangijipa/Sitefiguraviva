@@ -129,3 +129,162 @@ describe("AuthContext", () => {
     ).rejects.toThrow("Envio indisponível");
   });
 });
+
+describe("auth concurrency and failures", () => {
+  function deferred<T>() {
+    let resolve!: (value: T) => void;
+    const promise = new Promise<T>((r) => {
+      resolve = r;
+    });
+    return { promise, resolve };
+  }
+  let callback: (event: string, session: any) => void;
+  const session = (id: string) => ({
+    access_token: "race-token-" + id,
+    user: { id, email: id + "@example.com", user_metadata: {} },
+  });
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (createSupabaseBrowserClient as jest.Mock).mockReturnValue(mockSupabase);
+    mockSupabase.auth.getSession.mockResolvedValue({
+      data: { session: null },
+      error: null,
+    });
+    mockSupabase.auth.onAuthStateChange.mockImplementation((fn) => {
+      callback = fn;
+      return { data: { subscription: { unsubscribe: jest.fn() } } };
+    });
+    mockSupabase.auth.signOut.mockResolvedValue({ error: null });
+    global.fetch = jest.fn().mockResolvedValue({ ok: true }) as any;
+  });
+  it("does not let delayed initialization replace a newer account", async () => {
+    const initial = deferred<any>();
+    mockSupabase.auth.getSession.mockReturnValue(initial.promise);
+    mockSupabase.from.mockReturnValue({
+      select: () => ({
+        eq: () => ({
+          maybeSingle: async () => ({
+            data: {
+              role: "student",
+              is_active: true,
+              display_name: "New account",
+            },
+            error: null,
+          }),
+        }),
+      }),
+    });
+    const { result } = renderHook(() => useAuth(), { wrapper: AuthProvider });
+    act(() => callback("SIGNED_IN", session("new")));
+    await waitFor(() => expect(result.current.user?.id).toBe("new"));
+    await act(async () => {
+      initial.resolve({ data: { session: session("old") }, error: null });
+    });
+    expect(result.current.user?.id).toBe("new");
+  });
+  it("discards an old admin profile after an account switch", async () => {
+    const oldProfile = deferred<any>(),
+      newProfile = deferred<any>();
+    const reads: string[] = [];
+    mockSupabase.from.mockReturnValue({
+      select: () => ({
+        eq: (_field: string, uid: string) => ({
+          maybeSingle: () => {
+            reads.push(uid);
+            return uid === "old-admin"
+              ? oldProfile.promise
+              : newProfile.promise;
+          },
+        }),
+      }),
+    });
+    const { result } = renderHook(() => useAuth(), { wrapper: AuthProvider });
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    act(() => callback("SIGNED_IN", session("old-admin")));
+    await waitFor(() => expect(reads).toContain("old-admin"));
+    act(() => callback("SIGNED_IN", session("student-next")));
+    await waitFor(() => expect(reads).toContain("student-next"));
+    await act(async () => {
+      newProfile.resolve({
+        data: { role: "student", is_active: true },
+        error: null,
+      });
+    });
+    await act(async () => {
+      oldProfile.resolve({
+        data: { role: "admin", is_active: true },
+        error: null,
+      });
+    });
+    expect(result.current.user?.id).toBe("student-next");
+    expect(result.current.isAdmin).toBe(false);
+  });
+  it("finishes loading if the initial SDK request rejects", async () => {
+    mockSupabase.auth.getSession.mockRejectedValue(new Error("offline"));
+    const { result } = renderHook(() => useAuth(), { wrapper: AuthProvider });
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.user).toBeNull();
+    expect(result.current.isAdmin).toBe(false);
+  });
+  it("does not report a profile save when no database row was updated", async () => {
+    const save = jest.fn().mockResolvedValue({ data: null, error: null });
+    mockSupabase.auth.getSession.mockResolvedValue({
+      data: { session: session("profile-save") },
+      error: null,
+    });
+    mockSupabase.from.mockReturnValue({
+      select: () => ({
+        eq: () => ({
+          maybeSingle: async () => ({
+            data: {
+              role: "student",
+              is_active: true,
+              display_name: "Original",
+            },
+            error: null,
+          }),
+        }),
+      }),
+      update: () => ({ eq: () => ({ select: () => ({ maybeSingle: save }) }) }),
+    });
+    const { result } = renderHook(() => useAuth(), { wrapper: AuthProvider });
+    await waitFor(() =>
+      expect(result.current.user?.displayName).toBe("Original"),
+    );
+    await expect(
+      result.current.updateProfile({ displayName: "New" }),
+    ).rejects.toThrow("salvar");
+    expect(result.current.user?.displayName).toBe("Original");
+    expect(mockSupabase.auth.updateUser).not.toHaveBeenCalled();
+  });
+  it("clears the server cookie and reports an Auth logout failure", async () => {
+    mockSupabase.auth.getSession.mockResolvedValue({
+      data: { session: session("logout-failure") },
+      error: null,
+    });
+    mockSupabase.from.mockReturnValue({
+      select: () => ({
+        eq: () => ({
+          maybeSingle: async () => ({
+            data: { role: "student", is_active: true },
+            error: null,
+          }),
+        }),
+      }),
+    });
+    const { result } = renderHook(() => useAuth(), { wrapper: AuthProvider });
+    await waitFor(() => expect(result.current.user?.id).toBe("logout-failure"));
+    mockSupabase.auth.signOut.mockResolvedValue({
+      error: new Error("offline"),
+    });
+    await act(async () => {
+      await expect(result.current.signOut()).rejects.toThrow("não confirmou");
+    });
+    expect(global.fetch).toHaveBeenCalledWith(
+      "/api/auth/logout",
+      expect.anything(),
+    );
+    expect(result.current.user).toBeNull();
+    expect(mockRouter.push).not.toHaveBeenCalled();
+  });
+});

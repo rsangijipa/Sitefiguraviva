@@ -1,0 +1,2726 @@
+{
+  "basis": "Source inventory and transitive local calls, not proof of HTTP exploitation or exhaustive authorization",
+  "actions": [
+    {
+      "file": "src/actions/adminEnrollment.ts",
+      "action": "enrollLead",
+      "calls": [
+        "Number.isInteger",
+        "[\"active\", \"completed\"].includes",
+        "[\"submitted\", \"contacted\"].includes",
+        "buildPixPayload",
+        "createSupabaseServiceClient",
+        "db\n      .from",
+        "db\n      .from(\"applications\")\n      .select",
+        "db\n      .from(\"applications\")\n      .select(\"id,user_id,course_id,status\")\n      .eq",
+        "db\n      .from(\"applications\")\n      .select(\"id,user_id,course_id,status\")\n      .eq(\"id\", applicationId)\n      .maybeSingle",
+        "db\n      .from(\"courses\")\n      .select",
+        "db\n      .from(\"courses\")\n      .select(\"pix_price_cents,is_published,status\")\n      .eq",
+        "db\n      .from(\"courses\")\n      .select(\"pix_price_cents,is_published,status\")\n      .eq(\"id\", app.course_id)\n      .maybeSingle",
+        "db\n      .from(\"enrollments\")\n      .select",
+        "db\n      .from(\"enrollments\")\n      .select(\"status\")\n      .eq",
+        "db\n      .from(\"enrollments\")\n      .select(\"status\")\n      .eq(\"user_id\", app.user_id)\n      .eq",
+        "db\n      .from(\"enrollments\")\n      .select(\"status\")\n      .eq(\"user_id\", app.user_id)\n      .eq(\"course_id\", app.course_id)\n      .maybeSingle",
+        "db\n      .from(\"profiles\")\n      .select",
+        "db\n      .from(\"profiles\")\n      .select(\"id,is_active\")\n      .eq",
+        "db\n      .from(\"profiles\")\n      .select(\"id,is_active\")\n      .eq(\"id\", app.user_id)\n      .maybeSingle",
+        "db.rpc",
+        "findPixOrder",
+        "getPixConfig",
+        "id.replaceAll",
+        "id.replaceAll(\"-\", \"\").slice",
+        "randomUUID",
+        "requireAdmin",
+        "revalidatePath"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/actions/analytics.ts",
+      "action": "getStudentAnalytics",
+      "calls": [
+        "adminDb\n        .collection",
+        "adminDb\n        .collection(\"certificates\")\n        .where",
+        "adminDb\n        .collection(\"certificates\")\n        .where(\"userId\", \"==\", enrollment.userId)\n        .where",
+        "adminDb\n        .collection(\"certificates\")\n        .where(\"userId\", \"==\", enrollment.userId)\n        .where(\"courseId\", \"==\", courseId)\n        .where",
+        "adminDb\n        .collection(\"certificates\")\n        .where(\"userId\", \"==\", enrollment.userId)\n        .where(\"courseId\", \"==\", courseId)\n        .where(\"status\", \"==\", \"issued\")\n        .limit",
+        "adminDb\n        .collection(\"certificates\")\n        .where(\"userId\", \"==\", enrollment.userId)\n        .where(\"courseId\", \"==\", courseId)\n        .where(\"status\", \"==\", \"issued\")\n        .limit(1)\n        .get",
+        "adminDb\n        .collection(\"users\")\n        .doc",
+        "adminDb\n        .collection(\"users\")\n        .doc(enrollment.userId)\n        .collection",
+        "adminDb\n        .collection(\"users\")\n        .doc(enrollment.userId)\n        .collection(\"assessmentProgress\")\n        .where",
+        "adminDb\n        .collection(\"users\")\n        .doc(enrollment.userId)\n        .collection(\"assessmentProgress\")\n        .where(\"courseId\", \"==\", courseId)\n        .get",
+        "adminDb\n        .collection(\"users\")\n        .doc(enrollment.userId)\n        .collection(\"courseProgress\")\n        .doc",
+        "adminDb\n        .collection(\"users\")\n        .doc(enrollment.userId)\n        .collection(\"courseProgress\")\n        .doc(courseId)\n        .get",
+        "adminDb\n        .collection(\"users\")\n        .doc(enrollment.userId)\n        .get",
+        "adminDb\n      .collection",
+        "adminDb\n      .collection(\"enrollments\")\n      .where",
+        "adminDb\n      .collection(\"enrollments\")\n      .where(\"courseId\", \"==\", courseId)\n      .get",
+        "assessmentProg.data",
+        "auth.verifySessionCookie",
+        "console.error",
+        "cookieStore.get",
+        "cookies",
+        "enrollDoc.data",
+        "getAuthContext",
+        "progressDoc.data",
+        "studentsAnalytics.push",
+        "userDoc.data",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "getAuthContext",
+        "verifySession",
+        "auth.verifySessionCookie"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/actions/analytics.ts",
+      "action": "getCourseAnalytics",
+      "calls": [
+        "Date.now",
+        "adminDb\n        .collection",
+        "adminDb\n        .collection(\"assessmentSubmissions\")\n        .where",
+        "adminDb\n        .collection(\"assessmentSubmissions\")\n        .where(\"assessmentId\", \"==\", assessmentDoc.id)\n        .where",
+        "adminDb\n        .collection(\"assessmentSubmissions\")\n        .where(\"assessmentId\", \"==\", assessmentDoc.id)\n        .where(\"status\", \"==\", \"graded\")\n        .get",
+        "adminDb\n        .collection(\"users\")\n        .doc",
+        "adminDb\n        .collection(\"users\")\n        .doc(enrollment.userId)\n        .collection",
+        "adminDb\n        .collection(\"users\")\n        .doc(enrollment.userId)\n        .collection(\"courseProgress\")\n        .doc",
+        "adminDb\n        .collection(\"users\")\n        .doc(enrollment.userId)\n        .collection(\"courseProgress\")\n        .doc(courseId)\n        .get",
+        "adminDb\n      .collection",
+        "adminDb\n      .collection(\"assessments\")\n      .where",
+        "adminDb\n      .collection(\"assessments\")\n      .where(\"courseId\", \"==\", courseId)\n      .get",
+        "adminDb\n      .collection(\"certificates\")\n      .where",
+        "adminDb\n      .collection(\"certificates\")\n      .where(\"courseId\", \"==\", courseId)\n      .where",
+        "adminDb\n      .collection(\"certificates\")\n      .where(\"courseId\", \"==\", courseId)\n      .where(\"status\", \"==\", \"issued\")\n      .get",
+        "adminDb\n      .collection(\"enrollments\")\n      .where",
+        "adminDb\n      .collection(\"enrollments\")\n      .where(\"courseId\", \"==\", courseId)\n      .get",
+        "adminDb.collection",
+        "adminDb.collection(\"courses\").doc",
+        "adminDb.collection(\"courses\").doc(courseId).get",
+        "auth.verifySessionCookie",
+        "console.error",
+        "cookieStore.get",
+        "cookies",
+        "courseDoc.data",
+        "enrollDoc.data",
+        "getAuthContext",
+        "progress.lastUpdated?.toMillis",
+        "progressDoc.data",
+        "subDoc.data",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "getAuthContext",
+        "verifySession",
+        "auth.verifySessionCookie"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/actions/analytics.ts",
+      "action": "getPlatformAnalytics",
+      "calls": [
+        "(\n      await adminDb\n        .collection(\"certificates\")\n        .where(\"status\", \"==\", \"issued\")\n        .count()\n        .get()\n    ).data",
+        "(\n      await adminDb.collection(\"courses\").count().get()\n    ).data",
+        "(\n      await adminDb.collection(\"enrollments\").count().get()\n    ).data",
+        "(await adminDb.collection(\"users\").count().get()).data",
+        "Promise.all",
+        "adminDb\n        .collection",
+        "adminDb\n        .collection(\"certificates\")\n        .where",
+        "adminDb\n        .collection(\"certificates\")\n        .where(\"status\", \"==\", \"issued\")\n        .count",
+        "adminDb\n        .collection(\"certificates\")\n        .where(\"status\", \"==\", \"issued\")\n        .count()\n        .get",
+        "adminDb.collection",
+        "adminDb.collection(\"courses\").count",
+        "adminDb.collection(\"courses\").count().get",
+        "adminDb.collection(\"enrollments\").count",
+        "adminDb.collection(\"enrollments\").count().get",
+        "adminDb.collection(\"users\").count",
+        "adminDb.collection(\"users\").count().get",
+        "auth.verifySessionCookie",
+        "console.error",
+        "cookieStore.get",
+        "cookies",
+        "createSupabaseServiceClient",
+        "getAuthContext",
+        "supabase.from",
+        "supabase.from(\"certificates\").select",
+        "supabase.from(\"courses\").select",
+        "supabase.from(\"enrollments\").select",
+        "supabase.from(\"profiles\").select",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "getAuthContext",
+        "verifySession",
+        "auth.verifySessionCookie"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/actions/analytics.ts",
+      "action": "trackEvent",
+      "calls": [
+        "Date.now",
+        "Math.random",
+        "Math.random().toString",
+        "Math.random().toString(36).substring",
+        "adminDb.collection",
+        "adminDb.collection(\"analytics_events\").doc",
+        "adminDb.collection(\"analytics_events\").doc(eventId).set",
+        "auth.verifySessionCookie",
+        "console.error",
+        "cookieStore.get",
+        "cookies",
+        "createSupabaseServiceClient",
+        "getAuthContext",
+        "supabase.from",
+        "supabase.from(\"audit_logs\").insert",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "getAuthContext",
+        "verifySession",
+        "auth.verifySessionCookie"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/actions/analytics.ts",
+      "action": "trackFunnelEvent",
+      "calls": [
+        "Date.now",
+        "adminDb.collection",
+        "adminDb.collection(\"analytics_events\").doc",
+        "adminDb.collection(\"analytics_events\").doc(eventId).set",
+        "auth.verifySessionCookie",
+        "console.error",
+        "cookieStore.get",
+        "cookies",
+        "createSupabaseServiceClient",
+        "getAuthContext",
+        "supabase.from",
+        "supabase.from(\"audit_logs\").insert",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "getAuthContext",
+        "verifySession",
+        "auth.verifySessionCookie"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/actions/assessment.ts",
+      "action": "getAdminAssessments",
+      "calls": [
+        "Array.isArray",
+        "Object.entries",
+        "Object.entries(value as Record<string, unknown>).map",
+        "Object.fromEntries",
+        "adminDb\n    .collection",
+        "adminDb\n    .collection(\"assessments\")\n    .orderBy",
+        "adminDb\n    .collection(\"assessments\")\n    .orderBy(\"title\")\n    .get",
+        "auth.verifySessionCookie",
+        "cookieStore.get",
+        "cookies",
+        "createSupabaseServiceClient",
+        "data.map",
+        "doc.data",
+        "requireAdminClaims",
+        "requireUserClaims",
+        "serializeFirestoreDocument",
+        "serializeFirestoreValue",
+        "snapshot.docs.map",
+        "supabase\n      .from",
+        "supabase\n      .from(\"assessments\")\n      .select",
+        "supabase\n      .from(\"assessments\")\n      .select(\"*\")\n      .order",
+        "value.map",
+        "value.toDate",
+        "value.toDate().toISOString",
+        "value.toISOString",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "requireAdminClaims",
+        "requireUserClaims",
+        "verifySession",
+        "auth.verifySessionCookie"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/actions/assessment.ts",
+      "action": "getAdminSubmissionMetrics",
+      "calls": [
+        "Promise.all",
+        "adminDb.collection",
+        "auth.verifySessionCookie",
+        "cookieStore.get",
+        "cookies",
+        "createSupabaseServiceClient",
+        "pending.data",
+        "requireAdminClaims",
+        "requireUserClaims",
+        "submissions.count",
+        "submissions.count().get",
+        "submissions.where",
+        "submissions.where(\"status\", \"==\", \"submitted\").count",
+        "submissions.where(\"status\", \"==\", \"submitted\").count().get",
+        "supabase\n        .from",
+        "supabase\n        .from(\"assessment_submissions\")\n        .select",
+        "supabase\n        .from(\"assessment_submissions\")\n        .select(\"*\", { count: \"exact\", head: true })\n        .eq",
+        "total.data",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "requireAdminClaims",
+        "requireUserClaims",
+        "verifySession",
+        "auth.verifySessionCookie"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/actions/assessment.ts",
+      "action": "getAdminSubmissionsPage",
+      "calls": [
+        "Array.isArray",
+        "Math.floor",
+        "Math.max",
+        "Math.min",
+        "Object.entries",
+        "Object.entries(value as Record<string, unknown>).map",
+        "Object.fromEntries",
+        "Promise.all",
+        "adminDb\n      .collection",
+        "adminDb\n      .collection(\"assessmentSubmissions\")\n      .doc",
+        "adminDb\n      .collection(\"assessmentSubmissions\")\n      .doc(cursorId)\n      .get",
+        "adminDb\n    .collection",
+        "adminDb\n    .collection(\"assessmentSubmissions\")\n    .orderBy",
+        "adminDb\n    .collection(\"assessmentSubmissions\")\n    .orderBy(\"submittedAt\", \"desc\")\n    .limit",
+        "adminDb.collection",
+        "adminDb.collection(\"users\").doc",
+        "adminDb.collection(\"users\").doc(uid).get",
+        "auth.verifySessionCookie",
+        "cookieStore.get",
+        "cookies",
+        "doc.data",
+        "requireAdminClaims",
+        "requireUserClaims",
+        "s.data",
+        "serializeFirestoreDocument",
+        "serializeFirestoreValue",
+        "snapshot.docs.at",
+        "snapshot.docs.map",
+        "submissions.filter",
+        "submissions.map",
+        "submissionsQuery.get",
+        "submissionsQuery.startAfter",
+        "uniqueUserIds.map",
+        "userSnapshots\n      .filter",
+        "userSnapshots\n      .filter((s) => s.exists)\n      .map",
+        "value.map",
+        "value.toDate",
+        "value.toDate().toISOString",
+        "value.toISOString",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "requireAdminClaims",
+        "requireUserClaims",
+        "verifySession",
+        "auth.verifySessionCookie"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/actions/assessment.ts",
+      "action": "startAssessmentAttempt",
+      "calls": [
+        "Number",
+        "Timestamp.now",
+        "adminDb\n      .collection",
+        "adminDb\n      .collection(\"assessmentSubmissions\")\n      .add",
+        "adminDb\n      .collection(\"assessmentSubmissions\")\n      .where",
+        "adminDb\n      .collection(\"assessmentSubmissions\")\n      .where(\"assessmentId\", \"==\", assessmentId)\n      .where",
+        "adminDb\n      .collection(\"assessmentSubmissions\")\n      .where(\"assessmentId\", \"==\", assessmentId)\n      .where(\"userId\", \"==\", uid)\n      .get",
+        "adminDb\n      .collection(\"assessments\")\n      .doc",
+        "adminDb\n      .collection(\"assessments\")\n      .doc(assessmentId)\n      .get",
+        "assessmentSnap.data",
+        "auth.verifySessionCookie",
+        "console.error",
+        "cookieStore.get",
+        "cookies",
+        "createSupabaseServiceClient",
+        "d.data",
+        "existingAttempts.docs.reduce",
+        "new Date().toISOString",
+        "requireUserClaims",
+        "supabase.from",
+        "supabase.from(\"assessment_submissions\").insert",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "requireUserClaims",
+        "verifySession",
+        "auth.verifySessionCookie"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/actions/assessment.ts",
+      "action": "submitAssessmentAttempt",
+      "calls": [
+        "Timestamp.now",
+        "adminDb\n      .collection",
+        "adminDb\n      .collection(\"assessmentSubmissions\")\n      .doc",
+        "auth.verifySessionCookie",
+        "console.error",
+        "cookieStore.get",
+        "cookies",
+        "createSupabaseServiceClient",
+        "new Date().toISOString",
+        "requireUserClaims",
+        "submissionRef.get",
+        "submissionRef.update",
+        "submissionSnap.data",
+        "supabase\n        .from",
+        "supabase\n        .from(\"assessment_submissions\")\n        .update",
+        "supabase\n        .from(\"assessment_submissions\")\n        .update({\n          answers: answers as any,\n          status: \"submitted\",\n          submitted_at: nowIso,\n          updated_at: nowIso,\n        })\n        .eq",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "requireUserClaims",
+        "verifySession",
+        "auth.verifySessionCookie"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/actions/assessment.ts",
+      "action": "gradeAssessment",
+      "calls": [
+        "Date.now",
+        "Math.ceil",
+        "Math.max",
+        "Timestamp.now",
+        "adminDb\n      .collection",
+        "adminDb\n      .collection(\"assessmentSubmissions\")\n      .doc",
+        "adminDb\n      .collection(\"assessments\")\n      .doc",
+        "adminDb\n      .collection(\"assessments\")\n      .doc(submission.assessmentId)\n      .get",
+        "adminDb\n      .collection(\"users\")\n      .doc",
+        "adminDb\n      .collection(\"users\")\n      .doc(claims.uid)\n      .collection",
+        "adminDb\n      .collection(\"users\")\n      .doc(claims.uid)\n      .collection(\"assessmentProgress\")\n      .doc",
+        "answer.selectedOptions!.includes",
+        "assessment.questions.find",
+        "assessmentSnap.data",
+        "auth.verifySessionCookie",
+        "console.error",
+        "cookieStore.get",
+        "cookies",
+        "correctOptions.every",
+        "createSupabaseServiceClient",
+        "new Date().toISOString",
+        "progressRef.get",
+        "progressRef.set",
+        "progressSnap.data",
+        "question.options\n          .filter",
+        "question.options\n          .filter((opt) => opt.isCorrect)\n          .map",
+        "rateLimit",
+        "requireUserClaims",
+        "submission.answers.map",
+        "submissionRef.get",
+        "submissionRef.update",
+        "submissionSnap.data",
+        "supabase\n        .from",
+        "supabase\n        .from(\"assessment_submissions\")\n        .update",
+        "supabase\n        .from(\"assessment_submissions\")\n        .update({\n          answers: gradedAnswers as any,\n          score: earnedPoints,\n          percentage,\n          passed: requiresManualReview ? false : passed,\n          status: requiresManualReview ? \"submitted\" : \"graded\",\n          graded_at: nowIso,\n          updated_at: nowIso,\n        })\n        .eq",
+        "supabase.from",
+        "supabase.from(\"assessment_progress\").upsert",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "requireUserClaims",
+        "supabase\n        .from(\"assessment_submissions\")\n        .update({\n          answers: gradedAnswers as any,\n          score: earnedPoints,\n          percentage,\n          passed: requiresManualReview ? false : passed,\n          status: requiresManualReview ? \"submitted\" : \"graded\",\n          graded_at: nowIso,\n          updated_at: nowIso,\n        })\n        .eq",
+        "verifySession",
+        "auth.verifySessionCookie"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/actions/assessment.ts",
+      "action": "createAssessment",
+      "calls": [
+        "Timestamp.now",
+        "adminDb.collection",
+        "adminDb.collection(\"assessments\").add",
+        "auth.verifySessionCookie",
+        "console.error",
+        "cookieStore.get",
+        "cookies",
+        "createSupabaseServiceClient",
+        "data.questions?.reduce",
+        "requireAdminClaims",
+        "requireUserClaims",
+        "supabase.from",
+        "supabase.from(\"assessments\").insert",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "requireAdminClaims",
+        "requireUserClaims",
+        "verifySession",
+        "auth.verifySessionCookie"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/actions/assessment.ts",
+      "action": "updateAssessment",
+      "calls": [
+        "Timestamp.now",
+        "adminDb\n      .collection",
+        "adminDb\n      .collection(\"assessments\")\n      .doc",
+        "adminDb\n      .collection(\"assessments\")\n      .doc(id)\n      .update",
+        "auth.verifySessionCookie",
+        "console.error",
+        "cookieStore.get",
+        "cookies",
+        "createSupabaseServiceClient",
+        "data.questions?.reduce",
+        "import",
+        "import(\"@/lib/audit\").then",
+        "m.logAudit",
+        "new Date().toISOString",
+        "requireAdminClaims",
+        "requireUserClaims",
+        "revalidatePath",
+        "supabase.from",
+        "supabase.from(\"assessments\").update",
+        "supabase.from(\"assessments\").update(updates).eq",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "requireAdminClaims",
+        "requireUserClaims",
+        "verifySession",
+        "auth.verifySessionCookie"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/actions/assessment.ts",
+      "action": "deleteAssessment",
+      "calls": [
+        "adminDb.collection",
+        "adminDb.collection(\"assessments\").doc",
+        "adminDb.collection(\"assessments\").doc(id).delete",
+        "auth.verifySessionCookie",
+        "console.error",
+        "cookieStore.get",
+        "cookies",
+        "createSupabaseServiceClient",
+        "import",
+        "import(\"@/lib/audit\").then",
+        "m.logAudit",
+        "requireAdminClaims",
+        "requireUserClaims",
+        "revalidatePath",
+        "supabase.from",
+        "supabase.from(\"assessments\").delete",
+        "supabase.from(\"assessments\").delete().eq",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "requireAdminClaims",
+        "requireUserClaims",
+        "verifySession",
+        "auth.verifySessionCookie"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/actions/assessment.ts",
+      "action": "updateAssessmentStatus",
+      "calls": [
+        "Timestamp.now",
+        "adminDb.collection",
+        "adminDb.collection(\"assessments\").doc",
+        "adminDb.collection(\"assessments\").doc(id).update",
+        "auth.verifySessionCookie",
+        "console.error",
+        "cookieStore.get",
+        "cookies",
+        "createSupabaseServiceClient",
+        "import",
+        "import(\"@/lib/audit\").then",
+        "m.logAudit",
+        "new Date().toISOString",
+        "requireAdminClaims",
+        "requireUserClaims",
+        "revalidatePath",
+        "supabase\n        .from",
+        "supabase\n        .from(\"assessments\")\n        .update",
+        "supabase\n        .from(\"assessments\")\n        .update({ status, updated_at: new Date().toISOString() })\n        .eq",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "requireAdminClaims",
+        "requireUserClaims",
+        "verifySession",
+        "auth.verifySessionCookie"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/actions/assessment.ts",
+      "action": "getSubmissionDetail",
+      "calls": [
+        "Promise.all",
+        "adminDb\n      .collection",
+        "adminDb\n      .collection(\"assessmentSubmissions\")\n      .doc",
+        "adminDb\n      .collection(\"assessmentSubmissions\")\n      .doc(id)\n      .get",
+        "adminDb.collection",
+        "adminDb.collection(\"assessments\").doc",
+        "adminDb.collection(\"assessments\").doc(data.assessmentId).get",
+        "adminDb.collection(\"users\").doc",
+        "adminDb.collection(\"users\").doc(data.userId).get",
+        "assessmentSnap.data",
+        "auth.verifySessionCookie",
+        "console.error",
+        "cookieStore.get",
+        "cookies",
+        "requireAdminClaims",
+        "requireUserClaims",
+        "subSnap.data",
+        "userSnap.data",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "requireAdminClaims",
+        "requireUserClaims",
+        "verifySession",
+        "auth.verifySessionCookie"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/actions/assessment.ts",
+      "action": "saveManualGrading",
+      "calls": [
+        "Math.max",
+        "Timestamp.now",
+        "adminDb\n      .collection",
+        "adminDb\n      .collection(\"assessmentSubmissions\")\n      .doc",
+        "adminDb\n      .collection(\"assessments\")\n      .doc",
+        "adminDb\n      .collection(\"assessments\")\n      .doc(submission.assessmentId)\n      .get",
+        "adminDb\n      .collection(\"users\")\n      .doc",
+        "adminDb\n      .collection(\"users\")\n      .doc(submission.userId)\n      .collection",
+        "adminDb\n      .collection(\"users\")\n      .doc(submission.userId)\n      .collection(\"assessmentProgress\")\n      .doc",
+        "assessmentSnap.data",
+        "auth.verifySessionCookie",
+        "console.error",
+        "cookieStore.get",
+        "cookies",
+        "createSupabaseServiceClient",
+        "gradingData.answers.reduce",
+        "new Date().toISOString",
+        "progressRef.get",
+        "progressRef.set",
+        "progressSnap.data",
+        "requireAdminClaims",
+        "requireUserClaims",
+        "revalidatePath",
+        "subRef.get",
+        "subRef.update",
+        "subSnap.data",
+        "supabase\n        .from",
+        "supabase\n        .from(\"assessment_submissions\")\n        .update",
+        "supabase\n        .from(\"assessment_submissions\")\n        .update({\n          answers: gradingData.answers as any,\n          score: totalScore,\n          percentage,\n          passed,\n          status: \"graded\",\n          feedback: gradingData.feedback || null,\n          graded_by: claims.uid,\n          graded_at: nowIso,\n          updated_at: nowIso,\n        })\n        .eq",
+        "supabase.from",
+        "supabase.from(\"assessment_progress\").upsert",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "requireAdminClaims",
+        "requireUserClaims",
+        "verifySession",
+        "auth.verifySessionCookie"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/actions/audit.ts",
+      "action": "getAuditLogs",
+      "calls": [
+        "(data ?? []).map",
+        "Math.floor",
+        "Math.max",
+        "Math.min",
+        "console.error",
+        "createSupabaseServiceClient",
+        "query.lt",
+        "requireAdmin",
+        "supabase\n      .from",
+        "supabase\n      .from(\"audit_logs\")\n      .select",
+        "supabase\n      .from(\"audit_logs\")\n      .select(\n        \"id,event_type,actor_user_id,actor_email,actor_role,target_collection,target_id,payload,created_at\",\n      )\n      .order",
+        "supabase\n      .from(\"audit_logs\")\n      .select(\n        \"id,event_type,actor_user_id,actor_email,actor_role,target_collection,target_id,payload,created_at\",\n      )\n      .order(\"created_at\", { ascending: false })\n      .limit"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/actions/authAdmin.ts",
+      "action": "impersonateUser",
+      "calls": [
+        "String",
+        "logAudit",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "verifySession"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/actions/authAdmin.ts",
+      "action": "stopImpersonation",
+      "calls": [
+        "cookieStore.delete",
+        "cookieStore.get",
+        "cookieStore.set",
+        "cookies",
+        "getSupabaseSessionClaims",
+        "logAudit",
+        "readTokenExpirySeconds",
+        "redirect"
+      ],
+      "authorizationEvidence": [],
+      "requiresReview": true
+    },
+    {
+      "file": "src/actions/certificate.ts",
+      "action": "issueCertificate",
+      "calls": [
+        "console.error",
+        "createNotification",
+        "createSupabaseServiceClient",
+        "issueCertificateSupabase",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "verifySession"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/actions/certificate.ts",
+      "action": "getCertificate",
+      "calls": [
+        "/^[A-Za-z0-9_-]{6,120}$/.test",
+        "createSupabaseServiceClient",
+        "getCertificateFromRepo",
+        "supabase\n      .from",
+        "supabase\n      .from(\"certificates\")\n      .select",
+        "supabase\n      .from(\"certificates\")\n      .select(\"*\")\n      .or",
+        "supabase\n      .from(\"certificates\")\n      .select(\"*\")\n      .or(`id.eq.${certificateId},code.eq.${certificateId}`)\n      .maybeSingle",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "verifySession"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/actions/certificate.ts",
+      "action": "verifyCertificate",
+      "calls": [
+        "createSupabaseServiceClient",
+        "createSupabaseServiceClient()\n      .from",
+        "createSupabaseServiceClient()\n      .from(\"certificates\")\n      .select",
+        "createSupabaseServiceClient()\n      .from(\"certificates\")\n      .select(\"*\")\n      .eq",
+        "createSupabaseServiceClient()\n      .from(\"certificates\")\n      .select(\"*\")\n      .eq(\"code\", certificateId)\n      .maybeSingle",
+        "getClientIdentifier",
+        "import",
+        "rateLimit"
+      ],
+      "authorizationEvidence": [],
+      "requiresReview": true
+    },
+    {
+      "file": "src/actions/certificate.ts",
+      "action": "getUserCertificates",
+      "calls": [
+        "createSupabaseServiceClient",
+        "getUserCertificatesFromRepo",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "verifySession"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/actions/community.ts",
+      "action": "createPost",
+      "calls": [
+        "console.error",
+        "createSupabaseServiceClient",
+        "new Date().toISOString",
+        "randomUUID",
+        "revalidatePath",
+        "supabase\n      .from",
+        "supabase\n      .from(\"community_threads\")\n      .insert",
+        "supabase\n      .from(\"profiles\")\n      .select",
+        "supabase\n      .from(\"profiles\")\n      .select(\"display_name, photo_url, role\")\n      .eq",
+        "supabase\n      .from(\"profiles\")\n      .select(\"display_name, photo_url, role\")\n      .eq(\"id\", uid)\n      .maybeSingle",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "verifySession"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/actions/event.ts",
+      "action": "createEvent",
+      "calls": [
+        "Date.now",
+        "Math.ceil",
+        "Promise.all",
+        "console.error",
+        "console.warn",
+        "createNotification",
+        "createSupabaseServiceClient",
+        "enrollments.map",
+        "new Date(data.endsAt).toISOString",
+        "new Date(data.startsAt).toISOString",
+        "randomUUID",
+        "rateLimit",
+        "revalidatePath",
+        "supabase\n          .from",
+        "supabase\n          .from(\"enrollments\")\n          .select",
+        "supabase\n          .from(\"enrollments\")\n          .select(\"user_id\")\n          .eq",
+        "supabase\n          .from(\"enrollments\")\n          .select(\"user_id\")\n          .eq(\"course_id\", data.courseId)\n          .eq",
+        "supabase.from",
+        "supabase.from(\"events\").insert",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "verifySession"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/actions/event.ts",
+      "action": "deleteEvent",
+      "calls": [
+        "console.error",
+        "createSupabaseServiceClient",
+        "logAudit",
+        "revalidatePath",
+        "supabase.from",
+        "supabase.from(\"events\").delete",
+        "supabase.from(\"events\").delete().eq",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "verifySession"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/actions/event.ts",
+      "action": "updateEventStatus",
+      "calls": [
+        "console.error",
+        "createSupabaseServiceClient",
+        "logAudit",
+        "new Date().toISOString",
+        "revalidatePath",
+        "supabase\n      .from",
+        "supabase\n      .from(\"events\")\n      .update",
+        "supabase\n      .from(\"events\")\n      .update({\n        status: normalizedStatus as any,\n        updated_at: new Date().toISOString(),\n      })\n      .eq",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "verifySession"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/actions/gamification.ts",
+      "action": "processGamificationEvent",
+      "calls": [
+        "awardDailyLogin",
+        "awardLibraryView",
+        "clientEvent.safeParse",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "verifySession"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/actions/grading.ts",
+      "action": "manualGradeSubmission",
+      "calls": [
+        "Date.now",
+        "Math.ceil",
+        "Math.max",
+        "Timestamp.now",
+        "adminDb\n      .collection",
+        "adminDb\n      .collection(\"assessmentSubmissions\")\n      .doc",
+        "adminDb\n      .collection(\"assessments\")\n      .doc",
+        "adminDb\n      .collection(\"assessments\")\n      .doc(submission.assessmentId)\n      .get",
+        "adminDb\n      .collection(\"users\")\n      .doc",
+        "adminDb\n      .collection(\"users\")\n      .doc(submission.userId)\n      .collection",
+        "adminDb\n      .collection(\"users\")\n      .doc(submission.userId)\n      .collection(\"assessmentProgress\")\n      .doc",
+        "assessmentSnap.data",
+        "auth.verifySessionCookie",
+        "awardCanonicalCompletion",
+        "console.error",
+        "cookieStore.get",
+        "cookies",
+        "createNotification",
+        "createSupabaseServiceClient",
+        "new Date().toISOString",
+        "percentage.toFixed",
+        "progressRef.get",
+        "progressRef.set",
+        "progressSnap.data",
+        "questionGrades.find",
+        "rateLimit",
+        "requireAdminSession",
+        "submission.answers.map",
+        "submissionRef.get",
+        "submissionRef.update",
+        "submissionSnap.data",
+        "supabase\n        .from",
+        "supabase\n        .from(\"assessment_submissions\")\n        .update",
+        "supabase\n        .from(\"assessment_submissions\")\n        .update({\n          answers: updatedAnswers as any,\n          score: totalScore,\n          percentage,\n          passed,\n          status: \"graded\",\n          graded_by: claims.uid,\n          graded_at: nowIso,\n          updated_at: nowIso,\n          feedback: feedback || null,\n        })\n        .eq",
+        "supabase.from",
+        "supabase.from(\"assessment_progress\").upsert",
+        "updatedAnswers.reduce",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "requireAdminSession",
+        "verifySession",
+        "auth.verifySessionCookie"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/actions/grading.ts",
+      "action": "getPendingSubmissions",
+      "calls": [
+        "(assessments || []).map",
+        "(profiles || []).map",
+        "Promise.all",
+        "adminDb\n          .collection",
+        "adminDb\n          .collection(\"assessments\")\n          .doc",
+        "adminDb\n          .collection(\"assessments\")\n          .doc(data.assessmentId)\n          .get",
+        "adminDb\n          .collection(\"users\")\n          .doc",
+        "adminDb\n          .collection(\"users\")\n          .doc(data.userId)\n          .get",
+        "adminDb\n      .collection",
+        "adminDb\n      .collection(\"assessmentSubmissions\")\n      .where",
+        "adminDb\n      .collection(\"assessmentSubmissions\")\n      .where(\"status\", \"==\", \"submitted\")\n      .orderBy",
+        "adminDb\n      .collection(\"assessmentSubmissions\")\n      .where(\"status\", \"==\", \"submitted\")\n      .orderBy(\"submittedAt\", \"desc\")\n      .limit",
+        "assessMap.get",
+        "assessmentSnap.data",
+        "auth.verifySessionCookie",
+        "console.error",
+        "cookieStore.get",
+        "cookies",
+        "createSupabaseServiceClient",
+        "data.submittedAt?.toDate",
+        "data.submittedAt?.toDate().toISOString",
+        "doc.data",
+        "profileMap.get",
+        "query.get",
+        "query.where",
+        "requireAdminSession",
+        "snapshot.docs.map",
+        "subData.map",
+        "subData.map((s) => s.assessment_id).filter",
+        "subData.map((s) => s.user_id).filter",
+        "subQuery.eq",
+        "supabase\n        .from",
+        "supabase\n        .from(\"assessment_submissions\")\n        .select",
+        "supabase\n        .from(\"assessment_submissions\")\n        .select(\"*\")\n        .eq",
+        "supabase\n        .from(\"assessment_submissions\")\n        .select(\"*\")\n        .eq(\"status\", \"submitted\")\n        .order",
+        "supabase\n        .from(\"assessment_submissions\")\n        .select(\"*\")\n        .eq(\"status\", \"submitted\")\n        .order(\"submitted_at\", { ascending: false })\n        .limit",
+        "supabase.from",
+        "supabase.from(\"assessments\").select",
+        "supabase.from(\"assessments\").select(\"id, title\").in",
+        "supabase.from(\"profiles\").select",
+        "supabase.from(\"profiles\").select(\"id, display_name, email\").in",
+        "userSnap.data",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "requireAdminSession",
+        "verifySession",
+        "auth.verifySessionCookie"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/actions/material.ts",
+      "action": "addMaterial",
+      "calls": [
+        "addAdminMaterial",
+        "console.error",
+        "requireAdmin",
+        "revalidatePath"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/actions/material.ts",
+      "action": "deleteMaterial",
+      "calls": [
+        "deleteAdminMaterial",
+        "requireAdmin",
+        "revalidatePath"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/actions/profile.ts",
+      "action": "updateProfile",
+      "calls": [
+        "Math.round",
+        "[\n      displayName?.trim(),\n      normalizedPhone,\n      normalizedProfession,\n      normalizedCity,\n      normalizedState,\n      dateOfBirth,\n    ].filter",
+        "city?.trim",
+        "console.error",
+        "cookieStore.get",
+        "cookies",
+        "createSupabaseServiceClient",
+        "displayName?.trim",
+        "getSupabaseSessionClaims",
+        "instagram?.trim",
+        "instagram?.trim().replace",
+        "logAudit",
+        "new Date().toISOString",
+        "phoneNumber?.replace",
+        "profession?.trim",
+        "revalidatePath",
+        "state?.trim",
+        "state?.trim().toUpperCase",
+        "supabase\n      .from",
+        "supabase\n      .from(\"profiles\")\n      .select",
+        "supabase\n      .from(\"profiles\")\n      .select(\n        \"display_name, bio, phone_number, profession, city, state, date_of_birth, instagram, profile_completion\",\n      )\n      .eq",
+        "supabase\n      .from(\"profiles\")\n      .select(\n        \"display_name, bio, phone_number, profession, city, state, date_of_birth, instagram, profile_completion\",\n      )\n      .eq(\"id\", uid)\n      .maybeSingle",
+        "supabase.auth.admin.updateUserById",
+        "supabase.from",
+        "supabase.from(\"profiles\").upsert",
+        "updateProfileSchema.safeParse"
+      ],
+      "authorizationEvidence": [],
+      "requiresReview": true
+    },
+    {
+      "file": "src/actions/profile.ts",
+      "action": "uploadAvatar",
+      "calls": [
+        "ALLOWED_TYPES.includes",
+        "Buffer.from",
+        "compressImage",
+        "console.error",
+        "cookieStore.get",
+        "cookies",
+        "createSupabaseServiceClient",
+        "file.arrayBuffer",
+        "formData.get",
+        "getSupabaseSessionClaims",
+        "logAudit",
+        "logger.error",
+        "revalidatePath",
+        "supabase.auth.admin.updateUserById",
+        "supabase.from",
+        "supabase.from(\"profiles\").upsert",
+        "uploadPublicAvatar"
+      ],
+      "authorizationEvidence": [],
+      "requiresReview": true
+    },
+    {
+      "file": "src/app/actions/admin/applications.ts",
+      "action": "listApplicationsForAdmin",
+      "calls": [
+        "(courses.data ?? []).map",
+        "(profiles.data ?? []).map",
+        "Object.fromEntries",
+        "apps.map",
+        "apps.map((a) => a.user_id).filter",
+        "createSupabaseServiceClient",
+        "db\n        .from",
+        "db\n        .from(\"profiles\")\n        .select",
+        "db\n        .from(\"profiles\")\n        .select(\"id,email,display_name,phone_number\")\n        .in",
+        "db\n    .from",
+        "db\n    .from(\"applications\")\n    .select",
+        "db\n    .from(\"applications\")\n    .select(\"*\")\n    .order",
+        "db.from",
+        "db.from(\"courses\").select",
+        "db.from(\"courses\").select(\"id,title\").in",
+        "requireAdmin",
+        "users.get"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin/applications.ts",
+      "action": "markApplicationContacted",
+      "calls": [
+        "createSupabaseServiceClient",
+        "createSupabaseServiceClient().rpc",
+        "requireAdmin",
+        "revalidatePath"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin/applications.ts",
+      "action": "deleteApplication",
+      "calls": [
+        "createSupabaseServiceClient",
+        "createSupabaseServiceClient().rpc",
+        "requireAdmin",
+        "revalidatePath"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin/course-mutations.ts",
+      "action": "getAllCoursesAction",
+      "calls": [
+        "listAdminCourses",
+        "requireAdmin"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin/course-mutations.ts",
+      "action": "getCourseAction",
+      "calls": [
+        "getAdminCourse",
+        "requireAdmin"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin/course-mutations.ts",
+      "action": "getModulesAction",
+      "calls": [
+        "listAdminModules",
+        "requireAdmin"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin/course-mutations.ts",
+      "action": "getLessonsAction",
+      "calls": [
+        "listAdminLessons",
+        "requireAdmin"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin/course-mutations.ts",
+      "action": "getCourseEnrollmentsAction",
+      "calls": [
+        "listAdminCourseEnrollments",
+        "requireAdmin"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin/course-mutations.ts",
+      "action": "getCourseThreadsAction",
+      "calls": [
+        "listAdminCourseThreads",
+        "requireAdmin"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin/course-mutations.ts",
+      "action": "getMaterialsAction",
+      "calls": [
+        "listAdminMaterials",
+        "requireAdmin"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin/course-mutations.ts",
+      "action": "createCourseAction",
+      "calls": [
+        "Array.isArray",
+        "createAdminCourse",
+        "getStringField",
+        "requireAdmin",
+        "revalidatePath",
+        "sanitizeRecord"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin/course-mutations.ts",
+      "action": "updateCourseAction",
+      "calls": [
+        "Array.isArray",
+        "bumpAdminCourseRevision",
+        "getAdminCourse",
+        "requireAdmin",
+        "revalidatePath",
+        "sanitizeRecord",
+        "stripImmutableFields",
+        "updateAdminCourse"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin/course-mutations.ts",
+      "action": "deleteCourseAction",
+      "calls": [
+        "deleteAdminCourse",
+        "requireAdmin",
+        "revalidatePath"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin/course-mutations.ts",
+      "action": "createModuleAction",
+      "calls": [
+        "bumpAdminCourseRevision",
+        "createAdminModule",
+        "requireAdmin"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin/course-mutations.ts",
+      "action": "updateModuleAction",
+      "calls": [
+        "Array.isArray",
+        "bumpAdminCourseRevision",
+        "requireAdmin",
+        "sanitizeRecord",
+        "updateAdminModule"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin/course-mutations.ts",
+      "action": "deleteModuleAction",
+      "calls": [
+        "bumpAdminCourseRevision",
+        "deleteAdminModule",
+        "requireAdmin"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin/course-mutations.ts",
+      "action": "createLessonAction",
+      "calls": [
+        "bumpAdminCourseRevision",
+        "createAdminLesson",
+        "requireAdmin"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin/course-mutations.ts",
+      "action": "updateLessonAction",
+      "calls": [
+        "Array.isArray",
+        "bumpAdminCourseRevision",
+        "requireAdmin",
+        "sanitizeRecord",
+        "updateAdminLesson"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin/course-mutations.ts",
+      "action": "deleteLessonAction",
+      "calls": [
+        "bumpAdminCourseRevision",
+        "deleteAdminLesson",
+        "requireAdmin"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin/course-mutations.ts",
+      "action": "toggleEnrollmentStatusAction",
+      "calls": [
+        "requireAdmin",
+        "toggleAdminEnrollmentStatus"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin/course-mutations.ts",
+      "action": "updateThreadAction",
+      "calls": [
+        "Array.isArray",
+        "requireAdmin",
+        "sanitizeRecord",
+        "stripImmutableFields",
+        "updateAdminThread"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin/course-mutations.ts",
+      "action": "deleteThreadAction",
+      "calls": [
+        "deleteAdminThread",
+        "requireAdmin"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin/course-mutations.ts",
+      "action": "addMaterialAction",
+      "calls": [
+        "Array.isArray",
+        "addAdminMaterial",
+        "requireAdmin",
+        "sanitizeRecord"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin/course-mutations.ts",
+      "action": "updateMaterialAction",
+      "calls": [
+        "Array.isArray",
+        "requireAdmin",
+        "revalidatePath",
+        "sanitizeRecord",
+        "stripImmutableFields",
+        "updateAdminMaterial"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin/course-mutations.ts",
+      "action": "deleteMaterialAction",
+      "calls": [
+        "deleteAdminMaterial",
+        "requireAdmin",
+        "revalidatePath"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin/course-mutations.ts",
+      "action": "syncLessonsCountAction",
+      "calls": [
+        "requireAdmin",
+        "syncAdminLessonsCount"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin/enrollment.ts",
+      "action": "enrollUser",
+      "calls": [
+        "[\"open\", \"closed\"].includes",
+        "createSupabaseServiceClient",
+        "db\n      .from",
+        "db\n      .from(\"courses\")\n      .select",
+        "db\n      .from(\"courses\")\n      .select(\"id,is_published,status\")\n      .eq",
+        "db\n      .from(\"courses\")\n      .select(\"id,is_published,status\")\n      .eq(\"id\", courseId)\n      .maybeSingle",
+        "db.rpc",
+        "findOrCreateSupabaseUserByEmail",
+        "refresh",
+        "requireAdmin",
+        "revalidatePath",
+        "z\n      .string",
+        "z\n      .string()\n      .trim",
+        "z\n      .string()\n      .trim()\n      .toLowerCase",
+        "z\n      .string()\n      .trim()\n      .toLowerCase()\n      .email",
+        "z\n      .string()\n      .trim()\n      .toLowerCase()\n      .email()\n      .max",
+        "z\n      .string()\n      .trim()\n      .toLowerCase()\n      .email()\n      .max(254)\n      .parse"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin/enrollment.ts",
+      "action": "updateEnrollmentStatus",
+      "calls": [
+        "createSupabaseServiceClient",
+        "createSupabaseServiceClient().rpc",
+        "refresh",
+        "requireAdmin",
+        "revalidatePath"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin/enrollment.ts",
+      "action": "revokeAccess",
+      "calls": [
+        "createSupabaseServiceClient",
+        "createSupabaseServiceClient().rpc",
+        "refresh",
+        "requireAdmin",
+        "revalidatePath",
+        "updateEnrollmentStatus"
+      ],
+      "authorizationEvidence": [
+        "updateEnrollmentStatus",
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin/enrollment.ts",
+      "action": "batchEnrollUsers",
+      "calls": [
+        "Array.isArray",
+        "[\"open\", \"closed\"].includes",
+        "createSupabaseServiceClient",
+        "db\n      .from",
+        "db\n      .from(\"courses\")\n      .select",
+        "db\n      .from(\"courses\")\n      .select(\"id,is_published,status\")\n      .eq",
+        "db\n      .from(\"courses\")\n      .select(\"id,is_published,status\")\n      .eq(\"id\", courseId)\n      .maybeSingle",
+        "db.rpc",
+        "e.trim",
+        "e.trim().toLowerCase",
+        "emails.map",
+        "emails.some",
+        "enrollUser",
+        "enrolled.push",
+        "failed.push",
+        "findOrCreateSupabaseUserByEmail",
+        "refresh",
+        "requireAdmin",
+        "revalidatePath",
+        "z\n      .string",
+        "z\n      .string()\n      .trim",
+        "z\n      .string()\n      .trim()\n      .toLowerCase",
+        "z\n      .string()\n      .trim()\n      .toLowerCase()\n      .email",
+        "z\n      .string()\n      .trim()\n      .toLowerCase()\n      .email()\n      .max",
+        "z\n      .string()\n      .trim()\n      .toLowerCase()\n      .email()\n      .max(254)\n      .parse"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin/enrollment.ts",
+      "action": "approveEnrollment",
+      "calls": [
+        "[\"manual\", \"free\"].includes",
+        "approvePixEnrollment",
+        "createSupabaseServiceClient",
+        "createSupabaseServiceClient()\n      .from",
+        "createSupabaseServiceClient()\n      .from(\"enrollments\")\n      .select",
+        "createSupabaseServiceClient()\n      .from(\"enrollments\")\n      .select(\"payment_method\")\n      .eq",
+        "createSupabaseServiceClient()\n      .from(\"enrollments\")\n      .select(\"payment_method\")\n      .eq(\"user_id\", uid)\n      .eq",
+        "createSupabaseServiceClient()\n      .from(\"enrollments\")\n      .select(\"payment_method\")\n      .eq(\"user_id\", uid)\n      .eq(\"course_id\", courseId)\n      .maybeSingle",
+        "createSupabaseServiceClient().rpc",
+        "refresh",
+        "requireAdmin",
+        "revalidatePath",
+        "updateEnrollmentStatus"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin",
+        "updateEnrollmentStatus"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin/events.ts",
+      "action": "createEvent",
+      "calls": [
+        "assertAdmin",
+        "console.error",
+        "createSupabaseServiceClient",
+        "new Date(data.endsAt).toISOString",
+        "new Date(data.startsAt).toISOString",
+        "randomUUID",
+        "revalidatePath",
+        "supabase.from",
+        "supabase.from(\"events\").insert"
+      ],
+      "authorizationEvidence": [
+        "assertAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin/events.ts",
+      "action": "deleteEvent",
+      "calls": [
+        "assertAdmin",
+        "createSupabaseServiceClient",
+        "revalidatePath",
+        "supabase.from",
+        "supabase.from(\"events\").delete",
+        "supabase.from(\"events\").delete().eq"
+      ],
+      "authorizationEvidence": [
+        "assertAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin/maintenance.ts",
+      "action": "runEnrollmentMigration",
+      "calls": [
+        "assertAdmin",
+        "console.error",
+        "migrateEnrollmentIds",
+        "revalidatePath"
+      ],
+      "authorizationEvidence": [
+        "assertAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin/maintenance.ts",
+      "action": "runUserBackfill",
+      "calls": [
+        "assertAdmin",
+        "backfillUserProfiles",
+        "console.error",
+        "revalidatePath"
+      ],
+      "authorizationEvidence": [
+        "assertAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin/supabase-health.ts",
+      "action": "getSupabaseSyncHealthAction",
+      "calls": [
+        "(buckets.data ?? []).map",
+        "Promise.all",
+        "[courses, modules, lessons, gallery, pages].some",
+        "bucketById.get",
+        "createSupabaseServiceClient",
+        "requireAdmin",
+        "storageStatus",
+        "supabase\n          .from",
+        "supabase\n          .from(\"course_modules\")\n          .select",
+        "supabase\n          .from(\"gallery_items\")\n          .select",
+        "supabase\n          .from(\"public_pages\")\n          .select",
+        "supabase.from",
+        "supabase.from(\"courses\").select",
+        "supabase.from(\"lessons\").select",
+        "supabase.storage.listBuckets"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin/test-utils.ts",
+      "action": "generateTestCertificate",
+      "calls": [
+        "Date.now",
+        "Date.now().toString",
+        "Date.now().toString().slice",
+        "Promise.all",
+        "console.error",
+        "createSupabaseServiceClient",
+        "randomUUID",
+        "requireAdmin",
+        "supabase\n        .from",
+        "supabase\n        .from(\"profiles\")\n        .select",
+        "supabase\n        .from(\"profiles\")\n        .select(\"display_name\")\n        .eq",
+        "supabase\n        .from(\"profiles\")\n        .select(\"display_name\")\n        .eq(\"id\", admin.uid)\n        .maybeSingle",
+        "supabase.from",
+        "supabase.from(\"certificates\").insert",
+        "supabase.from(\"courses\").select",
+        "supabase.from(\"courses\").select(\"id, title\").limit",
+        "supabase.from(\"courses\").select(\"id, title\").limit(1).maybeSingle"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin/test-utils.ts",
+      "action": "deleteTestCertificates",
+      "calls": [
+        "(certificates ?? []).map",
+        "console.error",
+        "createSupabaseServiceClient",
+        "requireAdmin",
+        "supabase\n        .from",
+        "supabase\n        .from(\"certificates\")\n        .delete",
+        "supabase\n        .from(\"certificates\")\n        .delete()\n        .in",
+        "supabase\n      .from",
+        "supabase\n      .from(\"certificates\")\n      .select",
+        "supabase\n      .from(\"certificates\")\n      .select(\"id\")\n      .contains"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin-publishing.ts",
+      "action": "validateCoursePublishable",
+      "calls": [
+        "(course.coverImage || course.image)?.trim",
+        "course.description?.trim",
+        "course.title?.trim",
+        "errors.push",
+        "getAdminCourse",
+        "requireAdmin"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin-publishing.ts",
+      "action": "setCourseCommercialState",
+      "calls": [
+        "[\"publish\", \"unpublish\", \"open\", \"close\"].includes",
+        "auditService.logEvent",
+        "console.error",
+        "createSupabaseServiceClient",
+        "createSupabaseServiceClient().rpc",
+        "import",
+        "requireAdmin",
+        "revalidateCourse",
+        "revalidatePath"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin-publishing.ts",
+      "action": "toggleCourseStatus",
+      "calls": [
+        "[\"publish\", \"unpublish\", \"open\", \"close\"].includes",
+        "auditService.logEvent",
+        "console.error",
+        "createSupabaseServiceClient",
+        "createSupabaseServiceClient().rpc",
+        "getAdminCourse",
+        "import",
+        "requireAdmin",
+        "revalidateCourse",
+        "revalidatePath",
+        "setCourseCommercialState"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin-publishing.ts",
+      "action": "bumpCourseRevision",
+      "calls": [
+        "assertCanAuthorCourse",
+        "bumpAdminCourseRevision",
+        "revalidateCourse",
+        "revalidatePath"
+      ],
+      "authorizationEvidence": [
+        "assertCanAuthorCourse"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin-publishing.ts",
+      "action": "toggleModulePublish",
+      "calls": [
+        "(await listAdminLessons(courseId, moduleId)).some",
+        "(await listAdminModules(courseId)).find",
+        "assertCanAuthorCourse",
+        "bumpAdminCourseRevision",
+        "listAdminLessons",
+        "listAdminModules",
+        "revalidateCourse",
+        "revalidatePath",
+        "updateAdminModule"
+      ],
+      "authorizationEvidence": [
+        "assertCanAuthorCourse"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/admin-publishing.ts",
+      "action": "toggleLessonPublish",
+      "calls": [
+        "(await listAdminLessons(courseId, moduleId)).find",
+        "Array.isArray",
+        "assertCanAuthorCourse",
+        "bumpAdminCourseRevision",
+        "listAdminLessons",
+        "revalidateCourse",
+        "revalidatePath",
+        "updateAdminLesson"
+      ],
+      "authorizationEvidence": [
+        "assertCanAuthorCourse"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/announcements.ts",
+      "action": "markAnnouncementRead",
+      "calls": [
+        "(createSupabaseServiceClient() as any)\n    .from",
+        "(createSupabaseServiceClient() as any)\n    .from(\"student_announcement_reads\")\n    .upsert",
+        "createSupabaseServiceClient",
+        "revalidatePath",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "verifySession"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/assessment.ts",
+      "action": "saveDraft",
+      "calls": [
+        "FieldValue.serverTimestamp",
+        "assertCanAccessCourse",
+        "auth.verifySessionCookie",
+        "cookieStore.get",
+        "cookies",
+        "db.collection",
+        "db.collection(\"submissions\").doc",
+        "db.collection(\"submissions\").doc(submissionId).set",
+        "getAuthenticatedUser",
+        "getReadableAssessment",
+        "new Date().toISOString"
+      ],
+      "authorizationEvidence": [
+        "auth.verifySessionCookie"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/assessment.ts",
+      "action": "submitAssessment",
+      "calls": [
+        "Array.isArray",
+        "Date.now",
+        "Object.entries",
+        "Object.entries(userAnswers).map",
+        "Timestamp.now",
+        "answerVal.every",
+        "assertCanAccessCourse",
+        "assessmentDoc.data",
+        "auth.verifySessionCookie",
+        "awardCanonicalCompletion",
+        "console.error",
+        "cookieStore.get",
+        "cookies",
+        "correctIds.includes",
+        "db\n    .collection",
+        "db\n    .collection(\"assessments\")\n    .doc",
+        "db\n    .collection(\"assessments\")\n    .doc(assessmentId)\n    .get",
+        "db\n    .collection(\"submissions\")\n    .doc",
+        "db\n    .collection(\"submissions\")\n    .doc(`${uid}_${assessmentId}_draft`)\n    .delete",
+        "db.collection",
+        "db.collection(\"submissions\").doc",
+        "db.collection(\"submissions\").doc(submissionId).set",
+        "getAuthenticatedUser",
+        "getReadableAssessment",
+        "import",
+        "mcq.options\n          .filter",
+        "mcq.options\n          .filter((o) => o.isCorrect)\n          .map",
+        "mcq.options.find",
+        "publishEvent",
+        "questions.forEach"
+      ],
+      "authorizationEvidence": [
+        "auth.verifySessionCookie"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/auth.ts",
+      "action": "ensureUserProfileAction",
+      "calls": [
+        "console.error",
+        "cookieStore.set",
+        "cookies",
+        "createSupabaseServiceClient",
+        "ensureUserDoc",
+        "getSupabaseSessionClaims",
+        "new Date().toISOString",
+        "readTokenExpirySeconds",
+        "supabase\n      .from",
+        "supabase\n      .from(\"profiles\")\n      .select",
+        "supabase\n      .from(\"profiles\")\n      .select(\"*\")\n      .eq",
+        "supabase\n      .from(\"profiles\")\n      .select(\"*\")\n      .eq(\"id\", uid)\n      .maybeSingle",
+        "supabase\n      .from(\"profiles\")\n      .update",
+        "supabase\n      .from(\"profiles\")\n      .update({ last_login_at: new Date().toISOString() })\n      .eq",
+        "supabase.auth.getUser",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "verifySession"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/blog.ts",
+      "action": "saveBlogPostAction",
+      "calls": [
+        "blogPostSchema.parse",
+        "console.error",
+        "createSupabaseServiceClient",
+        "new Date().toISOString",
+        "randomUUID",
+        "requireAdmin",
+        "revalidatePath",
+        "slugify",
+        "supabase.from",
+        "supabase.from(\"posts\").insert",
+        "supabase.from(\"posts\").update",
+        "supabase.from(\"posts\").update(payload).eq",
+        "title\n    .toLowerCase",
+        "title\n    .toLowerCase()\n    .normalize",
+        "title\n    .toLowerCase()\n    .normalize(\"NFD\")\n    .replace",
+        "title\n    .toLowerCase()\n    .normalize(\"NFD\")\n    .replace(/\\p{Diacritic}/gu, \"\")\n    .replace",
+        "title\n    .toLowerCase()\n    .normalize(\"NFD\")\n    .replace(/\\p{Diacritic}/gu, \"\")\n    .replace(/[^a-z0-9]/g, \"-\")\n    .replace",
+        "title\n    .toLowerCase()\n    .normalize(\"NFD\")\n    .replace(/\\p{Diacritic}/gu, \"\")\n    .replace(/[^a-z0-9]/g, \"-\")\n    .replace(/-{2,}/g, \"-\")\n    .replace"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/blog.ts",
+      "action": "deleteBlogPostAction",
+      "calls": [
+        "console.error",
+        "createSupabaseServiceClient",
+        "createSupabaseServiceClient()\n      .from",
+        "createSupabaseServiceClient()\n      .from(\"posts\")\n      .delete",
+        "createSupabaseServiceClient()\n      .from(\"posts\")\n      .delete()\n      .eq",
+        "requireAdmin",
+        "revalidatePath"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/books.ts",
+      "action": "saveBookAction",
+      "calls": [
+        "assertIsAdmin",
+        "bookInput.parse",
+        "console.error",
+        "createSupabaseServiceClient",
+        "new Date().toISOString",
+        "revalidateBookPaths",
+        "revalidatePath",
+        "supabase\n        .from",
+        "supabase\n        .from(\"book_recommendations\")\n        .select",
+        "supabase\n        .from(\"book_recommendations\")\n        .update",
+        "supabase\n        .from(\"book_recommendations\")\n        .update(payload)\n        .eq",
+        "supabase.from",
+        "supabase.from(\"book_recommendations\").insert"
+      ],
+      "authorizationEvidence": [
+        "assertIsAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/books.ts",
+      "action": "deleteBookAction",
+      "calls": [
+        "assertIsAdmin",
+        "console.error",
+        "createSupabaseServiceClient",
+        "revalidateBookPaths",
+        "revalidatePath",
+        "supabase\n      .from",
+        "supabase\n      .from(\"book_recommendations\")\n      .delete",
+        "supabase\n      .from(\"book_recommendations\")\n      .delete()\n      .eq",
+        "supabase\n      .from(\"book_recommendations\")\n      .select",
+        "supabase\n      .from(\"book_recommendations\")\n      .select(\"cover_storage_path\")\n      .eq",
+        "supabase\n      .from(\"book_recommendations\")\n      .select(\"cover_storage_path\")\n      .eq(\"id\", id)\n      .single",
+        "supabase.storage\n        .from",
+        "supabase.storage\n        .from(BOOK_COVERS_BUCKET)\n        .remove"
+      ],
+      "authorizationEvidence": [
+        "assertIsAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/books.ts",
+      "action": "setBookPublishedAction",
+      "calls": [
+        "assertIsAdmin",
+        "console.error",
+        "createSupabaseServiceClient",
+        "new Date().toISOString",
+        "revalidateBookPaths",
+        "revalidatePath",
+        "supabase\n      .from",
+        "supabase\n      .from(\"book_recommendations\")\n      .update",
+        "supabase\n      .from(\"book_recommendations\")\n      .update({\n        is_published: isPublished,\n        updated_at: new Date().toISOString(),\n      })\n      .eq"
+      ],
+      "authorizationEvidence": [
+        "assertIsAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/books.ts",
+      "action": "reorderBooksAction",
+      "calls": [
+        "Array.isArray",
+        "assertIsAdmin",
+        "console.error",
+        "createSupabaseServiceClient",
+        "revalidateBookPaths",
+        "revalidatePath",
+        "supabase.rpc"
+      ],
+      "authorizationEvidence": [
+        "assertIsAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/books.ts",
+      "action": "listBooksAction",
+      "calls": [
+        "assertIsAdmin",
+        "console.error",
+        "createSupabaseServiceClient",
+        "supabase\n      .from",
+        "supabase\n      .from(\"book_recommendations\")\n      .select",
+        "supabase\n      .from(\"book_recommendations\")\n      .select(\"*\")\n      .order"
+      ],
+      "authorizationEvidence": [
+        "assertIsAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/books.ts",
+      "action": "getBookAction",
+      "calls": [
+        "assertIsAdmin",
+        "console.error",
+        "createSupabaseServiceClient",
+        "supabase\n      .from",
+        "supabase\n      .from(\"book_recommendations\")\n      .select",
+        "supabase\n      .from(\"book_recommendations\")\n      .select(\"*\")\n      .eq",
+        "supabase\n      .from(\"book_recommendations\")\n      .select(\"*\")\n      .eq(\"id\", id)\n      .single"
+      ],
+      "authorizationEvidence": [
+        "assertIsAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/course-data.ts",
+      "action": "getEnrolledCourseDataAction",
+      "calls": [
+        "getCourseData",
+        "getReadableCourseMaterialsAction",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "verifySession"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/course-materials.ts",
+      "action": "getReadableCourseMaterialsAction",
+      "calls": [
+        "(\n    data as {\n      id: string;\n      title: string;\n      type: string;\n      description: string | null;\n    }[]\n  ).map",
+        "Array.isArray",
+        "createSupabaseServiceClient",
+        "createSupabaseServiceClient().rpc",
+        "materialDownloadUrl",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "verifySession"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/enrollment-pix.ts",
+      "action": "generatePixPayload",
+      "calls": [
+        "Number.isInteger",
+        "buildPixPayload",
+        "createSupabaseServiceClient",
+        "db\n      .from",
+        "db\n      .from(\"courses\")\n      .select",
+        "db\n      .from(\"courses\")\n      .select(\"pix_price_cents,is_published,status\")\n      .eq",
+        "db\n      .from(\"courses\")\n      .select(\"pix_price_cents,is_published,status\")\n      .eq(\"id\", courseId)\n      .maybeSingle",
+        "db.rpc",
+        "findPixOrder",
+        "getPixConfig",
+        "id.replaceAll",
+        "id.replaceAll(\"-\", \"\").slice",
+        "randomUUID",
+        "revalidatePath",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "verifySession"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/enrollment-pix.ts",
+      "action": "createEnrollmentPending",
+      "calls": [
+        "Number.isInteger",
+        "buildPixPayload",
+        "createSupabaseServiceClient",
+        "db\n      .from",
+        "db\n      .from(\"courses\")\n      .select",
+        "db\n      .from(\"courses\")\n      .select(\"pix_price_cents,is_published,status\")\n      .eq",
+        "db\n      .from(\"courses\")\n      .select(\"pix_price_cents,is_published,status\")\n      .eq(\"id\", courseId)\n      .maybeSingle",
+        "db.rpc",
+        "findPixOrder",
+        "generatePixPayload",
+        "getPixConfig",
+        "id.replaceAll",
+        "id.replaceAll(\"-\", \"\").slice",
+        "randomUUID",
+        "revalidatePath",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "generatePixPayload",
+        "verifySession"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/enrollment-pix.ts",
+      "action": "approvePixEnrollment",
+      "calls": [
+        "createSupabaseServiceClient",
+        "createSupabaseServiceClient().rpc",
+        "requireAdmin",
+        "revalidatePath",
+        "reviewSchema.safeParse"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/enrollment-pix.ts",
+      "action": "rejectPixEnrollment",
+      "calls": [
+        "createSupabaseServiceClient",
+        "createSupabaseServiceClient().rpc",
+        "reason.trim",
+        "requireAdmin",
+        "revalidatePath"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/enrollment-pix.ts",
+      "action": "getPixOrderForAdmin",
+      "calls": [
+        "createSupabaseServiceClient",
+        "createSupabaseServiceClient()\n        .storage.from",
+        "createSupabaseServiceClient()\n        .storage.from(\"pix-receipts\")\n        .createSignedUrl",
+        "findPixOrder",
+        "requireAdmin"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/event.ts",
+      "action": "checkInEvent",
+      "calls": [
+        "console.error",
+        "createSupabaseServiceClient",
+        "new Date().toISOString",
+        "publishEvent",
+        "randomUUID",
+        "supabase\n    .from",
+        "supabase\n    .from(\"event_attendance\")\n    .insert",
+        "supabase\n    .from(\"event_attendance\")\n    .select",
+        "supabase\n    .from(\"event_attendance\")\n    .select(\"*\")\n    .eq",
+        "supabase\n    .from(\"event_attendance\")\n    .select(\"*\")\n    .eq(\"event_id\", event.id)\n    .eq",
+        "supabase\n    .from(\"event_attendance\")\n    .select(\"*\")\n    .eq(\"event_id\", event.id)\n    .eq(\"user_id\", uid)\n    .maybeSingle",
+        "supabase\n    .from(\"events\")\n    .select",
+        "supabase\n    .from(\"events\")\n    .select(\"*\")\n    .or",
+        "supabase\n    .from(\"events\")\n    .select(\"*\")\n    .or(`id.eq.${checkInCode},check_in_code.eq.${checkInCode}`)\n    .in",
+        "supabase\n    .from(\"events\")\n    .select(\"*\")\n    .or(`id.eq.${checkInCode},check_in_code.eq.${checkInCode}`)\n    .in(\"status\", [\"live\", \"scheduled\"])\n    .maybeSingle",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "verifySession"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/gallery.ts",
+      "action": "saveGalleryItemAction",
+      "calls": [
+        "assertIsAdmin",
+        "console.error",
+        "createSupabaseServiceClient",
+        "crypto.randomUUID",
+        "galleryInput.parse",
+        "input.tags\n        .split",
+        "input.tags\n        .split(\",\")\n        .map",
+        "input.tags\n        .split(\",\")\n        .map((tag) => tag.trim())\n        .filter",
+        "new Date().toISOString",
+        "revalidatePath",
+        "supabase\n        .from",
+        "supabase\n        .from(\"gallery_items\")\n        .insert",
+        "supabase\n        .from(\"gallery_items\")\n        .update",
+        "supabase\n        .from(\"gallery_items\")\n        .update(payload)\n        .eq",
+        "tag.trim"
+      ],
+      "authorizationEvidence": [
+        "assertIsAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/gallery.ts",
+      "action": "deleteGalleryItemAction",
+      "calls": [
+        "assertIsAdmin",
+        "console.error",
+        "createSupabaseServiceClient",
+        "createSupabaseServiceClient()\n      .from",
+        "createSupabaseServiceClient()\n      .from(\"gallery_items\")\n      .delete",
+        "createSupabaseServiceClient()\n      .from(\"gallery_items\")\n      .delete()\n      .eq",
+        "revalidatePath"
+      ],
+      "authorizationEvidence": [
+        "assertIsAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/gamification-admin.ts",
+      "action": "awardManualXp",
+      "calls": [
+        "auditService.logEvent",
+        "console.error",
+        "gamificationService.awardXp",
+        "requireAdmin",
+        "revalidatePath"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/gamification-admin.ts",
+      "action": "awardManualBadge",
+      "calls": [
+        "auditService.logEvent",
+        "console.error",
+        "gamificationService.awardBadge",
+        "requireAdmin",
+        "revalidatePath"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/gamification-read.ts",
+      "action": "getMyGamificationProfile",
+      "calls": [
+        "getProfile",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "verifySession"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/lms.ts",
+      "action": "getLessonContentAction",
+      "calls": [
+        "console.error",
+        "getLessonContent"
+      ],
+      "authorizationEvidence": [
+        "getLessonContent"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/lms.ts",
+      "action": "updateLessonBlocksAction",
+      "calls": [
+        "console.error",
+        "revalidatePath",
+        "saveLessonContent"
+      ],
+      "authorizationEvidence": [
+        "saveLessonContent"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/metrics.ts",
+      "action": "getStudentDashboardKPIs",
+      "calls": [
+        "buildStudentDashboardKPIs",
+        "new Date().toISOString",
+        "requireSession",
+        "requireSessionBase"
+      ],
+      "authorizationEvidence": [
+        "requireSession",
+        "requireSessionBase"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/metrics.ts",
+      "action": "getAdminDashboardKPIs",
+      "calls": [
+        "buildAdminDashboardKPIs",
+        "new Date().toISOString",
+        "requireAdmin"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/password-reset.ts",
+      "action": "requestPasswordResetAction",
+      "calls": [
+        "createSupabaseAuthServerClient",
+        "createSupabaseAuthServerClient().auth.resetPasswordForEmail",
+        "getAuthEmailRedirect",
+        "getClientIdentifier",
+        "headers",
+        "rateLimit",
+        "z\n    .string",
+        "z\n    .string()\n    .trim",
+        "z\n    .string()\n    .trim()\n    .toLowerCase",
+        "z\n    .string()\n    .trim()\n    .toLowerCase()\n    .max",
+        "z\n    .string()\n    .trim()\n    .toLowerCase()\n    .max(254)\n    .email",
+        "z\n    .string()\n    .trim()\n    .toLowerCase()\n    .max(254)\n    .email()\n    .safeParse"
+      ],
+      "authorizationEvidence": [],
+      "requiresReview": true
+    },
+    {
+      "file": "src/app/actions/progress.ts",
+      "action": "markLessonCompleted",
+      "calls": [
+        "assertCanAccessCourse",
+        "awardCanonicalCompletion",
+        "console.error",
+        "recordLessonProgress",
+        "revalidatePath",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "verifySession",
+        "assertCanAccessCourse"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/progress.ts",
+      "action": "updateLessonProgress",
+      "calls": [
+        "assertCanAccessCourse",
+        "awardCanonicalCompletion",
+        "console.error",
+        "lessonProgressInput.parse",
+        "recordLessonProgress",
+        "revalidatePath",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "verifySession",
+        "assertCanAccessCourse"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/progress.ts",
+      "action": "updateLessonLastAccess",
+      "calls": [
+        "assertCanAccessCourse",
+        "console.error",
+        "recordLessonAccess",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "verifySession",
+        "assertCanAccessCourse"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/progress.ts",
+      "action": "recalculateProgress",
+      "calls": [
+        "assertCanAccessCourse",
+        "console.error",
+        "recalculateCourseProgress",
+        "revalidatePath",
+        "verifySession"
+      ],
+      "authorizationEvidence": [
+        "verifySession",
+        "assertCanAccessCourse"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/public-documents.ts",
+      "action": "listPublicDocumentsAction",
+      "calls": [
+        "createSupabaseServiceClient",
+        "createSupabaseServiceClient()\n    .from",
+        "createSupabaseServiceClient()\n    .from(\"public_documents\")\n    .select",
+        "createSupabaseServiceClient()\n    .from(\"public_documents\")\n    .select(\n      \"id, title, category, file_url, file_path, file_size, file_type, is_published, created_at\",\n    )\n    .order",
+        "requireAdmin"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/public-documents.ts",
+      "action": "createPublicDocumentAction",
+      "calls": [
+        "createSupabaseServiceClient",
+        "createSupabaseServiceClient()\n    .from",
+        "createSupabaseServiceClient()\n    .from(\"public_documents\")\n    .insert",
+        "documentSchema.parse",
+        "requireAdmin",
+        "revalidatePath"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/public-documents.ts",
+      "action": "deletePublicDocumentAction",
+      "calls": [
+        "createSupabaseServiceClient",
+        "requireAdmin",
+        "revalidatePath",
+        "supabase\n    .from",
+        "supabase\n    .from(\"public_documents\")\n    .delete",
+        "supabase\n    .from(\"public_documents\")\n    .delete()\n    .eq",
+        "supabase\n    .from(\"public_documents\")\n    .select",
+        "supabase\n    .from(\"public_documents\")\n    .select(\"file_path\")\n    .eq",
+        "supabase\n    .from(\"public_documents\")\n    .select(\"file_path\")\n    .eq(\"id\", id)\n    .maybeSingle",
+        "supabase.storage.from",
+        "supabase.storage.from(\"course-assets\").remove"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/signup.ts",
+      "action": "registerForCourseAction",
+      "calls": [
+        "Date.now",
+        "Math.ceil",
+        "Math.max",
+        "auth.auth.signOut",
+        "auth.auth.signUp",
+        "console.error",
+        "createSupabaseAuthServerClient",
+        "createSupabaseServiceClient",
+        "getAuthEmailRedirect",
+        "getClientIdentifier",
+        "headers",
+        "rateLimit",
+        "signupSchema.safeParse",
+        "supabase\n      .from",
+        "supabase\n      .from(\"courses\")\n      .select",
+        "supabase\n      .from(\"courses\")\n      .select(\"id, is_published, status\")\n      .eq",
+        "supabase\n      .from(\"courses\")\n      .select(\"id, is_published, status\")\n      .eq(\"id\", courseId)\n      .maybeSingle"
+      ],
+      "authorizationEvidence": [],
+      "requiresReview": true
+    },
+    {
+      "file": "src/app/actions/siteSettings.ts",
+      "action": "updateSiteSettings",
+      "calls": [
+        "console.error",
+        "patchPublicConfig",
+        "requireAdmin",
+        "revalidatePath",
+        "settingsSchemas[key as keyof typeof settingsSchemas].parse",
+        "upsertPublicPage"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/siteSettings.ts",
+      "action": "getGoogleSettings",
+      "calls": [
+        "Object.fromEntries",
+        "Object.keys",
+        "Object.keys(emptyGoogle).map",
+        "getPublicPage",
+        "requireAdmin"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/siteSettings.ts",
+      "action": "updateGoogleSettings",
+      "calls": [
+        "googleSchema.parse",
+        "patchPublicConfig",
+        "requireAdmin",
+        "revalidatePath"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/user-management.ts",
+      "action": "updateUserRole",
+      "calls": [
+        "[\"admin\", \"tutor\", \"student\"].includes",
+        "createSupabaseServiceClient",
+        "createSupabaseServiceClient().rpc",
+        "failure",
+        "govern",
+        "requireAdmin",
+        "revalidatePath"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/user-management.ts",
+      "action": "toggleUserStatus",
+      "calls": [
+        "[\"active\", \"disabled\"].includes",
+        "createSupabaseServiceClient",
+        "createSupabaseServiceClient()\n    .from",
+        "createSupabaseServiceClient()\n    .from(\"profiles\")\n    .select",
+        "createSupabaseServiceClient()\n    .from(\"profiles\")\n    .select(\"id,email,is_active\")\n    .eq",
+        "createSupabaseServiceClient()\n    .from(\"profiles\")\n    .select(\"id,email,is_active\")\n    .eq(\"id\", targetUid)\n    .maybeSingle",
+        "createSupabaseServiceClient().rpc",
+        "db.auth.admin.updateUserById",
+        "failure",
+        "govern",
+        "readProfile",
+        "requireAdmin",
+        "revalidatePath"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/user-management.ts",
+      "action": "deleteUser",
+      "calls": [
+        "createSupabaseServiceClient",
+        "createSupabaseServiceClient()\n    .from",
+        "createSupabaseServiceClient()\n    .from(\"profiles\")\n    .select",
+        "createSupabaseServiceClient()\n    .from(\"profiles\")\n    .select(\"id,email,is_active\")\n    .eq",
+        "createSupabaseServiceClient()\n    .from(\"profiles\")\n    .select(\"id,email,is_active\")\n    .eq(\"id\", targetUid)\n    .maybeSingle",
+        "createSupabaseServiceClient().rpc",
+        "db\n      .from",
+        "db\n      .from(\"profiles\")\n      .select",
+        "db\n      .from(\"profiles\")\n      .select(\"id\")\n      .eq",
+        "db\n      .from(\"profiles\")\n      .select(\"id\")\n      .eq(\"id\", targetUid)\n      .maybeSingle",
+        "db.auth.admin.deleteUser",
+        "db.rpc",
+        "failure",
+        "govern",
+        "readProfile",
+        "requireAdmin",
+        "revalidatePath"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/user-management.ts",
+      "action": "sendUserAccessEmail",
+      "calls": [
+        "createSupabaseAuthServerClient",
+        "createSupabaseAuthServerClient().auth.signInWithOtp",
+        "createSupabaseServiceClient",
+        "createSupabaseServiceClient()\n    .from",
+        "createSupabaseServiceClient()\n    .from(\"profiles\")\n    .select",
+        "createSupabaseServiceClient()\n    .from(\"profiles\")\n    .select(\"id,email,is_active\")\n    .eq",
+        "createSupabaseServiceClient()\n    .from(\"profiles\")\n    .select(\"id,email,is_active\")\n    .eq(\"id\", targetUid)\n    .maybeSingle",
+        "data.user.email.toLowerCase",
+        "db.auth.admin.getUserById",
+        "failure",
+        "getAuthEmailRedirect",
+        "profile.email.toLowerCase",
+        "rateLimit",
+        "readProfile",
+        "requireAdmin"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/actions/user-management.ts",
+      "action": "listUsersForAdmin",
+      "calls": [
+        "(profiles || []).map",
+        "Math.floor",
+        "Math.max",
+        "Math.min",
+        "Number",
+        "Number.isFinite",
+        "Number.isSafeInteger",
+        "String",
+        "createSupabaseServiceClient",
+        "createSupabaseServiceClient()\n      .from",
+        "createSupabaseServiceClient()\n      .from(\"profiles\")\n      .select",
+        "createSupabaseServiceClient()\n      .from(\"profiles\")\n      .select(\n        \"id,email,display_name,photo_url,role,is_active,created_at,last_login_at,phone_number,profile_completion\",\n      )\n      .order",
+        "createSupabaseServiceClient()\n      .from(\"profiles\")\n      .select(\n        \"id,email,display_name,photo_url,role,is_active,created_at,last_login_at,phone_number,profile_completion\",\n      )\n      .order(\"created_at\", { ascending: false })\n      .range",
+        "failure",
+        "requireAdmin"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/admin/(protected)/approvals/actions.ts",
+      "action": "getPendingEnrollmentsAction",
+      "calls": [
+        "(enrollments || []).map",
+        "(error as { digest: string }).digest.startsWith",
+        "console.error",
+        "createSupabaseServiceClient",
+        "requireAdmin",
+        "rethrowRedirect",
+        "supabase\n      .from",
+        "supabase\n      .from(\"enrollments\")\n      .select",
+        "supabase\n      .from(\"enrollments\")\n      .select(\"*, courses(title)\")\n      .eq"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/admin/(protected)/approvals/actions.ts",
+      "action": "approveEnrollment",
+      "calls": [
+        "approveCanonical",
+        "createSupabaseServiceClient",
+        "createSupabaseServiceClient()\n    .from",
+        "createSupabaseServiceClient()\n    .from(\"enrollments\")\n    .select",
+        "createSupabaseServiceClient()\n    .from(\"enrollments\")\n    .select(\"id\")\n    .eq",
+        "createSupabaseServiceClient()\n    .from(\"enrollments\")\n    .select(\"id\")\n    .eq(\"id\", enrollmentId)\n    .eq",
+        "createSupabaseServiceClient()\n    .from(\"enrollments\")\n    .select(\"id\")\n    .eq(\"id\", enrollmentId)\n    .eq(\"user_id\", uid)\n    .eq",
+        "createSupabaseServiceClient()\n    .from(\"enrollments\")\n    .select(\"id\")\n    .eq(\"id\", enrollmentId)\n    .eq(\"user_id\", uid)\n    .eq(\"course_id\", courseId)\n    .maybeSingle",
+        "requireAdmin"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin",
+        "approveCanonical"
+      ],
+      "requiresReview": false
+    },
+    {
+      "file": "src/app/admin/(protected)/approvals/actions.ts",
+      "action": "rejectEnrollment",
+      "calls": [
+        "createSupabaseServiceClient",
+        "db\n    .from",
+        "db\n    .from(\"enrollments\")\n    .select",
+        "db\n    .from(\"enrollments\")\n    .select(\"id,payment_method,status\")\n    .eq",
+        "db\n    .from(\"enrollments\")\n    .select(\"id,payment_method,status\")\n    .eq(\"id\", enrollmentId)\n    .eq",
+        "db\n    .from(\"enrollments\")\n    .select(\"id,payment_method,status\")\n    .eq(\"id\", enrollmentId)\n    .eq(\"user_id\", uid)\n    .eq",
+        "db\n    .from(\"enrollments\")\n    .select(\"id,payment_method,status\")\n    .eq(\"id\", enrollmentId)\n    .eq(\"user_id\", uid)\n    .eq(\"course_id\", courseId)\n    .maybeSingle",
+        "db\n    .from(\"enrollments\")\n    .update",
+        "db\n    .from(\"enrollments\")\n    .update({\n      status: \"canceled\",\n      rejection_reason: reason.trim(),\n      updated_at: new Date().toISOString(),\n    })\n    .eq",
+        "db\n    .from(\"enrollments\")\n    .update({\n      status: \"canceled\",\n      rejection_reason: reason.trim(),\n      updated_at: new Date().toISOString(),\n    })\n    .eq(\"id\", enrollmentId)\n    .eq",
+        "db\n    .from(\"enrollments\")\n    .update({\n      status: \"canceled\",\n      rejection_reason: reason.trim(),\n      updated_at: new Date().toISOString(),\n    })\n    .eq(\"id\", enrollmentId)\n    .eq(\"status\", \"pending_approval\")\n    .select",
+        "new Date().toISOString",
+        "reason.trim",
+        "rejectPixEnrollment",
+        "requireAdmin",
+        "revalidatePath"
+      ],
+      "authorizationEvidence": [
+        "requireAdmin"
+      ],
+      "requiresReview": false
+    }
+  ]
+}

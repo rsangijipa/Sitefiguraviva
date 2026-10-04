@@ -17,7 +17,7 @@ export default function LegalDocument({ doc, type }: LegalDocumentProps) {
       : { href: LEGAL_ROUTES.privacy, label: "Política de Privacidade" };
 
   return (
-    <main className="min-h-screen bg-paper">
+    <div className="min-h-screen bg-paper">
       <Navbar />
 
       <article className="max-w-3xl mx-auto px-6 pt-32 pb-24">
@@ -61,6 +61,6 @@ export default function LegalDocument({ doc, type }: LegalDocumentProps) {
       </article>
 
       <Footer />
-    </main>
+    </div>
   );
 }

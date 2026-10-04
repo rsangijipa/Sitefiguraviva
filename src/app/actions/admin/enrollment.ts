@@ -154,9 +154,13 @@ export async function approveEnrollment(
       .eq("course_id", courseId)
       .maybeSingle();
     if (error || !data) throw new Error("Matrícula não encontrada.");
-    return data.payment_method === "pix"
-      ? approvePixEnrollment(uid, courseId, confirmation)
-      : updateEnrollmentStatus(uid, courseId, "active");
+    if (data.payment_method === "pix")
+      return approvePixEnrollment(uid, courseId, confirmation);
+    if (!["manual", "free"].includes(data.payment_method))
+      throw new Error(
+        "Esta matrícula exige revisão pelo fluxo de pagamento correspondente.",
+      );
+    return updateEnrollmentStatus(uid, courseId, "active");
   } catch (error) {
     return {
       success: false,

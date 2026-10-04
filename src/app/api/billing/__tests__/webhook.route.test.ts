@@ -55,6 +55,9 @@ describe("billing webhook route", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    process.env.STRIPE_BILLING_MODE = "test";
+    process.env.STRIPE_SECRET_KEY = "sk_test_fixture";
+    delete process.env.VERCEL_ENV;
 
     runTransactionMock.mockImplementation(async (handler: any) => {
       const tx = {
@@ -107,6 +110,17 @@ describe("billing webhook route", () => {
     expect(logAudit).not.toHaveBeenCalledWith(
       expect.objectContaining({ action: "billing.activation_deferred" }),
     );
+  });
+
+  it("rejects a live event before any financial write", async () => {
+    constructEventMock.mockReturnValue({
+      id: "evt_live",
+      livemode: true,
+      type: "checkout.session.completed",
+    });
+    expect((await POST(makeRequest())).status).toBe(403);
+    expect(runTransactionMock).not.toHaveBeenCalled();
+    expect(activateEnrollmentFromStripe).not.toHaveBeenCalled();
   });
 
   it("defers activation and writes audit when checkout is not paid", async () => {

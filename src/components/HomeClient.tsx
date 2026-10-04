@@ -78,6 +78,17 @@ export default function HomeClient({ initialData }: HomeClientProps = {}) {
   const isTermsOpen = modalType === "terms";
   const legalType = isPrivacyOpen ? "privacy" : isTermsOpen ? "terms" : null;
 
+  const fullCourses = useCourses(false, {
+    scope: "list",
+    enabled: isCalendarOpen || isCourseOpen,
+  });
+  const fullPosts = useBlogPosts(false, {
+    scope: "list",
+    enabled: isBlogOpen || isReaderOpen,
+  });
+  const modalCourses = fullCourses.data ?? courses;
+  const modalPosts = fullPosts.data ?? blogPosts;
+
   // Item IDs
   const articleId = searchParams.get("articleId");
   const courseId = searchParams.get("courseId");
@@ -85,13 +96,13 @@ export default function HomeClient({ initialData }: HomeClientProps = {}) {
 
   // Resolve selections
   const selectedArticle = articleId
-    ? blogPosts.find((p: any) => String(p.id) === String(articleId))
+    ? modalPosts.find((p: any) => String(p.id) === String(articleId))
     : null;
   const selectedCourse = courseId
-    ? courses.find((c: any) => String(c.id) === String(courseId))
+    ? modalCourses.find((c: any) => String(c.id) === String(courseId))
     : null;
   const selectedPost = postId
-    ? blogPosts.find((p: any) => String(p.id) === String(postId))
+    ? modalPosts.find((p: any) => String(p.id) === String(postId))
     : null;
 
   const closeModals = () => {
@@ -120,12 +131,7 @@ export default function HomeClient({ initialData }: HomeClientProps = {}) {
       <AlertBar />
       <Navbar />
 
-      <main
-        id="main-content"
-        role="main"
-        tabIndex={-1}
-        className="outline-none"
-      >
+      <div id="home-content" tabIndex={-1} className="outline-none">
         <HeroSection content={home} config={config} />
 
         <Reveal variant="medium">
@@ -152,7 +158,7 @@ export default function HomeClient({ initialData }: HomeClientProps = {}) {
         <Reveal variant="soft">
           <InstagramSection />
         </Reveal>
-      </main>
+      </div>
 
       <Footer />
       <FloatingControls />
@@ -179,7 +185,7 @@ export default function HomeClient({ initialData }: HomeClientProps = {}) {
       <CalendarModal
         isOpen={isCalendarOpen}
         onClose={closeModals}
-        courses={courses}
+        courses={modalCourses}
       />
       <GalleryModal
         isOpen={isGalleryOpen}

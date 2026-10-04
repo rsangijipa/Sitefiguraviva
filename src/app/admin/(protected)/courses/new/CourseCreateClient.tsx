@@ -38,7 +38,11 @@ export default function CourseCreateClient() {
     description: "",
     instructor: "Figura Viva",
     category: "Geral",
-    duration: "4 semanas",
+    duration: "",
+    frequency: "",
+    workload: "",
+    date: "",
+    location: "",
     level: "beginner" as
       | "beginner"
       | "intermediate"
@@ -100,7 +104,12 @@ export default function CourseCreateClient() {
         description: formData.description.trim(),
         instructor: formData.instructor.trim() || "Figura Viva",
         category: formData.category,
-        duration: formData.duration.trim() || "4 semanas",
+        duration: formData.duration.trim(),
+        frequency: formData.frequency.trim(),
+        date: formData.date.trim(),
+        location: formData.location.trim(),
+        workload:
+          formData.workload === "" ? undefined : Number(formData.workload),
         level: formData.level,
         coverImage: formData.coverImage || "",
         image: formData.coverImage || "",
@@ -181,6 +190,29 @@ export default function CourseCreateClient() {
           onSubmit={handleSubmit}
           className="p-4 sm:p-6 lg:p-8 bg-stone-50/30 space-y-6"
         >
+          <div className="grid gap-4 md:grid-cols-2 mb-6">
+            {[
+              ["frequency", "Frequência"],
+              ["date", "Datas dos encontros"],
+              ["location", "Local ou plataforma"],
+              ["workload", "Carga horária (minutos)"],
+            ].map(([key, label]) => (
+              <label key={key} className="text-sm">
+                {label}
+                <input
+                  className="block w-full p-3 border rounded-xl"
+                  type={key === "workload" ? "number" : "text"}
+                  min={key === "workload" ? 0 : undefined}
+                  step={key === "workload" ? 1 : undefined}
+                  value={formData[key]}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, [key]: e.target.value }))
+                  }
+                />
+              </label>
+            ))}
+          </div>
+
           <div className="bg-amber-50/80 border border-amber-200 text-amber-900 p-4 rounded-xl flex items-start gap-3 shadow-xs">
             <AlertTriangle
               size={18}

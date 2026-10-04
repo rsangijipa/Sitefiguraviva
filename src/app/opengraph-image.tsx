@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { getPublicSiteOrigin } from "@/lib/public-site-url";
 
 export const alt = "Instituto Figura Viva — Gestalt-Terapia & Formação Clínica";
 export const size = { width: 1200, height: 630 };
@@ -85,7 +86,9 @@ export default async function OpengraphImage() {
           color: "#8C8577",
         }}
       >
-        <div style={{ display: "flex" }}>figuraviva.com.br</div>
+        <div style={{ display: "flex" }}>
+          {new URL(getPublicSiteOrigin()).hostname}
+        </div>
         <div style={{ display: "flex" }}>Encontros que transformam</div>
       </div>
     </div>,

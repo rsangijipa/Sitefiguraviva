@@ -1,0 +1,98 @@
+{
+  "date": "2026-10-04",
+  "block": 15,
+  "baseCommit": "5c5cceb0755ce099e79a41101438bfef8370ee48",
+  "scope": "local isolated application and HTTP/browser checks; no deployment, authenticated production journey or real payment",
+  "checks": {
+    "lint": "passed",
+    "scripts": {
+      "passed": 30,
+      "scope": "unchanged script sources checked against final snapshot"
+    },
+    "jest": {
+      "passed": 581,
+      "skipped": 7,
+      "suitesPassed": 128
+    },
+    "types": "passed",
+    "build": "passed",
+    "publicBrowser": {
+      "passed": 5,
+      "browser": "Chromium 153",
+      "seconds": 20
+    },
+    "http": {
+      "passed": 6,
+      "results": [
+        {
+          "name": "same-origin logout",
+          "status": 200
+        },
+        {
+          "name": "cross-origin logout",
+          "status": 403
+        },
+        {
+          "name": "missing-origin logout",
+          "status": 403
+        },
+        {
+          "name": "checkout-subscription",
+          "status": 503
+        },
+        {
+          "name": "customer-portal",
+          "status": 503
+        },
+        {
+          "name": "webhook",
+          "status": 503
+        }
+      ]
+    }
+  },
+  "snapshot": {
+    "runtimeFiles": 1071,
+    "sourceMatches": true,
+    "manifestSha256": "85228222cc1ab4ea6f1ededfd822032750f23c79eff83d78ed6421875ea8c6e1"
+  },
+  "supabase": {
+    "project": "jdxorryvmcvtqsddkpdm",
+    "mode": "read-only policies, privileges, triggers, function definitions and security advisors",
+    "advisors": [
+      {
+        "name": "rls_enabled_no_policy",
+        "level": "INFO",
+        "count": 2
+      },
+      {
+        "name": "function_search_path_mutable",
+        "level": "WARN",
+        "count": 1
+      },
+      {
+        "name": "anon_security_definer_function_executable",
+        "level": "WARN",
+        "count": 6
+      },
+      {
+        "name": "authenticated_security_definer_function_executable",
+        "level": "WARN",
+        "count": 6
+      },
+      {
+        "name": "auth_leaked_password_protection",
+        "level": "WARN",
+        "count": 1
+      }
+    ]
+  },
+  "attempts": [
+    "Initial wrapper type error and three route-test environment failures fixed.",
+    "Intermediate 571 and 573-test snapshots compiled successfully.",
+    "Real same-origin HTTP logout initially returned 403 due to Next internal hostname; shared Host/Origin validation corrected login/logout.",
+    "Final 581-test snapshot, native build, six HTTP checks and five public browser scenarios passed."
+  ],
+  "publication": "not performed",
+  "productionWrites": "none"
+}

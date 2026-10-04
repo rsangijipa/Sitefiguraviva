@@ -1,8 +1,10 @@
-import { Metadata, Viewport } from "next";
+import { Metadata } from "next";
 import { Fraunces, Karla } from "next/font/google";
 import "./globals.css";
 import "@/components/resources/apps/emotion-tree/emotion-tree.css";
 import Providers from "./providers";
+import { getPublicSiteOrigin } from "@/lib/public-site-url";
+const siteOrigin = getPublicSiteOrigin();
 import { PublicContactProvider } from "@/features/public-site/components/PublicContactProvider";
 import { getPublicContact } from "@/features/public-site/infrastructure/publicContact.server";
 
@@ -32,7 +34,7 @@ const karla = Karla({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://figuraviva.com.br"),
+  metadataBase: new URL(siteOrigin),
   title: {
     default: "Instituto Figura Viva | Gestalt-Terapia & Formação",
     template: "%s | Instituto Figura Viva",
@@ -52,7 +54,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "pt_BR",
-    url: "https://figuraviva.com.br",
+    url: siteOrigin,
     title: "Instituto Figura Viva | Gestalt-Terapia & Formação Clínica",
     description:
       "Acolhimento clínico e formação profissional em Gestalt-Terapia. Encontros que transformam vidas.",
@@ -101,7 +103,6 @@ import JsonLd from "@/components/system/JsonLd";
 import GoogleAnalytics from "@/components/system/GoogleAnalytics";
 import CookieConsent from "@/components/system/CookieConsent";
 import BackToTop from "@/components/system/BackToTop";
-import { themeInitScript } from "@/components/providers/ThemeProvider";
 
 export default async function RootLayout({
   children,
@@ -114,13 +115,10 @@ export default async function RootLayout({
       lang="pt-BR"
       className={`${fraunces.variable} ${karla.variable}`}
       data-scroll-behavior="smooth"
+      data-theme="light"
+      style={{ colorScheme: "light" }}
       suppressHydrationWarning
     >
-      <head>
-        {/* Antes da primeira pintura: sem isto o tema escuro aparece só depois
-            da hidratação e a pessoa leva um flash de tela clara na cara. */}
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
-      </head>
       <body className="antialiased bg-paper text-text overflow-x-hidden">
         <a href="#main-content" className="skip-to-content">
           Pular para o conteúdo principal
@@ -132,8 +130,8 @@ export default async function RootLayout({
                 "@context": "https://schema.org",
                 "@type": "Organization",
                 name: "Instituto Figura Viva",
-                url: "https://figuraviva.com.br",
-                logo: "https://figuraviva.com.br/icon-512x512.png",
+                url: siteOrigin,
+                logo: `${siteOrigin}/icon-512x512.png`,
                 sameAs: ["https://www.instagram.com/institutofiguraviva/"],
                 address: {
                   "@type": "PostalAddress",

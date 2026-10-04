@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-04",
+  "block": 14,
+  "baseCommit": "5c5cceb0755ce099e79a41101438bfef8370ee48",
+  "scope": "local isolated checks; no deployment or authenticated production journey",
+  "checks": {
+    "lint": "passed",
+    "scripts": {
+      "passed": 30
+    },
+    "jest": {
+      "passed": 543,
+      "skipped": 7,
+      "suitesPassed": 122
+    },
+    "types": "passed",
+    "build": "passed"
+  },
+  "productionReadOnly": {
+    "project": "jdxorryvmcvtqsddkpdm",
+    "publishedCommercialCourses": 2,
+    "publishedPosts": 1
+  },
+  "snapshot": {
+    "runtimeFiles": 1061,
+    "sourceMatches": true,
+    "manifestSha256": "0aadfb77608e66e374ffec2130e56cd24be9a4c6a13f626008649e1f830634b6"
+  },
+  "attempts": [
+    "Initial unit/scripts/lint passed, types and build rejected deep Supabase type inference; corrected by separate typed table queries.",
+    "First build retry failed in remote Google font loader; final retry passed without font mocks.",
+    "Final lint/unit, separate types and final build passed; sitemap ISR interval verified in final build."
+  ],
+  "publication": "not performed"
+}

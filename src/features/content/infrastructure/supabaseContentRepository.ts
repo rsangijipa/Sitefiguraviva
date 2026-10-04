@@ -84,8 +84,8 @@ export function mapPublicCourse(row: TableRow<"courses">): ContentRecord {
     details: row.details,
     team: row.team,
     mediators: getCourseMediators(row.details, legacy, row.team),
-    date: legacy.date ?? details.date ?? row.duration_label,
-    frequency: legacy.frequency ?? details.frequency ?? null,
+    date: details.date ?? legacy.date ?? row.duration_label,
+    frequency: details.frequency ?? legacy.frequency ?? null,
     syllabus: Array.isArray(details.syllabus)
       ? details.syllabus
       : Array.isArray(legacy.syllabus)

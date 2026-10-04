@@ -67,7 +67,7 @@ export default async function CertificateValidationPage({ params }: Props) {
         </div>
       </header>
 
-      <main className="flex-1 flex items-center justify-center p-4">
+      <div className="flex-1 flex items-center justify-center p-4">
         <div className="bg-white p-8 md:p-12 rounded-2xl shadow-2xl border border-amber-100 max-w-2xl w-full text-center relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-amber-300 to-amber-500" />
 
@@ -124,7 +124,7 @@ export default async function CertificateValidationPage({ params }: Props) {
             requisitos acadêmicos deste curso.
           </p>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

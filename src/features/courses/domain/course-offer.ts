@@ -1,8 +1,16 @@
 export function validateCommercialFields(data: {
+  workload?: number;
   totalPriceCents?: number | null;
   installments?: number | null;
   pixPriceCents?: number | null;
 }) {
+  if (
+    data.workload !== undefined &&
+    (!Number.isInteger(data.workload) ||
+      data.workload < 0 ||
+      data.workload > 1000000)
+  )
+    throw new Error("Informe a carga horária em minutos inteiros.");
   for (const key of ["totalPriceCents", "pixPriceCents"] as const) {
     const value = data[key];
     if (

@@ -1,0 +1,1512 @@
+{
+  "basis": "Static TypeScript imports, exports and literal dynamic imports, including root Next entries; does not prove absence of runtime consumers",
+  "nextEntries": 138,
+  "candidates": [
+    {
+      "file": "src/actions/community.ts",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/actions/grading.ts",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [
+        "src/components/admin/grading/GradingDashboard.tsx"
+      ],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/actions/thought-garden-actions.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/actions/thought-river-actions.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/app/actions/admin/backfill-progress.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/app/actions/admin/dashboard.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/app/actions/certificate.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/app/actions/create-course.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/app/portal/course/[courseId]/certificate/PrintButton.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/admin/analytics/AnalyticsDashboard.tsx",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/components/admin/analytics/EngagementChart.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/admin/CourseEditorModal.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/admin/CreateCourseModal.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/admin/grading/GradingDashboard.tsx",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/components/admin/MaterialsManager.tsx",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/components/assessment/QuizTaker.tsx",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/components/certificates/CertificateDebug.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/common/FileUploader.tsx",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [
+        "src/components/assessment/QuizTaker.tsx"
+      ],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/components/FeelingsTree.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/laura/Testimonials.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/layout/AppShell.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/layout/MobileNav.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/portal/ActivityChart.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/portal/community/NewTopicButton.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/portal/community/NewTopicModal.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/portal/community/PostCard.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/portal/events/LiveEventCard.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/portal/PrintCertificateButton.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/portal/PWAInstallBanner.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/portal/VideoPlayer.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/body-map/components/ProgressIndicator.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/body-map/components/RegionList.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/body-map/components/SensationPicker.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/body-map/components/SummaryCard.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/body-map/hooks/use-body-map.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/cartas-gestalticas/CartasGestalticasApp.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/cartas-gestalticas/main.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/casoclinicointerativo/main.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/diario-aqui-e-agora/DiarioAquiEAgoraApp.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/diario-aqui-e-agora/main.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/duas-cadeiras/DuasCadeirasApp.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/duas-cadeiras/main.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/emotion-tree/components/DiaryHistory.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/emotion-tree/components/EmotionWheel.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/emotion-tree/components/ExplorationPanel.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/emotion-tree/data/emotions.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/emotion-tree/data/quotes.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/emotion-tree/lib/server/quote-repository.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/emotion-tree/main.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/emotion-tree/types.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/emotion-tree/utils/diaryStorage.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/emotion-tree/utils/svgMath.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/Escuta-sons-para-awareness/src/App.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/Escuta-sons-para-awareness/src/components/AdminCMS.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/Escuta-sons-para-awareness/src/components/PortalHeader.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/Escuta-sons-para-awareness/src/components/ResourceCatalog.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/Escuta-sons-para-awareness/src/components/StudentHistory.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/figura-e-fundo/FiguraEFundoApp.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/figura-e-fundo/main.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/fronteiras-de-contato/FronteirasDeContatoApp.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/fronteiras-de-contato/main.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/grounding-54321/components/HistoryModal.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/grounding-54321/Grounding54321App.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/grounding-54321/main.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/grounding-54321/utils/telemetry.ts",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/components/resources/apps/intensidade-agora/components/CircularIndicator.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/intensidade-agora/components/CompletionScreen.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/intensidade-agora/components/InfoDialog.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/intensidade-agora/components/IntensitySlider.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/intensidade-agora/components/ObservationForm.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/intensidade-agora/components/ParticleField.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/intensidade-agora/hooks/use-intensity-canvas.ts",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/components/resources/apps/intensidade-agora/hooks/use-local-storage.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/intensidade-agora/types.ts",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [
+        "src/components/resources/apps/intensidade-agora/hooks/use-intensity-canvas.ts"
+      ],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/components/resources/apps/intensidade-agora/utils/particle-colors.ts",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [
+        "src/components/resources/apps/intensidade-agora/hooks/use-intensity-canvas.ts"
+      ],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/components/resources/apps/jardim-de-pensamentos/src/App.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/jardim-de-pensamentos/src/components/interactive-shell/InteractiveResourceShell.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/jardim-de-pensamentos/src/components/interactive-shell/ResourceCompletion.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/jardim-de-pensamentos/src/components/interactive-shell/ResourceControls.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/jardim-de-pensamentos/src/components/interactive-shell/ResourceHeader.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/jardim-de-pensamentos/src/components/interactive-shell/ResourceStage.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/jardim-de-pensamentos/src/features/admin/AdminThoughtGarden.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/jardim-de-pensamentos/src/features/interactive-resources/thought-garden/components/BotanicalGardenCanvas.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/jardim-de-pensamentos/src/features/interactive-resources/thought-garden/components/GardenBottomBar.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/jardim-de-pensamentos/src/features/interactive-resources/thought-garden/components/GardenCompletion.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/jardim-de-pensamentos/src/features/interactive-resources/thought-garden/components/GardenStage.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/jardim-de-pensamentos/src/features/interactive-resources/thought-garden/components/LeafActions.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/jardim-de-pensamentos/src/features/interactive-resources/thought-garden/components/SavedThoughtsList.tsx",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/components/resources/apps/jardim-de-pensamentos/src/features/interactive-resources/thought-garden/components/ThoughtComposer.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/jardim-de-pensamentos/src/features/interactive-resources/thought-garden/components/ThoughtLeaf.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/jardim-de-pensamentos/src/features/interactive-resources/thought-garden/reducer.ts",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/components/resources/apps/jardim-de-pensamentos/src/features/interactive-resources/thought-garden/repository.ts",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [
+        "src/components/resources/apps/jardim-de-pensamentos/src/features/interactive-resources/thought-garden/components/SavedThoughtsList.tsx"
+      ],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/components/resources/apps/jardim-de-pensamentos/src/features/interactive-resources/thought-garden/schema.ts",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [
+        "src/components/resources/apps/jardim-de-pensamentos/src/features/interactive-resources/thought-garden/reducer.ts",
+        "src/components/resources/apps/jardim-de-pensamentos/src/features/interactive-resources/thought-garden/repository.ts",
+        "src/components/resources/apps/jardim-de-pensamentos/src/features/interactive-resources/thought-garden/components/SavedThoughtsList.tsx"
+      ],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/components/resources/apps/jardim-de-pensamentos/src/features/interactive-resources/thought-garden/ThoughtGardenExperience.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/jardim-de-pensamentos/src/features/interactive-resources/thought-garden/types.ts",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [
+        "src/components/resources/apps/jardim-de-pensamentos/src/features/interactive-resources/thought-garden/reducer.ts",
+        "src/components/resources/apps/jardim-de-pensamentos/src/features/interactive-resources/thought-garden/repository.ts",
+        "src/components/resources/apps/jardim-de-pensamentos/src/features/interactive-resources/thought-garden/components/SavedThoughtsList.tsx"
+      ],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/components/resources/apps/jardim-de-pensamentos/src/features/portal/PortalCatalog.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/mental-health-quiz/config.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/mental-health-quiz/lib/assessmentEngine.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/mental-health-quiz/lib/validation/instrumentValidator.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/mental-health-quiz/MentalHealthQuiz.tsx",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/components/resources/apps/necessidades-agora/src/App.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/necessidades-agora/src/components/portal/PortalHeader.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/necessidades-agora/src/components/portal/ResourcesCatalog.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/necessidades-agora/src/features/interactive-resources/current-needs/admin/AdminNeedsCatalog.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/rios-dos-pensamentos/src/App.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/rios-dos-pensamentos/src/features/admin/ThoughtRiverAdmin.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/rios-dos-pensamentos/src/features/interactive-resources/InteractiveResourceShell.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/rios-dos-pensamentos/src/features/interactive-resources/thought-river/components/ActiveLeavesList.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/rios-dos-pensamentos/src/features/interactive-resources/thought-river/components/RiverCanvas.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/rios-dos-pensamentos/src/features/interactive-resources/thought-river/components/RiverCompletion.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/rios-dos-pensamentos/src/features/interactive-resources/thought-river/components/RiverComposer.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/rios-dos-pensamentos/src/features/interactive-resources/thought-river/components/RiverControls.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/rios-dos-pensamentos/src/features/interactive-resources/thought-river/engine/audioAmbience.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/rios-dos-pensamentos/src/features/interactive-resources/thought-river/engine/leafMotion.ts",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [
+        "src/components/resources/apps/rios-dos-pensamentos/src/features/interactive-resources/thought-river/engine/riverScene.ts"
+      ],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/components/resources/apps/rios-dos-pensamentos/src/features/interactive-resources/thought-river/engine/riverScene.ts",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [
+        "src/components/resources/apps/rios-dos-pensamentos/src/features/interactive-resources/thought-river/engine/leafMotion.ts"
+      ],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/components/resources/apps/rios-dos-pensamentos/src/features/interactive-resources/thought-river/engine/riverWebGL.ts",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [
+        "src/components/resources/apps/rios-dos-pensamentos/src/features/interactive-resources/thought-river/engine/riverScene.ts"
+      ],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/components/resources/apps/rios-dos-pensamentos/src/features/interactive-resources/thought-river/hooks/useRiverLoop.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/rios-dos-pensamentos/src/features/interactive-resources/thought-river/repository.ts",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [
+        "src/components/resources/apps/rios-dos-pensamentos/src/features/portal/StudentHistory.tsx"
+      ],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/components/resources/apps/rios-dos-pensamentos/src/features/interactive-resources/thought-river/ThoughtRiverExperience.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/rios-dos-pensamentos/src/features/portal/ResourcesCatalog.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/rios-dos-pensamentos/src/features/portal/StudentHistory.tsx",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/components/resources/apps/rios-dos-pensamentos/src/types.ts",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [
+        "src/components/resources/apps/rios-dos-pensamentos/src/features/interactive-resources/thought-river/repository.ts",
+        "src/components/resources/apps/rios-dos-pensamentos/src/features/interactive-resources/thought-river/engine/leafMotion.ts",
+        "src/components/resources/apps/rios-dos-pensamentos/src/features/interactive-resources/thought-river/engine/riverScene.ts",
+        "src/components/resources/apps/rios-dos-pensamentos/src/features/portal/StudentHistory.tsx"
+      ],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/components/resources/apps/rios-dos-pensamentos/ThoughtRiverApp.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/sala-de-pausa/src/App.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/sala-de-pausa/src/features/interactive-resources/pause-room/components/SalaDePausaEditorialGuide.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/sala-de-pausa/src/features/interactive-resources/pause-room/components/SalaDePausaHistoryTab.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/sala-de-pausa/src/features/interactive-resources/pause-room/components/SalaDePausaSoundLab.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/sala-de-pausa/src/features/interactive-resources/pause-room/components/SalaDePausaTopBar.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/sala-de-pausa/src/features/interactive-resources/pause-room/SalaDePausaWindow.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/sala-de-pausa/src/features/interactive-resources/river-of-thoughts/RiverExperience.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/sala-de-pausa/src/features/interactive-resources/river-of-thoughts/RiverStreamEngine.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/sala-de-pausa/src/features/interactive-resources/river-of-thoughts/RiverTextStage.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/sala-de-pausa/src/features/interactive-resources/river-of-thoughts/RiverVisualStage.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/sala-de-pausa/src/features/portal/EditorialAdminView.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/sala-de-pausa/src/features/portal/PortalHeader.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/sala-de-pausa/src/features/portal/ResourceCatalog.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/sala-de-pausa/src/features/portal/SqlSchemaModal.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/sala-de-pausa/src/features/portal/StudentHistoryView.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/apps/soma-scan/index.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/BreathingApp.jsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/data/emotionsData.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/resources/services/supabaseService.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/sections/ExploreSection.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/sections/FounderSection.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/sections/InstituteSection.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/sections/MemoryMiniFooter.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/sections/TestimonialsSection.tsx",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/components/system/EmptyState.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/TreeVisualization.jsx",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/components/ui/OrganicBackground.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/ui/PanelHeader.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/ui/StatCard.tsx",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/components/visual/BackgroundEngine.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/visual/FiguraVivaTree.tsx",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/components/visual/ParticlesLayer.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/components/visual/RainbowTree.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/contracts/user.contract.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/features/awareness-tree/components/experience/ExperienceClient.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/features/awareness-tree/components/pwa/ServiceWorkerRegistration.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/features/interactive-resources/awareness-sounds/audio/assetLoader.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/features/interactive-resources/awareness-sounds/audio/audioEngine.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/features/interactive-resources/pause-room/components/DurationPicker.tsx",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [
+        "src/features/interactive-resources/pause-room/components/HubView.tsx"
+      ],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/features/interactive-resources/pause-room/components/HubView.tsx",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [
+        "src/features/interactive-resources/pause-room/PauseRoomExperience.tsx"
+      ],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/features/interactive-resources/pause-room/components/index.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/features/interactive-resources/pause-room/components/PauseChoiceGrid.tsx",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [
+        "src/features/interactive-resources/pause-room/components/HubView.tsx"
+      ],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/features/interactive-resources/pause-room/components/PauseCompletion.tsx",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [
+        "src/features/interactive-resources/pause-room/PauseRoomExperience.tsx"
+      ],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/features/interactive-resources/pause-room/components/PauseControls.tsx",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [
+        "src/features/interactive-resources/pause-room/PauseRoomExperience.tsx"
+      ],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/features/interactive-resources/pause-room/components/PauseStage.tsx",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [
+        "src/features/interactive-resources/pause-room/PauseRoomExperience.tsx"
+      ],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/features/interactive-resources/pause-room/components/TimerDisplay.tsx",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [
+        "src/features/interactive-resources/pause-room/PauseRoomExperience.tsx"
+      ],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/features/interactive-resources/pause-room/index.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/features/interactive-resources/pause-room/PauseRoomExperience.tsx",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/features/interactive-resources/pause-room/practices/BreathingPractice.tsx",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [
+        "src/features/interactive-resources/pause-room/PauseRoomExperience.tsx"
+      ],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/features/interactive-resources/pause-room/practices/ListeningPractice.tsx",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [
+        "src/features/interactive-resources/pause-room/PauseRoomExperience.tsx"
+      ],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/features/interactive-resources/pause-room/practices/MovementPractice.tsx",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [
+        "src/features/interactive-resources/pause-room/PauseRoomExperience.tsx"
+      ],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/features/interactive-resources/pause-room/practices/ObservingPractice.tsx",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [
+        "src/features/interactive-resources/pause-room/PauseRoomExperience.tsx"
+      ],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/features/interactive-resources/pause-room/practices/SlowingPractice.tsx",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [
+        "src/features/interactive-resources/pause-room/PauseRoomExperience.tsx"
+      ],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/features/interactive-resources/pause-room/repository.ts",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [
+        "src/features/interactive-resources/pause-room/PauseRoomExperience.tsx"
+      ],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/features/interactive-resources/pause-room/types.ts",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [
+        "src/features/interactive-resources/pause-room/repository.ts",
+        "src/features/interactive-resources/pause-room/PauseRoomExperience.tsx",
+        "src/features/interactive-resources/pause-room/components/HubView.tsx",
+        "src/features/interactive-resources/pause-room/components/HubView.tsx",
+        "src/features/interactive-resources/pause-room/components/PauseChoiceGrid.tsx",
+        "src/features/interactive-resources/pause-room/components/PauseCompletion.tsx",
+        "src/features/interactive-resources/pause-room/components/PauseStage.tsx"
+      ],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/features/public-site/components/ConsultationCta.tsx",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/hooks/use-progress-sync.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/hooks/useCache.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/hooks/useGamification.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/hooks/useMediaQuery.ts",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/hooks/usePWAInstall.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/hooks/useUserSync.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/hooks/useViewTransitionRouter.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/lib/analytics/kpi-service.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/lib/analytics.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/lib/auth-server.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/lib/certificates/issuer.ts",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/lib/course-content/course-mirror.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/lib/course-content/revision.ts",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/lib/errors.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/lib/gamification/admin.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/lib/progress/progressService.ts",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/lib/repositories/enrollmentRepository.server.ts",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/lib/repositories/userRepository.server.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/lib/server-feature-flags.ts",
+      "exists": true,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "retain pending dynamic usage/test/contract review"
+    },
+    {
+      "file": "src/services/api.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/services/configService.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/services/interactionService.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/services/progressService.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/services/whatsappService.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/types/community.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    },
+    {
+      "file": "src/types/schema.ts",
+      "exists": false,
+      "reachableFromNext": false,
+      "importedBy": [],
+      "classification": "removed"
+    }
+  ],
+  "summary": {
+    "total": 205,
+    "removed": 157,
+    "retained": 48,
+    "reachable": 0
+  }
+}

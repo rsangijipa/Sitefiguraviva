@@ -41,3 +41,7 @@ Este bloqueio reconhece os formatos conhecidos e verifica coerência de configur
 ## Confirmação que falta
 
 Informar apenas: projeto antigo encontrado/excluído; categorias de credenciais revogadas e data; endereço de homologação com banco separado; banco recebedor Pix. Não é necessário enviar valores secretos.
+
+### Origem pública e atendimento — bloco 14
+
+Metadados, JSON-LD, sitemap, robots e cartão social usam NEXT_PUBLIC_BASE_URL, com fallback para https://www.institutofiguraviva.com.br quando ausente. Configure somente uma origem HTTPS, sem caminho, usuário, senha, parâmetros ou fragmentos; HTTP é permitido apenas em loopback. O redirecionamento de Auth continua exigindo sua configuração explícita. O e-mail confirmado pelo proprietário é contato@figuraviva.com.br, compartilhado pelo rodapé e pelo suporte do portal. Preview/homologação ainda precisam de política de indexação e verificação separada; configuração no código não comprova ajuste na Vercel.

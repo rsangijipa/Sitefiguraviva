@@ -52,7 +52,9 @@ export default function AdminLogin() {
         } = await supabase.auth.getSession();
         const sync = await ensureUserProfileAction(sbSession?.access_token);
         if (!sync.success) {
-          console.error("Admin profile sync failed:", sync.error);
+          throw new Error(
+            "Não foi possível conferir seu perfil. Tente entrar novamente.",
+          );
         }
 
         addToast("Login realizado com sucesso!", "success");
@@ -133,7 +135,16 @@ export default function AdminLogin() {
                 <div className="space-y-4 w-full">
                   <button
                     onClick={async () => {
-                      await signOut();
+                      try {
+                        await signOut();
+                      } catch (error) {
+                        addToast(
+                          error instanceof Error
+                            ? error.message
+                            : "Não foi possível sair.",
+                          "error",
+                        );
+                      }
                     }}
                     className="w-full bg-red-50 text-red-600 py-4 rounded-xl font-bold uppercase tracking-[0.2em] text-[10px] hover:bg-red-100 transition-all border border-red-100"
                   >

@@ -76,6 +76,10 @@ export async function getCertificate(
   // Logic remains mostly same but can be simplified if we rely on the natural key
   // I'll keep the recovery logic for now as it's useful
   try {
+    const actor = await verifySession();
+    if (!actor) return { error: "Unauthorized" };
+    if (!/^[A-Za-z0-9_-]{6,120}$/.test(certificateId))
+      return { error: "Certificado não encontrado" };
     const supabase = createSupabaseServiceClient();
     const { data, error } = await supabase
       .from("certificates")
@@ -84,6 +88,8 @@ export async function getCertificate(
       .maybeSingle();
     if (error) throw error;
     if (!data) return { error: "Certificado não encontrado" };
+    if (!actor.isAdmin && data.user_id !== actor.uid)
+      return { error: "Forbidden" };
     const certificate = await getCertificateFromRepo(
       data.user_id,
       data.course_id,

@@ -85,6 +85,17 @@ export async function registerForCourseAction(
       };
     }
 
+    const emailLimit = await rateLimit(
+      email,
+      "signup-destination",
+      RateLimitPresets.SIGNUP_ATTEMPT,
+    );
+    if (!emailLimit.allowed)
+      return {
+        success: false,
+        error: "Aguarde antes de solicitar outra confirmação para este e-mail.",
+      };
+
     const supabase = createSupabaseServiceClient();
 
     // The course gate: no open course, no account.

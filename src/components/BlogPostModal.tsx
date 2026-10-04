@@ -19,7 +19,7 @@ export default function BlogPostModal({
   if (!post) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={onClose} ariaLabel="Artigo do blog">
       <ModalContent size="lg" className="bg-paper p-0">
         <div className="relative h-full flex flex-col">
           {/* Close Button - Premium Style */}

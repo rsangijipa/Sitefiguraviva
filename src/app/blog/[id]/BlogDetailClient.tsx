@@ -5,9 +5,15 @@ import { ArrowLeft, Clock, Share2, Heart } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { getImageSrc } from "@/lib/imageUtils";
-import { SafeHtml } from "@/components/SafeHtml";
+import type { ReactNode } from "react";
 
-export default function BlogDetailClient({ post }: { post: any }) {
+export default function BlogDetailClient({
+  post,
+  editorialContent,
+}: {
+  post: any;
+  editorialContent: ReactNode;
+}) {
   const router = useRouter();
 
   return (
@@ -55,24 +61,7 @@ export default function BlogDetailClient({ post }: { post: any }) {
               </p>
             )}
 
-            <SafeHtml
-              html={
-                post.content ||
-                `
-                            <p>A Gestalt-Terapia nos convida a uma postura de curiosidade radical. Não se trata de explicar o fenômeno, mas de habitá-lo.
-                            Quando removemos as camadas de interpretação pré-concebida, o que resta é o encontro puro, a fronteira de contato onde o 'eu' e o 'outro' se co-constroem.</p>
-                            
-                            <div class="bg-primary/5 p-12 rounded-[2.5rem] border border-primary/5 my-16">
-                                <h3 class="font-serif text-3xl text-primary mb-6">O Conceito de Fronteira</h3>
-                                <p>É nesta zona de tensão que a vida acontece. Nem totalmente fundidos, nem totalmente isolados.
-                                A saúde mental, nesta perspectiva, é a fluidez desta fronteira – a capacidade de trocar com o ambiente sem perder a própria integridade.</p>
-                            </div>
-                            
-                            <p>Continuar este estudo exige uma disposição para o desaponto – o desaponto das certezas.
-                            Somente no vazio fértil é que o novo pode emergir.</p>
-                        `
-              }
-            />
+            {editorialContent}
           </div>
 
           <footer className="mt-24 pt-12 border-t border-primary/5">

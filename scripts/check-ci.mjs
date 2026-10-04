@@ -53,6 +53,7 @@ try {
         "scripts/upload-course-covers-lib.test.mjs",
         "scripts/e2e-preflight.test.mjs",
         "scripts/supabase-environment.test.mjs",
+        "scripts/check-release-secrets.test.mjs",
       ],
       unit: [packageBin("jest", "jest"), "--runInBand"],
       types: [

@@ -106,3 +106,28 @@ it("delegates Pix approval to bank reconciliation", async () => {
   expect(pix).toHaveBeenCalledWith("student", "course", undefined);
   expect(rpc).not.toHaveBeenCalled();
 });
+
+it.each([null, "stripe", "unknown"])(
+  "rejects unsupported approval method %s before mutation",
+  async (method) => {
+    read.mockResolvedValue({ data: { payment_method: method }, error: null });
+    expect(await approveEnrollment("student", "course")).toMatchObject({
+      success: false,
+    });
+    expect(rpc).not.toHaveBeenCalled();
+    expect(pix).not.toHaveBeenCalled();
+  },
+);
+it.each(["manual", "free"])(
+  "grants %s access through the database guard",
+  async (method) => {
+    read.mockResolvedValue({ data: { payment_method: method }, error: null });
+    expect(await approveEnrollment("student", "course")).toMatchObject({
+      success: true,
+    });
+    expect(rpc).toHaveBeenCalledWith(
+      "set_enrollment_admin_state",
+      expect.objectContaining({ p_status: "active" }),
+    );
+  },
+);

@@ -476,6 +476,34 @@ export default function CourseEditorClient({
                             <option value="advanced">Avançado</option>
                           </select>
                         </div>
+                        <div className="col-span-2 grid gap-4 md:grid-cols-2">
+                          {[
+                            ["date", "Datas dos encontros"],
+                            ["location", "Local ou plataforma"],
+                            ["workload", "Carga horária (minutos)"],
+                          ].map(([key, label]) => (
+                            <label key={key} className="text-sm">
+                              {label}
+                              <input
+                                className="block w-full p-3 border rounded-xl"
+                                type={key === "workload" ? "number" : "text"}
+                                min={key === "workload" ? 0 : undefined}
+                                step={key === "workload" ? 1 : undefined}
+                                value={course[key] ?? ""}
+                                onChange={(e) =>
+                                  updateCourse({
+                                    [key]:
+                                      key === "workload"
+                                        ? e.target.value === ""
+                                          ? undefined
+                                          : Number(e.target.value)
+                                        : e.target.value,
+                                  })
+                                }
+                              />
+                            </label>
+                          ))}
+                        </div>
                         <div className="space-y-2 col-span-2">
                           <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400 pl-1">
                             Frequência

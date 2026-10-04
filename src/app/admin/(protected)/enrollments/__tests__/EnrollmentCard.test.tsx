@@ -77,3 +77,20 @@ it("handles thrown action errors", async () => {
     ),
   );
 });
+
+it.each(["pix", "stripe", null, "unknown"])(
+  "does not offer ordinary approval for %s",
+  (method) => {
+    render(
+      <EnrollmentCard
+        {...props}
+        enrollment={{
+          ...props.enrollment,
+          status: "pending_approval",
+          paymentMethod: method,
+        }}
+      />,
+    );
+    expect(screen.queryByTitle("Aprovar Matrícula")).not.toBeInTheDocument();
+  },
+);

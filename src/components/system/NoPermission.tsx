@@ -3,16 +3,26 @@
 import { Lock, LogOut } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter, usePathname } from "next/navigation";
+import { useToast } from "@/context/ToastContext";
+import { usePathname } from "next/navigation";
 
 export function NoPermission() {
   const { signOut } = useAuth();
-  const router = useRouter();
+  const { addToast } = useToast();
   const pathname = usePathname();
 
   const handleSwitchAccount = async () => {
     // Redirect to auth preserving the current intent (admin page)
-    await signOut(`/auth?next=${encodeURIComponent(pathname)}`);
+    try {
+      await signOut(`/auth?next=${encodeURIComponent(pathname)}`);
+    } catch (error) {
+      addToast(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível trocar de conta.",
+        "error",
+      );
+    }
   };
 
   return (

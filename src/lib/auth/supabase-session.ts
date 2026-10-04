@@ -36,6 +36,34 @@ export async function getSupabaseSessionClaims(
 
     if (userError || !user) return null;
 
+    if (process.env.AUTH_SESSION_CHECK_MODE === "enforce") {
+      // Parse only after Auth verified the token. Existence is checked in auth.sessions;
+      // JWT signature/expiry alone cannot detect logout or an administrative block.
+      let sessionId: string;
+      try {
+        sessionId = JSON.parse(
+          Buffer.from(accessToken.split(".")[1], "base64url").toString("utf8"),
+        ).session_id;
+      } catch {
+        return null;
+      }
+      if (
+        typeof sessionId !== "string" ||
+        !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+          sessionId,
+        )
+      )
+        return null;
+      const { data: activeSession, error: sessionError } = await supabase.rpc(
+        "is_auth_session_active",
+        {
+          p_user: user.id,
+          p_session: sessionId,
+        },
+      );
+      if (sessionError || activeSession !== true) return null;
+    }
+
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select("role, is_active")

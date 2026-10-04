@@ -1,0 +1,117 @@
+{
+  "date": "2026-10-04",
+  "baseCommit": "5c5cceb0755ce099e79a41101438bfef8370ee48",
+  "runtime": "v26.5.0",
+  "scope": "Clean private snapshot, fake credentials and read-only loopback API; no deployment or live financial transaction",
+  "source": {
+    "files": 1097,
+    "sha256": "816ee36b9eccb92b0ce651e6cd9c58e24f643514bdbf5cb022ebe29cf482ad83",
+    "rootMatchesSnapshot": true
+  },
+  "checks": [
+    {
+      "check": "lint",
+      "exitCode": 0
+    },
+    {
+      "check": "scripts",
+      "exitCode": 0
+    },
+    {
+      "check": "unit",
+      "exitCode": 0
+    },
+    {
+      "check": "types",
+      "exitCode": 0
+    },
+    {
+      "check": "build",
+      "exitCode": 0
+    }
+  ],
+  "tests": {
+    "appPassed": 614,
+    "appSkipped": 7,
+    "suitesPassed": 133,
+    "suitesSkipped": 1,
+    "scriptsPassed": 32,
+    "browserPassed": 7
+  },
+  "browser": {
+    "exitCode": 0,
+    "seconds": 20,
+    "browser": "Local Chromium 153; CI uses Playwright-pinned Chromium",
+    "fixture": "Read-only local HTTP, fake credentials; no remote calls"
+  },
+  "http": [
+    {
+      "name": "same-origin logout",
+      "status": 200
+    },
+    {
+      "name": "cross-origin logout",
+      "status": 403
+    },
+    {
+      "name": "missing-origin logout",
+      "status": 403
+    },
+    {
+      "name": "checkout-subscription",
+      "status": 503
+    },
+    {
+      "name": "customer-portal",
+      "status": 503
+    },
+    {
+      "name": "webhook",
+      "status": 503
+    }
+  ],
+  "audit": {
+    "production": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "includingDevelopment": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 36,
+      "critical": 0,
+      "total": 36
+    },
+    "developmentAdvisory": "https://github.com/advisories/GHSA-vfj7-8cjw-p6xm"
+  },
+  "secrets": {
+    "scope": "release and reachable HEAD history",
+    "findings": []
+  },
+  "supabase": {
+    "sessionMigration": "20261004163454_block_17_session_revocation.sql",
+    "persistentApplied": false,
+    "approval": "Pending explicit authorization after auto-review rejection",
+    "flag": "profile/default; enforce disabled",
+    "rollbackChecks": {
+      "lifecycleAndPermissions": 6,
+      "authenticatedRls": 3
+    },
+    "historicalPublicPdfCount": 3
+  },
+  "priorAttempts": {
+    "initialBuild": 0,
+    "initialUnit": "Sanitizer ESM incompatibility, fixed via transpilePackages",
+    "initialBrowser": "Theme initializer script blocked by CSP; removed and represented by server HTML attributes"
+  },
+  "limitations": [
+    "Node 24/Linux CI and Vercel status verified separately after push",
+    "Auth, SMTP, bank, role-based E2E and recovery require separate homologation",
+    "Production audit zero does not mean all development dependencies are clear"
+  ]
+}

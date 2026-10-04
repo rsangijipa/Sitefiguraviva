@@ -20,7 +20,7 @@ export default function LegalModal({ isOpen, onClose, type }: LegalModalProps) {
   const Icon = type === "privacy" ? ShieldCheck : FileText;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={onClose} ariaLabel="Informações legais">
       <ModalContent
         size="lg"
         className="bg-paper overflow-hidden flex flex-col max-h-[90vh]"

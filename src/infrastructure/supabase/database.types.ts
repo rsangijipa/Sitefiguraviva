@@ -927,6 +927,14 @@ export interface Database {
         };
         Returns: Json;
       };
+      is_auth_session_active: {
+        Args: { p_user: string; p_session: string };
+        Returns: boolean;
+      };
+      current_auth_session_is_active: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
       profile_has_dependencies: {
         Args: { p_target: string };
         Returns: boolean;

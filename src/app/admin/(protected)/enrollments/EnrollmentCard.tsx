@@ -152,7 +152,7 @@ export function EnrollmentCard({
 
         <div className="flex items-center gap-1">
           {enrollment.status === "pending_approval" &&
-            enrollment.paymentMethod !== "pix" && (
+            ["manual", "free"].includes(enrollment.paymentMethod) && (
               <Button
                 size="icon"
                 variant="ghost"

@@ -134,3 +134,6 @@ test_smoke*
 public/sw.js.map
 public/workbox-*.js
 public/workbox-*.js.map
+
+!/scripts/check-release-secrets.mjs
+!/scripts/check-release-secrets.test.mjs

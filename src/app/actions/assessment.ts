@@ -11,6 +11,7 @@ import {
 } from "@/types/assessment";
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { awardCanonicalCompletion } from "@/features/gamification/application/awardCanonicalGamification.server";
+import { assertCanAccessCourse } from "@/lib/auth/access-gate";
 
 // Helper: Verify Auth
 async function getAuthenticatedUser() {
@@ -26,12 +27,29 @@ async function getAuthenticatedUser() {
   }
 }
 
+async function getReadableAssessment(uid: string, assessmentId: string) {
+  if (
+    typeof assessmentId !== "string" ||
+    !assessmentId.trim() ||
+    assessmentId.length > 200
+  )
+    throw new Error("Assessment not found");
+  const snapshot = await db.collection("assessments").doc(assessmentId).get();
+  if (!snapshot.exists) throw new Error("Assessment not found");
+  const assessment = snapshot.data() as AssessmentDoc;
+  if (assessment.status !== "published" || !assessment.courseId)
+    throw new Error("Assessment unavailable");
+  await assertCanAccessCourse(uid, assessment.courseId);
+  return assessment;
+}
+
 // Action: Save Draft (Autosave)
 export async function saveDraft(
   assessmentId: string,
   answers: Record<string, any>,
 ) {
   const uid = await getAuthenticatedUser();
+  await getReadableAssessment(uid, assessmentId);
   const submissionId = `${uid}_${assessmentId}_draft`; // Simple ID strategy for draft
 
   // Upsert draft
@@ -62,13 +80,7 @@ export async function submitAssessment(
   const uid = await getAuthenticatedUser();
 
   // 1. Fetch Source of Truth (Assessment with Correct Answers)
-  const assessmentDoc = await db
-    .collection("assessments")
-    .doc(assessmentId)
-    .get();
-  if (!assessmentDoc.exists) throw new Error("Assessment not found");
-
-  const assessment = assessmentDoc.data() as AssessmentDoc;
+  const assessment = await getReadableAssessment(uid, assessmentId);
 
   // 2. Grading Logic
   let totalScore = 0;

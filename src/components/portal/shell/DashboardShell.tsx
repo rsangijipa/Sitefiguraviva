@@ -29,7 +29,14 @@ const QUICK_LINKS = [
   {
     label: "Meditação & Áudio",
     href: ROUTES.audio,
-    keywords: ["audio", "meditacao", "awareness", "relaxamento", "fritz perls", "presenca"],
+    keywords: [
+      "audio",
+      "meditacao",
+      "awareness",
+      "relaxamento",
+      "fritz perls",
+      "presenca",
+    ],
   },
   {
     label: "Certificados",
@@ -193,14 +200,14 @@ export const DashboardShell = ({ children }: { children: React.ReactNode }) => {
         </header>
 
         {/* Page Content */}
-        <main
+        <div
           className="flex-1 overflow-y-auto p-4 pb-24 lg:p-8 scroll-smooth"
           data-lenis-prevent
         >
           <div className="max-w-7xl mx-auto space-y-8 animate-fade-in-up">
             {children}
           </div>
-        </main>
+        </div>
 
         <nav
           aria-label="Navegação principal do portal"

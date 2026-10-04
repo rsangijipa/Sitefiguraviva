@@ -1,10 +1,11 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
-import type { User as SupabaseUser } from "@supabase/supabase-js";
+import { createContext, useContext, useEffect, useState, useRef } from "react";
+import type { User as SupabaseUser, Session } from "@supabase/supabase-js";
 import { createSupabaseBrowserClient } from "@/infrastructure/supabase/client";
 import { UserRole, UserStatus } from "@/types/user";
 import { useRouter } from "next/navigation";
+import { createSessionSynchronizer } from "@/lib/auth/session-sync";
 import { logger } from "@/lib/logger";
 import { requestPasswordResetAction } from "@/app/actions/password-reset";
 import { normalizeUserRole } from "@/lib/auth/authService";
@@ -18,56 +19,7 @@ export interface User {
   user_metadata?: Record<string, any>;
 }
 
-/**
- * Module scope so the value survives re-renders and route changes: the cookie
- * only needs rewriting when the access token itself changed, not on every
- * auth-state notification.
- */
-let lastSyncedToken: string | null = null;
-
-// `signIn()` and the `onAuthStateChange` listener both call this with the
-// same freshly-minted token right after login. Without tracking the in-flight
-// request, the second caller would see `lastSyncedToken` already set (by the
-// first caller, synchronously, before its fetch even resolves) and return
-// immediately as if the cookie were already written — then `handleSuccess`
-// would call a server action that reads that cookie before it actually
-// exists, failing with "Unauthenticated". Concurrent callers now await the
-// same underlying request instead of racing past it.
-let pendingSync: { token: string; promise: Promise<void> } | null = null;
-
-async function syncServerSession(accessToken: string): Promise<void> {
-  if (accessToken === lastSyncedToken) return;
-  if (pendingSync?.token === accessToken) return pendingSync.promise;
-
-  const promise = (async () => {
-    try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ accessToken }),
-      });
-
-      if (response.ok) {
-        lastSyncedToken = accessToken;
-      } else {
-        throw new Error(
-          "Não foi possível iniciar sua sessão. Tente novamente.",
-        );
-      }
-      // Leave lastSyncedToken untouched on failure so a later event retries.
-    } catch (error) {
-      // Leave lastSyncedToken untouched so a later event retries.
-      throw error;
-    } finally {
-      if (pendingSync?.token === accessToken) {
-        pendingSync = null;
-      }
-    }
-  })();
-
-  pendingSync = { token: accessToken, promise };
-  return promise;
-}
+const syncServerSession = createSessionSynchronizer();
 
 interface AuthContextType {
   user: User | null;
@@ -142,141 +94,142 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  const profileGeneration = useRef(0);
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
 
   useEffect(() => {
-    const fetchProfileAndSetState = async (
-      currentUser: SupabaseUser | null,
-    ) => {
-      if (currentUser) {
-        try {
-          logger.info("[AuthContext] User logged in:", currentUser.email);
-
-          // Fetch profile from Supabase
-          const { data: profile, error: profileError } = await supabase
-            .from("profiles")
-            .select("role, is_active, display_name, photo_url")
-            .eq("id", currentUser.id)
-            .maybeSingle();
-          if (profileError) throw profileError;
-
-          const mappedUser = mapSupabaseUser(currentUser, profile);
-          setUser(mappedUser);
-
-          if (!profile) {
-            // OAuth can need server-side profile bootstrap. Identity alone
-            // must not be treated as an active or privileged app profile.
-            setRole(null);
-            setStatus(null);
-            setTenantId(null);
-            setIsAdmin(false);
-            setLoading(false);
-            return;
-          }
-
-          const userRole = normalizeUserRole(profile.role);
-          const isActive = profile.is_active === true;
-
-          const userStatus: UserStatus = !isActive ? "disabled" : "active";
-
-          // SECURITY GUARD: Force Logout if Disabled
-          if (userStatus === "disabled") {
-            logger.warn("Account disabled. Forcing logout.");
-            await supabase.auth.signOut();
-            setUser(null);
-            setRole(null);
-            setStatus(null);
-            setIsAdmin(false);
-            setLoading(false);
-            router.push("/admin/login?error=disabled");
-            return;
-          }
-
-          const resolvedTenant =
-            (currentUser.user_metadata?.tenantId as string) || "viva";
-          setTenantId(resolvedTenant);
-
-          setRole(userRole);
-          setStatus(userStatus);
-          setIsAdmin(userRole === "admin");
-
-          logger.info("[AuthContext] Final state:", {
-            role: userRole,
-            status: userStatus,
-            tenantId: resolvedTenant,
-            isAdmin: userRole === "admin",
-          });
-        } catch (error) {
-          logger.error("Error fetching user data:", error);
-          setUser(mapSupabaseUser(currentUser));
-          setRole(null);
-          setStatus(null);
-          setTenantId(null);
-          setIsAdmin(false);
-        }
-      } else {
-        setUser(null);
-        setRole(null);
-        setStatus(null);
-        setTenantId(null);
-        setIsAdmin(false);
-      }
-
-      setLoading(false);
+    const generationState = profileGeneration;
+    let disposed = false;
+    let authEventReceived = false;
+    let lastIdentity: string | null | undefined;
+    const timers = new Set<ReturnType<typeof setTimeout>>();
+    const clearIdentity = () => {
+      setUser(null);
+      setRole(null);
+      setStatus(null);
+      setTenantId(null);
+      setIsAdmin(false);
     };
-
-    // Initialize session check
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      fetchProfileAndSetState(session?.user ?? null);
-      if (session?.access_token) {
-        void syncServerSession(session.access_token).catch((error) =>
-          logger.warn("Session sync failed", error),
-        );
+    const applySession = async (
+      session: Session | null,
+      generation: number,
+      cookieSync: Promise<void>,
+    ) => {
+      const current = () => !disposed && generationState.current === generation;
+      const currentUser = session?.user ?? null;
+      if (!current()) return;
+      if (!currentUser) {
+        clearIdentity();
+        setLoading(false);
+        return;
       }
-    });
-
-    // Listen for auth state changes
+      try {
+        await cookieSync;
+        if (!current()) return;
+        const { data: profile, error } = await supabase
+          .from("profiles")
+          .select("role, is_active, display_name, photo_url")
+          .eq("id", currentUser.id)
+          .maybeSingle();
+        if (!current()) return;
+        if (error) throw error;
+        if (profile && profile.is_active !== true) {
+          clearIdentity();
+          setLoading(false);
+          await syncServerSession(null);
+          if (!current()) return;
+          const { error: logoutError } = await supabase.auth.signOut();
+          if (logoutError) throw logoutError;
+          router.push("/auth?error=disabled");
+          return;
+        }
+        setUser(mapSupabaseUser(currentUser, profile));
+        const resolvedRole = profile ? normalizeUserRole(profile.role) : null;
+        setRole(resolvedRole);
+        setStatus(profile ? "active" : null);
+        setTenantId(profile ? "viva" : null);
+        setIsAdmin(resolvedRole === "admin");
+      } catch (error) {
+        if (!current()) return;
+        logger.error("Error fetching user data:", error);
+        clearIdentity();
+      } finally {
+        if (current()) setLoading(false);
+      }
+    };
+    const acceptSession = (session: Session | null) => {
+      const generation = ++generationState.current;
+      // Cookie writes enter the queue synchronously; SDK calls wait for the callback to finish.
+      const cookieSync = syncServerSession(session?.access_token ?? null);
+      void cookieSync.catch((error) =>
+        logger.warn("Session sync failed", error),
+      );
+      const identity = session?.user.id ?? null;
+      if (lastIdentity !== identity) {
+        clearIdentity();
+        setLoading(true);
+        lastIdentity = identity;
+      }
+      const timer = setTimeout(() => {
+        timers.delete(timer);
+        void applySession(session, generation, cookieSync);
+      }, 0);
+      timers.add(timer);
+    };
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      fetchProfileAndSetState(session?.user ?? null);
-
-      // Keep the httpOnly cookie in step with the client session. Supabase
-      // refreshes the access token in the background; without this the cookie
-      // kept the token minted at sign-in, so every server-side check started
-      // failing about an hour later while the client still looked signed in.
-      if (session?.access_token) {
-        void syncServerSession(session.access_token).catch((error) =>
-          logger.warn("Session sync failed", error),
-        );
-      } else if (event === "SIGNED_OUT") {
-        lastSyncedToken = null;
-        void fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
-      }
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      authEventReceived = true;
+      acceptSession(session);
     });
-
+    void supabase.auth
+      .getSession()
+      .then(({ data: { session }, error }) => {
+        if (disposed || authEventReceived) return;
+        if (error) {
+          clearIdentity();
+          setLoading(false);
+          logger.warn("Session initialization failed", error);
+          return;
+        }
+        acceptSession(session);
+      })
+      .catch((error) => {
+        if (!disposed && !authEventReceived) {
+          clearIdentity();
+          setLoading(false);
+          logger.warn("Session initialization failed", error);
+        }
+      });
     return () => {
+      disposed = true;
+      ++generationState.current;
+      timers.forEach(clearTimeout);
       subscription.unsubscribe();
     };
   }, [router, supabase]);
 
   const signOut = async (redirectPath: string = "/") => {
-    try {
-      await supabase.auth.signOut();
-      lastSyncedToken = null;
-      await fetch("/api/auth/logout", { method: "POST" });
-
-      setRole(null);
-      setStatus(null);
-      setIsAdmin(false);
-      setUser(null);
-
-      router.refresh();
-      router.push(redirectPath);
-    } catch (error) {
-      logger.error("Error signing out:", error);
-    }
+    ++profileGeneration.current;
+    setUser(null);
+    setRole(null);
+    setStatus(null);
+    setTenantId(null);
+    setIsAdmin(false);
+    // Clear the server cookie even when the Auth SDK cannot reach the provider.
+    const [cookieResult, authResult] = await Promise.allSettled([
+      syncServerSession(null),
+      supabase.auth.signOut(),
+    ]);
+    setLoading(false);
+    if (cookieResult.status === "rejected") throw cookieResult.reason;
+    if (authResult.status === "rejected" || authResult.value.error)
+      throw new Error(
+        "A sessão local foi encerrada, mas a autenticação não confirmou a saída. Tente novamente.",
+      );
+    router.refresh();
+    router.push(redirectPath);
   };
 
   const signIn = async (email: string, password: string) => {
@@ -308,32 +261,38 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     displayName?: string;
     photoURL?: string;
   }) => {
-    if (user) {
-      await supabase.auth.updateUser({
-        data: {
-          display_name: profile.displayName,
-          avatar_url: profile.photoURL,
-        },
-      });
-
-      await supabase
-        .from("profiles")
-        .update({
-          display_name: profile.displayName,
-          photo_url: profile.photoURL,
-        })
-        .eq("id", user.id);
-
-      setUser((prev) =>
-        prev
-          ? {
-              ...prev,
-              displayName: profile.displayName ?? prev.displayName,
-              photoURL: profile.photoURL ?? prev.photoURL,
-            }
-          : null,
+    if (!user) throw new Error("Entre na sua conta antes de alterar o perfil.");
+    const uid = user.id;
+    const generation = profileGeneration.current;
+    const updates = {
+      ...(profile.displayName !== undefined
+        ? { display_name: profile.displayName }
+        : {}),
+      ...(profile.photoURL !== undefined
+        ? { photo_url: profile.photoURL }
+        : {}),
+    };
+    const { data: saved, error: profileError } = await supabase
+      .from("profiles")
+      .update(updates)
+      .eq("id", uid)
+      .select("id")
+      .maybeSingle();
+    if (profileError || !saved)
+      throw new Error("Não foi possível salvar seu perfil. Tente novamente.");
+    if (generation !== profileGeneration.current)
+      throw new Error(
+        "Sua conta mudou durante a atualização. Confira o perfil novamente.",
       );
-    }
+    setUser((prev) =>
+      prev?.id === uid
+        ? {
+            ...prev,
+            displayName: profile.displayName ?? prev.displayName,
+            photoURL: profile.photoURL ?? prev.photoURL,
+          }
+        : prev,
+    );
   };
 
   const resetPassword = async (email: string) => {

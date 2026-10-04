@@ -1,10 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
+import {
+  isStripeTestBillingEnabled,
+  STRIPE_DISABLED_MESSAGE,
+} from "@/lib/billing-mode";
 import { getStripe } from "@/lib/stripe";
 import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import { getBearerSupabaseSessionClaims } from "@/lib/auth/supabase-session";
 import { env } from "@/config/env";
 
 export async function POST(req: NextRequest) {
+  if (!isStripeTestBillingEnabled())
+    return NextResponse.json(
+      { error: STRIPE_DISABLED_MESSAGE },
+      { status: 503 },
+    );
   try {
     const stripe = getStripe();
     const claims = await getBearerSupabaseSessionClaims(req);
@@ -39,7 +48,7 @@ export async function POST(req: NextRequest) {
     }
 
     const isAvailable =
-      courseData.status === "open" || courseData.is_published === true;
+      courseData.status === "open" && courseData.is_published === true;
     if (!isAvailable) {
       return NextResponse.json(
         { error: "Course is not available" },

@@ -10,6 +10,8 @@ import { requireAdmin } from "@/lib/auth/server";
 import { z } from "zod";
 import {
   upsertPublicPage,
+  patchPublicConfig,
+  getPublicPage,
   type PublicPageKey,
 } from "@/features/public-site/infrastructure/supabasePublicPagesRepository.server";
 
@@ -96,10 +98,14 @@ export async function updateSiteSettings(key: PublicPageKey, data: unknown) {
       throw new Error("Seção de configurações indisponível.");
     const validatedData =
       settingsSchemas[key as keyof typeof settingsSchemas].parse(data);
-    const updatedAt = await upsertPublicPage(key, {
+    const payload = {
       ...validatedData,
       updatedBy: user.email ?? "admin",
-    });
+    };
+    const updatedAt =
+      key === "config"
+        ? await patchPublicConfig(payload)
+        : await upsertPublicPage(key, payload);
 
     revalidatePath("/");
     revalidatePath("/", "layout");
@@ -116,6 +122,83 @@ export async function updateSiteSettings(key: PublicPageKey, data: unknown) {
       success: false,
       error:
         error instanceof z.ZodError ? error.issues[0]?.message : error.message,
+    };
+  }
+}
+
+const googleSchema = z.object({
+  calendarId: z.string().trim().max(500),
+  driveFolderId: z
+    .string()
+    .trim()
+    .max(200)
+    .regex(/^[\w-]*$/, "ID da pasta inválido."),
+  formsUrl: z
+    .string()
+    .trim()
+    .max(2000)
+    .refine((value) => {
+      if (!value) return true;
+      try {
+        const url = new URL(value);
+        return (
+          url.protocol === "https:" &&
+          !url.username &&
+          !url.password &&
+          (url.hostname === "forms.gle" ||
+            (url.hostname === "docs.google.com" &&
+              url.pathname.startsWith("/forms/")))
+        );
+      } catch {
+        return false;
+      }
+    }, "Informe um link HTTPS do Google Forms."),
+  youtubeId: z
+    .string()
+    .trim()
+    .max(200)
+    .regex(/^[\w@-]*$/, "ID do YouTube inválido."),
+});
+const emptyGoogle = {
+  calendarId: "",
+  driveFolderId: "",
+  formsUrl: "",
+  youtubeId: "",
+};
+
+export async function getGoogleSettings() {
+  await requireAdmin();
+  const config = await getPublicPage<Record<string, unknown>>(
+    "config",
+    emptyGoogle,
+  );
+  return Object.fromEntries(
+    Object.keys(emptyGoogle).map((key) => [
+      key,
+      typeof config[key] === "string" ? config[key] : "",
+    ]),
+  ) as typeof emptyGoogle;
+}
+
+export async function updateGoogleSettings(data: unknown) {
+  try {
+    const actor = await requireAdmin();
+    const values = googleSchema.parse(data);
+    const updatedAt = await patchPublicConfig({
+      ...values,
+      updatedBy: actor.email ?? "admin",
+    });
+    revalidatePath("/", "layout");
+    revalidatePath("/admin/google");
+    revalidatePath("/admin/settings");
+    return { success: true, updatedAt };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof z.ZodError
+          ? error.issues[0]?.message
+          : "Não foi possível salvar as integrações. Tente novamente.",
     };
   }
 }

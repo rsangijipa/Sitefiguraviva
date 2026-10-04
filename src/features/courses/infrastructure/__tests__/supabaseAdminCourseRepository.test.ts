@@ -187,3 +187,62 @@ it("normalizes historical photo-only mediator records before saving an uploaded 
     }),
   );
 });
+
+it("persists commercial schedule and restores canonical frequency over legacy data", async () => {
+  await createAdminCourse({
+    frequency: "Quinzenal",
+    date: "A confirmar",
+    location: "Online",
+    workload: 120,
+    syllabus: ["Tema"],
+  });
+  expect(query.insert).toHaveBeenCalledWith(
+    expect.objectContaining({
+      workload_minutes: 120,
+      details: expect.objectContaining({
+        frequency: "Quinzenal",
+        date: "A confirmar",
+        location: "Online",
+        syllabus: ["Tema"],
+      }),
+    }),
+  );
+  query.maybeSingle.mockResolvedValue({
+    data: {
+      id: "course",
+      details: { frequency: "Atual" },
+      legacy_payload: { frequency: "Antiga" },
+    },
+    error: null,
+  });
+  expect(await getAdminCourse("course")).toMatchObject({ frequency: "Atual" });
+});
+it("preserves existing details when updating only frequency or syllabus", async () => {
+  query.maybeSingle.mockResolvedValue({
+    data: {
+      id: "course",
+      details: { date: "Data existente", mediators: [mediator] },
+    },
+    error: null,
+  });
+  await updateAdminCourse("course", {
+    frequency: "Mensal",
+    syllabus: ["Novo"],
+  });
+  expect(query.update).toHaveBeenCalledWith(
+    expect.objectContaining({
+      details: expect.objectContaining({
+        date: "Data existente",
+        mediators: [mediator],
+        frequency: "Mensal",
+        syllabus: ["Novo"],
+      }),
+    }),
+  );
+});
+it("rejects nonintegral workloads", async () => {
+  await expect(createAdminCourse({ workload: 1.5 })).rejects.toThrow(
+    "carga horária",
+  );
+  expect(query.insert).not.toHaveBeenCalled();
+});

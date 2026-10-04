@@ -1,3 +1,5 @@
+import { SafeHtmlServer } from "@/components/SafeHtml.server";
+import { publicContentPath } from "@/lib/public-site-url";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import BlogDetailClient from "./BlogDetailClient";
@@ -30,15 +32,16 @@ export async function generateMetadata({
     const title = data?.title || "Blog";
     const description =
       data?.excerpt || data?.subtitle || "Conteudo do Instituto Figura Viva";
-    const image = data?.image || "/og-default.jpg";
+    const image = data?.image || "/opengraph-image";
 
     return {
       title,
       description,
       alternates: {
-        canonical: `/blog/${data?.slug || id}`,
+        canonical: publicContentPath("blog", docSnap),
       },
       openGraph: {
+        url: publicContentPath("blog", docSnap),
         title,
         description,
         type: "article",
@@ -78,7 +81,12 @@ async function BlogContent({ id }: { id: string }) {
       updated_at: data?.updated_at ?? null,
     };
 
-    return <BlogDetailClient post={post} />;
+    return (
+      <BlogDetailClient
+        post={post}
+        editorialContent={<SafeHtmlServer html={post.content} />}
+      />
+    );
   } catch (error) {
     console.error("❌ Blog Fetch Error:", error);
     notFound();

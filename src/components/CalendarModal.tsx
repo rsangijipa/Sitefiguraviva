@@ -162,7 +162,7 @@ export default function CalendarModal({
   );
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={onClose} ariaLabel="Calendário de cursos">
       <ModalContent className="max-h-[85vh]">
         <ModalHeader>{headerTitle}</ModalHeader>
         <ModalBody>

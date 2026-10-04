@@ -36,7 +36,7 @@ export function AdminPageShell({
   return (
     <div className={cn("flex flex-col animate-fade-in", className)}>
       {/* Main Content */}
-      <main
+      <div
         className={cn(
           "w-full flex-1 flex flex-col min-h-0",
           !className?.includes("max-w-") && "max-w-7xl",
@@ -70,7 +70,7 @@ export function AdminPageShell({
 
         {/* Dynamic Content */}
         <div className="flex-1 flex flex-col min-h-0 space-y-4">{children}</div>
-      </main>
+      </div>
     </div>
   );
 }

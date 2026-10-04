@@ -72,6 +72,11 @@ export interface CourseDoc {
   instructorTitle?: string;
   workload?: number;
   duration?: string;
+  date?: string;
+  time?: string;
+  location?: string;
+  format?: string | string[];
+  introVideoUrl?: string;
   frequency?: string; // "2x por semana", "Encontros quinzenais", etc.
   level?: string;
   category?: string;
@@ -93,6 +98,12 @@ export interface CourseDoc {
   // Metadata
   tags?: string[];
   details?: {
+    frequency?: string;
+    date?: string;
+    time?: string;
+    location?: string;
+    format?: string | string[];
+    introVideoUrl?: string;
     mediators?: Mediator[];
     syllabus?: string[];
     intro?: string; // Short intro text

@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/context/ToastContext";
 import { useAuth } from "@/context/AuthContext";
 import { ROUTES } from "@/lib/routes";
 import { gamificationService } from "@/services/gamificationService";
@@ -124,6 +125,7 @@ const NavItem = ({
 export const SidebarNav = ({ className }: { className?: string }) => {
   const pathname = usePathname();
   const { user, signOut } = useAuth();
+  const { addToast } = useToast();
 
   const NAV_ITEMS = [
     { label: "Visão Geral", icon: LayoutDashboard, href: ROUTES.portal },
@@ -218,7 +220,16 @@ export const SidebarNav = ({ className }: { className?: string }) => {
         </Link>
 
         <button
-          onClick={() => signOut()}
+          onClick={() =>
+            void signOut().catch((error) =>
+              addToast(
+                error instanceof Error
+                  ? error.message
+                  : "Não foi possível sair. Tente novamente.",
+                "error",
+              ),
+            )
+          }
           className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-stone-500 hover:bg-red-50 hover:text-red-600 transition-colors"
         >
           <LogOut size={18} />

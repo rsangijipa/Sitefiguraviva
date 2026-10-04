@@ -25,3 +25,68 @@ test.describe("Smoke Tests - Core Routes", () => {
     }
   });
 });
+
+test("core public routes have one main landmark and unique main-content anchor", async ({
+  page,
+}) => {
+  for (const route of [
+    "/",
+    "/auth",
+    "/curso",
+    "/blog",
+    "/contato",
+    "/termos",
+  ]) {
+    await page.goto(route);
+    await expect(page.locator("main")).toHaveCount(1);
+    await expect(page.locator("#main-content")).toHaveCount(1);
+  }
+});
+test("authentication uses a fresh CSP nonce and hydrates under the policy", async ({
+  page,
+}) => {
+  const violations: string[] = [];
+  page.on("console", (message) => {
+    // The isolated read-only API uses a separate loopback port, intentionally
+    // excluded from the production connect-src policy. Keep all script errors.
+    const fixtureConnection =
+      /http:\/\/127\.0\.0\.1:\d+/.test(message.text()) &&
+      /connect-src|Refused to connect/.test(message.text());
+    if (
+      message.type() === "error" &&
+      /Content Security Policy|Refused to execute/.test(message.text()) &&
+      !fixtureConnection
+    )
+      violations.push(message.text());
+  });
+  const response = await page.goto("/auth");
+  const policy = response?.headers()["content-security-policy"] || "";
+  const nonce = policy.match(/'nonce-([^']+)'/)?.[1];
+  expect(nonce).toBeTruthy();
+  const freshResponse = await page.request.get("/auth");
+  expect(freshResponse.headers()["content-security-policy"]).not.toContain(
+    `'nonce-${nonce}'`,
+  );
+  expect(
+    policy.split(";").find((value) => value.trim().startsWith("script-src")),
+  ).not.toContain("unsafe-inline");
+  const nonces = await page
+    .locator("script")
+    .evaluateAll((elements) =>
+      elements
+        .filter(
+          (e) =>
+            e.getAttribute("src")?.includes("_next") ||
+            e.textContent?.includes("self.__next_f"),
+        )
+        .map((e) => (e as HTMLScriptElement).nonce),
+    );
+  expect(nonces.length).toBeGreaterThan(0);
+  expect(nonces.every((value) => value === nonce)).toBeTruthy();
+  await expect(page.locator('input[type="email"]')).toBeVisible();
+  await page.locator('input[type="email"]').fill("fixture@example.invalid");
+  await expect(page.locator('input[type="email"]')).toHaveValue(
+    "fixture@example.invalid",
+  );
+  expect(violations).toEqual([]);
+});

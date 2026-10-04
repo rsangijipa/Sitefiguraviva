@@ -1,7 +1,10 @@
 "use server";
 
 import { verifySession } from "@/lib/auth/server";
-import { getSupabaseSessionClaims } from "@/lib/auth/supabase-session";
+import {
+  getSupabaseSessionClaims,
+  readTokenExpirySeconds,
+} from "@/lib/auth/supabase-session";
 import { logAudit } from "@/lib/audit";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -49,9 +52,12 @@ export async function stopImpersonation() {
   try {
     // Verify backup token is still valid with Supabase session claims
     const claims = await getSupabaseSessionClaims(backupSession);
-    if (!claims) {
+    if (!claims || !claims.admin || !claims.isActive) {
       throw new Error("Invalid backup session");
     }
+
+    const maxAge = readTokenExpirySeconds(backupSession);
+    if (!maxAge) throw new Error("Expired backup session");
 
     // Log stop
     await logAudit({
@@ -62,10 +68,11 @@ export async function stopImpersonation() {
 
     // Restore
     cookieStore.set(COOKIE_NAME, backupSession, {
-      maxAge: 60 * 60 * 24 * 5, // reset window
+      maxAge,
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       path: "/",
+      sameSite: "lax",
     });
 
     cookieStore.delete(IMPERSONATION_COOKIE_NAME);

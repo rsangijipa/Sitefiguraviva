@@ -4,6 +4,8 @@ import {
 } from "@/lib/auth/supabase-session";
 import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 
+const rpc = jest.fn();
+const token = `header.${Buffer.from(JSON.stringify({ session_id: "00000000-0000-4000-8000-000000000001" })).toString("base64url")}.signature`;
 const getUser = jest.fn();
 const maybeSingle = jest.fn();
 const eq = jest.fn(() => ({ maybeSingle }));
@@ -17,9 +19,12 @@ jest.mock("@/infrastructure/supabase/server", () => ({
 describe("Supabase session claims", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    process.env.AUTH_SESSION_CHECK_MODE = "enforce";
+    rpc.mockResolvedValue({ data: true, error: null });
     (createSupabaseServiceClient as jest.Mock).mockReturnValue({
       auth: { getUser },
       from,
+      rpc,
     });
   });
 
@@ -33,7 +38,7 @@ describe("Supabase session claims", () => {
       error: null,
     });
 
-    await expect(getSupabaseSessionClaims("valid-token")).resolves.toEqual({
+    await expect(getSupabaseSessionClaims(token)).resolves.toEqual({
       uid: "user-1",
       email: "admin@figura.viva",
       role: "administrador",
@@ -53,7 +58,7 @@ describe("Supabase session claims", () => {
       error: null,
     });
 
-    await expect(getSupabaseSessionClaims("valid-token")).resolves.toBeNull();
+    await expect(getSupabaseSessionClaims(token)).resolves.toBeNull();
   });
 
   it("does not elevate an allowlisted email or editable metadata", async () => {
@@ -71,9 +76,10 @@ describe("Supabase session claims", () => {
       data: { role: "student", is_active: true },
       error: null,
     });
-    await expect(
-      getSupabaseSessionClaims("valid-token"),
-    ).resolves.toMatchObject({ role: "student", admin: false });
+    await expect(getSupabaseSessionClaims(token)).resolves.toMatchObject({
+      role: "student",
+      admin: false,
+    });
   });
 
   it("fails closed without a persisted active profile", async () => {
@@ -82,17 +88,17 @@ describe("Supabase session claims", () => {
       error: null,
     });
     maybeSingle.mockResolvedValue({ data: null, error: null });
-    await expect(getSupabaseSessionClaims("valid-token")).resolves.toBeNull();
+    await expect(getSupabaseSessionClaims(token)).resolves.toBeNull();
     maybeSingle.mockResolvedValue({
       data: { role: "admin", is_active: null },
       error: null,
     });
-    await expect(getSupabaseSessionClaims("valid-token")).resolves.toBeNull();
+    await expect(getSupabaseSessionClaims(token)).resolves.toBeNull();
     maybeSingle.mockResolvedValue({
       data: { role: "admin", is_active: true },
       error: new Error("lookup failed"),
     });
-    await expect(getSupabaseSessionClaims("valid-token")).resolves.toBeNull();
+    await expect(getSupabaseSessionClaims(token)).resolves.toBeNull();
   });
 
   it("rejects requests without a bearer token before calling Supabase", async () => {
@@ -103,4 +109,19 @@ describe("Supabase session claims", () => {
     await expect(getBearerSupabaseSessionClaims(request)).resolves.toBeNull();
     expect(getUser).not.toHaveBeenCalled();
   });
+});
+
+it("rejects revoked sessions and session verification failure", async () => {
+  process.env.AUTH_SESSION_CHECK_MODE = "enforce";
+  getUser.mockResolvedValue({ data: { user: { id: "user-1" } }, error: null });
+  rpc
+    .mockResolvedValueOnce({ data: false, error: null })
+    .mockResolvedValueOnce({ data: null, error: { message: "unavailable" } });
+  expect(await getSupabaseSessionClaims(token)).toBeNull();
+  expect(await getSupabaseSessionClaims(token)).toBeNull();
+  expect(await getSupabaseSessionClaims("invalid-token")).toBeNull();
+});
+
+afterAll(() => {
+  delete process.env.AUTH_SESSION_CHECK_MODE;
 });

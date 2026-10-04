@@ -22,10 +22,15 @@ export interface Post {
 
 export const useCourses = (
   isAdmin = false,
-  options?: { initialData?: any[]; scope?: "preview" | "list" },
+  options?: {
+    initialData?: any[];
+    scope?: "preview" | "list";
+    enabled?: boolean;
+  },
 ) => {
   return useQuery({
     queryKey: ["courses", isAdmin, options?.scope ?? "list"],
+    enabled: options?.enabled ?? true,
     queryFn: () =>
       isAdmin
         ? listContent("courses", { publishedOnly: false })
@@ -37,10 +42,15 @@ export const useCourses = (
 
 export const useBlogPosts = (
   isAdmin = false,
-  options?: { initialData?: any[]; scope?: "preview" | "list" },
+  options?: {
+    initialData?: any[];
+    scope?: "preview" | "list";
+    enabled?: boolean;
+  },
 ) => {
   return useQuery({
     queryKey: ["posts", isAdmin, options?.scope ?? "list"],
+    enabled: options?.enabled ?? true,
     queryFn: () =>
       isAdmin
         ? listContent("posts", { publishedOnly: false })
