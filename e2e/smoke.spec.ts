@@ -70,17 +70,23 @@ test("authentication uses a fresh CSP nonce and hydrates under the policy", asyn
   expect(
     policy.split(";").find((value) => value.trim().startsWith("script-src")),
   ).not.toContain("unsafe-inline");
-  const nonces = await page
-    .locator("script")
-    .evaluateAll((elements) =>
-      elements
+  // Validate parser-inserted scripts in the actual server response. Trusted
+  // Next runtime scripts added after hydration are allowed by strict-dynamic.
+  const nonces = await page.evaluate(
+    (html) =>
+      Array.from(
+        new DOMParser()
+          .parseFromString(html, "text/html")
+          .querySelectorAll("script"),
+      )
         .filter(
           (e) =>
             e.getAttribute("src")?.includes("_next") ||
             e.textContent?.includes("self.__next_f"),
         )
         .map((e) => (e as HTMLScriptElement).nonce),
-    );
+    await response!.text(),
+  );
   expect(nonces.length).toBeGreaterThan(0);
   expect(nonces.every((value) => value === nonce)).toBeTruthy();
   await expect(page.locator('input[type="email"]')).toBeVisible();

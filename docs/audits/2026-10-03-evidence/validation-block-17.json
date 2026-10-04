@@ -5,7 +5,7 @@
   "scope": "Clean private snapshot, fake credentials and read-only loopback API; no deployment or live financial transaction",
   "source": {
     "files": 1097,
-    "sha256": "816ee36b9eccb92b0ce651e6cd9c58e24f643514bdbf5cb022ebe29cf482ad83",
+    "sha256": "d6d69d8c96db8d5d922fdd89633975837162e4a8a7c6b3f56f02c44768e79354",
     "rootMatchesSnapshot": true
   },
   "checks": [
@@ -40,7 +40,7 @@
   },
   "browser": {
     "exitCode": 0,
-    "seconds": 20,
+    "seconds": 45,
     "browser": "Local Chromium 153; CI uses Playwright-pinned Chromium",
     "fixture": "Read-only local HTTP, fake credentials; no remote calls"
   },
@@ -113,5 +113,21 @@
     "Node 24/Linux CI and Vercel status verified separately after push",
     "Auth, SMTP, bank, role-based E2E and recovery require separate homologation",
     "Production audit zero does not mean all development dependencies are clear"
-  ]
+  ],
+  "ciFirstPush": {
+    "commit": "3bab24953ddd06256b876f6a4ca0e7ad4e0db2d0",
+    "runId": 37221510463,
+    "runUrl": "https://github.com/rsangijipa/Sitefiguraviva/actions/runs/37221510463",
+    "runtime": "Node 24/Linux",
+    "lint": 0,
+    "scripts": 0,
+    "unit": 0,
+    "types": 0,
+    "build": 0,
+    "firestore": "success",
+    "smoke": 1,
+    "vercel": "success",
+    "failure": "DOM nonce assertion included runtime-inserted scripts; corrected to inspect original server HTML",
+    "correction": "E2E test only; application and build input hashes unchanged; lint/types/browser repeated successfully"
+  }
 }
