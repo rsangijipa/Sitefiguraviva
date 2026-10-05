@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-04",
+  "removed": [
+    { "name": "@react-three/postprocessing", "version": "3.1.1", "kind": "direct" },
+    { "name": "postprocessing", "version": "6.39.4", "kind": "direct" },
+    { "name": "n8ao", "version": "2.0.1", "kind": "transitive" }
+  ],
+  "otherLockEntriesChanged": [],
+  "preservedSharedDependency": "maath (used by @react-three/drei)",
+  "validation": {
+    "cleanInstall": "npm ci --ignore-scripts (passed; 1421 packages installed)",
+    "lint": "passed",
+    "scriptsPassed": 43,
+    "jest": { "suitesPassed": 137, "testsPassed": 639, "skipped": 7 },
+    "typecheck": "passed",
+    "build": "passed",
+    "firstLoadJsCourseKB": 397,
+    "firstLoadJsLessonKB": 324,
+    "publicSmoke": { "passed": 7, "seconds": 12.4, "exitCode": 0, "browser": "Chromium headless shell 1243 (temporary test configuration)" },
+    "buildWarning": "Webpack cache: Unable to snapshot resolve dependencies"
+  },
+  "knip": { "unusedDependenciesBefore": 8, "unusedDependenciesAfter": 6, "unresolved": 0 },
+  "notVerified": [
+    "Authenticated staging flow (staging does not exist)",
+    "Cache hits in GitHub after publishing local workflow changes"
+  ]
+}

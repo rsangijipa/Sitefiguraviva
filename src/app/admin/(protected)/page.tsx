@@ -1,585 +1,502 @@
 "use client";
 
-import { motion } from "framer-motion";
-import {
-  BarChart,
-  Users,
-  BookOpen,
-  Activity,
-  FileText,
-  Eye,
-  Image as ImageIcon,
-} from "lucide-react";
-import { Card, CardContent } from "@/components/ui/Card";
-import { useState, useEffect } from "react";
-import { getAuditLogs } from "@/actions/audit";
-import { getAdminDashboardKPIs } from "@/app/actions/metrics";
-import { Settings, Zap, Shield, Globe, Award, List } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
-import { runEnrollmentMigration } from "@/app/actions/admin/maintenance";
-import { useToast } from "@/context/ToastContext";
+import {
+  ArrowRight,
+  BookOpen,
+  CheckCircle2,
+  ClipboardCheck,
+  Clock3,
+  FilePlus2,
+  ImagePlus,
+  LibraryBig,
+  Plus,
+  RefreshCw,
+  Users,
+  AlertCircle,
+  Activity,
+  ChevronDown,
+} from "lucide-react";
+import { getAdminDashboardKPIs } from "@/app/actions/metrics";
+import { getAuditLogs } from "@/actions/audit";
+import type { AdminDashboardKpisData } from "@/lib/metrics/kpi";
 import { SupabaseSyncHealth } from "@/components/admin/SupabaseSyncHealth";
+import styles from "./Dashboard.module.css";
+
+type AuditLog = {
+  id: string;
+  action: string;
+  timestamp: string;
+  actor: { email?: string };
+  target: { collection: string; id: string };
+};
+const formatNumber = (value?: number) =>
+  value === undefined ? "—" : value.toLocaleString("pt-BR");
+const formatDate = (value: string) => {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? "Data indisponível"
+    : date.toLocaleString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+};
+const actionLabel = (action: string) => {
+  const labels: Record<string, string> = {
+    create: "Criação",
+    update: "Atualização",
+    delete: "Exclusão",
+    login: "Entrada",
+    publish: "Publicação",
+    approve: "Aprovação",
+  };
+  return labels[action.toLowerCase()] ?? action.replace(/[_.-]/g, " ");
+};
+const quickActions = [
+  {
+    label: "Novo curso",
+    description: "Preparar uma formação",
+    href: "/admin/courses/new",
+    icon: Plus,
+    tone: "green",
+  },
+  {
+    label: "Avaliações",
+    description: "Organizar provas e atividades",
+    href: "/admin/assessments",
+    icon: FilePlus2,
+    tone: "blue",
+  },
+  {
+    label: "Adicionar foto",
+    description: "Atualizar a galeria",
+    href: "/admin/gallery/new",
+    icon: ImagePlus,
+    tone: "amber",
+  },
+  {
+    label: "Novo livro",
+    description: "Ampliar a estante",
+    href: "/admin/books/new",
+    icon: LibraryBig,
+    tone: "violet",
+  },
+];
 
 export default function AdminDashboard() {
-  const { addToast } = useToast();
-  const [auditLogs, setAuditLogs] = useState<any[]>([]);
-  const [serverStats, setServerStats] = useState<any>(null);
-  const [statsError, setStatsError] = useState<string | null>(null);
-  const [kpiMeta, setKpiMeta] = useState<{
-    updatedAt?: string;
-    source?: Record<string, string>;
-  }>({});
+  const [data, setData] = useState<AdminDashboardKpisData>();
+  const [logs, setLogs] = useState<AuditLog[]>([]);
+  const [updatedAt, setUpdatedAt] = useState<string>();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>();
+  const [auditError, setAuditError] = useState(false);
+  const [healthOpen, setHealthOpen] = useState(false);
+  const mounted = useRef(false);
+  const pending = useRef(false);
+
+  const load = useCallback(async () => {
+    if (pending.current) return;
+    pending.current = true;
+    setLoading(true);
+    const [metrics, activity] = await Promise.allSettled([
+      getAdminDashboardKPIs(),
+      getAuditLogs(6),
+    ]);
+    if (mounted.current) {
+      if (
+        metrics.status === "fulfilled" &&
+        metrics.value.success &&
+        metrics.value.data
+      ) {
+        setData(metrics.value.data);
+        setUpdatedAt(metrics.value.updatedAt);
+        setError(undefined);
+      } else {
+        setError("Não foi possível atualizar as métricas. Tente novamente.");
+      }
+      if (
+        activity.status === "fulfilled" &&
+        activity.value.success &&
+        activity.value.logs
+      ) {
+        setLogs(activity.value.logs);
+        setAuditError(false);
+      } else {
+        setAuditError(true);
+      }
+      setLoading(false);
+    }
+    pending.current = false;
+  }, []);
 
   useEffect(() => {
-    const load = async () => {
-      setStatsError(null);
-
-      const [auditRes, statsRes] = await Promise.all([
-        getAuditLogs(10),
-        getAdminDashboardKPIs(),
-      ]);
-
-      if (auditRes.success) {
-        setAuditLogs(auditRes.logs);
-      } else {
-        setStatsError("Falha ao carregar atividade recente.");
-      }
-
-      if (statsRes.success && statsRes.data) {
-        setServerStats({
-          totalUsers: statsRes.data.totalUsers,
-          activeEnrollments: statsRes.data.accessGranted,
-          totalCourses: statsRes.data.totalCourses,
-          libraryDocs: statsRes.data.libraryDocs,
-          totalAuditLogs: statsRes.data.totalAuditLogs,
-          recentUsers: statsRes.data.recentUsers,
-          pendingEnrollments: statsRes.data.pendingEnrollments,
-          source: statsRes.source,
-          updatedAt: statsRes.updatedAt,
-        });
-        setKpiMeta({ updatedAt: statsRes.updatedAt, source: statsRes.source });
-      } else {
-        setStatsError(
-          "Falha ao carregar métricas do painel. Tente atualizar em alguns segundos.",
-        );
-      }
+    mounted.current = true;
+    void load();
+    const refreshIfVisible = () => {
+      if (!document.hidden) void load();
     };
-
-    load();
-    const interval = setInterval(load, 45_000);
-    return () => clearInterval(interval);
-  }, []);
+    const interval = setInterval(refreshIfVisible, 60_000);
+    document.addEventListener("visibilitychange", refreshIfVisible);
+    return () => {
+      mounted.current = false;
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", refreshIfVisible);
+    };
+  }, [load]);
 
   const stats = [
     {
-      label: "Alunos Totais",
-      value: serverStats?.totalUsers ?? (statsError ? "—" : "..."),
+      label: "Usuários cadastrados",
+      value: data?.totalUsers,
+      description: data
+        ? formatNumber(data.newUsers30Days) + " novos nos últimos 30 dias"
+        : "Todos os perfis da plataforma",
       icon: Users,
-      change: "Base de Dados",
+      tone: "blue",
+      href: "/admin/users",
     },
     {
-      label: "Acesso Liberado",
-      value: serverStats?.activeEnrollments ?? (statsError ? "—" : "..."),
-      icon: Zap,
-      change: "Active + Completed",
-    },
-    {
-      label: "Cursos",
-      value: serverStats?.totalCourses ?? (statsError ? "—" : "..."),
-      icon: BookOpen,
-      change: "Catálogo",
-    },
-    {
-      label: "Documentos",
-      value: serverStats?.libraryDocs ?? (statsError ? "—" : "..."),
-      icon: FileText,
-      change: "Biblioteca",
-    },
-  ];
-
-  const resources = [
-    {
-      label: "Configurações",
-      desc: "Ajustes do site e textos legais",
-      href: "/admin/settings",
-      icon: Settings,
-      color: "text-blue-500",
-    },
-    {
-      label: "Matrículas",
-      desc: "Gerenciar acessos e inscrições",
+      label: "Matrículas com acesso",
+      value: data?.accessGranted,
+      description: "Acessos ativos e de cursos concluídos",
+      icon: CheckCircle2,
+      tone: "green",
       href: "/admin/enrollments",
-      icon: Award,
-      color: "text-gold",
     },
     {
-      label: "Agenda & Eventos",
-      desc: "Calendário de lives e encontros",
-      href: "/admin/events",
-      icon: Globe,
-      color: "text-green-500",
+      label: "Matrículas pendentes",
+      value: data?.pendingEnrollmentCount,
+      description: "Aguardando aprovação de acesso",
+      icon: Clock3,
+      tone: "amber",
+      href: "/admin/enrollments",
     },
     {
-      label: "Auditoria",
-      desc: "Logs completos de segurança",
-      href: "/admin/logs",
-      icon: Shield,
-      color: "text-red-500",
+      label: "Cursos publicados",
+      value: data?.publishedCourses,
+      description: data
+        ? formatNumber(data.totalCourses) + " cursos no catálogo completo"
+        : "Disponíveis na plataforma",
+      icon: BookOpen,
+      tone: "violet",
+      href: "/admin/courses",
     },
   ];
-
-  const formatTimeAgo = (dateStr: any) => {
-    if (!dateStr) return "N/A";
-    const date = new Date(dateStr);
-    if (isNaN(date.getTime())) return "Data inválida";
-
-    const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
-    if (seconds < 60) return "agora mesmo";
-
-    let interval = seconds / 31536000;
-    if (interval > 1)
-      return (
-        Math.floor(interval) +
-        (Math.floor(interval) === 1 ? " ano" : " anos") +
-        " atrás"
-      );
-    interval = seconds / 2592000;
-    if (interval > 1)
-      return (
-        Math.floor(interval) +
-        (Math.floor(interval) === 1 ? " mês" : " meses") +
-        " atrás"
-      );
-    interval = seconds / 86400;
-    if (interval > 1)
-      return (
-        Math.floor(interval) +
-        (Math.floor(interval) === 1 ? " dia" : " dias") +
-        " atrás"
-      );
-    interval = seconds / 3600;
-    if (interval > 1)
-      return (
-        Math.floor(interval) +
-        (Math.floor(interval) === 1 ? " hora" : " horas") +
-        " atrás"
-      );
-    interval = seconds / 60;
-    if (interval > 1)
-      return (
-        Math.floor(interval) +
-        (Math.floor(interval) === 1 ? " minuto" : " minutos") +
-        " atrás"
-      );
-    return "agora mesmo";
-  };
+  const tasks = [
+    {
+      title: "Revisar matrículas",
+      description: "Confira os pedidos antes de liberar acesso.",
+      count: data?.pendingEnrollmentCount,
+      href: "/admin/enrollments",
+      icon: Users,
+      tone: "amber",
+    },
+    {
+      title: "Corrigir avaliações",
+      description: "Respostas enviadas aguardando correção.",
+      count: data?.submissionsToGrade,
+      href: "/admin/assessments/submissions",
+      icon: ClipboardCheck,
+      tone: "blue",
+    },
+    {
+      title: "Preparar cursos",
+      description: "Rascunhos que você pode continuar editando.",
+      count: data?.draftCourses,
+      href: "/admin/courses",
+      icon: BookOpen,
+      tone: "violet",
+    },
+  ];
 
   return (
-    <div>
-      {/* Premium Welcome Section */}
-      <header className="mb-12 relative overflow-hidden p-8 rounded-[2rem] bg-gradient-to-r from-primary/5 to-transparent border border-primary/5">
-        <div className="relative z-10">
-          <h1 className="text-4xl md:text-5xl font-serif text-primary mb-2">
-            Painel Administrativo
-          </h1>
-          <p className="text-lg text-primary/60 font-light flex items-center gap-2">
-            <Activity className="w-4 h-4 text-gold" />
-            Visão geral do sistema e atividades recentes
-          </p>
+    <div className={styles.dashboard}>
+      <header className={styles.heading}>
+        <div>
+          <p className={styles.eyebrow}>Seu espaço de gestão</p>
+          <h1>Visão geral</h1>
+          <p>Acompanhe o que importa e escolha a próxima ação.</p>
         </div>
-        <div className="absolute top-0 right-0 w-64 h-64 bg-gold/10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2" />
+        <div className={styles.refreshArea}>
+          <span>
+            {updatedAt
+              ? "Atualizado em " + formatDate(updatedAt)
+              : loading
+                ? "Carregando dados…"
+                : "Dados indisponíveis"}
+          </span>
+          <button
+            type="button"
+            onClick={() => void load()}
+            disabled={loading}
+            className={styles.refresh}
+          >
+            <RefreshCw
+              size={17}
+              className={loading ? styles.spinning : undefined}
+              aria-hidden="true"
+            />
+            {loading ? "Atualizando" : "Atualizar"}
+          </button>
+        </div>
       </header>
 
-      {/* Quick Actions Bar for Content Creation */}
-      <div className="mb-10 grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <Link
-          href="/admin/courses/new"
-          className="group p-4 rounded-2xl bg-white border border-stone-200 shadow-sm hover:border-gold/40 hover:shadow-md transition-all flex items-center gap-3.5"
-        >
-          <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-            <BookOpen size={20} />
-          </div>
-          <div>
-            <span className="block text-xs font-bold text-primary group-hover:text-gold transition-colors">
-              Novo Curso
-            </span>
-            <span className="text-[10px] text-stone-400">Criar formação</span>
-          </div>
-        </Link>
-
-        <Link
-          href="/admin/assessments/new"
-          className="group p-4 rounded-2xl bg-white border border-stone-200 shadow-sm hover:border-gold/40 hover:shadow-md transition-all flex items-center gap-3.5"
-        >
-          <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-            <FileText size={20} />
-          </div>
-          <div>
-            <span className="block text-xs font-bold text-primary group-hover:text-gold transition-colors">
-              Nova Prova
-            </span>
-            <span className="text-[10px] text-stone-400">Criar avaliação</span>
-          </div>
-        </Link>
-
-        <Link
-          href="/admin/gallery/new"
-          className="group p-4 rounded-2xl bg-white border border-stone-200 shadow-sm hover:border-gold/40 hover:shadow-md transition-all flex items-center gap-3.5"
-        >
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-            <ImageIcon size={20} />
-          </div>
-          <div>
-            <span className="block text-xs font-bold text-primary group-hover:text-gold transition-colors">
-              Nova Imagem
-            </span>
-            <span className="text-[10px] text-stone-400">Upload de foto</span>
-          </div>
-        </Link>
-
-        <Link
-          href="/admin/books/new"
-          className="group p-4 rounded-2xl bg-white border border-stone-200 shadow-sm hover:border-gold/40 hover:shadow-md transition-all flex items-center gap-3.5"
-        >
-          <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-            <Award size={20} />
-          </div>
-          <div>
-            <span className="block text-xs font-bold text-primary group-hover:text-gold transition-colors">
-              Novo Livro
-            </span>
-            <span className="text-[10px] text-stone-400">Estante pública</span>
-          </div>
-        </Link>
-      </div>
-
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-        {stats.map((stat, idx) => (
-          <motion.div
-            key={idx}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: idx * 0.1 }}
-          >
-            <Card className="hover:border-gold/30 transition-all duration-300 hover:shadow-lg bg-white/50 hover:bg-white h-full">
-              <CardContent className="p-8">
-                <div className="flex justify-between items-start mb-6">
-                  <div className="p-3 bg-primary/5 rounded-2xl group-hover:bg-gold/10 group-hover:text-gold transition-colors text-primary">
-                    <stat.icon size={20} />
-                  </div>
-                  <span className="text-[10px] font-bold text-primary/40 bg-primary/5 px-2 py-1 rounded-full uppercase tracking-wider">
-                    {stat.change}
-                  </span>
-                </div>
-                <h3 className="text-4xl font-serif text-primary mb-1">
-                  {stat.value}
-                </h3>
-                <p className="text-primary/40 text-[10px] font-bold uppercase tracking-[0.2em]">
-                  {stat.label}
-                </p>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
-
-      <div className="mb-8">
-        <SupabaseSyncHealth />
-      </div>
-
-      <div className="grid lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-8">
-          {/* New Dashboard Cards: Pending & Recent */}
-          <div className="grid md:grid-cols-2 gap-6">
-            <Card className="border-gold/20 bg-gold/5 backdrop-blur-sm">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-bold text-primary flex items-center gap-2">
-                    <Award size={18} className="text-gold" /> Matrículas
-                    Pendentes
-                  </h3>
-                  <Link
-                    href="/admin/enrollments"
-                    className="text-[10px] font-bold text-gold uppercase tracking-widest"
-                  >
-                    Ver Tudo
-                  </Link>
-                </div>
-                <div className="space-y-3">
-                  {serverStats?.pendingEnrollments?.length > 0 ? (
-                    serverStats.pendingEnrollments.map((en: any) => (
-                      <div
-                        key={en.id}
-                        className="flex items-center justify-between p-2 rounded-lg bg-white/50 border border-gold/10"
-                      >
-                        <div className="min-w-0">
-                          <p className="text-xs font-bold text-primary truncate">
-                            {en.userName || en.email}
-                          </p>
-                          <p className="text-[10px] text-primary/40 truncate">
-                            {en.courseTitle}
-                          </p>
-                        </div>
-                        <Link
-                          href="/admin/enrollments"
-                          className="text-[10px] px-2 py-1 bg-gold text-white rounded-md font-bold uppercase tracking-tighter"
-                        >
-                          Aprovar
-                        </Link>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-xs text-primary/40 italic py-2 text-center">
-                      Nenhuma matrícula pendente.
-                    </p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-primary/20 bg-primary/5 backdrop-blur-sm">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-bold text-primary flex items-center gap-2">
-                    <Users size={18} className="text-primary" /> Novos Usuários
-                  </h3>
-                  <Link
-                    href="/admin/users"
-                    className="text-[10px] font-bold text-primary/40 uppercase tracking-widest"
-                  >
-                    Ver Todos
-                  </Link>
-                </div>
-                <div className="space-y-3">
-                  {serverStats?.recentUsers?.length > 0 ? (
-                    serverStats.recentUsers.map((u: any) => (
-                      <div
-                        key={u.id}
-                        className="flex items-center gap-3 p-2 rounded-lg bg-white/50 border border-primary/10"
-                      >
-                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary uppercase">
-                          {u.displayName?.charAt(0) ||
-                            u.email?.charAt(0) ||
-                            "?"}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-xs font-bold text-primary truncate">
-                            {u.displayName || "Sem Nome"}
-                          </p>
-                          <p className="text-[10px] text-primary/40 truncate">
-                            {u.email}
-                          </p>
-                        </div>
-                        <span className="text-[8px] text-primary/20">
-                          {formatTimeAgo(u.createdAt)}
-                        </span>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-xs text-primary/40 italic py-2 text-center">
-                      Nenhum usuário recente.
-                    </p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Recent Activity */}
-          <Card className="border-primary/5 bg-white/50 backdrop-blur-sm">
-            <CardContent className="p-10">
-              <div className="flex items-center justify-between mb-8">
-                <h3 className="font-serif text-2xl text-primary">
-                  Atividade Recente
-                </h3>
-                <div className="flex items-center gap-3">
-                  <Link
-                    href="/admin/logs"
-                    className="text-primary/40 text-[10px] font-bold uppercase tracking-widest hover:text-gold transition-colors"
-                  >
-                    Ver Tudo
-                  </Link>
-                  <div className="px-3 py-1 rounded-full bg-gold/10 text-gold text-xs font-bold uppercase tracking-wider">
-                    Logs
-                  </div>
-                </div>
-              </div>
-
-              <div className="max-h-[500px] overflow-y-auto pr-4 space-y-4 custom-scrollbar">
-                {auditLogs.length > 0 ? (
-                  auditLogs.map((log, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.05 }}
-                      className="flex items-center gap-4 border-b border-primary/5 pb-4 last:border-0 last:pb-0 hover:bg-primary/5 p-3 rounded-xl transition-all -mx-2 group"
-                    >
-                      <div className="w-12 h-12 rounded-2xl bg-primary/5 flex items-center justify-center text-primary font-serif font-bold text-lg shrink-0 group-hover:bg-gold/10 group-hover:text-gold transition-colors">
-                        {(log.actor?.email || "A").charAt(0).toUpperCase()}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-primary break-words">
-                          <span className="font-bold">
-                            {log.actor?.email?.split("@")[0] || "Sistema"}
-                          </span>{" "}
-                          <span className="text-primary/70">
-                            {log.action || log.eventType}
-                          </span>
-                        </p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="text-[10px] px-2 py-0.5 rounded-lg bg-primary/5 text-primary/60 font-bold uppercase tracking-wider">
-                            {log.target?.collection || "Geral"}
-                          </span>
-                          <span className="text-xs text-primary/30">
-                            • {formatTimeAgo(log.timestamp)}
-                          </span>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))
-                ) : (
-                  <div className="text-center py-20 bg-primary/5 rounded-3xl border border-dashed border-primary/10">
-                    <Activity className="w-12 h-12 text-primary/20 mx-auto mb-4" />
-                    <p className="text-primary/40 italic">
-                      Nenhuma atividade recente registrada.
-                    </p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+      {error && (
+        <div role="alert" className={styles.error}>
+          <AlertCircle size={19} aria-hidden="true" />
+          <span>
+            {error}{" "}
+            {data &&
+              "Os números abaixo são da última atualização bem-sucedida."}
+          </span>
         </div>
+      )}
 
-        {/* Resources & Shortcuts */}
-        <div className="lg:col-span-1 space-y-6">
-          <h3 className="font-serif text-2xl text-primary mb-4 px-2">
-            Recursos Rápidos
-          </h3>
-          {resources.map((res, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.1 }}
-            >
-              <Link href={res.href}>
-                <Card className="hover:border-gold/30 hover:shadow-md transition-all group overflow-hidden bg-white/50 backdrop-blur-sm group">
-                  <CardContent className="p-6 flex items-center gap-4">
-                    <div
-                      className={cn(
-                        "p-4 rounded-2xl bg-primary/5 group-hover:bg-gold/10 transition-colors",
-                        res.color,
-                      )}
-                    >
-                      <res.icon size={24} />
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-bold text-primary group-hover:text-gold transition-colors">
-                        {res.label}
-                      </h4>
-                      <p className="text-xs text-primary/40 line-clamp-1">
-                        {res.desc}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            </motion.div>
-          ))}
-
-          {/* Users Quick Link */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.5 }}
+      <section
+        className={styles.stats}
+        aria-label="Indicadores principais"
+        aria-busy={loading}
+      >
+        {stats.map((stat) => (
+          <Link
+            key={stat.label}
+            href={stat.href}
+            className={styles.stat}
+            data-tone={stat.tone}
           >
-            <Link href="/admin/users">
-              <Card className="hover:border-primary/30 hover:shadow-md transition-all group bg-primary text-white overflow-hidden">
-                <CardContent className="p-6 flex items-center gap-4">
-                  <div className="p-4 rounded-2xl bg-white/10 group-hover:bg-white/20 transition-colors">
-                    <Users size={24} />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-bold">Gerenciar Usuários</h4>
-                    <p className="text-xs text-white/60 line-clamp-1">
-                      Controle perfis e acessos
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          </motion.div>
-
-          {/* Maintenance Quick Action */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.6 }}
-          >
-            <Card className="border-red-100 bg-red-50/10 backdrop-blur-sm">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-bold text-primary flex items-center gap-2">
-                    <Zap size={18} className="text-red-500" /> Manutenção
-                  </h3>
-                </div>
-                <p className="text-[10px] text-primary/40 mb-4 uppercase tracking-widest leading-relaxed">
-                  {" "}
-                  Standardize enrollment IDs to {`{uid}_{courseId}`}{" "}
-                </p>
-                <button
-                  onClick={async () => {
-                    if (
-                      confirm(
-                        "Deseja iniciar a migração de IDs de matrícula? Esta ação é irreversível e atualizará todos os registros para o formato determinístico.",
-                      )
-                    ) {
-                      const loadingToastId = "migration-loading";
-                      addToast("Iniciando migração...", "info");
-
-                      const res = await runEnrollmentMigration();
-
-                      if (res.success) {
-                        addToast(
-                          `Sucesso! ${(res as any).migratedCount} registros migrados.`,
-                          "success",
-                        );
-                      } else {
-                        addToast(
-                          "Erro na migração: " + (res as any).error,
-                          "error",
-                        );
-                      }
-                    }
-                  }}
-                  className="w-full py-2 bg-white border border-red-200 text-red-600 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all shadow-sm"
-                >
-                  Executar Migração
-                </button>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Special Quick Action */}
-          <div className="p-8 bg-gold rounded-[2rem] text-white shadow-xl shadow-gold/20 relative overflow-hidden group mt-10">
-            <div className="relative z-10">
-              <h4 className="font-serif text-xl mb-2">Novo Conteúdo?</h4>
-              <p className="text-white/70 text-sm mb-6">
-                Comece um novo curso ou artigo agora mesmo.
-              </p>
-              <Link
-                href="/admin/courses"
-                className="bg-white text-gold font-bold px-6 py-3 rounded-xl text-sm hover:shadow-lg transition-all inline-block hover:scale-105 active:scale-95"
-              >
-                Criar Agora
-              </Link>
+            <div className={styles.statTop}>
+              <span className={styles.icon}>
+                <stat.icon size={21} aria-hidden="true" />
+              </span>
+              <ArrowRight size={17} aria-hidden="true" />
             </div>
-            <BookOpen className="absolute -bottom-4 -right-4 w-32 h-32 text-white/10 -rotate-12 transition-transform group-hover:scale-110" />
+            <p className={styles.statLabel}>{stat.label}</p>
+            <strong className={styles.statValue}>
+              {formatNumber(stat.value)}
+            </strong>
+            <p className={styles.statDescription}>{stat.description}</p>
+          </Link>
+        ))}
+      </section>
+
+      <section className={styles.priorities} aria-labelledby="admin-priorities">
+        <div className={styles.sectionHeading}>
+          <div>
+            <h2 id="admin-priorities">Próximas ações</h2>
+            <p>Pedidos, correções e conteúdos em preparação.</p>
           </div>
+          <span className={styles.sectionTag}>Rotina do dia</span>
         </div>
+        <div className={styles.tasks}>
+          {tasks.map((task) => (
+            <Link
+              key={task.title}
+              href={task.href}
+              className={styles.task}
+              data-tone={task.tone}
+            >
+              <span className={styles.icon}>
+                <task.icon size={20} aria-hidden="true" />
+              </span>
+              <div>
+                <h3>{task.title}</h3>
+                <p>{task.description}</p>
+              </div>
+              <strong
+                aria-label={
+                  task.count === undefined
+                    ? "Quantidade indisponível"
+                    : task.count + " registros"
+                }
+              >
+                {formatNumber(task.count)}
+              </strong>
+              <ArrowRight size={17} aria-hidden="true" />
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section aria-labelledby="admin-shortcuts">
+        <div className={styles.sectionHeading}>
+          <h2 id="admin-shortcuts">Acesso rápido</h2>
+        </div>
+        <div className={styles.shortcuts}>
+          {quickActions.map((action) => (
+            <Link
+              key={action.href}
+              href={action.href}
+              className={styles.shortcut}
+              data-tone={action.tone}
+            >
+              <span className={styles.icon}>
+                <action.icon size={20} aria-hidden="true" />
+              </span>
+              <div>
+                <strong>{action.label}</strong>
+                <p>{action.description}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <div className={styles.twoColumns}>
+        <section className={styles.panel} aria-labelledby="admin-pending">
+          <div className={styles.sectionHeading}>
+            <div>
+              <h2 id="admin-pending">Aguardando aprovação</h2>
+              <p>
+                {data
+                  ? "Mostrando " +
+                    data.pendingEnrollments.length +
+                    " de " +
+                    formatNumber(data.pendingEnrollmentCount) +
+                    " matrículas pendentes"
+                  : "Pedidos mais recentes"}
+              </p>
+            </div>
+            <Link href="/admin/enrollments">
+              Ver todas <ArrowRight size={15} />
+            </Link>
+          </div>
+          {!data ? (
+            <p className={styles.empty}>
+              {loading ? "Carregando matrículas…" : "Matrículas indisponíveis."}
+            </p>
+          ) : data.pendingEnrollments.length ? (
+            <ul className={styles.list}>
+              {data.pendingEnrollments.map((enrollment) => (
+                <li key={enrollment.id}>
+                  <span className={styles.personIcon} data-tone="amber">
+                    <Users size={17} aria-hidden="true" />
+                  </span>
+                  <div>
+                    <strong>
+                      {enrollment.userName ||
+                        enrollment.email ||
+                        "Usuário sem nome"}
+                    </strong>
+                    <p>{enrollment.courseTitle}</p>
+                  </div>
+                  <Link href="/admin/enrollments" className={styles.review}>
+                    Revisar
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className={styles.empty}>
+              <CheckCircle2 size={25} />
+              <p>Nenhuma matrícula aguardando aprovação.</p>
+            </div>
+          )}
+        </section>
+
+        <section className={styles.panel} aria-labelledby="admin-users">
+          <div className={styles.sectionHeading}>
+            <div>
+              <h2 id="admin-users">Cadastros recentes</h2>
+              <p>Últimos usuários que chegaram à plataforma.</p>
+            </div>
+            <Link href="/admin/users">
+              Ver todos <ArrowRight size={15} />
+            </Link>
+          </div>
+          {!data ? (
+            <p className={styles.empty}>
+              {loading ? "Carregando usuários…" : "Cadastros indisponíveis."}
+            </p>
+          ) : data.recentUsers.length ? (
+            <ul className={styles.list}>
+              {data.recentUsers.map((person) => (
+                <li key={person.id}>
+                  <span className={styles.personIcon} data-tone="blue">
+                    {(person.display_name || person.email || "?")
+                      .charAt(0)
+                      .toUpperCase()}
+                  </span>
+                  <div>
+                    <strong>
+                      {person.display_name || "Sem nome informado"}
+                    </strong>
+                    <p>{person.email || "Sem e-mail informado"}</p>
+                  </div>
+                  <time dateTime={person.created_at}>
+                    {formatDate(person.created_at)}
+                  </time>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className={styles.empty}>Nenhum cadastro encontrado.</p>
+          )}
+        </section>
       </div>
+
+      <section className={styles.panel} aria-labelledby="admin-activity">
+        <div className={styles.sectionHeading}>
+          <div>
+            <h2 id="admin-activity">Atividade recente</h2>
+            <p>Últimas ações registradas na administração.</p>
+          </div>
+          <Link href="/admin/logs">
+            Ver histórico <ArrowRight size={15} />
+          </Link>
+        </div>
+        {auditError ? (
+          <p role="status" className={styles.empty}>
+            Não foi possível carregar o histórico. Use “Atualizar” para tentar
+            novamente.
+          </p>
+        ) : !logs.length ? (
+          <p className={styles.empty}>
+            {loading
+              ? "Carregando atividade…"
+              : "Nenhuma atividade registrada."}
+          </p>
+        ) : (
+          <ul className={styles.activityList}>
+            {logs.map((log) => (
+              <li key={log.id}>
+                <span className={styles.activityIcon}>
+                  <Activity size={17} aria-hidden="true" />
+                </span>
+                <div>
+                  <strong>{actionLabel(log.action)}</strong>
+                  <p>
+                    {log.actor.email || "Sistema"}
+                    {log.target.collection ? " · " + log.target.collection : ""}
+                  </p>
+                </div>
+                <time dateTime={log.timestamp}>
+                  {formatDate(log.timestamp)}
+                </time>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <details
+        className={styles.technical}
+        onToggle={(event) => setHealthOpen(event.currentTarget.open)}
+      >
+        <summary>
+          Publicação e ferramentas <ChevronDown size={17} aria-hidden="true" />
+        </summary>
+        {healthOpen && (
+          <div>
+            <SupabaseSyncHealth />
+            <Link href="/admin/utilities">
+              Abrir ferramentas de manutenção <ArrowRight size={16} />
+            </Link>
+          </div>
+        )}
+      </details>
     </div>
   );
 }

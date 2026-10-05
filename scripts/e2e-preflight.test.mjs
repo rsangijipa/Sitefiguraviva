@@ -1,6 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { assertIsolatedE2eEnvironment } from "./e2e-preflight.mjs";
+import {
+  assertIsolatedE2eEnvironment,
+  assertEadPilotEnvironment,
+} from "./e2e-preflight.mjs";
 const staging = {
   BASE_URL: "https://staging.example.invalid",
   E2E_ISOLATED_ENVIRONMENT: "true",
@@ -40,6 +43,48 @@ test("requires complete test accounts", () =>
   assert.throws(() =>
     assertIsolatedE2eEnvironment({ ...staging, ADMIN_PASSWORD: "" }),
   ));
+
+const pilot = {
+  ...staging,
+  E2E_COURSE_ID: "pilot-course",
+  E2E_FINAL_LESSON_ID: "final-text-lesson",
+  E2E_COURSE_TITLE: "Curso piloto",
+  E2E_FINAL_LESSON_TITLE: "Última aula",
+};
+test("accepts an explicit pilot in isolated staging", () =>
+  assert.equal(assertEadPilotEnvironment(pilot), staging.BASE_URL));
+for (const name of [
+  "E2E_COURSE_ID",
+  "E2E_FINAL_LESSON_ID",
+  "E2E_COURSE_TITLE",
+  "E2E_FINAL_LESSON_TITLE",
+]) {
+  test(`pilot rejects missing ${name}`, () =>
+    assert.throws(() => assertEadPilotEnvironment({ ...pilot, [name]: "" })));
+}
+for (const value of [
+  "../other-course",
+  "course?lesson=other",
+  "course/other",
+  "course#fragment",
+  " course ",
+]) {
+  test(`pilot rejects an unsafe path segment: ${value}`, () =>
+    assert.throws(() =>
+      assertEadPilotEnvironment({ ...pilot, E2E_COURSE_ID: value }),
+    ));
+}
+test("pilot still rejects production and missing mutation consent", () => {
+  assert.throws(() =>
+    assertEadPilotEnvironment({
+      ...pilot,
+      BASE_URL: "https://institutofiguraviva.com.br",
+    }),
+  );
+  assert.throws(() =>
+    assertEadPilotEnvironment({ ...pilot, E2E_ALLOW_MUTATIONS: "false" }),
+  );
+});
 
 import { createCiFixture } from "./ci-fixture.mjs";
 test("CI replaces service settings, forces a local browser target and rejects HTTP writes", async () => {

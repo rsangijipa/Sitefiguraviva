@@ -23,6 +23,13 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      - name: Restore Next.js build cache
+        uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: ${{ runner.os }}-next-${{ hashFiles('.nvmrc', 'package-lock.json', 'next.config.mjs', 'tsconfig.json') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-next-${{ hashFiles('.nvmrc', 'package-lock.json', 'next.config.mjs', 'tsconfig.json') }}-
       - run: node scripts/check-release-secrets.mjs
       - run: npm audit --omit=dev --audit-level=moderate
       - run: npx playwright install --with-deps chromium
@@ -33,6 +40,29 @@ jobs:
           name: public-smoke-report
           path: playwright-report/
           retention-days: 7
+  knip-report:
+    name: Knip audit (report only)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Report unused code and dependencies
+        run: |
+          mkdir -p reports
+          npm run --silent audit:knip > reports/knip.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: knip-report
+          path: reports/knip.json
+          retention-days: 14
   firestore-rules:
     name: Legacy Firestore emulator rules
     runs-on: ubuntu-latest

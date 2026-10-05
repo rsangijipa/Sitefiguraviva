@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 // import { useApp } from '@/context/AppContext';
 import { useToast } from "@/context/ToastContext";
 import { ArrowLeft } from "lucide-react";
+import AuthBackground from "@/components/ui/AuthBackground";
 
 import { useAuth } from "@/context/AuthContext";
 import { ensureUserProfileAction } from "@/app/actions/auth";
@@ -33,7 +34,9 @@ export default function AdminLogin() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.currentTarget;
-    const email = (form.elements.namedItem("email") as HTMLInputElement).value;
+    const email = (
+      form.elements.namedItem("email") as HTMLInputElement
+    ).value.trim();
     const password = (form.elements.namedItem("password") as HTMLInputElement)
       .value;
 
@@ -43,7 +46,13 @@ export default function AdminLogin() {
       const { error } = await signIn(email, password);
 
       if (error) {
-        addToast(`Falha no login: ${error.message || error}`, "error");
+        const message =
+          error.code === "invalid_credentials"
+            ? "E-mail ou senha incorretos. Confira os dados ou redefina sua senha."
+            : error.code === "email_not_confirmed"
+              ? "Confirme seu e-mail antes de entrar."
+              : "Não foi possível entrar. Tente novamente.";
+        addToast(message, "error");
       } else {
         // Ensure profile sync
         const supabase = createSupabaseBrowserClient();
@@ -70,26 +79,23 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-paper relative overflow-hidden">
+    <div className="relative flex min-h-[100svh] items-center justify-center bg-paper px-4 py-20">
       {/* Navigation Button */}
       <button
         onClick={() => router.push("/")}
-        className="absolute top-8 left-8 z-20 flex items-center gap-2 text-primary/40 hover:text-primary transition-colors font-bold uppercase tracking-widest text-xs"
+        className="absolute top-4 left-4 z-20 min-h-11 sm:left-8 flex items-center gap-2 text-primary/40 hover:text-primary transition-colors font-bold uppercase tracking-widest text-xs"
       >
         <ArrowLeft size={16} /> Voltar ao Início
       </button>
 
-      {/* Artistic background */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-gold/5 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-accent/5 rounded-full blur-[120px]" />
-      </div>
+      <AuthBackground />
 
       <motion.div
+        data-auth-card
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
-        className="bg-white/40 backdrop-blur-3xl p-8 md:p-16 rounded-[2rem] md:rounded-[3rem] shadow-[0_80px_150px_-30px_rgba(38,58,58,0.15)] w-full max-w-md relative z-10 border border-white/60 text-center mx-4"
+        className="relative z-10 w-full max-w-[440px] rounded-[20px] border border-primary/15 bg-[#fffdf9]/95 p-6 text-center shadow-xl sm:p-8"
       >
         {authLoading ? (
           <div className="flex flex-col items-center justify-center py-12 animate-pulse">
@@ -162,15 +168,15 @@ export default function AdminLogin() {
           </div>
         ) : (
           <>
-            <div className="flex flex-col items-center mb-12">
-              <div className="w-24 h-24 rounded-full mb-8 flex items-center justify-center p-1 border border-primary/10 shadow-xl bg-paper overflow-hidden">
+            <div className="mb-6 flex flex-col items-center">
+              <div className="h-16 w-16 rounded-full mb-4 flex items-center justify-center p-1 border border-primary/10 shadow-xl bg-paper overflow-hidden">
                 <img
                   src="/assets/logo.jpeg"
                   alt="Instituto Figura Viva"
                   className="w-full h-full rounded-full object-cover"
                 />
               </div>
-              <h1 className="font-serif text-4xl text-primary mb-3">
+              <h1 className="font-serif text-3xl text-primary mb-3">
                 Figura <span className="font-light text-gold italic">Viva</span>
               </h1>
               <p className="text-primary/40 text-[10px] uppercase tracking-[0.4em] font-bold">
@@ -223,7 +229,7 @@ export default function AdminLogin() {
                 </button>
               </form>
 
-              <div className="flex flex-col items-center gap-6 mt-8">
+              <div className="mt-5 flex flex-col items-center gap-3">
                 <div className="w-8 h-[1px] bg-primary/10" />
                 <p className="text-[9px] text-primary/30 uppercase font-bold tracking-[0.3em] leading-relaxed max-w-[200px]">
                   Acesso restrito para administradores.

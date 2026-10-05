@@ -11,6 +11,10 @@ const isProd = process.env.NODE_ENV === "production";
 const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 
 const nextConfig = {
+  // Only check-ci sets this after both standalone validations pass.
+  // Regular builds keep Next's lint and TypeScript checks enabled.
+  eslint: { ignoreDuringBuilds: process.env.FIGURA_CI_VALIDATED === "1" },
+  typescript: { ignoreBuildErrors: process.env.FIGURA_CI_VALIDATED === "1" },
   transpilePackages: [
     "htmlparser2",
     "domhandler",
@@ -58,6 +62,7 @@ const nextConfig = {
         value:
           [
             "default-src 'self'",
+            "manifest-src 'self'",
             "object-src 'none'",
             "base-uri 'self'",
             "form-action 'self'",

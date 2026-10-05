@@ -48,8 +48,28 @@ export type AdminDashboardKpisData = {
   totalCourses: number;
   libraryDocs: number;
   totalAuditLogs: number;
-  recentUsers: any[];
-  pendingEnrollments: any[];
+  pendingEnrollmentCount: number;
+  publishedCourses: number;
+  draftCourses: number;
+  newUsers30Days: number;
+  submissionsToGrade: number;
+  recentUsers: {
+    id: string;
+    display_name: string | null;
+    email: string | null;
+    role: string;
+    created_at: string;
+  }[];
+  pendingEnrollments: {
+    id: string;
+    user_id: string | null;
+    course_id: string;
+    status: string;
+    enrolled_at: string;
+    userName: string | null;
+    email: string | null;
+    courseTitle: string;
+  }[];
 };
 
 export type KpiActionResult<T> = {
@@ -457,38 +477,65 @@ export async function buildAdminDashboardKPIs(): Promise<
     "courses",
     "public_documents",
     "audit_logs",
+    "assessment_submissions",
   ]);
   try {
     const supabase = createSupabaseServiceClient();
-    const [users, access, courses, documents, audits, recentUsers, pending] =
-      await Promise.all([
-        supabase.from("profiles").select("id", { count: "exact", head: true }),
-        supabase
-          .from("enrollments")
-          .select("id", { count: "exact", head: true })
-          .in("status", ["active", "completed"]),
-        supabase.from("courses").select("id", { count: "exact", head: true }),
-        supabase
-          .from("public_documents")
-          .select("id", { count: "exact", head: true }),
-        supabase
-          .from("audit_logs")
-          .select("id", { count: "exact", head: true }),
-        supabase
-          .from("profiles")
-          .select("id,display_name,email,role,created_at")
-          .order("created_at", { ascending: false })
-          .limit(5),
-        supabase
-          .from("enrollments")
-          // Do not rely on implicit PostgREST relationship names here. This
-          // query powers the Admin landing page and must work while schemas
-          // are migrated or relationship metadata is reloaded.
-          .select("id,user_id,course_id,status,enrolled_at")
-          .eq("status", "pending_approval")
-          .order("enrolled_at", { ascending: false })
-          .limit(5),
-      ]);
+    const [
+      users,
+      access,
+      courses,
+      documents,
+      audits,
+      recentUsers,
+      pending,
+      published,
+      drafts,
+      newUsers,
+      submissions,
+    ] = await Promise.all([
+      supabase.from("profiles").select("id", { count: "exact", head: true }),
+      supabase
+        .from("enrollments")
+        .select("id", { count: "exact", head: true })
+        .in("status", ["active", "completed"]),
+      supabase.from("courses").select("id", { count: "exact", head: true }),
+      supabase
+        .from("public_documents")
+        .select("id", { count: "exact", head: true }),
+      supabase.from("audit_logs").select("id", { count: "exact", head: true }),
+      supabase
+        .from("profiles")
+        .select("id,display_name,email,role,created_at")
+        .order("created_at", { ascending: false })
+        .limit(5),
+      supabase
+        .from("enrollments")
+        // Do not rely on implicit PostgREST relationship names here. This
+        // query powers the Admin landing page and must work while schemas
+        // are migrated or relationship metadata is reloaded.
+        .select("id,user_id,course_id,status,enrolled_at", { count: "exact" })
+        .eq("status", "pending_approval")
+        .order("enrolled_at", { ascending: false })
+        .limit(5),
+      supabase
+        .from("courses")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "open")
+        .eq("is_published", true),
+      supabase
+        .from("courses")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "draft"),
+      supabase
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .gte("created_at", new Date(Date.now() - 30 * 86400000).toISOString()),
+      supabase
+        .from("assessment_submissions")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "submitted"),
+    ]);
     const error =
       users.error ||
       access.error ||
@@ -496,7 +543,11 @@ export async function buildAdminDashboardKPIs(): Promise<
       documents.error ||
       audits.error ||
       recentUsers.error ||
-      pending.error;
+      pending.error ||
+      published.error ||
+      drafts.error ||
+      newUsers.error ||
+      submissions.error;
     if (error) throw error;
     const pendingRows = pending.data ?? [];
     const pendingUserIds = pendingRows
@@ -530,6 +581,11 @@ export async function buildAdminDashboardKPIs(): Promise<
         totalCourses: courses.count ?? 0,
         libraryDocs: documents.count ?? 0,
         totalAuditLogs: audits.count ?? 0,
+        pendingEnrollmentCount: pending.count ?? 0,
+        publishedCourses: published.count ?? 0,
+        draftCourses: drafts.count ?? 0,
+        newUsers30Days: newUsers.count ?? 0,
+        submissionsToGrade: submissions.count ?? 0,
         recentUsers: recentUsers.data ?? [],
         pendingEnrollments: pendingRows.map((enrollment) => ({
           ...enrollment,

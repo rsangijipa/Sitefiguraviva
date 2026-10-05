@@ -26,8 +26,8 @@ export function CertificateIssueCard({
   existingCertificate,
 }: CertificateIssueCardProps) {
   const [loading, setLoading] = useState(false);
-  const [issued, setIssued] = useState(!!existingCertificate);
-  const [certId, setCertId] = useState(existingCertificate?.id);
+  const [issuedCourseId, setIssuedCourseId] = useState<string | null>(null);
+  const issued = !!existingCertificate || issuedCourseId === courseId;
   const router = useRouter();
 
   const handleIssue = async () => {
@@ -35,8 +35,7 @@ export function CertificateIssueCard({
     try {
       const res = await issueCertificate(courseId);
       if (res.success) {
-        setIssued(true);
-        setCertId(res.certificateId);
+        setIssuedCourseId(courseId);
         router.refresh();
         // Optional: Toast success
       } else {

@@ -8,7 +8,7 @@ import {
 } from "@/types/lms";
 import {
   addMaterialAction,
-  createCourseAction,
+  createCourseResultAction,
   createLessonAction,
   createModuleAction,
   deleteCourseAction,
@@ -44,7 +44,9 @@ export const adminCourseService = {
   },
 
   async createCourse(data: Partial<CourseDoc>): Promise<string> {
-    return createCourseAction(data);
+    const result = await createCourseResultAction(data);
+    if (result.success === false) throw new Error(result.message);
+    return result.courseId;
   },
 
   async updateCourse(

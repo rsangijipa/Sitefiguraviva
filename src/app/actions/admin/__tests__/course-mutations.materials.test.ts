@@ -90,9 +90,12 @@ jest.mock(
 import {
   addMaterialAction,
   createCourseAction,
+  createCourseResultAction,
   deleteMaterialAction,
   updateCourseAction,
 } from "@/app/actions/admin/course-mutations";
+import { requireAdmin } from "@/lib/auth/server";
+import { z } from "zod";
 
 describe("course-mutations material actions", () => {
   beforeEach(() => {
@@ -151,5 +154,83 @@ describe("course-mutations material actions", () => {
       title: "Novo título",
     });
     expect(bumpAdminCourseRevision).toHaveBeenCalledWith("course-1");
+  });
+
+  it("returns the new course ID with a draft payload", async () => {
+    createAdminCourse.mockResolvedValueOnce("new-course");
+    await expect(
+      createCourseResultAction({ title: "Novo curso" }),
+    ).resolves.toEqual({
+      success: true,
+      courseId: "new-course",
+    });
+    expect(createAdminCourse).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: "draft",
+        isPublished: false,
+      }),
+    );
+  });
+
+  it("rejects a blank title before reaching the database", async () => {
+    await expect(createCourseResultAction({ title: " " })).resolves.toEqual({
+      success: false,
+      message: "Informe o título do curso.",
+    });
+    expect(createAdminCourse).not.toHaveBeenCalled();
+  });
+
+  it("returns an actionable slug conflict without database details", async () => {
+    createAdminCourse.mockRejectedValueOnce({
+      code: "23505",
+      details: "private database details",
+    });
+    const result = await createCourseResultAction({ title: "Curso" });
+    expect(result).toEqual({
+      success: false,
+      message: expect.stringContaining("slug"),
+    });
+    expect(JSON.stringify(result)).not.toContain("private database details");
+  });
+
+  it("returns mediator validation instead of a production exception", async () => {
+    const validation = z
+      .string()
+      .uuid("Selecione mediadores cadastrados.")
+      .safeParse("legacy-id");
+    if (validation.success) throw new Error("Expected invalid mediator ID");
+    createAdminCourse.mockRejectedValueOnce(validation.error);
+    await expect(createCourseResultAction({ title: "Curso" })).resolves.toEqual(
+      {
+        success: false,
+        message: "Selecione mediadores cadastrados.",
+      },
+    );
+  });
+
+  it("hides unexpected database errors from the client and logs them on the server", async () => {
+    const spy = jest.spyOn(console, "error").mockImplementation(() => {});
+    const error = new Error("private database details");
+    try {
+      createAdminCourse.mockRejectedValueOnce(error);
+      const result = await createCourseResultAction({ title: "Curso" });
+      expect(result.success).toBe(false);
+      expect(JSON.stringify(result)).not.toContain(error.message);
+      expect(spy).toHaveBeenCalledWith(
+        "[createCourse] Failed to save course",
+        error,
+      );
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it("preserves authentication redirects and never inserts unauthorized data", async () => {
+    const redirect = new Error("NEXT_REDIRECT");
+    jest.mocked(requireAdmin).mockRejectedValueOnce(redirect);
+    await expect(createCourseResultAction({ title: "Curso" })).rejects.toBe(
+      redirect,
+    );
+    expect(createAdminCourse).not.toHaveBeenCalled();
   });
 });

@@ -1,0 +1,27 @@
+.background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background: #f7f1e7;
+}
+
+.artwork {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+@media (max-width: 1023px) and (orientation: portrait) {
+  .artwork {
+    object-position: 35% center;
+  }
+}
+
+@media (max-width: 767px) and (orientation: portrait) {
+  .artwork {
+    object-position: 24% center;
+  }
+}

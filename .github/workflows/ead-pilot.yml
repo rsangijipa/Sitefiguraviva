@@ -1,0 +1,57 @@
+name: EAD pilot journey
+on:
+  workflow_dispatch:
+    inputs:
+      course_id:
+        description: Published pilot course ID in isolated staging
+        required: true
+        type: string
+      course_title:
+        description: Exact pilot course title
+        required: true
+        type: string
+      final_lesson_id:
+        description: Only incomplete lesson ID (text lesson)
+        required: true
+        type: string
+      final_lesson_title:
+        description: Exact final lesson title
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: ead-pilot-staging
+  cancel-in-progress: false
+jobs:
+  pilot:
+    environment: homologacao
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      BASE_URL: ${{ vars.E2E_BASE_URL }}
+      E2E_REMOTE: "1"
+      E2E_ISOLATED_ENVIRONMENT: ${{ vars.E2E_ISOLATED_ENVIRONMENT }}
+      E2E_ALLOW_MUTATIONS: ${{ vars.E2E_ALLOW_MUTATIONS }}
+      E2E_SUPABASE_PROJECT_REF: ${{ vars.E2E_SUPABASE_PROJECT_REF }}
+      E2E_COURSE_ID: ${{ inputs.course_id }}
+      E2E_COURSE_TITLE: ${{ inputs.course_title }}
+      E2E_FINAL_LESSON_ID: ${{ inputs.final_lesson_id }}
+      E2E_FINAL_LESSON_TITLE: ${{ inputs.final_lesson_title }}
+      ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
+      ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
+      STUDENT_EMAIL: ${{ secrets.E2E_STUDENT_EMAIL }}
+      STUDENT_PASSWORD: ${{ secrets.E2E_STUDENT_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: node scripts/e2e-preflight.mjs --ead-pilot
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test e2e/completion-journey.spec.ts --project=chromium --workers=1 --retries=0
+      # Authenticated traces and storageState stay off uploaded artifacts.

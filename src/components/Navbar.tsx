@@ -163,7 +163,7 @@ export default function Navbar() {
                 fetchPriority="high"
               />
             </div>
-            <span className="text-xl font-serif text-primary tracking-tight font-bold">
+            <span className="text-[22px] sm:text-2xl font-serif text-primary tracking-tight font-bold">
               Figura <span className="font-light text-gold italic">Viva</span>
             </span>
           </Link>
@@ -171,7 +171,7 @@ export default function Navbar() {
           {/* Desktop Menu */}
           <div
             ref={desktopMenuRef}
-            className="hidden xl:flex items-center gap-1 font-sans text-[11px] 2xl:text-xs font-bold tracking-[0.18em] uppercase text-text/80"
+            className="hidden xl:flex items-center gap-1 font-sans text-base font-semibold tracking-[0.06em] uppercase text-text/90"
           >
             {DESKTOP_NAVIGATION.map((entry) => {
               if ("href" in entry) {
@@ -179,7 +179,7 @@ export default function Navbar() {
                   <Link
                     key={entry.label}
                     href={entry.href}
-                    className="flex min-h-[44px] items-center rounded-md px-4 py-2 transition-colors duration-200 hover:bg-areia hover:text-primary focus-visible:ring-2 focus-visible:ring-primary"
+                    className="flex min-h-[44px] items-center rounded-md px-3 py-2 transition-colors duration-200 hover:bg-areia hover:text-primary focus-visible:ring-2 focus-visible:ring-primary"
                   >
                     {entry.label}
                   </Link>
@@ -226,7 +226,7 @@ export default function Navbar() {
                               href={item.href}
                               role="menuitem"
                               onClick={() => setDesktopMenuOpen(null)}
-                              className="flex min-h-11 items-center rounded-md px-3 py-2 text-sm font-medium text-primary transition-colors hover:bg-areia focus-visible:bg-areia focus-visible:outline-none"
+                              className="flex min-h-11 items-center rounded-md px-3 py-2 text-base font-medium text-primary transition-colors hover:bg-areia focus-visible:bg-areia focus-visible:outline-none"
                             >
                               {item.label}
                             </a>
@@ -243,7 +243,7 @@ export default function Navbar() {
 
             <Link
               href="/portal"
-              className="ml-2 inline-flex min-h-11 items-center rounded-md bg-primary px-5 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-white transition-colors hover:bg-primary-dark"
+              className="ml-2 inline-flex min-h-11 items-center rounded-md bg-primary px-5 py-2 text-sm font-bold uppercase tracking-[0.06em] text-white transition-colors hover:bg-primary-dark"
             >
               Área do aluno
             </Link>
@@ -315,7 +315,7 @@ export default function Navbar() {
               data-lenis-prevent
             >
               <div className="space-y-1 mb-8">
-                <span className="mb-4 block px-4 text-[10px] font-bold uppercase tracking-[0.25em] text-muted">
+                <span className="mb-4 block px-4 text-xs font-bold uppercase tracking-[0.12em] text-muted">
                   Navegação principal
                 </span>
                 {navItems.map((item) => (
@@ -348,7 +348,7 @@ export default function Navbar() {
                     href="https://instagram.com/institutofiguraviva"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-muted transition-colors hover:text-primary"
+                    className="flex items-center gap-3 text-xs font-bold uppercase tracking-wider text-muted transition-colors hover:text-primary"
                   >
                     <div className="rounded-md bg-areia p-2">
                       <Instagram size={14} />
@@ -361,7 +361,7 @@ export default function Navbar() {
                   <Link
                     href="/portal"
                     onClick={() => setMobileOpen(false)}
-                    className="flex w-full items-center justify-center gap-2 rounded-md bg-primary py-6 text-[11px] font-bold uppercase tracking-[0.2em] text-white transition-colors hover:bg-primary-dark active:scale-[0.98]"
+                    className="flex w-full items-center justify-center gap-2 rounded-md bg-primary py-6 text-sm font-bold uppercase tracking-[0.08em] text-white transition-colors hover:bg-primary-dark active:scale-[0.98]"
                   >
                     <UserIcon size={14} />
                     Acessar plataforma

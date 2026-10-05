@@ -17,6 +17,12 @@ const routeLabels: Record<string, string> = {
   users: "Usuários e permissões",
   enrollments: "Alunos e matrículas",
   applications: "Interessados e inscrições",
+  assessments: "Avaliações",
+  submissions: "Correções",
+  calendar: "Calendário",
+  books: "Livros",
+  gallery: "Galeria",
+  new: "Novo",
 };
 
 export default function Breadcrumbs({
@@ -58,6 +64,7 @@ export default function Breadcrumbs({
     >
       <Link
         href={pathname.startsWith("/admin") ? "/admin" : "/portal"}
+        aria-label={pathname.startsWith("/admin") ? "Visão geral do painel" : "Início do portal"}
         className="text-stone-500 hover:text-stone-800 transition-colors flex items-center"
       >
         <Home size={14} className="mr-1" />

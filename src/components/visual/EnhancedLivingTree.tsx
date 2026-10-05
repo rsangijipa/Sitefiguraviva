@@ -22,6 +22,7 @@ export interface EnhancedLivingTreeProps {
   windDirection: number; // -1 to 1
   leafFlutter: boolean;
   interactive: boolean;
+  driftingLeaves?: boolean;
   onCanopyClick?: (x: number, y: number) => void;
 }
 
@@ -42,6 +43,7 @@ export default function EnhancedLivingTree({
   windDirection = 0.5,
   leafFlutter = true,
   interactive = true,
+  driftingLeaves = true,
   onCanopyClick,
 }: EnhancedLivingTreeProps) {
   const id = useId().replace(/:/g, "");
@@ -65,12 +67,25 @@ export default function EnhancedLivingTree({
     gustWave: 0,
   });
 
-  // Animation loop with spring physics & traveling wind ripples
+  const [animationEnabled, setAnimationEnabled] = useState(false);
+
+  // Pause decoration outside the viewport and respect reduced-motion preferences.
   useEffect(() => {
     let frameId: number;
+    let running = false;
+    let inView = false;
+    const motionPreference = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    );
+    const mobile = window.matchMedia("(max-width: 767px)");
     let lastTime = performance.now();
 
     const animate = (time: number) => {
+      if (!running) return;
+      if (time - lastTime < 1000 / (mobile.matches ? 24 : 30)) {
+        frameId = requestAnimationFrame(animate);
+        return;
+      }
       const dt = Math.min((time - lastTime) / 1000, 0.05);
       lastTime = time;
 
@@ -98,7 +113,7 @@ export default function EnhancedLivingTree({
       p.currentY += (p.targetY - p.currentY) * 0.1;
 
       // Update sound with natural wind rhythm
-      if (windIntensity > 0) {
+      if (interactive && windIntensity > 0) {
         natureAudio.updateWind(
           Math.abs(p.velocity) * 0.4 + windIntensity * 0.6,
         );
@@ -114,9 +129,33 @@ export default function EnhancedLivingTree({
       frameId = requestAnimationFrame(animate);
     };
 
-    frameId = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(frameId);
-  }, [windIntensity, windDirection]);
+    const updatePlayback = () => {
+      const shouldRun = inView && !document.hidden && !motionPreference.matches;
+      setAnimationEnabled(shouldRun);
+      if (shouldRun === running) return;
+      running = shouldRun;
+      if (running) {
+        lastTime = performance.now();
+        frameId = requestAnimationFrame(animate);
+      } else {
+        cancelAnimationFrame(frameId);
+      }
+    };
+    const observer = new IntersectionObserver(([entry]) => {
+      inView = entry.isIntersecting;
+      updatePlayback();
+    });
+    if (containerRef.current) observer.observe(containerRef.current);
+    motionPreference.addEventListener("change", updatePlayback);
+    document.addEventListener("visibilitychange", updatePlayback);
+    return () => {
+      running = false;
+      cancelAnimationFrame(frameId);
+      observer.disconnect();
+      motionPreference.removeEventListener("change", updatePlayback);
+      document.removeEventListener("visibilitychange", updatePlayback);
+    };
+  }, [windIntensity, windDirection, interactive]);
 
   // Pointer move handler: applies wind force impulse
   const handlePointerMove = useCallback(
@@ -141,6 +180,7 @@ export default function EnhancedLivingTree({
   }, []);
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!interactive) return;
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
     const clickX = e.clientX - rect.left;
@@ -183,7 +223,8 @@ export default function EnhancedLivingTree({
   return (
     <div
       ref={containerRef}
-      className={`relative w-full aspect-[454/523] select-none cursor-pointer group ${className}`}
+      className={`relative w-full aspect-[454/523] select-none ${interactive ? "cursor-pointer" : "pointer-events-none"} group ${className}`}
+      data-tree-animation={animationEnabled ? "running" : "paused"}
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}
       onClick={handleClick}
@@ -450,7 +491,9 @@ export default function EnhancedLivingTree({
                       (leafFlutter ? 1.6 : 0.4) +
                     petal.phase;
                   const flutterAngle = leafFlutter
-                    ? Math.sin(microPhase) * (2.5 + windIntensity * 3.5)
+                    ? Math.sin(microPhase) *
+                      Math.min(1, windIntensity) *
+                      (2.5 + windIntensity * 3.5)
                     : 0;
                   const flutterScaleX = leafFlutter
                     ? petal.scale * (0.78 + 0.12 * Math.cos(microPhase * 1.2))
@@ -493,33 +536,37 @@ export default function EnhancedLivingTree({
         </g>
 
         <g aria-hidden="true" pointerEvents="none">
-          {FLYING_LEAVES.map((leaf) => (
-            <g
-              key={`${leaf.x}-${leaf.y}`}
-              className="enhanced-tree-flying-leaf"
-              style={{ animationDelay: leaf.delay }}
-            >
+          {driftingLeaves &&
+            FLYING_LEAVES.map((leaf) => (
               <g
-                transform={`translate(${leaf.x} ${leaf.y}) rotate(${leaf.angle}) scale(${leaf.scale})`}
+                key={`${leaf.x}-${leaf.y}`}
+                className="enhanced-tree-flying-leaf"
+                style={{
+                  animationDelay: leaf.delay,
+                  animationPlayState: animationEnabled ? "running" : "paused",
+                }}
               >
-                <use
-                  href={`#${id}-master-petal`}
-                  fill={leaf.color}
-                  fillOpacity="0.9"
-                  stroke={leaf.color}
-                  strokeOpacity="0.35"
-                  strokeWidth="0.8"
-                />
-                <path
-                  d="M0 16 Q1 -3 0 -15"
-                  fill="none"
-                  stroke="rgba(255,255,255,0.45)"
-                  strokeWidth="0.75"
-                  strokeLinecap="round"
-                />
+                <g
+                  transform={`translate(${leaf.x} ${leaf.y}) rotate(${leaf.angle}) scale(${leaf.scale})`}
+                >
+                  <use
+                    href={`#${id}-master-petal`}
+                    fill={leaf.color}
+                    fillOpacity="0.9"
+                    stroke={leaf.color}
+                    strokeOpacity="0.35"
+                    strokeWidth="0.8"
+                  />
+                  <path
+                    d="M0 16 Q1 -3 0 -15"
+                    fill="none"
+                    stroke="rgba(255,255,255,0.45)"
+                    strokeWidth="0.75"
+                    strokeLinecap="round"
+                  />
+                </g>
               </g>
-            </g>
-          ))}
+            ))}
         </g>
       </svg>
     </div>

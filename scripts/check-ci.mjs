@@ -45,6 +45,17 @@ try {
       NODE_ENV: check === "build" || check === "smoke" ? "production" : "test",
     };
     if (check === "unit") delete env.FIRESTORE_EMULATOR_HOST;
+    // Do not inherit a bypass from the caller. A build-only invocation must
+    // still validate, and failed checks must never authorize the bypass.
+    delete env.FIGURA_CI_VALIDATED;
+    if (
+      check === "build" &&
+      ["lint", "types"].every((validation) =>
+        results.some((result) => result.check === validation && result.exitCode === 0),
+      )
+    ) {
+      env.FIGURA_CI_VALIDATED = "1";
+    }
     const commands = {
       lint: [packageBin("eslint", "eslint"), "src", "tests", "e2e"],
       scripts: [

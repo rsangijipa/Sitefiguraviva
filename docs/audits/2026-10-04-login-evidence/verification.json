@@ -1,0 +1,222 @@
+[
+  {
+    "name": "desktop",
+    "viewport": [
+      1440,
+      900
+    ],
+    "path": "/auth",
+    "status": 200,
+    "card": {
+      "x": 820,
+      "y": 136.5,
+      "width": 440,
+      "height": 671
+    },
+    "background": {
+      "loaded": true,
+      "source": "http://localhost:3101/assets/auth/watercolor.webp",
+      "position": "50% 50%"
+    },
+    "horizontalOverflow": false,
+    "errors": []
+  },
+  {
+    "name": "laptop",
+    "viewport": [
+      1366,
+      768
+    ],
+    "path": "/auth",
+    "status": 200,
+    "card": {
+      "x": 783,
+      "y": 70.5,
+      "width": 440,
+      "height": 671
+    },
+    "background": {
+      "loaded": true,
+      "source": "http://localhost:3101/assets/auth/watercolor.webp",
+      "position": "50% 50%"
+    },
+    "horizontalOverflow": false,
+    "errors": []
+  },
+  {
+    "name": "tablet",
+    "viewport": [
+      768,
+      1024
+    ],
+    "path": "/auth",
+    "status": 200,
+    "card": {
+      "x": 164,
+      "y": 198.5,
+      "width": 440,
+      "height": 671
+    },
+    "background": {
+      "loaded": true,
+      "source": "http://localhost:3101/assets/auth/watercolor.webp",
+      "position": "35% 50%"
+    },
+    "horizontalOverflow": false,
+    "errors": []
+  },
+  {
+    "name": "mobile",
+    "viewport": [
+      390,
+      844
+    ],
+    "path": "/auth",
+    "status": 200,
+    "card": {
+      "x": 16,
+      "y": 115.5,
+      "width": 358,
+      "height": 657
+    },
+    "background": {
+      "loaded": true,
+      "source": "http://localhost:3101/assets/auth/watercolor-small.webp",
+      "position": "24% 50%"
+    },
+    "horizontalOverflow": false,
+    "errors": []
+  },
+  {
+    "name": "medium-mobile",
+    "viewport": [
+      375,
+      667
+    ],
+    "path": "/auth",
+    "status": 200,
+    "card": {
+      "x": 16,
+      "y": 111,
+      "width": 343,
+      "height": 489
+    },
+    "background": {
+      "loaded": true,
+      "source": "http://localhost:3101/assets/auth/watercolor-small.webp",
+      "position": "24% 50%"
+    },
+    "horizontalOverflow": false,
+    "errors": []
+  },
+  {
+    "name": "small-mobile",
+    "viewport": [
+      320,
+      568
+    ],
+    "path": "/auth",
+    "status": 200,
+    "card": {
+      "x": 16,
+      "y": 68,
+      "width": 288,
+      "height": 489
+    },
+    "background": {
+      "loaded": true,
+      "source": "http://localhost:3101/assets/auth/watercolor-small.webp",
+      "position": "24% 50%"
+    },
+    "horizontalOverflow": false,
+    "errors": []
+  },
+  {
+    "name": "landscape",
+    "viewport": [
+      844,
+      390
+    ],
+    "path": "/auth",
+    "status": 200,
+    "card": {
+      "x": 202,
+      "y": 68,
+      "width": 440,
+      "height": 495
+    },
+    "background": {
+      "loaded": true,
+      "source": "http://localhost:3101/assets/auth/watercolor.webp",
+      "position": "50% 50%"
+    },
+    "horizontalOverflow": false,
+    "errors": []
+  },
+  {
+    "name": "signup-mobile",
+    "viewport": [
+      390,
+      844
+    ],
+    "path": "/auth?mode=signup",
+    "status": 200,
+    "card": {
+      "x": 16,
+      "y": 68,
+      "width": 358,
+      "height": 923.25
+    },
+    "background": {
+      "loaded": true,
+      "source": "http://localhost:3101/assets/auth/watercolor-small.webp",
+      "position": "24% 50%"
+    },
+    "horizontalOverflow": false,
+    "errors": []
+  },
+  {
+    "name": "admin-mobile",
+    "viewport": [
+      390,
+      844
+    ],
+    "path": "/auth?next=%2Fadmin",
+    "status": 200,
+    "card": {
+      "x": 16,
+      "y": 115.5,
+      "width": 358,
+      "height": 657
+    },
+    "background": {
+      "loaded": true,
+      "source": "http://localhost:3101/assets/auth/watercolor-small.webp",
+      "position": "24% 50%"
+    },
+    "horizontalOverflow": false,
+    "errors": []
+  },
+  {
+    "name": "legacy-admin",
+    "viewport": [
+      1366,
+      768
+    ],
+    "path": "/admin/login",
+    "status": 200,
+    "card": {
+      "x": 783,
+      "y": 70.5,
+      "width": 440,
+      "height": 671
+    },
+    "background": {
+      "loaded": true,
+      "source": "http://localhost:3101/assets/auth/watercolor.webp",
+      "position": "50% 50%"
+    },
+    "horizontalOverflow": false,
+    "errors": []
+  }
+]

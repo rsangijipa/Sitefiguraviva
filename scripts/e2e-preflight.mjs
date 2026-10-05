@@ -42,12 +42,27 @@ export function assertIsolatedE2eEnvironment(env) {
   return url.origin;
 }
 
+export function assertEadPilotEnvironment(env) {
+  const origin = assertIsolatedE2eEnvironment(env);
+  for (const name of ["E2E_COURSE_ID", "E2E_FINAL_LESSON_ID"]) {
+    if (!/^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/.test(env[name] || ""))
+      throw new Error(`Missing or invalid ${name}.`);
+  }
+  for (const name of ["E2E_COURSE_TITLE", "E2E_FINAL_LESSON_TITLE"])
+    if (!env[name]?.trim()) throw new Error(`Missing ${name}.`);
+  return origin;
+}
+
 if (
   process.argv[1] &&
   import.meta.url === pathToFileURL(process.argv[1]).href
 ) {
   try {
-    assertIsolatedE2eEnvironment(process.env);
+    if (process.argv.includes("--ead-pilot")) {
+      assertEadPilotEnvironment(process.env);
+    } else {
+      assertIsolatedE2eEnvironment(process.env);
+    }
     console.log("Isolated E2E configuration verified.");
   } catch {
     console.error(

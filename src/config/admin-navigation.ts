@@ -42,9 +42,9 @@ export const ADMIN_NAVIGATION_GROUPS: AdminNavigationGroup[] = [
   {
     label: "Pessoas",
     items: [
-      { icon: Shield, label: "Usuários & Permissões", path: "/admin/users" },
+      { icon: Shield, label: "Usuários e permissões", path: "/admin/users" },
       { icon: UserPlus, label: "Interessados", path: "/admin/applications" },
-      { icon: Users, label: "Alunos & Matrículas", path: "/admin/enrollments" },
+      { icon: Users, label: "Matrículas", path: "/admin/enrollments" },
     ],
   },
   {
@@ -54,12 +54,12 @@ export const ADMIN_NAVIGATION_GROUPS: AdminNavigationGroup[] = [
       { icon: Check, label: "Aprovações", path: "/admin/approvals" },
       {
         icon: FileText,
-        label: "Avaliações (Provas)",
+        label: "Avaliações",
         path: "/admin/assessments",
       },
       {
         icon: ClipboardList,
-        label: "Correções (Provas)",
+        label: "Correções",
         path: "/admin/assessments/submissions",
       },
     ],
@@ -70,7 +70,7 @@ export const ADMIN_NAVIGATION_GROUPS: AdminNavigationGroup[] = [
       { icon: PenTool, label: "Diário Visual", path: "/admin/blog" },
       { icon: BookOpen, label: "Galeria", path: "/admin/gallery" },
       { icon: FileText, label: "Documentos", path: "/admin/public-docs" },
-      { icon: Library, label: "Estante (Livros)", path: "/admin/books" },
+      { icon: Library, label: "Livros", path: "/admin/books" },
     ],
   },
   {
@@ -85,8 +85,8 @@ export const ADMIN_NAVIGATION_GROUPS: AdminNavigationGroup[] = [
   {
     label: "Sistema",
     items: [
-      { icon: Activity, label: "Logs de Sistema", path: "/admin/logs" },
-      { icon: Settings, label: "Utilidades (Dev)", path: "/admin/utilities" },
+      { icon: Activity, label: "Histórico do sistema", path: "/admin/logs" },
+      { icon: Settings, label: "Utilidades", path: "/admin/utilities" },
       { icon: Settings, label: "Configurações", path: "/admin/settings" },
     ],
   },
@@ -96,5 +96,14 @@ export function isAdminRouteActive(pathname: string | null, itemPath: string) {
   if (!pathname) return false;
   if (itemPath === "/admin") return pathname === itemPath;
 
-  return pathname === itemPath || pathname.startsWith(`${itemPath}/`);
+  const matches = pathname === itemPath || pathname.startsWith(`${itemPath}/`);
+  const hasMoreSpecificMatch = ADMIN_NAVIGATION_GROUPS.some((group) =>
+    group.items.some(
+      (item) =>
+        item.path !== itemPath &&
+        item.path.startsWith(`${itemPath}/`) &&
+        (pathname === item.path || pathname.startsWith(`${item.path}/`)),
+    ),
+  );
+  return matches && !hasMoreSpecificMatch;
 }

@@ -1,0 +1,248 @@
+{
+  "date": "2026-10-04",
+  "removedDirect": [
+    {
+      "name": "@tsparticles/react",
+      "version": "3.0.0"
+    },
+    {
+      "name": "@tsparticles/slim",
+      "version": "3.9.1"
+    },
+    {
+      "name": "tsparticles",
+      "version": "3.9.1"
+    }
+  ],
+  "removedInstallationEntries": [
+    {
+      "name": "@tsparticles/basic",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/engine",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/interaction-external-attract",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/interaction-external-bounce",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/interaction-external-bubble",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/interaction-external-connect",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/interaction-external-grab",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/interaction-external-pause",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/interaction-external-push",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/interaction-external-remove",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/interaction-external-repulse",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/interaction-external-slow",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/interaction-external-trail",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/interaction-particles-attract",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/interaction-particles-collisions",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/interaction-particles-links",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/move-base",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/move-parallax",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/plugin-absorbers",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/plugin-easing-quad",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/plugin-emitters",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/plugin-emitters-shape-circle",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/plugin-emitters-shape-square",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/plugin-hex-color",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/plugin-hsl-color",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/plugin-rgb-color",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/react",
+      "version": "3.0.0"
+    },
+    {
+      "name": "@tsparticles/shape-circle",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/shape-emoji",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/shape-image",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/shape-line",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/shape-polygon",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/shape-square",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/shape-star",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/shape-text",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/slim",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/updater-color",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/updater-destroy",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/updater-life",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/updater-opacity",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/updater-out-modes",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/updater-roll",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/updater-rotate",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/updater-size",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/updater-stroke-color",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/updater-tilt",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/updater-twinkle",
+      "version": "3.9.1"
+    },
+    {
+      "name": "@tsparticles/updater-wobble",
+      "version": "3.9.1"
+    },
+    {
+      "name": "tsparticles",
+      "version": "3.9.1"
+    }
+  ],
+  "otherLockEntriesChanged": [],
+  "validation": {
+    "cleanInstall": "npm ci --ignore-scripts --no-audit --no-fund (passed; 1372 packages)",
+    "removedPackagesAbsent": true,
+    "lint": "passed",
+    "typecheck": "passed",
+    "build": "passed",
+    "firstLoadJsCourseKB": 397,
+    "firstLoadJsLessonKB": 324,
+    "publicSmoke": {
+      "passed": 7,
+      "seconds": 10.9,
+      "exitCode": 0,
+      "browser": "Chromium headless shell 1243 (temporary test configuration)"
+    },
+    "scriptsAndJest": "Not rerun; latest execution is cleanup-02",
+    "buildWarning": "Webpack cache: Unable to snapshot resolve dependencies"
+  },
+  "knip": {
+    "unusedDependenciesBefore": 6,
+    "unusedDependenciesAfter": 3,
+    "unresolved": 0,
+    "remaining": [
+      "jspdf",
+      "qrcode.react",
+      "recharts"
+    ]
+  },
+  "preservedConsumer": "recharts imported by src/components/admin/analytics/AnalyticsDashboard.tsx",
+  "notVerified": [
+    "Authenticated staging flow (staging does not exist)",
+    "Cache hits in GitHub after publishing local workflow changes"
+  ]
+}

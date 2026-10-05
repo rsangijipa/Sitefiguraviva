@@ -10,6 +10,7 @@ import {
   ModuleDoc,
 } from "@/types/lms";
 import { revalidatePath } from "next/cache";
+import { ZodError } from "zod";
 import {
   addAdminMaterial,
   bumpAdminCourseRevision,
@@ -112,6 +113,10 @@ export async function createCourseAction(
   data: Partial<CourseDoc>,
 ): Promise<string> {
   await requireAdmin();
+  return insertCourse(data);
+}
+
+async function insertCourse(data: Partial<CourseDoc>): Promise<string> {
   const payload = sanitizeRecord(data, "course");
   const coverImage =
     getStringField(payload, "coverImage") || getStringField(payload, "image");
@@ -125,6 +130,68 @@ export async function createCourseAction(
   });
   revalidatePath("/admin/courses");
   return courseId;
+}
+
+export type CreateCourseResult =
+  | { success: true; courseId: string }
+  | { success: false; message: string };
+
+export async function createCourseResultAction(
+  data: Partial<CourseDoc>,
+): Promise<CreateCourseResult> {
+  // Keep authentication redirects outside error handling.
+  await requireAdmin();
+  if (!data || typeof data !== "object" || Array.isArray(data)) {
+    return { success: false, message: "Confira os dados do curso." };
+  }
+  if (typeof data.title !== "string" || !data.title.trim()) {
+    return { success: false, message: "Informe o título do curso." };
+  }
+  try {
+    return { success: true, courseId: await insertCourse(data) };
+  } catch (error: unknown) {
+    if (error instanceof ZodError) {
+      return {
+        success: false,
+        message: error.issues[0]?.message || "Confira os dados do curso.",
+      };
+    }
+    const safeValidationMessages = [
+      "Informe a carga horária em minutos inteiros.",
+      "Valor comercial inválido.",
+      "Informe um número de parcelas entre 1 e 120.",
+    ];
+    if (
+      error instanceof Error &&
+      safeValidationMessages.includes(error.message)
+    ) {
+      return { success: false, message: error.message };
+    }
+    const code =
+      error && typeof error === "object" && "code" in error
+        ? String(error.code)
+        : undefined;
+    if (code === "23505") {
+      return {
+        success: false,
+        message:
+          "Já existe um curso com esse endereço (slug). Escolha outro endereço.",
+      };
+    }
+    if (code === "23503") {
+      return {
+        success: false,
+        message:
+          "Um dos registros vinculados ao curso não existe mais. Atualize a página e confira os dados.",
+      };
+    }
+    console.error("[createCourse] Failed to save course", error);
+    return {
+      success: false,
+      message:
+        "Não foi possível salvar o curso. Tente novamente. Se o erro continuar, consulte os logs do servidor.",
+    };
+  }
 }
 
 export async function updateCourseAction(

@@ -52,7 +52,9 @@ export default function NotificationBell() {
     <div className="relative z-50">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-stone-500 hover:text-stone-800 transition-colors"
+        className="relative flex h-11 w-11 items-center justify-center rounded-lg text-stone-600 hover:bg-stone-100 hover:text-stone-800 transition-colors"
+        aria-label="Notificações"
+        aria-expanded={isOpen}
         title="Notificações"
       >
         <Bell size={20} />
@@ -67,7 +69,7 @@ export default function NotificationBell() {
             className="fixed inset-0 z-40 bg-transparent"
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute right-0 mt-4 w-80 md:w-96 bg-white rounded-2xl shadow-2xl border border-stone-100 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 origin-top-right">
+          <div className="fixed inset-x-4 top-16 w-auto sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-3 sm:w-96 bg-white rounded-2xl shadow-2xl border border-stone-100 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 origin-top-right">
             <div className="p-5 border-b border-stone-50 flex justify-between items-center bg-white">
               <div>
                 <h3 className="font-bold text-stone-800">Notificações</h3>

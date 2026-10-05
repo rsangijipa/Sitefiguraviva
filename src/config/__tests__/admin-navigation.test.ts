@@ -23,4 +23,19 @@ describe("admin navigation", () => {
   it("does not keep the dashboard active on another admin route", () => {
     expect(isAdminRouteActive("/admin/courses", "/admin")).toBe(false);
   });
+
+  it("highlights corrections without also highlighting assessments", () => {
+    expect(
+      isAdminRouteActive(
+        "/admin/assessments/submissions",
+        "/admin/assessments/submissions",
+      ),
+    ).toBe(true);
+    expect(
+      isAdminRouteActive(
+        "/admin/assessments/submissions",
+        "/admin/assessments",
+      ),
+    ).toBe(false);
+  });
 });

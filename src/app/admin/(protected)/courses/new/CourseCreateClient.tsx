@@ -170,7 +170,7 @@ export default function CourseCreateClient() {
     >
       <div className="flex flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
         {/* Sub-header navigation / progress indicator */}
-        <div className="border-b border-stone-200 bg-stone-50/70 px-6 py-4 flex items-center justify-between">
+        <div className="border-b border-stone-200 bg-stone-50/70 px-4 sm:px-6 py-4 flex flex-wrap gap-3 items-center justify-between">
           <div className="flex items-center gap-2 text-primary font-semibold text-sm">
             <Layout size={18} className="text-primary" />
             <span>Informações Gerais do Curso</span>

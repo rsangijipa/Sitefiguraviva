@@ -1,0 +1,202 @@
+[
+  {
+    "name": "desktop",
+    "viewport": [
+      1440,
+      900
+    ],
+    "status": 200,
+    "stage": {
+      "x": 776.59375,
+      "y": 104,
+      "width": 543.390625,
+      "height": 520
+    },
+    "copy": {
+      "x": 120,
+      "y": 255.375,
+      "width": 560,
+      "height": 217.234375
+    },
+    "overlap": false,
+    "overflow": false,
+    "reducedMotionPauses": true,
+    "offscreenPauses": true,
+    "errors": []
+  },
+  {
+    "name": "laptop",
+    "viewport": [
+      1366,
+      768
+    ],
+    "status": 200,
+    "stage": {
+      "x": 739.59375,
+      "y": 104,
+      "width": 543.390625,
+      "height": 520
+    },
+    "copy": {
+      "x": 83,
+      "y": 255.375,
+      "width": 560,
+      "height": 217.234375
+    },
+    "overlap": false,
+    "overflow": false,
+    "reducedMotionPauses": true,
+    "offscreenPauses": true,
+    "errors": []
+  },
+  {
+    "name": "tablet",
+    "viewport": [
+      768,
+      1024
+    ],
+    "status": 200,
+    "stage": {
+      "x": 416.390625,
+      "y": 112,
+      "width": 311.609375,
+      "height": 340
+    },
+    "copy": {
+      "x": 40,
+      "y": 121.890625,
+      "width": 344.390625,
+      "height": 320.203125
+    },
+    "overlap": false,
+    "overflow": false,
+    "reducedMotionPauses": true,
+    "offscreenPauses": true,
+    "errors": []
+  },
+  {
+    "name": "mobile",
+    "viewport": [
+      390,
+      844
+    ],
+    "status": 200,
+    "stage": {
+      "x": 55,
+      "y": 461.203125,
+      "width": 280,
+      "height": 280
+    },
+    "copy": {
+      "x": 24,
+      "y": 112,
+      "width": 342,
+      "height": 325.203125
+    },
+    "overlap": false,
+    "overflow": false,
+    "reducedMotionPauses": true,
+    "offscreenPauses": true,
+    "errors": []
+  },
+  {
+    "name": "small-mobile",
+    "viewport": [
+      320,
+      740
+    ],
+    "status": 200,
+    "stage": {
+      "x": 40,
+      "y": 482.328125,
+      "width": 240,
+      "height": 240
+    },
+    "copy": {
+      "x": 20,
+      "y": 112,
+      "width": 280,
+      "height": 346.328125
+    },
+    "overlap": false,
+    "overflow": false,
+    "reducedMotionPauses": true,
+    "offscreenPauses": true,
+    "errors": []
+  },
+  {
+    "name": "landscape",
+    "viewport": [
+      844,
+      390
+    ],
+    "status": 200,
+    "stage": {
+      "x": 456.296875,
+      "y": 112,
+      "width": 347.6875,
+      "height": 340
+    },
+    "copy": {
+      "x": 40,
+      "y": 120.546875,
+      "width": 384.296875,
+      "height": 322.890625
+    },
+    "overlap": false,
+    "overflow": false,
+    "reducedMotionPauses": true,
+    "offscreenPauses": true,
+    "errors": []
+  },
+  {
+    "name": "dark-desktop",
+    "viewport": [
+      1440,
+      900
+    ],
+    "status": 200,
+    "stage": {
+      "x": 776.59375,
+      "y": 104,
+      "width": 543.390625,
+      "height": 520
+    },
+    "copy": {
+      "x": 120,
+      "y": 255.375,
+      "width": 560,
+      "height": 217.234375
+    },
+    "overlap": false,
+    "overflow": false,
+    "reducedMotionPauses": true,
+    "offscreenPauses": true,
+    "errors": []
+  },
+  {
+    "name": "reduced-mobile",
+    "viewport": [
+      390,
+      844
+    ],
+    "status": 200,
+    "stage": {
+      "x": 55,
+      "y": 461.203125,
+      "width": 280,
+      "height": 280
+    },
+    "copy": {
+      "x": 24,
+      "y": 112,
+      "width": 342,
+      "height": 325.203125
+    },
+    "overlap": false,
+    "overflow": false,
+    "reducedMotionPauses": true,
+    "offscreenPauses": false,
+    "errors": []
+  }
+]

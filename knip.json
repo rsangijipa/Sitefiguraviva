@@ -1,0 +1,13 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": ["scripts/**/*.{js,mjs,cjs,ts}", "e2e/**/*.ts", "public/sw.js"],
+  "project": [
+    "src/**/*.{js,jsx,ts,tsx}",
+    "scripts/**/*.{js,mjs,cjs,ts}",
+    "tests/**/*.{js,ts,tsx}",
+    "e2e/**/*.{js,ts,tsx}",
+    "*.{js,mjs,cjs,ts}"
+  ],
+  "ignore": ["public/workbox-*.js"],
+  "ignoreBinaries": ["firebase"]
+}

@@ -1,0 +1,7492 @@
+{
+  "issues": [
+    {
+      "file": "src/actions/grading.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/actions/grading.ts"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/TreeVisualization.jsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/TreeVisualization.jsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/hooks/useMediaQuery.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/hooks/useMediaQuery.ts"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/lib/server-feature-flags.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/lib/server-feature-flags.ts"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/scripts/backfill-users.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/scripts/backfill-users.ts"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/scripts/migrate-enrollments.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/scripts/migrate-enrollments.ts"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/admin/MaterialsManager.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/admin/MaterialsManager.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/assessment/QuizTaker.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/assessment/QuizTaker.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/common/FileUploader.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/common/FileUploader.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/ComingSoonResource.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/ComingSoonResource.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/services/supabaseService.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/services/supabaseService.ts"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/sections/MethodologySection.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/sections/MethodologySection.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/sections/TestimonialsSection.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/sections/TestimonialsSection.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/ui/WaveLines.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/ui/WaveLines.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/thought-garden/repository.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/features/thought-garden/repository.ts"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/thought-garden/schema.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/features/thought-garden/schema.ts"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/thought-garden/types.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/features/thought-garden/types.ts"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/thought-garden/use-session-state.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/features/thought-garden/use-session-state.ts"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/app/actions/admin/maintenance.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/app/actions/admin/maintenance.ts"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/admin/analytics/AnalyticsDashboard.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/admin/analytics/AnalyticsDashboard.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/admin/grading/GradingDashboard.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/admin/grading/GradingDashboard.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/interactive-resources/awareness-sounds/AwarenessSoundsExperience.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/features/interactive-resources/awareness-sounds/AwarenessSoundsExperience.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/interactive-resources/awareness-sounds/repository.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/features/interactive-resources/awareness-sounds/repository.ts"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/interactive-resources/awareness-sounds/schema.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/features/interactive-resources/awareness-sounds/schema.ts"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/interactive-resources/awareness-sounds/types.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/features/interactive-resources/awareness-sounds/types.ts"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/interactive-resources/pause-room/PauseRoomExperience.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/features/interactive-resources/pause-room/PauseRoomExperience.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/thought-garden/components/GardenCompletion.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/features/thought-garden/components/GardenCompletion.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/thought-garden/components/GardenEmptyState.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/features/thought-garden/components/GardenEmptyState.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/thought-garden/components/GardenErrorState.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/features/thought-garden/components/GardenErrorState.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/thought-garden/components/GardenExitModal.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/features/thought-garden/components/GardenExitModal.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/thought-garden/components/GardenLoading.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/features/thought-garden/components/GardenLoading.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/thought-garden/components/GardenStage.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/features/thought-garden/components/GardenStage.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/thought-garden/components/SavedThoughtsList.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/features/thought-garden/components/SavedThoughtsList.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/thought-garden/components/ThoughtComposer.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/features/thought-garden/components/ThoughtComposer.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/thought-garden/components/ThoughtGardenExperience.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/features/thought-garden/components/ThoughtGardenExperience.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/thought-garden/components/ThoughtLeaf.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/features/thought-garden/components/ThoughtLeaf.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/casoclinicointerativo/App.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/casoclinicointerativo/App.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/casoclinicointerativo/types.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/casoclinicointerativo/types.ts"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/duas-cadeiras/App.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/duas-cadeiras/App.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/fronteiras-de-contato/App.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/fronteiras-de-contato/App.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/intensidade-agora/IntensidadeAgoraApp.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/intensidade-agora/IntensidadeAgoraApp.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/intensidade-agora/types.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/intensidade-agora/types.ts"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/jardim-de-pensamentos/JardimPensamentosApp.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/jardim-de-pensamentos/JardimPensamentosApp.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/polaridades/PolaridadesApp.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/polaridades/PolaridadesApp.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/interactive-resources/pause-room/components/DurationPicker.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/features/interactive-resources/pause-room/components/DurationPicker.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/interactive-resources/pause-room/components/HubView.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/features/interactive-resources/pause-room/components/HubView.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/interactive-resources/pause-room/components/PauseChoiceGrid.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/features/interactive-resources/pause-room/components/PauseChoiceGrid.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/interactive-resources/pause-room/components/PauseControls.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/features/interactive-resources/pause-room/components/PauseControls.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/interactive-resources/pause-room/components/PauseStage.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/features/interactive-resources/pause-room/components/PauseStage.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/interactive-resources/pause-room/components/TimerDisplay.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/features/interactive-resources/pause-room/components/TimerDisplay.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/interactive-resources/pause-room/practices/BreathingPractice.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/features/interactive-resources/pause-room/practices/BreathingPractice.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/interactive-resources/pause-room/practices/ListeningPractice.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/features/interactive-resources/pause-room/practices/ListeningPractice.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/interactive-resources/pause-room/practices/MovementPractice.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/features/interactive-resources/pause-room/practices/MovementPractice.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/interactive-resources/pause-room/practices/ObservingPractice.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/features/interactive-resources/pause-room/practices/ObservingPractice.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/interactive-resources/pause-room/practices/SlowingPractice.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/features/interactive-resources/pause-room/practices/SlowingPractice.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/app/admin/(protected)/settings/components/ConfigSettings.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/app/admin/(protected)/settings/components/ConfigSettings.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/app/admin/(protected)/settings/components/InstituteSettings.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/app/admin/(protected)/settings/components/InstituteSettings.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/app/admin/(protected)/settings/components/TeamSettings.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/app/admin/(protected)/settings/components/TeamSettings.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/casoclinicointerativo/components/CaseCard.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/casoclinicointerativo/components/CaseCard.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/casoclinicointerativo/components/CaseNavigator.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/casoclinicointerativo/components/CaseNavigator.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/casoclinicointerativo/components/ConclusionView.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/casoclinicointerativo/components/ConclusionView.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/casoclinicointerativo/components/ControlsHeader.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/casoclinicointerativo/components/ControlsHeader.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/casoclinicointerativo/components/StudyModal.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/casoclinicointerativo/components/StudyModal.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/casoclinicointerativo/data/casesData.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/casoclinicointerativo/data/casesData.ts"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/duas-cadeiras/components/AbstractChairs.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/duas-cadeiras/components/AbstractChairs.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/duas-cadeiras/components/ChairNamingModal.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/duas-cadeiras/components/ChairNamingModal.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/duas-cadeiras/components/ConfirmDeleteModal.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/duas-cadeiras/components/ConfirmDeleteModal.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/duas-cadeiras/components/DialogueExchange.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/duas-cadeiras/components/DialogueExchange.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/duas-cadeiras/components/HistoryModal.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/duas-cadeiras/components/HistoryModal.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/duas-cadeiras/components/PerspectiveInput.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/duas-cadeiras/components/PerspectiveInput.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/duas-cadeiras/components/SessionControls.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/duas-cadeiras/components/SessionControls.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/duas-cadeiras/components/SessionSummaryModal.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/duas-cadeiras/components/SessionSummaryModal.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/duas-cadeiras/components/TherapeuticNotice.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/duas-cadeiras/components/TherapeuticNotice.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/fronteiras-de-contato/components/DiaryView.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/fronteiras-de-contato/components/DiaryView.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/fronteiras-de-contato/components/RelationalFieldCanvas.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/fronteiras-de-contato/components/RelationalFieldCanvas.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/fronteiras-de-contato/components/TheoryGuide.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/fronteiras-de-contato/components/TheoryGuide.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/fronteiras-de-contato/components/VignetteAdmin.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/fronteiras-de-contato/components/VignetteAdmin.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/fronteiras-de-contato/components/VignetteCatalog.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/fronteiras-de-contato/components/VignetteCatalog.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/fronteiras-de-contato/components/VignettePlayer.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/fronteiras-de-contato/components/VignettePlayer.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/intensidade-agora/hooks/use-intensity-canvas.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/intensidade-agora/hooks/use-intensity-canvas.ts"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/intensidade-agora/utils/particle-colors.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/intensidade-agora/utils/particle-colors.ts"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/jardim-de-pensamentos/portal-garden/components/BotanicalShapes.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/jardim-de-pensamentos/portal-garden/components/BotanicalShapes.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/jardim-de-pensamentos/portal-garden/components/JardimCanvas.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/jardim-de-pensamentos/portal-garden/components/JardimCanvas.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/jardim-de-pensamentos/portal-garden/components/JardimDePensamentos.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/jardim-de-pensamentos/portal-garden/components/JardimDePensamentos.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/jardim-de-pensamentos/portal-garden/types/index.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/jardim-de-pensamentos/portal-garden/types/index.ts"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/jardim-de-pensamentos/portal-garden/lib/api.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/jardim-de-pensamentos/portal-garden/lib/api.ts"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/jardim-de-pensamentos/portal-garden/lib/soundSynthesizer.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/jardim-de-pensamentos/portal-garden/lib/soundSynthesizer.ts"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/jardim-de-pensamentos/portal-garden/components/shell/InteractiveResourceShell.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/jardim-de-pensamentos/portal-garden/components/shell/InteractiveResourceShell.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/rios-dos-pensamentos/src/features/portal/StudentHistory.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/rios-dos-pensamentos/src/features/portal/StudentHistory.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/jardim-de-pensamentos/src/features/interactive-resources/thought-garden/components/SavedThoughtsList.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [
+        {
+          "name": "src/components/resources/apps/jardim-de-pensamentos/src/features/interactive-resources/thought-garden/components/SavedThoughtsList.tsx"
+        }
+      ],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "package.json",
+      "binaries": [
+        {
+          "name": "tsc"
+        }
+      ],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [
+        {
+          "name": "@google/generative-ai",
+          "line": 31,
+          "col": 6,
+          "pos": 1417
+        },
+        {
+          "name": "@react-three/postprocessing",
+          "line": 36,
+          "col": 6,
+          "pos": 1602
+        },
+        {
+          "name": "@tsparticles/react",
+          "line": 40,
+          "col": 6,
+          "pos": 1763
+        },
+        {
+          "name": "@tsparticles/slim",
+          "line": 41,
+          "col": 6,
+          "pos": 1799
+        },
+        {
+          "name": "jspdf",
+          "line": 54,
+          "col": 6,
+          "pos": 2195
+        },
+        {
+          "name": "next-view-transitions",
+          "line": 59,
+          "col": 6,
+          "pos": 2324
+        },
+        {
+          "name": "postprocessing",
+          "line": 60,
+          "col": 6,
+          "pos": 2363
+        },
+        {
+          "name": "qrcode.react",
+          "line": 62,
+          "col": 6,
+          "pos": 2420
+        },
+        {
+          "name": "recharts",
+          "line": 67,
+          "col": 6,
+          "pos": 2565
+        },
+        {
+          "name": "tsparticles",
+          "line": 73,
+          "col": 6,
+          "pos": 2727
+        }
+      ],
+      "devDependencies": [
+        {
+          "name": "ts-node",
+          "line": 101,
+          "col": 6,
+          "pos": 3580
+        }
+      ],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/necessidades-agora/src/vite-env.d.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "vite",
+          "line": 1,
+          "col": 1,
+          "pos": 0
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/public-site/infrastructure/publicContact.server.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "server-only",
+          "line": 1,
+          "col": 8,
+          "pos": 7
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/public-site/infrastructure/supabasePublicPagesRepository.server.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "server-only",
+          "line": 1,
+          "col": 8,
+          "pos": 7
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/infrastructure/supabase/server.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "server-only",
+          "line": 1,
+          "col": 8,
+          "pos": 7
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "tests/accessibility/public-contracts.test.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "@jest/globals",
+          "line": 3,
+          "col": 38,
+          "pos": 93
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "tests/architecture/no-firebase-runtime.test.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "@jest/globals",
+          "line": 3,
+          "col": 38,
+          "pos": 118
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "tests/performance/public-budgets.test.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "@jest/globals",
+          "line": 3,
+          "col": 38,
+          "pos": 93
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/lib/auth/server.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "server-only",
+          "line": 1,
+          "col": 8,
+          "pos": 7
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/certificates/infrastructure/supabaseCertificateIssuer.server.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "server-only",
+          "line": 1,
+          "col": 8,
+          "pos": 7
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/lib/auth/access-gate.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "server-only",
+          "line": 1,
+          "col": 8,
+          "pos": 7
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/progress/application/recordLessonProgress.server.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "server-only",
+          "line": 1,
+          "col": 8,
+          "pos": 7
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/gamification/infrastructure/supabaseGamificationRepository.server.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "awardBadge",
+          "line": 116,
+          "col": 23,
+          "pos": 3152
+        },
+        {
+          "name": "updateStreak",
+          "line": 148,
+          "col": 23,
+          "pos": 4008
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "server-only",
+          "line": 1,
+          "col": 8,
+          "pos": 7
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/lib/auth/user-service.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "server-only",
+          "line": 1,
+          "col": 8,
+          "pos": 7
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/lib/course-content.server.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "server-only",
+          "line": 1,
+          "col": 8,
+          "pos": 7
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/lib/courseService.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "server-only",
+          "line": 1,
+          "col": 8,
+          "pos": 7
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/lib/repositories/enrollmentRepository.server.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "server-only",
+          "line": 1,
+          "col": 8,
+          "pos": 7
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/courses/infrastructure/supabaseAdminCourseRepository.server.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "getAdminPublishingSnapshot",
+          "line": 897,
+          "col": 23,
+          "pos": 28448
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "server-only",
+          "line": 1,
+          "col": 8,
+          "pos": 7
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/enrollments/infrastructure/supabaseEnrollmentRepository.server.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "findEnrollmentByLegacyFirebaseUid",
+          "line": 67,
+          "col": 23,
+          "pos": 2021
+        },
+        {
+          "name": "listCourseEnrollments",
+          "line": 83,
+          "col": 23,
+          "pos": 2473
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "server-only",
+          "line": 1,
+          "col": 8,
+          "pos": 7
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/progress/infrastructure/supabaseProgressRepository.server.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "listProgressByLegacyFirebaseUid",
+          "line": 39,
+          "col": 23,
+          "pos": 1113
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "server-only",
+          "line": 1,
+          "col": 8,
+          "pos": 7
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/lib/editorial-html.server.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "server-only",
+          "line": 1,
+          "col": 8,
+          "pos": 7
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/lib/pix.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "server-only",
+          "line": 1,
+          "col": 8,
+          "pos": 7
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/lib/rateLimit.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "server-only",
+          "line": 1,
+          "col": 8,
+          "pos": 7
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/services/__tests__/gamificationService.test.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "@jest/globals",
+          "line": 1,
+          "col": 38,
+          "pos": 37
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/lib/auth/authoring-gate.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "assertIsTutorOrAdmin",
+          "line": 11,
+          "col": 23,
+          "pos": 361
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "server-only",
+          "line": 1,
+          "col": 8,
+          "pos": 7
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/lib/auth/supabase-session.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "server-only",
+          "line": 1,
+          "col": 8,
+          "pos": 7
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/lib/image-compression.server.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "IMAGE_MIME_TYPES",
+          "line": 6,
+          "col": 3,
+          "pos": 76
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "server-only",
+          "line": 1,
+          "col": 8,
+          "pos": 7
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/awareness-tree/lib/server/quote-repository.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "listThemes",
+          "line": 33,
+          "col": 23,
+          "pos": 948
+        },
+        {
+          "name": "randomQuote",
+          "line": 42,
+          "col": 23,
+          "pos": 1223
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "server-only",
+          "line": 1,
+          "col": 8,
+          "pos": 7
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/SafeHtml.server.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "server-only",
+          "line": 1,
+          "col": 8,
+          "pos": 7
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/lib/pix-order.server.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "server-only",
+          "line": 1,
+          "col": 8,
+          "pos": 7
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/courses/infrastructure/supabaseCourseRepository.server.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "listPublishedCourses",
+          "line": 95,
+          "col": 23,
+          "pos": 2662
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "server-only",
+          "line": 1,
+          "col": 8,
+          "pos": 7
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/infrastructure/supabase/storage.server.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "server-only",
+          "line": 1,
+          "col": 8,
+          "pos": 7
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/lib/auth/admin-user-lookup.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "server-only",
+          "line": 1,
+          "col": 8,
+          "pos": 7
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/lib/auth/enrollment-service.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "expireSubscriptionEnrollment",
+          "line": 193,
+          "col": 23,
+          "pos": 6166
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "server-only",
+          "line": 1,
+          "col": 8,
+          "pos": 7
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/test-utils/supabaseMock.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "@jest/globals",
+          "line": 1,
+          "col": 22,
+          "pos": 21
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/assessments/infrastructure/__tests__/supabaseAssessmentRepository.server.test.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "@jest/globals",
+          "line": 1,
+          "col": 56,
+          "pos": 55
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/community/infrastructure/__tests__/supabaseCommunityRepository.server.test.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "@jest/globals",
+          "line": 1,
+          "col": 56,
+          "pos": 55
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/certificates/infrastructure/__tests__/supabaseCertificateRepository.server.test.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "@jest/globals",
+          "line": 1,
+          "col": 56,
+          "pos": 55
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/gamification/infrastructure/__tests__/supabaseGamificationRepository.server.test.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "@jest/globals",
+          "line": 1,
+          "col": 56,
+          "pos": 55
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/events/infrastructure/__tests__/supabaseEventRepository.server.test.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "@jest/globals",
+          "line": 1,
+          "col": 56,
+          "pos": 55
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/notifications/infrastructure/__tests__/supabaseNotificationRepository.server.test.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "@jest/globals",
+          "line": 1,
+          "col": 56,
+          "pos": 55
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/necessidades-agora/src/features/interactive-resources/current-needs/__tests__/currentNeeds.test.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "@jest/globals",
+          "line": 57,
+          "col": 40,
+          "pos": 1700
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/gamification/application/awardCanonicalGamification.server.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "server-only",
+          "line": 1,
+          "col": 8,
+          "pos": 7
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/emotion-tree/components/3d/TreeScene.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "three-stdlib",
+          "line": 6,
+          "col": 57,
+          "pos": 272
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/awareness-tree/components/3d/TreeScene.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [
+        {
+          "name": "three-stdlib",
+          "line": 13,
+          "col": 57,
+          "pos": 285
+        }
+      ],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/ui/Button.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "Button",
+          "line": 112,
+          "col": 10,
+          "pos": 3562
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "ButtonProps",
+          "line": 40,
+          "col": 18,
+          "pos": 1784
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/lib/siteSettings.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "LEGAL_ROUTES",
+          "line": 119,
+          "col": 25,
+          "pos": 3835
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "HomeSettings",
+          "line": 6,
+          "col": 15,
+          "pos": 280
+        },
+        {
+          "name": "TeamMember",
+          "line": 100,
+          "col": 18,
+          "pos": 3438
+        },
+        {
+          "name": "LegalSection",
+          "line": 122,
+          "col": 3,
+          "pos": 3899
+        },
+        {
+          "name": "LegalDocumentContent",
+          "line": 123,
+          "col": 3,
+          "pos": 3915
+        },
+        {
+          "name": "LegalDocumentType",
+          "line": 124,
+          "col": 3,
+          "pos": 3939
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/actions/assessment.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "gradeAssessment",
+          "line": 372,
+          "col": 23,
+          "pos": 9687
+        },
+        {
+          "name": "updateAssessmentStatus",
+          "line": 702,
+          "col": 23,
+          "pos": 19335
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/lib/firebase/admin.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [
+        [
+          {
+            "name": "db",
+            "line": 236,
+            "col": 14,
+            "pos": 7606
+          },
+          {
+            "name": "adminDb",
+            "line": 264,
+            "col": 14,
+            "pos": 8456
+          }
+        ],
+        [
+          {
+            "name": "auth",
+            "line": 244,
+            "col": 14,
+            "pos": 7862
+          },
+          {
+            "name": "adminAuth",
+            "line": 265,
+            "col": 14,
+            "pos": 8483
+          }
+        ]
+      ],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "getAdminApp",
+          "line": 18,
+          "col": 17,
+          "pos": 478
+        },
+        {
+          "name": "getAdminAuth",
+          "line": 188,
+          "col": 17,
+          "pos": 6128
+        },
+        {
+          "name": "getAdminFirestore",
+          "line": 192,
+          "col": 17,
+          "pos": 6217
+        },
+        {
+          "name": "getAdminStorage",
+          "line": 196,
+          "col": 17,
+          "pos": 6328
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/actions/authAdmin.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "impersonateUser",
+          "line": 15,
+          "col": 23,
+          "pos": 404
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/actions/certificate.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "verifyCertificate",
+          "line": 109,
+          "col": 23,
+          "pos": 3521
+        },
+        {
+          "name": "getUserCertificates",
+          "line": 140,
+          "col": 23,
+          "pos": 4366
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/app/actions/progress.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "recalculateProgress",
+          "line": 133,
+          "col": 23,
+          "pos": 3697
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/hooks/useContent.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "usePublicLibrary",
+          "line": 83,
+          "col": 14,
+          "pos": 1983
+        },
+        {
+          "name": "usePageContent",
+          "line": 92,
+          "col": 14,
+          "pos": 2247
+        },
+        {
+          "name": "useTeamMembers",
+          "line": 99,
+          "col": 14,
+          "pos": 2404
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "Course",
+          "line": 9,
+          "col": 18,
+          "pos": 211
+        },
+        {
+          "name": "Post",
+          "line": 16,
+          "col": 18,
+          "pos": 321
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/ui/Card.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "CardHeader",
+          "line": 80,
+          "col": 3,
+          "pos": 2172
+        },
+        {
+          "name": "CardFooter",
+          "line": 81,
+          "col": 3,
+          "pos": 2186
+        },
+        {
+          "name": "CardTitle",
+          "line": 82,
+          "col": 3,
+          "pos": 2200
+        },
+        {
+          "name": "CardDescription",
+          "line": 83,
+          "col": 3,
+          "pos": 2213
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/icons/index.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "Video",
+          "line": 18,
+          "col": 21,
+          "pos": 555
+        },
+        {
+          "name": "MapPin",
+          "line": 19,
+          "col": 21,
+          "pos": 625
+        },
+        {
+          "name": "X",
+          "line": 21,
+          "col": 21,
+          "pos": 766
+        },
+        {
+          "name": "ArrowRight",
+          "line": 22,
+          "col": 21,
+          "pos": 828
+        },
+        {
+          "name": "ArrowLeft",
+          "line": 23,
+          "col": 21,
+          "pos": 909
+        },
+        {
+          "name": "AlertCircle",
+          "line": 25,
+          "col": 21,
+          "pos": 1071
+        },
+        {
+          "name": "FileText",
+          "line": 29,
+          "col": 21,
+          "pos": 1375
+        },
+        {
+          "name": "FileCheck",
+          "line": 30,
+          "col": 21,
+          "pos": 1452
+        },
+        {
+          "name": "Bell",
+          "line": 33,
+          "col": 21,
+          "pos": 1695
+        },
+        {
+          "name": "User",
+          "line": 34,
+          "col": 21,
+          "pos": 1763
+        },
+        {
+          "name": "Settings",
+          "line": 35,
+          "col": 21,
+          "pos": 1831
+        },
+        {
+          "name": "LogOut",
+          "line": 36,
+          "col": 21,
+          "pos": 1907
+        },
+        {
+          "name": "Menu",
+          "line": 37,
+          "col": 21,
+          "pos": 1980
+        },
+        {
+          "name": "Search",
+          "line": 38,
+          "col": 21,
+          "pos": 2048
+        },
+        {
+          "name": "Plus",
+          "line": 39,
+          "col": 21,
+          "pos": 2120
+        },
+        {
+          "name": "Trash2",
+          "line": 40,
+          "col": 21,
+          "pos": 2188
+        },
+        {
+          "name": "Edit",
+          "line": 41,
+          "col": 21,
+          "pos": 2261
+        },
+        {
+          "name": "Info",
+          "line": 42,
+          "col": 21,
+          "pos": 2329
+        },
+        {
+          "name": "Clock",
+          "line": 44,
+          "col": 21,
+          "pos": 2482
+        },
+        {
+          "name": "Lock",
+          "line": 47,
+          "col": 21,
+          "pos": 2705
+        },
+        {
+          "name": "ChevronRight",
+          "line": 48,
+          "col": 21,
+          "pos": 2773
+        },
+        {
+          "name": "ChevronLeft",
+          "line": 49,
+          "col": 21,
+          "pos": 2858
+        },
+        {
+          "name": "ChevronDown",
+          "line": 50,
+          "col": 21,
+          "pos": 2941
+        },
+        {
+          "name": "MoreVertical",
+          "line": 51,
+          "col": 21,
+          "pos": 3024
+        },
+        {
+          "name": "Send",
+          "line": 53,
+          "col": 21,
+          "pos": 3182
+        },
+        {
+          "name": "Heart",
+          "line": 54,
+          "col": 21,
+          "pos": 3250
+        },
+        {
+          "name": "Pin",
+          "line": 55,
+          "col": 21,
+          "pos": 3320
+        },
+        {
+          "name": "GripVertical",
+          "line": 56,
+          "col": 21,
+          "pos": 3386
+        },
+        {
+          "name": "Save",
+          "line": 57,
+          "col": 21,
+          "pos": 3471
+        },
+        {
+          "name": "Camera",
+          "line": 58,
+          "col": 21,
+          "pos": 3539
+        },
+        {
+          "name": "Filter",
+          "line": 61,
+          "col": 21,
+          "pos": 3779
+        },
+        {
+          "name": "Grid",
+          "line": 62,
+          "col": 21,
+          "pos": 3851
+        },
+        {
+          "name": "LifeBuoy",
+          "line": 63,
+          "col": 21,
+          "pos": 3919
+        },
+        {
+          "name": "ShieldAlert",
+          "line": 64,
+          "col": 21,
+          "pos": 3996
+        },
+        {
+          "name": "Wifi",
+          "line": 65,
+          "col": 21,
+          "pos": 4079
+        },
+        {
+          "name": "WifiOff",
+          "line": 66,
+          "col": 21,
+          "pos": 4147
+        },
+        {
+          "name": "BellRing",
+          "line": 67,
+          "col": 21,
+          "pos": 4222
+        },
+        {
+          "name": "FolderOpen",
+          "line": 69,
+          "col": 21,
+          "pos": 4369
+        },
+        {
+          "name": "Tag",
+          "line": 71,
+          "col": 21,
+          "pos": 4520
+        },
+        {
+          "name": "Pause",
+          "line": 72,
+          "col": 21,
+          "pos": 4586
+        },
+        {
+          "name": "RotateCcw",
+          "line": 73,
+          "col": 21,
+          "pos": 4656
+        },
+        {
+          "name": "XCircle",
+          "line": 74,
+          "col": 21,
+          "pos": 4735
+        },
+        {
+          "name": "Users",
+          "line": 75,
+          "col": 21,
+          "pos": 4810
+        },
+        {
+          "name": "BarChart",
+          "line": 76,
+          "col": 21,
+          "pos": 4880
+        },
+        {
+          "name": "Upload",
+          "line": 77,
+          "col": 21,
+          "pos": 4957
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "LucideIcon",
+          "line": 85,
+          "col": 15,
+          "pos": 5426
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/ResourcesSection.jsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "resourceApps",
+          "line": 348,
+          "col": 10,
+          "pos": 12941
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/data/courses.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "getCourseContent",
+          "line": 22,
+          "col": 23,
+          "pos": 599
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "CourseWithModules",
+          "line": 7,
+          "col": 18,
+          "pos": 199
+        },
+        {
+          "name": "ModuleWithLessons",
+          "line": 11,
+          "col": 18,
+          "pos": 293
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/lib/auth/access-types.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [
+        {
+          "namespace": "AccessErrorCode",
+          "name": "LESSON_NOT_AVAILABLE",
+          "line": 11,
+          "col": 3,
+          "pos": 443
+        }
+      ],
+      "exports": [
+        {
+          "name": "ContentUnavailableError",
+          "line": 46,
+          "col": 14,
+          "pos": 1319
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/lib/repositories/courseRepository.server.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "getCourseRef",
+          "line": 12,
+          "col": 17,
+          "pos": 267
+        },
+        {
+          "name": "listCourses",
+          "line": 20,
+          "col": 23,
+          "pos": 481
+        },
+        {
+          "name": "getCourse",
+          "line": 25,
+          "col": 23,
+          "pos": 652
+        },
+        {
+          "name": "listModules",
+          "line": 30,
+          "col": 23,
+          "pos": 837
+        },
+        {
+          "name": "listLessons",
+          "line": 43,
+          "col": 23,
+          "pos": 1228
+        },
+        {
+          "name": "listCourseEnrollments",
+          "line": 66,
+          "col": 23,
+          "pos": 1769
+        },
+        {
+          "name": "listCourseThreads",
+          "line": 77,
+          "col": 23,
+          "pos": 2072
+        },
+        {
+          "name": "listMaterials",
+          "line": 89,
+          "col": 23,
+          "pos": 2392
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/lib/image-compression.js",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "IMAGE_MIME_TYPES",
+          "line": 92,
+          "col": 9,
+          "pos": 3186
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/app/actions/enrollment-pix.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "createEnrollmentPending",
+          "line": 79,
+          "col": 23,
+          "pos": 2577
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/awareness-tree/types/quote.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "TONES",
+          "line": 10,
+          "col": 14,
+          "pos": 133
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/config/features.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "FEATURE_FLAGS",
+          "line": 9,
+          "col": 14,
+          "pos": 277
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/types/lms.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "BlockSchema",
+          "line": 377,
+          "col": 14,
+          "pos": 8294
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "Timestamp",
+          "line": 5,
+          "col": 13,
+          "pos": 161
+        },
+        {
+          "name": "Role",
+          "line": 13,
+          "col": 13,
+          "pos": 279
+        },
+        {
+          "name": "EnrollmentStatus",
+          "line": 14,
+          "col": 13,
+          "pos": 329
+        },
+        {
+          "name": "LessonType",
+          "line": 40,
+          "col": 13,
+          "pos": 781
+        },
+        {
+          "name": "UserDoc",
+          "line": 44,
+          "col": 18,
+          "pos": 910
+        },
+        {
+          "name": "BlockDoc",
+          "line": 178,
+          "col": 18,
+          "pos": 3904
+        },
+        {
+          "name": "Course",
+          "line": 331,
+          "col": 13,
+          "pos": 7377
+        },
+        {
+          "name": "ProgressDoc",
+          "line": 341,
+          "col": 18,
+          "pos": 7631
+        },
+        {
+          "name": "Material",
+          "line": 354,
+          "col": 13,
+          "pos": 7943
+        },
+        {
+          "name": "AuditLogDoc",
+          "line": 356,
+          "col": 18,
+          "pos": 7985
+        },
+        {
+          "name": "ValidatedBlock",
+          "line": 409,
+          "col": 13,
+          "pos": 9086
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/providers/ThemeProvider.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "THEME_STORAGE_KEY",
+          "line": 14,
+          "col": 14,
+          "pos": 258
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/lib/consent.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "readConsent",
+          "line": 41,
+          "col": 17,
+          "pos": 1204
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/interactive-resources/pause-room/repository.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "getHistory",
+          "line": 142,
+          "col": 23,
+          "pos": 3690
+        },
+        {
+          "name": "getSession",
+          "line": 196,
+          "col": 23,
+          "pos": 5043
+        },
+        {
+          "name": "deleteSession",
+          "line": 229,
+          "col": 23,
+          "pos": 5836
+        },
+        {
+          "name": "exportOwnData",
+          "line": 254,
+          "col": 23,
+          "pos": 6430
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/lib/auth/access-policy.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "BLOCKED_COURSE_STATUSES",
+          "line": 13,
+          "col": 14,
+          "pos": 359
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/ui/Badge.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "badgeVariants",
+          "line": 37,
+          "col": 17,
+          "pos": 1362
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "BadgeProps",
+          "line": 27,
+          "col": 18,
+          "pos": 1075
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/admin/AdminStates.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "AdminSuccessState",
+          "line": 18,
+          "col": 17,
+          "pos": 1413
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/hooks/useAdminAssessments.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "useAdminSubmissions",
+          "line": 36,
+          "col": 14,
+          "pos": 805
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/hooks/useUsers.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "useAllUsersPaginated",
+          "line": 15,
+          "col": 14,
+          "pos": 314
+        },
+        {
+          "name": "useUpdateUserRole",
+          "line": 69,
+          "col": 14,
+          "pos": 1821
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/services/uploadService.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "uploadService",
+          "line": 21,
+          "col": 14,
+          "pos": 529
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/lib/logging.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "logServerEvent",
+          "line": 27,
+          "col": 23,
+          "pos": 785
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/fronteiras-de-contato/services/api.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "getVignettes",
+          "line": 25,
+          "col": 23,
+          "pos": 662
+        },
+        {
+          "name": "createVignette",
+          "line": 29,
+          "col": 23,
+          "pos": 798
+        },
+        {
+          "name": "updateVignette",
+          "line": 55,
+          "col": 23,
+          "pos": 1599
+        },
+        {
+          "name": "deleteVignette",
+          "line": 70,
+          "col": 23,
+          "pos": 2020
+        },
+        {
+          "name": "resetVignettes",
+          "line": 82,
+          "col": 23,
+          "pos": 2286
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/public-site/gallery/gallery-media.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "GALLERY_PLACEHOLDER_SRC",
+          "line": 1,
+          "col": 14,
+          "pos": 13
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/admin/FormShell.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "FormActions",
+          "line": 63,
+          "col": 17,
+          "pos": 1348
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/duas-cadeiras/utils/storage.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "exportSessionToMarkdown",
+          "line": 42,
+          "col": 17,
+          "pos": 1190
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/mental-health-quiz/scoring/aq10.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "AQ10_MIN_SCORE",
+          "line": 151,
+          "col": 14,
+          "pos": 4492
+        },
+        {
+          "name": "AQ10_MAX_SCORE",
+          "line": 152,
+          "col": 14,
+          "pos": 4525
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/mental-health-quiz/scoring/asrs.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "ASRS_MIN_SCORE",
+          "line": 112,
+          "col": 14,
+          "pos": 3506
+        },
+        {
+          "name": "ASRS_MAX_SCORE",
+          "line": 113,
+          "col": 14,
+          "pos": 3539
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/mental-health-quiz/scoring/cbi.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "calculateCBIDomain",
+          "line": 51,
+          "col": 14,
+          "pos": 936
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "CBIDomainResult",
+          "line": 41,
+          "col": 18,
+          "pos": 761
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/mental-health-quiz/scoring/phq9.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "PHQ9_MIN_SCORE",
+          "line": 114,
+          "col": 14,
+          "pos": 3233
+        },
+        {
+          "name": "PHQ9_MAX_SCORE",
+          "line": 115,
+          "col": 14,
+          "pos": 3266
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/mental-health-quiz/scoring/who5.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "WHO5_MIN_SCORE",
+          "line": 80,
+          "col": 14,
+          "pos": 2519
+        },
+        {
+          "name": "WHO5_MAX_SCORE",
+          "line": 81,
+          "col": 14,
+          "pos": 2552
+        },
+        {
+          "name": "WHO5_THRESHOLD",
+          "line": 82,
+          "col": 14,
+          "pos": 2586
+        },
+        {
+          "name": "WHO5_THRESHOLD_PERCENTAGE",
+          "line": 83,
+          "col": 14,
+          "pos": 2633
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/Escuta-sons-para-awareness/src/features/interactive-resources/awareness-sounds/schema.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "VALID_MODES",
+          "line": 15,
+          "col": 14,
+          "pos": 311
+        },
+        {
+          "name": "VALID_SOUND_IDS",
+          "line": 17,
+          "col": 14,
+          "pos": 383
+        },
+        {
+          "name": "VALID_DIRECTIONS",
+          "line": 24,
+          "col": 14,
+          "pos": 507
+        },
+        {
+          "name": "VALID_DISTANCES",
+          "line": 33,
+          "col": 14,
+          "pos": 642
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/Escuta-sons-para-awareness/src/features/interactive-resources/awareness-sounds/repository.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "SUPABASE_MIGRATIONS_SQL",
+          "line": 26,
+          "col": 14,
+          "pos": 934
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/jardim-de-pensamentos/src/features/interactive-resources/thought-garden/repository.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "DEFAULT_EDITORIAL_CONFIG",
+          "line": 27,
+          "col": 14,
+          "pos": 898
+        },
+        {
+          "name": "getEditorialConfig",
+          "line": 49,
+          "col": 23,
+          "pos": 1871
+        },
+        {
+          "name": "updateEditorialConfig",
+          "line": 65,
+          "col": 23,
+          "pos": 2282
+        },
+        {
+          "name": "updateThoughtRecord",
+          "line": 192,
+          "col": 23,
+          "pos": 6071
+        },
+        {
+          "name": "exportUserRecords",
+          "line": 249,
+          "col": 23,
+          "pos": 7893
+        },
+        {
+          "name": "recordTelemetry",
+          "line": 301,
+          "col": 17,
+          "pos": 9368
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "AllowedTelemetryEvent",
+          "line": 288,
+          "col": 13,
+          "pos": 9054
+        },
+        {
+          "name": "TelemetryLog",
+          "line": 294,
+          "col": 18,
+          "pos": 9194
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/rios-dos-pensamentos/src/features/interactive-resources/thought-river/repository.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "recordTelemetry",
+          "line": 285,
+          "col": 17,
+          "pos": 8159
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/core/feedback/index.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "EmptyState",
+          "line": 1,
+          "col": 10,
+          "pos": 9
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "EmptyStateProps",
+          "line": 1,
+          "col": 27,
+          "pos": 26
+        },
+        {
+          "name": "ErrorStateProps",
+          "line": 2,
+          "col": 27,
+          "pos": 91
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/hooks/useBodyScrollLock.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [
+        [
+          {
+            "name": "useBodyScrollLock",
+            "line": 104,
+            "col": 17,
+            "pos": 3140
+          },
+          {
+            "name": "default",
+            "line": 112,
+            "col": 16,
+            "pos": 3315
+          }
+        ]
+      ],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "lockBodyScroll",
+          "line": 40,
+          "col": 17,
+          "pos": 1281
+        },
+        {
+          "name": "unlockBodyScroll",
+          "line": 72,
+          "col": 17,
+          "pos": 2188
+        },
+        {
+          "name": "default",
+          "line": 112,
+          "col": 16,
+          "pos": 3315
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/hooks/useFocusTrap.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [
+        [
+          {
+            "name": "useFocusTrap",
+            "line": 12,
+            "col": 17,
+            "pos": 407
+          },
+          {
+            "name": "default",
+            "line": 66,
+            "col": 16,
+            "pos": 2133
+          }
+        ]
+      ],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "default",
+          "line": 66,
+          "col": 16,
+          "pos": 2133
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/lib/presenters/mappers.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "toCourseDTO",
+          "line": 23,
+          "col": 17,
+          "pos": 721
+        },
+        {
+          "name": "toEnrollmentDTO",
+          "line": 48,
+          "col": 17,
+          "pos": 1449
+        },
+        {
+          "name": "toLessonDTO",
+          "line": 68,
+          "col": 17,
+          "pos": 2093
+        },
+        {
+          "name": "toModuleDTO",
+          "line": 92,
+          "col": 17,
+          "pos": 2768
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/lib/rbac.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "ROLES",
+          "line": 3,
+          "col": 14,
+          "pos": 74
+        },
+        {
+          "name": "isValidRole",
+          "line": 27,
+          "col": 17,
+          "pos": 725
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/app/actions/blog.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "deleteBlogPostAction",
+          "line": 91,
+          "col": 23,
+          "pos": 2860
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/lib/firebase/client.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "signInWithGoogle",
+          "line": 37,
+          "col": 14,
+          "pos": 1367
+        },
+        {
+          "name": "app",
+          "line": 54,
+          "col": 10,
+          "pos": 2013
+        },
+        {
+          "name": "auth",
+          "line": 54,
+          "col": 15,
+          "pos": 2018
+        },
+        {
+          "name": "storage",
+          "line": 54,
+          "col": 25,
+          "pos": 2028
+        },
+        {
+          "name": "functions",
+          "line": 54,
+          "col": 34,
+          "pos": 2037
+        },
+        {
+          "name": "googleProvider",
+          "line": 54,
+          "col": 45,
+          "pos": 2048
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/interactive-resources/thought-river/engine/leafMotion.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "MIN_LEAF_DURATION_MS",
+          "line": 3,
+          "col": 14,
+          "pos": 57
+        },
+        {
+          "name": "MAX_LEAF_DURATION_MS",
+          "line": 4,
+          "col": 14,
+          "pos": 101
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/interactive-resources/thought-river/repository.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "saveRiverSession",
+          "line": 64,
+          "col": 23,
+          "pos": 1758
+        },
+        {
+          "name": "getRiverSession",
+          "line": 161,
+          "col": 23,
+          "pos": 4550
+        },
+        {
+          "name": "exportOwnRiverData",
+          "line": 210,
+          "col": 23,
+          "pos": 5898
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/mental-health-quiz/App.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [
+        [
+          {
+            "name": "App",
+            "line": 12,
+            "col": 17,
+            "pos": 441
+          },
+          {
+            "name": "default",
+            "line": 87,
+            "col": 16,
+            "pos": 2488
+          }
+        ]
+      ],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "App",
+          "line": 12,
+          "col": 17,
+          "pos": 441
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/emotion-tree/lib/theme/scene-tokens.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "SKY_SUN_POSITION",
+          "line": 16,
+          "col": 14,
+          "pos": 655
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/emotion-tree/lib/utils/local-favorites.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "removeFavorites",
+          "line": 47,
+          "col": 17,
+          "pos": 1181
+        },
+        {
+          "name": "migrateFavoritesBucket",
+          "line": 55,
+          "col": 17,
+          "pos": 1356
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/emotion-tree/lib/utils/storage.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "STORAGE_NAMESPACE",
+          "line": 8,
+          "col": 14,
+          "pos": 286
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/emotion-tree/types/quote.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "THEME_SLUGS",
+          "line": 1,
+          "col": 14,
+          "pos": 13
+        },
+        {
+          "name": "TONES",
+          "line": 10,
+          "col": 14,
+          "pos": 133
+        },
+        {
+          "name": "INTERACTION_ACTIONS",
+          "line": 41,
+          "col": 14,
+          "pos": 744
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "InteractionAction",
+          "line": 43,
+          "col": 13,
+          "pos": 837
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/rios-dos-pensamentos/src/features/interactive-resources/thought-river/engine/leafMotion.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "COLORS",
+          "line": 10,
+          "col": 14,
+          "pos": 337
+        },
+        {
+          "name": "drawRiverBed",
+          "line": 53,
+          "col": 17,
+          "pos": 1757
+        },
+        {
+          "name": "drawSediments",
+          "line": 144,
+          "col": 17,
+          "pos": 4166
+        },
+        {
+          "name": "drawLeafRipples",
+          "line": 178,
+          "col": 17,
+          "pos": 5147
+        },
+        {
+          "name": "drawLeaf",
+          "line": 218,
+          "col": 17,
+          "pos": 6235
+        },
+        {
+          "name": "drawAquaticFlora",
+          "line": 339,
+          "col": 17,
+          "pos": 9749
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/rios-dos-pensamentos/src/features/interactive-resources/thought-river/engine/riverWebGL.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "RiverWebGLRenderer",
+          "line": 203,
+          "col": 14,
+          "pos": 8689
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/context/UIContext.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "UIProvider",
+          "line": 17,
+          "col": 14,
+          "pos": 334
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/SafeHtml.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "sanitizeHtml",
+          "line": 82,
+          "col": 17,
+          "pos": 1715
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/hooks/useSiteSettings.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "useFounderSettings",
+          "line": 14,
+          "col": 14,
+          "pos": 267
+        },
+        {
+          "name": "useInstituteSettings",
+          "line": 24,
+          "col": 14,
+          "pos": 635
+        },
+        {
+          "name": "useSEOSettings",
+          "line": 35,
+          "col": 14,
+          "pos": 1011
+        },
+        {
+          "name": "useConfigSettings",
+          "line": 45,
+          "col": 14,
+          "pos": 1354
+        },
+        {
+          "name": "useTeamSettings",
+          "line": 62,
+          "col": 14,
+          "pos": 1808
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/ciclodocontato/services/api.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "saveContactStages",
+          "line": 56,
+          "col": 23,
+          "pos": 1515
+        },
+        {
+          "name": "saveScenarios",
+          "line": 89,
+          "col": 23,
+          "pos": 2438
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/awareness-tree/lib/theme/scene-tokens.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "SKY_SUN_POSITION",
+          "line": 19,
+          "col": 14,
+          "pos": 645
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/awareness-tree/lib/utils/local-favorites.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "removeFavorites",
+          "line": 55,
+          "col": 17,
+          "pos": 1234
+        },
+        {
+          "name": "migrateFavoritesBucket",
+          "line": 63,
+          "col": 17,
+          "pos": 1409
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/awareness-tree/lib/utils/storage.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "STORAGE_NAMESPACE",
+          "line": 8,
+          "col": 14,
+          "pos": 286
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/interactive-resources/thought-river/schema.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "riverSessionSchema",
+          "line": 20,
+          "col": 14,
+          "pos": 410
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/sala-de-pausa/src/services/supabase/client.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "DEMO_USERS",
+          "line": 17,
+          "col": 14,
+          "pos": 397
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/mental-health-quiz/utils/storage.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "getResultsByQuestionnaire",
+          "line": 144,
+          "col": 14,
+          "pos": 4196
+        },
+        {
+          "name": "clearResults",
+          "line": 149,
+          "col": 14,
+          "pos": 4355
+        },
+        {
+          "name": "deleteResult",
+          "line": 157,
+          "col": 14,
+          "pos": 4531
+        },
+        {
+          "name": "exportResults",
+          "line": 166,
+          "col": 14,
+          "pos": 4812
+        },
+        {
+          "name": "getStorageUsage",
+          "line": 173,
+          "col": 14,
+          "pos": 5025
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "StorageUsage",
+          "line": 18,
+          "col": 18,
+          "pos": 443
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/soma-scan/services/bodyScanService.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "generateHeuristicRecommendation",
+          "line": 122,
+          "col": 14,
+          "pos": 3276
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/emotion-tree/lib/audio/soundscape.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "Soundscape",
+          "line": 16,
+          "col": 14,
+          "pos": 320
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/emotion-tree/lib/theme/panorama.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "SKY_TOP_COLOR",
+          "line": 23,
+          "col": 14,
+          "pos": 747
+        },
+        {
+          "name": "createPanoramaSvg",
+          "line": 90,
+          "col": 17,
+          "pos": 3169
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/actions/analytics.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "getStudentAnalytics",
+          "line": 41,
+          "col": 23,
+          "pos": 985
+        },
+        {
+          "name": "getCourseAnalytics",
+          "line": 158,
+          "col": 23,
+          "pos": 4515
+        },
+        {
+          "name": "getPlatformAnalytics",
+          "line": 293,
+          "col": 23,
+          "pos": 8353
+        },
+        {
+          "name": "trackFunnelEvent",
+          "line": 441,
+          "col": 23,
+          "pos": 12473
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/visual/enhanced-tree-data.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "RAW_PETALS",
+          "line": 17,
+          "col": 14,
+          "pos": 350
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/shell/InteractiveResourceShell.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "ResourceHeader",
+          "line": 19,
+          "col": 14,
+          "pos": 578
+        },
+        {
+          "name": "ResourceStage",
+          "line": 128,
+          "col": 14,
+          "pos": 4921
+        },
+        {
+          "name": "ResourceControls",
+          "line": 203,
+          "col": 14,
+          "pos": 7375
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/awareness-tree/lib/audio/soundscape.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "Soundscape",
+          "line": 16,
+          "col": 14,
+          "pos": 320
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/awareness-tree/lib/theme/panorama.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "SKY_TOP_COLOR",
+          "line": 23,
+          "col": 14,
+          "pos": 747
+        },
+        {
+          "name": "createPanoramaSvg",
+          "line": 96,
+          "col": 17,
+          "pos": 3188
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/mental-health-quiz/data/categories.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "getCategoryLabel",
+          "line": 37,
+          "col": 14,
+          "pos": 1050
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/mental-health-quiz/data/instruments/index.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "PHQ9",
+          "line": 14,
+          "col": 10,
+          "pos": 324
+        },
+        {
+          "name": "WHO5",
+          "line": 15,
+          "col": 10,
+          "pos": 355
+        },
+        {
+          "name": "ASRS",
+          "line": 16,
+          "col": 10,
+          "pos": 386
+        },
+        {
+          "name": "AQ10",
+          "line": 17,
+          "col": 10,
+          "pos": 417
+        },
+        {
+          "name": "CBI",
+          "line": 18,
+          "col": 10,
+          "pos": 448
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/mental-health-quiz/utils/scoring.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "calculateScore",
+          "line": 16,
+          "col": 14,
+          "pos": 263
+        },
+        {
+          "name": "calculateMaxScore",
+          "line": 22,
+          "col": 14,
+          "pos": 440
+        },
+        {
+          "name": "getScorePercentage",
+          "line": 26,
+          "col": 14,
+          "pos": 542
+        },
+        {
+          "name": "getIntensityBar",
+          "line": 69,
+          "col": 14,
+          "pos": 1946
+        },
+        {
+          "name": "getIntensityColor",
+          "line": 74,
+          "col": 14,
+          "pos": 2123
+        },
+        {
+          "name": "getIntensityTextColor",
+          "line": 80,
+          "col": 14,
+          "pos": 2312
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/emotion-tree/lib/tree/leafArtwork.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "LEAF_BLADE_BOX",
+          "line": 24,
+          "col": 14,
+          "pos": 817
+        },
+        {
+          "name": "leafCanopyColor",
+          "line": 189,
+          "col": 17,
+          "pos": 6365
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "LeafPalette",
+          "line": 154,
+          "col": 13,
+          "pos": 5091
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/emotion-tree/lib/tree/leafGeometry.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "createLeafGeometry",
+          "line": 55,
+          "col": 17,
+          "pos": 1616
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "LeafGeometryOptions",
+          "line": 11,
+          "col": 13,
+          "pos": 358
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/awareness-tree/lib/tree/leafArtwork.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "LEAF_BLADE_BOX",
+          "line": 24,
+          "col": 14,
+          "pos": 817
+        },
+        {
+          "name": "leafCanopyColor",
+          "line": 190,
+          "col": 17,
+          "pos": 6365
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "LeafPalette",
+          "line": 155,
+          "col": 13,
+          "pos": 5091
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/awareness-tree/lib/tree/leafGeometry.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "createLeafGeometry",
+          "line": 57,
+          "col": 17,
+          "pos": 1624
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "LeafGeometryOptions",
+          "line": 11,
+          "col": 13,
+          "pos": 358
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/Escuta-sons-para-awareness/src/features/interactive-resources/awareness-sounds/audio/audioEngine.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [
+        {
+          "name": "AwarenessAudioEngine",
+          "line": 29,
+          "col": 14,
+          "pos": 1109
+        }
+      ],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/ui/Input.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "InputProps",
+          "line": 31,
+          "col": 18,
+          "pos": 1520
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/config/admin-navigation.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "AdminNavigationItem",
+          "line": 20,
+          "col": 18,
+          "pos": 275
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/infrastructure/supabase/database.types.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "AppRole",
+          "line": 9,
+          "col": 13,
+          "pos": 127
+        },
+        {
+          "name": "TableName",
+          "line": 1098,
+          "col": 13,
+          "pos": 31933
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/resourceCatalog.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "ResourceCategory",
+          "line": 5,
+          "col": 13,
+          "pos": 228
+        },
+        {
+          "name": "ResourceStatus",
+          "line": 10,
+          "col": 13,
+          "pos": 328
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/visual/FiguraVivaTree.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "FiguraVivaTreeProps",
+          "line": 12,
+          "col": 18,
+          "pos": 445
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/interactive-resources/pause-room/types.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "PracticeId",
+          "line": 1,
+          "col": 13,
+          "pos": 12
+        },
+        {
+          "name": "PauseStatus",
+          "line": 31,
+          "col": 13,
+          "pos": 707
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/types/assessment.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "QuestionType",
+          "line": 11,
+          "col": 13,
+          "pos": 267
+        },
+        {
+          "name": "AssessmentStatus",
+          "line": 16,
+          "col": 13,
+          "pos": 362
+        },
+        {
+          "name": "SubmissionStatus",
+          "line": 17,
+          "col": 13,
+          "pos": 429
+        },
+        {
+          "name": "QuestionBase",
+          "line": 27,
+          "col": 18,
+          "pos": 571
+        },
+        {
+          "name": "EssayQuestion",
+          "line": 60,
+          "col": 18,
+          "pos": 1158
+        },
+        {
+          "name": "PracticalQuestion",
+          "line": 70,
+          "col": 18,
+          "pos": 1368
+        },
+        {
+          "name": "AssessmentAnalytics",
+          "line": 200,
+          "col": 18,
+          "pos": 4345
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/types/event.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "EventType",
+          "line": 4,
+          "col": 13,
+          "pos": 18
+        },
+        {
+          "name": "EventProvider",
+          "line": 5,
+          "col": 13,
+          "pos": 79
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/types/user.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "AuditLog",
+          "line": 6,
+          "col": 18,
+          "pos": 174
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/duas-cadeiras/types.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "ChairId",
+          "line": 1,
+          "col": 13,
+          "pos": 12
+        },
+        {
+          "name": "ChairConfig",
+          "line": 3,
+          "col": 18,
+          "pos": 51
+        },
+        {
+          "name": "DialogueTurn",
+          "line": 10,
+          "col": 18,
+          "pos": 159
+        },
+        {
+          "name": "SessionState",
+          "line": 30,
+          "col": 13,
+          "pos": 521
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/Escuta-sons-para-awareness/src/features/interactive-resources/awareness-sounds/types.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "TelemetryEventName",
+          "line": 106,
+          "col": 13,
+          "pos": 2637
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/necessidades-agora/src/features/interactive-resources/current-needs/types.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "NeedCategory",
+          "line": 6,
+          "col": 13,
+          "pos": 129
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/lib/legal.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "LegalSection",
+          "line": 11,
+          "col": 18,
+          "pos": 402
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/GalleryModal.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "Photo",
+          "line": 17,
+          "col": 18,
+          "pos": 392
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/CalendarModal.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "CalendarCourse",
+          "line": 12,
+          "col": 18,
+          "pos": 312
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/lib/events/bus.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "EventType",
+          "line": 3,
+          "col": 13,
+          "pos": 93
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/types/gamification.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "BadgeCategory",
+          "line": 3,
+          "col": 13,
+          "pos": 66
+        },
+        {
+          "name": "BadgeDefinition",
+          "line": 5,
+          "col": 18,
+          "pos": 151
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/app/actions/admin/supabase-health.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "SyncHealthStatus",
+          "line": 6,
+          "col": 13,
+          "pos": 158
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/interactive-resources/thought-river/types.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "RiverSessionMode",
+          "line": 8,
+          "col": 13,
+          "pos": 156
+        },
+        {
+          "name": "RiverSessionSummary",
+          "line": 23,
+          "col": 18,
+          "pos": 538
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/sala-de-pausa/src/types/index.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "UserRole",
+          "line": 7,
+          "col": 13,
+          "pos": 165
+        },
+        {
+          "name": "FloatingThought",
+          "line": 108,
+          "col": 18,
+          "pos": 2835
+        },
+        {
+          "name": "RiverSpeed",
+          "line": 121,
+          "col": 13,
+          "pos": 3191
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/fronteiras-de-contato/types.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "RelationalMovementType",
+          "line": 1,
+          "col": 13,
+          "pos": 12
+        },
+        {
+          "name": "FieldDynamic",
+          "line": 7,
+          "col": 18,
+          "pos": 115
+        },
+        {
+          "name": "InstituteAnalysis",
+          "line": 15,
+          "col": 18,
+          "pos": 383
+        },
+        {
+          "name": "VignetteResponse",
+          "line": 22,
+          "col": 18,
+          "pos": 763
+        },
+        {
+          "name": "ActiveTab",
+          "line": 65,
+          "col": 13,
+          "pos": 2041
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/grounding-54321/types.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "SenseType",
+          "line": 1,
+          "col": 13,
+          "pos": 12
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/types/index.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "ResourceCategory",
+          "line": 6,
+          "col": 13,
+          "pos": 110
+        },
+        {
+          "name": "InteractiveResource",
+          "line": 17,
+          "col": 18,
+          "pos": 320
+        },
+        {
+          "name": "EmotionWheelSelection",
+          "line": 54,
+          "col": 18,
+          "pos": 1016
+        },
+        {
+          "name": "InteractiveResourceSession",
+          "line": 64,
+          "col": 18,
+          "pos": 1230
+        },
+        {
+          "name": "TelemetryEvent",
+          "line": 95,
+          "col": 13,
+          "pos": 1906
+        },
+        {
+          "name": "TelemetryLog",
+          "line": 101,
+          "col": 18,
+          "pos": 2039
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/mental-health-quiz/types.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "InstrumentMode",
+          "line": 12,
+          "col": 13,
+          "pos": 147
+        },
+        {
+          "name": "ScoringType",
+          "line": 18,
+          "col": 13,
+          "pos": 294
+        },
+        {
+          "name": "SafetyRule",
+          "line": 53,
+          "col": 18,
+          "pos": 917
+        },
+        {
+          "name": "Evidence",
+          "line": 60,
+          "col": 18,
+          "pos": 1070
+        },
+        {
+          "name": "QuestionnaireBase",
+          "line": 124,
+          "col": 18,
+          "pos": 2490
+        },
+        {
+          "name": "ScreeningDomain",
+          "line": 149,
+          "col": 18,
+          "pos": 3034
+        },
+        {
+          "name": "ResultRule",
+          "line": 156,
+          "col": 18,
+          "pos": 3150
+        },
+        {
+          "name": "Category",
+          "line": 182,
+          "col": 13,
+          "pos": 3652
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/jardim-de-pensamentos/src/features/interactive-resources/thought-garden/types.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "LeafStatus",
+          "line": 6,
+          "col": 13,
+          "pos": 136
+        },
+        {
+          "name": "UserSessionProfile",
+          "line": 75,
+          "col": 18,
+          "pos": 1862
+        },
+        {
+          "name": "GardenViewPreset",
+          "line": 83,
+          "col": 13,
+          "pos": 1999
+        },
+        {
+          "name": "WindIntensity",
+          "line": 84,
+          "col": 13,
+          "pos": 2078
+        },
+        {
+          "name": "RightPanelState",
+          "line": 85,
+          "col": 13,
+          "pos": 2136
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/rios-dos-pensamentos/src/types.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "ResourceState",
+          "line": 5,
+          "col": 13,
+          "pos": 106
+        },
+        {
+          "name": "RiverMode",
+          "line": 15,
+          "col": 13,
+          "pos": 250
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/figura-e-fundo/types.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "RoundTheme",
+          "line": 7,
+          "col": 13,
+          "pos": 112
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/banco-de-microcasos/types.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "Level",
+          "line": 1,
+          "col": 13,
+          "pos": 12
+        },
+        {
+          "name": "MicroCaseStep",
+          "line": 3,
+          "col": 18,
+          "pos": 85
+        },
+        {
+          "name": "MicroCaseClosure",
+          "line": 15,
+          "col": 18,
+          "pos": 286
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/ciclodocontato/types.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "ReferenceItem",
+          "line": 12,
+          "col": 18,
+          "pos": 185
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/emotion-tree/lib/tree/generateTree.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "BranchKind",
+          "line": 17,
+          "col": 13,
+          "pos": 740
+        },
+        {
+          "name": "LeafKind",
+          "line": 29,
+          "col": 13,
+          "pos": 1028
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/lib/storage/db.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "DraftSubmission",
+          "line": 17,
+          "col": 18,
+          "pos": 380
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/awareness-tree/lib/tree/generateTree.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "BranchKind",
+          "line": 17,
+          "col": 13,
+          "pos": 740
+        },
+        {
+          "name": "LeafKind",
+          "line": 29,
+          "col": 13,
+          "pos": 1028
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/emotion-tree/lib/tree/leafMaterial.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "LeafMaterialUniforms",
+          "line": 17,
+          "col": 13,
+          "pos": 604
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/types/analytics.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "Certificate",
+          "line": 8,
+          "col": 15,
+          "pos": 187
+        },
+        {
+          "name": "CertificateTemplate",
+          "line": 10,
+          "col": 18,
+          "pos": 220
+        },
+        {
+          "name": "AssessmentAnalytics",
+          "line": 77,
+          "col": 18,
+          "pos": 1582
+        },
+        {
+          "name": "QuestionStats",
+          "line": 100,
+          "col": 18,
+          "pos": 2004
+        },
+        {
+          "name": "ExcelExportData",
+          "line": 133,
+          "col": 18,
+          "pos": 2777
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/types/index.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "InteractiveResource",
+          "line": 17,
+          "col": 18,
+          "pos": 320
+        },
+        {
+          "name": "EmotionNuance",
+          "line": 27,
+          "col": 18,
+          "pos": 560
+        },
+        {
+          "name": "EmotionSecondary",
+          "line": 33,
+          "col": 18,
+          "pos": 665
+        },
+        {
+          "name": "EmotionFamily",
+          "line": 39,
+          "col": 18,
+          "pos": 762
+        },
+        {
+          "name": "BodyAnchor",
+          "line": 49,
+          "col": 18,
+          "pos": 952
+        },
+        {
+          "name": "EmotionWheelSelection",
+          "line": 54,
+          "col": 18,
+          "pos": 1016
+        },
+        {
+          "name": "InteractiveResourceSession",
+          "line": 64,
+          "col": 18,
+          "pos": 1230
+        },
+        {
+          "name": "InteractiveResourceEntry",
+          "line": 75,
+          "col": 18,
+          "pos": 1472
+        },
+        {
+          "name": "TelemetryEvent",
+          "line": 95,
+          "col": 13,
+          "pos": 1906
+        },
+        {
+          "name": "TelemetryLog",
+          "line": 101,
+          "col": 18,
+          "pos": 2039
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/components/resources/apps/necessidades-agora/src/types.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "UserRole",
+          "line": 6,
+          "col": 13,
+          "pos": 131
+        },
+        {
+          "name": "UserProfile",
+          "line": 8,
+          "col": 18,
+          "pos": 191
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/awareness-tree/lib/tree/leafMaterial.ts",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [
+        {
+          "name": "LeafMaterialUniforms",
+          "line": 17,
+          "col": 13,
+          "pos": 604
+        }
+      ],
+      "unlisted": [],
+      "unresolved": []
+    },
+    {
+      "file": "src/features/interactive-resources/thought-river/ThoughtRiverExperience.tsx",
+      "binaries": [],
+      "catalog": [],
+      "catalogReferences": [],
+      "dependencies": [],
+      "devDependencies": [],
+      "duplicates": [
+        [
+          {
+            "name": "ThoughtRiverExperience",
+            "line": 34,
+            "col": 17,
+            "pos": 1166
+          },
+          {
+            "name": "default",
+            "line": 318,
+            "col": 16,
+            "pos": 10047
+          }
+        ]
+      ],
+      "enumMembers": [],
+      "exports": [],
+      "files": [],
+      "namespaceMembers": [],
+      "optionalPeerDependencies": [],
+      "types": [],
+      "unlisted": [],
+      "unresolved": []
+    }
+  ]
+}

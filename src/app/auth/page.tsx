@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useCourses } from "@/hooks/useContent";
 import { Input } from "@/components/ui/Input";
 import PageShell from "@/components/ui/PageShell";
+import styles from "./AuthPage.module.css";
 import { createSupabaseBrowserClient } from "@/infrastructure/supabase/client";
 import { ensureUserProfileAction } from "@/app/actions/auth";
 import { registerForCourseAction } from "@/app/actions/signup";
@@ -304,19 +305,19 @@ function AuthContent() {
   };
 
   return (
-    <PageShell variant="auth" className="p-4 md:p-8 min-h-screen">
-      <Link
-        href="/"
-        className="absolute left-8 top-8 z-50 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-text/70 transition-colors hover:text-primary"
-      >
-        <ArrowRight className="rotate-180" size={16} /> Voltar ao Início
-      </Link>
+    <PageShell variant="auth" className={styles.shell}>
+      <nav className={styles.navigation} aria-label="Voltar ao site">
+        <Link
+          href="/"
+          className="inline-flex min-h-11 items-center gap-2 text-xs font-semibold text-primary transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        >
+          <ArrowRight className="rotate-180" size={16} /> Voltar ao Início
+        </Link>
+      </nav>
 
-      <div className="relative z-10 mx-auto grid min-h-[calc(100vh-6rem)] w-full max-w-6xl items-center gap-12 py-20 lg:grid-cols-[1fr_480px] lg:gap-20">
-        {/* Coluna editorial. Vem depois do formulario na ordem do documento,
-            para que no telefone o campo de e-mail seja a primeira coisa sob o
-            polegar; no desktop `lg:order-first` a devolve para a esquerda. */}
-        <aside className="fv-bg fv-bg-login hidden rounded-md lg:order-first lg:block lg:p-12">
+      <div className={styles.layout}>
+        {/* A apresentação aparece ao lado do formulário apenas em telas largas. */}
+        <aside className="hidden min-w-0 lg:block lg:pr-4">
           <span className="fv-eyebrow mb-6">Instituto Figura Viva</span>
           <p className="font-serif text-4xl font-semibold leading-[1.15] text-primary xl:text-5xl">
             {isAdminIntent && !isSignup
@@ -333,17 +334,22 @@ function AuthContent() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative z-10 w-full rounded-md border border-border bg-paper p-8 md:p-12"
+          className={styles.card}
+          data-auth-card
         >
-          <div className="flex flex-col items-center mb-8">
-            <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full border border-border bg-paper p-1">
+          <div
+            className={`${styles.brand} flex flex-col items-center text-center`}
+          >
+            <div
+              className={`${styles.logo} flex h-14 w-14 items-center justify-center rounded-full border border-border bg-paper p-1`}
+            >
               <img
                 src="/assets/logo.jpeg"
-                alt="Logo"
+                alt="Instituto Figura Viva"
                 className="w-full h-full rounded-full object-cover"
               />
             </div>
-            <h1 className="font-serif text-3xl text-primary font-bold mb-1">
+            <h1 className="mb-1 font-serif text-2xl font-bold leading-tight text-primary sm:text-3xl">
               {isSignup
                 ? "Criar Conta"
                 : isAdminIntent
@@ -360,7 +366,7 @@ function AuthContent() {
           <button
             onClick={handleGoogleAuth}
             disabled={loading}
-            className="mb-6 flex w-full items-center justify-center gap-3 rounded-md border border-border bg-paper py-3.5 font-bold text-text transition-colors hover:border-igarape hover:bg-areia active:scale-[0.98]"
+            className={`${styles.google} flex w-full items-center justify-center gap-3 rounded-md border border-border bg-paper py-3 text-sm font-bold text-text transition-colors hover:border-igarape hover:bg-areia active:scale-[0.98]`}
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path
@@ -383,7 +389,7 @@ function AuthContent() {
             Continuar com Google
           </button>
 
-          <div className="relative mb-6">
+          <div className={`${styles.divider} relative`}>
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-border"></div>
             </div>
@@ -402,7 +408,7 @@ function AuthContent() {
               também a pasta de spam. Se já tem conta, faça login.
             </div>
           )}
-          <form onSubmit={handleEmailAuth} className="space-y-4">
+          <form onSubmit={handleEmailAuth} className={styles.form}>
             <AnimatePresence mode="wait">
               {isSignup && (
                 <motion.div
@@ -489,23 +495,37 @@ function AuthContent() {
             />
 
             <div className="space-y-1">
-              <Input
-                id="password"
-                name="password"
-                label="Senha"
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                rightIcon={showPassword ? EyeOff : Eye}
-                onRightIconClick={() => setShowPassword(!showPassword)}
-                autoComplete={isSignup ? "new-password" : "current-password"}
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  name="password"
+                  label="Senha"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="pr-12"
+                  autoComplete={isSignup ? "new-password" : "current-password"}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((value) => !value)}
+                  aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                  aria-pressed={showPassword}
+                  className="absolute bottom-0.5 right-1 inline-flex h-11 w-11 items-center justify-center rounded-md text-primary/70 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                >
+                  {showPassword ? (
+                    <EyeOff size={18} aria-hidden="true" />
+                  ) : (
+                    <Eye size={18} aria-hidden="true" />
+                  )}
+                </button>
+              </div>
               {!isSignup && (
                 <div className="text-right">
                   <Link
                     href="/auth/reset-password"
-                    className="text-[10px] font-bold uppercase text-primary underline-offset-4 hover:underline"
+                    className={`${styles.forgot} inline-flex min-h-8 items-center text-xs font-semibold text-primary underline-offset-4 hover:underline`}
                   >
                     Esqueceu a senha?
                   </Link>
@@ -539,7 +559,9 @@ function AuthContent() {
             </button>
           </form>
 
-          <div className="mt-8 border-t border-border/70 pt-6 text-center">
+          <div
+            className={`${styles.switcher} border-t border-border/70 text-center`}
+          >
             <button
               onClick={() =>
                 router.push(isSignup ? "/auth" : "/auth?mode=signup")
@@ -560,10 +582,10 @@ function AuthContent() {
             </button>
           </div>
 
-          <div className="mt-8 text-center">
+          <div className={`${styles.access} text-center`}>
             <Link
               href={isAdminIntent ? "/auth" : "/auth?next=%2Fadmin"}
-              className="text-[10px] font-medium uppercase tracking-widest text-muted transition-colors hover:text-text"
+              className="inline-flex min-h-8 items-center text-xs font-medium text-text/70 transition-colors hover:text-primary hover:underline"
             >
               {isAdminIntent ? "Acesso de aluno" : "Acesso administrativo"}
             </Link>

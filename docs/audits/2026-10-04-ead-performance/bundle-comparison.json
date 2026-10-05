@@ -1,0 +1,23 @@
+{
+  "metric": "Sum of individually gzipped JS chunks from route, root layout and portal layout manifests",
+  "baseline": {
+    "/portal/course/[courseId]/page": {
+      "gzipBytes": 538725,
+      "chunks": 28
+    },
+    "/portal/page": {
+      "gzipBytes": 481870,
+      "chunks": 23
+    }
+  },
+  "candidate": {
+    "/portal/course/[courseId]/page": {
+      "gzipBytes": 487039,
+      "chunks": 25
+    },
+    "/portal/page": {
+      "gzipBytes": 481881,
+      "chunks": 23
+    }
+  }
+}

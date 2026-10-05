@@ -6,8 +6,6 @@ import {
   ChevronUp,
   MoreHorizontal,
   Search,
-  Filter,
-  Download,
   ChevronLeft,
   ChevronRight,
   SearchX,
@@ -132,28 +130,26 @@ export function DataTable<
           <input
             type="text"
             placeholder={searchPlaceholder}
+            aria-label={searchPlaceholder}
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
             disabled={manualPagination} // Disable search for now if manual pagination (until server-side search implemented)
             className="w-full pl-10 pr-4 py-2.5 bg-stone-50 border border-stone-100 rounded-xl text-sm outline-none focus:bg-white focus:border-primary/30 focus:ring-4 focus:ring-primary/5 transition-all disabled:opacity-50"
           />
-        </div>
-
-        <div className="flex items-center gap-2">
-          <button className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-stone-600 bg-white border border-stone-100 rounded-xl hover:bg-stone-50 transition-colors">
-            <Filter size={16} />
-            Filtros
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-stone-600 bg-white border border-stone-100 rounded-xl hover:bg-stone-50 transition-colors">
-            <Download size={16} />
-            Exportar
-          </button>
         </div>
       </div>
 
       {/* Table Container */}
       <div className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+        <div
+          className="overflow-x-auto"
+          tabIndex={0}
+          role="region"
+          aria-label="Tabela de registros, role para ver todas as colunas"
+        >
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-stone-50/50 border-b border-stone-100">
@@ -162,7 +158,7 @@ export function DataTable<
                     key={column.key}
                     onClick={() => column.sortable && handleSort(column.key)}
                     className={cn(
-                      "px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-stone-400 select-none",
+                      "px-4 py-3 text-xs font-semibold text-stone-600 select-none",
                       column.sortable &&
                         !manualPagination &&
                         "cursor-pointer hover:text-stone-700 transition-colors",
@@ -183,7 +179,7 @@ export function DataTable<
                 {actions && (
                   <th
                     key="actions"
-                    className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-stone-400 text-right"
+                    className="px-4 py-3 text-xs font-semibold text-stone-600 text-right"
                   >
                     Ações
                   </th>

@@ -1,0 +1,49 @@
+{
+  "date": "2026-10-04",
+  "nextVersion": "15.5.25",
+  "firstLoadJsKB": {
+    "before": 493,
+    "after": 397,
+    "reduction": 96,
+    "reductionPercent": 19.47
+  },
+  "lessonFirstLoadJsKB": {
+    "before": 325,
+    "after": 325
+  },
+  "playerDynamicChunks": [
+    "static/chunks/3182-193a8c3aa32ce6d6.js",
+    "static/chunks/5939-79edde4d2b06680b.js",
+    "static/chunks/5809-4e2a4f583c101d9c.js",
+    "static/chunks/4723.287e9fbaab255a9e.js",
+    "static/chunks/500-370071b4e44fe299.js",
+    "static/chunks/6105.52526e8fdec3b264.js"
+  ],
+  "validation": {
+    "lint": "passed",
+    "scripts": {
+      "passed": 32
+    },
+    "jest": {
+      "suitesPassed": 136,
+      "testsPassed": 636,
+      "testsSkipped": 7
+    },
+    "typecheck": "passed",
+    "baselineBuild": "passed",
+    "candidateBuild": "passed",
+    "lockfileDryRun": "passed",
+    "knip": "passed (report only)",
+    "publicSmoke": {
+      "passed": 7,
+      "exitCode": 0,
+      "seconds": 9.4,
+      "browser": "installed Chromium headless shell 1243",
+      "note": "Temporary test configuration only; Next server started directly to avoid Windows webServer teardown hanging; fixture used the build-time port. No production configuration changed."
+    }
+  },
+  "notVerified": [
+    "Authenticated course enrollment, resume and certificate flows",
+    "GitHub cache hit and timing across real workflow runs"
+  ]
+}

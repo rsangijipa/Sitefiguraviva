@@ -1,0 +1,46 @@
+{
+  "date": "2026-10-04",
+  "removed": [
+    {
+      "name": "@google/generative-ai",
+      "version": "0.24.1"
+    },
+    {
+      "name": "next-view-transitions",
+      "version": "0.3.5"
+    }
+  ],
+  "otherVersionsChanged": [],
+  "validation": {
+    "cleanInstall": "npm ci --ignore-scripts (passed)",
+    "removedPackagesAbsentFromCleanInstall": true,
+    "removedPackagesAbsentFromWorkspace": true,
+    "lint": "passed",
+    "scripts": {
+      "passed": 43
+    },
+    "jest": {
+      "suitesPassed": 137,
+      "testsPassed": 639,
+      "skipped": 7
+    },
+    "typecheck": "passed",
+    "build": "passed",
+    "firstLoadJsCourseKB": 397,
+    "publicSmoke": {
+      "passed": 7,
+      "seconds": 11.1,
+      "exitCode": 0,
+      "browser": "Chromium headless shell 1243 (temporary test configuration)"
+    }
+  },
+  "knip": {
+    "unusedDependenciesBefore": 10,
+    "unusedDependenciesAfter": 8,
+    "unresolved": 0
+  },
+  "notVerified": [
+    "Authenticated staging flow (staging does not exist)",
+    "Cache hits in GitHub after publishing local workflow changes"
+  ]
+}

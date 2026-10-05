@@ -23,7 +23,6 @@ import {
 } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { LessonPlayer } from "@/components/lms/LessonPlayer";
 import { useEnrolledCourse } from "@/hooks/useEnrolledCourse";
 import { cn } from "@/lib/utils";
 import { EnrollmentDoc, CommunityThreadDoc } from "@/types/lms";
@@ -31,6 +30,19 @@ import { communityService } from "@/services/communityService";
 import { certificateService } from "@/services/certificateService";
 import { CertificateDoc } from "@/types/lms";
 import { CertificateIssueCard } from "@/components/portal/CertificateIssueCard";
+
+const LessonPlayer = dynamic(
+  () => import("@/components/lms/LessonPlayer").then((mod) => mod.LessonPlayer),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="min-h-screen flex items-center justify-center" role="status">
+        <Loader2 className="w-8 h-8 animate-spin text-primary/30" aria-hidden="true" />
+        <span className="sr-only">Carregando aula...</span>
+      </div>
+    ),
+  },
+);
 
 const CourseCommunity = dynamic(
   () => import("@/components/community/CourseCommunity"),

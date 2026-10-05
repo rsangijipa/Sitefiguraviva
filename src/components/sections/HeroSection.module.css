@@ -1,0 +1,126 @@
+.hero {
+  --fv-bg-strength: 0.42;
+  --fv-bg-strength-dark: 0.12;
+  position: relative;
+  overflow: hidden;
+  padding: 112px 24px 36px;
+  background-color: rgb(var(--color-paper));
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgb(var(--color-paper) / 65%),
+    transparent 75%
+  );
+}
+
+.layout {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  align-items: center;
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.copy {
+  min-width: 0;
+  max-width: 560px;
+}
+
+.visual {
+  position: relative;
+  justify-self: center;
+  width: min(100%, 280px);
+  height: 280px;
+  pointer-events: none;
+}
+
+.visual::before {
+  content: "";
+  position: absolute;
+  inset: 4% -15% 8%;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse,
+    rgb(199 173 109 / 10%),
+    rgb(149 173 152 / 6%) 50%,
+    transparent 72%
+  );
+}
+
+.tree {
+  width: 100%;
+  height: 100%;
+  opacity: 0.85;
+  filter: saturate(0.72) contrast(0.96);
+}
+
+@media (min-width: 640px) {
+  .hero {
+    padding-inline: 32px;
+  }
+  .visual {
+    width: 320px;
+    height: 330px;
+  }
+}
+
+@media (min-width: 768px) {
+  .hero {
+    padding: 112px 40px 48px;
+  }
+  .hero::after {
+    background: linear-gradient(
+      90deg,
+      rgb(var(--color-paper) / 85%),
+      rgb(var(--color-paper) / 35%) 45%,
+      transparent 75%
+    );
+  }
+  .layout {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    gap: 32px;
+  }
+  .visual {
+    width: 100%;
+    height: clamp(340px, 40vw, 520px);
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero {
+    padding-top: 104px;
+    padding-bottom: 40px;
+  }
+  .layout {
+    min-height: 480px;
+    gap: 56px;
+  }
+  .visual {
+    height: 520px;
+  }
+}
+
+@media (max-width: 359px) {
+  .hero {
+    padding-inline: 20px;
+  }
+  .visual {
+    height: 240px;
+    width: 240px;
+  }
+}
+
+:global(.dark) .hero::after {
+  background: none;
+}
+:global(.dark) .tree {
+  opacity: 0.72;
+}

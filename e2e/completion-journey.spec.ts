@@ -1,93 +1,110 @@
 import { test, expect } from "@playwright/test";
-import {
-  loginAsStudent,
-  HAS_STUDENT_CREDENTIALS,
-  MISSING_STUDENT_CREDENTIALS,
-} from "./helpers";
+import { loginAsStudent } from "./helpers";
+import { execFileSync } from "node:child_process";
+import path from "node:path";
 
-test.describe("Student Completion Journey", () => {
-  test.skip(!HAS_STUDENT_CREDENTIALS, MISSING_STUDENT_CREDENTIALS);
+test.describe("EAD pilot: resume, progress and certificate", () => {
+  test.skip(
+    !process.env.E2E_COURSE_ID,
+    "Configure an explicit isolated EAD pilot.",
+  );
+  // Completion consumes the fixture. Retries would no longer prove the transition.
+  test.describe.configure({ retries: 0 });
+  test.beforeAll(() => {
+    execFileSync(
+      process.execPath,
+      [path.resolve(__dirname, "../scripts/e2e-preflight.mjs"), "--ead-pilot"],
+      {
+        env: process.env,
+        windowsHide: true,
+        timeout: 10_000,
+      },
+    );
+  });
 
-  test("should complete a course and see the certificate", async ({ page }) => {
-    // 1. Login as student
+  test("persists the selected lesson and issues this course's certificate", async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
+    const courseId = process.env.E2E_COURSE_ID!;
+    const courseTitle = process.env.E2E_COURSE_TITLE!;
+    const lessonId = process.env.E2E_FINAL_LESSON_ID!;
+    const lessonTitle = process.env.E2E_FINAL_LESSON_TITLE!;
+    const lobby = `/portal/course/${encodeURIComponent(courseId)}`;
+
     await loginAsStudent(page);
+    await page.goto(lobby);
+    await expect(
+      page.getByRole("heading", { name: courseTitle, exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByText("Certificado Indisponível", { exact: true }),
+    ).toBeVisible();
 
-    // 2. Go to courses list
-    await page.goto("/portal/courses");
+    // The old resume target must differ so a missing write cannot pass using seeded data.
+    await page
+      .getByRole("button", { name: "Continuar Estudando", exact: true })
+      .click();
+    await expect(page).toHaveURL((url) =>
+      Boolean(url.searchParams.get("lesson")),
+    );
+    expect(new URL(page.url()).searchParams.get("lesson")).not.toBe(lessonId);
 
-    // 3. Find and open the first course
-    const firstCourse = page.locator('a[href*="/portal/course/"]').first();
-    await expect(firstCourse).toBeVisible({ timeout: 15000 });
-    await firstCourse.click();
+    await page.goto(`${lobby}?tab=modules`);
+    await page.getByText(lessonTitle, { exact: true }).click();
+    await expect(page).toHaveURL(
+      (url) => url.searchParams.get("lesson") === lessonId,
+    );
+    await expect(
+      page.getByRole("heading", { name: lessonTitle, exact: true }),
+    ).toBeVisible();
+    const progress = page.getByTestId("lesson-sidebar-progress");
+    await expect(progress).toBeVisible();
+    const counts = (await progress.innerText()).match(/(\d+)\s*\/\s*(\d+)/);
+    expect(counts, "Pilot must expose lesson progress").not.toBeNull();
+    const completed = Number(counts![1]);
+    const total = Number(counts![2]);
+    expect(total).toBeGreaterThanOrEqual(2);
+    expect(completed, "Only the final text lesson may remain incomplete").toBe(
+      total - 1,
+    );
+    await expect(page.getByTestId("mark-lesson-complete")).toBeVisible();
 
-    // 4. Wait for Course Player to load
-    await page.waitForSelector("h1", { state: "visible" });
+    // Full navigation discards client state and reads persisted course data.
+    await page.goto(lobby);
+    await page
+      .getByRole("button", { name: "Continuar Estudando", exact: true })
+      .click();
+    await expect(page).toHaveURL(
+      (url) => url.searchParams.get("lesson") === lessonId,
+    );
+    await expect(
+      page.getByRole("heading", { name: lessonTitle, exact: true }),
+    ).toBeVisible();
 
-    // 5. Complete all uncompleted lessons
-    // Note: For E2E stability in a real DB, we might want to target a specific "Test Course"
-    // Here we'll try to find any lesson that is NOT completed and click it
+    await page.getByTestId("mark-lesson-complete").click();
+    const fullProgress = new RegExp(`${total}\\s*/\\s*${total}\\s*Aulas`);
+    await expect(progress).toHaveText(fullProgress);
+    await page.reload();
+    await expect(progress).toHaveText(fullProgress);
+    await expect(page.getByTestId("mark-lesson-complete")).toHaveCount(0);
 
-    // Let's look for buttons in the sidebar that don't have the Check icon
-    // Based on src/components/portal/LessonSidebar.tsx:
-    // completed has CheckCircle2.
+    await page.goto(lobby);
+    const issued = page.getByTestId("certificate-issued");
+    const issue = page.getByTestId("issue-certificate-button");
+    await expect(issue.or(issued)).toBeVisible();
+    if (await issue.isVisible()) await issue.click();
+    await expect(issued).toBeVisible();
+    await expect(page.locator(`a[href="${lobby}/certificate"]`)).toBeVisible();
+    await page.reload();
+    await expect(issued).toBeVisible();
 
-    let hasUnfinishedLessons = true;
-    let attempts = 0;
-
-    while (hasUnfinishedLessons && attempts < 20) {
-      attempts++;
-
-      // Find first lesson button that does NOT have the checkmark
-      // This is a bit tricky with Lucide icons in Shadcn-like components
-      // We'll look for lesson buttons and check their icon
-      const lessons = page.locator("aside button");
-      const count = await lessons.count();
-
-      let foundNext = false;
-      for (let i = 0; i < count; i++) {
-        const lesson = lessons.nth(i);
-        const isCompleted =
-          (await lesson.locator("svg.text-green-500").count()) > 0;
-        const isLocked =
-          (await lesson.locator('svg[class*="Lock"]').count()) > 0;
-
-        if (!isCompleted && !isLocked) {
-          await lesson.click();
-
-          // Wait for content area to update
-          await page.waitForTimeout(1000);
-
-          // Click "Marcar como Concluída" if it's there
-          const completeBtn = page.locator(
-            'button:has-text("Marcar como Concluída")',
-          );
-          if (await completeBtn.isVisible()) {
-            await completeBtn.click();
-            // Wait for update
-            await expect(lesson.locator("svg.text-green-500")).toBeVisible({
-              timeout: 10000,
-            });
-          } else {
-            // Maybe it's a video that marks itself or it's already done
-          }
-
-          foundNext = true;
-          break;
-        }
-      }
-
-      if (!foundNext) {
-        hasUnfinishedLessons = false;
-      }
-    }
-
-    // 6. Navigate to Certificates page to verify issuance
     await page.goto("/portal/certificates");
-
-    // 7. Check if a certificate is visible
-    const certificateCard = page.locator('div:has-text("Certificado")').first();
-    // Since we might not have actually finished a NEW course (if it was already done),
-    // we just verify the page loads and shows "something" related to certificates.
-    await expect(page.locator("h1")).toContainText("Meus Certificados");
+    const card = page.getByTestId("portal-certificate-card").filter({
+      has: page.getByRole("heading", { name: courseTitle, exact: true }),
+    });
+    await expect(card).toHaveCount(1);
+    await card.getByRole("button", { name: "Baixar", exact: true }).click();
+    await expect(page).toHaveURL(/\/portal\/certificates\/[^/?#]+$/);
   });
 });

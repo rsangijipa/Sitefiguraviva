@@ -71,9 +71,12 @@ export const metadata: Metadata = {
     follow: true,
   },
   icons: {
-    icon: [{ url: "/favicon.ico" }],
+    icon: [
+      { url: "/favicon.ico?v=figura-viva-2", sizes: "192x192" },
+      { url: "/icon-192x192.png", sizes: "192x192", type: "image/png" },
+    ],
     apple: [
-      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+      { url: "/apple-touch-icon.png", sizes: "512x512", type: "image/png" },
     ],
   },
   manifest: "/manifest.json",
