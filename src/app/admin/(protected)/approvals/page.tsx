@@ -165,22 +165,69 @@ export default function ApprovalsPage() {
             {pendingRegistrations.length > 0 && (
               <section className="space-y-3" aria-labelledby="pending-registrations-title">
                 <h2 id="pending-registrations-title" className="text-lg font-semibold text-primary">Cadastros aguardando aprovação</h2>
-                {pendingRegistrations.map((registration) => (
-                  <Card key={registration.id} className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between">
-                    <div className="flex min-w-0 items-center gap-3">
-                      <div className="rounded-full bg-primary/5 p-2 text-primary"><User size={20} /></div>
-                      <div className="min-w-0">
-                        <h3 className="truncate font-semibold text-primary">{registration.display_name || "Novo aluno"}</h3>
-                        <p className="truncate text-sm text-stone-600">{registration.email}</p>
-                        <p className="text-xs text-stone-400">Solicitado em {new Date(registration.created_at).toLocaleDateString("pt-BR")}</p>
+                {pendingRegistrations.map((registration) => {
+                  const isConfirmed = Boolean(registration.email_confirmed);
+                  return (
+                    <Card key={registration.id} className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between">
+                      <div className="flex min-w-0 items-center gap-3">
+                        <div className="rounded-full bg-primary/5 p-2 text-primary shrink-0"><User size={20} /></div>
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2 mb-1">
+                            <h3 className="truncate font-semibold text-primary">{registration.display_name || "Novo aluno"}</h3>
+                            {isConfirmed ? (
+                              <span className="inline-flex items-center gap-1 rounded bg-green-50 px-2 py-0.5 text-xs font-semibold text-green-700 border border-green-200">
+                                <Check size={12} /> E-mail verificado
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 rounded bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700 border border-amber-200">
+                                <Clock size={12} /> E-mail não verificado
+                              </span>
+                            )}
+                            <span className="inline-flex items-center gap-1 rounded bg-stone-100 px-2 py-0.5 text-xs font-medium text-stone-600">
+                              Aguardando aprovação
+                            </span>
+                          </div>
+                          <p className="truncate text-sm text-stone-600">{registration.email}</p>
+                          {registration.phone_number && (
+                            <p className="text-xs text-stone-500">Telefone: {registration.phone_number}</p>
+                          )}
+                          {registration.course_title && (
+                            <p className="text-xs text-stone-700 mt-1">
+                              Curso de interesse: <strong className="font-semibold text-primary">{registration.course_title}</strong>
+                            </p>
+                          )}
+                          <p className="text-xs text-stone-400 mt-0.5">Solicitado em {new Date(registration.created_at).toLocaleDateString("pt-BR")}</p>
+                          {!isConfirmed && (
+                            <p className="text-xs text-amber-700 font-medium mt-1">
+                              * Confirmação de e-mail obrigatória antes da aprovação administrativa.
+                            </p>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex flex-wrap justify-end gap-2">
-                      <Button variant="outline" color="danger" size="sm" leftIcon={<X size={16} />} onClick={() => handleRegistrationReview(registration, false)} disabled={processingId === registration.id}>Rejeitar cadastro</Button>
-                      <Button size="sm" leftIcon={processingId === registration.id ? <Clock className="animate-spin" /> : <Check size={16} />} onClick={() => handleRegistrationReview(registration, true)} disabled={processingId === registration.id}>Aprovar cadastro</Button>
-                    </div>
-                  </Card>
-                ))}
+                      <div className="flex flex-wrap justify-end items-center gap-2">
+                        <Button
+                          variant="outline"
+                          color="danger"
+                          size="sm"
+                          leftIcon={<X size={16} />}
+                          onClick={() => handleRegistrationReview(registration, false)}
+                          disabled={processingId === registration.id}
+                        >
+                          Rejeitar cadastro
+                        </Button>
+                        <Button
+                          size="sm"
+                          leftIcon={processingId === registration.id ? <Clock className="animate-spin" /> : <Check size={16} />}
+                          onClick={() => handleRegistrationReview(registration, true)}
+                          disabled={processingId === registration.id || !isConfirmed}
+                          title={!isConfirmed ? "O aluno deve confirmar o e-mail antes da aprovação." : undefined}
+                        >
+                          Aprovar cadastro
+                        </Button>
+                      </div>
+                    </Card>
+                  );
+                })}
               </section>
             )}
             {pendingEnrollments.map((en) => (

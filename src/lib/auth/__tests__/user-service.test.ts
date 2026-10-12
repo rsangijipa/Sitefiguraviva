@@ -34,6 +34,14 @@ describe("trusted profile bootstrap", () => {
       { onConflict: "id", ignoreDuplicates: true },
     );
   });
+  it("never activates an e-mail account that has no profile: it becomes a pending registration", async () => {
+    const result = await ensureUserDoc({ uid: "direct-signup", email: "a@x.com", provider: "email" });
+    expect(result.success).toBe(false);
+    expect(upsert).toHaveBeenCalledWith(
+      expect.objectContaining({ role: "student", is_active: false, registration_status: "pending" }),
+      { onConflict: "id", ignoreDuplicates: true },
+    );
+  });
   it("preserves a provisioned role during login", async () => {
     maybeSingle.mockResolvedValue({
       data: { id: "admin-1", role: "admin", is_active: true },

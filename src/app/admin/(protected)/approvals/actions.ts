@@ -49,7 +49,39 @@ export async function getPendingEnrollmentsAction() {
       .order("created_at", { ascending: true });
     if (registrationsError) throw registrationsError;
 
-    return { success: true, enrollments: formatted, registrations: registrations ?? [] };
+    const { data: allCourses } = await supabase
+      .from("courses")
+      .select("id, title");
+    const courseMap = new Map((allCourses || []).map((c: any) => [c.id, c.title]));
+
+    const enrichedRegistrations = await Promise.all(
+      (registrations || []).map(async (reg: any) => {
+        try {
+          const { data: authData } = await supabase.auth.admin.getUserById(reg.id);
+          const emailConfirmed = Boolean(authData?.user?.email_confirmed_at);
+          const courseInterest = authData?.user?.user_metadata?.course_interest || null;
+          return {
+            ...reg,
+            email_confirmed: emailConfirmed,
+            course_interest: courseInterest,
+            course_title: courseInterest ? courseMap.get(courseInterest) || courseInterest : null,
+          };
+        } catch {
+          return {
+            ...reg,
+            email_confirmed: false,
+            course_interest: null,
+            course_title: null,
+          };
+        }
+      }),
+    );
+
+    return {
+      success: true,
+      enrollments: formatted,
+      registrations: enrichedRegistrations,
+    };
   } catch (error: any) {
     rethrowRedirect(error);
     console.error("getPendingEnrollmentsAction Error:", error);
@@ -71,7 +103,17 @@ export async function reviewRegistration(targetUid: string, approve: boolean) {
       "review_pending_registration",
       { p_actor: actor.uid, p_target: targetUid, p_approve: approve },
     );
-    if (error || !data)
+    if (error) {
+      if (error.message?.includes("Email not confirmed")) {
+        return {
+          success: false,
+          error:
+            "Não é possível aprovar um cadastro com e-mail não confirmado.",
+        };
+      }
+      return { success: false, error: "Cadastro pendente não encontrado." };
+    }
+    if (!data)
       return { success: false, error: "Cadastro pendente não encontrado." };
     revalidatePath("/admin/approvals");
     revalidatePath("/admin/users");

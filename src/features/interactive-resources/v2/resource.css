@@ -127,15 +127,19 @@
 @media(min-width:1024px) { .fv-stage-grid { grid-template-columns:minmax(0,1fr) minmax(260px,340px); } .fv-content { padding:48px 32px 64px; } }
 @media(max-width:639px) { .fv-resource-header { gap:8px; padding:10px 12px; } .fv-resource-title { display:none; } .fv-resource-tools { margin-left:auto; gap:6px; } .fv-resource-back { padding:0 10px; font-size:.875rem; } .fv-content { padding:24px 16px 48px; } .fv-stage,.fv-aside { padding:20px; } .fv-actions > .fv-button { flex:1 1 180px; } }
 @media(prefers-reduced-motion:reduce) { .fv-resources *, .fv-resources *::before, .fv-resources *::after { animation:none !important; transition:none !important; scroll-behavior:auto !important; } }
-/* ===== Kit de ilustração (arte provisória vetorial) ===== */
+/* ===== Espaços de ilustração (imagens em public/brand/recursos) ===== */
+.fv-slot { display:block; width:100%; height:auto; object-fit:cover; border-radius:16px; background:var(--fv-areia); }
+.fv-slot--empty { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; padding:12px; border:2px dashed var(--fv-nevoa); color:var(--fv-pedra); font-size:.82rem; font-weight:700; text-align:center; }
+.fv-slot--empty code { font-size:.72rem; font-weight:500; word-break:break-all; }
+.fv-slot--banner { margin:0 0 16px; }
+.fv-rubin { max-width:440px; margin:8px 0 20px; }
 .fv-illustration { display:block; width:100%; height:auto; }
-.fv-banner { max-height:120px; margin:0 0 16px; }
-.fv-rubin { max-width:420px; margin:8px 0 20px; border-radius:var(--fv-radius-lg,24px); }
-.fv-practice-art { max-height:72px; margin-bottom:8px; }
-.fv-chairs, .fv-cycle { max-width:520px; margin:16px 0; }
+.fv-cycle { max-width:520px; margin:16px 0; }
 .fv-resources svg [role="button"] { cursor:pointer; outline:none; }
 .fv-resources svg [role="button"]:focus-visible > :first-child { stroke:var(--fv-verde-raiz); stroke-width:3px; stroke-dasharray:4 4; }
 .fv-link-button { min-height:44px; padding:0; border:0; background:none; color:var(--fv-verde-raiz); font-weight:700; text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
+.fv-chips { margin-top:8px; gap:8px; }
+.fv-chips .fv-button { min-height:40px; padding:8px 14px; font-size:.88rem; }
 
 /* Cartas 2:3 (seção 7.2): canto 24 px, borda Névoa, sem sombra. */
 .fv-card-filters { display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr)); }
@@ -143,10 +147,12 @@
 .fv-gcard { display:flex; flex-direction:column; gap:12px; padding:18px; border:2px solid var(--fv-nevoa); border-radius:24px; background:var(--fv-creme-papel); }
 .fv-gcard-face { display:flex; flex-direction:column; gap:10px; min-height:360px; }
 .fv-gcard-label { color:var(--fv-terra-barro); font-size:.72rem; font-weight:700; letter-spacing:.13em; text-transform:uppercase; }
-.fv-gcard-art { aspect-ratio:300/180; border-radius:16px; overflow:hidden; background:var(--fv-areia); }
+.fv-gcard-art { aspect-ratio:3/2; }
+.fv-gcard-art .fv-slot { height:100%; }
 .fv-gcard h3 { margin:4px 0 0; font-size:1.25rem; }
 .fv-gcard-text { margin:0; font-size:.95rem; line-height:1.5; flex:1; }
 .fv-gcard .fv-reference { font-size:.78rem; }
+.fv-gcard-more { color:var(--fv-pedra); font-size:.75rem; margin-top:-6px; }
 .fv-gcard--back { background:var(--fv-verde-raiz); border-color:var(--fv-verde-raiz); }
 .fv-gcard--back .fv-gcard-face { justify-content:center; }
 .fv-gcard-label--back { color:var(--fv-creme-papel); display:flex; align-items:center; gap:10px; }
@@ -158,25 +164,40 @@
 .fv-gcard--back .fv-button--secondary:not([aria-pressed="true"]) { background:var(--fv-creme-papel); }
 .fv-gcard-relations ul { display:flex; flex-wrap:wrap; gap:4px 14px; margin:4px 0 0; padding:0; list-style:none; }
 .fv-gcard--back .fv-gcard-relations .fv-label, .fv-gcard--back .fv-link-button { color:var(--fv-creme-papel); }
+.fv-print-card .fv-gcard-art { max-width:360px; margin:8px 0 16px; }
+/* Retrato tipográfico das cartas de autoria: iniciais em Fraunces, sem foto. */
+.fv-author-portrait { display:flex; align-items:center; justify-content:center; height:100%; min-height:120px; border-radius:16px; background:var(--fv-areia); }
+.fv-author-portrait span { color:var(--fv-verde-raiz); font-family:var(--font-serif),Georgia,serif; font-weight:600; font-size:3.4rem; letter-spacing:.02em; border-bottom:2px solid var(--fv-terra-barro); line-height:1.1; }
 
-/* Copa (seção 7.4): vento como único movimento, desligável. */
-.fv-copa { max-width:520px; }
-.fv-canopy { display:block; width:100%; height:auto; }
-.fv-canopy-leaf { transform-box:fill-box; transform-origin:center; animation:fv-vento 5s ease-in-out infinite alternate; }
-.fv-canopy[data-still="true"] .fv-canopy-leaf { animation:none; }
-@keyframes fv-vento { from { transform:rotate(-4deg); } to { transform:rotate(4deg); } }
+/* Copa (seção 7.4): imagem + 10 folhas tocáveis. */
+.fv-copa { max-width:560px; }
+.fv-canopy-leaves { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; margin:12px 0 0; padding:0; list-style:none; }
+.fv-leaf-button { display:flex; flex-direction:column; align-items:center; gap:2px; width:100%; min-height:56px; padding:6px; border:2px solid var(--fv-nevoa); border-radius:12px; background:var(--fv-creme-papel); color:var(--fv-mata); font-size:.75rem; font-weight:700; cursor:pointer; }
+.fv-leaf-button svg { width:18px; height:24px; fill:var(--fv-verde-igarape); }
+.fv-leaf-button[aria-pressed="true"] { border-color:var(--fv-verde-raiz); background:var(--fv-areia); }
 
-/* Figura e fundo: campo ao lado das opções a partir de 900 px. */
+/* Figura e fundo */
 .fv-figure-stage { display:grid; gap:20px; align-items:start; }
-.fv-figure-field { display:block; width:100%; max-width:520px; height:auto; border-radius:16px; }
-.fv-field-element { transition:opacity 240ms ease; }
 @media (min-width:900px) { .fv-figure-stage { grid-template-columns:minmax(0,1fr) minmax(0,1fr); } }
+.fv-layer-list li { display:grid; gap:4px; }
+.fv-layer-toggle { margin-top:0; }
 
-/* Mapa do Corpo: silhueta ao lado dos controles a partir de 760 px. */
+/* Laboratório Fenomenológico e Escuta Dialógica */
+.fv-transcript { margin:16px 0; padding:16px 20px; border:1px solid var(--fv-nevoa); border-radius:8px; background:var(--fv-creme-papel); }
+.fv-transcript ol { margin:8px 0 0; padding-left:20px; color:var(--fv-pedra); font-size:.92rem; }
+.fv-feedback { margin:6px 0 0; padding:10px 12px; border-left:3px solid var(--fv-verde-raiz); background:var(--fv-areia); font-size:.92rem; }
+.fv-feedback--differs { border-left-color:var(--fv-terra-barro); }
+.fv-horizon { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0 0; padding:0; list-style:none; }
+.fv-horizon li { padding:8px 12px; border:1px solid var(--fv-nevoa); border-radius:4px; background:var(--fv-creme-papel); }
+.fv-compare { display:grid; gap:16px; }
+.fv-compare section { padding:16px; border:1px solid var(--fv-nevoa); border-radius:8px; background:var(--fv-creme-papel); }
+@media (min-width:900px) { .fv-compare { grid-template-columns:1fr 1fr; } }
+.fv-quote { margin:16px 0; padding:12px 18px; border-left:3px solid var(--fv-terra-barro); font-family:var(--font-serif),Georgia,serif; font-size:1.2rem; font-style:italic; }
+.fv-responses li .fv-label { display:block; margin-bottom:4px; }
+.fv-details { margin-top:16px; }
+
+/* Mapa do Corpo: silhueta funcional ao lado dos controles a partir de 760 px. */
 .fv-body-layout { display:grid; gap:24px; align-items:start; }
 .fv-body-figure { display:grid; gap:12px; justify-items:center; }
 .fv-body { width:100%; max-width:240px; height:auto; }
 @media (min-width:760px) { .fv-body-layout { grid-template-columns:260px minmax(0,1fr); } }
-@media (prefers-reduced-motion:reduce) { .fv-canopy-leaf { animation:none; } .fv-field-element { transition:none; } }
-.fv-gcard-more { color:var(--fv-pedra); font-size:.75rem; margin-top:-6px; }
-.fv-print-card .fv-gcard-art { max-width:360px; margin:8px 0 16px; }

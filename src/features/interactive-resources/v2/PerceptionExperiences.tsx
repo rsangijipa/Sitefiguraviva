@@ -38,6 +38,13 @@ export function ArrivalExperience(props: ExperienceProps) {
     <div className="fv-actions"><Button onClick={next}>{step+1===steps.length ? "Concluir chegada" : "Continuar"}</Button><Button secondary onClick={next}>Pular</Button>{step>0 && <Button secondary onClick={() => setStep(step-1)}>Voltar à etapa anterior</Button>}</div>
   </>;
 }
+/** Fechamento descritivo (guia 5.2): só o que foi marcado, nas palavras da interface, sem padrões nem recomendações. */
+const IN: Record<string,string> = { "cabeça":"na cabeça","pescoço":"no pescoço",ombros:"nos ombros",peito:"no peito","abdômen":"no abdômen","braços":"nos braços","mãos":"nas mãos",quadril:"no quadril",pernas:"nas pernas","pés":"nos pés" };
+export function describeBody(points: BodyPoint[]) {
+  const parts = points.filter(point => point.sensation !== "não sei").map(point => `${point.sensation === "outra" ? point.note || "outra sensação" : point.sensation} ${IN[point.region] ?? point.region}`);
+  if (!parts.length) return "";
+  return `Você notou ${parts.length > 1 ? `${parts.slice(0, -1).join(", ")} e ${parts[parts.length - 1]}` : parts[0]}.`;
+}
 export function BodyExperience(props: ExperienceProps) {
   const [regions,setRegions] = useState<BodyPoint[]>([]); const [index,setIndex] = useState(0);
   const mode = props.mode === "percorrer" ? "percorrer" : "mapear";
@@ -45,6 +52,7 @@ export function BodyExperience(props: ExperienceProps) {
   useExperienceDraft(payload,props.onDraft);
   return <><h2>{mode === "percorrer" ? `Percorrer: ${BODY_REGIONS[index]}` : "Perceber o corpo"}</h2>
     <p>Você pode não perceber uma região. “Não sei” também cabe aqui.</p><BodySelector value={regions} onChange={setRegions} illustrations={props.version?.configuration.items} currentRegion={mode==="percorrer" ? BODY_REGIONS[index] : undefined} />
+    {!!describeBody(regions) && <p className="fv-mode-status" aria-live="polite">{describeBody(regions)}</p>}
     {mode==="percorrer" && <p className="fv-note">O roteiro permanece em texto. Áudio docente aparece quando houver gravação revisada e licenciada.</p>}
     <div className="fv-actions">{mode==="percorrer" && index<BODY_REGIONS.length-1 ? <><Button onClick={() => setIndex(index+1)}>Próxima região</Button><Button secondary onClick={() => setIndex(index+1)}>Pular região</Button></> : <Button onClick={() => props.onComplete(payload)}>Concluir percepção</Button>}{index>0 && mode==="percorrer" && <Button secondary onClick={() => setIndex(index-1)}>Região anterior</Button>}</div>
   </>;

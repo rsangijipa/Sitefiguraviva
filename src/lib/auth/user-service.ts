@@ -9,6 +9,8 @@ export interface UserAuthContextInput {
   display_name?: string | null;
   picture?: string | null;
   photoURL?: string | null;
+  /** Provedor verificado pelo Auth (app_metadata.provider), nunca vindo do cliente. */
+  provider?: string | null;
 }
 
 /**
@@ -34,6 +36,25 @@ export async function ensureUserDoc(decodedToken: UserAuthContextInput) {
       .maybeSingle();
 
     if (lookupError) throw lookupError;
+
+    if (!existingProfile && decodedToken.provider === "email") {
+      // Conta de e-mail e senha sem perfil: o Auth permite cadastro direto, sem
+      // passar pela solicitação do site. Nunca nasce ativa; entra na fila de
+      // aprovação como qualquer outro cadastro e só vira aluno após a revisão.
+      const { error } = await supabase.from("profiles").upsert(
+        {
+          id: uid,
+          email,
+          display_name: displayName,
+          role: "student",
+          is_active: false,
+          registration_status: "pending",
+        },
+        { onConflict: "id", ignoreDuplicates: true },
+      );
+      if (error) throw error;
+      return { success: false, error: "Registration pending approval" };
+    }
 
     if (!existingProfile) {
       console.log(`[ensureUserDoc] Creating new user profile for ${uid}`);

@@ -1,4 +1,7 @@
-import { registerForCourseAction } from "@/app/actions/signup";
+import {
+  registerForCourseAction,
+  resendConfirmationEmailAction,
+} from "@/app/actions/signup";
 
 jest.mock("next/headers", () => ({
   headers: jest.fn(() =>
@@ -16,13 +19,26 @@ jest.mock("@/lib/rateLimit", () => ({
 }));
 
 const mockCourseMaybeSingle = jest.fn();
-const mockCreateUser = jest.fn();
+const mockProfileMaybeSingle = jest.fn();
+const mockSignUp = jest.fn();
+const mockResend = jest.fn();
 const mockDeleteUser = jest.fn();
 const mockProfileInsert = jest.fn();
 
 jest.mock("@/infrastructure/supabase/server", () => ({
+  createSupabaseAuthServerClient: () => ({
+    auth: {
+      signUp: mockSignUp,
+      resend: mockResend,
+    },
+  }),
   createSupabaseServiceClient: () => ({
-    auth: { admin: { createUser: mockCreateUser, deleteUser: mockDeleteUser, updateUserById: jest.fn() } },
+    auth: {
+      admin: {
+        deleteUser: mockDeleteUser,
+        updateUserById: jest.fn(),
+      },
+    },
     from: (table: string) => {
       if (table === "courses") {
         return {
@@ -31,9 +47,24 @@ jest.mock("@/infrastructure/supabase/server", () => ({
           }),
         };
       }
-      return { insert: (...args: unknown[]) => mockProfileInsert(...args) };
+      if (table === "profiles") {
+        return {
+          insert: (...args: unknown[]) => mockProfileInsert(...args),
+          select: () => ({
+            eq: () => ({ maybeSingle: mockProfileMaybeSingle }),
+          }),
+        };
+      }
+      return { insert: mockProfileInsert };
     },
   }),
+}));
+
+jest.mock("@/lib/auth/email-flow", () => ({
+  getAuthEmailRedirect: jest.fn(
+    (kind: string, courseId?: string) =>
+      `https://www.institutofiguraviva.com.br/auth/${kind}${courseId ? `?courseId=${courseId}` : ""}`,
+  ),
 }));
 
 const validInput = {
@@ -56,8 +87,13 @@ describe("registerForCourseAction", () => {
     mockCourseMaybeSingle.mockResolvedValue({
       data: { id: "curso-gestalt", is_published: true, status: "open" },
     });
-    mockCreateUser.mockResolvedValue({
-      data: { user: { id: "uuid-123" } },
+    mockSignUp.mockResolvedValue({
+      data: {
+        user: {
+          id: "uuid-123",
+          identities: [{ id: "identity-1", user_id: "uuid-123" }],
+        },
+      },
       error: null,
     });
     mockProfileInsert.mockResolvedValue({ error: null });
@@ -70,7 +106,7 @@ describe("registerForCourseAction", () => {
     });
 
     expect(result.success).toBe(false);
-    expect(mockCreateUser).not.toHaveBeenCalled();
+    expect(mockSignUp).not.toHaveBeenCalled();
   });
 
   it("refuses when the course does not exist", async () => {
@@ -79,7 +115,7 @@ describe("registerForCourseAction", () => {
     const result = await registerForCourseAction(validInput);
 
     expect(result.success).toBe(false);
-    expect(mockCreateUser).not.toHaveBeenCalled();
+    expect(mockSignUp).not.toHaveBeenCalled();
   });
 
   it("refuses when the course is not published", async () => {
@@ -90,7 +126,7 @@ describe("registerForCourseAction", () => {
     const result = await registerForCourseAction(validInput);
 
     expect(result.success).toBe(false);
-    expect(mockCreateUser).not.toHaveBeenCalled();
+    expect(mockSignUp).not.toHaveBeenCalled();
   });
 
   it("refuses a weak password before touching Supabase", async () => {
@@ -100,7 +136,7 @@ describe("registerForCourseAction", () => {
     });
 
     expect(result.success).toBe(false);
-    expect(mockCreateUser).not.toHaveBeenCalled();
+    expect(mockSignUp).not.toHaveBeenCalled();
   });
 
   it("refuses when the rate limit is exceeded", async () => {
@@ -113,26 +149,58 @@ describe("registerForCourseAction", () => {
     const result = await registerForCourseAction(validInput);
 
     expect(result.success).toBe(false);
-    expect(mockCreateUser).not.toHaveBeenCalled();
+    expect(mockSignUp).not.toHaveBeenCalled();
   });
 
-  it("creates an inactive account for administrator approval without sending confirmation mail", async () => {
+  it("creates an unconfirmed, pending account via auth.signUp without auto-confirming", async () => {
     const result = await registerForCourseAction(validInput);
     expect(result).toEqual({
       success: true,
       courseId: "curso-gestalt",
+      email: "maria@example.com",
       requiresAdminApproval: true,
+      requiresEmailVerification: true,
     });
-    expect(mockCreateUser).toHaveBeenCalledWith({
+    expect(mockSignUp).toHaveBeenCalledWith({
       email: "maria@example.com",
       password: "senha-forte-123",
-      email_confirm: true,
-      user_metadata: { full_name: "Maria Souza", phone: "(69) 99999-1234", course_interest: "curso-gestalt" },
+      options: {
+        data: {
+          full_name: "Maria Souza",
+          phone: "(69) 99999-1234",
+          course_interest: "curso-gestalt",
+        },
+        emailRedirectTo: expect.stringContaining("/auth/verify"),
+      },
     });
-    expect(mockProfileInsert).toHaveBeenCalledWith(expect.objectContaining({
-      id: "uuid-123", email: "maria@example.com", is_active: false, registration_status: "pending",
-    }));
+    expect(mockProfileInsert).toHaveBeenCalledWith({
+      id: "uuid-123",
+      email: "maria@example.com",
+      display_name: "Maria Souza",
+      phone_number: "(69) 99999-1234",
+      role: "student",
+      is_active: false,
+      registration_status: "pending",
+    });
   });
+
+  it("refuses duplicate registration when identities is empty (email enumeration protection)", async () => {
+    mockSignUp.mockResolvedValue({
+      data: {
+        user: {
+          id: "uuid-existing",
+          identities: [],
+        },
+      },
+      error: null,
+    });
+
+    const result = await registerForCourseAction(validInput);
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("já tem uma conta");
+    expect(mockProfileInsert).not.toHaveBeenCalled();
+  });
+
   it("rejects a closed course and database failures", async () => {
     mockCourseMaybeSingle.mockResolvedValue({
       data: { is_published: true, status: "closed" },
@@ -144,12 +212,71 @@ describe("registerForCourseAction", () => {
       error: { message: "DB failure" },
     });
     expect((await registerForCourseAction(validInput)).success).toBe(false);
-    expect(mockCreateUser).not.toHaveBeenCalled();
+    expect(mockSignUp).not.toHaveBeenCalled();
   });
-  it("does not leave an authentication account when pending profile creation fails", async () => {
-    mockProfileInsert.mockResolvedValue({ error: { message: "db unavailable" } });
+
+  it("cleans up the auth user if profile insertion fails to prevent orphaned auth accounts", async () => {
+    mockProfileInsert.mockResolvedValue({
+      error: { message: "database unavailable" },
+    });
     const result = await registerForCourseAction(validInput);
     expect(result.success).toBe(false);
     expect(mockDeleteUser).toHaveBeenCalledWith("uuid-123");
+  });
+});
+
+describe("resendConfirmationEmailAction", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockRateLimit.mockResolvedValue({
+      allowed: true,
+      remaining: 4,
+      resetAt: Date.now() + 60000,
+    });
+    mockResend.mockResolvedValue({ data: {}, error: null });
+    mockProfileMaybeSingle.mockResolvedValue({
+      data: { id: "uuid-1", is_active: false, registration_status: "pending" },
+    });
+  });
+
+  it("rejects invalid email formats", async () => {
+    const result = await resendConfirmationEmailAction("invalid-email");
+    expect(result.success).toBe(false);
+    expect(result.message).toContain("válido");
+    expect(mockResend).not.toHaveBeenCalled();
+  });
+
+  it("enforces rate limits", async () => {
+    mockRateLimit.mockResolvedValueOnce({
+      allowed: false,
+      remaining: 0,
+      resetAt: Date.now() + 120000,
+    });
+    const result = await resendConfirmationEmailAction("user@example.com");
+    expect(result.success).toBe(false);
+    expect(result.message).toContain("Muitas tentativas");
+    expect(mockResend).not.toHaveBeenCalled();
+  });
+
+  it("resends confirmation email for pending accounts", async () => {
+    const result = await resendConfirmationEmailAction("aluno@example.com");
+    expect(result.success).toBe(true);
+    expect(mockResend).toHaveBeenCalledWith({
+      type: "signup",
+      email: "aluno@example.com",
+      options: {
+        emailRedirectTo: expect.stringContaining("/auth/verify"),
+      },
+    });
+  });
+
+  it("notifies already active accounts to log in instead", async () => {
+    mockProfileMaybeSingle.mockResolvedValueOnce({
+      data: { id: "uuid-active", is_active: true, registration_status: "approved" },
+    });
+    const result = await resendConfirmationEmailAction("ativo@example.com");
+    expect(result.success).toBe(false);
+    expect(result.message).toContain("já foi confirmado");
+    expect(mockResend).not.toHaveBeenCalled();
   });
 });

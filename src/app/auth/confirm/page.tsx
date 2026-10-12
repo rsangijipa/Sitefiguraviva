@@ -12,6 +12,11 @@ function ConfirmationContent() {
   const courseId = params.get("courseId");
   const [error, setError] = useState("");
   useEffect(() => {
+    const tokenHash = params.get("token_hash");
+    if (tokenHash) {
+      router.replace(`/auth/verify?${params.toString()}`);
+      return;
+    }
     let cancelled = false;
     const complete = async () => {
       try {
@@ -40,7 +45,7 @@ function ConfirmationContent() {
     return () => {
       cancelled = true;
     };
-  }, [courseId, router]);
+  }, [courseId, params, router]);
   return (
     <PageShell variant="auth" className="min-h-screen p-8">
       <div className="mx-auto max-w-lg rounded-md border border-border bg-paper p-8 text-center">

@@ -100,6 +100,7 @@ export async function POST(request: Request) {
       email: user.email,
       displayName: user.user_metadata?.full_name,
       picture: user.user_metadata?.avatar_url,
+      provider: user.app_metadata?.provider,
     });
     if (!profile.success || !(await getSupabaseSessionClaims(accessToken))) {
       return NextResponse.json(

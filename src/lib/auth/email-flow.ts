@@ -1,6 +1,6 @@
 // Use deployment configuration, never form input or forwarded request headers.
 export function getAuthEmailRedirect(
-  kind: "confirm" | "recovery",
+  kind: "confirm" | "recovery" | "verify",
   courseId?: string,
 ) {
   const base = process.env.NEXT_PUBLIC_BASE_URL;
@@ -20,11 +20,14 @@ export function getAuthEmailRedirect(
   }
   if (origin.username || origin.password)
     throw new Error("Invalid Auth redirect origin.");
-  const url = new URL(
-    kind === "confirm" ? "/auth/confirm" : "/auth/update-password",
-    origin.origin,
-  );
-  if (kind === "confirm" && courseId)
+  const pathname =
+    kind === "recovery"
+      ? "/auth/update-password"
+      : kind === "verify"
+        ? "/auth/verify"
+        : "/auth/confirm";
+  const url = new URL(pathname, origin.origin);
+  if (courseId)
     url.searchParams.set("courseId", courseId);
   return url.toString();
 }

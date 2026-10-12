@@ -4,7 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useState, Suspense, useEffect, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Eye, EyeOff, Loader2, ArrowRight, ChevronDown } from "lucide-react";
+import { Eye, EyeOff, Loader2, ArrowRight, ChevronDown, Mail } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCourses } from "@/hooks/useContent";
 import { Input } from "@/components/ui/Input";
@@ -12,7 +12,10 @@ import PageShell from "@/components/ui/PageShell";
 import styles from "./AuthPage.module.css";
 import { createSupabaseBrowserClient } from "@/infrastructure/supabase/client";
 import { ensureUserProfileAction } from "@/app/actions/auth";
-import { registerForCourseAction } from "@/app/actions/signup";
+import {
+  registerForCourseAction,
+  resendConfirmationEmailAction,
+} from "@/app/actions/signup";
 import { getRedirectPathForRole } from "@/lib/auth/authService";
 import { getAuthIntent, getSafeNextPath } from "@/features/auth/auth-intent";
 
@@ -73,8 +76,16 @@ function AuthContent() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [signupStep, setSignupStep] = useState(1);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(
+    searchParams.get("error") === "disabled"
+      ? "Sua conta aguarda aprovação administrativa. O acesso será liberado após a análise do Instituto."
+      : "",
+  );
   const [registrationSubmitted, setRegistrationSubmitted] = useState(false);
+  const [submittedEmail, setSubmittedEmail] = useState("");
+  const [resendMessage, setResendMessage] = useState<string | null>(null);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
 
   // 2. Fields
@@ -88,12 +99,42 @@ function AuthContent() {
   // Toggle Mode
   useEffect(() => {
     setIsSignup(mode === "signup");
-    setError("");
+    setError(
+      searchParams.get("error") === "disabled"
+        ? "Sua conta aguarda aprovação administrativa. O acesso será liberado após a análise do Instituto."
+        : "",
+    );
     setRegistrationSubmitted(false);
+    setSubmittedEmail("");
+    setResendMessage(null);
     setLoading(false);
     setGoogleLoading(false);
     setSignupStep(1);
-  }, [mode]);
+  }, [mode, searchParams]);
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const interval = setInterval(() => {
+      setResendCooldown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [resendCooldown]);
+
+  const handleResendConfirmation = async () => {
+    const target = submittedEmail || email;
+    if (!target || resendCooldown > 0) return;
+    setResendLoading(true);
+    setResendMessage(null);
+    try {
+      const res = await resendConfirmationEmailAction(target);
+      setResendMessage(res.message);
+      setResendCooldown(60);
+    } catch {
+      setResendMessage("Não foi possível reenviar. Tente novamente em instantes.");
+    } finally {
+      setResendLoading(false);
+    }
+  };
 
   const authHref = (signup: boolean) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -269,6 +310,7 @@ function AuthContent() {
           return;
         }
 
+        setSubmittedEmail(email);
         setRegistrationSubmitted(true);
         setPassword("");
         setLoading(false);
@@ -418,19 +460,67 @@ function AuthContent() {
           </>}
 
           {registrationSubmitted && (
-            <div
-              role="status"
-              className="mb-6 rounded-md border border-border bg-areia p-4 text-sm text-text"
-            >
-              Seu cadastro foi enviado para análise do Instituto. O acesso à
-              plataforma será liberado após a aprovação do administrador. Depois
-              da aprovação, entre com seu e-mail e senha.
+            <div className="mb-6 space-y-4" role="status">
+              <div className="rounded-xl border border-border bg-areia/60 p-5 text-left space-y-3">
+                <div className="flex items-center gap-2 text-primary font-bold">
+                  <Mail size={18} />
+                  <h2 className="font-serif text-lg leading-tight">
+                    Verifique seu e-mail
+                  </h2>
+                </div>
+
+                <p className="text-sm text-text leading-relaxed">
+                  Enviamos uma solicitação de confirmação para o endereço{" "}
+                  <strong className="text-primary font-semibold">
+                    {submittedEmail || email}
+                  </strong>
+                  . Acesse sua caixa de entrada e siga as instruções para continuar
+                  seu cadastro no Instituto Figura Viva.
+                </p>
+
+                <div className="rounded-lg border border-border/80 bg-paper/90 p-3 text-xs text-text/80 space-y-1">
+                  <p>
+                    • Verifique também sua pasta de <strong>Spam</strong> ou lixo eletrônico.
+                  </p>
+                  <p>
+                    • A aprovação administrativa ocorre após a confirmação do seu e-mail.
+                  </p>
+                </div>
+
+                <div className="pt-2 border-t border-border/60">
+                  {resendMessage && (
+                    <p
+                      role="status"
+                      className="mb-2 rounded-lg bg-paper p-2.5 text-xs font-medium text-text border border-border"
+                    >
+                      {resendMessage}
+                    </p>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleResendConfirmation}
+                    disabled={resendLoading || resendCooldown > 0}
+                    className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-border bg-paper px-3 text-xs font-semibold text-primary transition-colors hover:bg-areia disabled:opacity-50"
+                  >
+                    {resendLoading ? (
+                      <Loader2 size={14} className="animate-spin" />
+                    ) : (
+                      <Mail size={14} />
+                    )}
+                    {resendCooldown > 0
+                      ? `Reenviar e-mail em ${resendCooldown}s`
+                      : "Reenviar e-mail de confirmação"}
+                  </button>
+                </div>
+              </div>
+
+              <Link
+                href={authHref(false)}
+                className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-border bg-paper px-4 text-sm font-semibold text-primary hover:bg-areia transition-colors"
+              >
+                Ir para o login
+              </Link>
             </div>
-          )}
-          {registrationSubmitted && (
-            <Link href={authHref(false)} className="mb-5 inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-paper px-4 text-sm font-semibold text-primary hover:bg-areia">
-              Ir para o login
-            </Link>
           )}
           {isSignup && !registrationSubmitted && <div className={styles.steps} aria-label="Etapas do cadastro">
             <span aria-current={signupStep === 1 ? "step" : undefined}>1. Seus dados</span>

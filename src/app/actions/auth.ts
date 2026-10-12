@@ -38,6 +38,7 @@ export async function ensureUserProfileAction(providedToken?: string): Promise<{
         email: data.user.email,
         displayName: data.user.user_metadata?.full_name,
         picture: data.user.user_metadata?.avatar_url,
+        provider: data.user.app_metadata?.provider,
       });
       if (!ensured.success) {
         return { success: false, error: "Profile unavailable" };

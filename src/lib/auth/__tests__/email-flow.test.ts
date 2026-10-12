@@ -15,6 +15,13 @@ describe("configured Auth redirects", () => {
     expect(url.searchParams.get("courseId")).toBe(
       "x?next=https://evil.example",
     );
+
+    const verifyUrl = new URL(
+      getAuthEmailRedirect("verify", "curso-gestalt"),
+    );
+    expect(verifyUrl.origin).toBe("https://www.institutofiguraviva.com.br");
+    expect(verifyUrl.pathname).toBe("/auth/verify");
+    expect(verifyUrl.searchParams.get("courseId")).toBe("curso-gestalt");
   });
   it("accepts localhost for development but refuses unsafe deployment URLs", () => {
     process.env.NEXT_PUBLIC_BASE_URL = "http://localhost:3000";

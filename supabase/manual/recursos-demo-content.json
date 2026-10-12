@@ -379,7 +379,7 @@
         "deck": "ajustamentos",
         "format": "",
         "prompt": "Onde no corpo você segura algo que não foi dito?",
-        "teacherResponse": "Músculos tensos, autocrítica e autocuidado excessivo podem ser formas de retroflexão. A pergunta é: a quem isso se dirigia?",
+        "teacherResponse": "Músculos tensos, autocrítica e cuidados excessivos consigo podem ser formas de retroflexão. A pergunta é: a quem isso se dirigia?",
         "segments": [],
         "alternatives": [],
         "relatedConcepts": [
@@ -1118,6 +1118,70 @@
       },
       {
         "deck": "",
+        "format": "clinico",
+        "prompt": "O que se destaca para você na mesa agora?",
+        "teacherResponse": "A mesa é a mesma; o que muda é a necessidade de quem chega. É a autorregulação organísmica organizando o campo: a figura acompanha a necessidade dominante e se desfaz quando ela é atendida.",
+        "segments": [
+          {
+            "id": "agua",
+            "text": "A jarra de água"
+          },
+          {
+            "id": "pao",
+            "text": "O prato de pão"
+          },
+          {
+            "id": "cadeira",
+            "text": "A cadeira confortável"
+          },
+          {
+            "id": "foto",
+            "text": "A foto de alguém querido"
+          }
+        ],
+        "alternatives": [
+          {
+            "id": "sede",
+            "text": "Sede",
+            "comment": "a jarra de água"
+          },
+          {
+            "id": "cansaco",
+            "text": "Cansaço",
+            "comment": "a cadeira confortável"
+          },
+          {
+            "id": "saudade",
+            "text": "Saudade",
+            "comment": "a foto de alguém querido"
+          }
+        ],
+        "relatedConcepts": [],
+        "references": [
+          {
+            "author": "PERLS, F.; HEFFERLINE, R.; GOODMAN, P.",
+            "work": "Gestalt-terapia",
+            "year": 1997,
+            "edition": "São Paulo: Summus",
+            "pages": ""
+          },
+          {
+            "author": "PERLS, F.",
+            "work": "Ego, fome e agressão",
+            "year": 2002,
+            "edition": "São Paulo: Summus",
+            "pages": ""
+          }
+        ],
+        "asset": "",
+        "license": "",
+        "id": "clinico-mesa",
+        "kind": "situation",
+        "title": "Mesa posta",
+        "text": "Situação de estudo. Você chega a uma mesa posta: uma jarra de água, um prato de pão, uma cadeira confortável e uma foto de alguém querido apoiada num copo."
+      },
+      {
+        "deck": "",
         "format": "sessao",
         "prompt": "O que parece estar emergindo do fundo neste momento?",
         "teacherResponse": "Temas que surgem no fim podem indicar uma figura que só ficou suportável quando havia pouco tempo. Nomear isso com cuidado e combinar retomá-lo respeita o ritmo da pessoa.",
@@ -1163,6 +1227,58 @@
         "kind": "situation",
         "title": "Final de encontro",
         "text": "Situação fictícia. Faltando poucos minutos para o fim do encontro, a pessoa começa a falar de algo que diz ser “bobagem, mas que não sai da cabeça”."
+      },
+      {
+        "deck": "",
+        "format": "sessao",
+        "prompt": "Marque cada trecho como figura ou fundo, do jeito que aparece para você.",
+        "teacherResponse": "Uma leitura possível: o trabalho é o tema anunciado, mas o pai e o aniversário parecem pedir lugar; o gesto com a aliança acompanha essa passagem. Voltar ao trabalho pode ser um modo de regular a aproximação. Nada disso precisa ser dito como interpretação: descrever a passagem já devolve à pessoa o que está emergindo.",
+        "segments": [
+          {
+            "id": "trabalho",
+            "text": "“Vim falar do trabalho”"
+          },
+          {
+            "id": "pai",
+            "text": "“Acordei pensando no meu pai”"
+          },
+          {
+            "id": "aniversario",
+            "text": "“Ele faria aniversário hoje”"
+          },
+          {
+            "id": "alianca",
+            "text": "Mexe na aliança"
+          },
+          {
+            "id": "corrido",
+            "text": "“No trabalho está tudo corrido”"
+          }
+        ],
+        "alternatives": [],
+        "relatedConcepts": [],
+        "references": [
+          {
+            "author": "POLSTER, E.; POLSTER, M.",
+            "work": "Gestalt-terapia integrada",
+            "year": 2001,
+            "edition": "São Paulo: Summus",
+            "pages": ""
+          },
+          {
+            "author": "YONTEF, G. M.",
+            "work": "Processo, diálogo e awareness: ensaios em Gestalt-terapia",
+            "year": 1998,
+            "edition": "São Paulo: Summus",
+            "pages": ""
+          }
+        ],
+        "asset": "",
+        "license": "",
+        "id": "sessao-2",
+        "kind": "situation",
+        "title": "Figura na sessão",
+        "text": "Trecho de sessão fictícia. Cliente: “Vim falar do trabalho, mas acordei pensando no meu pai.” Pausa. “Ele faria aniversário hoje.” Mexe na aliança. “Enfim, no trabalho está tudo corrido.”"
       }
     ],
     "audio": [],
@@ -1322,7 +1438,7 @@
         "deck": "",
         "format": "ribeiro",
         "prompt": "Que fatores do ciclo do contato você reconhece?",
-        "teacherResponse": "O modelo de Jorge Ponciano Ribeiro descreve fatores de cura e os bloqueios correspondentes. Aqui é possível reconhecer sensação, consciência, mobilização, ação, satisfação e retirada; vale discutir o que seria interação e contato final nessa situação.",
+        "teacherResponse": "O modelo de Jorge Ponciano Ribeiro descreve fatores que sustentam o contato e os bloqueios correspondentes. Aqui é possível reconhecer sensação, consciência, mobilização, ação, satisfação e retirada; vale discutir o que seria interação e contato final nessa situação.",
         "segments": [
           {
             "id": "fluidez",
@@ -1737,9 +1853,183 @@
     "items": [
       {
         "deck": "",
+        "format": "fundamentos",
+        "prompt": "Classifique cada anotação como observação, interpretação ou julgamento.",
+        "teacherResponse": "Ao falar sobre a reunião, a pessoa disse: “Minhas mãos ficam geladas”. Em seguida, olhou para o chão e permaneceu em silêncio por cerca de dez segundos. Quando a terapeuta perguntou o que ela percebia naquele momento, respondeu: “Estou apertando uma mão contra a outra”.",
+        "segments": [
+          {
+            "id": "f1",
+            "text": "A pessoa disse que suas mãos ficam geladas ao pensar na reunião."
+          },
+          {
+            "id": "f2",
+            "text": "Ela olhou para o chão porque tem medo de enfrentar a reunião."
+          },
+          {
+            "id": "f3",
+            "text": "Ela deveria falar de forma mais aberta, em vez de evitar o assunto."
+          },
+          {
+            "id": "f4",
+            "text": "Após a primeira fala, houve silêncio por aproximadamente dez segundos."
+          },
+          {
+            "id": "f5",
+            "text": "Esse silêncio comprova que ela sente vergonha."
+          },
+          {
+            "id": "f6",
+            "text": "A reação dela foi inadequada para um processo terapêutico."
+          }
+        ],
+        "alternatives": [
+          {
+            "id": "f1",
+            "text": "observacao",
+            "comment": "Retoma um relato verbal presente na cena, sem atribuir uma causa."
+          },
+          {
+            "id": "f2",
+            "text": "interpretacao",
+            "comment": "Atribui uma causa subjetiva não confirmada à direção do olhar."
+          },
+          {
+            "id": "f3",
+            "text": "julgamento",
+            "comment": "Introduz expectativa normativa sobre como a pessoa deveria agir."
+          },
+          {
+            "id": "f4",
+            "text": "observacao",
+            "comment": "Descreve duração aproximada e sequência observáveis."
+          },
+          {
+            "id": "f5",
+            "text": "interpretacao",
+            "comment": "Conclui um estado emocional a partir de um único sinal."
+          },
+          {
+            "id": "f6",
+            "text": "julgamento",
+            "comment": "Avalia a reação segundo um padrão implícito de adequação."
+          }
+        ],
+        "relatedConcepts": [],
+        "references": [
+          {
+            "author": "YONTEF, G. M.",
+            "work": "Processo, diálogo e awareness: ensaios em Gestalt-terapia",
+            "year": 1998,
+            "edition": "São Paulo: Summus",
+            "pages": ""
+          },
+          {
+            "author": "FRAZÃO, L. M.; FUKUMITSU, K. O. (org.)",
+            "work": "Gestalt-terapia: fundamentos epistemológicos e influências filosóficas",
+            "year": 2013,
+            "edition": "São Paulo: Summus",
+            "pages": ""
+          }
+        ],
+        "asset": "",
+        "license": "",
+        "id": "janela",
+        "kind": "exercise",
+        "title": "A janela",
+        "text": "Cena fictícia. A terapeuta pergunta como a pessoa se sente ao pensar em uma reunião de trabalho. Pessoa: “Quando penso em ir à reunião, minhas mãos ficam geladas.” A pessoa olha para o chão e permanece em silêncio por cerca de dez segundos. Terapeuta: “O que você percebe neste momento?” Pessoa: “Estou apertando uma mão contra a outra.”"
+      },
+      {
+        "deck": "",
+        "format": "aprofundamento",
+        "prompt": "Classifique cada anotação como observação, interpretação ou julgamento.",
+        "teacherResponse": "A pessoa contou que a irmã a convidou para um encontro no domingo e que respondeu que pensaria. Enquanto falava, ajeitou a manga do casaco e sorriu brevemente. Após a pergunta da terapeuta sobre como era contar aquilo naquele momento, disse perceber que falava baixo ao chegar nessa parte.",
+        "segments": [
+          {
+            "id": "f1",
+            "text": "A pessoa relatou ter recebido um convite da irmã."
+          },
+          {
+            "id": "f2",
+            "text": "O sorriso demonstra que, no fundo, ela deseja ir."
+          },
+          {
+            "id": "f3",
+            "text": "Ela está complicando um assunto simples."
+          },
+          {
+            "id": "f4",
+            "text": "Enquanto falava, a pessoa ajeitou a manga do casaco."
+          },
+          {
+            "id": "f5",
+            "text": "Ela falou baixo porque teme desagradar a família."
+          },
+          {
+            "id": "f6",
+            "text": "O certo seria que ela resolvesse o convite imediatamente."
+          }
+        ],
+        "alternatives": [
+          {
+            "id": "f1",
+            "text": "observacao",
+            "comment": "Reproduz um dado narrado pela própria pessoa."
+          },
+          {
+            "id": "f2",
+            "text": "interpretacao",
+            "comment": "Converte uma expressão observada em certeza sobre desejo."
+          },
+          {
+            "id": "f3",
+            "text": "julgamento",
+            "comment": "Introduz uma avaliação do relato e da conduta."
+          },
+          {
+            "id": "f4",
+            "text": "observacao",
+            "comment": "Descreve um movimento situado na sequência do encontro."
+          },
+          {
+            "id": "f5",
+            "text": "interpretacao",
+            "comment": "Atribui uma motivação não explicitada pela pessoa."
+          },
+          {
+            "id": "f6",
+            "text": "julgamento",
+            "comment": "Prescreve uma conduta e desconsidera o ritmo da experiência."
+          }
+        ],
+        "relatedConcepts": [],
+        "references": [
+          {
+            "author": "YONTEF, G. M.",
+            "work": "Processo, diálogo e awareness: ensaios em Gestalt-terapia",
+            "year": 1998,
+            "edition": "São Paulo: Summus",
+            "pages": ""
+          },
+          {
+            "author": "MERLEAU-PONTY, M.",
+            "work": "Fenomenologia da percepção",
+            "year": 1999,
+            "edition": "São Paulo: Martins Fontes",
+            "pages": ""
+          }
+        ],
+        "asset": "",
+        "license": "",
+        "id": "convite",
+        "kind": "exercise",
+        "title": "O convite",
+        "text": "Cena fictícia. Pessoa: “Minha irmã me convidou para o encontro de domingo. Eu disse que ia pensar.” Enquanto fala, a pessoa ajeita a manga do casaco e sorri brevemente. Terapeuta: “Como é para você contar isso agora?” Pessoa: “Eu percebo que falo baixo quando chego nessa parte.”"
+      },
+      {
+        "deck": "",
         "format": "",
         "prompt": "Classifique cada frase como observação, interpretação ou julgamento.",
-        "teacherResponse": "Reescrita apenas descritiva: “Quando o assunto mudou para o trabalho, a cliente cruzou os braços. Nas últimas frases, a voz ficou mais baixa.” As frases 1 e 4 são observações; a 2 é interpretação; a 3, julgamento.",
+        "teacherResponse": "Quando o assunto mudou para o trabalho, a cliente cruzou os braços. Nas últimas frases, a voz ficou mais baixa.",
         "segments": [
           {
             "id": "f1",
@@ -1758,7 +2048,28 @@
             "text": "A voz ficou mais baixa nas últimas frases."
           }
         ],
-        "alternatives": [],
+        "alternatives": [
+          {
+            "id": "f1",
+            "text": "observacao",
+            "comment": "Descreve um gesto situado no momento em que ocorreu."
+          },
+          {
+            "id": "f2",
+            "text": "interpretacao",
+            "comment": "Atribui uma intenção ao gesto; “claramente” reforça uma certeza que a cena não dá."
+          },
+          {
+            "id": "f3",
+            "text": "julgamento",
+            "comment": "Qualifica a postura segundo um padrão de maturidade."
+          },
+          {
+            "id": "f4",
+            "text": "observacao",
+            "comment": "Descreve uma mudança de volume na sequência da fala."
+          }
+        ],
         "relatedConcepts": [],
         "references": [
           {
@@ -1782,54 +2093,6 @@
         "kind": "exercise",
         "title": "Relato de uma observação",
         "text": "Trecho fictício escrito por um estudante após observar um atendimento simulado."
-      },
-      {
-        "deck": "",
-        "format": "",
-        "prompt": "Classifique cada frase como observação, interpretação ou julgamento.",
-        "teacherResponse": "Reescrita apenas descritiva: “O participante chegou dez minutos depois do início, sentou-se perto da porta e falou duas vezes.” Frases 1 e 3 são observações; a 2, interpretação; a 4, julgamento.",
-        "segments": [
-          {
-            "id": "f1",
-            "text": "O participante chegou dez minutos depois do início."
-          },
-          {
-            "id": "f2",
-            "text": "Ele não se importa com o grupo."
-          },
-          {
-            "id": "f3",
-            "text": "Sentou-se perto da porta e falou duas vezes."
-          },
-          {
-            "id": "f4",
-            "text": "Esse comportamento é inadequado."
-          }
-        ],
-        "alternatives": [],
-        "relatedConcepts": [],
-        "references": [
-          {
-            "author": "YONTEF, G. M.",
-            "work": "Processo, diálogo e awareness: ensaios em Gestalt-terapia",
-            "year": 1998,
-            "edition": "São Paulo: Summus",
-            "pages": ""
-          },
-          {
-            "author": "MERLEAU-PONTY, M.",
-            "work": "Fenomenologia da percepção",
-            "year": 1999,
-            "edition": "São Paulo: Martins Fontes",
-            "pages": ""
-          }
-        ],
-        "asset": "",
-        "license": "",
-        "id": "trecho-2",
-        "kind": "exercise",
-        "title": "Anotação depois de um grupo",
-        "text": "Trecho fictício de anotação após um encontro de grupo."
       }
     ],
     "audio": [],
@@ -1897,19 +2160,24 @@
         "segments": [],
         "alternatives": [
           {
-            "id": "a1",
+            "id": "interpretar",
+            "text": "“Talvez você tenha medo de ser julgada aqui também.”",
+            "comment": "Oferece uma hipótese sobre o que está por trás; pode soar como saber mais do que a pessoa."
+          },
+          {
+            "id": "aconselhar",
+            "text": "“Tente me dar uma chance e você vai ver que eu entendo.”",
+            "comment": "Pede confiança e orienta a conduta; pode ignorar o que a fala comunica agora."
+          },
+          {
+            "id": "refletir",
+            "text": "“Parece importante para você ser entendida.”",
+            "comment": "Devolve o sentido percebido; pode ajudar se não soar como técnica."
+          },
+          {
+            "id": "incluir",
             "text": "“Tem razão, eu não passei por isso. Me conta como é para você.”",
             "comment": "Reconhece o limite sem se defender e abre espaço para a experiência da pessoa."
-          },
-          {
-            "id": "a2",
-            "text": "“Já atendi muita gente com o mesmo problema.”",
-            "comment": "Responde ao conteúdo com autoridade profissional e pode afastar o encontro."
-          },
-          {
-            "id": "a3",
-            "text": "“Parece que é importante para você ser entendido.”",
-            "comment": "Acompanha o que está por trás da frase; pode ser útil se não soar como técnica."
           }
         ],
         "relatedConcepts": [],
@@ -1944,19 +2212,24 @@
         "segments": [],
         "alternatives": [
           {
-            "id": "a1",
-            "text": "“Então vou escolher um tema.”",
+            "id": "interpretar",
+            "text": "“Esse tanto faz parece esconder um cansaço.”",
+            "comment": "Nomeia algo que a pessoa não disse; pode antecipar a experiência dela."
+          },
+          {
+            "id": "aconselhar",
+            "text": "“Então vou escolher um tema para começarmos.”",
             "comment": "Assume a direção e pode reforçar a passividade."
           },
           {
-            "id": "a2",
-            "text": "“Percebo seus ombros encolhidos enquanto diz isso.”",
-            "comment": "Descreve o observável e convida à awareness sem interpretar."
+            "id": "refletir",
+            "text": "“Hoje tanto faz.”",
+            "comment": "Devolve a fala tal como veio, sem acrescentar sentido."
           },
           {
-            "id": "a3",
-            "text": "“Como chega para você hoje esse tanto faz?”",
-            "comment": "Toma a própria fala como figura e convida a explorá-la."
+            "id": "incluir",
+            "text": "“Percebo seus ombros encolhidos enquanto diz isso. Como chega para você esse tanto faz?”",
+            "comment": "Descreve o observável e toma a própria fala como figura do encontro."
           }
         ],
         "relatedConcepts": [],
@@ -1991,19 +2264,24 @@
         "segments": [],
         "alternatives": [
           {
-            "id": "a1",
-            "text": "“Não estou do lado de ninguém.”",
+            "id": "interpretar",
+            "text": "“Isso deve se repetir em outras relações suas.”",
+            "comment": "Interpreta cedo demais e tira a fala do aqui e agora."
+          },
+          {
+            "id": "aconselhar",
+            "text": "“Não estou do lado de ninguém, pode confiar em mim.”",
             "comment": "Defende-se e encerra a possibilidade de explorar a percepção."
           },
           {
-            "id": "a2",
-            "text": "“Me conta quando você começou a sentir isso aqui.”",
-            "comment": "Leva a percepção a sério e busca o momento concreto em que ela surgiu."
+            "id": "refletir",
+            "text": "“Você sente que eu estou do lado dela.”",
+            "comment": "Reconhece a percepção sem negá-la nem confirmá-la."
           },
           {
-            "id": "a3",
-            "text": "“Isso deve se repetir em outras relações suas.”",
-            "comment": "Interpreta cedo demais e tira a fala do aqui e agora."
+            "id": "incluir",
+            "text": "“Me conta quando você começou a sentir isso aqui comigo.”",
+            "comment": "Leva a percepção a sério e busca o momento concreto em que ela surgiu na relação."
           }
         ],
         "relatedConcepts": [],

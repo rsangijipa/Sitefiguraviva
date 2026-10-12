@@ -2,12 +2,10 @@
 import { useId, type ReactNode, type SVGProps } from "react";
 
 /**
- * Kit de ilustração dos Recursos (Design System v1, parte de ilustração).
- *
- * ARTE PROVISÓRIA (placeholder vetorial): manchas por turbulência SVG, ramos de
- * traço 3 px com terminais redondos e folhas genéricas. Só cores da paleta, por
- * token, para acompanhar o tema escuro. Sem sombra, brilho ou contorno de app.
- * A arte contratada pode substituir estes desenhos sem mudar quem os usa.
+ * Primitivas SVG dos gráficos funcionais dos Recursos (silhueta do corpo e
+ * diagrama do ciclo). As ilustrações em si são imagens em
+ * public/brand/recursos (ver slots.ts). Só cores da paleta, por token, para
+ * acompanhar o tema escuro; sem sombra nem brilho.
  */
 export const C = {
   raiz: "var(--fv-verde-raiz)", igarape: "var(--fv-verde-igarape)", barro: "var(--fv-terra-barro)",
@@ -41,19 +39,6 @@ type StainProps = { cx: number; cy: number; rx: number; ry?: number; color: KitC
 /** Mancha de aquarela: nunca com contorno; a borda é a própria tinta. */
 export function Stain({ cx, cy, rx, ry = rx, color, opacity = 0.85, filter, rotate = 0, ...rest }: StainProps) {
   return <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill={C[color]} opacity={opacity} filter={`url(#${filter})`} transform={rotate ? `rotate(${rotate} ${cx} ${cy})` : undefined} {...rest} />;
-}
-
-/** Ramo: traço contínuo de 3 px, terminais redondos. */
-export function Ramo({ d, color = "barro", width = 3, ...rest }: { d: string; color?: KitColor; width?: number } & Omit<SVGProps<SVGPathElement>, "color" | "d">) {
-  return <path d={d} fill="none" stroke={C[color]} strokeWidth={width} strokeLinecap="round" strokeLinejoin="round" {...rest} />;
-}
-
-/** Folha genérica (não é espécie botânica): ponta para cima, centro em (0,0). */
-export function Leaf({ x, y, size = 1, rotate = 0, color = "broto", opacity = 0.9, vein = true }: { x: number; y: number; size?: number; rotate?: number; color?: KitColor; opacity?: number; vein?: boolean }) {
-  return <g transform={`translate(${x} ${y}) rotate(${rotate}) scale(${size})`}>
-    <path d="M0 -14 C9 -8 9 6 0 14 C-9 6 -9 -8 0 -14Z" fill={C[color]} opacity={opacity} />
-    {vein && <path d="M0 -10 V11" stroke={C.creme} strokeWidth={1.2} strokeLinecap="round" opacity={0.55} />}
-  </g>;
 }
 
 /** Moldura padrão de ilustração do kit: papel Areia, sem borda. */
