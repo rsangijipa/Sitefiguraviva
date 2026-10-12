@@ -7,6 +7,8 @@ import {
 import { getAuthEmailRedirect } from "@/lib/auth/email-flow";
 import { rateLimit, RateLimitPresets } from "@/lib/rateLimit";
 import type { UserRole, UserStatus } from "@/types/user";
+import type { Database } from "@/infrastructure/supabase/database.types";
+import type { AdminUserAttributes } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 import { prepareResourceAccountErasure } from "@/features/interactive-resources/v2/maintenance.server";
 
@@ -213,5 +215,110 @@ export async function listUsersForAdmin(pageToken?: string, pageSize = 100) {
     };
   } catch (error) {
     return { ...failure(error), users: [], nextPageToken: null };
+  }
+}
+
+export interface AdminUpdateUserData {
+  displayName?: string;
+  phoneNumber?: string;
+  email?: string;
+  password?: string;
+}
+
+export async function adminUpdateUser(
+  targetUid: string,
+  data: AdminUpdateUserData,
+) {
+  try {
+    await requireAdmin();
+    if (!targetUid || typeof targetUid !== "string") {
+      throw new Error("ID de usuário inválido.");
+    }
+
+    const db = createSupabaseServiceClient();
+    const profile = await readProfile(targetUid);
+
+    const updateProfileData: Database["public"]["Tables"]["profiles"]["Update"] = {};
+    const updateAuthData: AdminUserAttributes = {};
+
+    // 1. Display Name
+    if (typeof data.displayName === "string") {
+      const name = data.displayName.trim();
+      if (name.length < 2) {
+        throw new Error("O nome deve ter ao menos 2 caracteres.");
+      }
+      updateProfileData.display_name = name;
+      updateAuthData.user_metadata = {
+        ...updateAuthData.user_metadata,
+        full_name: name,
+      };
+    }
+
+    // 2. Phone Number
+    if (typeof data.phoneNumber === "string") {
+      const phone = data.phoneNumber.trim();
+      updateProfileData.phone_number = phone;
+      updateAuthData.user_metadata = {
+        ...updateAuthData.user_metadata,
+        phone,
+      };
+    }
+
+    // 3. Email
+    if (typeof data.email === "string" && data.email.trim()) {
+      const email = data.email.trim().toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        throw new Error("E-mail informado é inválido.");
+      }
+      if (email !== profile.email.toLowerCase()) {
+        updateProfileData.email = email;
+        updateAuthData.email = email;
+        updateAuthData.email_confirm = true;
+      }
+    }
+
+    // 4. Password
+    if (typeof data.password === "string" && data.password.trim()) {
+      const password = data.password.trim();
+      if (password.length < 8) {
+        throw new Error("A nova senha deve ter no mínimo 8 caracteres.");
+      }
+      updateAuthData.password = password;
+    }
+
+    // 5. Update Supabase Auth if needed
+    if (Object.keys(updateAuthData).length > 0) {
+      const { error: authError } = await db.auth.admin.updateUserById(
+        targetUid,
+        updateAuthData,
+      );
+      if (authError) {
+        console.error("adminUpdateUser authError:", authError);
+        throw new Error(
+          authError.message?.toLowerCase().includes("email")
+            ? "Não foi possível atualizar o e-mail: o endereço já está em uso por outra conta."
+            : `Falha ao atualizar autenticação: ${authError.message}`,
+        );
+      }
+    }
+
+    // 6. Update profiles table if needed
+    if (Object.keys(updateProfileData).length > 0) {
+      updateProfileData.updated_at = new Date().toISOString();
+      const { error: profileError } = await db
+        .from("profiles")
+        .update(updateProfileData)
+        .eq("id", targetUid);
+
+      if (profileError) {
+        console.error("adminUpdateUser profileError:", profileError);
+        throw new Error("Não foi possível atualizar as informações do perfil.");
+      }
+    }
+
+    revalidatePath("/admin/users");
+    return { success: true as const, error: undefined };
+  } catch (error) {
+    return failure(error);
   }
 }

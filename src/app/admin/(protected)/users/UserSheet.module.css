@@ -1,0 +1,149 @@
+.sheet {
+  display: flex;
+  flex-direction: column;
+  width: calc(100% - 32px);
+  max-width: 880px;
+  max-height: calc(
+    100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom)
+  );
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgb(var(--n-200));
+  border-radius: 20px;
+  background: rgb(var(--color-surface));
+  box-shadow: 0 24px 64px rgb(0 0 0 / 24%);
+}
+
+.header {
+  display: flex;
+  flex-shrink: 0;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid rgb(var(--n-200));
+}
+
+.close {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  color: rgb(var(--n-600));
+  transition: background-color 150ms;
+}
+
+.close:hover {
+  background: rgb(var(--n-100));
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  flex-shrink: 0;
+  gap: 4px;
+  padding: 8px 24px 0;
+  border-bottom: 1px solid rgb(var(--n-200));
+  background: rgb(var(--n-50));
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.tabs button {
+  justify-content: center;
+  min-width: 0;
+  min-height: 44px;
+  padding: 8px;
+  color: rgb(var(--n-600));
+  overflow-wrap: anywhere;
+}
+
+.tabs button[aria-pressed="true"] {
+  color: rgb(var(--color-primary));
+  background: rgb(var(--color-surface));
+}
+
+.tabs svg {
+  flex-shrink: 0;
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  overflow-wrap: anywhere;
+  padding: 20px 24px 24px;
+  scrollbar-gutter: stable;
+  scroll-padding-block: 16px;
+}
+
+.sheet :is(button, summary) {
+  min-height: 44px;
+  touch-action: manipulation;
+}
+
+.sheet button {
+  white-space: normal;
+}
+
+.sheet :is(input, select, textarea) {
+  min-width: 0;
+  max-width: 100%;
+  min-height: 44px;
+  font-size: 1rem;
+}
+
+.sheet input[type="password"],
+.sheet input[placeholder="Digite nova senha para alterar diretamente..."] {
+  padding-right: 48px;
+}
+
+.sheet :is(button, summary, input, select, textarea, a):focus-visible {
+  outline: 2px solid rgb(var(--color-primary));
+  outline-offset: 2px;
+}
+
+.sheet button:has(> svg:only-child) {
+  min-width: 44px;
+}
+
+@media (max-width: 639px) {
+  .sheet {
+    width: calc(100% - 16px);
+    max-height: calc(
+      100dvh - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom)
+    );
+    border-radius: 16px;
+  }
+
+  .header {
+    padding: 16px 12px 12px;
+    gap: 8px;
+  }
+
+  .tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 4px 8px;
+  }
+
+  .body {
+    padding: 16px 12px 20px;
+    scrollbar-gutter: auto;
+  }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  .header {
+    padding-block: 8px;
+  }
+
+  .tabs {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    padding-top: 0;
+  }
+}

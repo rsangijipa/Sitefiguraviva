@@ -4,13 +4,13 @@ import {
 } from "../admin-navigation";
 
 describe("admin navigation", () => {
-  it("lists applications in the Pessoas category", () => {
+  it("lists Pessoas in the Pessoas category", () => {
     const people = ADMIN_NAVIGATION_GROUPS.find(
       (group) => group.label === "Pessoas",
     );
 
     expect(
-      people?.items.some((item) => item.path === "/admin/applications"),
+      people?.items.some((item) => item.path === "/admin/users"),
     ).toBe(true);
   });
 

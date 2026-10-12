@@ -18,7 +18,8 @@ jest.mock("@/infrastructure/supabase/server", () => ({
   }),
 }));
 jest.mock("next/cache", () => ({ revalidatePath: jest.fn() }));
-import { enrollLead } from "../adminEnrollment";
+import { enrollLead, enrollLeadWithExternalPix } from "../adminEnrollment";
+import { revalidatePath } from "next/cache";
 beforeEach(() => {
   jest.clearAllMocks();
   admin.mockResolvedValue({ uid: "admin" });
@@ -99,4 +100,88 @@ it("does not change existing active enrollment", async () => {
 it("does not report success when preparation errors", async () => {
   rpc.mockResolvedValue({ data: null, error: { message: "consent missing" } });
   expect((await enrollLead("saved-app")).success).toBe(false);
+});
+
+describe("external Pix enrollment", () => {
+  it.each([false, undefined, "true", 1])(
+    "requires explicit confirmation (%s)",
+    async (confirmation) => {
+      const result = await enrollLeadWithExternalPix(
+        "saved-app",
+        confirmation as boolean,
+      );
+      expect(result.success).toBe(false);
+      expect(rpc).not.toHaveBeenCalled();
+    },
+  );
+
+  it("requires an administrator before granting access", async () => {
+    admin.mockRejectedValueOnce(new Error("Forbidden"));
+    expect((await enrollLeadWithExternalPix("saved-app", true)).success).toBe(
+      false,
+    );
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
+  it("rejects an empty application identity", async () => {
+    expect((await enrollLeadWithExternalPix("  ", true)).success).toBe(false);
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
+  it("uses persisted application identity without generating a charge", async () => {
+    delete process.env.PIX_MERCHANT_KEY;
+    rpc.mockResolvedValueOnce({
+      data: {
+        enrollmentId: "enrollment",
+        userId: "saved-user",
+        courseId: "saved-course",
+        alreadyProcessed: false,
+      },
+      error: null,
+    });
+    const result = await enrollLeadWithExternalPix("saved-app", true);
+    expect(result).toEqual({
+      success: true,
+      enrollmentId: "enrollment",
+      userId: "saved-user",
+      courseId: "saved-course",
+      alreadyProcessed: false,
+    });
+    expect(rpc).toHaveBeenCalledTimes(1);
+    expect(rpc).toHaveBeenCalledWith("enroll_application_external_pix", {
+      p_actor: "admin",
+      p_application: "saved-app",
+      p_confirmed: true,
+    });
+    expect(find).not.toHaveBeenCalled();
+    expect(revalidatePath).toHaveBeenCalledWith("/admin/users");
+    expect(revalidatePath).toHaveBeenCalledWith("/portal/course/saved-course");
+  });
+
+  it("preserves the result of an already completed enrollment", async () => {
+    rpc.mockResolvedValueOnce({
+      data: {
+        enrollmentId: "enrollment",
+        userId: "saved-user",
+        courseId: "saved-course",
+        alreadyProcessed: true,
+      },
+      error: null,
+    });
+    expect(await enrollLeadWithExternalPix("saved-app", true)).toMatchObject({
+      success: true,
+      alreadyProcessed: true,
+    });
+  });
+
+  it("does not report success or refresh on database rejection", async () => {
+    rpc.mockResolvedValueOnce({
+      data: null,
+      error: { message: "state conflict" },
+    });
+    expect((await enrollLeadWithExternalPix("saved-app", true)).success).toBe(
+      false,
+    );
+    expect(revalidatePath).not.toHaveBeenCalled();
+  });
 });

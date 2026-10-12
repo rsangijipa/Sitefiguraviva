@@ -9,6 +9,9 @@ jest.mock("next/navigation", () => ({ useRouter: () => router }));
 jest.mock("@/context/ToastContext", () => ({
   useToast: () => ({ addToast: toast }),
 }));
+jest.mock("@/context/AuthContext", () => ({
+  useAuth: () => ({ user: null }),
+}));
 jest.mock("@/app/actions/enrollment-pix", () => ({
   generatePixPayload: (id: string) => generate(id),
 }));
@@ -94,5 +97,55 @@ describe("student Pix state", () => {
     );
     expect(screen.getByText("Inscrição Confirmada!")).toBeInTheDocument();
     expect(screen.queryByText("Inscrição em Análise")).not.toBeInTheDocument();
+  });
+
+  it("pre-fills form data from userProfile and displays connected account banner in Step 2", () => {
+    render(
+      <EnrollmentStepper
+        courseId="course-a"
+        initialData={{
+          uid: "student-123",
+          course: { title: "Curso A" },
+          application: null,
+          enrollment: null,
+          pixOrder: null,
+          userProfile: {
+            display_name: "Mariana Aluna",
+            phone_number: "11999998888",
+            profession: "Psicóloga Clínica",
+            email: "mariana@example.com",
+            is_active: true,
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getByText("Identificado na plataforma")).toBeInTheDocument();
+    expect(screen.getByText("Conta Conectada")).toBeInTheDocument();
+    expect(screen.getByText("mariana@example.com")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("Mariana Aluna")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("11999998888")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("Psicóloga Clínica")).toBeInTheDocument();
+    expect(screen.getByRole("checkbox")).toBeChecked();
+  });
+
+  it("renders Step 1 for unauthenticated visitors", () => {
+    render(
+      <EnrollmentStepper
+        courseId="course-a"
+        initialData={{
+          uid: null,
+          course: { title: "Curso A" },
+          application: null,
+          enrollment: null,
+          pixOrder: null,
+          userProfile: null,
+        }}
+      />,
+    );
+
+    expect(screen.getByText("Primeiro, identifique-se")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Já possuo conta/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Criar nova conta/ })).toBeInTheDocument();
   });
 });

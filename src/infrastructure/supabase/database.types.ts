@@ -911,6 +911,7 @@ export interface Database {
           cover_storage_path: string;
           purchase_url: string;
           publication_year: number | null;
+          category: string | null;
           is_published: boolean;
           sort_order: number;
           updated_by: string | null;
@@ -996,6 +997,10 @@ export interface Database {
       };
       grant_manual_course_access: {
         Args: { p_actor: string; p_user: string; p_course: string };
+        Returns: Json;
+      };
+      enroll_application_external_pix: {
+        Args: { p_actor: string; p_application: string; p_confirmed: boolean };
         Returns: Json;
       };
       prepare_application_pix: {

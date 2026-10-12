@@ -5,6 +5,76 @@ import { requireAdmin } from "@/lib/auth/server";
 import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import { buildPixPayload, getPixConfig } from "@/lib/pix";
 import { findPixOrder } from "@/lib/pix-order.server";
+import { z } from "zod";
+
+/** External receipts are administrator attestations, not gateway reconciliations. */
+export async function enrollLeadWithExternalPix(
+  applicationId: string,
+  receivedConfirmed: boolean,
+): Promise<
+  | { success: false; error: string }
+  | {
+      success: true;
+      enrollmentId: string;
+      userId: string;
+      courseId: string;
+      alreadyProcessed: boolean;
+    }
+> {
+  try {
+    const actor = await requireAdmin();
+    const parsed = z
+      .object({
+        applicationId: z.string().trim().min(1).max(200),
+        receivedConfirmed: z.literal(true),
+      })
+      .safeParse({ applicationId, receivedConfirmed });
+    if (!parsed.success) {
+      return {
+        success: false,
+        error:
+          "Confirme que o Pix foi recebido fora do sistema para matricular.",
+      };
+    }
+    const { data, error } = await createSupabaseServiceClient().rpc(
+      "enroll_application_external_pix",
+      {
+        p_actor: actor.uid,
+        p_application: parsed.data.applicationId,
+        p_confirmed: parsed.data.receivedConfirmed,
+      },
+    );
+    if (error || !data) {
+      return {
+        success: false,
+        error:
+          "Não foi possível matricular. Confira a conta, o curso e a matrícula existente.",
+      };
+    }
+    const result = data as {
+      enrollmentId: string;
+      userId: string;
+      courseId: string;
+      alreadyProcessed: boolean;
+    };
+    for (const path of [
+      "/admin/users",
+      "/admin/applications",
+      "/admin/enrollments",
+      "/portal",
+      `/portal/course/${result.courseId}`,
+      `/inscricao/${result.courseId}`,
+    ]) {
+      revalidatePath(path);
+    }
+    return { success: true, ...result };
+  } catch {
+    return {
+      success: false,
+      error: "Não foi possível confirmar o Pix externo e concluir a matrícula.",
+    };
+  }
+}
 
 /** Only the persisted application identifies the student and the course. */
 export async function enrollLead(applicationId: string, _clientData?: unknown) {

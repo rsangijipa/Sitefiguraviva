@@ -43,9 +43,7 @@ export const ADMIN_NAVIGATION_GROUPS: AdminNavigationGroup[] = [
   {
     label: "Pessoas",
     items: [
-      { icon: Shield, label: "Usuários e permissões", path: "/admin/users" },
-      { icon: UserPlus, label: "Interessados", path: "/admin/applications" },
-      { icon: Users, label: "Matrículas", path: "/admin/enrollments" },
+      { icon: Users, label: "Pessoas", path: "/admin/users" },
     ],
   },
   {
@@ -80,7 +78,6 @@ export const ADMIN_NAVIGATION_GROUPS: AdminNavigationGroup[] = [
     items: [
       { icon: Calendar, label: "Calendário", path: "/admin/calendar" },
       { icon: Calendar, label: "Eventos Ao Vivo", path: "/admin/events" },
-      { icon: Trophy, label: "Gamificação", path: "/admin/gamification" },
       { icon: Globe, label: "Google Suite", path: "/admin/google" },
     ],
   },

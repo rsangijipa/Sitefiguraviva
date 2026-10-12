@@ -5,12 +5,16 @@ const admin = jest.fn(),
   remove = jest.fn(),
   getAuth = jest.fn(),
   otp = jest.fn(),
-  limit = jest.fn();
+  limit = jest.fn(),
+  updateProfile = jest.fn();
 jest.mock("@/lib/auth/server", () => ({ requireAdmin: () => admin() }));
 jest.mock("@/infrastructure/supabase/server", () => ({
   createSupabaseServiceClient: () => ({
     rpc,
-    from: () => ({ select: () => ({ eq: () => ({ maybeSingle: read }) }) }),
+    from: () => ({
+      select: () => ({ eq: () => ({ maybeSingle: read }) }),
+      update: (data: unknown) => ({ eq: (col: string, val: unknown) => updateProfile(data, col, val) }),
+    }),
     auth: {
       admin: { updateUserById: ban, deleteUser: remove, getUserById: getAuth },
     },
@@ -28,6 +32,7 @@ import {
   toggleUserStatus,
   deleteUser,
   sendUserAccessEmail,
+  adminUpdateUser,
 } from "../user-management";
 beforeEach(() => {
   jest.clearAllMocks();
@@ -45,6 +50,7 @@ beforeEach(() => {
   });
   otp.mockResolvedValue({ error: null });
   limit.mockResolvedValue({ allowed: true });
+  updateProfile.mockResolvedValue({ error: null });
   process.env.NEXT_PUBLIC_BASE_URL = "https://www.institutofiguraviva.com.br";
 });
 it("checks persisted governance result instead of raw update", async () => {
@@ -158,4 +164,83 @@ it("enforces resend throttle before email", async () => {
   limit.mockResolvedValue({ allowed: false });
   expect((await sendUserAccessEmail("student")).success).toBe(false);
   expect(otp).not.toHaveBeenCalled();
+});
+
+describe("adminUpdateUser", () => {
+  it("updates displayName and phoneNumber in auth and profiles", async () => {
+    const res = await adminUpdateUser("student", {
+      displayName: "Carlos Silva",
+      phoneNumber: "11988887777",
+    });
+    expect(res.success).toBe(true);
+    expect(ban).toHaveBeenCalledWith("student", {
+      user_metadata: {
+        full_name: "Carlos Silva",
+        phone: "11988887777",
+      },
+    });
+    expect(updateProfile).toHaveBeenCalledWith(
+      expect.objectContaining({
+        display_name: "Carlos Silva",
+        phone_number: "11988887777",
+      }),
+      "id",
+      "student",
+    );
+  });
+
+  it("updates password directly via updateUserById", async () => {
+    const res = await adminUpdateUser("student", {
+      password: "new-secure-password",
+    });
+    expect(res.success).toBe(true);
+    expect(ban).toHaveBeenCalledWith("student", {
+      password: "new-secure-password",
+    });
+  });
+
+  it("updates email and sets email_confirm true when email changes", async () => {
+    const res = await adminUpdateUser("student", {
+      email: "newemail@example.com",
+    });
+    expect(res.success).toBe(true);
+    expect(ban).toHaveBeenCalledWith("student", {
+      email: "newemail@example.com",
+      email_confirm: true,
+    });
+    expect(updateProfile).toHaveBeenCalledWith(
+      expect.objectContaining({
+        email: "newemail@example.com",
+      }),
+      "id",
+      "student",
+    );
+  });
+
+  it("rejects password shorter than 8 characters", async () => {
+    const res = await adminUpdateUser("student", {
+      password: "123",
+    });
+    expect(res.success).toBe(false);
+    expect(res.error).toContain("mínimo 8 caracteres");
+    expect(ban).not.toHaveBeenCalled();
+  });
+
+  it("rejects invalid email address", async () => {
+    const res = await adminUpdateUser("student", {
+      email: "not-an-email",
+    });
+    expect(res.success).toBe(false);
+    expect(res.error).toContain("inválido");
+    expect(ban).not.toHaveBeenCalled();
+  });
+
+  it("rejects non-admin actor", async () => {
+    admin.mockRejectedValue(new Error("Unauthorized"));
+    const res = await adminUpdateUser("student", {
+      displayName: "Novo Nome",
+    });
+    expect(res.success).toBe(false);
+    expect(ban).not.toHaveBeenCalled();
+  });
 });
