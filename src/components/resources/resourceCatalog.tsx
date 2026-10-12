@@ -69,4 +69,13 @@ export function resourceHref(resource: ResourceDefinition, mode?: string): strin
   const path = `${resource.access === "public" ? "/recursos" : "/portal/recursos"}/${resource.slug}`;
   return mode && resource.modes.includes(mode) ? `${path}?modo=${encodeURIComponent(mode)}` : path;
 }
+const modeLabels: Record<string, string> = {
+  clinico: "Clínico", sessao: "Sessão", relacoes: "Relações", dialogo: "Diálogo", agua: "Água",
+  estatico: "Estático", laboratorio: "Laboratório", atelie: "Ateliê",
+};
+/** Rótulo legível de um modo: os slugs não carregam acentos nem espaços. */
+export function modeLabel(mode: string): string {
+  const label = modeLabels[mode] ?? mode.replaceAll("-", " ");
+  return label.charAt(0).toLocaleUpperCase("pt-BR") + label.slice(1);
+}
 export function isPublicResource(resource: ResourceDefinition): boolean { return resource.access === "public" && resource.visibility === "published"; }

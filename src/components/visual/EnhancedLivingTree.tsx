@@ -325,6 +325,7 @@ export default function EnhancedLivingTree({
 
         {/* 1. Ground Shadow & Moss Base */}
         <ellipse
+          data-tree-ground
           cx="194"
           cy="484"
           rx="145"

@@ -30,6 +30,9 @@ try{
  const legacyAliases=['casoclinicointerativo','EmotionWheel','ciclodocontato','respiracao','rios-dos-pensamentos','check-in'];
  for(const slug of legacyAliases)await db.query("insert into public.interactive_resource_entries(user_id,resource_slug,payload) values($1,$2,$3)",[uid.a,slug,JSON.stringify({fixture:'Texto neutro de teste'})]);
  await db.exec(readFileSync(new URL("../migrations/20261012161154_recursos_interativos_v2.sql",import.meta.url),"utf8"));
+ await db.exec(readFileSync(new URL("../migrations/20261013090000_recursos_editorial_devolucao.sql",import.meta.url),"utf8"));
+ await db.exec(readFileSync(new URL("../migrations/20261013100000_recursos_admin_autoria.sql",import.meta.url),"utf8"));
+ await db.exec(readFileSync(new URL("../migrations/20261013110000_recursos_modo_demonstracao.sql",import.meta.url),"utf8"));
  checks++;
  assert.equal((await db.query("select count(*)::int as count from public.interactive_resource_entries where legacy_record and schema_version=0 and formation_id is null and payload->>'fixture'='Texto neutro de teste' and expires_at>now()+interval '5 months'")).rows[0].count,legacyAliases.length);checks++;
  // Verify the production ACL first; a temporary grant below is solely a test
@@ -76,6 +79,17 @@ try{
  assert.equal(version.reviewer_id,uid.reviewer);checks++;
  version=await transition(uid.author,"save",version,{...configuration,items:[{...configuration.items[0],text:"Outro texto neutro de teste"}]});
  assert.equal(version.status,"draft");assert.equal(version.reviewer_id,null);checks++;
+ const returnVersion=async(actor,row,note)=>(await db.query("select public.fv_resource_transition($1,'return','chegada',$2,null,$3,$4) as version",[actor,row.id,row.updated_at,note])).rows[0].version;
+ version=await transition(uid.author,"submit",version);
+ await denied(()=>returnVersion(uid.author,version,"A própria autoria não devolve."));
+ await denied(()=>returnVersion(uid.reviewer,version,"curta"));
+ version=await returnVersion(uid.reviewer,version,"Conferir a referência do item de teste.");
+ assert.equal(version.status,"draft");assert.equal(version.review_note,"Conferir a referência do item de teste.");assert.equal(version.returned_by,uid.reviewer);checks++;
+ await denied(()=>returnVersion(uid.admin,version,"Rascunho não pode ser devolvido."));
+ version=await transition(uid.author,"submit",version);version=await transition(uid.reviewer,"review",version);
+ assert.equal(version.review_note,null);checks++;
+ version=await returnVersion(uid.admin,version,"Assinatura descartada pela administração.");
+ assert.equal(version.status,"draft");assert.equal(version.reviewer_id,null);checks++;
  version=await transition(uid.author,"submit",version);version=await transition(uid.reviewer,"review",version);
  version=await transition(uid.admin,"publish",version);
  assert.equal(version.status,"published");checks++;
@@ -83,6 +97,33 @@ try{
  await denied(()=>db.query("delete from public.resource_content_versions where id=$1",[version.id]));
  let next=await transition(uid.author,"clone",version);next=await transition(uid.author,"submit",next);next=await transition(uid.reviewer,"review",next);next=await transition(uid.admin,"publish",next);
  assert.equal((await db.query("select count(*)::int as count from public.resource_content_versions where resource_key='chegada' and status='published'")).rows[0].count,1);checks++;
+ // Administração escreve e submete, mas nunca assina o próprio texto.
+ let adminDraft=await transition(uid.admin,"clone",next);
+ adminDraft=await transition(uid.admin,"save",adminDraft,{...configuration,items:[{...configuration.items[0],text:"Texto neutro escrito pela administração"}]});
+ assert.equal(adminDraft.authored_by,uid.admin);checks++;
+ adminDraft=await transition(uid.admin,"submit",adminDraft);
+ assert.equal(adminDraft.status,"submitted");checks++;
+ await denied(()=>transition(uid.admin,"review",adminDraft));
+ await denied(()=>transition(uid.a,"save",adminDraft,configuration));
+ adminDraft=await transition(uid.reviewer,"review",adminDraft);adminDraft=await transition(uid.admin,"publish",adminDraft);
+ assert.equal(adminDraft.status,"published");checks++;
+ // Modo demonstração: só administração publica, sem assinatura, e a marca não pode ser apagada.
+ const emptyDemo=await transition(uid.admin,"create",null,empty);
+ await denied(()=>transition(uid.admin,"publish_demo",emptyDemo));
+ await db.query("delete from public.resource_content_versions where id=$1",[emptyDemo.id]);
+ let demo=await transition(uid.admin,"clone",adminDraft);
+ demo=await transition(uid.admin,"save",demo,configuration);
+ await denied(()=>transition(uid.author,"publish_demo",demo));
+ await denied(()=>transition(uid.reviewer,"publish_demo",demo));
+ demo=await transition(uid.admin,"publish_demo",demo);
+ assert.equal(demo.status,"published");assert.equal(demo.demo,true);assert.equal(demo.reviewer_crp,null);checks++;
+ assert.equal((await db.query("select status from public.resource_content_versions where id=$1",[adminDraft.id])).rows[0].status,"archived");checks++;
+ await denied(()=>db.query("update public.resource_content_versions set demo=false where id=$1",[demo.id]));
+ await denied(()=>db.query("update public.resource_content_versions set status='reviewed',demo=false where id=$1",[demo.id]));
+ let signed=await transition(uid.admin,"clone",demo);
+ assert.equal(signed.demo,false);checks++;
+ signed=await transition(uid.admin,"submit",signed);signed=await transition(uid.reviewer,"review",signed);signed=await transition(uid.admin,"publish",signed);
+ assert.equal(signed.demo,false);assert.equal(signed.reviewer_crp,"00/0000");checks++;
  await db.query("update public.resource_formation_retention set departure_date=now()-interval '7 months' where enrollment_id=$1",[enrollment]);
  await db.query("select set_config('request.jwt.claim.sub',$1,false)",[uid.a]);await db.exec("set role authenticated");
  assert.equal((await db.query("select count(*)::int as count from public.arrival_records")).rows[0].count,0);checks++;

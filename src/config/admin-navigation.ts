@@ -4,6 +4,7 @@ import {
   BookOpen,
   Calendar,
   Check,
+  ClipboardCheck,
   ClipboardList,
   FileText,
   Globe,
@@ -68,7 +69,7 @@ export const ADMIN_NAVIGATION_GROUPS: AdminNavigationGroup[] = [
     label: "Conteúdo",
     items: [
       { icon: PenTool, label: "Diário Visual", path: "/admin/blog" },
-      { icon: BookOpen, label: "Recursos Interativos", path: "/admin/recursos" },
+      { icon: ClipboardCheck, label: "Aprovação de recursos", path: "/admin/recursos" },
       { icon: BookOpen, label: "Galeria", path: "/admin/gallery" },
       { icon: FileText, label: "Documentos", path: "/admin/public-docs" },
       { icon: Library, label: "Livros", path: "/admin/books" },

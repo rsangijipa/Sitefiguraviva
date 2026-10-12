@@ -13,16 +13,16 @@ describe("ResourceHost mode changes",()=>{
  beforeEach(()=>push.mockClear());
  it("shows the selected card-study mode even while editorial content is unavailable",()=>{
   render(<ResourceHost slug="cartas-gestalticas" snapshot={snapshot}/>);
-  fireEvent.click(screen.getByRole("button",{name:/^revisar/}));
-  expect(screen.getByRole("button",{name:/^revisar/})).toHaveAttribute("aria-pressed","true");
-  expect(screen.getByText("Modo selecionado:").parentElement).toHaveTextContent("revisar");
+  fireEvent.click(screen.getByRole("button",{name:/^Revisar/}));
+  expect(screen.getByRole("button",{name:/^Revisar/})).toHaveAttribute("aria-pressed","true");
+  expect(screen.getByText("Modo selecionado:").parentElement).toHaveTextContent("Revisar");
   fireEvent.click(screen.getByRole("button",{name:"Iniciar recurso"}));
   expect(screen.getByRole("heading",{name:"O acervo aguarda revisão docente"})).toBeInTheDocument();
  });
  it("supports choosing a mode, starting, and returning to the mode screen",()=>{
   render(<ResourceHost slug="figura-e-fundo" snapshot={snapshot}/>);
-  fireEvent.click(screen.getByRole("button",{name:/^sessao/}));
-  expect(screen.getByText("Modo selecionado:").parentElement).toHaveTextContent("sessao");
+  fireEvent.click(screen.getByRole("button",{name:/^Sessão/}));
+  expect(screen.getByText("Modo selecionado:").parentElement).toHaveTextContent("Sessão");
   fireEvent.click(screen.getByRole("button",{name:"Iniciar recurso"}));
   expect(screen.getByRole("heading",{name:"O acervo aguarda revisão docente"})).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button",{name:"Voltar à escolha do modo"}));
@@ -33,13 +33,13 @@ describe("ResourceHost mode changes",()=>{
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole("button",{name:"Começar"}));
   fireEvent.change(screen.getByLabelText("Como você chega agora?"),{target:{value:"Palavra de teste"}});
-  fireEvent.click(screen.getByRole("button",{name:"completa"}));
+  fireEvent.click(screen.getByRole("button",{name:"Completa"}));
   expect(screen.getByRole("dialog",{name:"Trocar de modo?"})).toBeInTheDocument();
   expect(screen.getByLabelText("Como você chega agora?")).toHaveValue("Palavra de teste");
   fireEvent.click(screen.getByRole("button",{name:"Continuar neste modo"}));
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   expect(screen.getByLabelText("Como você chega agora?")).toHaveValue("Palavra de teste");
-  fireEvent.click(screen.getByRole("button",{name:"completa"}));
+  fireEvent.click(screen.getByRole("button",{name:"Completa"}));
   fireEvent.click(screen.getByRole("button",{name:"Trocar modo e descartar"}));
   expect(screen.queryByLabelText("Como você chega agora?")).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole("button",{name:"Começar"}));

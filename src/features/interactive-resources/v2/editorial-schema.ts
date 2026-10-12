@@ -41,6 +41,10 @@ export interface EditorialVersion {
   status: "draft" | "submitted" | "reviewed" | "published" | "archived";
   configuration: EditorialConfig; authoredBy: string | null;
   reviewerName: string | null; reviewerCrp: string | null; reviewedAt: string | null; updatedAt: string;
+  /** Observação da última devolução para ajustes; some quando a versão é assinada. */
+  reviewNote: string | null; returnedAt: string | null;
+  /** Publicada pela administração como demonstração, sem revisão docente. */
+  demo: boolean;
 }
 export function emptyEditorialConfig(resourceKey: z.infer<typeof ResourceKeySchema>): EditorialConfig {
   return { schemaVersion: 1, resourceKey, items: [], audio: [], artApprovalId: null };
@@ -58,6 +62,31 @@ export function assertPublishable(configuration: EditorialConfig) {
     if (item.asset && (!item.license.trim() || !configuration.artApprovalId)) throw new Error("Arte sem licença e curadoria registrada.");
   }
   if (new TextEncoder().encode(JSON.stringify(configuration)).byteLength > 512 * 1024) throw new Error("Versão editorial maior que o limite permitido.");
+}
+
+/**
+ * Mesmas regras de `assertPublishable`, mas reunidas em lista para a tela de
+ * aprovação mostrar tudo o que falta de uma vez, item por item.
+ */
+export function editorialIssues(configuration: EditorialConfig): string[] {
+  const issues: string[] = [];
+  if (!configuration.items.length) issues.push("O acervo desta versão está vazio.");
+  if (configuration.items.filter(item => item.kind === "card").length > 60) issues.push("O acervo comporta até 60 cartas.");
+  const ids = new Set<string>();
+  configuration.items.forEach((item, index) => {
+    const label = item.title.trim() || `Item ${index + 1}`;
+    if (ids.has(item.id)) issues.push(`${label}: identificador repetido.`);
+    ids.add(item.id);
+    if (!item.title.trim()) issues.push(`Item ${index + 1}: falta título.`);
+    if (!item.text.trim()) issues.push(`${label}: falta texto docente.`);
+    if (item.kind !== "guidance" && !item.references.length) issues.push(`${label}: falta referência bibliográfica.`);
+    if (item.references.some(reference => !reference.author.trim() || !reference.work.trim() || reference.year === null)) issues.push(`${label}: referência sem autoria, obra ou ano.`);
+    if (item.asset && !item.license.trim()) issues.push(`${label}: arte sem licença.`);
+    if (item.asset && !configuration.artApprovalId) issues.push(`${label}: arte sem curadoria registrada.`);
+  });
+  if (configuration.audio.length && !configuration.artApprovalId) issues.push("Áudio sem curadoria registrada.");
+  if (new TextEncoder().encode(JSON.stringify(configuration)).byteLength > 512 * 1024) issues.push("Versão maior que o limite de 512 KB.");
+  return issues;
 }
 
 export function isBrandAsset(path: string, type: "image" | "audio") {

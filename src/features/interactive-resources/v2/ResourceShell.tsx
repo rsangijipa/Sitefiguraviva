@@ -68,20 +68,20 @@ export function ResourceShell({ resource, version, concepts, onNavigateAway, chi
             </button>
           </div>
         </header>
-        <main className="fv-resource-body">
+        <div className="fv-resource-body" data-scroll-root>
           <section className="fv-resources" data-register={resource.register} aria-label={resource.title}>
             <div className="fv-content">
-              <header className="fv-header"><span className="fv-label">{resource.category} · {resource.duration}</span><h1>{resource.title}</h1><p className="fv-support">{resource.description}</p>{preview && <p className="fv-tag">Prévia editorial · sem publicação e sem salvamento pessoal</p>}</header>
+              <header className="fv-header"><span className="fv-label">{resource.category} · {resource.duration}</span><h1>{resource.title}</h1><p className="fv-support">{resource.description}</p>{preview && <p className="fv-tag">Prévia editorial · sem publicação e sem salvamento pessoal</p>}{version?.demo && <p className="fv-tag" role="note">Conteúdo de demonstração · ainda sem revisão docente</p>}</header>
               {error && <p className="fv-error" role="alert">{error}</p>}
               <div className="fv-stage-grid"><div className="fv-stage">{children}</div><aside className="fv-aside" aria-label="Apoio à experiência">
                 <span className="fv-label">Para acompanhar</span><h2>No seu tempo</h2><p>Você pode pular perguntas ou voltar à escolha do modo quando quiser.</p>
-                {version?.reviewerName && <p className="fv-reference">Revisão: {version.reviewerName} · CRP {version.reviewerCrp}</p>}
+                {version?.demo ? <p className="fv-reference">Conteúdo de demonstração, publicado para testes e apresentação. Ainda não passou por revisão docente.</p> : version?.reviewerName && <p className="fv-reference">Revisão: {version.reviewerName} · CRP {version.reviewerCrp}</p>}
                 {!!concepts.length && <><h3>Conceitos relacionados</h3><ul className="fv-list">{concepts.slice(0, 12).map(item => <li key={item.id}><button className="fv-button fv-button--secondary" type="button" onClick={() => setConcept(item)}>{item.title}</button></li>)}</ul></>}
                 <PrivacyNote /><Link href="/portal/recursos/meus-registros" onClick={event => requestNavigation(event, "/portal/recursos/meus-registros")}>Meus registros</Link>
               </aside></div>
             </div>
           </section>
-        </main>
+        </div>
       </div>
     </div>
     <Dialog title={concept?.title ?? "Conceito"} open={!!concept} onClose={() => setConcept(null)}>{concept && <><p className="fv-summary">{concept.text}</p><ReferenceLine item={concept} /></>}</Dialog>

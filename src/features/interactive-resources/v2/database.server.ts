@@ -14,12 +14,13 @@ export interface ContentRow {
   id: string; resource_key: ResourceKey; version: number; status: string;
   configuration: Json; authored_by: string | null; reviewer_id: string | null;
   reviewer_name: string | null; reviewer_crp: string | null; reviewed_at: string | null;
+  review_note?: string | null; demo?: boolean; returned_at?: string | null; returned_by?: string | null;
   created_at: string; updated_at: string;
 }
 type Table<Row> = { Row: Row & Record<string, unknown>; Insert: Partial<Row> & Record<string, unknown>; Update: Partial<Row> & Record<string, unknown>; Relationships: [] };
 type ResourceDatabase = Omit<Database, "public" | "__InternalSupabase"> & {
   public: { Views: Record<string, never>; Enums: Database["public"]["Enums"]; CompositeTypes: Record<string, never>; Functions: {
-    fv_resource_transition: { Args: { p_actor: string; p_action: string; p_resource_key: ResourceKey; p_version_id: string | null; p_configuration: Json | null; p_expected_updated_at: string | null }; Returns: Json };
+    fv_resource_transition: { Args: { p_actor: string; p_action: string; p_resource_key: ResourceKey; p_version_id: string | null; p_configuration: Json | null; p_expected_updated_at: string | null; p_note?: string | null }; Returns: Json };
   }; Tables: {
     arrival_records: Table<RecordRow>; polarity_records: Table<RecordRow>; phenomenology_lab_records: Table<RecordRow>;
     interactive_resource_entries: Table<RecordRow>; need_records: Table<RecordRow>;

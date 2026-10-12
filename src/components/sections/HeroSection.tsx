@@ -21,6 +21,8 @@ export default function HeroSection({
 
   return (
     <header className={`fv-bg fv-bg-hero ${styles.hero}`} data-home-hero>
+      {/* Aquarela de chão: ocupa a largura da janela, ancorada na base da árvore. */}
+      <TreeAtmosphere />
       <div className={styles.layout}>
         <div className={styles.copy}>
           {/* O nome da instituição é o título */}
@@ -84,7 +86,6 @@ export default function HeroSection({
         </div>
 
         <div className={styles.visual} aria-hidden="true" data-hero-tree>
-          <TreeAtmosphere />
           <EnhancedLivingTree
             className={styles.tree}
             theme="figura-viva"

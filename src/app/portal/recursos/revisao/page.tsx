@@ -7,5 +7,5 @@ export default async function EditorialPage(){
  await requireSession("/auth?next=/portal/recursos/revisao");const session=await resourceSession();
  const roles=session?await editorialPermissions(session.uid):[];
  if(!session || !session.isAdmin && !roles.length)return <section className="fv-resources"><div className="fv-content"><h1>Trabalho editorial</h1><p>Esta área exige permissão docente.</p></div></section>;
- return <EditorialWorkbench admin={session.isAdmin} author={roles.some(item=>item.role==="docente_autor")} reviewer={roles.some(item=>item.role==="docente_revisor")}/>;
+ return <EditorialWorkbench admin={session.isAdmin} author={session.isAdmin || roles.some(item=>item.role==="docente_autor")} reviewer={roles.some(item=>item.role==="docente_revisor")}/>;
 }

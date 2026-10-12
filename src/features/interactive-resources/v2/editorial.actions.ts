@@ -21,7 +21,7 @@ export async function listEditorialVersions(key: unknown): Promise<ResourceResul
 }
 const TransitionSchema = z.strictObject({
   resourceKey: ResourceKeySchema, versionId: z.uuid().nullable(),
-  action: z.enum(["create", "save", "submit", "review", "publish", "clone"]),
+  action: z.enum(["create", "save", "submit", "review", "publish", "publish_demo", "clone"]),
   expectedUpdatedAt: z.iso.datetime({ offset: true }).nullable(), configuration: EditorialConfigSchema.nullable(),
 });
 export async function transitionEditorialVersion(input: unknown): Promise<ResourceResult<EditorialVersion>> {
@@ -34,14 +34,14 @@ export async function transitionEditorialVersion(input: unknown): Promise<Resour
     const roles = await editorialPermissions(session.uid);
     const author = roles.some(item => item.role === "docente_autor");
     const reviewer = roles.some(item => item.role === "docente_revisor");
-    const allowed = params.action === "publish" ? session.isAdmin :
+    const allowed = params.action === "publish" || params.action === "publish_demo" ? session.isAdmin :
       params.action === "review" ? reviewer :
-      params.action === "create" || params.action === "clone" ? author || session.isAdmin : author;
+      author || session.isAdmin; // Administração também escreve (20261013100000); assinatura segue exclusiva de revisor.
     if (!allowed) return { ok: false, code: "forbidden", error: "Esta ação exige a permissão editorial correspondente." };
     const db = resourceDatabase();
     let configuration = params.action === "create" ? emptyEditorialConfig(params.resourceKey) : params.configuration;
     if (params.action === "save" && (!configuration || configuration.resourceKey !== params.resourceKey)) return { ok: false, code: "invalid", error: "A configuração não corresponde ao recurso." };
-    if (["submit", "review", "publish"].includes(params.action)) {
+    if (["submit", "review", "publish", "publish_demo"].includes(params.action)) {
       const current = await db.from("resource_content_versions").select("*").eq("id", params.versionId ?? "").eq("resource_key", params.resourceKey).maybeSingle();
       if (current.error || !current.data) return { ok: false, code: "unavailable", error: "Versão indisponível." };
       configuration = EditorialConfigSchema.parse(current.data.configuration);

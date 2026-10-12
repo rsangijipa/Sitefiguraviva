@@ -6,6 +6,7 @@ import { Button, TextField, TextArea, RangeScale, SelectableCard, EmptyContent, 
 import { useExperienceDraft, type ExperienceProps } from "./experience-types";
 import type { EditorialItem } from "./editorial-schema";
 import { EmotionWheel } from "./EmotionWheel";
+import { TwoChairs } from "./illustration/scenes";
 
 function ItemSelection({ items, value, onChange, max = 1 }: { items: EditorialItem[]; value: string[]; onChange: (ids: string[]) => void; max?: number }) {
   return !items.length ? <p className="fv-support">As opções deste acervo aguardam revisão docente. Você pode pular esta etapa.</p> :
@@ -70,7 +71,7 @@ export function PolarityExperience(props: ExperienceProps) {
   const add = () => { if(text.trim() && turns.length<12) { setTurns(values => [...values,{side,text}]); setText(""); setSide(side===0 ? 1 : 0); } };
   return <><h2>Como você nomeia os dois lados?</h2><p className="fv-note">Este é um experimento de escrita da formação. Ele não substitui a cadeira vazia conduzida em processo terapêutico.</p>
     <TextField label="Primeiro lado" value={names[0]} maxLength={60} onChange={value => setNames([value,names[1]])} /><TextField label="Segundo lado" value={names[1]} maxLength={60} onChange={value => setNames([names[0],value])} />
-    {props.mode === "dialogo" ? <><div className="fv-options">{([0,1] as const).map(index => <SelectableCard key={index} label={names[index] || `Lado ${index+1}`} selected={side===index} onSelect={() => setSide(index)} />)}</div><TextArea label={`Escrever como ${names[side] || `lado ${side+1}`}`} value={text} onChange={setText} /><Button onClick={add} disabled={!text.trim() || turns.length>=12}>Registrar fala e trocar de lado</Button><ul className="fv-list">{turns.map((turn,index) => <li key={index}><strong>{names[turn.side] || `Lado ${turn.side+1}`}</strong><p>{turn.text}</p></li>)}</ul></> : <RangeScale label="Onde você se percebe agora?" value={position} onChange={setPosition} ends={[names[0]||"Primeiro lado",names[1]||"Segundo lado"]} />}
+    {props.mode === "dialogo" ? <><TwoChairs active={side} names={names} /><div className="fv-options">{([0,1] as const).map(index => <SelectableCard key={index} label={names[index] || `Lado ${index+1}`} selected={side===index} onSelect={() => setSide(index)} />)}</div><TextArea label={`Escrever como ${names[side] || `lado ${side+1}`}`} value={text} onChange={setText} /><Button onClick={add} disabled={!text.trim() || turns.length>=12}>Registrar fala e trocar de lado</Button><ul className="fv-list">{turns.map((turn,index) => <li key={index}><strong>{names[turn.side] || `Lado ${turn.side+1}`}</strong><p>{turn.text}</p></li>)}</ul></> : <RangeScale label="Onde você se percebe agora?" value={position} onChange={setPosition} ends={[names[0]||"Primeiro lado",names[1]||"Segundo lado"]} />}
     <TextArea label="O que cada lado ouviu do outro?" value={reflection} onChange={setReflection} /><div className="fv-actions"><Button onClick={() => props.onComplete({...payload,turns:text.trim() && turns.length<12 ? [...turns,{side,text}] : turns})}>Concluir</Button><Button secondary onClick={() => props.onComplete(payload)}>Parar</Button></div>
   </>;
 }

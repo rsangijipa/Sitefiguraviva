@@ -5,6 +5,7 @@ import { Button, TextArea, SelectableCard } from "./ui";
 import { useExperienceDraft, type ExperienceProps } from "./experience-types";
 import { resourceAudioManager } from "./audio-manager";
 import Link from "next/link";
+import { PracticeArt } from "./illustration/scenes";
 const WaterStage = dynamic(() => import("./WaterStage").then(module => module.WaterStage), { ssr:false, loading:() => <p role="status">Preparando a superfície…</p> });
 const PRACTICES = [
   { id:"respirar",title:"Respirar",text:"Perceba sua respiração natural, no seu ritmo." },
@@ -29,8 +30,8 @@ export function PauseExperience(props: ExperienceProps) {
     return () => { clearInterval(timer); document.removeEventListener("visibilitychange",hide); resourceAudioManager.stopAll(); };
   },[started,paused]);
   const selected=PRACTICES.find(item => item.id===practice) ?? PRACTICES[0];
-  if(!started) return <><h2>Que tipo de pausa cabe agora?</h2><p>Você pode adaptar, trocar ou encerrar quando quiser.</p><div className="fv-options">{PRACTICES.map(item => <SelectableCard key={item.id} label={item.title} selected={practice===item.id} onSelect={() => setPractice(item.id)}><span>{item.text}</span></SelectableCard>)}</div><div className="fv-actions"><Button onClick={() => setStarted(true)}>Começar pausa</Button></div></>;
-  return <><h2>{selected.title}</h2><p>{selected.text}</p><p aria-live="off">Tempo nesta pausa: {Math.floor(seconds/60)} min {seconds%60} s · sem meta</p>
+  if(!started) return <><h2>Que tipo de pausa cabe agora?</h2><p>Você pode adaptar, trocar ou encerrar quando quiser.</p><div className="fv-options">{PRACTICES.map(item => <SelectableCard key={item.id} label={item.title} selected={practice===item.id} onSelect={() => setPractice(item.id)}><PracticeArt practice={item.id} className="fv-illustration fv-practice-art" /><span>{item.text}</span></SelectableCard>)}</div><div className="fv-actions"><Button onClick={() => setStarted(true)}>Começar pausa</Button></div></>;
+  return <><PracticeArt practice={selected.id} /><h2>{selected.title}</h2><p>{selected.text}</p><p aria-live="off">Tempo nesta pausa: {Math.floor(seconds/60)} min {seconds%60} s · sem meta</p>
     {practice==="pelos-sentidos" && <><h3>{SENSES[sense]}</h3><div className="fv-actions"><Button secondary onClick={() => setSense((sense+1)%SENSES.length)}>Próximo sentido</Button><Button secondary onClick={() => setSense((sense+1)%SENSES.length)}>Não sei</Button></div></>}
     {practice==="desacelerar" && <><WaterStage /><Link href="/recursos/igarape">Abrir experiência completa</Link></>}
     {practice==="ouvir" && <Link href="/recursos/sons-para-awareness">Abrir Sons para Awareness</Link>}

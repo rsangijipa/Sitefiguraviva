@@ -79,6 +79,24 @@ export default function FloatingAudioPlayer() {
     return () => clearInterval(interval);
   }, [sleepRemaining, isPlaying, stop]); // Added stop to dependency array
 
+  // Empurra os controles flutuantes globais para cima enquanto o player ocupa o mesmo canto.
+  const [playerElement, setPlayerElement] = useState<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!playerElement) return;
+    const root = document.documentElement;
+    const update = () => {
+      // Player em bottom-6 (24px); controles em 16px; 12px de respiro entre eles.
+      root.style.setProperty("--fv-controls-bottom", `${Math.ceil(playerElement.getBoundingClientRect().height) + 20}px`);
+    };
+    update();
+    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(update);
+    observer?.observe(playerElement);
+    return () => {
+      observer?.disconnect();
+      root.style.removeProperty("--fv-controls-bottom");
+    };
+  }, [playerElement]);
+
   if (!currentTrack) return null;
 
   const formatTime = (time: number) => {
@@ -96,6 +114,7 @@ export default function FloatingAudioPlayer() {
 
   return (
     <div
+      ref={setPlayerElement}
       data-secondary-floating-control="true"
       className={cn(
         "fixed bottom-6 right-6 z-[100] transition-all duration-500 ease-out animate-in slide-in-from-bottom-10",

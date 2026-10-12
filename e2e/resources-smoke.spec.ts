@@ -1,60 +1,56 @@
 import { test, expect, type Page } from "@playwright/test";
 
-async function openResource(page: Page, slug: string) {
-  await page.goto(`/recursos/${slug}`);
+async function open(page: Page, path: string) {
+  await page.goto(path);
   await page.getByRole("button", { name: "Recusar", exact: true }).click();
 }
 
-test.describe("Resources navigation and content", () => {
-  test("Banco de Microcasos changes section and returns to the catalog", async ({ page }) => {
-    await openResource(page, "banco-de-microcasos");
-    const window = page.getByRole("region", { name: "Banco de Microcasos", exact: true });
-    await expect(window).toBeVisible();
-    const sections = page.getByRole("navigation", { name: "Seções do recurso" });
-    await expect(sections.getByRole("button", { name: "Início", exact: true })).toHaveAttribute("aria-current", "page");
-    await sections.getByRole("button", { name: "Minha exploração", exact: true }).click();
-    await expect(sections.getByRole("button", { name: "Minha exploração", exact: true })).toHaveAttribute("aria-current", "page");
-    await expect(window.getByRole("heading", { name: /O que permanece.*em campo/i })).toBeVisible();
-    await page.getByRole("button", { name: "Voltar para Recursos", exact: true }).click();
+test.describe("Resources catalog and experiences", () => {
+  test("catalog filters by category and opens a resource", async ({ page }) => {
+    await open(page, "/recursos");
+    const filters = page.getByRole("group", { name: "Filtrar por categoria" });
+    await filters.getByRole("button", { name: /^Pausar/ }).click();
+    await expect(filters.getByRole("button", { name: /^Pausar/ })).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByRole("heading", { name: "Perceber", exact: true })).toHaveCount(0);
+    await page.getByRole("link", { name: "Abrir recurso: Igarapé" }).click();
+    await expect(page).toHaveURL(/\/recursos\/igarape$/);
+    await expect(page.getByRole("heading", { level: 1, name: "Igarapé" })).toBeVisible();
+    await page.getByRole("link", { name: "Voltar para recursos" }).click();
     await expect(page).toHaveURL(/\/recursos$/);
-    await expect(window).not.toBeVisible();
-    await expect(page.getByRole("heading", { name: "O que você precisa agora?", exact: true })).toBeVisible();
-    const group = page.getByRole("region", { name: "APRENDER", exact: true });
-    await group.getByRole("link", { name: /^Banco de Microcasos\./ }).click();
-    await expect(page).toHaveURL(/\/recursos\/banco-de-microcasos$/);
-    await expect(window).toBeVisible();
   });
 
-  test("Ciclo do Contato changes and resets the selected section", async ({ page }) => {
-    await openResource(page, "ciclo-do-contato");
-    const window = page.getByRole("region", { name: "Ciclo do Contato", exact: true });
-    await expect(window).toBeVisible();
-    const sections = page.getByRole("navigation", { name: "Seções do recurso" });
-    await sections.getByRole("button", { name: "Guiado", exact: true }).click();
-    await expect(sections.getByRole("button", { name: "Guiado", exact: true })).toHaveAttribute("aria-current", "page");
-    await sections.getByRole("button", { name: "Início", exact: true }).click();
-    await expect(sections.getByRole("button", { name: "Início", exact: true })).toHaveAttribute("aria-current", "page");
-    await page.getByRole("button", { name: "Voltar para Recursos", exact: true }).click();
-    await expect(page).toHaveURL(/\/recursos$/);
-    await expect(window).not.toBeVisible();
+  test("legacy alias resolves to the canonical resource and mode", async ({ page }) => {
+    await open(page, "/recursos/lago");
+    await expect(page).toHaveURL(/\/recursos\/igarape\?modo=agua$/);
+    await expect(page.getByText("Modo selecionado:")).toContainText("Água");
+  });
+
+  test("global floating controls stay available inside a resource", async ({ page }) => {
+    await open(page, "/recursos/figura-e-fundo");
+    const options = page.getByRole("button", { name: "Mais opções: tema" });
+    await expect(options).toBeVisible();
+    await options.click();
+    await expect(page.getByRole("region", { name: "Aparência" })).toBeVisible();
+    await page.keyboard.press("Escape");
+
+    const scroller = page.locator("[data-scroll-root]");
+    await scroller.evaluate((element) => element.scrollTo({ top: element.scrollHeight }));
+    const backToTop = page.getByRole("button", { name: "Voltar ao topo da página" });
+    await expect(backToTop).toBeVisible();
+    await backToTop.click();
+    await expect.poll(() => scroller.evaluate((element) => element.scrollTop)).toBe(0);
   });
 
   test.describe("mobile viewport", () => {
     test.use({ viewport: { width: 360, height: 800 } });
     test("return control remains reachable at 360px", async ({ page }) => {
-      await openResource(page, "banco-de-microcasos");
-      const window = page.getByRole("region", { name: "Banco de Microcasos", exact: true });
-      await expect(window).toBeVisible();
-      const close = page.getByRole("button", { name: "Voltar para Recursos", exact: true });
-      await expect(close).toBeInViewport();
-      // Wait for the modal entry animation before measuring the touch target.
-      await expect.poll(async () => {
-        const box = await close.boundingBox();
-        return Math.round(Math.min(box?.width ?? 0, box?.height ?? 0));
-      }).toBeGreaterThanOrEqual(44);
-      await close.click();
+      await open(page, "/recursos/igarape");
+      const back = page.getByRole("link", { name: "Voltar para recursos" });
+      await expect(back).toBeInViewport();
+      const box = await back.boundingBox();
+      expect(Math.round(Math.min(box?.width ?? 0, box?.height ?? 0))).toBeGreaterThanOrEqual(44);
+      await back.click();
       await expect(page).toHaveURL(/\/recursos$/);
-      await expect(window).not.toBeVisible();
     });
   });
 });
