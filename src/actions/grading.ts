@@ -1,41 +1,15 @@
 "use server";
 
-import { auth, adminDb } from "@/lib/firebase/admin";
-import { Timestamp } from "firebase-admin/firestore";
-import { cookies } from "next/headers";
 import { rateLimit } from "@/lib/rateLimit";
-import { verifySession } from "@/lib/auth/server";
+import { requireStaff } from "@/lib/auth/server";
+import { assertCanAuthorCourse } from "@/lib/auth/authoring-gate";
+import { recordLessonProgress } from "@/features/progress/application/recordLessonProgress.server";
+import type { Question, StudentAnswer } from "@/types/assessment";
+import type { Json } from "@/infrastructure/supabase/database.types";
 import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import { createNotification } from "@/features/notifications/infrastructure/supabaseNotificationRepository.server";
-import type { AssessmentSubmissionDoc } from "@/types/assessment";
+import { readSubmissionsPage } from "@/features/assessments/infrastructure/adminAssessmentQueries.server";
 import { awardCanonicalCompletion } from "@/features/gamification/application/awardCanonicalGamification.server";
-
-async function requireAdminSession() {
-  const session = await verifySession();
-  if (session && session.isAdmin) {
-    return {
-      uid: session.uid,
-      email: session.email,
-      role: session.role || "admin",
-    };
-  }
-
-  // Fallback for tests or legacy cookies
-  try {
-    const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get("session")?.value;
-    if (sessionCookie && auth?.verifySessionCookie) {
-      const claims = await auth.verifySessionCookie(sessionCookie, true);
-      if (claims.role === "admin" || claims.admin === true) {
-        return claims;
-      }
-    }
-  } catch {
-    // ignore
-  }
-
-  throw new Error("Forbidden: Admins only");
-}
 
 /**
  * Manual grading for essay and practical questions
@@ -47,180 +21,233 @@ export async function manualGradeSubmission(
   feedback?: string,
 ) {
   try {
-    const claims = await requireAdminSession();
-
-    // Rate limiting
-    const rateLimitResult = await rateLimit(claims.uid, "manualGrade", {
+    await requireStaff();
+    if (
+      !/^[A-Za-z0-9_-]{1,200}$/.test(submissionId) ||
+      !Array.isArray(questionGrades) ||
+      questionGrades.length > 200 ||
+      (feedback?.length ?? 0) > 20000
+    )
+      throw new Error("Invalid grading input");
+    const supabase = createSupabaseServiceClient();
+    const { data: submission, error: readError } = await supabase
+      .from("assessment_submissions")
+      .select(
+        "id,user_id,course_id,assessment_id,answers,status,attempt_number,updated_at",
+      )
+      .eq("id", submissionId)
+      .maybeSingle();
+    if (readError) throw readError;
+    if (
+      !submission?.user_id ||
+      !["submitted", "graded"].includes(submission.status)
+    )
+      throw new Error("Submission unavailable");
+    const actor = await assertCanAuthorCourse(submission.course_id);
+    const limited = await rateLimit(actor.uid, "manualGrade", {
       maxRequests: 50,
       windowMs: 60000,
     });
-
-    if (!rateLimitResult.allowed) {
-      const waitSeconds = Math.ceil(
-        (rateLimitResult.resetAt - Date.now()) / 1000,
-      );
-      return {
-        error: `Limite de correções excedido. Aguarde ${waitSeconds}s.`,
-      };
+    if (!limited.allowed)
+      return { error: "Limite de correções excedido. Aguarde um minuto." };
+    const { data: assessment, error: assessmentError } = await supabase
+      .from("assessments")
+      .select("id,course_id,lesson_id,title,questions,passing_score")
+      .eq("id", submission.assessment_id)
+      .eq("course_id", submission.course_id)
+      .maybeSingle();
+    if (assessmentError) throw assessmentError;
+    if (!assessment || !Array.isArray(assessment.questions))
+      throw new Error("Assessment unavailable");
+    const questions = assessment.questions as unknown as Question[];
+    const grades = new Map(
+      questionGrades.map((grade) => [grade.questionId, grade.pointsEarned]),
+    );
+    if (grades.size !== questionGrades.length)
+      throw new Error("Duplicate grades");
+    const manual = questions.filter(
+      (question) => question.type === "essay" || question.type === "practical",
+    );
+    if (
+      !manual.length ||
+      grades.size !== manual.length ||
+      manual.some((question) => !grades.has(question.id))
+    )
+      throw new Error("Grade every manual question exactly once");
+    for (const question of manual) {
+      const points = grades.get(question.id)!;
+      if (!Number.isFinite(points) || points < 0 || points > question.points)
+        throw new Error("Grade outside question bounds");
     }
-
-    // Get submission from Firestore
-    const submissionRef = adminDb
-      .collection("assessmentSubmissions")
-      .doc(submissionId);
-    const submissionSnap = await submissionRef.get();
-
-    if (!submissionSnap.exists) {
-      return { error: "Submissão não encontrada" };
-    }
-
-    const submission = submissionSnap.data() as AssessmentSubmissionDoc;
-
-    // Get assessment
-    const assessmentSnap = await adminDb
-      .collection("assessments")
-      .doc(submission.assessmentId)
-      .get();
-
-    if (!assessmentSnap.exists) {
-      return { error: "Avaliação não encontrada" };
-    }
-
-    const assessment = assessmentSnap.data();
-
-    // Update manual grades
-    const updatedAnswers = submission.answers.map((answer) => {
-      const grade = questionGrades.find(
-        (g) => g.questionId === answer.questionId,
-      );
-      if (grade) {
-        return {
-          ...answer,
-          pointsEarned: grade.pointsEarned,
-          isCorrect: grade.pointsEarned > 0,
-        };
-      }
-      return answer;
+    const previousAnswers = Array.isArray(submission.answers)
+      ? (submission.answers as unknown as StudentAnswer[])
+      : [];
+    const answers = questions.map((question) => {
+      if (!Number.isFinite(question.points) || question.points < 0)
+        throw new Error("Invalid question points");
+      const answer = previousAnswers.find(
+        (item) => item.questionId === question.id,
+      ) ?? { questionId: question.id };
+      // Persisted objective scores can predate write hardening; recompute from the key.
+      let isCorrect = false;
+      let pointsEarned = 0;
+      if (question.type === "multiple_choice") {
+        const expected = question.options
+          .filter((option) => option.isCorrect)
+          .map((option) => option.id);
+        const selected = answer.selectedOptions ?? [];
+        isCorrect =
+          Array.isArray(selected) &&
+          expected.length > 0 &&
+          selected.length === expected.length &&
+          new Set(selected).size === selected.length &&
+          (question.allowMultiple || selected.length <= 1) &&
+          selected.every(
+            (id) => typeof id === "string" && expected.includes(id),
+          );
+        pointsEarned = isCorrect ? question.points : 0;
+      } else if (question.type === "true_false") {
+        isCorrect =
+          typeof answer.booleanAnswer === "boolean" &&
+          answer.booleanAnswer === question.correctAnswer;
+        pointsEarned = isCorrect ? question.points : 0;
+      } else if (question.type === "essay" || question.type === "practical") {
+        pointsEarned = grades.get(question.id)!;
+        isCorrect = pointsEarned > 0;
+      } else throw new Error("Unsupported question type");
+      return { ...answer, pointsEarned, isCorrect };
     });
-
-    // Recalculate total score
-    const totalScore = updatedAnswers.reduce(
-      (sum, ans) => sum + (ans.pointsEarned || 0),
+    const totalPoints = questions.reduce(
+      (sum, question) => sum + question.points,
       0,
     );
-    const totalPoints = assessment.totalPoints || 100;
-    const percentage =
-      totalPoints > 0 ? (totalScore / totalPoints) * 100 : 0;
-    const passed = percentage >= assessment.passingScore;
-
-    // Update submission in Firestore
-    await submissionRef.update({
-      answers: updatedAnswers,
-      score: totalScore,
-      percentage,
-      passed,
-      status: "graded",
-      gradedBy: claims.uid,
-      gradedAt: Timestamp.now(),
-      feedback: feedback || "",
-    });
-
-    // Update user progress in Firestore
-    const progressRef = adminDb
-      .collection("users")
-      .doc(submission.userId)
-      .collection("assessmentProgress")
-      .doc(submission.assessmentId);
-
-    const progressSnap = await progressRef.get();
-    const currentProgress = progressSnap.exists ? progressSnap.data() : null;
-
-    const newBestPercentage = Math.max(
-      percentage,
-      currentProgress?.bestPercentage || 0,
-    );
-    const newBestScore = Math.max(totalScore, currentProgress?.bestScore || 0);
-
-    await progressRef.set(
-      {
-        assessmentId: submission.assessmentId,
-        userId: submission.userId,
-        courseId: submission.courseId,
-        attempts: currentProgress?.attempts || submission.attemptNumber,
-        bestScore: newBestScore,
-        bestPercentage: newBestPercentage,
-        passed: newBestPercentage >= assessment.passingScore,
-        lastAttemptAt: Timestamp.now(),
-        submissions: currentProgress?.submissions || [submissionId],
-      },
-      { merge: true },
-    );
-
-    // Sync to Supabase
-    try {
-      const supabase = createSupabaseServiceClient();
-      const nowIso = new Date().toISOString();
-
-      await supabase
-        .from("assessment_submissions")
-        .update({
-          answers: updatedAnswers as any,
-          score: totalScore,
-          percentage,
-          passed,
-          status: "graded",
-          graded_by: claims.uid,
-          graded_at: nowIso,
-          updated_at: nowIso,
-          feedback: feedback || null,
-        })
-        .eq("id", submissionId);
-
-      await supabase.from("assessment_progress").upsert({
-        id: `${submission.userId}_${submission.assessmentId}`,
-        assessment_id: submission.assessmentId,
-        user_id: submission.userId,
-        course_id: submission.courseId,
-        attempts: currentProgress?.attempts || submission.attemptNumber,
-        best_score: newBestScore,
-        best_percentage: newBestPercentage,
-        passed: newBestPercentage >= assessment.passingScore,
-        last_attempt_at: nowIso,
-        submissions: (currentProgress?.submissions || [submissionId]) as any,
-      });
-
-      // Send notification to student via Supabase
-      await createNotification(
-        submission.userId,
+    if (totalPoints <= 0) throw new Error("Assessment has no points");
+    const score = answers.reduce((sum, answer) => sum + answer.pointsEarned, 0);
+    const percentage = (score / totalPoints) * 100;
+    const passed = percentage >= assessment.passing_score;
+    const now = new Date().toISOString();
+    const { data: written, error: writeError } = await supabase
+      .from("assessment_submissions")
+      .update({
+        answers: answers as unknown as Json,
+        score,
+        percentage,
+        passed,
+        status: "graded",
+        graded_by: actor.uid,
+        graded_at: now,
+        updated_at: now,
+        feedback: feedback || null,
+      })
+      .eq("id", submissionId)
+      .eq("updated_at", submission.updated_at)
+      .select("id")
+      .maybeSingle();
+    if (writeError) throw writeError;
+    if (!written) throw new Error("Submission changed; reload before grading");
+    const { data: current, error: progressReadError } = await supabase
+      .from("assessment_progress")
+      .select("attempts,best_score,best_percentage,submissions,passed")
+      .eq("user_id", submission.user_id)
+      .eq("assessment_id", submission.assessment_id)
+      .maybeSingle();
+    if (progressReadError) throw progressReadError;
+    const bestPercentage = Math.max(percentage, current?.best_percentage ?? 0);
+    const { error: progressError } = await supabase
+      .from("assessment_progress")
+      .upsert(
         {
-          title: passed ? "✅ Avaliação Aprovada!" : "📝 Avaliação Corrigida",
-          body: passed
-            ? `Parabéns! Você foi aprovado(a) em "${assessment.title}" com ${percentage.toFixed(1)}%`
-            : `Sua avaliação "${assessment.title}" foi corrigida. Nota: ${percentage.toFixed(1)}%`,
-          link: `/portal/courses/${submission.courseId}/assessments/${submission.assessmentId}`,
+          user_id: submission.user_id,
+          assessment_id: submission.assessment_id,
+          course_id: submission.course_id,
+          attempts: Math.max(submission.attempt_number, current?.attempts ?? 0),
+          best_score: Math.max(score, current?.best_score ?? 0),
+          best_percentage: bestPercentage,
+          passed: bestPercentage >= assessment.passing_score,
+          last_attempt_at: now,
+          submissions: [
+            ...new Set([
+              ...(Array.isArray(current?.submissions)
+                ? current.submissions.filter(
+                    (id): id is string => typeof id === "string",
+                  )
+                : []),
+              submissionId,
+            ]),
+          ],
+          updated_at: now,
+        },
+        { onConflict: "user_id,assessment_id" },
+      );
+    if (progressError) throw progressError;
+    let progressSaved = true;
+    if (passed && assessment.lesson_id) {
+      const [
+        { data: lesson, error: lessonError },
+        { data: enrollment, error: enrollmentError },
+      ] = await Promise.all([
+        supabase
+          .from("lessons")
+          .select("module_id")
+          .eq("id", assessment.lesson_id)
+          .eq("course_id", submission.course_id)
+          .maybeSingle(),
+        supabase
+          .from("enrollments")
+          .select("status,access_until")
+          .eq("user_id", submission.user_id)
+          .eq("course_id", submission.course_id)
+          .maybeSingle(),
+      ]);
+      if (lessonError || enrollmentError) progressSaved = false;
+      else if (
+        lesson &&
+        enrollment &&
+        ["active", "completed"].includes(enrollment.status) &&
+        (!enrollment.access_until ||
+          new Date(enrollment.access_until).getTime() > Date.now())
+      ) {
+        try {
+          await recordLessonProgress(submission.user_id, {
+            courseId: submission.course_id,
+            moduleId: lesson.module_id,
+            lessonId: assessment.lesson_id,
+            status: "completed",
+            percent: 100,
+          });
+        } catch (error) {
+          progressSaved = false;
+          console.error("Manual grading lesson progress failed", error);
+        }
+      }
+    }
+    try {
+      await createNotification(
+        submission.user_id,
+        {
+          title: "Avaliação corrigida",
+          body: assessment.title + ": " + percentage.toFixed(1) + "%",
+          link: "/portal/course/" + submission.course_id,
           type: "course_update",
         },
-        supabase as any,
+        supabase,
       );
-    } catch {
-      // ignore
+      if (passed)
+        await awardCanonicalCompletion(submission.user_id, {
+          kind: "quiz",
+          courseId: submission.course_id,
+          submissionId,
+        });
+    } catch (error) {
+      console.error("Manual grading notification or award failed", error);
     }
-
-    // Award XP if passed
-    if (passed) {
-      await awardCanonicalCompletion(submission.userId, {
-        kind: "quiz",
-        courseId: submission.courseId,
-        submissionId,
-      });
-    }
-
     return {
       success: true,
-      score: totalScore,
+      score,
       totalPoints,
       percentage,
       passed,
+      progressSaved,
     };
   } catch (error) {
     console.error("Manual Grade Error:", error);
@@ -234,98 +261,38 @@ export async function manualGradeSubmission(
  */
 export async function getPendingSubmissions(courseId?: string) {
   try {
-    await requireAdminSession();
-
-    // Try Supabase first
-    try {
-      const supabase = createSupabaseServiceClient();
-      let subQuery = supabase
-        .from("assessment_submissions")
-        .select("*")
-        .eq("status", "submitted")
-        .order("submitted_at", { ascending: false })
-        .limit(50);
-
-      if (courseId) {
-        subQuery = subQuery.eq("course_id", courseId);
-      }
-
-      const { data: subData, error: subError } = await subQuery;
-
-      if (!subError && subData && subData.length > 0) {
-        const userIds = [...new Set(subData.map((s) => s.user_id).filter(Boolean))];
-        const assessIds = [...new Set(subData.map((s) => s.assessment_id).filter(Boolean))];
-
-        const [{ data: profiles }, { data: assessments }] = await Promise.all([
-          supabase.from("profiles").select("id, display_name, email").in("id", userIds as string[]),
-          supabase.from("assessments").select("id, title").in("id", assessIds as string[]),
-        ]);
-
-        const profileMap = new Map((profiles || []).map((p) => [p.id, p]));
-        const assessMap = new Map((assessments || []).map((a) => [a.id, a]));
-
-        return {
-          submissions: subData.map((s) => ({
-            id: s.id,
-            assessmentId: s.assessment_id,
-            userId: s.user_id,
-            courseId: s.course_id,
-            attemptNumber: s.attempt_number,
-            answers: s.answers,
-            status: s.status,
-            studentName: profileMap.get(s.user_id || "")?.display_name || "Anônimo",
-            studentEmail: profileMap.get(s.user_id || "")?.email || "",
-            assessmentTitle: assessMap.get(s.assessment_id)?.title || "Sem título",
-            submittedAtDate: s.submitted_at || undefined,
-          })),
-        };
-      }
-    } catch {
-      // fallback
-    }
-
-    let query = adminDb
-      .collection("assessmentSubmissions")
-      .where("status", "==", "submitted")
-      .orderBy("submittedAt", "desc")
-      .limit(50);
-
-    if (courseId) {
-      query = query.where("courseId", "==", courseId);
-    }
-
-    const snapshot = await query.get();
-
-    const submissions = await Promise.all(
-      snapshot.docs.map(async (doc) => {
-        const data = doc.data();
-
-        // Fetch user details
-        const userSnap = await adminDb
-          .collection("users")
-          .doc(data.userId)
-          .get();
-        const userData = userSnap.data();
-
-        // Fetch assessment details
-        const assessmentSnap = await adminDb
-          .collection("assessments")
-          .doc(data.assessmentId)
-          .get();
-        const assessmentData = assessmentSnap.data();
-
-        return {
-          id: doc.id,
-          ...data,
-          studentName: userData?.displayName || "Anônimo",
-          studentEmail: userData?.email || "",
-          assessmentTitle: assessmentData?.title || "Sem título",
-          submittedAtDate: data.submittedAt?.toDate().toISOString(),
-        };
-      }),
+    const page = await readSubmissionsPage({
+      status: "submitted",
+      pageSize: 50,
+      courseId,
+    });
+    if (!page.submissions.length) return { submissions: [] };
+    const ids = [
+      ...new Set(page.submissions.map((submission) => submission.assessmentId)),
+    ];
+    const { data: assessments, error } = await createSupabaseServiceClient()
+      .from("assessments")
+      .select("id,title")
+      .in("id", ids);
+    if (error) throw error;
+    const titles = new Map(
+      (assessments ?? []).map((assessment) => [
+        assessment.id,
+        assessment.title,
+      ]),
     );
-
-    return { submissions };
+    return {
+      submissions: page.submissions.map((submission) => ({
+        ...submission,
+        studentName: page.users[submission.userId]?.displayName || "Anônimo",
+        studentEmail: page.users[submission.userId]?.email || "",
+        assessmentTitle: titles.get(submission.assessmentId) || "Sem título",
+        submittedAtDate:
+          typeof submission.submittedAt === "string"
+            ? submission.submittedAt
+            : undefined,
+      })),
+    };
   } catch (error) {
     console.error("Get Pending Submissions Error:", error);
     return { error: "Erro ao buscar submissões" };

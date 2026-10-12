@@ -262,8 +262,7 @@ export const CertificateDocument: React.FC<CertificateDocumentProps> = ({
 
   // --- ASSETS ---
   // Using absolute path for public folder assets if needed, or relative
-  // Assuming logo is at public/assets/logo-figura-viva.jpg or .png
-  const logoUrl = "/assets/logo-figura-viva.png"; // Fallback to png usually better for transparency
+  const logoUrl = "/assets/logo-figura-viva.jpg";
   // Optional watercolor background
   const bgUrl = "/assets/_bg_aquarela.png";
 

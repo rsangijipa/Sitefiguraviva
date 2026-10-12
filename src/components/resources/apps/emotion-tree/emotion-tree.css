@@ -1,5 +1,11 @@
 
 
+.fv-emotion-tree-fonts {
+  --font-display: var(--font-serif);
+  --font-display-alt: var(--font-serif);
+  --font-hand: var(--font-serif);
+}
+
 .emotion-tree-app {
   --background: #12382c;
   --foreground: #f8f1e5;

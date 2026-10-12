@@ -3,7 +3,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Save, ArrowLeft, BookOpen, Sparkles, ExternalLink, ShieldCheck } from "lucide-react";
+import {
+  Save,
+  ArrowLeft,
+  BookOpen,
+  Sparkles,
+  ExternalLink,
+  ShieldCheck,
+} from "lucide-react";
 import Button from "@/components/ui/Button";
 import { useToast } from "@/context/ToastContext";
 import ImageUpload from "@/components/admin/ImageUpload";
@@ -15,6 +22,7 @@ export default function NewBookPage() {
   const router = useRouter();
   const { addToast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [coverConfirmed, setCoverConfirmed] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -29,6 +37,7 @@ export default function NewBookPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isUploading || isSubmitting) return;
 
     if (!formData.coverImageUrl) {
       addToast("Faça o upload da capa do livro antes de salvar.", "error");
@@ -37,7 +46,7 @@ export default function NewBookPage() {
     if (!coverConfirmed) {
       addToast(
         "Por favor, confirme a autorização de uso da imagem da capa.",
-        "error"
+        "error",
       );
       return;
     }
@@ -102,6 +111,7 @@ export default function NewBookPage() {
           <Button
             onClick={handleSubmit}
             isLoading={isSubmitting}
+            disabled={isUploading || isSubmitting}
             size="sm"
             className="shadow-lg shadow-primary/20"
           >
@@ -117,7 +127,10 @@ export default function NewBookPage() {
           <span>Ficha de Recomendação Bibliográfica</span>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-4 sm:p-6 lg:p-8 bg-stone-50/30 space-y-6">
+        <form
+          onSubmit={handleSubmit}
+          className="p-4 sm:p-6 lg:p-8 bg-stone-50/30 space-y-6"
+        >
           <FormShell className="max-w-none grid lg:grid-cols-12 gap-8 bg-transparent border-0 shadow-none p-0">
             {/* Coluna Esquerda: Capa e Autorização */}
             <div className="lg:col-span-5 xl:col-span-4 space-y-6">
@@ -129,6 +142,7 @@ export default function NewBookPage() {
                 <div className="space-y-4">
                   <div className="mx-auto max-w-[240px] aspect-[2/3] w-full rounded-xl overflow-hidden bg-stone-100 border border-stone-200 shadow-inner">
                     <ImageUpload
+                      onUploadingChange={setIsUploading}
                       bucket="public-book-covers"
                       folder="covers"
                       defaultImage={formData.coverImageUrl}
@@ -152,7 +166,8 @@ export default function NewBookPage() {
                         className="mt-0.5 h-4 w-4 rounded border-amber-300 text-primary focus:ring-primary shrink-0"
                       />
                       <span>
-                        Confirmo que possuo autorização ou que esta capa é de uso promocional legítimo para divulgação da obra.
+                        Confirmo que possuo autorização ou que esta capa é de
+                        uso promocional legítimo para divulgação da obra.
                       </span>
                     </label>
                   </div>
@@ -169,7 +184,10 @@ export default function NewBookPage() {
               >
                 <div className="space-y-4">
                   <div>
-                    <label htmlFor="book-title" className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5">
+                    <label
+                      htmlFor="book-title"
+                      className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5"
+                    >
                       Título do Livro *
                     </label>
                     <input
@@ -177,7 +195,12 @@ export default function NewBookPage() {
                       type="text"
                       required
                       value={formData.title}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          title: e.target.value,
+                        }))
+                      }
                       placeholder="Ex: Gestalt-Terapia Explicada"
                       className="w-full rounded-xl border border-stone-200 bg-white px-4 py-3 text-base font-serif font-bold text-stone-800 focus:border-primary focus:outline-none"
                     />
@@ -185,7 +208,10 @@ export default function NewBookPage() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="sm:col-span-2">
-                      <label htmlFor="book-author" className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5">
+                      <label
+                        htmlFor="book-author"
+                        className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5"
+                      >
                         Autor(a) / Organizador(a) *
                       </label>
                       <input
@@ -193,14 +219,22 @@ export default function NewBookPage() {
                         type="text"
                         required
                         value={formData.author}
-                        onChange={(e) => setFormData((prev) => ({ ...prev, author: e.target.value }))}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            author: e.target.value,
+                          }))
+                        }
                         placeholder="Ex: Frederick S. Perls"
                         className="w-full rounded-xl border border-stone-200 bg-white px-3.5 py-2.5 text-sm font-medium text-stone-700 focus:border-primary focus:outline-none"
                       />
                     </div>
 
                     <div>
-                      <label htmlFor="book-year" className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5">
+                      <label
+                        htmlFor="book-year"
+                        className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5"
+                      >
                         Ano de Publicação
                       </label>
                       <input
@@ -209,7 +243,12 @@ export default function NewBookPage() {
                         min={0}
                         max={9999}
                         value={formData.publicationYear}
-                        onChange={(e) => setFormData((prev) => ({ ...prev, publicationYear: e.target.value }))}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            publicationYear: e.target.value,
+                          }))
+                        }
                         placeholder="Ex: 1969"
                         className="w-full rounded-xl border border-stone-200 bg-white px-3.5 py-2.5 text-sm font-medium text-stone-700 focus:border-primary focus:outline-none"
                       />
@@ -217,7 +256,10 @@ export default function NewBookPage() {
                   </div>
 
                   <div>
-                    <label htmlFor="book-purchase-url" className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5">
+                    <label
+                      htmlFor="book-purchase-url"
+                      className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5"
+                    >
                       Link para Compra / Catálogo da Editora *
                     </label>
                     <div className="relative">
@@ -226,11 +268,19 @@ export default function NewBookPage() {
                         type="url"
                         required
                         value={formData.purchaseUrl}
-                        onChange={(e) => setFormData((prev) => ({ ...prev, purchaseUrl: e.target.value }))}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            purchaseUrl: e.target.value,
+                          }))
+                        }
                         placeholder="https://www.amazon.com.br/dp/... ou link da editora"
                         className="w-full rounded-xl border border-stone-200 bg-white pl-4 pr-10 py-2.5 text-sm font-medium text-stone-700 focus:border-primary focus:outline-none"
                       />
-                      <ExternalLink size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none" />
+                      <ExternalLink
+                        size={16}
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
+                      />
                     </div>
                   </div>
                 </div>
@@ -242,14 +292,22 @@ export default function NewBookPage() {
                 className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm"
               >
                 <div>
-                  <label htmlFor="book-description" className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5">
+                  <label
+                    htmlFor="book-description"
+                    className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5"
+                  >
                     Sinopse / Por que indicamos este livro
                   </label>
                   <textarea
                     id="book-description"
                     rows={5}
                     value={formData.description}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        description: e.target.value,
+                      }))
+                    }
                     placeholder="Descreva as contribuições teóricas ou práticas desta obra, conceitos fundamentais abordados e para qual momento formativo ela é recomendada..."
                     className="w-full rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-700 focus:border-primary focus:outline-none resize-none"
                   />
@@ -268,6 +326,7 @@ export default function NewBookPage() {
                 <Button
                   type="submit"
                   isLoading={isSubmitting}
+                  disabled={isUploading || isSubmitting}
                   className="shadow-lg shadow-primary/20"
                 >
                   <Sparkles size={16} className="mr-1.5" />

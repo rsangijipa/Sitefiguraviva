@@ -17,6 +17,7 @@ interface BlogPostFormProps {
 export function BlogPostForm({ post, onSuccess, onCancel }: BlogPostFormProps) {
   const { addToast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   const initialForm = {
     title: post?.title || "",
@@ -34,6 +35,7 @@ export function BlogPostForm({ post, onSuccess, onCancel }: BlogPostFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isUploading || isSubmitting) return;
     setIsSubmitting(true);
 
     try {
@@ -106,6 +108,7 @@ export function BlogPostForm({ post, onSuccess, onCancel }: BlogPostFormProps) {
               Imagem de Capa
             </label>
             <ImageUpload
+              onUploadingChange={setIsUploading}
               defaultImage={formData.image}
               onUpload={(url) =>
                 setFormData((prev) => ({ ...prev, image: url }))
@@ -211,14 +214,16 @@ export function BlogPostForm({ post, onSuccess, onCancel }: BlogPostFormProps) {
           type="button"
           onClick={onCancel}
           className="px-6 py-2.5 text-[10px] font-bold text-stone-400 hover:text-stone-600 transition-colors uppercase tracking-widest"
-          disabled={isSubmitting}
+          disabled={isSubmitting || isUploading}
         >
           Cancelar
         </button>
         <Button
           type="submit"
           disabled={
-            isSubmitting || (formData.type === "library" && !formData.pdf_url)
+            isSubmitting ||
+            isUploading ||
+            (formData.type === "library" && !formData.pdf_url)
           }
           className="px-8 shadow-lg shadow-primary/20"
         >

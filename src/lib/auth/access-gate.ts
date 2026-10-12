@@ -146,7 +146,7 @@ export async function assertCanAccessCourse(
     courseId,
     enrollmentId: enrollment.id || `profile_${uid}_${courseId}`,
     paymentMethod: enrollment.paymentMethod || "free",
-    courseVersion: enrollment.courseVersionAtEnrollment,
+    courseVersion: enrollment.courseVersionAtEnrollment ?? undefined,
     accessUntil: enrollment.accessUntil || undefined,
   };
 }

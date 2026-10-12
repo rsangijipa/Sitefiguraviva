@@ -226,7 +226,7 @@ export default function Navbar() {
                               href={item.href}
                               role="menuitem"
                               onClick={() => setDesktopMenuOpen(null)}
-                              className="flex min-h-11 items-center rounded-md px-3 py-2 text-base font-medium text-primary transition-colors hover:bg-areia focus-visible:bg-areia focus-visible:outline-none"
+                              className="flex min-h-11 items-center rounded-md px-3 py-2 text-base font-medium text-primary transition-colors hover:bg-areia focus-visible:bg-areia focus-visible:ring-2 focus-visible:ring-primary"
                             >
                               {item.label}
                             </a>
@@ -368,7 +368,7 @@ export default function Navbar() {
                   </Link>
                 </div>
 
-                <p className="pb-2 text-center text-[9px] font-bold uppercase tracking-[0.3em] text-muted">
+                <p className="pb-2 text-center text-caption font-bold uppercase tracking-[0.3em] text-muted">
                   &copy; {new Date().getFullYear()} Figura Viva
                 </p>
               </div>

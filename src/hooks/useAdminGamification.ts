@@ -1,19 +1,16 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { collection, getDocs, orderBy, query } from "firebase/firestore";
-import { db } from "@/lib/firebase/client";
+import { getAdminGamificationProfiles } from "@/app/actions/gamification-read";
+import { mapGamificationProfileToClient } from "@/services/gamificationService";
 
 export const useAllGamificationProfiles = () => {
   return useQuery({
     queryKey: ["admin_gamification_profiles"],
     queryFn: async () => {
-      const q = query(
-        collection(db, "gamification_profiles"),
-        orderBy("totalXp", "desc"),
+      return (await getAdminGamificationProfiles()).map(
+        mapGamificationProfileToClient,
       );
-      const snapshot = await getDocs(q);
-      return snapshot.docs.map((doc) => ({ uid: doc.id, ...doc.data() }));
     },
   });
 };

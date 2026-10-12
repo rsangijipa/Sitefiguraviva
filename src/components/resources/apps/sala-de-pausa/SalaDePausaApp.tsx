@@ -8,7 +8,7 @@ export default function SalaDePausaApp({ user, onExit }: { user?: { id?: string;
     id: user?.id ?? user?.uid ?? "",
     name: user?.displayName ?? "",
     email: user?.email ?? "",
-    role: "student",
+    role: user?.id || user?.uid ? "student" : "guest",
     avatarInitials: (user?.displayName ?? "").slice(0, 2).toUpperCase(),
   };
   return <PauseRoomExperience currentUser={currentUser} onBackToPortal={onExit ?? (() => {})} />;

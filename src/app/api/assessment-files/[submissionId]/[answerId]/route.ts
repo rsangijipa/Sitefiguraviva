@@ -17,7 +17,7 @@ export async function GET(
   context: { params: Promise<{ submissionId: string; answerId: string }> },
 ) {
   const session = request.cookies.get("session")?.value;
-  const claims = session && (await getSupabaseSessionClaims(session));
+  const claims = session ? await getSupabaseSessionClaims(session) : null;
   if (!claims?.isActive)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const parsed = paramsSchema.safeParse(await context.params);

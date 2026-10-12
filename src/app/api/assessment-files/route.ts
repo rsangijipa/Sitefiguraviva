@@ -35,7 +35,7 @@ const formSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const session = request.cookies.get("session")?.value;
-    const claims = session && (await getSupabaseSessionClaims(session));
+    const claims = session ? await getSupabaseSessionClaims(session) : null;
     if (!claims?.isActive)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 

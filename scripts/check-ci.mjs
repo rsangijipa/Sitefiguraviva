@@ -13,7 +13,15 @@ function packageBin(packageName, command) {
     typeof manifest.bin === "string" ? manifest.bin : manifest.bin[command],
   );
 }
-const modes = new Set(["lint", "scripts", "unit", "types", "build", "smoke"]);
+const modes = new Set([
+  "lint",
+  "scripts",
+  "unit",
+  "types",
+  "security",
+  "build",
+  "smoke",
+]);
 const requested = process.argv.slice(2);
 if (requested.some((mode) => !modes.has(mode)))
   throw new Error("Unknown CI check.");
@@ -35,7 +43,7 @@ if (
   );
 const checks = requested.length
   ? requested
-  : ["lint", "scripts", "unit", "types", "build"];
+  : ["lint", "scripts", "unit", "types", "security", "build"];
 const fixture = await createCiFixture();
 const results = [];
 try {
@@ -50,8 +58,10 @@ try {
     delete env.FIGURA_CI_VALIDATED;
     if (
       check === "build" &&
-      ["lint", "types"].every((validation) =>
-        results.some((result) => result.check === validation && result.exitCode === 0),
+      ["lint", "types", "security"].every((validation) =>
+        results.some(
+          (result) => result.check === validation && result.exitCode === 0,
+        ),
       )
     ) {
       env.FIGURA_CI_VALIDATED = "1";
@@ -72,6 +82,11 @@ try {
         "--noEmit",
         "--incremental",
         "false",
+      ],
+      security: [
+        require.resolve("typescript/lib/tsc.js"),
+        "--project",
+        "tsconfig.security.json",
       ],
       build: [require.resolve("next/dist/bin/next"), "build"],
       smoke: [

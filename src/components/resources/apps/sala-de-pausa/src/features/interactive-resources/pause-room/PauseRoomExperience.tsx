@@ -5,14 +5,13 @@
  * Fluxo: choosing -> preparing -> active <-> paused -> completed.
  */
 
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState } from 'react';
 import { InteractiveResourceShell } from '../shell/InteractiveResourceShell';
 import { PauseChoiceGrid } from './components/PauseChoiceGrid';
 import { DurationPicker } from './components/DurationPicker';
 import { PausePlayer } from './components/PausePlayer';
 import { PAUSE_PRACTICES, PRACTICE_ORDER } from './editorialData';
 import { PausePracticeId, PlannedDurationSeconds, ResourceState, UserProfile } from '../../../types';
-import { supabaseClient } from '../../../services/supabase/client';
 import { webAudio } from '../../../services/audio/webAudioService';
 import { Sparkles, ArrowRight } from 'lucide-react';
 
@@ -37,14 +36,12 @@ export const PauseRoomExperience: React.FC<PauseRoomExperienceProps> = ({
   // Dados da sessão concluída
   const [activeDuration, setActiveDuration] = useState<number>(0);
   const [endedBy, setEndedBy] = useState<'timer' | 'user' | 'switch'>('user');
-  const clientRequestIdRef = useRef<string>('');
 
   const currentPractice = PAUSE_PRACTICES[selectedPracticeId];
 
   // Iniciar a prática
   const handleStartPractice = () => {
-    clientRequestIdRef.current = 'req-' + Math.random().toString(36).substring(2, 9);
-    supabaseClient.logTelemetry('resource_started', 'sala-de-pausa');
+    setActiveDuration(0);
     setPhase('active');
   };
 
@@ -53,31 +50,7 @@ export const PauseRoomExperience: React.FC<PauseRoomExperienceProps> = ({
     setActiveDuration(duration);
     setEndedBy(reason);
     webAudio.stop();
-    supabaseClient.logTelemetry(
-      reason === 'timer' ? 'resource_completed' : 'resource_abandoned',
-      'sala-de-pausa',
-      duration
-    );
     setPhase('completed');
-  };
-
-  // Salvar no histórico
-  const handleSaveToHistory = async (reflectionText: string) => {
-    const result = await supabaseClient.savePauseSession({
-      client_request_id: clientRequestIdRef.current || 'req-' + Math.random().toString(36).substring(2, 9),
-      practice_id: selectedPracticeId,
-      practice_title: currentPractice.title,
-      planned_duration_seconds: plannedDuration,
-      active_duration_seconds: activeDuration,
-      ended_by: endedBy,
-      reflection: reflectionText ? reflectionText.slice(0, 500) : null,
-      content_version: currentPractice.version,
-    });
-
-    if (result.error) {
-      return { success: false, error: result.error };
-    }
-    return { success: true };
   };
 
   const handleToggleMute = () => {
@@ -101,7 +74,6 @@ export const PauseRoomExperience: React.FC<PauseRoomExperienceProps> = ({
       practiceTitle={currentPractice.title}
       activeDurationSeconds={activeDuration}
       endedBy={endedBy}
-      onSaveToHistory={handleSaveToHistory}
       onBackToPortal={onBackToPortal}
       
       // Áudio & Acessibilidade
@@ -118,7 +90,7 @@ export const PauseRoomExperience: React.FC<PauseRoomExperienceProps> = ({
       // Ações dos controles
       onStart={phase === 'choosing' ? handleStartPractice : undefined}
       startLabel={`Começar pausa com ${currentPractice.title}`}
-      onEndExperience={() => handleEndPractice(activeDuration || 60, 'user')}
+      onEndExperience={() => handleEndPractice(activeDuration, 'user')}
       onSwitchPractice={phase === 'active' ? () => setPhase('choosing') : undefined}
       switchLabel="Escolher outra prática"
     >
@@ -155,6 +127,7 @@ export const PauseRoomExperience: React.FC<PauseRoomExperienceProps> = ({
           plannedDuration={plannedDuration}
           reducedMotion={reducedMotion}
           onEndExperience={handleEndPractice}
+          onDurationChange={setActiveDuration}
           onRequestSwitchPractice={() => setPhase('choosing')}
           currentUser={currentUser}
         />

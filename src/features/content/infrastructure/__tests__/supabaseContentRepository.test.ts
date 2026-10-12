@@ -9,6 +9,8 @@ import {
   listContent,
   listPublishedContent,
   listPublishedCourses,
+  mapPublicCourse,
+  mapPublicPost,
 } from "../supabaseContentRepository";
 
 const mockedCreateSupabaseBrowserClient = jest.mocked(
@@ -245,3 +247,76 @@ it("does not replace a direct lookup SDK error with an empty course", async () =
     message: "connection failure",
   });
 });
+
+it("does not serialize arbitrary legacy keys or permission-bearing course teams", () => {
+  const mapped = mapPublicCourse({
+    id: "course",
+    title: "Curso",
+    legacy_payload: {
+      internalSecret: "SECRET",
+      image: "/fallback.jpg",
+      images: ["/fallback.jpg"],
+      modality: "Online",
+      mediators: [{ name: "Ana", role: "Mediadora", internalSecret: "SECRET" }],
+    },
+    details: {
+      intro: "Introdução",
+      internalSecret: "SECRET",
+      schedule: ["Segunda", { internalSecret: "SECRET" }],
+    },
+    team: { "private-uid": { role: "admin" } },
+  } as never);
+  expect(mapped).not.toHaveProperty("internalSecret");
+  expect(mapped).not.toHaveProperty("team");
+  expect(mapped).toEqual(
+    expect.objectContaining({
+      image: "/fallback.jpg",
+      modality: "Online",
+      details: { intro: "Introdução", schedule: ["Segunda"] },
+      mediators: [expect.objectContaining({ name: "Ana" })],
+    }),
+  );
+  expect(JSON.stringify(mapped)).not.toContain("SECRET");
+  expect(JSON.stringify(mapped)).not.toContain("private-uid");
+});
+it("allows only textual editorial metadata on public posts", () => {
+  const mapped = mapPublicPost({
+    id: "post",
+    title: "Texto",
+    legacy_payload: {
+      internalSecret: "SECRET",
+      author: "Autora",
+      authorImage: { internalSecret: "SECRET" },
+      category: "Gestalt",
+      date: "Outubro",
+    },
+  } as never);
+  expect(mapped).toEqual(
+    expect.objectContaining({
+      author: "Autora",
+      category: "Gestalt",
+      date: "Outubro",
+    }),
+  );
+  expect(mapped).not.toHaveProperty("authorImage");
+  expect(JSON.stringify(mapped)).not.toContain("SECRET");
+});
+it.each(["publicGallery", "team"] as const)(
+  "does not hydrate arbitrary legacy metadata for %s",
+  async (kind) => {
+    const query = queryResult([
+      {
+        id: "record",
+        name: "Pessoa",
+        title: "Imagem",
+        legacy_payload: { internalSecret: "SECRET" },
+      },
+    ]);
+    mockedCreateSupabaseBrowserClient.mockReturnValue({
+      from: () => query,
+    } as never);
+    const records = await listPublishedContent(kind);
+    expect(records).toHaveLength(1);
+    expect(JSON.stringify(records)).not.toContain("SECRET");
+  },
+);

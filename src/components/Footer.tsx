@@ -51,7 +51,7 @@ export default function Footer() {
             aria-label="Explorar o site"
             className="min-w-0 md:col-span-5 lg:col-span-4"
           >
-            <h4 className="mb-1 font-sans text-[10px] font-bold uppercase tracking-[0.2em] text-gold-light">
+            <h4 className="mb-1 font-sans text-caption font-bold uppercase tracking-[0.2em] text-gold-light">
               Explorar
             </h4>
             <ul className="grid grid-cols-2 gap-x-3 text-sm text-paper/75">
@@ -72,7 +72,7 @@ export default function Footer() {
             aria-label="Informações institucionais"
             className="min-w-0 md:col-span-3 lg:col-span-2"
           >
-            <h4 className="mb-1 font-sans text-[10px] font-bold uppercase tracking-[0.2em] text-gold-light">
+            <h4 className="mb-1 font-sans text-caption font-bold uppercase tracking-[0.2em] text-gold-light">
               Institucional
             </h4>
             <ul className="flex flex-wrap gap-x-5 text-sm text-paper/75 md:block">
@@ -90,7 +90,7 @@ export default function Footer() {
           </nav>
 
           <div className="min-w-0 md:col-span-12 lg:col-span-3">
-            <h4 className="mb-1 font-sans text-[10px] font-bold uppercase tracking-[0.2em] text-gold-light">
+            <h4 className="mb-1 font-sans text-caption font-bold uppercase tracking-[0.2em] text-gold-light">
               Contato
             </h4>
             <div className="grid items-start gap-x-6 gap-y-1 text-sm text-paper/75 sm:grid-cols-2 lg:grid-cols-1">

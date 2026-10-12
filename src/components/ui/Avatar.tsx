@@ -1,3 +1,4 @@
+"use client";
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
@@ -19,14 +20,26 @@ Avatar.displayName = "Avatar";
 export const AvatarImage = React.forwardRef<
   HTMLImageElement,
   React.ImgHTMLAttributes<HTMLImageElement>
->(({ className, alt = "", ...props }, ref) => (
-  <img
-    ref={ref}
-    className={cn("aspect-square h-full w-full", className)}
-    alt={alt}
-    {...props}
-  />
-));
+>(({ className, alt = "", src, onError, ...props }, ref) => {
+  const [failedSrc, setFailedSrc] = React.useState<string | Blob>();
+  if (!src || src === failedSrc) return null;
+  return (
+    <img
+      ref={ref}
+      className={cn(
+        "absolute inset-0 z-10 aspect-square h-full w-full object-cover",
+        className,
+      )}
+      src={src}
+      alt={alt}
+      onError={(event) => {
+        setFailedSrc(src);
+        onError?.(event);
+      }}
+      {...props}
+    />
+  );
+});
 AvatarImage.displayName = "AvatarImage";
 
 export const AvatarFallback = React.forwardRef<

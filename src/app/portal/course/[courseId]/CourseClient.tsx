@@ -31,19 +31,6 @@ import { certificateService } from "@/services/certificateService";
 import { CertificateDoc } from "@/types/lms";
 import { CertificateIssueCard } from "@/components/portal/CertificateIssueCard";
 
-const LessonPlayer = dynamic(
-  () => import("@/components/lms/LessonPlayer").then((mod) => mod.LessonPlayer),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="min-h-screen flex items-center justify-center" role="status">
-        <Loader2 className="w-8 h-8 animate-spin text-primary/30" aria-hidden="true" />
-        <span className="sr-only">Carregando aula...</span>
-      </div>
-    ),
-  },
-);
-
 const CourseCommunity = dynamic(
   () => import("@/components/community/CourseCommunity"),
   {
@@ -77,7 +64,7 @@ function CourseContent({ initialData }: { initialData?: any }) {
 
   // ID Processing: standardizing param name from page
   const courseId = typeof routeId === "string" ? routeId : "";
-  const initialLessonId = searchParams.get("lesson");
+
   const initialTab = searchParams.get("tab") || "overview";
 
   // State
@@ -85,8 +72,6 @@ function CourseContent({ initialData }: { initialData?: any }) {
     data,
     isLoading,
     isAccessDenied: hookDenied,
-    updateLastAccess,
-    markComplete,
   } = useEnrolledCourse(courseId, user?.uid, isAdmin, initialData);
 
   const isAccessDenied = data?.isAccessDenied || hookDenied;
@@ -99,11 +84,6 @@ function CourseContent({ initialData }: { initialData?: any }) {
   const allLessons = useMemo(
     () => (data?.modules ?? []).flatMap((m: any) => m.lessons ?? []),
     [data?.modules],
-  );
-
-  // Player State
-  const [activeLessonId, setActiveLessonId] = useState<string | null>(
-    initialLessonId,
   );
 
   // Tab State
@@ -129,43 +109,11 @@ function CourseContent({ initialData }: { initialData?: any }) {
     }
   }, [activeTab, courseId, threads.length]);
 
-  // Update active lesson if URL changes (back/forward navigation)
-  useEffect(() => {
-    if (initialLessonId !== null && initialLessonId !== undefined) {
-      setActiveLessonId(initialLessonId);
-    } else {
-      setActiveLessonId(null);
-    }
-  }, [initialLessonId]);
-
   // Handlers
   const handleSelectLesson = (lessonId: string) => {
-    setActiveLessonId(lessonId);
-    // Update URL
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("lesson", lessonId);
-    router.push(`/portal/course/${courseId}?${params.toString()}`, {
-      scroll: false,
-    });
-    updateLastAccess(lessonId);
-  };
-
-  const handleMarkComplete = (lessonId: string, moduleId?: string) => {
-    // If moduleId provided (by LessonPlayer), use it
-    if (moduleId) {
-      markComplete(lessonId, moduleId);
-      return;
-    }
-
-    // Fallback: Find it in modules
-    const courseModule = modules.find((m) =>
-      m.lessons.some((l) => l.id === lessonId),
+    router.push(
+      `/portal/course/${courseId}/lesson/${encodeURIComponent(lessonId)}`,
     );
-    if (courseModule) {
-      markComplete(lessonId, courseModule.id);
-    } else {
-      console.error("Could not find module for lesson", lessonId);
-    }
   };
 
   const handleTabChange = (tab: string) => {
@@ -199,41 +147,6 @@ function CourseContent({ initialData }: { initialData?: any }) {
   }
 
   if (!course) return null;
-
-  // View: PLAYER MODE
-  if (activeLessonId && !isAccessDenied) {
-    const activeLesson =
-      allLessons.find((l) => l.id === activeLessonId) || null;
-
-    // Navigation Logic
-    const currentIndex = allLessons.findIndex((l) => l.id === activeLessonId);
-    const prevLessonId =
-      currentIndex > 0 ? allLessons[currentIndex - 1].id : undefined;
-    const nextLessonId =
-      currentIndex < allLessons.length - 1
-        ? allLessons[currentIndex + 1].id
-        : undefined;
-
-    if (!activeLesson && modules.length > 0) {
-      // Fallback or Loading
-    }
-
-    return (
-      <LessonPlayer
-        course={{
-          id: course.id,
-          title: course.title,
-          backLink: `/portal/course/${course.id}`,
-        }}
-        modules={modules}
-        activeLesson={activeLesson}
-        onSelectLesson={handleSelectLesson}
-        onMarkComplete={handleMarkComplete}
-        prevLessonId={prevLessonId}
-        nextLessonId={nextLessonId}
-      />
-    );
-  }
 
   // View: LOBBY MODE (Tabs)
   return (

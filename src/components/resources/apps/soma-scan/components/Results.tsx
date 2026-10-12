@@ -23,7 +23,7 @@ const Results: React.FC<ResultsProps> = ({ data, onRestart }) => {
         console.error("Failed to generate insight", error);
         setInsight({
           summary: "Scan completo.",
-          recommendation: "Respire fundo e beba um pouco de água.",
+          recommendation: "Você pode voltar ao mapa ou encerrar por aqui.",
         });
       } finally {
         setLoading(false);

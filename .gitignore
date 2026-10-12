@@ -139,3 +139,6 @@ public/workbox-*.js.map
 
 !/scripts/check-release-secrets.mjs
 !/scripts/check-release-secrets.test.mjs
+
+# Isolated local review builds
+/.next-*/

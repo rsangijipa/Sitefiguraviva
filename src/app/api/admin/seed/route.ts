@@ -1,3 +1,4 @@
+import { isSameOriginRequest } from "@/lib/auth/request-origin";
 import { NextRequest, NextResponse } from "next/server";
 import { verifySession } from "@/lib/auth/server";
 import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
@@ -8,7 +9,10 @@ import {
   DEFAULT_SEO,
 } from "@/lib/siteSettings";
 
-export async function GET(request: NextRequest) {
+export async function POST(request: NextRequest) {
+  if (!isSameOriginRequest(request)) {
+    return NextResponse.json({ error: "Forbidden origin" }, { status: 403 });
+  }
   try {
     const claims = await verifySession();
     if (!claims) {
@@ -56,8 +60,18 @@ export async function GET(request: NextRequest) {
       success: true,
       message: "Site settings seeded successfully (idempotent).",
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Seed Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: "Unable to complete administrative operation" },
+      { status: 500 },
+    );
   }
+}
+
+export async function GET() {
+  return NextResponse.json(
+    { error: "Use POST for this administrative operation." },
+    { status: 405, headers: { Allow: "POST" } },
+  );
 }

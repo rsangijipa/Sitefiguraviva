@@ -1,5 +1,6 @@
+import { resourceCatalog, isPublicResource } from "@/components/resources/resourceCatalog";
 import { MetadataRoute } from "next";
-import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
+import { createSupabaseAnonServerClient } from "@/infrastructure/supabase/server";
 import { getPublicSiteOrigin, publicContentPath } from "@/lib/public-site-url";
 
 export const revalidate = 300;
@@ -9,7 +10,7 @@ type Entry = { id: string; slug?: string | null; updated_at?: string | null };
 // Fail independently: an unavailable catalog must not hide the institutional pages.
 async function publishedEntries(table: "courses" | "posts"): Promise<Entry[]> {
   try {
-    const supabase = createSupabaseServiceClient();
+    const supabase = createSupabaseAnonServerClient();
     const query =
       table === "courses"
         ? supabase
@@ -51,8 +52,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "",
     "/instituto",
     "/instituto/fundadora",
+    "/instituto/manifesto",
+    "/instituto/laura-perls",
+    "/estante",
     "/formacoes",
     "/recursos",
+    ...resourceCatalog
+      .filter(isPublicResource)
+      .map((resource) => `/recursos/${resource.slug}`),
     "/public-library",
     "/public-gallery",
     "/blog",

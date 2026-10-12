@@ -260,37 +260,27 @@ export default function QuizBuilder({
 
           <div>
             <label className="block text-xs font-bold text-stone-700 mb-2 uppercase tracking-wider">
-              Tempo limite (min)
+              Tempo limite (sem limite nesta versão)
             </label>
             <input
               type="number"
               min="0"
-              value={formData.timeLimit || ""}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  timeLimit: e.target.value ? parseInt(e.target.value) : null,
-                })
-              }
+              value=""
+              disabled
               className="w-full px-3 py-2 rounded-lg border-2 border-stone-200 focus:border-primary outline-none"
-              placeholder="Ilimitado"
+              placeholder="Sem limite"
             />
           </div>
 
           <div>
             <label className="block text-xs font-bold text-stone-700 mb-2 uppercase tracking-wider">
-              Tentativas
+              Tentativas (uma nesta versão)
             </label>
             <input
               type="number"
               min="1"
-              value={formData.maxAttempts || ""}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  maxAttempts: e.target.value ? parseInt(e.target.value) : null,
-                })
-              }
+              value={1}
+              disabled
               className="w-full px-3 py-2 rounded-lg border-2 border-stone-200 focus:border-primary outline-none"
               placeholder="Ilimitado"
             />

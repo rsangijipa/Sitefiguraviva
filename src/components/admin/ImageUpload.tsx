@@ -5,6 +5,7 @@ import { Loader2, UploadCloud, X } from "lucide-react";
 import Image from "next/image";
 import { getImageSrc } from "@/lib/imageUtils";
 import { uploadAdminAsset } from "@/infrastructure/supabase/storage.client";
+import { MAX_ADMIN_IMAGE_BYTES } from "@/lib/admin-upload-limits";
 
 interface ImageUploadProps {
   onUpload: (url: string, path: string) => void;
@@ -47,9 +48,8 @@ export default function ImageUpload({
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      // 5MB limit
-      setError("A imagem deve ter no máximo 5MB.");
+    if (file.size > MAX_ADMIN_IMAGE_BYTES) {
+      setError("A imagem deve ter no máximo 4 MB.");
       return;
     }
 
@@ -65,7 +65,7 @@ export default function ImageUpload({
         folder,
         bucket,
         kind: "image",
-        maxBytes: 5 * 1024 * 1024,
+        maxBytes: MAX_ADMIN_IMAGE_BYTES,
         mimeTypes: ["image/png", "image/jpeg", "image/webp"],
       });
 
@@ -128,7 +128,7 @@ export default function ImageUpload({
         <label
           htmlFor={inputId}
           className={`
-                    absolute inset-0 flex flex-col items-center justify-center border-2 border-dashed border-stone-300 rounded-lg cursor-pointer bg-stone-50 hover:bg-stone-100 transition-colors
+                    absolute inset-0 flex flex-col items-center justify-center border-2 border-dashed border-stone-300 rounded-lg cursor-pointer bg-stone-50 hover:bg-stone-100 transition-colors focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2
                     ${error ? "border-red-300 bg-red-50" : ""}
                 `}
         >
@@ -139,11 +139,12 @@ export default function ImageUpload({
               <>
                 <UploadCloud className="w-8 h-8 text-stone-400 mb-3" />
                 <p className="mb-2 text-sm text-stone-500">
-                  <span className="font-bold">Clique para upload</span> ou
-                  arraste
+                  <span className="font-bold">
+                    Clique para enviar uma imagem
+                  </span>
                 </p>
                 <p className="text-xs text-stone-400">
-                  PNG, JPG ou WEBP (máx. 5 MB)
+                  PNG, JPG ou WEBP (máx. 4 MB)
                 </p>
                 <p className="mt-1 text-xs text-stone-400">
                   A imagem será compactada automaticamente.
@@ -155,7 +156,8 @@ export default function ImageUpload({
             id={inputId}
             ref={inputRef}
             type="file"
-            className="hidden"
+            className="sr-only"
+            aria-label="Enviar imagem"
             onChange={handleFileChange}
             accept="image/png, image/jpeg, image/webp"
             disabled={uploading}

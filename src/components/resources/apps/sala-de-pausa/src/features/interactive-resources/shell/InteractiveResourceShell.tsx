@@ -126,7 +126,7 @@ export const InteractiveResourceShell: React.FC<InteractiveResourceShellProps> =
 
       {/* 2. Palco ou Tela de Conclusão */}
       <div className="flex-1 flex flex-col justify-center">
-        {state === 'completed' && onSaveToHistory && onBackToPortal ? (
+        {state === 'completed' && onBackToPortal ? (
           <div className="py-6 px-4">
             <ResourceCompletion
               practiceTitle={practiceTitle || title}

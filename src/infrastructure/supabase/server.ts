@@ -76,7 +76,7 @@ export function createSupabaseAnonServerClient() {
 }
 
 // Auth mutations need a request-local client rather than sharing a user session.
-export function createSupabaseAuthServerClient() {
+export function createSupabaseAuthServerClient(accessToken?: string) {
   const key =
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
@@ -84,6 +84,9 @@ export function createSupabaseAuthServerClient() {
   const url = requireSupabaseUrl();
   validateSupabaseKey(url, key, "public");
   return createClient<Database>(url, key, {
+    ...(accessToken
+      ? { global: { headers: { Authorization: `Bearer ${accessToken}` } } }
+      : {}),
     auth: {
       persistSession: false,
       autoRefreshToken: false,

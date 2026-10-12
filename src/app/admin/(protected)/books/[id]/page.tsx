@@ -37,6 +37,7 @@ export default function EditBookPage({
 
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isPublished, setIsPublished] = useState(false);
   const [coverConfirmed, setCoverConfirmed] = useState(true);
@@ -66,7 +67,9 @@ export default function EditBookPage({
             coverStoragePath: book.cover_storage_path || "",
             purchaseUrl: book.purchase_url || "",
             publicationYear:
-              book.publication_year != null ? String(book.publication_year) : "",
+              book.publication_year != null
+                ? String(book.publication_year)
+                : "",
           });
           setIsPublished(Boolean(book.is_published));
           setCoverConfirmed(true);
@@ -85,6 +88,7 @@ export default function EditBookPage({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isUploading || isSubmitting) return;
 
     if (!formData.coverImageUrl) {
       addToast("A capa do livro é obrigatória.", "error");
@@ -93,7 +97,7 @@ export default function EditBookPage({
     if (!coverConfirmed) {
       addToast(
         "Por favor, confirme a autorização de uso da imagem da capa.",
-        "error"
+        "error",
       );
       return;
     }
@@ -139,7 +143,8 @@ export default function EditBookPage({
   };
 
   const handleDelete = async () => {
-    if (!confirm("Tem certeza que deseja remover este livro da estante?")) return;
+    if (!confirm("Tem certeza que deseja remover este livro da estante?"))
+      return;
 
     setIsDeleting(true);
     try {
@@ -165,7 +170,7 @@ export default function EditBookPage({
           isPublished
             ? "Livro definido como rascunho."
             : "Livro publicado na estante do site!",
-          "success"
+          "success",
         );
       } else {
         throw new Error(res.error);
@@ -221,6 +226,7 @@ export default function EditBookPage({
           <Button
             onClick={handleSubmit}
             isLoading={isSubmitting}
+            disabled={isUploading || isSubmitting}
             size="sm"
             className="shadow-lg shadow-primary/20"
           >
@@ -253,7 +259,10 @@ export default function EditBookPage({
             <p className="text-sm">Carregando informações do livro...</p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="p-4 sm:p-6 lg:p-8 bg-stone-50/30 space-y-6">
+          <form
+            onSubmit={handleSubmit}
+            className="p-4 sm:p-6 lg:p-8 bg-stone-50/30 space-y-6"
+          >
             <FormShell className="max-w-none grid lg:grid-cols-12 gap-8 bg-transparent border-0 shadow-none p-0">
               {/* Coluna Esquerda: Capa e Autorização */}
               <div className="lg:col-span-5 xl:col-span-4 space-y-6">
@@ -265,6 +274,7 @@ export default function EditBookPage({
                   <div className="space-y-4">
                     <div className="mx-auto max-w-[240px] aspect-[2/3] w-full rounded-xl overflow-hidden bg-stone-100 border border-stone-200 shadow-inner">
                       <ImageUpload
+                        onUploadingChange={setIsUploading}
                         bucket="public-book-covers"
                         folder="covers"
                         defaultImage={formData.coverImageUrl}
@@ -288,7 +298,8 @@ export default function EditBookPage({
                           className="mt-0.5 h-4 w-4 rounded border-amber-300 text-primary focus:ring-primary shrink-0"
                         />
                         <span>
-                          Confirmo que possuo autorização ou que esta capa é de uso promocional legítimo para divulgação da obra.
+                          Confirmo que possuo autorização ou que esta capa é de
+                          uso promocional legítimo para divulgação da obra.
                         </span>
                       </label>
                     </div>
@@ -305,7 +316,10 @@ export default function EditBookPage({
                 >
                   <div className="space-y-4">
                     <div>
-                      <label htmlFor="edit-book-title" className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5">
+                      <label
+                        htmlFor="edit-book-title"
+                        className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5"
+                      >
                         Título do Livro *
                       </label>
                       <input
@@ -313,7 +327,12 @@ export default function EditBookPage({
                         type="text"
                         required
                         value={formData.title}
-                        onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            title: e.target.value,
+                          }))
+                        }
                         placeholder="Ex: Gestalt-Terapia Explicada"
                         className="w-full rounded-xl border border-stone-200 bg-white px-4 py-3 text-base font-serif font-bold text-stone-800 focus:border-primary focus:outline-none"
                       />
@@ -321,7 +340,10 @@ export default function EditBookPage({
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div className="sm:col-span-2">
-                        <label htmlFor="edit-book-author" className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5">
+                        <label
+                          htmlFor="edit-book-author"
+                          className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5"
+                        >
                           Autor(a) / Organizador(a) *
                         </label>
                         <input
@@ -329,14 +351,22 @@ export default function EditBookPage({
                           type="text"
                           required
                           value={formData.author}
-                          onChange={(e) => setFormData((prev) => ({ ...prev, author: e.target.value }))}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              author: e.target.value,
+                            }))
+                          }
                           placeholder="Ex: Frederick S. Perls"
                           className="w-full rounded-xl border border-stone-200 bg-white px-3.5 py-2.5 text-sm font-medium text-stone-700 focus:border-primary focus:outline-none"
                         />
                       </div>
 
                       <div>
-                        <label htmlFor="edit-book-year" className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5">
+                        <label
+                          htmlFor="edit-book-year"
+                          className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5"
+                        >
                           Ano de Publicação
                         </label>
                         <input
@@ -345,7 +375,12 @@ export default function EditBookPage({
                           min={0}
                           max={9999}
                           value={formData.publicationYear}
-                          onChange={(e) => setFormData((prev) => ({ ...prev, publicationYear: e.target.value }))}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              publicationYear: e.target.value,
+                            }))
+                          }
                           placeholder="Ex: 1969"
                           className="w-full rounded-xl border border-stone-200 bg-white px-3.5 py-2.5 text-sm font-medium text-stone-700 focus:border-primary focus:outline-none"
                         />
@@ -353,7 +388,10 @@ export default function EditBookPage({
                     </div>
 
                     <div>
-                      <label htmlFor="edit-book-purchase-url" className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5">
+                      <label
+                        htmlFor="edit-book-purchase-url"
+                        className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5"
+                      >
                         Link para Compra / Catálogo da Editora *
                       </label>
                       <div className="relative">
@@ -362,11 +400,19 @@ export default function EditBookPage({
                           type="url"
                           required
                           value={formData.purchaseUrl}
-                          onChange={(e) => setFormData((prev) => ({ ...prev, purchaseUrl: e.target.value }))}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              purchaseUrl: e.target.value,
+                            }))
+                          }
                           placeholder="https://www.amazon.com.br/dp/... ou link da editora"
                           className="w-full rounded-xl border border-stone-200 bg-white pl-4 pr-10 py-2.5 text-sm font-medium text-stone-700 focus:border-primary focus:outline-none"
                         />
-                        <ExternalLink size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none" />
+                        <ExternalLink
+                          size={16}
+                          className="absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
+                        />
                       </div>
                     </div>
                   </div>
@@ -378,14 +424,22 @@ export default function EditBookPage({
                   className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm"
                 >
                   <div>
-                    <label htmlFor="edit-book-description" className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5">
+                    <label
+                      htmlFor="edit-book-description"
+                      className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5"
+                    >
                       Sinopse / Por que indicamos este livro
                     </label>
                     <textarea
                       id="edit-book-description"
                       rows={5}
                       value={formData.description}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          description: e.target.value,
+                        }))
+                      }
                       placeholder="Descreva as contribuições teóricas ou práticas desta obra, conceitos fundamentais abordados e para qual momento formativo ela é recomendada..."
                       className="w-full rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-700 focus:border-primary focus:outline-none resize-none"
                     />
@@ -404,6 +458,7 @@ export default function EditBookPage({
                   <Button
                     type="submit"
                     isLoading={isSubmitting}
+                    disabled={isUploading || isSubmitting}
                     className="shadow-lg shadow-primary/20"
                   >
                     <Sparkles size={16} className="mr-1.5" />

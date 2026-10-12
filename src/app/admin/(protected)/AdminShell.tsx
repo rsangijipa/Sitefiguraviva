@@ -304,9 +304,14 @@ export default function AdminShell({
             <Settings size={17} aria-hidden="true" />
           </Link>
         </header>
-        <main id="main-content" className={styles.content}>
+        <div
+          id="admin-content"
+          className={styles.content}
+          role="region"
+          aria-label="Conteúdo do painel"
+        >
           {children}
-        </main>
+        </div>
       </div>
     </div>
   );

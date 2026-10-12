@@ -1,4 +1,4 @@
-import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
+import { createSupabaseAnonServerClient } from "@/infrastructure/supabase/server";
 import { Certificate } from "@/types/certificate";
 import { CheckCircle, XCircle, Award } from "lucide-react";
 import Image from "next/image";
@@ -16,10 +16,8 @@ export default async function CertificateValidationPage({ params }: Props) {
   const { code } = await params;
 
   // Case-insensitive lookup (store as uppercase usually, but let's be safe)
-  const { data: cert, error } = await createSupabaseServiceClient()
-    .from("certificates")
-    .select("*")
-    .eq("code", code.toUpperCase())
+  const { data: cert, error } = await createSupabaseAnonServerClient()
+    .rpc("verify_public_certificate", { p_code: code })
     .maybeSingle();
 
   if (error || !cert) {

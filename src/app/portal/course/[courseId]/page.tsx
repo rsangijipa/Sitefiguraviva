@@ -8,10 +8,18 @@ import { requireSession } from "@/lib/auth/server";
 
 export default async function CoursePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ courseId: string }>;
+  searchParams: Promise<{ lesson?: string | string[] }>;
 }) {
   const { courseId } = await params;
+  const { lesson } = await searchParams;
+  if (typeof lesson === "string" && lesson.trim()) {
+    redirect(
+      `/portal/course/${encodeURIComponent(courseId)}/lesson/${encodeURIComponent(lesson)}`,
+    );
+  }
   const session = await requireSession("/auth");
   const uid = session.uid;
   const isAdmin = session.isAdmin;

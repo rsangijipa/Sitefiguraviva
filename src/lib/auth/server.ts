@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -31,31 +32,33 @@ function isStaffRole(role: unknown): boolean {
   return isAdminRole(normalized) || normalized === "tutor";
 }
 
-export async function verifySession(): Promise<ServerAuthContext | null> {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("session")?.value;
+export const verifySession = cache(
+  async (): Promise<ServerAuthContext | null> => {
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get("session")?.value;
 
-  if (!sessionCookie) {
-    return null;
-  }
+    if (!sessionCookie) {
+      return null;
+    }
 
-  try {
-    const claims = await getSupabaseSessionClaims(sessionCookie);
-    if (!claims || !claims.isActive) return null;
+    try {
+      const claims = await getSupabaseSessionClaims(sessionCookie);
+      if (!claims || !claims.isActive) return null;
 
-    return {
-      uid: claims.uid,
-      email: claims.email,
-      role: claims.role,
-      isAdmin: claims.admin,
-      isStaff: claims.admin || claims.tutor,
-      isActive: claims.isActive,
-    };
-  } catch (error) {
-    logger.warn("Session verification failed:", error);
-    return null;
-  }
-}
+      return {
+        uid: claims.uid,
+        email: claims.email,
+        role: claims.role,
+        isAdmin: claims.admin,
+        isStaff: claims.admin || claims.tutor,
+        isActive: claims.isActive,
+      };
+    } catch (error) {
+      logger.warn("Session verification failed:", error);
+      return null;
+    }
+  },
+);
 
 export async function requireSession(
   redirectTo = "/auth",

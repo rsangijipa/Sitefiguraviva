@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BookshelfSection from "@/components/sections/BookshelfSection";
-import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
+import { createSupabaseAnonServerClient } from "@/infrastructure/supabase/server";
 
 export const metadata: Metadata = {
   title: "Estante",
@@ -19,7 +19,7 @@ export const revalidate = 3600; // Revalidate every hour
 
 async function getBooks() {
   try {
-    const { data, error } = await createSupabaseServiceClient()
+    const { data, error } = await createSupabaseAnonServerClient()
       .from("book_recommendations")
       .select(
         "id, title, author, description, cover_image_url, purchase_url, publication_year",

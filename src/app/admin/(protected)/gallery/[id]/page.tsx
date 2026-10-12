@@ -2,7 +2,14 @@
 
 import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Save, ArrowLeft, Image as ImageIcon, Trash2, Loader2, Sparkles } from "lucide-react";
+import {
+  Save,
+  ArrowLeft,
+  Image as ImageIcon,
+  Trash2,
+  Loader2,
+  Sparkles,
+} from "lucide-react";
 import Button from "@/components/ui/Button";
 import Link from "next/link";
 import { useToast } from "@/context/ToastContext";
@@ -25,6 +32,7 @@ export default function EditGalleryImagePage({
   const { addToast } = useToast();
   const { data: gallery = [], isLoading: loadingGallery } = useGallery();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -42,7 +50,9 @@ export default function EditGalleryImagePage({
         setFormData({
           title: item.title || "",
           category: item.category || "Geral",
-          tags: Array.isArray(item.tags) ? item.tags.join(", ") : item.tags || "",
+          tags: Array.isArray(item.tags)
+            ? item.tags.join(", ")
+            : item.tags || "",
           caption: item.caption || "",
           src: item.src || "",
         });
@@ -52,6 +62,7 @@ export default function EditGalleryImagePage({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isUploading || isSubmitting) return;
     if (!formData.src) {
       addToast("A imagem é obrigatória.", "error");
       return;
@@ -79,7 +90,8 @@ export default function EditGalleryImagePage({
   };
 
   const handleDelete = async () => {
-    if (!confirm("Tem certeza que deseja excluir esta imagem da galeria?")) return;
+    if (!confirm("Tem certeza que deseja excluir esta imagem da galeria?"))
+      return;
     setIsDeleting(true);
     try {
       const res = await deleteGalleryItemAction(id);
@@ -119,6 +131,7 @@ export default function EditGalleryImagePage({
           <Button
             onClick={handleSubmit}
             isLoading={isSubmitting}
+            disabled={isUploading || isSubmitting}
             size="sm"
             className="shadow-lg shadow-primary/20"
           >
@@ -140,7 +153,10 @@ export default function EditGalleryImagePage({
             <p className="text-sm">Carregando imagem...</p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="p-4 sm:p-6 lg:p-8 bg-stone-50/30 space-y-6">
+          <form
+            onSubmit={handleSubmit}
+            className="p-4 sm:p-6 lg:p-8 bg-stone-50/30 space-y-6"
+          >
             <FormShell className="max-w-none grid lg:grid-cols-12 gap-8 bg-transparent border-0 shadow-none p-0">
               {/* Coluna Esquerda: Preview e Upload da Imagem */}
               <div className="lg:col-span-5 space-y-4">
@@ -152,8 +168,11 @@ export default function EditGalleryImagePage({
                   <div className="space-y-3">
                     <div className="w-full aspect-[4/3] rounded-2xl overflow-hidden bg-stone-100 border border-stone-200">
                       <ImageUpload
+                        onUploadingChange={setIsUploading}
                         defaultImage={formData.src}
-                        onUpload={(url) => setFormData((prev) => ({ ...prev, src: url }))}
+                        onUpload={(url) =>
+                          setFormData((prev) => ({ ...prev, src: url }))
+                        }
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -170,7 +189,10 @@ export default function EditGalleryImagePage({
                 >
                   <div className="space-y-4">
                     <div>
-                      <label htmlFor="edit-photo-title" className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5">
+                      <label
+                        htmlFor="edit-photo-title"
+                        className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5"
+                      >
                         Título / Evento *
                       </label>
                       <input
@@ -178,20 +200,33 @@ export default function EditGalleryImagePage({
                         type="text"
                         required
                         value={formData.title}
-                        onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            title: e.target.value,
+                          }))
+                        }
                         placeholder="Título da foto..."
                         className="w-full rounded-xl border border-stone-200 bg-white px-4 py-3 text-base font-serif font-bold text-stone-800 focus:border-primary focus:outline-none"
                       />
                     </div>
 
                     <div>
-                      <label htmlFor="edit-photo-category" className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5">
+                      <label
+                        htmlFor="edit-photo-category"
+                        className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5"
+                      >
                         Categoria
                       </label>
                       <select
                         id="edit-photo-category"
                         value={formData.category}
-                        onChange={(e) => setFormData((prev) => ({ ...prev, category: e.target.value }))}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            category: e.target.value,
+                          }))
+                        }
                         className="w-full rounded-xl border border-stone-200 bg-white px-3.5 py-2.5 text-sm font-medium focus:border-primary focus:outline-none"
                       >
                         <option value="Geral">Geral</option>
@@ -203,28 +238,44 @@ export default function EditGalleryImagePage({
                     </div>
 
                     <div>
-                      <label htmlFor="edit-photo-caption" className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5">
+                      <label
+                        htmlFor="edit-photo-caption"
+                        className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5"
+                      >
                         Legenda Descritiva
                       </label>
                       <textarea
                         id="edit-photo-caption"
                         rows={4}
                         value={formData.caption}
-                        onChange={(e) => setFormData((prev) => ({ ...prev, caption: e.target.value }))}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            caption: e.target.value,
+                          }))
+                        }
                         placeholder="Descrição da imagem..."
                         className="w-full rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-700 focus:border-primary focus:outline-none resize-none"
                       />
                     </div>
 
                     <div>
-                      <label htmlFor="edit-photo-tags" className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5">
+                      <label
+                        htmlFor="edit-photo-tags"
+                        className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5"
+                      >
                         Tags (separadas por vírgula)
                       </label>
                       <input
                         id="edit-photo-tags"
                         type="text"
                         value={formData.tags}
-                        onChange={(e) => setFormData((prev) => ({ ...prev, tags: e.target.value }))}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            tags: e.target.value,
+                          }))
+                        }
                         placeholder="Tags separadas por vírgula"
                         className="w-full rounded-xl border border-stone-200 bg-white px-3.5 py-2.5 text-sm text-stone-600 focus:border-primary focus:outline-none"
                       />
@@ -244,6 +295,7 @@ export default function EditGalleryImagePage({
                   <Button
                     type="submit"
                     isLoading={isSubmitting}
+                    disabled={isUploading || isSubmitting}
                     className="shadow-lg shadow-primary/20"
                   >
                     <Sparkles size={16} className="mr-1.5" />

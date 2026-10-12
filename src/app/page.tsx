@@ -1,3 +1,7 @@
+import {
+  PUBLIC_COURSE_COLUMNS,
+  PUBLIC_POST_COLUMNS,
+} from "@/features/content/infrastructure/public-content-columns";
 import { getPublicPage } from "@/features/public-site/infrastructure/supabasePublicPagesRepository.server";
 import { DEFAULT_HOME, DEFAULT_CONFIG } from "@/lib/siteSettings";
 import type { Metadata } from "next";
@@ -8,11 +12,11 @@ import {
   mapPublicPost,
 } from "@/features/content/infrastructure/supabaseContentRepository";
 import HomeClient from "@/components/HomeClient";
-import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
+import { createSupabaseAnonServerClient } from "@/infrastructure/supabase/server";
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
-    const { data } = await createSupabaseServiceClient()
+    const { data } = await createSupabaseAnonServerClient()
       .from("public_pages")
       .select("content")
       .eq("key", "seo")
@@ -40,20 +44,18 @@ export const revalidate = 3600;
 
 async function getHomeData() {
   try {
-    const supabase = createSupabaseServiceClient();
+    const supabase = createSupabaseAnonServerClient();
     const [{ data: courseRows }, { data: postRows }] = await Promise.all([
       supabase
         .from("courses")
-        .select(
-          "*, course_mediators(mediator:mediators(id,name,role,image,bio))",
-        )
+        .select(PUBLIC_COURSE_COLUMNS)
         .eq("is_published", true)
         .in("status", ["open", "closed"])
         .order("created_at", { ascending: false })
         .limit(3),
       supabase
         .from("posts")
-        .select("*")
+        .select(PUBLIC_POST_COLUMNS)
         .eq("is_published", true)
         .order("created_at", { ascending: false })
         .limit(3),

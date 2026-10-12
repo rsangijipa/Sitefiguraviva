@@ -89,6 +89,7 @@ module.exports = {
       // os mesmos números em pixel leem maiores: os topos da escala baixaram
       // para manter o peso ótico institucional em vez de virar cartaz.
       fontSize: {
+        caption: ["0.75rem", { lineHeight: "1.5" }],
         "fluid-h1": [
           "clamp(2.25rem, 5.4vw, 3.75rem)",
           { lineHeight: "1.06", letterSpacing: "-0.02em" },

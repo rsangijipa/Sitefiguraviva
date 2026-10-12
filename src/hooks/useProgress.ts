@@ -28,12 +28,13 @@ export function useProgress(
       if (entry.synced) return; // Skip if already synced
 
       try {
-        await updateLessonProgress(courseId, moduleId, lessonId, {
+        const result = await updateLessonProgress(courseId, moduleId, lessonId, {
           status: entry.completed ? "completed" : "in_progress",
           maxWatchedSecond: entry.seekPosition, // Assuming seekPosition tracks max watched? Or need logic?
           // Ideally check max, but for now passing seekPosition is "current progress"
           percent: entry.completed ? 100 : 0,
         });
+        if (!result.success) throw new Error(result.error);
 
         // Mark as synced locally
         if (entry.id) {
@@ -79,7 +80,7 @@ export function useProgress(
     if (!userId) return;
     const entry = await db.progress.where({ userId, lessonId }).first();
     if (entry) {
-      syncToRemote(entry);
+      await syncToRemote(entry);
     }
   }, [userId, lessonId, syncToRemote]);
 

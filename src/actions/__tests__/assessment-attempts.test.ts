@@ -2,7 +2,9 @@ import {
   startAssessmentAttempt,
   submitAssessmentAttempt,
 } from "@/actions/assessment";
-import { auth, adminDb } from "@/lib/firebase/admin";
+import { verifySession } from "@/lib/auth/server";
+
+jest.mock("@/lib/auth/server", () => ({ verifySession: jest.fn() }));
 
 jest.mock("next/headers", () => ({
   cookies: jest.fn(() =>
@@ -94,9 +96,12 @@ const mocks = firebaseModule.__mocks as {
 describe("assessment attempts server actions", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (auth.verifySessionCookie as jest.Mock).mockResolvedValue({
+    (verifySession as jest.Mock).mockResolvedValue({
       uid: "user-123",
       role: "student",
+      isActive: true,
+      isAdmin: false,
+      isStaff: false,
     });
   });
 

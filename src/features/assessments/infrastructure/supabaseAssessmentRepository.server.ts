@@ -23,7 +23,7 @@ function mapAssessment(row: AssessmentRow): AssessmentDoc {
     passingScore: row.passing_score,
     totalPoints: row.total_points,
     status: row.status,
-    isRequired: false,
+    isRequired: row.is_required ?? false,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     createdBy: row.created_by || "",
@@ -75,7 +75,9 @@ export async function listCourseAssessments(
 ): Promise<AssessmentDoc[]> {
   const { data, error } = await supabase
     .from("assessments")
-    .select("*")
+    .select(
+      "id,course_id,lesson_id,title,description,passing_score,total_points,status,is_required,created_by,created_at,updated_at",
+    )
     .eq("course_id", courseId)
     .eq("status", "published")
     .order("created_at", { ascending: false });
@@ -88,11 +90,9 @@ export async function getAssessment(
   assessmentId: string,
   supabase = createSupabaseBrowserClient(),
 ): Promise<AssessmentDoc | null> {
-  const { data, error } = await supabase
-    .from("assessments")
-    .select("*")
-    .eq("id", assessmentId)
-    .maybeSingle();
+  const { data, error } = await supabase.rpc("get_student_assessment", {
+    p_assessment_id: assessmentId,
+  });
 
   if (error) throw error;
   return data ? mapAssessment(data as AssessmentRow) : null;

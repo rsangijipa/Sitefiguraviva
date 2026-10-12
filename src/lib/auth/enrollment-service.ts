@@ -71,9 +71,10 @@ export async function writeEnrollmentMirror({
     access_until: toIsoDate(
       (enrollmentDoc as any).access_until ?? enrollmentDoc.accessUntil,
     ),
-    enrolled_at: toIsoDate(
-      (enrollmentDoc as any).enrolled_at ?? enrollmentDoc.enrolledAt,
-    ),
+    enrolled_at:
+      toIsoDate(
+        (enrollmentDoc as any).enrolled_at ?? enrollmentDoc.enrolledAt,
+      ) ?? undefined,
     progress_summary:
       (enrollmentDoc as any).progress_summary ?? enrollmentDoc.progressSummary,
     course_version_at_enrollment:

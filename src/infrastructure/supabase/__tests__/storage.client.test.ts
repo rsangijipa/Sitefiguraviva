@@ -78,6 +78,28 @@ it("requires a session before sending images", async () => {
   expect(fetchUpload).not.toHaveBeenCalled();
 });
 
+it("rejects images over the hosting limit even when a caller allows 5 MB", async () => {
+  const file = new File([new Uint8Array(4 * 1024 * 1024 + 1)], "large.jpg", {
+    type: "image/jpeg",
+  });
+  await expect(uploadAdminAsset(file, imageOptions)).rejects.toThrow("4 MB");
+  expect(fetchUpload).not.toHaveBeenCalled();
+});
+
+it("reports a hosting 413 response without attempting to parse HTML as JSON", async () => {
+  const json = jest.fn().mockRejectedValue(new SyntaxError("HTML response"));
+  fetchUpload.mockResolvedValue({ ok: false, status: 413, json });
+  await expect(uploadAdminAsset(image(), imageOptions)).rejects.toThrow("4 MB");
+  expect(json).not.toHaveBeenCalled();
+});
+
+it("does not confirm an upload when the response is missing its URL", async () => {
+  fetchUpload.mockResolvedValue({ ok: true, json: async () => ({}) });
+  await expect(uploadAdminAsset(image(), imageOptions)).rejects.toThrow(
+    "não foi confirmado",
+  );
+});
+
 it("rejects oversized and unsupported inputs before sending", async () => {
   await expect(
     uploadAdminAsset(image(), { ...imageOptions, maxBytes: 2 }),

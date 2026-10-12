@@ -22,7 +22,7 @@ export default function ResourcesPage() {
         title="Recursos para a presença"
         description="Ferramentas interativas para observar, sentir e refletir."
         notice="Recursos educativos: não substituem acompanhamento profissional."
-        backgroundImage="/assets/fv/heroes/recursos.png"
+        backgroundImage="/assets/fv/heroes/recursos.webp"
       />
       <ResourcesSection />
     </PublicSiteFrame>

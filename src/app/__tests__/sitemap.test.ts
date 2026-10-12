@@ -1,10 +1,14 @@
+import { resourceCatalog } from "@/components/resources/resourceCatalog";
 jest.mock("@/infrastructure/supabase/server", () => ({
-  createSupabaseServiceClient: jest.fn(),
+  createSupabaseAnonServerClient: jest.fn(),
 }));
-import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
+import { createSupabaseAnonServerClient } from "@/infrastructure/supabase/server";
 import sitemap from "../sitemap";
 import robots from "../robots";
-const client = jest.mocked(createSupabaseServiceClient);
+const staticCount =
+  13 +
+  resourceCatalog.filter((resource) => resource.status === "available").length;
+const client = jest.mocked(createSupabaseAnonServerClient);
 describe("public discovery", () => {
   beforeEach(() => {
     process.env.NEXT_PUBLIC_BASE_URL = "https://www.institutofiguraviva.com.br";
@@ -14,7 +18,7 @@ describe("public discovery", () => {
       throw new Error("offline");
     });
     const entries = await sitemap();
-    expect(entries).toHaveLength(10);
+    expect(entries).toHaveLength(staticCount);
     expect(entries).toContainEqual(
       expect.objectContaining({
         url: process.env.NEXT_PUBLIC_BASE_URL + "/termos",
@@ -54,7 +58,7 @@ describe("public discovery", () => {
         url: process.env.NEXT_PUBLIC_BASE_URL + "/curso/gestalt%20cl%C3%ADnica",
       }),
     );
-    expect(entries[10]).not.toHaveProperty("lastModified");
+    expect(entries[staticCount]).not.toHaveProperty("lastModified");
   });
   it("ignores rows returned alongside a database error", async () => {
     const q: any = {
@@ -67,7 +71,7 @@ describe("public discovery", () => {
       }),
     };
     client.mockReturnValue({ from: () => q } as any);
-    expect(await sitemap()).toHaveLength(10);
+    expect(await sitemap()).toHaveLength(staticCount);
     expect(robots().sitemap).toBe(
       process.env.NEXT_PUBLIC_BASE_URL + "/sitemap.xml",
     );

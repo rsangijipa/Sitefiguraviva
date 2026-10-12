@@ -15,6 +15,7 @@ export default function NewGalleryImagePage() {
   const router = useRouter();
   const { addToast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -26,6 +27,7 @@ export default function NewGalleryImagePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isUploading || isSubmitting) return;
     if (!formData.src) {
       addToast("Faça o upload de uma imagem antes de salvar.", "error");
       return;
@@ -72,6 +74,7 @@ export default function NewGalleryImagePage() {
           <Button
             onClick={handleSubmit}
             isLoading={isSubmitting}
+            disabled={isUploading || isSubmitting}
             size="sm"
             className="shadow-lg shadow-primary/20"
           >
@@ -87,7 +90,10 @@ export default function NewGalleryImagePage() {
           <span>Upload e Metadados da Fotografia</span>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-4 sm:p-6 lg:p-8 bg-stone-50/30 space-y-6">
+        <form
+          onSubmit={handleSubmit}
+          className="p-4 sm:p-6 lg:p-8 bg-stone-50/30 space-y-6"
+        >
           <FormShell className="max-w-none grid lg:grid-cols-12 gap-8 bg-transparent border-0 shadow-none p-0">
             {/* Coluna Esquerda: Preview e Upload da Imagem */}
             <div className="lg:col-span-5 space-y-4">
@@ -99,13 +105,17 @@ export default function NewGalleryImagePage() {
                 <div className="space-y-3">
                   <div className="w-full aspect-[4/3] rounded-2xl overflow-hidden bg-stone-100 border border-stone-200">
                     <ImageUpload
+                      onUploadingChange={setIsUploading}
                       defaultImage={formData.src}
-                      onUpload={(url) => setFormData((prev) => ({ ...prev, src: url }))}
+                      onUpload={(url) =>
+                        setFormData((prev) => ({ ...prev, src: url }))
+                      }
                       className="w-full h-full object-cover"
                     />
                   </div>
                   <p className="text-xs text-stone-400">
-                    Formatos suportados: PNG, JPG ou WebP. Proporção recomendada: 4:3 ou 16:9.
+                    Formatos suportados: PNG, JPG ou WebP. Proporção
+                    recomendada: 4:3 ou 16:9.
                   </p>
                 </div>
               </FormSection>
@@ -120,7 +130,10 @@ export default function NewGalleryImagePage() {
               >
                 <div className="space-y-4">
                   <div>
-                    <label htmlFor="photo-title" className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5">
+                    <label
+                      htmlFor="photo-title"
+                      className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5"
+                    >
                       Título / Evento *
                     </label>
                     <input
@@ -128,20 +141,33 @@ export default function NewGalleryImagePage() {
                       type="text"
                       required
                       value={formData.title}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          title: e.target.value,
+                        }))
+                      }
                       placeholder="Ex: Workshop de Gestalt no Jardim"
                       className="w-full rounded-xl border border-stone-200 bg-white px-4 py-3 text-base font-serif font-bold text-stone-800 focus:border-primary focus:outline-none"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="photo-category" className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5">
+                    <label
+                      htmlFor="photo-category"
+                      className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5"
+                    >
                       Categoria
                     </label>
                     <select
                       id="photo-category"
                       value={formData.category}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, category: e.target.value }))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          category: e.target.value,
+                        }))
+                      }
                       className="w-full rounded-xl border border-stone-200 bg-white px-3.5 py-2.5 text-sm font-medium focus:border-primary focus:outline-none"
                     >
                       <option value="Geral">Geral</option>
@@ -153,28 +179,44 @@ export default function NewGalleryImagePage() {
                   </div>
 
                   <div>
-                    <label htmlFor="photo-caption" className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5">
+                    <label
+                      htmlFor="photo-caption"
+                      className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5"
+                    >
                       Legenda Descritiva
                     </label>
                     <textarea
                       id="photo-caption"
                       rows={4}
                       value={formData.caption}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, caption: e.target.value }))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          caption: e.target.value,
+                        }))
+                      }
                       placeholder="Breve relato sobre este momento, participantes ou data..."
                       className="w-full rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-700 focus:border-primary focus:outline-none resize-none"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="photo-tags" className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5">
+                    <label
+                      htmlFor="photo-tags"
+                      className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5"
+                    >
                       Tags (separadas por vírgula)
                     </label>
                     <input
                       id="photo-tags"
                       type="text"
                       value={formData.tags}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, tags: e.target.value }))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          tags: e.target.value,
+                        }))
+                      }
                       placeholder="presencial, vivencia, turma-2026"
                       className="w-full rounded-xl border border-stone-200 bg-white px-3.5 py-2.5 text-sm text-stone-600 focus:border-primary focus:outline-none"
                     />
@@ -194,6 +236,7 @@ export default function NewGalleryImagePage() {
                 <Button
                   type="submit"
                   isLoading={isSubmitting}
+                  disabled={isUploading || isSubmitting}
                   className="shadow-lg shadow-primary/20"
                 >
                   <Sparkles size={16} className="mr-1.5" />

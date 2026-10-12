@@ -1,5 +1,6 @@
 import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
-import { AssessmentDoc, AssessmentSubmissionDoc } from "@/types/assessment";
+import { AssessmentSubmissionDoc } from "@/types/assessment";
+import { getStudentAssessmentForSession } from "@/features/assessments/infrastructure/studentAssessmentQueries.server";
 import { ExamExitWrapper } from "@/components/assessment/ExamExitWrapper"; // Ensure this path is correct
 import { CheckCircle, AlertTriangle } from "lucide-react";
 import Link from "next/link";
@@ -15,29 +16,8 @@ export default async function ExamPage({
   const session = await requireSession("/auth");
   const uid = session.uid;
 
-  // Fetch Assessment & Submission (Parallel)
-  // NOTE: In production, use "submissions" collection query where assessmentId == examId AND userId == uid to find latest
-  // For MVP, we effectively used ID like `${uid}_${assessmentId}_draft` for drafts and timestamped for finals.
-  // We need to check if there is ANY 'submitted'/'graded' submission first to block retakes.
-
-  const supabase = createSupabaseServiceClient();
-  const [
-    { data: assessmentRow, error: assessmentError },
-    { data: submissionRows, error: submissionsError },
-  ] = await Promise.all([
-    supabase.from("assessments").select("*").eq("id", examId).maybeSingle(),
-    supabase
-      .from("assessment_submissions")
-      .select("*")
-      .eq("assessment_id", examId)
-      .eq("user_id", uid)
-      .in("status", ["submitted", "graded"])
-      .limit(1),
-  ]);
-  if (assessmentError || submissionsError)
-    throw assessmentError || submissionsError;
-
-  if (!assessmentRow) {
+  const assessment = await getStudentAssessmentForSession(examId);
+  if (!assessment) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
         <AlertTriangle size={48} className="text-red-500 mb-4" />
@@ -54,18 +34,23 @@ export default async function ExamPage({
     );
   }
 
-  const assessment = {
-    id: assessmentRow.id,
-    ...assessmentRow,
-    courseId: assessmentRow.course_id,
-  } as unknown as AssessmentDoc;
+  const supabase = createSupabaseServiceClient();
+  const { data: submissionRow, error: submissionError } = await supabase
+    .from("assessment_submissions")
+    .select(
+      "id,assessment_id,user_id,course_id,answers,status,score,percentage,passed,attempt_number,started_at,submitted_at,updated_at",
+    )
+    .eq("assessment_id", examId)
+    .eq("user_id", uid)
+    .order("attempt_number", { ascending: false })
+    .order("started_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (submissionError) throw submissionError;
 
   // Check if already completed
-  if (submissionRows?.length) {
-    const submission = {
-      id: submissionRows[0].id,
-      ...submissionRows[0],
-    } as unknown as AssessmentSubmissionDoc;
+  if (submissionRow && submissionRow.status !== "pending") {
+    const submission = submissionRow;
     const passed = submission.passed;
 
     return (
@@ -94,18 +79,17 @@ export default async function ExamPage({
     );
   }
 
-  // Check for Draft
-  const { data: draftRow } = await supabase
-    .from("assessment_submissions")
-    .select("*")
-    .eq("id", `${uid}_${examId}_draft`)
-    .maybeSingle();
-  const existingSubmission = draftRow
+  const existingSubmission = submissionRow
     ? ({
-        id: draftRow.id,
-        ...draftRow,
-        assessmentId: draftRow.assessment_id,
-        userId: draftRow.user_id,
+        id: submissionRow.id,
+        assessmentId: submissionRow.assessment_id,
+        userId: submissionRow.user_id,
+        courseId: submissionRow.course_id,
+        answers: submissionRow.answers,
+        status: submissionRow.status,
+        attemptNumber: submissionRow.attempt_number,
+        startedAt: submissionRow.started_at,
+        lastSavedAt: submissionRow.updated_at,
       } as unknown as AssessmentSubmissionDoc)
     : undefined;
 

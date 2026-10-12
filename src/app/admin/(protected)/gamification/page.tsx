@@ -14,14 +14,20 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
 import { BADGE_DEFINITIONS } from "@/lib/gamification";
 import { cn } from "@/lib/utils";
+import { getImageSrc } from "@/lib/imageUtils";
 
 export default function GamificationAdminPage() {
   const {
     data: profiles,
     isLoading: profilesLoading,
+    error: profilesError,
     refetch,
   } = useAllGamificationProfiles();
-  const { data: users, isLoading: usersLoading } = useAllUsers();
+  const {
+    data: users,
+    isLoading: usersLoading,
+    error: usersError,
+  } = useAllUsers();
   const { addToast } = useToast();
   const [isPending, startTransition] = useTransition();
 
@@ -85,7 +91,10 @@ export default function GamificationAdminPage() {
       render: (row) => (
         <div className="flex items-center gap-3">
           <Avatar className="w-8 h-8">
-            <AvatarImage src={row.photoURL} alt={row.displayName} />
+            <AvatarImage
+              src={getImageSrc(row.photoURL, "")}
+              alt={row.displayName}
+            />
             <AvatarFallback>{row.displayName?.[0]}</AvatarFallback>
           </Avatar>
           <div>
@@ -154,6 +163,15 @@ export default function GamificationAdminPage() {
       description="Visualize o engajamento dos alunos e conceda bônus de XP ou conquistas manuais."
       breadcrumbs={[{ label: "Gamificação" }]}
     >
+      {(profilesError || usersError) && (
+        <div
+          role="alert"
+          className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700"
+        >
+          Não foi possível carregar a gamificação ou os usuários. Atualize a
+          página para tentar novamente.
+        </div>
+      )}
       <DataTable
         data={joinedData}
         columns={columns}

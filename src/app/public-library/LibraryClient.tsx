@@ -97,7 +97,7 @@ export default function LibraryClient({
         eyebrow="Acervo"
         title="Biblioteca Viva"
         description="Uma curadoria de textos, artigos e recursos para aprofundar seu conhecimento em Gestalt-terapia e awareness."
-        backgroundImage="/assets/fv/heroes/biblioteca.png"
+        backgroundImage="/assets/fv/heroes/biblioteca.webp"
       />
 
       <div className="fv-container flex-1 pt-14">

@@ -1,4 +1,5 @@
 import { uploadAdminAsset } from "@/infrastructure/supabase/storage.client";
+import { MAX_ADMIN_IMAGE_BYTES } from "@/lib/admin-upload-limits";
 export async function uploadFiles(
   files: File[],
   folder = "avatars",
@@ -11,7 +12,7 @@ export async function uploadFiles(
             bucket: "public-avatars",
             folder,
             kind: "image",
-            maxBytes: 5 * 1024 * 1024,
+            maxBytes: MAX_ADMIN_IMAGE_BYTES,
             mimeTypes: ["image/jpeg", "image/png", "image/webp"],
           })
         ).url,

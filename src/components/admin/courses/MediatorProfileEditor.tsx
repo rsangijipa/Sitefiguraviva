@@ -52,7 +52,7 @@ export default function MediatorProfileEditor({
                 onUpload={(image) => update(index, { image })}
               />
               <p className="mt-2 text-xs text-stone-500">
-                Foto quadrada, até 5 MB.
+                Foto quadrada, até 4 MB.
               </p>
             </div>
             <div className="space-y-3">

@@ -1,0 +1,21 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "strict": true,
+    "incremental": false
+  },
+  "include": [
+    "next-env.d.ts",
+    "src/lib/auth/**/*.ts",
+    "src/infrastructure/supabase/**/*.ts",
+    "src/app/api/**/*.ts",
+    "src/features/courses/domain/**/*.ts",
+    "src/features/courses/infrastructure/**/*.ts",
+    "src/features/lms/**/*.ts",
+    "src/lib/security-policy.ts",
+    "src/app/actions/assessment.ts",
+    "src/actions/grading.ts",
+    "src/features/assessments/infrastructure/adminAssessmentQueries.server.ts",
+    "src/features/assessments/infrastructure/studentAssessmentQueries.server.ts"
+  ]
+}

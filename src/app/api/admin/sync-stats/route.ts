@@ -1,3 +1,4 @@
+import { isSameOriginRequest } from "@/lib/auth/request-origin";
 import { NextResponse } from "next/server";
 import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import { verifySession } from "@/lib/auth/server";
@@ -5,7 +6,10 @@ import { verifySession } from "@/lib/auth/server";
 export const dynamic = "force-dynamic";
 
 /** Recalculates canonical Supabase statistics. */
-export async function POST() {
+export async function POST(request: Request) {
+  if (!isSameOriginRequest(request)) {
+    return NextResponse.json({ error: "Forbidden origin" }, { status: 403 });
+  }
   const claims = await verifySession();
   if (!claims)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

@@ -1,3 +1,9 @@
+import {
+  PUBLIC_COURSE_COLUMNS,
+  PUBLIC_POST_COLUMNS,
+  PUBLIC_GALLERY_COLUMNS,
+  PUBLIC_TEAM_COLUMNS,
+} from "./public-content-columns";
 import { createSupabaseBrowserClient } from "@/infrastructure/supabase/client";
 import { getCourseMediators } from "@/utils/mediators";
 import type { Json, TableRow } from "@/infrastructure/supabase/database.types";
@@ -28,6 +34,39 @@ function jsonObject(value: Json): Record<string, unknown> {
     : {};
 }
 
+/** Only editorial strings can cross the public hydration boundary. */
+function editorialText(
+  source: Record<string, unknown>,
+  keys: readonly string[],
+) {
+  return Object.fromEntries(
+    keys.flatMap((key) =>
+      typeof source[key] === "string" ? [[key, source[key]]] : [],
+    ),
+  );
+}
+function editorialList(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === "string")
+    : [];
+}
+function publicCourseDetails(source: Record<string, unknown>) {
+  const details: Record<string, unknown> = editorialText(source, [
+    "intro",
+    "location",
+    "date",
+    "frequency",
+  ]);
+  for (const key of ["format", "schedule"]) {
+    if (typeof source[key] === "string") details[key] = source[key];
+    else if (Array.isArray(source[key]))
+      details[key] = editorialList(source[key]);
+  }
+  if (Array.isArray(source.syllabus))
+    details.syllabus = editorialList(source.syllabus);
+  return details;
+}
+
 export function mapPublicCourse(row: TableRow<"courses">): ContentRecord {
   const legacy = jsonObject(row.legacy_payload);
   const details = jsonObject(row.details);
@@ -52,7 +91,13 @@ export function mapPublicCourse(row: TableRow<"courses">): ContentRecord {
   const images = [...new Set(image ? [image, ...legacyImages] : legacyImages)];
 
   return {
-    ...legacy,
+    ...editorialText(legacy, [
+      "modality",
+      "duration",
+      "workload",
+      "location",
+      "link",
+    ]),
     id: row.id,
     title: row.title ?? "",
     subtitle: row.subtitle,
@@ -81,8 +126,7 @@ export function mapPublicCourse(row: TableRow<"courses">): ContentRecord {
     stripePriceId: row.stripe_price_id,
     stripeProductId: row.stripe_product_id,
     tags: row.tags,
-    details: row.details,
-    team: row.team,
+    details: publicCourseDetails(details),
     mediators: getCourseMediators(
       row.details,
       legacy,
@@ -93,12 +137,22 @@ export function mapPublicCourse(row: TableRow<"courses">): ContentRecord {
         }
       ).course_mediators,
     ),
-    date: details.date ?? legacy.date ?? row.duration_label,
-    frequency: details.frequency ?? legacy.frequency ?? null,
+    date:
+      typeof details.date === "string"
+        ? details.date
+        : typeof legacy.date === "string"
+          ? legacy.date
+          : row.duration_label,
+    frequency:
+      typeof details.frequency === "string"
+        ? details.frequency
+        : typeof legacy.frequency === "string"
+          ? legacy.frequency
+          : null,
     syllabus: Array.isArray(details.syllabus)
-      ? details.syllabus
+      ? editorialList(details.syllabus)
       : Array.isArray(legacy.syllabus)
-        ? legacy.syllabus
+        ? editorialList(legacy.syllabus)
         : [],
     stats: row.stats,
     communityEnabled: row.community_enabled,
@@ -112,7 +166,13 @@ export function mapPublicCourse(row: TableRow<"courses">): ContentRecord {
 
 export function mapPublicPost(row: TableRow<"posts">): ContentRecord {
   return {
-    ...jsonObject(row.legacy_payload),
+    ...editorialText(jsonObject(row.legacy_payload), [
+      "author",
+      "authorImage",
+      "date",
+      "readingTime",
+      "category",
+    ]),
     id: row.id,
     title: row.title,
     slug: row.slug,
@@ -136,7 +196,6 @@ export function mapPublicPost(row: TableRow<"posts">): ContentRecord {
 
 function mapGalleryItem(row: TableRow<"gallery_items">): ContentRecord {
   return {
-    ...jsonObject(row.legacy_payload),
     id: row.id,
     src: row.image_url,
     url: row.image_url,
@@ -155,7 +214,6 @@ function mapGalleryItem(row: TableRow<"gallery_items">): ContentRecord {
 
 function mapTeamMember(row: TableRow<"team_members">): ContentRecord {
   return {
-    ...jsonObject(row.legacy_payload),
     id: row.id,
     title: row.name,
     name: row.name,
@@ -179,11 +237,7 @@ export async function listContent(
   const supabase = createSupabaseBrowserClient();
 
   if (kind === "courses") {
-    let query = supabase
-      .from("courses")
-      .select(
-        "*, course_mediators(mediator:mediators(id,name,role,image,bio))",
-      );
+    let query = supabase.from("courses").select(PUBLIC_COURSE_COLUMNS);
     if (publishedOnly) {
       query = query.eq("is_published", true).in("status", ["open", "closed"]);
     }
@@ -195,7 +249,7 @@ export async function listContent(
   }
 
   if (kind === "posts" || kind === "publicLibrary") {
-    let query = supabase.from("posts").select("*");
+    let query = supabase.from("posts").select(PUBLIC_POST_COLUMNS);
     if (publishedOnly) query = query.eq("is_published", true);
     if (kind === "publicLibrary") query = query.eq("type", "library");
     const { data, error } = await query.order("created_at", {
@@ -206,7 +260,7 @@ export async function listContent(
   }
 
   if (kind === "gallery" || kind === "publicGallery") {
-    let query = supabase.from("gallery_items").select("*");
+    let query = supabase.from("gallery_items").select(PUBLIC_GALLERY_COLUMNS);
     if (publishedOnly) query = query.eq("is_published", true);
     const { data, error } = await query.order("created_at", {
       ascending: false,
@@ -215,7 +269,7 @@ export async function listContent(
     return (data ?? []).map(mapGalleryItem);
   }
 
-  let query = supabase.from("team_members").select("*");
+  let query = supabase.from("team_members").select(PUBLIC_TEAM_COLUMNS);
   if (publishedOnly) query = query.eq("is_published", true);
   const { data, error } = await query.order("sort_order", { ascending: true });
   if (error) throw error;
@@ -253,7 +307,7 @@ export async function getPublishedCourseByField(
 ): Promise<ContentRecord | null> {
   const { data, error } = await createSupabaseBrowserClient()
     .from("courses")
-    .select("*, course_mediators(mediator:mediators(id,name,role,image,bio))")
+    .select(PUBLIC_COURSE_COLUMNS)
     .eq("is_published", true)
     .in("status", ["open", "closed"])
     .eq(field, value)

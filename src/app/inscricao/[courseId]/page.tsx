@@ -2,7 +2,7 @@ import { findPixOrder } from "@/lib/pix-order.server";
 import { verifySession } from "@/lib/auth/server";
 import EnrollmentStepper from "./EnrollmentStepper";
 import PageShell from "@/components/ui/PageShell";
-import { getCourseById } from "@/features/courses/infrastructure/supabaseCourseRepository.server";
+import { getPublishedCourseByField } from "@/features/content/infrastructure/supabaseContentRepository";
 import { findEnrollmentBySupabaseUser } from "@/features/enrollments/infrastructure/supabaseEnrollmentRepository.server";
 import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 
@@ -16,7 +16,7 @@ export default async function EnrollmentPage({
   const uid = session?.isActive ? session.uid : null;
 
   // 1. Fetch Course Data
-  const courseData = await getCourseById(courseId);
+  const courseData = await getPublishedCourseByField("id", courseId);
   if (!courseData) {
     return (
       <div className="p-10 text-center text-error">Curso não encontrado.</div>

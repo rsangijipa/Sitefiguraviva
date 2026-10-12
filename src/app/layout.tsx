@@ -1,7 +1,6 @@
 import { Metadata } from "next";
 import { Fraunces, Karla } from "next/font/google";
 import "./globals.css";
-import "@/components/resources/apps/emotion-tree/emotion-tree.css";
 import Providers from "./providers";
 import { getPublicSiteOrigin } from "@/lib/public-site-url";
 const siteOrigin = getPublicSiteOrigin();
@@ -47,10 +46,9 @@ export const metadata: Metadata = {
     "Formação Clínica",
     "Instituto Figura Viva",
     "Ouro Preto D'Oeste",
-    "Richard Sangi",
   ],
   authors: [{ name: "Instituto Figura Viva" }],
-  creator: "Richard Sangi",
+  creator: "Instituto Figura Viva",
   openGraph: {
     type: "website",
     locale: "pt_BR",
@@ -149,7 +147,7 @@ export default async function RootLayout({
             <CookieConsent />
             <main
               id="main-content"
-              className="flex-1 w-full outline-none"
+              className="flex-1 w-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
               tabIndex={-1}
             >
               <LenisProvider>{children}</LenisProvider>

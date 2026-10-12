@@ -194,8 +194,10 @@ export async function POST(req: NextRequest) {
 
         if (!enrollmentQuery.empty) {
           const data = enrollmentQuery.docs[0].data() as EnrollmentDoc;
+          const uid = data.uid || data.userId;
+          if (!uid) throw new Error("Enrollment has no user identity");
           await activateEnrollmentFromStripe({
-            uid: data.uid || data.userId,
+            uid,
             courseId: data.courseId,
             sessionId: subscriptionId,
             isSubscription: true,

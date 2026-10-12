@@ -58,15 +58,18 @@ export const QuestionRenderer = ({
             : value === option.id;
 
           return (
-            <div
+            <button
+              type="button"
               key={option.id}
+              aria-pressed={isSelected}
+              disabled={readOnly}
               onClick={() =>
                 isMulti
                   ? handleMultiSelect(option.id)
                   : handleSingleSelect(option.id)
               }
               className={cn(
-                "relative p-4 rounded-xl border-2 transition-all cursor-pointer flex items-center gap-4",
+                "relative w-full text-left p-4 rounded-xl border-2 transition-all cursor-pointer flex items-center gap-4 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
                 isSelected
                   ? "border-primary bg-primary/5 shadow-sm"
                   : "border-stone-100 bg-white hover:border-primary/30 hover:bg-stone-50",
@@ -93,7 +96,7 @@ export const QuestionRenderer = ({
               >
                 {option.text}
               </span>
-            </div>
+            </button>
           );
         })}
       </div>
@@ -114,11 +117,14 @@ export const QuestionRenderer = ({
         {options.map((option) => {
           const isSelected = value === option.id;
           return (
-            <div
+            <button
+              type="button"
               key={String(option.id)}
+              aria-pressed={isSelected}
+              disabled={readOnly}
               onClick={() => handleSingleSelect(option.id)}
               className={cn(
-                "relative p-4 rounded-xl border-2 transition-all cursor-pointer flex items-center gap-4",
+                "relative w-full text-left p-4 rounded-xl border-2 transition-all cursor-pointer flex items-center gap-4 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
                 isSelected
                   ? "border-primary bg-primary/5 shadow-sm"
                   : "border-stone-100 bg-white hover:border-primary/30 hover:bg-stone-50",
@@ -144,7 +150,7 @@ export const QuestionRenderer = ({
               >
                 {option.text}
               </span>
-            </div>
+            </button>
           );
         })}
       </div>
@@ -152,7 +158,7 @@ export const QuestionRenderer = ({
   };
 
   const renderText = () => {
-    if (question.type !== "essay") return null;
+    if (question.type !== "essay" && question.type !== "practical") return null;
 
     // Note: EssayQuestion type has minLength/maxLength if we want to enforce it visually.
     // Assuming custom prop was intended or check question properties more strictly if needed.
@@ -162,6 +168,7 @@ export const QuestionRenderer = ({
     return (
       <div className="space-y-2">
         <textarea
+          aria-label={question.title || "Resposta da atividade"}
           value={typeof value === "string" ? value : ""}
           onChange={(e) => !readOnly && onChange(e.target.value)}
           disabled={readOnly}
@@ -202,7 +209,7 @@ export const QuestionRenderer = ({
           ? renderChoice()
           : question.type === "true_false"
             ? renderTrueFalse()
-            : question.type === "essay"
+            : question.type === "essay" || question.type === "practical"
               ? renderText()
               : null}
       </div>

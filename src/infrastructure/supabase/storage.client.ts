@@ -1,6 +1,7 @@
 "use client";
 
 import { createSupabaseBrowserClient } from "./client";
+import { MAX_ADMIN_IMAGE_BYTES } from "@/lib/admin-upload-limits";
 
 // Keep administrative assets in the bucket already used by course uploads.
 // The old `uploads` bucket is not present in every Supabase environment and
@@ -115,6 +116,8 @@ export async function uploadAdminAsset(
   validateUploadFile(file, normalizedOptions);
 
   if (file.type.startsWith("image/")) {
+    if (file.size > MAX_ADMIN_IMAGE_BYTES)
+      throw new Error("A imagem deve ter no máximo 4 MB.");
     const { data, error } =
       await createSupabaseBrowserClient().auth.getSession();
     if (error || !data.session) throw new Error("Faça login novamente.");
@@ -127,9 +130,13 @@ export async function uploadAdminAsset(
       body: form,
       headers: { Authorization: `Bearer ${data.session.access_token}` },
     });
-    const result = await response.json();
+    if (response.status === 413)
+      throw new Error("A imagem deve ter no máximo 4 MB.");
+    const result = await response.json().catch(() => null);
     if (!response.ok)
-      throw new Error(result.error || "Não foi possível enviar a imagem.");
+      throw new Error(result?.error || "Não foi possível enviar a imagem.");
+    if (!result?.url || !result?.path)
+      throw new Error("O envio não foi confirmado. Tente novamente.");
     return result;
   }
 

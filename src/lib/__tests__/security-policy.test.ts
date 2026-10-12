@@ -17,3 +17,16 @@ it("does not interpolate arbitrary policy text", () => {
     "'unsafe-eval'",
   );
 });
+
+import { contentSecurityPolicy } from "../security-policy.shared";
+it("shares resource directives between static and nonce-protected routes", () => {
+  const common = (policy: string) =>
+    policy.split(";").filter((rule) => !rule.trim().startsWith("script-src"));
+  expect(common(contentSecurityPolicy())).toEqual(
+    common(protectedContentSecurityPolicy("safe")),
+  );
+  expect(contentSecurityPolicy()).not.toContain("unsafe-eval");
+  expect(contentSecurityPolicy()).toContain(
+    "media-src 'self' blob: data: https://*.supabase.co",
+  );
+});

@@ -1,229 +1,228 @@
 "use server";
 
-import { auth, db } from "@/lib/firebase/admin";
-import { cookies } from "next/headers";
-import {
-  AssessmentDoc,
-  AssessmentSubmissionDoc,
-  Question,
-  MultipleChoiceQuestion,
-  TrueFalseQuestion,
-} from "@/types/assessment";
-import { FieldValue, Timestamp } from "firebase-admin/firestore";
-import { awardCanonicalCompletion } from "@/features/gamification/application/awardCanonicalGamification.server";
+import { createHash } from "node:crypto";
+import { verifySession } from "@/lib/auth/server";
+import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import { assertCanAccessCourse } from "@/lib/auth/access-gate";
+import { revalidatePath } from "next/cache";
+import { markLessonCompleted } from "@/app/actions/progress";
+import type { Question, StudentAnswer } from "@/types/assessment";
+import type { Json } from "@/infrastructure/supabase/database.types";
 
-// Helper: Verify Auth
-async function getAuthenticatedUser() {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("session")?.value;
-  if (!sessionCookie) throw new Error("Unauthorized");
-
-  try {
-    const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
-    return decodedClaims.uid;
-  } catch {
-    throw new Error("Unauthorized");
-  }
-}
-
-async function getReadableAssessment(uid: string, assessmentId: string) {
-  if (
-    typeof assessmentId !== "string" ||
-    !assessmentId.trim() ||
-    assessmentId.length > 200
-  )
+async function context(assessmentId: string, raw: Record<string, unknown>) {
+  const session = await verifySession();
+  if (!session) throw new Error("Unauthorized");
+  if (!/^[a-zA-Z0-9_-]{1,200}$/.test(assessmentId))
     throw new Error("Assessment not found");
-  const snapshot = await db.collection("assessments").doc(assessmentId).get();
-  if (!snapshot.exists) throw new Error("Assessment not found");
-  const assessment = snapshot.data() as AssessmentDoc;
-  if (assessment.status !== "published" || !assessment.courseId)
+  if (
+    !raw ||
+    typeof raw !== "object" ||
+    Array.isArray(raw) ||
+    JSON.stringify(raw).length > 100000
+  )
+    throw new Error("Invalid answers");
+  const supabase = createSupabaseServiceClient();
+  const { data: assessment, error } = await supabase
+    .from("assessments")
+    .select("id,course_id,lesson_id,status,questions,passing_score")
+    .eq("id", assessmentId)
+    .maybeSingle();
+  if (error) throw error;
+  if (!assessment || assessment.status !== "published")
     throw new Error("Assessment unavailable");
-  await assertCanAccessCourse(uid, assessment.courseId);
-  return assessment;
+  await assertCanAccessCourse(session.uid, assessment.course_id);
+  const questions = assessment.questions as unknown as Question[];
+  if (!Array.isArray(questions) || !questions.length)
+    throw new Error("Assessment has no questions");
+  const answers: StudentAnswer[] = questions.map((question) => {
+    if (!Number.isFinite(question.points) || question.points < 0)
+      throw new Error("Invalid assessment points");
+    const value = raw[question.id];
+    if (value === undefined) return { questionId: question.id };
+    if (question.type === "multiple_choice") {
+      const selectedOptions = Array.isArray(value) ? value : [value];
+      if (
+        selectedOptions.some(
+          (option) =>
+            typeof option !== "string" ||
+            !question.options.some((item) => item.id === option),
+        ) ||
+        new Set(selectedOptions).size !== selectedOptions.length ||
+        (!question.allowMultiple && selectedOptions.length > 1)
+      )
+        throw new Error("Invalid selected options");
+      return { questionId: question.id, selectedOptions };
+    }
+    if (question.type === "true_false") {
+      if (typeof value !== "boolean") throw new Error("Invalid boolean answer");
+      return { questionId: question.id, booleanAnswer: value };
+    }
+    if (typeof value !== "string" || value.length > 20000)
+      throw new Error("Invalid text answer");
+    return { questionId: question.id, textAnswer: value };
+  });
+  return { supabase, assessment, questions, answers, uid: session.uid };
 }
 
-// Action: Save Draft (Autosave)
+async function draft(ctx: Awaited<ReturnType<typeof context>>) {
+  const { supabase, assessment, uid } = ctx;
+  const { data: last, error } = await supabase
+    .from("assessment_submissions")
+    .select("id,status,attempt_number,started_at")
+    .eq("user_id", uid)
+    .eq("assessment_id", assessment.id)
+    .order("attempt_number", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw error;
+  if (last?.status === "pending") return last;
+  if (last) throw new Error("Attempt already submitted");
+  const attempt = 1;
+  // A stable UUID makes concurrent initial autosaves share the same attempt.
+  const hex = createHash("sha256")
+    .update(`${uid}:${assessment.id}:${attempt}`)
+    .digest("hex");
+  const id = `${hex.slice(0, 8)}-${hex.slice(8, 12)}-4${hex.slice(13, 16)}-8${hex.slice(17, 20)}-${hex.slice(20, 32)}`;
+  const { error: insertError } = await supabase
+    .from("assessment_submissions")
+    .upsert(
+      {
+        id,
+        assessment_id: assessment.id,
+        course_id: assessment.course_id,
+        user_id: uid,
+        attempt_number: attempt,
+        status: "pending",
+        answers: [],
+      },
+      { onConflict: "id", ignoreDuplicates: true },
+    );
+  if (insertError) throw insertError;
+  return { id, status: "pending", attempt_number: attempt };
+}
+
 export async function saveDraft(
   assessmentId: string,
-  answers: Record<string, any>,
+  raw: Record<string, unknown>,
 ) {
-  const uid = await getAuthenticatedUser();
-  await getReadableAssessment(uid, assessmentId);
-  const submissionId = `${uid}_${assessmentId}_draft`; // Simple ID strategy for draft
-
-  // Upsert draft
-  await db.collection("submissions").doc(submissionId).set(
-    {
-      assessmentId,
-      userId: uid,
-      status: "pending", // Changed from 'in_progress' to 'pending' to match AssessmentSubmissionDoc
-      answers: [], // TODO: Map Record<string, any> to StudentAnswer[]
-      // We are storing raw answers for draft, but for strict type compliance we might need to adjust.
-      // For now, using merge: true allows partial data which might not fully validate against Submission doc if we were strict,
-      // but Firestore is schemaless so this is fine for the draft document.
-      draftAnswers: answers,
-      lastSavedAt: FieldValue.serverTimestamp(),
-      attemptNumber: 1, // TODO: Handle multi-attempt logic later
-    },
-    { merge: true },
-  );
-
-  return { success: true, savedAt: new Date().toISOString() };
+  const ctx = await context(assessmentId, raw);
+  const pending = await draft(ctx);
+  const savedAt = new Date().toISOString();
+  const { data, error } = await ctx.supabase
+    .from("assessment_submissions")
+    .update({ answers: ctx.answers as unknown as Json, updated_at: savedAt })
+    .eq("id", pending.id)
+    .eq("user_id", ctx.uid)
+    .eq("status", "pending")
+    .select("id")
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) throw new Error("Attempt already submitted");
+  return { success: true, savedAt };
 }
 
-// Action: Submit & Grade
 export async function submitAssessment(
   assessmentId: string,
-  userAnswers: Record<string, any>,
+  raw: Record<string, unknown>,
 ) {
-  const uid = await getAuthenticatedUser();
-
-  // 1. Fetch Source of Truth (Assessment with Correct Answers)
-  const assessment = await getReadableAssessment(uid, assessmentId);
-
-  // 2. Grading Logic
-  let totalScore = 0;
-  let maxScore = 0;
-  const feedback: Record<string, { correct: boolean; score: number }> = {};
+  const ctx = await context(assessmentId, raw);
+  const pending = await draft(ctx);
+  let score = 0;
+  let total = 0;
   let requiresManualGrading = false;
-
-  // We assume questions are embedded
-  const questions = assessment.questions || [];
-
-  questions.forEach((q: Question) => {
-    const answerVal = userAnswers[q.id];
-    maxScore += q.points;
-
-    let earned = 0;
-    let isCorrect = false;
-
-    if (q.type === "multiple_choice") {
-      const mcq = q as MultipleChoiceQuestion;
-      // Logic for Multiple Choice
-      if (mcq.allowMultiple) {
-        // Multiple correct answers allowed
-        const correctIds = mcq.options
-          .filter((o) => o.isCorrect)
-          .map((o) => o.id);
-        // Ensure answerVal is array and matches exactly (ignoring order)
-        if (
-          Array.isArray(answerVal) &&
-          answerVal.length === correctIds.length &&
-          answerVal.every((v: any) => correctIds.includes(v))
-        ) {
-          earned = q.points;
-          isCorrect = true;
-        }
-      } else {
-        // Single choice (behaved like 'single_choice' in old code)
-        const correctOption = mcq.options.find((o) => o.isCorrect);
-        if (correctOption && answerVal === correctOption.id) {
-          earned = q.points;
-          isCorrect = true;
-        }
-      }
-    } else if (q.type === "true_false") {
-      const tfq = q as TrueFalseQuestion;
-      if (answerVal === tfq.correctAnswer) {
-        earned = q.points;
-        isCorrect = true;
-      }
-    } else if (q.type === "essay" || q.type === "practical") {
-      requiresManualGrading = true;
-      // No auto points for manual grading types
-    }
-
-    totalScore += earned;
-    feedback[q.id] = { correct: isCorrect, score: earned };
-  });
-
-  const percent = maxScore > 0 ? (totalScore / maxScore) * 100 : 0;
-  const passed = percent >= (assessment.passingScore || 70);
-
-  // 3. Save Submission
-  const submissionId = `${uid}_${assessmentId}_${Date.now()}`; // Unique for history
-
-  // Convert record to StudentAnswer[]
-  const answersList = Object.entries(userAnswers).map(([qId, val]) => {
-    // This is a simplification. Ideally we map based on question type.
-    return {
-      questionId: qId,
-      // We'd popuplate fields based on type, but for now putting raw value where we can or extending type
-      // Since StudentAnswer interface is specific, let's try to fit it:
-      selectedOptions: Array.isArray(val)
-        ? val
-        : typeof val === "string"
-          ? [val]
-          : undefined,
-      booleanAnswer: typeof val === "boolean" ? val : undefined,
-      textAnswer: typeof val === "string" ? val : undefined,
-      // Note: practical fileUrl handling needs more logic
-    };
-  });
-
-  const submission: AssessmentSubmissionDoc = {
-    id: submissionId,
-    assessmentId,
-    userId: uid,
-    courseId: assessment.courseId,
-    attemptNumber: 1, // Logic needed to increment
-    status: requiresManualGrading ? "submitted" : "graded",
-    answers: answersList,
-    score: totalScore,
-    percentage: percent,
-    passed,
-    submittedAt: Timestamp.now(),
-    startedAt: Timestamp.now(), // placeholder, should be passed from client or fetched from draft
-  };
-
-  await db.collection("submissions").doc(submissionId).set(submission);
-
-  // 4. Update Draft to Closed? (Or just delete it)
-  await db
-    .collection("submissions")
-    .doc(`${uid}_${assessmentId}_draft`)
-    .delete();
-
-  // 5. Update Enrollment/Progress via Event Bus
-  // This is the "Total Sync" pattern
-  try {
-    const { publishEvent } = await import("@/lib/events/bus"); // Dynamic import to avoid cycles if any
-
-    await publishEvent({
-      type: "ASSESSMENT_GRADED",
-      actorUserId: uid,
-      targetId: submissionId,
-      context: {
-        assessmentId: assessmentId,
-        courseId: assessment.courseId,
-        moduleId: assessment.moduleId || "unknown",
-      },
-      payload: {
-        submittedAt: submission.submittedAt as any,
-        grade: percent,
+  for (const question of ctx.questions) {
+    const answer = ctx.answers.find((item) => item.questionId === question.id)!;
+    total += question.points;
+    let correct = false;
+    if (question.type === "multiple_choice") {
+      const expected = question.options
+        .filter((item) => item.isCorrect)
+        .map((item) => item.id);
+      const selected = answer.selectedOptions ?? [];
+      correct =
+        expected.length > 0 &&
+        selected.length === expected.length &&
+        selected.every((id) => expected.includes(id));
+    } else if (question.type === "true_false") {
+      correct =
+        answer.booleanAnswer !== undefined &&
+        answer.booleanAnswer === question.correctAnswer;
+    } else requiresManualGrading = true;
+    answer.isCorrect = correct;
+    answer.pointsEarned = correct ? question.points : 0;
+    score += answer.pointsEarned;
+  }
+  if (total <= 0) throw new Error("Assessment has no points");
+  const grade = (score / total) * 100;
+  const passed =
+    !requiresManualGrading && grade >= ctx.assessment.passing_score;
+  const now = new Date().toISOString();
+  const { data, error } = await ctx.supabase
+    .from("assessment_submissions")
+    .update({
+      answers: ctx.answers as unknown as Json,
+      score,
+      percentage: grade,
+      passed,
+      status: requiresManualGrading ? "submitted" : "graded",
+      submitted_at: now,
+      graded_at: requiresManualGrading ? null : now,
+      updated_at: now,
+    })
+    .eq("id", pending.id)
+    .eq("user_id", ctx.uid)
+    .eq("status", "pending")
+    .select("id")
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) throw new Error("Attempt already submitted");
+  const { error: progressError } = await ctx.supabase
+    .from("assessment_progress")
+    .upsert(
+      {
+        user_id: ctx.uid,
+        assessment_id: ctx.assessment.id,
+        course_id: ctx.assessment.course_id,
+        attempts: pending.attempt_number,
+        best_score: score,
+        best_percentage: grade,
         passed,
-        score: totalScore,
+        last_attempt_at: now,
+        submissions: [data.id],
+        updated_at: now,
       },
-    });
-  } catch (e) {
-    console.error("Failed to publish event", e);
+      { onConflict: "user_id,assessment_id" },
+    );
+  if (progressError)
+    console.error(
+      "Assessment progress summary could not be saved",
+      progressError,
+    );
+  let progressSaved = !progressError;
+  if (passed && ctx.assessment.lesson_id) {
+    const { data: lesson, error: lessonError } = await ctx.supabase
+      .from("lessons")
+      .select("module_id")
+      .eq("id", ctx.assessment.lesson_id)
+      .eq("course_id", ctx.assessment.course_id)
+      .maybeSingle();
+    if (lessonError || !lesson) progressSaved = false;
+    else {
+      const result = await markLessonCompleted(
+        ctx.assessment.course_id,
+        lesson.module_id,
+        ctx.assessment.lesson_id,
+      );
+      progressSaved = progressSaved && result.success;
+    }
   }
-
-  // 6. Award XP if passed and auto-graded
-  if (passed && !requiresManualGrading) {
-    await awardCanonicalCompletion(uid, {
-      kind: "quiz",
-      courseId: assessment.courseId,
-      submissionId,
-    });
-  }
-
+  revalidatePath(`/portal/course/${ctx.assessment.course_id}`);
   return {
     success: true,
-    submissionId,
-    grade: percent,
+    submissionId: data.id,
+    grade,
     passed,
     requiresManualGrading,
+    progressSaved,
   };
 }

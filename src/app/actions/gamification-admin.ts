@@ -1,7 +1,12 @@
 "use server";
 
 import { requireAdmin } from "@/lib/auth/server";
-import { gamificationService } from "@/lib/gamification/gamificationService";
+import {
+  awardXp,
+  awardBadge,
+} from "@/features/gamification/infrastructure/supabaseGamificationRepository.server";
+import { randomUUID } from "node:crypto";
+import { BADGE_DEFINITIONS } from "@/lib/gamification";
 import { auditService } from "@/lib/audit";
 import { revalidatePath } from "next/cache";
 
@@ -15,13 +20,26 @@ export async function awardManualXp(
 ) {
   const adminClaims = await requireAdmin();
 
-  if (!userId || amount === 0) return { error: "Invalid data" };
+  if (
+    !userId ||
+    !Number.isSafeInteger(amount) ||
+    amount <= 0 ||
+    amount > 100000 ||
+    !reason?.trim() ||
+    reason.length > 1000
+  )
+    return { error: "Informe um valor inteiro positivo e um motivo." };
 
   try {
-    await gamificationService.awardXp(userId, amount, "admin_reward", {
-      adminId: adminClaims.uid,
-      adminEmail: adminClaims.email,
-      reason,
+    await awardXp({
+      userId,
+      amount,
+      reason: "admin_reward",
+      eventKey: `admin:${randomUUID()}`,
+      metadata: {
+        adminId: adminClaims.uid,
+        reason: reason.trim(),
+      },
     });
 
     await auditService.logEvent({
@@ -45,10 +63,11 @@ export async function awardManualXp(
 export async function awardManualBadge(userId: string, badgeId: string) {
   const adminClaims = await requireAdmin();
 
-  if (!userId || !badgeId) return { error: "Invalid data" };
+  if (!userId || !BADGE_DEFINITIONS.some((badge) => badge.id === badgeId))
+    return { error: "Conquista inválida." };
 
   try {
-    await gamificationService.awardBadge(userId, badgeId);
+    await awardBadge(userId, badgeId);
 
     await auditService.logEvent({
       eventType: "ADMIN_BADGE_AWARDED",

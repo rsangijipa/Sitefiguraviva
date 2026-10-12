@@ -1,9 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { CoursePlayer } from "./CoursePlayer";
+import dynamic from "next/dynamic";
 import { Lesson, Module } from "@/types/lms";
-import { useProgress } from "@/hooks/useProgress";
 import { markLessonCompleted } from "@/app/actions/progress";
 
 interface LessonPlayerWrapperProps {
@@ -21,7 +20,14 @@ interface LessonPlayerWrapperProps {
 }
 
 import { useState, useEffect } from "react";
-import { AssessmentPlayer } from "../assessment/AssessmentPlayer";
+const CoursePlayer = dynamic(() =>
+  import("./CoursePlayer").then((module) => module.CoursePlayer),
+);
+const AssessmentPlayer = dynamic(() =>
+  import("../assessment/AssessmentPlayer").then(
+    (module) => module.AssessmentPlayer,
+  ),
+);
 import { analyticsService } from "@/services/analyticsService";
 import { useAuth } from "@/context/AuthContext";
 
@@ -29,15 +35,16 @@ export function LessonPlayerWrapper(props: LessonPlayerWrapperProps) {
   const router = useRouter();
   const { user } = useAuth();
   const [autoAdvance, setAutoAdvance] = useState(false);
+  const [progressError, setProgressError] = useState<string | null>(null);
 
   // v4: Retention Tracking
   useEffect(() => {
     if (user?.uid && props.course.id && props.activeLesson.id) {
-      analyticsService.trackLessonStart(
-        user.uid,
-        props.course.id,
-        props.activeLesson.id,
-      );
+      void analyticsService
+        .trackLessonStart(user.uid, props.course.id, props.activeLesson.id)
+        .catch(() =>
+          setProgressError("Não foi possível registrar o acesso à aula."),
+        );
     }
   }, [user?.uid, props.course.id, props.activeLesson.id]);
 
@@ -45,23 +52,31 @@ export function LessonPlayerWrapper(props: LessonPlayerWrapperProps) {
     router.push(`/portal/course/${props.course.id}/lesson/${lessonId}`);
   };
 
-  const handleMarkComplete = async (lessonId: string) => {
+  const handleMarkComplete = async (lessonId: string, moduleId?: string) => {
     try {
-      await markLessonCompleted(
+      const result = await markLessonCompleted(
         props.course.id,
-        props.activeLesson.moduleId,
+        moduleId ||
+          props.activeLesson.moduleId ||
+          props.modules.find((item) =>
+            item.lessons.some((lesson) => lesson.id === lessonId),
+          )?.id,
         lessonId,
       );
+      if (!result.success) throw new Error(result.error);
+      setProgressError(null);
+      router.refresh();
 
       // v4: Retention Tracking
       if (user?.uid) {
-        analyticsService.trackLessonCompletion(
+        await analyticsService.trackLessonCompletion(
           user.uid,
           props.course.id,
           lessonId,
         );
       }
     } catch (error) {
+      setProgressError("Não foi possível salvar a conclusão. Tente novamente.");
       console.error("Failed to mark lesson complete", error);
     }
   };
@@ -81,6 +96,11 @@ export function LessonPlayerWrapper(props: LessonPlayerWrapperProps) {
 
   return (
     <div className="space-y-4">
+      {progressError && (
+        <p role="alert" className="text-sm text-red-700">
+          {progressError}
+        </p>
+      )}
       {props.activeLesson.type === "quiz" && props.assessment ? (
         <AssessmentPlayer
           assessment={props.assessment}

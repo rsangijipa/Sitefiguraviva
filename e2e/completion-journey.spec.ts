@@ -46,14 +46,17 @@ test.describe("EAD pilot: resume, progress and certificate", () => {
       .getByRole("button", { name: "Continuar Estudando", exact: true })
       .click();
     await expect(page).toHaveURL((url) =>
-      Boolean(url.searchParams.get("lesson")),
+      url.pathname.startsWith(`${lobby}/lesson/`),
     );
-    expect(new URL(page.url()).searchParams.get("lesson")).not.toBe(lessonId);
+    expect(new URL(page.url()).pathname).not.toBe(
+      `${lobby}/lesson/${encodeURIComponent(lessonId)}`,
+    );
 
     await page.goto(`${lobby}?tab=modules`);
     await page.getByText(lessonTitle, { exact: true }).click();
     await expect(page).toHaveURL(
-      (url) => url.searchParams.get("lesson") === lessonId,
+      (url) =>
+        url.pathname === `${lobby}/lesson/${encodeURIComponent(lessonId)}`,
     );
     await expect(
       page.getByRole("heading", { name: lessonTitle, exact: true }),
@@ -76,7 +79,8 @@ test.describe("EAD pilot: resume, progress and certificate", () => {
       .getByRole("button", { name: "Continuar Estudando", exact: true })
       .click();
     await expect(page).toHaveURL(
-      (url) => url.searchParams.get("lesson") === lessonId,
+      (url) =>
+        url.pathname === `${lobby}/lesson/${encodeURIComponent(lessonId)}`,
     );
     await expect(
       page.getByRole("heading", { name: lessonTitle, exact: true }),

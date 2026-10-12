@@ -1,81 +1,54 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  collection,
-  getDocs,
-  doc,
-  updateDoc,
-  orderBy,
-  query,
-  limit,
-  startAfter,
-} from "firebase/firestore";
-import { db } from "@/lib/firebase/client";
-import { UserData, UserRole } from "@/types/user";
+  listUsersForAdmin,
+  updateUserRole,
+} from "@/app/actions/user-management";
+import type { UserRole } from "@/types/user";
 
-export const useAllUsersPaginated = (pageSize = 20, lastDoc?: any) => {
-  return useQuery({
-    queryKey: ["users_admin", pageSize, lastDoc?.id],
-    queryFn: async () => {
-      let q = query(
-        collection(db, "users"),
-        orderBy("lastLogin", "desc"),
-        limit(pageSize),
-      );
+type AdminUser = Awaited<
+  ReturnType<typeof listUsersForAdmin>
+>["users"][number] & { isAdmin: boolean };
 
-      if (lastDoc) {
-        // When using startAfter, we need to rebuild the query to ensure correct ordering/limits
-        q = query(
-          collection(db, "users"),
-          orderBy("lastLogin", "desc"),
-          startAfter(lastDoc),
-          limit(pageSize),
-        );
-      }
-
-      const snapshot = await getDocs(q);
-      const users = snapshot.docs.map(
-        (doc) => ({ uid: doc.id, ...doc.data() }) as UserData,
-      );
-
-      return {
-        users,
-        lastVisible: snapshot.docs[snapshot.docs.length - 1],
-        hasMore: snapshot.docs.length === pageSize,
-      };
-    },
+async function readUsers(pageSize: number, cursor?: { id: string }) {
+  const result = await listUsersForAdmin(cursor?.id, pageSize);
+  if (!result.success)
+    throw new Error(result.error || "Não foi possível carregar os usuários.");
+  const users = result.users.map((user) => ({
+    ...user,
+    isAdmin: user.role === "admin",
+  }));
+  return {
+    users,
+    lastVisible: result.nextPageToken
+      ? { id: result.nextPageToken }
+      : undefined,
+    hasMore: !!result.nextPageToken,
+  };
+}
+export const useAllUsersPaginated = (pageSize = 20, cursor?: { id: string }) =>
+  useQuery({
+    queryKey: ["users_admin", pageSize, cursor?.id],
+    queryFn: () => readUsers(pageSize, cursor),
   });
-};
-
-export const useAllUsers = (initialData?: UserData[]) => {
-  // Legacy hook wrapper for backward compatibility until refactor complete
-  // Still fetches all but limited to 50 for safety in "Phase 5" context
-  return useQuery({
+export const useAllUsers = (initialData?: AdminUser[]) =>
+  useQuery({
     queryKey: ["users_admin_legacy"],
-    queryFn: async () => {
-      const q = query(
-        collection(db, "users"),
-        orderBy("lastLogin", "desc"),
-        limit(50),
-      );
-      const snapshot = await getDocs(q);
-      return snapshot.docs.map(
-        (doc) => ({ uid: doc.id, ...doc.data() }) as UserData,
-      );
-    },
+    queryFn: async () => (await readUsers(1000)).users,
     initialData,
   });
-};
-
 export const useUpdateUserRole = () => {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async ({ uid, role }: { uid: string; role: UserRole }) => {
-      const userRef = doc(db, "users", uid);
-      await updateDoc(userRef, { role });
+      const result = await updateUserRole(uid, role);
+      if (!result.success)
+        throw new Error(
+          result.error || "Não foi possível atualizar a permissão.",
+        );
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["users_admin"] });
+      void queryClient.invalidateQueries({ queryKey: ["users_admin"] });
+      void queryClient.invalidateQueries({ queryKey: ["users_admin_legacy"] });
     },
   });
 };

@@ -1,6 +1,6 @@
 "use client";
 
-import { useReducer, useEffect } from "react";
+import { useReducer, useEffect, useRef, useState } from "react";
 import { AssessmentDoc, AssessmentSubmissionDoc } from "@/types/assessment";
 import { QuestionRenderer } from "./QuestionRenderer";
 import { AssessmentNavigation } from "./AssessmentNavigation";
@@ -57,6 +57,10 @@ export const AssessmentPlayer = ({
   existingSubmission,
   onExit,
 }: AssessmentPlayerProps) => {
+  const submitting = useRef(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const closed = existingSubmission && existingSubmission.status !== "pending";
   // Initial State Setup
   const [state, dispatch] = useReducer(reducer, {
     currentIndex: 0,
@@ -74,8 +78,14 @@ export const AssessmentPlayer = ({
               // Let's rely on how we stored it. In action we made it array.
               // But for Single Choice UI it expects a string.
               // Let's keep it as array if > 1 or just return the array and let UI handle it.
+              const question = assessment.questions.find(
+                (item) => item.id === ans.questionId,
+              );
               val =
-                ans.selectedOptions.length === 1
+                ans.selectedOptions.length === 1 &&
+                !(
+                  question?.type === "multiple_choice" && question.allowMultiple
+                )
                   ? ans.selectedOptions[0]
                   : ans.selectedOptions;
             } else if (ans.booleanAnswer !== undefined) {
@@ -93,26 +103,39 @@ export const AssessmentPlayer = ({
         )
       : {},
     isSaving: false,
-    lastSavedAt: existingSubmission?.lastSavedAt?.toDate() || null,
+    lastSavedAt: existingSubmission?.lastSavedAt
+      ? new Date(existingSubmission.lastSavedAt)
+      : null,
   });
 
   // Autosave Effect (Debounced)
   useEffect(() => {
-    if (!state.isSaving) return;
+    if (!state.isSaving || isSubmitting || closed) return;
+    let cancelled = false;
 
     const timer = setTimeout(async () => {
       try {
         console.log("Auto-saving draft...");
         await saveDraft(assessment.id, state.answers);
-        dispatch({ type: "MARK_SAVED" });
+        if (!cancelled) {
+          dispatch({ type: "MARK_SAVED" });
+          setSaveError(null);
+        }
       } catch (err) {
         console.error("Autosave failed", err);
+        if (!cancelled)
+          setSaveError(
+            "Não foi possível salvar. Suas respostas continuam nesta tela.",
+          );
         // Optionally handle error state
       }
     }, 2000); // 2s debounce
 
-    return () => clearTimeout(timer);
-  }, [state.answers, state.isSaving, assessment.id]);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [state.answers, state.isSaving, assessment.id, isSubmitting, closed]);
 
   const currentQuestion = assessment.questions[state.currentIndex];
   const isFirst = state.currentIndex === 0;
@@ -127,21 +150,52 @@ export const AssessmentPlayer = ({
   };
 
   const handleFinish = async () => {
+    if (submitting.current || closed) return;
     const confirm = window.confirm(
       "Tem certeza que deseja finalizar a prova? Você não poderá alterar suas respostas depois.",
     );
     if (confirm) {
+      submitting.current = true;
+      setIsSubmitting(true);
       try {
         // Ensure final state is sent
-        await submitAssessment(assessment.id, state.answers);
-        alert("Prova enviada com sucesso!");
+        const result = await submitAssessment(assessment.id, state.answers);
+        alert(
+          result.progressSaved
+            ? "Prova enviada com sucesso!"
+            : "Prova enviada. Não foi possível atualizar o progresso da aula; consulte o portal.",
+        );
         onExit(); // This should trigger the parent to refresh or redirect
       } catch (error) {
         console.error("Submission failed", error);
         alert("Erro ao enviar. Tente novamente.");
+      } finally {
+        submitting.current = false;
+        setIsSubmitting(false);
       }
     }
   };
+
+  if (closed)
+    return (
+      <div className="p-8 space-y-4">
+        <h1 className="text-xl font-serif">{assessment.title}</h1>
+        <p>
+          Sua avaliação já foi enviada
+          {existingSubmission.status === "submitted"
+            ? " e aguarda correção"
+            : ""}
+          .
+        </p>
+        <button onClick={onExit} className="text-primary underline">
+          Voltar ao curso
+        </button>
+      </div>
+    );
+  if (!currentQuestion)
+    return (
+      <p role="status">Esta avaliação ainda não possui questões disponíveis.</p>
+    );
 
   return (
     <div className="min-h-screen bg-[#FDFCF9] flex flex-col pb-24">
@@ -180,12 +234,17 @@ export const AssessmentPlayer = ({
 
       {/* Main Content: Question */}
       <main className="flex-1 w-full max-w-3xl mx-auto px-6 py-12">
+        {saveError && (
+          <p role="alert" className="mb-4 text-sm text-red-700">
+            {saveError}
+          </p>
+        )}
         <QuestionRenderer
           key={currentQuestion.id} // Force remount on change for animation
           question={currentQuestion}
           value={state.answers[currentQuestion.id]}
           onChange={handleAnswerChange}
-          readOnly={false}
+          readOnly={isSubmitting}
         />
       </main>
 
@@ -197,6 +256,7 @@ export const AssessmentPlayer = ({
         onPrev={() => dispatch({ type: "PREV_QUESTION" })}
         onReview={() => console.log("Open Grid")}
         onFinish={handleFinish}
+        isSubmitting={isSubmitting}
         canNext={!isLast}
         canPrev={!isFirst}
         isLast={isLast}

@@ -2,18 +2,17 @@ jest.mock("../server", () => ({
   createSupabaseServiceClient: jest.fn(),
 }));
 jest.mock("@/lib/image-compression.server", () => ({
-  compressImage: jest
-    .fn()
-    .mockResolvedValue({
-      body: Buffer.from("compressed"),
-      contentType: "image/jpeg",
-    }),
+  compressImage: jest.fn().mockResolvedValue({
+    body: Buffer.from("compressed"),
+    contentType: "image/jpeg",
+  }),
 }));
 
 import { createSupabaseServiceClient } from "../server";
 import {
   deleteStorageObject,
   uploadPublicCourseAsset,
+  uploadPublicAvatar,
 } from "../storage.server";
 
 const mockedCreateSupabaseServiceClient = jest.mocked(
@@ -101,5 +100,33 @@ describe("uploadPublicCourseAsset", () => {
 
     expect(from).toHaveBeenCalledWith("uploads");
     expect(remove).toHaveBeenCalledWith(["uploads/admin/uuid-guide.pdf"]);
+  });
+});
+
+it("changes the avatar URL after replacement while keeping the user's storage path", async () => {
+  const upload = jest.fn().mockResolvedValue({ error: null });
+  const from = jest
+    .fn()
+    .mockReturnValue({
+      upload,
+      getPublicUrl: () => ({
+        data: { publicUrl: "https://example.invalid/avatar.webp" },
+      }),
+    });
+  mockedCreateSupabaseServiceClient.mockReturnValue({
+    storage: { from },
+  } as never);
+  const input = {
+    userId: "user",
+    body: Buffer.from("sanitized avatar"),
+    contentType: "image/webp",
+  };
+  const first = await uploadPublicAvatar(input),
+    second = await uploadPublicAvatar(input);
+  expect(first).toMatch(/^https:\/\/example.invalid\/avatar.webp\?v=/);
+  expect(first).not.toBe(second);
+  expect(upload).toHaveBeenCalledWith("avatars/user/avatar.webp", input.body, {
+    contentType: "image/webp",
+    upsert: true,
   });
 });

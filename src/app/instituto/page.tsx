@@ -65,7 +65,7 @@ export default async function InstitutePage() {
           institute.subtitle ||
           "Um campo aberto para encontro, formação e transformação no coração de Rondônia."
         }
-        backgroundImage="/assets/fv/heroes/instituto.png"
+        backgroundImage="/assets/fv/heroes/instituto.webp"
         actions={
           <Link
             href="/instituto/fundadora"

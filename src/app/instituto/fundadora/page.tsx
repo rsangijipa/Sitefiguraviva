@@ -52,7 +52,7 @@ export default async function FounderPage() {
           founder.role ||
           "Gestalt-terapeuta, formadora e guardiã de um campo de encontros."
         }
-        backgroundImage="/assets/fv/heroes/fundadora.png"
+        backgroundImage="/assets/fv/heroes/fundadora.webp"
         actions={
           <Link
             href="/formacoes"

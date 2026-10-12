@@ -1,0 +1,330 @@
+[
+  {
+    "route": "/admin/users",
+    "status": 200,
+    "url": "http://127.0.0.1:3004/admin/users",
+    "headings": [
+      "Visão geral",
+      "Pessoas",
+      "Aprendizagem",
+      "Conteúdo",
+      "Operação",
+      "Sistema",
+      "Gerenciar Usuários"
+    ],
+    "notices": [
+      "Usuários e permissões",
+      "Usuários e permissões"
+    ],
+    "errors": []
+  },
+  {
+    "route": "/admin/applications",
+    "status": 200,
+    "url": "http://127.0.0.1:3004/admin/applications",
+    "headings": [
+      "Visão geral",
+      "Pessoas",
+      "Aprendizagem",
+      "Conteúdo",
+      "Operação",
+      "Sistema",
+      "Interessados & Inscrições"
+    ],
+    "notices": [
+      "Usuários e permissões"
+    ],
+    "errors": []
+  },
+  {
+    "route": "/admin/enrollments",
+    "status": 200,
+    "url": "http://127.0.0.1:3004/admin/enrollments",
+    "headings": [
+      "Visão geral",
+      "Pessoas",
+      "Aprendizagem",
+      "Conteúdo",
+      "Operação",
+      "Sistema",
+      "Alunos & Matrículas"
+    ],
+    "notices": [
+      "Usuários e permissões"
+    ],
+    "errors": []
+  },
+  {
+    "route": "/admin/courses",
+    "status": 200,
+    "url": "http://127.0.0.1:3004/admin/courses",
+    "headings": [
+      "Visão geral",
+      "Pessoas",
+      "Aprendizagem",
+      "Conteúdo",
+      "Operação",
+      "Sistema",
+      "Cursos & Formações",
+      "Cadastro de mediadores"
+    ],
+    "notices": [
+      "Usuários e permissões",
+      "Carregando cadastro…"
+    ],
+    "errors": []
+  },
+  {
+    "route": "/admin/approvals",
+    "status": 200,
+    "url": "http://127.0.0.1:3004/admin/approvals",
+    "headings": [
+      "Visão geral",
+      "Pessoas",
+      "Aprendizagem",
+      "Conteúdo",
+      "Operação",
+      "Sistema",
+      "Aprovações"
+    ],
+    "notices": [
+      "Usuários e permissões",
+      "Libere acessos pagos sem interromper o restante do painel."
+    ],
+    "errors": []
+  },
+  {
+    "route": "/admin/assessments",
+    "status": 200,
+    "url": "http://127.0.0.1:3004/admin/assessments",
+    "headings": [
+      "Visão geral",
+      "Pessoas",
+      "Aprendizagem",
+      "Conteúdo",
+      "Operação",
+      "Sistema",
+      "Avaliações & Provas"
+    ],
+    "notices": [
+      "Usuários e permissões"
+    ],
+    "errors": []
+  },
+  {
+    "route": "/admin/assessments/submissions",
+    "status": 200,
+    "url": "http://127.0.0.1:3004/admin/assessments/submissions",
+    "headings": [
+      "Visão geral",
+      "Pessoas",
+      "Aprendizagem",
+      "Conteúdo",
+      "Operação",
+      "Sistema",
+      "Correções & Submissões"
+    ],
+    "notices": [
+      "Usuários e permissões"
+    ],
+    "errors": []
+  },
+  {
+    "route": "/admin/blog",
+    "status": 200,
+    "url": "http://127.0.0.1:3004/admin/blog",
+    "headings": [
+      "Visão geral",
+      "Pessoas",
+      "Aprendizagem",
+      "Conteúdo",
+      "Operação",
+      "Sistema",
+      "Blog & Biblioteca"
+    ],
+    "notices": [
+      "Usuários e permissões"
+    ],
+    "errors": []
+  },
+  {
+    "route": "/admin/gallery",
+    "status": 200,
+    "url": "http://127.0.0.1:3004/admin/gallery",
+    "headings": [
+      "Visão geral",
+      "Pessoas",
+      "Aprendizagem",
+      "Conteúdo",
+      "Operação",
+      "Sistema",
+      "Galeria de Imagens"
+    ],
+    "notices": [
+      "Usuários e permissões"
+    ],
+    "errors": []
+  },
+  {
+    "route": "/admin/public-docs",
+    "status": 200,
+    "url": "http://127.0.0.1:3004/admin/public-docs",
+    "headings": [
+      "Visão geral",
+      "Pessoas",
+      "Aprendizagem",
+      "Conteúdo",
+      "Operação",
+      "Sistema"
+    ],
+    "notices": [
+      "Usuários e permissões"
+    ],
+    "errors": []
+  },
+  {
+    "route": "/admin/books",
+    "status": 200,
+    "url": "http://127.0.0.1:3004/admin/books",
+    "headings": [
+      "Visão geral",
+      "Pessoas",
+      "Aprendizagem",
+      "Conteúdo",
+      "Operação",
+      "Sistema",
+      "Estante de Livros"
+    ],
+    "notices": [
+      "Usuários e permissões"
+    ],
+    "errors": []
+  },
+  {
+    "route": "/admin/calendar",
+    "status": 200,
+    "url": "http://127.0.0.1:3004/admin/calendar",
+    "headings": [
+      "Visão geral",
+      "Pessoas",
+      "Aprendizagem",
+      "Conteúdo",
+      "Operação",
+      "Sistema",
+      "Calendário Acadêmico & Encontros"
+    ],
+    "notices": [
+      "Usuários e permissões"
+    ],
+    "errors": []
+  },
+  {
+    "route": "/admin/events",
+    "status": 200,
+    "url": "http://127.0.0.1:3004/admin/events",
+    "headings": [
+      "Visão geral",
+      "Pessoas",
+      "Aprendizagem",
+      "Conteúdo",
+      "Operação",
+      "Sistema",
+      "Eventos Ao Vivo & Híbridos"
+    ],
+    "notices": [
+      "Usuários e permissões"
+    ],
+    "errors": []
+  },
+  {
+    "route": "/admin/gamification",
+    "status": 200,
+    "url": "http://127.0.0.1:3004/admin/gamification",
+    "headings": [
+      "Visão geral",
+      "Pessoas",
+      "Aprendizagem",
+      "Conteúdo",
+      "Operação",
+      "Sistema",
+      "Gamificação & Recompensas"
+    ],
+    "notices": [
+      "Usuários e permissões"
+    ],
+    "errors": []
+  },
+  {
+    "route": "/admin/google",
+    "status": 200,
+    "url": "http://127.0.0.1:3004/admin/google",
+    "headings": [
+      "Visão geral",
+      "Pessoas",
+      "Aprendizagem",
+      "Conteúdo",
+      "Operação",
+      "Sistema"
+    ],
+    "notices": [
+      "Usuários e permissões",
+      "Cadastre referências dos serviços Google. Salvar um endereço não verifica a conexão nem configura permissões no serviço."
+    ],
+    "errors": []
+  },
+  {
+    "route": "/admin/logs",
+    "status": 200,
+    "url": "http://127.0.0.1:3004/admin/logs",
+    "headings": [
+      "Visão geral",
+      "Pessoas",
+      "Aprendizagem",
+      "Conteúdo",
+      "Operação",
+      "Sistema",
+      "Logs de Auditoria"
+    ],
+    "notices": [
+      "Usuários e permissões"
+    ],
+    "errors": []
+  },
+  {
+    "route": "/admin/utilities",
+    "status": 200,
+    "url": "http://127.0.0.1:3004/admin/utilities",
+    "headings": [
+      "Visão geral",
+      "Pessoas",
+      "Aprendizagem",
+      "Conteúdo",
+      "Operação",
+      "Sistema",
+      "Utilidades de Admin",
+      "Certificados de Teste"
+    ],
+    "notices": [
+      "Usuários e permissões"
+    ],
+    "errors": []
+  },
+  {
+    "route": "/admin/settings",
+    "status": 200,
+    "url": "http://127.0.0.1:3004/admin/settings",
+    "headings": [
+      "Visão geral",
+      "Pessoas",
+      "Aprendizagem",
+      "Conteúdo",
+      "Operação",
+      "Sistema",
+      "Conteúdo do site"
+    ],
+    "notices": [
+      "Usuários e permissões"
+    ],
+    "errors": []
+  }
+]

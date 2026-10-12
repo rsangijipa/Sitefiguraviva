@@ -1,4 +1,11 @@
 import { createSessionSynchronizer } from "../session-sync";
+it("writes a refreshed access token even when the same user's old token was synchronized", async () => {
+  const request = jest.fn().mockResolvedValue({ ok: true });
+  const sync = createSessionSynchronizer(request);
+  await sync("old-access-token");
+  await sync("refreshed-access-token");
+  expect(JSON.parse(request.mock.calls[1][1].body).accessToken).toBe("refreshed-access-token");
+});
 function deferred<T>() {
   let resolve!: (value: T) => void;
   const promise = new Promise<T>((r) => {

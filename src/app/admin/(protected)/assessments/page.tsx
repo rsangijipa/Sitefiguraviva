@@ -18,6 +18,7 @@ export default function AdminAssessmentsPage() {
   const {
     data: assessments,
     isLoading: assessmentsLoading,
+    error: assessmentsError,
     refetch,
   } = useAdminAssessments();
   const { data: courses, isLoading: coursesLoading } = useAllCourses();
@@ -35,6 +36,7 @@ export default function AdminAssessmentsPage() {
       const result = await deleteAssessment(id);
       if (result.success) {
         addToast("Avaliação excluída com sucesso!", "success");
+        await refetch();
       } else {
         addToast(result.error || "Erro ao excluir avaliação", "error");
       }
@@ -136,6 +138,21 @@ export default function AdminAssessmentsPage() {
         </Button>
       }
     >
+      {assessmentsError && (
+        <div
+          role="alert"
+          className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700"
+        >
+          Não foi possível carregar as avaliações.{" "}
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="underline font-bold"
+          >
+            Tentar novamente
+          </button>
+        </div>
+      )}
       <DataTable
         data={assessments || []}
         columns={columns}

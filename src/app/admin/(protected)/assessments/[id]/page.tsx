@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { AdminPageShell } from "@/components/admin/AdminPageShell";
 import QuizBuilder from "@/components/admin/assessment/QuizBuilder";
 import { useToast } from "@/context/ToastContext";
-import { assessmentService } from "@/services/assessmentService";
+import { getAdminAssessment } from "@/actions/assessment";
 import { AssessmentDoc } from "@/types/assessment";
 import { Loader2 } from "lucide-react";
 
@@ -24,7 +24,7 @@ export default function EditAssessmentPage({
     let mounted = true;
     (async () => {
       try {
-        const data = await assessmentService.getAssessment(id);
+        const data = await getAdminAssessment(id);
         if (!mounted) return;
         if (data) {
           setAssessment(data);

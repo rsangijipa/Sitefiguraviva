@@ -1,4 +1,5 @@
 import "server-only";
+import { randomUUID } from "node:crypto";
 
 import { createSupabaseServiceClient } from "./server";
 import { compressImage } from "@/lib/image-compression.server";
@@ -64,5 +65,6 @@ export async function uploadPublicAvatar(input: {
     throw error;
   }
 
-  return storage.getPublicUrl(path).data.publicUrl;
+  // A replacement keeps the storage path, but must invalidate browser/CDN caches.
+  return `${storage.getPublicUrl(path).data.publicUrl}?v=${randomUUID()}`;
 }

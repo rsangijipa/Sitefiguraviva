@@ -29,7 +29,7 @@ export default async function CoursesPage() {
         eyebrow="Formação & estudos"
         title="Ciclos de aprendizagem"
         description="Cursos, grupos de estudos e vivências para habitar a Gestalt-terapia com rigor, sensibilidade e presença."
-        backgroundImage="/assets/fv/heroes/formacoes.png"
+        backgroundImage="/assets/fv/heroes/formacoes.webp"
       />
       <CoursesListClient courses={courses} />
     </PublicSiteFrame>

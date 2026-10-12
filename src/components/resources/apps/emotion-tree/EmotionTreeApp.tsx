@@ -1,5 +1,7 @@
 "use client";
 
+import "./emotion-tree.css";
+
 import dynamic from "next/dynamic";
 import { AnimatePresence, motion } from "motion/react";
 import { ChevronRight, Heart, RefreshCw, SlidersHorizontal, Sparkles } from "lucide-react";

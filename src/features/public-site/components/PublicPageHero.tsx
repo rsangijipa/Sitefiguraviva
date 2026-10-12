@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Image from "next/image";
 
 interface PublicPageHeroProps {
   eyebrow?: string;
@@ -24,10 +25,16 @@ export default function PublicPageHero({
       className={`relative isolate overflow-hidden border-b border-primary/10 bg-paper px-6 pt-32 md:pt-40 ${notice ? "pb-10 md:pb-12" : "pb-16 md:pb-20"}`}
     >
       {backgroundImage && (
-        <div
-          className="absolute inset-0 -z-20 bg-cover bg-right"
-          style={{ backgroundImage: `url(${backgroundImage})` }}
-        />
+        <div className="absolute inset-0 -z-20" aria-hidden="true">
+          <Image
+            src={backgroundImage}
+            alt=""
+            fill
+            sizes="100vw"
+            priority
+            className="object-cover object-right"
+          />
+        </div>
       )}
       <div
         className={
@@ -39,7 +46,7 @@ export default function PublicPageHero({
       <div className="container relative z-10 mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.72fr)]">
         <div className="max-w-3xl">
           {eyebrow && (
-            <p className="mb-4 text-[11px] font-bold uppercase tracking-[0.28em] text-gold">
+            <p className="mb-4 text-caption font-bold uppercase tracking-[0.28em] text-gold">
               {eyebrow}
             </p>
           )}

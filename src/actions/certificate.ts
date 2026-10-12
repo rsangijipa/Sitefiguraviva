@@ -1,6 +1,9 @@
 "use server";
 
-import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
+import {
+  createSupabaseAnonServerClient,
+  createSupabaseServiceClient,
+} from "@/infrastructure/supabase/server";
 import { verifySession } from "@/lib/auth/server";
 import { createNotification } from "@/features/notifications/infrastructure/supabaseNotificationRepository.server";
 import {
@@ -121,10 +124,8 @@ export async function verifyCertificate(certificateId: string) {
       };
     }
 
-    const { data, error } = await createSupabaseServiceClient()
-      .from("certificates")
-      .select("*")
-      .eq("code", certificateId)
+    const { data, error } = await createSupabaseAnonServerClient()
+      .rpc("verify_public_certificate", { p_code: certificateId })
       .maybeSingle();
     if (error || !data)
       return { valid: false, message: "Certificado não encontrado" };

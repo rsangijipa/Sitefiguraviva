@@ -141,22 +141,22 @@ export async function recordLessonAccess(
   const supabase = createSupabaseServiceClient();
   const { data: lesson, error } = await supabase
     .from("lessons")
-    .select("id")
+    .select("id,module_id")
     .eq("id", lessonId)
     .eq("course_id", courseId)
     .eq("is_published", true)
     .maybeSingle();
   if (error) throw error;
   if (!lesson) throw new Error("Lesson is not published in this course");
-  const { error: updateError } = await supabase
-    .from("enrollments")
-    .update({
-      last_accessed_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    })
-    .eq("user_id", userId)
-    .eq("course_id", courseId);
-  if (updateError) throw updateError;
+  // The canonical writer preserves completed status and watch position while
+  // updating lastLessonId, so reopening a lesson cannot erase completion.
+  await recordLessonProgress(userId, {
+    courseId,
+    moduleId: lesson.module_id,
+    lessonId,
+    status: "in_progress",
+    percent: 0,
+  });
 }
 
 export async function recalculateCourseProgress(

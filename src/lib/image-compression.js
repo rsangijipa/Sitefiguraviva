@@ -5,6 +5,7 @@ const sharp =
 
 const IMAGE_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_IMAGE_UPLOAD_BYTES = 5 * 1024 * 1024;
+/** @type {Record<string, "jpeg" | "png" | "webp">} */
 const formats = {
   "image/jpeg": "jpeg",
   "image/png": "png",

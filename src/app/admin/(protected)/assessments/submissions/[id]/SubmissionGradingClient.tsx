@@ -68,7 +68,7 @@ export default function SubmissionGradingClient({
         feedback: overallFeedback,
       });
 
-      if (result.success) {
+      if ("success" in result && result.success) {
         addToast("Correção salva com sucesso!", "success");
         router.push("/admin/assessments/submissions");
         router.refresh();

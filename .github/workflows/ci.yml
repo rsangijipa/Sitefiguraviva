@@ -33,7 +33,7 @@ jobs:
       - run: node scripts/check-release-secrets.mjs
       - run: npm audit --omit=dev --audit-level=moderate
       - run: npx playwright install --with-deps chromium
-      - run: npm run check:ci -- lint scripts unit types build smoke
+      - run: npm run check:ci -- lint scripts unit types security build smoke
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

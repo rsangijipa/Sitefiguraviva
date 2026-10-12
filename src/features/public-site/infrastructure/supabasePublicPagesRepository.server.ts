@@ -1,6 +1,9 @@
 import "server-only";
 
-import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
+import {
+  createSupabaseAnonServerClient,
+  createSupabaseServiceClient,
+} from "@/infrastructure/supabase/server";
 import type { Json } from "@/infrastructure/supabase/database.types";
 
 export type PublicPageKey =
@@ -16,10 +19,11 @@ export async function getPublicPage<T extends object>(
   key: PublicPageKey,
   fallback: T,
 ): Promise<T> {
-  const { data, error } = await createSupabaseServiceClient()
+  const { data, error } = await createSupabaseAnonServerClient()
     .from("public_pages")
     .select("content,is_published")
     .eq("key", key)
+    .eq("is_published", true)
     .maybeSingle();
   if (error) throw error;
   return data?.is_published && data.content && typeof data.content === "object"

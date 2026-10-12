@@ -1,3 +1,4 @@
+import { isSameOriginRequest } from "@/lib/auth/request-origin";
 import { NextResponse } from "next/server";
 import { verifySession } from "@/lib/auth/server";
 import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
@@ -5,7 +6,10 @@ import type { Json } from "@/infrastructure/supabase/database.types";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(request: Request) {
+export async function POST(request: Request) {
+  if (!isSameOriginRequest(request)) {
+    return NextResponse.json({ error: "Forbidden origin" }, { status: 403 });
+  }
   try {
     const claims = await verifySession();
     if (!claims) {
@@ -76,8 +80,18 @@ export async function GET(request: Request) {
       success: true,
       message: `Migrated ${migratedCount} legacy lessons to blocks.`,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Migration error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: "Unable to complete administrative operation" },
+      { status: 500 },
+    );
   }
+}
+
+export async function GET() {
+  return NextResponse.json(
+    { error: "Use POST for this administrative operation." },
+    { status: 405, headers: { Allow: "POST" } },
+  );
 }

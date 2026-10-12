@@ -107,7 +107,28 @@ export default async function LessonPage({
 
       if (assessmentError) throw assessmentError;
       if (assessmentRow) {
-        assessment = assessmentRow;
+        // Student payloads never include the answer key or instructor rubric.
+        const questions = Array.isArray(assessmentRow.questions)
+          ? assessmentRow.questions.map((raw: any) => {
+              const { correctAnswer, correctOption, correctOptions, explanation, rubric, ...question } = raw;
+              if (Array.isArray(question.options)) {
+                question.options = question.options.map(
+                  ({ isCorrect, ...option }: any) => option,
+                );
+              }
+              return question;
+            })
+          : [];
+        assessment = {
+          id: assessmentRow.id,
+          courseId: assessmentRow.course_id,
+          lessonId: assessmentRow.lesson_id,
+          title: assessmentRow.title,
+          description: assessmentRow.description,
+          passingScore: assessmentRow.passing_score,
+          totalPoints: assessmentRow.total_points,
+          questions,
+        };
         const { data: submissionRow } = await supabase
           .from("assessment_submissions")
           .select("*")
@@ -116,7 +137,13 @@ export default async function LessonPage({
           .order("started_at", { ascending: false })
           .limit(1)
           .maybeSingle();
-        submission = submissionRow;
+        if (submissionRow)
+          submission = {
+            id: submissionRow.id,
+            answers: submissionRow.answers,
+            status: submissionRow.status,
+            lastSavedAt: submissionRow.updated_at,
+          };
       }
     } catch (e) {
       console.error("Error fetching assessment:", e);

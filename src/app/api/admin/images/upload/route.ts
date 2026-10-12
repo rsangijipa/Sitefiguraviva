@@ -3,10 +3,10 @@ import { randomUUID } from "node:crypto";
 import { getBearerSupabaseSessionClaims } from "@/lib/auth/supabase-session";
 import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import { rateLimit, RateLimitUnavailableError } from "@/lib/rateLimit";
+import { MAX_ADMIN_IMAGE_BYTES } from "@/lib/admin-upload-limits";
 import {
   compressImage,
   ImageCompressionError,
-  MAX_IMAGE_UPLOAD_BYTES,
 } from "@/lib/image-compression.server";
 
 export const runtime = "nodejs";
@@ -59,10 +59,10 @@ export async function POST(req: NextRequest) {
       const { done, value } = await reader.read();
       if (done) break;
       size += value.byteLength;
-      if (size > MAX_IMAGE_UPLOAD_BYTES + 16384) {
+      if (size > MAX_ADMIN_IMAGE_BYTES + 16384) {
         await reader.cancel();
         return NextResponse.json(
-          { error: "A imagem deve ter no máximo 5 MB." },
+          { error: "A imagem deve ter no máximo 4 MB." },
           { status: 413, headers },
         );
       }
@@ -87,9 +87,9 @@ export async function POST(req: NextRequest) {
         { error: "Imagem obrigatória." },
         { status: 400, headers },
       );
-    if (file.size > MAX_IMAGE_UPLOAD_BYTES)
+    if (file.size > MAX_ADMIN_IMAGE_BYTES)
       return NextResponse.json(
-        { error: "A imagem deve ter no máximo 5 MB." },
+        { error: "A imagem deve ter no máximo 4 MB." },
         { status: 413, headers },
       );
     if (

@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import LibraryClient from "./LibraryClient";
 import type { Metadata } from "next";
 import { listPublishedContent } from "@/features/content/infrastructure/supabaseContentRepository";
-import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
+import { createSupabaseAnonServerClient } from "@/infrastructure/supabase/server";
 
 export const metadata: Metadata = {
   title: "Biblioteca Pública",
@@ -22,7 +22,7 @@ async function getLibraryData() {
   try {
     const [posts, documentsResult] = await Promise.all([
       listPublishedContent("publicLibrary"),
-      createSupabaseServiceClient()
+      createSupabaseAnonServerClient()
         .from("public_documents")
         .select("id, title, category, file_url, file_size, created_at")
         .eq("is_published", true)

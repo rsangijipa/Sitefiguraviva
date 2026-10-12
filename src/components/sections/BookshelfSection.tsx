@@ -75,7 +75,7 @@ export default function BookshelfSection({ livros }: { livros: Livro[] }) {
           eyebrow="Leituras"
           title="Estante de preferidos"
           description="Obras que atravessam a formação e a clínica no Instituto. As referências levam ao catálogo do editor — o acervo em texto integral fica na Biblioteca."
-          backgroundImage="/assets/fv/heroes/estante.png"
+          backgroundImage="/assets/fv/heroes/estante.webp"
         />
       </div>
 
@@ -122,7 +122,7 @@ export default function BookshelfSection({ livros }: { livros: Livro[] }) {
                         {featured.description}
                       </p>
                     )}
-                    <span className="mt-5 inline-flex w-fit items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-primary">
+                    <span className="mt-5 inline-flex w-fit items-center gap-1.5 text-caption font-bold uppercase tracking-widest text-primary">
                       Saiba mais
                     </span>
                   </div>
@@ -138,7 +138,7 @@ export default function BookshelfSection({ livros }: { livros: Livro[] }) {
                   type="button"
                   onClick={() => setTheme(option)}
                   aria-pressed={theme === option}
-                  className={`min-h-11 rounded-sm border px-4 py-2 text-[10px] font-bold uppercase tracking-wider transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+                  className={`min-h-11 rounded-sm border px-4 py-2 text-caption font-bold uppercase tracking-wider transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                     theme === option
                       ? "border-primary bg-primary text-white"
                       : "border-border bg-paper text-text/70 hover:border-igarape hover:bg-areia hover:text-primary"
@@ -186,7 +186,7 @@ export default function BookshelfSection({ livros }: { livros: Livro[] }) {
                           {livro.description}
                         </p>
                       )}
-                      <span className="mt-2 flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest text-primary">
+                      <span className="mt-2 flex items-center gap-1.5 text-caption font-bold uppercase tracking-widest text-primary">
                         Saiba mais
                       </span>
                     </div>
@@ -283,7 +283,7 @@ export default function BookshelfSection({ livros }: { livros: Livro[] }) {
                         href={selected.purchaseUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="touch-manipulation mt-6 flex w-full items-center justify-center gap-2 rounded-md bg-primary px-5 py-3.5 text-[10px] font-bold uppercase tracking-widest text-white transition-colors hover:bg-gold active:bg-gold sm:w-fit sm:justify-start"
+                        className="touch-manipulation mt-6 flex w-full items-center justify-center gap-2 rounded-md bg-primary px-5 py-3.5 text-caption font-bold uppercase tracking-widest text-white transition-colors hover:bg-gold active:bg-gold sm:w-fit sm:justify-start"
                       >
                         Onde encontrar
                         <ExternalLink size={12} aria-hidden />

@@ -1,4 +1,4 @@
-import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
+import { createSupabaseAnonServerClient } from "@/infrastructure/supabase/server";
 import { VerificationBadge } from "@/components/certificate/VerificationBadge";
 import Link from "next/link";
 
@@ -22,10 +22,8 @@ export default async function CertificateVerifyPage({ params }: PageProps) {
   const { code } = await params;
 
   // 1. Query by 'code'
-  const { data, error } = await createSupabaseServiceClient()
-    .from("certificates")
-    .select("*")
-    .eq("code", code)
+  const { data, error } = await createSupabaseAnonServerClient()
+    .rpc("verify_public_certificate", { p_code: code })
     .maybeSingle();
 
   if (error || !data) {

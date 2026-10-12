@@ -807,6 +807,7 @@ export interface Database {
           passing_score: number;
           total_points: number;
           questions: Json;
+          is_required: boolean;
           status: "draft" | "published" | "archived";
           created_by: string | null;
           created_at: string;
@@ -932,6 +933,14 @@ export interface Database {
     };
     Views: Record<string, never>;
     Functions: {
+      get_student_assessment: {
+        Args: { p_assessment_id: string };
+        Returns: Json;
+      };
+      verify_public_certificate: {
+        Args: { p_code: string };
+        Returns: { code: string; issued_at: string; metadata: Json }[];
+      };
       can_current_user_read_course_outline: {
         Args: { p_course: string; p_published: boolean };
         Returns: boolean;

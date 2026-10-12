@@ -17,7 +17,7 @@ interface ResourceCompletionProps {
   activeDurationSeconds: number;
   endedBy: 'timer' | 'user' | 'switch';
   currentUser: UserProfile;
-  onSaveToHistory: (reflectionText: string) => Promise<{ success: boolean; error?: string }>;
+  onSaveToHistory?: (reflectionText: string) => Promise<{ success: boolean; error?: string }>;
   onBackToPortal: () => void;
   onContinueAWhile?: () => void;
   canContinue?: boolean;
@@ -48,7 +48,7 @@ export const ResourceCompletion: React.FC<ResourceCompletionProps> = ({
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isSaving || savedSuccess) return;
+    if (!onSaveToHistory || isSaving || savedSuccess) return;
 
     setIsSaving(true);
     setSaveError(null);
@@ -65,6 +65,17 @@ export const ResourceCompletion: React.FC<ResourceCompletionProps> = ({
 
   const charCount = reflection.length;
   const isOverLimit = charCount > 500;
+
+  if (!onSaveToHistory) {
+    return (
+      <section aria-label="Conclusão da pausa" className="mx-auto max-w-xl rounded-2xl border border-border bg-paper p-6 text-text">
+        <h2 className="font-serif text-2xl text-primary">Sua pausa pode terminar aqui</h2>
+        <p className="mt-3">Você dedicou {formatDuration(activeDurationSeconds)} a este momento no seu ritmo.</p>
+        <p className="mt-3 text-sm text-muted">Esta experiência não salva dados ou reflexões.</p>
+        <button type="button" onClick={onBackToPortal} className="mt-6 min-h-11 rounded-lg bg-primary px-5 py-3 text-paper focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">Voltar aos recursos</button>
+      </section>
+    );
+  }
 
   return (
     <div 

@@ -1,7 +1,11 @@
+import { PUBLIC_COURSE_COLUMNS } from "@/features/content/infrastructure/public-content-columns";
 import "server-only";
 import { getCourseMediators } from "@/utils/mediators";
 
-import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
+import {
+  createSupabaseAnonServerClient,
+  createSupabaseServiceClient,
+} from "@/infrastructure/supabase/server";
 import type { TableRow } from "@/infrastructure/supabase/database.types";
 import type {
   CourseModuleRecord,
@@ -93,10 +97,10 @@ function mapLesson(row: LessonRow): LessonRecord {
 }
 
 export async function listPublishedCourses(): Promise<CourseRecord[]> {
-  const supabase = createSupabaseServiceClient();
+  const supabase = createSupabaseAnonServerClient();
   const { data, error } = await supabase
     .from("courses")
-    .select("*, course_mediators(mediator:mediators(id,name,role,image,bio))")
+    .select(PUBLIC_COURSE_COLUMNS)
     .eq("is_published", true)
     .eq("status", "open")
     .order("created_at", { ascending: false });

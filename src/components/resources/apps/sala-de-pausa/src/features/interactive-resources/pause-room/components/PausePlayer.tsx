@@ -23,6 +23,7 @@ interface PausePlayerProps {
   onEndExperience: (activeDuration: number, endedBy: 'timer' | 'user' | 'switch') => void;
   onRequestSwitchPractice: () => void;
   currentUser: UserProfile;
+  onDurationChange?: (seconds: number) => void;
 }
 
 export const PausePlayer: React.FC<PausePlayerProps> = ({
@@ -32,6 +33,7 @@ export const PausePlayer: React.FC<PausePlayerProps> = ({
   onEndExperience,
   onRequestSwitchPractice,
   currentUser,
+  onDurationChange,
 }) => {
   const [showSwitchConfirm, setShowSwitchConfirm] = useState<boolean>(false);
 
@@ -62,6 +64,10 @@ export const PausePlayer: React.FC<PausePlayerProps> = ({
     const secs = seconds % 60;
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
+
+  useEffect(() => {
+    onDurationChange?.(timer.activeSeconds);
+  }, [timer.activeSeconds, onDurationChange]);
 
   const handleManualEnd = () => {
     timer.stop();
@@ -183,7 +189,7 @@ export const PausePlayer: React.FC<PausePlayerProps> = ({
           type="button"
           onClick={handleManualEnd}
           className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-[#96551F] text-[#96551F] hover:bg-[#F1E9DB] transition-all text-xs font-medium min-h-[40px]"
-          title="Encerrar pausa e ir para reflexão"
+          title="Encerrar pausa"
         >
           <Square className="w-3.5 h-3.5" />
           <span>Encerrar pausa</span>

@@ -152,7 +152,7 @@ export default function CoursesSection({
                         />
                         <div className="absolute top-2.5 left-2.5 flex flex-wrap gap-1.5 pointer-events-none">
                           {course.category && (
-                            <span className="rounded-sm border border-border bg-paper/95 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary backdrop-blur-sm">
+                            <span className="rounded-sm border border-border bg-paper/95 px-2.5 py-0.5 text-caption font-bold uppercase tracking-wider text-primary backdrop-blur-sm">
                               {course.category === "Formacao"
                                 ? "Formação"
                                 : course.category === "GrupoEstudos"
@@ -161,7 +161,7 @@ export default function CoursesSection({
                             </span>
                           )}
                           {isClosed && (
-                            <span className="rounded-sm bg-error/90 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white backdrop-blur-sm">
+                            <span className="rounded-sm bg-error/90 px-2.5 py-0.5 text-caption font-bold uppercase tracking-wider text-white backdrop-blur-sm">
                               {course.status}
                             </span>
                           )}
@@ -178,7 +178,7 @@ export default function CoursesSection({
                               {course.subtitle}
                             </p>
                           )}
-                          <p className="text-[11px] font-bold uppercase tracking-wider text-fv-terra-barro">
+                          <p className="text-caption font-bold uppercase tracking-wider text-fv-terra-barro">
                             {course.date || "Início em breve"}
                           </p>
                         </div>
@@ -189,12 +189,12 @@ export default function CoursesSection({
 
                         <div className="mt-auto border-t border-border/70 pt-2.5 flex items-center justify-between">
                           {isClosed ? (
-                            <span className="inline-flex cursor-not-allowed items-center gap-1.5 py-1 text-[11px] font-bold uppercase tracking-widest text-muted">
+                            <span className="inline-flex cursor-not-allowed items-center gap-1.5 py-1 text-caption font-bold uppercase tracking-widest text-muted">
                               Inscrições Encerradas
                             </span>
                           ) : (
                             <span
-                              className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-primary group-hover:text-fv-verde-raiz transition-colors"
+                              className="inline-flex items-center gap-1.5 text-caption font-bold uppercase tracking-widest text-primary group-hover:text-fv-verde-raiz transition-colors"
                               aria-label={`Saiba mais sobre ${course.title}`}
                             >
                               Saiba Mais{" "}
@@ -238,7 +238,7 @@ export default function CoursesSection({
         <div className="mt-8 flex flex-col items-center justify-center gap-4">
           {courses.some((c) => Boolean(c.date)) && (
             <div className="flex flex-wrap items-center justify-center gap-2 max-w-2xl px-4">
-              <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-fv-terra-barro">
+              <span className="text-caption font-bold uppercase tracking-[0.16em] text-fv-terra-barro">
                 Próximos Inícios:
               </span>
               {courses
@@ -246,7 +246,7 @@ export default function CoursesSection({
                 .map((c, i) => (
                   <span
                     key={c.id || i}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-border bg-paper px-3 py-1 text-[11px] font-medium text-primary shadow-xs"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-border bg-paper px-3 py-1 text-caption font-medium text-primary shadow-xs"
                   >
                     <span className="w-1.5 h-1.5 rounded-full bg-fv-terra-barro" />
                     <span className="font-bold text-primary truncate max-w-[160px]">

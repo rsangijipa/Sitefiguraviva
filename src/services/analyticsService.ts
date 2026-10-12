@@ -1,4 +1,4 @@
-import { createSupabaseBrowserClient } from "@/infrastructure/supabase/client";
+import { updateLessonLastAccess } from "@/app/actions/progress";
 import { trackEvent } from "@/lib/telemetry/events";
 
 export const analyticsService = {
@@ -6,14 +6,8 @@ export const analyticsService = {
    * Tracks when a user starts or continues a lesson.
    */
   async trackLessonStart(userId: string, courseId: string, lessonId: string) {
-    const supabase: any = createSupabaseBrowserClient();
-    await supabase.from("lesson_progress").upsert({
-      user_id: userId,
-      course_id: courseId,
-      lesson_id: lessonId,
-      status: "in_progress",
-      updated_at: new Date().toISOString(),
-    });
+    const result = await updateLessonLastAccess(courseId, lessonId);
+    if (!result.success) throw new Error(result.error);
 
     trackEvent("lesson_started", { courseId, lessonId });
   },
@@ -26,17 +20,6 @@ export const analyticsService = {
     courseId: string,
     lessonId: string,
   ) {
-    const supabase: any = createSupabaseBrowserClient();
-    await supabase.from("lesson_progress").upsert({
-      user_id: userId,
-      course_id: courseId,
-      lesson_id: lessonId,
-      status: "completed",
-      percent: 100,
-      completed_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    });
-
     trackEvent("lesson_completed", { courseId, lessonId });
   },
 

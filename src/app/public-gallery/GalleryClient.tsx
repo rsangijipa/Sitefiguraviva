@@ -142,7 +142,7 @@ export default function GalleryClient({
         eyebrow="Confluência"
         title="Galeria de imagens"
         description="Um registro visual dos encontros, vivências e da beleza que floresce no Instituto Figura Viva."
-        backgroundImage="/assets/fv/heroes/galeria.png"
+        backgroundImage="/assets/fv/heroes/galeria.webp"
       />
 
       <div className="fv-container flex-1 pt-14">

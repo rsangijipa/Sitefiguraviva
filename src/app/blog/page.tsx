@@ -104,7 +104,7 @@ export default async function BlogPage() {
         eyebrow="Diário visual"
         title="Reflexões em movimento"
         description="Artigos, poesias e reflexões sobre a Gestalt-terapia e o viver humano."
-        backgroundImage="/assets/fv/heroes/blog.png"
+        backgroundImage="/assets/fv/heroes/blog.webp"
       />
       <div className="min-h-screen bg-paper pb-20 pt-16">
         <div className="max-w-7xl mx-auto px-6 md:px-12">

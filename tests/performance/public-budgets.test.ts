@@ -8,6 +8,12 @@ const read = (relativePath: string) =>
   fs.readFileSync(file(relativePath), "utf8");
 
 describe("public performance budgets", () => {
+  it("keeps each institutional hero below 300 KB", () => {
+    for (const name of ["biblioteca", "blog", "estante", "formacoes", "fundadora", "galeria", "instituto", "recursos"]) {
+      expect(fs.statSync(file(`public/assets/fv/heroes/${name}.webp`)).size).toBeLessThan(300 * 1024);
+    }
+  });
+
   it("keeps lightweight fallback artwork inside fixed byte limits", () => {
     expect(
       fs.statSync(file("public/assets/fv/hero-tree-lite.svg")).size,

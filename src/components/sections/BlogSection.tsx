@@ -146,19 +146,19 @@ export default function BlogSection({
                           size={28}
                           className="mb-2 text-fv-terra-barro"
                         />
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-center line-clamp-2">
+                        <span className="text-caption font-bold uppercase tracking-widest text-center line-clamp-2">
                           {post.category || "Biblioteca"}
                         </span>
                       </div>
                     )}
-                    <span className="absolute top-2 left-2 rounded-sm bg-paper/90 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary backdrop-blur-xs">
+                    <span className="absolute top-2 left-2 rounded-sm bg-paper/90 px-2 py-0.5 text-caption font-bold uppercase tracking-wider text-primary backdrop-blur-xs">
                       {post.category ||
                         (activeTab === "blog" ? "Blog" : "Biblioteca")}
                     </span>
                   </div>
 
                   <div className="flex flex-col flex-1">
-                    <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-fv-terra-barro font-semibold mb-1.5">
+                    <div className="flex items-center gap-2 text-caption uppercase tracking-wider text-fv-terra-barro font-semibold mb-1.5">
                       <span>{post.date || "Atualizado"}</span>
                     </div>
 
@@ -171,7 +171,7 @@ export default function BlogSection({
                         "Clique para acessar este conteúdo na íntegra."}
                     </p>
 
-                    <div className="mt-auto pt-2 border-t border-border/50 flex items-center justify-between text-[11px] font-bold uppercase tracking-widest text-primary group-hover:text-fv-verde-raiz transition-colors">
+                    <div className="mt-auto pt-2 border-t border-border/50 flex items-center justify-between text-caption font-bold uppercase tracking-widest text-primary group-hover:text-fv-verde-raiz transition-colors">
                       <span>
                         {activeTab === "blog" ? "Ler Artigo" : "Acessar Acervo"}
                       </span>
