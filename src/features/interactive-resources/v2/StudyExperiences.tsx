@@ -3,9 +3,10 @@ import { useState, type ReactNode } from "react";
 import { Button, TextArea, SelectableCard, EmptyContent, ReferenceLine, TextField, Dialog } from "./ui";
 import { DECKS, type EditorialItem } from "./editorial-schema";
 import { useExperienceDraft, type ExperienceProps } from "./experience-types";
-import { useResourceMotion } from "./ResourceShell";
 import { ConceptIllustration } from "./illustration/ConceptIllustration";
-import { Canopy, ContactBoundary, CycleDiagram, FigureField, RubinTree } from "./illustration/scenes";
+import { Canopy, ContactBoundary, CycleDiagram, RubinTree } from "./illustration/scenes";
+import { IllustrationSlot } from "./illustration/IllustrationSlot";
+import { SLOTS } from "./illustration/slots";
 
 /** Primeira frase da definição: a frente da carta mostra uma frase; o resto vai para "Aprofundar". */
 const firstSentence = (text: string) => text.match(/^.*?[.!?](\s|$)/)?.[0].trim() ?? text;
@@ -38,7 +39,6 @@ export function CardsExperience(props: ExperienceProps) {
   const [known,setKnown] = useState<string[]>([]); const [reflection,setReflection] = useState("");
   const [flipped,setFlipped] = useState<string[]>([]); const [selected,setSelected] = useState<string|null>(null);
   const [leaf,setLeaf] = useState<number|null>(null);
-  const reduced = useResourceMotion();
   const payload={favorites,review,known,reflection}; useExperienceDraft(payload,props.onDraft);
   const items=props.version?.configuration.items.filter(item => item.kind==="card") ?? [];
   if(!items.length) return <EmptyContent />;
@@ -49,7 +49,7 @@ export function CardsExperience(props: ExperienceProps) {
   const card=items.find(item => item.id===selected);
   return <><h2>{props.mode==="copa" ? "Colher uma carta" : props.mode==="relacoes" ? "Relações entre conceitos" : "Percorrer o acervo"}</h2>
     {props.mode==="copa" ? <div className="fv-copa"><p>Toque uma folha da copa. Uma carta do acervo vem até você.</p>
-      <Canopy onPick={pick} still={reduced} picked={leaf} />
+      <Canopy onPick={pick} picked={leaf} />
       <div className="fv-actions"><Button secondary onClick={() => pick(null)}>Colher uma carta ao acaso</Button></div></div> :
       <><div className="fv-card-filters"><TextField label="Buscar título" value={search} onChange={setSearch} /><label className="fv-field"><span>Baralho</span><select value={deck} onChange={event => setDeck(event.target.value)}><option value="">Todos os baralhos</option>{DECKS.map(value => <option key={value.id} value={value.id}>{value.title} ({items.filter(item => item.deck===value.id).length})</option>)}</select></label></div>
       {props.mode==="revisar" && !visible.length && <p>Você ainda não marcou cartas para rever nesta experiência.</p>}
@@ -74,35 +74,59 @@ export function CardsExperience(props: ExperienceProps) {
 }
 
 const RUBIN_OPTIONS = ["Dois rostos", "Uma árvore", "Os dois, alternando", "Outra coisa"];
+type Layer = "figura" | "fundo";
+/**
+ * Figura e Fundo (seções 7.3 e 8 do guia):
+ * - perceptivo: abre com a árvore de Rubin; cada rodada tem a sua imagem;
+ * - clínico: "Mesa posta" quando a rodada traz necessidades (alternativas):
+ *   a figura muda conforme a necessidade escolhida;
+ * - sessão: "Figura na sessão": cada trecho é marcado como figura ou fundo.
+ */
 export function FigureExperience(props: ExperienceProps) {
   const [index,setIndex] = useState(props.mode==="perceptivo" ? -1 : 0); const [selected,setSelected] = useState("");
-  const [rubin,setRubin] = useState(""); const [reflection,setReflection] = useState(""); const [compare,setCompare] = useState(false);
+  const [rubin,setRubin] = useState(""); const [need,setNeed] = useState(""); const [layers,setLayers] = useState<Record<string,Layer>>({});
+  const [reflection,setReflection] = useState(""); const [compare,setCompare] = useState(false);
   useExperienceDraft(null,props.onDraft);
-  const all=props.version?.configuration.items ?? [];
-  const items=all.filter(item => item.format===props.mode);
-  if(index<0) return <><h2>A árvore de Rubin</h2><RubinTree className="fv-illustration fv-rubin" /><p className="fv-summary">O que aparece primeiro para você?</p>
+  const items=(props.version?.configuration.items ?? []).filter(item => item.format===props.mode);
+  if(index<0) return <><h2>A árvore de Rubin</h2><RubinTree /><p className="fv-summary">O que aparece primeiro para você?</p>
     <div className="fv-options" role="group" aria-label="O que aparece primeiro">{RUBIN_OPTIONS.map(option => <SelectableCard key={option} label={option} selected={rubin===option} onSelect={() => setRubin(option)} />)}</div>
     {rubin && <p className="fv-note" aria-live="polite">Não há resposta certa. A figura se forma na relação entre quem percebe e o que é percebido: a primeira camada vem da psicologia da Gestalt (Rubin, 1915); a segunda, do conceito clínico de figura e fundo (Perls, Hefferline e Goodman, 1951).</p>}
     <div className="fv-actions"><Button onClick={() => setIndex(0)} disabled={!items.length}>{items.length ? "Seguir para as rodadas" : "Rodadas aguardam o acervo"}</Button><Button secondary onClick={() => props.onComplete(null)}>Encerrar</Button></div></>;
   const current=items[index];
   if(!current) return <EmptyContent />;
+  const next=() => {setIndex(index+1);setSelected("");setNeed("");setLayers({});setReflection("");setCompare(false);};
   const chosen=current.segments.find(item => item.id===selected);
-  return <><p className="fv-tag">Rodada {index+1} de {items.length}</p><h2>{current.title}</h2>
-    <div className="fv-figure-stage"><FigureField segments={current.segments} selected={selected} variant={props.mode==="perceptivo" ? "formas" : "texto"} onSelect={id => {setSelected(id);setCompare(false);}} />
-      <div><p className="fv-summary">{current.text}</p><p>{current.prompt}</p>
-        <div className="fv-options" role="group" aria-label="Elementos do campo">{current.segments.map(item => <SelectableCard key={item.id} label={item.text} selected={selected===item.id} onSelect={() => {setSelected(item.id);setCompare(false);}} />)}</div>
-        <p className="fv-mode-status" aria-live="polite">{chosen ? <>Figura agora: <strong>{chosen.text}</strong>. O restante continua no campo, como fundo.</> : "Toque no que se destaca para você."}</p></div></div>
+  const chosenNeed=current.alternatives.find(item => item.id===need);
+  const session=props.mode==="sessao";
+  const marked=Object.keys(layers).length;
+  return <><p className="fv-tag">Rodada {index+1} de {items.length}{props.mode!=="perceptivo" ? " · situação fictícia" : ""}</p><h2>{current.title}</h2>
+    <div className={props.mode==="perceptivo" ? "fv-figure-stage" : undefined}>
+      {props.mode==="perceptivo" && <IllustrationSlot slot={SLOTS.round(current.id,current.title)} />}
+      <div><p className="fv-summary">{current.text}</p>
+        {!!current.alternatives.length && <><h3>Mesa posta: com qual necessidade você chega?</h3><div className="fv-options" role="group" aria-label="Necessidade">{current.alternatives.map(item => <SelectableCard key={item.id} label={item.text} selected={need===item.id} onSelect={() => setNeed(item.id)} />)}</div>
+          {chosenNeed && <p className="fv-note" aria-live="polite">Com {chosenNeed.text.toLocaleLowerCase("pt-BR")}, costuma virar figura: <strong>{chosenNeed.comment}</strong></p>}</>}
+        <p>{current.prompt}</p>
+        {session ? <ul className="fv-list fv-layer-list" aria-label="Trechos da sessão">{current.segments.map(item => <li key={item.id}><p>{item.text}</p>
+            <div className="fv-actions fv-layer-toggle" role="group" aria-label={`Camada de: ${item.text}`}>{(["figura","fundo"] as const).map(layer => <Button key={layer} secondary aria-pressed={layers[item.id]===layer} onClick={() => setLayers(values => ({...values,[item.id]:layer}))}>{layer==="figura" ? "Figura" : "Fundo"}</Button>)}</div></li>)}</ul>
+          : <><div className="fv-options" role="group" aria-label="Elementos do campo">{current.segments.map(item => <SelectableCard key={item.id} label={item.text} selected={selected===item.id} onSelect={() => {setSelected(item.id);setCompare(false);}} />)}</div>
+            <p className="fv-mode-status" aria-live="polite">{chosen ? <>Figura agora: <strong>{chosen.text}</strong>. O restante continua no campo, como fundo.</> : "Escolha o que se destaca para você."}</p></>}
+        {session && <p className="fv-mode-status" aria-live="polite">{marked} de {current.segments.length} trechos marcados. Não há marcação certa.</p>}
+      </div></div>
     <TextArea label="O que apareceu como figura para você?" value={reflection} onChange={setReflection} />
-    {compare && <section><h3>Leitura docente para comparar</h3><p>{current.teacherResponse}</p></section>}<ReferenceLine item={current} /><div className="fv-actions"><Button secondary onClick={() => setCompare(true)}>Comparar leituras</Button>{index+1<items.length ? <Button onClick={() => {setIndex(index+1);setSelected("");setReflection("");setCompare(false);}}>Próxima rodada</Button> : <Button onClick={() => props.onComplete(null)}>Concluir</Button>}<Button secondary onClick={() => props.onComplete(null)}>Pular e encerrar</Button></div></>;
+    {compare && <section><h3>Leitura docente para comparar</h3><p>{current.teacherResponse}</p></section>}<ReferenceLine item={current} /><div className="fv-actions"><Button secondary onClick={() => setCompare(true)}>Comparar leituras</Button>{index+1<items.length ? <Button onClick={next}>Próxima rodada</Button> : <Button onClick={() => props.onComplete(null)}>Concluir</Button>}<Button secondary onClick={() => props.onComplete(null)}>Pular e encerrar</Button></div></>;
 }
+/** Ciclo do Contato (seção 8): lentes com referência própria e "Onde o ciclo se interrompeu?". */
 export function CycleExperience(props: ExperienceProps) {
   const [model,setModel] = useState<"zinker"|"phg"|"ribeiro">("zinker"); const [index,setIndex] = useState(0);
-  const [sequence,setSequence] = useState<string[]>([]); const [reflection,setReflection] = useState(""); const [compare,setCompare] = useState(false);
+  const [sequence,setSequence] = useState<string[]>([]); const [interruption,setInterruption] = useState(""); const [reflection,setReflection] = useState(""); const [compare,setCompare] = useState(false);
   const items=(props.version?.configuration.items ?? []).filter(item => item.format===model);
-  const item=items[index]; const payload={itemId:item?.id ?? "",model,sequence,reflection}; useExperienceDraft(payload,props.onDraft);
+  const item=items[index]; const payload={itemId:item?.id ?? "",model,sequence,reflection:[interruption && `Interrupção percebida: ${item?.segments.find(phase => phase.id===interruption)?.text ?? ""}`,reflection].filter(Boolean).join("\n").slice(0,500)}; useExperienceDraft(payload,props.onDraft);
   if(!(props.version?.configuration.items.length)) return <EmptyContent />;
-  return <><h2>Escolher uma lente de estudo</h2><div className="fv-options">{(["zinker","phg","ribeiro"] as const).map(id => <SelectableCard key={id} label={id==="zinker" ? "Zinker" : id==="phg" ? "PHG" : "Jorge Ponciano Ribeiro"} selected={model===id} onSelect={() => {setModel(id);setIndex(0);setSequence([]);setCompare(false);}} />)}</div>{item ? <><h3 style={{marginTop:24}}>{item.title}</h3><p className="fv-summary">{item.text}</p>
-    <CycleDiagram phases={item.segments} marked={sequence} /><p>{item.prompt}</p><div className="fv-options">{item.segments.map(phase => <SelectableCard key={phase.id} label={phase.text} selected={sequence.includes(phase.id)} onSelect={() => setSequence(values => values.includes(phase.id) ? values.filter(value => value!==phase.id) : [...values,phase.id])} />)}</div><TextArea label="Sua leitura da situação, se quiser" value={reflection} onChange={setReflection} />{compare && item.teacherResponse && <><h3>Leitura docente</h3><p className="fv-summary">{item.teacherResponse}</p></>}<ReferenceLine item={item} /><div className="fv-actions">{item.teacherResponse && <Button secondary onClick={() => setCompare(true)}>Comparar leituras</Button>}{index+1<items.length && <Button secondary onClick={() => {setIndex(index+1);setSequence([]);setReflection("");setCompare(false);}}>Outra situação</Button>}<Button onClick={() => props.onComplete(payload)}>Concluir estudo</Button></div></> : <EmptyContent />}</>;
+  const reset=() => {setSequence([]);setInterruption("");setReflection("");setCompare(false);};
+  return <><h2>Escolher uma lente de estudo</h2><div className="fv-options">{(["zinker","phg","ribeiro"] as const).map(id => <SelectableCard key={id} label={id==="zinker" ? "Zinker" : id==="phg" ? "PHG" : "Jorge Ponciano Ribeiro"} selected={model===id} onSelect={() => {setModel(id);setIndex(0);reset();}} />)}</div>{item ? <><h3 style={{marginTop:24}}>{item.title}</h3><p className="fv-summary">{item.text}</p>
+    <CycleDiagram phases={item.segments} marked={sequence} /><p>{item.prompt}</p><div className="fv-options">{item.segments.map(phase => <SelectableCard key={phase.id} label={phase.text} selected={sequence.includes(phase.id)} onSelect={() => setSequence(values => values.includes(phase.id) ? values.filter(value => value!==phase.id) : [...values,phase.id])} />)}</div>
+    <label className="fv-field"><span>Onde o ciclo se interrompeu?</span><select value={interruption} onChange={event => setInterruption(event.target.value)}><option value="">Não se interrompeu / não sei</option>{item.segments.map(phase => <option key={phase.id} value={phase.id}>{phase.text}</option>)}</select></label>
+    <TextArea label="Sua leitura da situação, se quiser" value={reflection} onChange={setReflection} />{compare && item.teacherResponse && <><h3>Leitura docente</h3><p className="fv-summary">{item.teacherResponse}</p></>}<ReferenceLine item={item} /><div className="fv-actions">{item.teacherResponse && <Button secondary onClick={() => setCompare(true)}>Comparar leituras</Button>}{index+1<items.length && <Button secondary onClick={() => {setIndex(index+1);reset();}}>Outra situação</Button>}<Button onClick={() => props.onComplete(payload)}>Concluir estudo</Button></div></> : <EmptyContent />}</>;
 }
 export function BoundariesExperience(props: ExperienceProps) {
   const [index,setIndex]=useState(0); const [hypotheses,setHypotheses]=useState<string[]>([]); const [reflection,setReflection]=useState(""); const [compare,setCompare]=useState(false);
