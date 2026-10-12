@@ -25,3 +25,6 @@
     object-position: 24% center;
   }
 }
+
+:global(.dark) .background { background:rgb(var(--color-paper)); }
+:global(.dark) .artwork { opacity:.3; filter:brightness(.65) saturate(.65); }

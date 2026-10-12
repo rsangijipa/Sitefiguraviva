@@ -79,11 +79,11 @@ export default function LibraryClient({
     router.replace("/public-library", { scroll: false });
   };
 
-  const [featured, ...remaining] = initialItems;
+  const featured = initialItems[0];
 
-  const filteredItems = remaining.filter((item) => {
+  const filteredItems = initialItems.filter((item) => {
     const matchesSearch =
-      item.title.toLowerCase().includes(search.toLowerCase()) ||
+      String(item.title || "").toLowerCase().includes(search.toLowerCase()) ||
       item.subtitle?.toLowerCase().includes(search.toLowerCase());
     const matchesGroup = group === "Todos" || groupOf(item) === group;
     return matchesSearch && matchesGroup;

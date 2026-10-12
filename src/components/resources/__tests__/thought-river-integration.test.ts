@@ -1,54 +1,20 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { resourceCatalog } from "../resourceCatalog";
-
-const root = process.cwd();
-const readSource = (path: string) => readFileSync(join(root, path), "utf8");
-
-describe("Rio dos Pensamentos integration", () => {
-  const resource = resourceCatalog.find(
-    (item) => item.slug === "rio-dos-pensamentos",
-  );
-
-  it("publishes the specified card without duplicating the catalog entry", () => {
-    expect(
-      resourceCatalog.filter((item) => item.slug === "rio-dos-pensamentos"),
-    ).toHaveLength(1);
-    expect(resource).toMatchObject({
-      title: "Rio dos Pensamentos",
-      description: "Observe pensamentos passando, sem precisar afastá-los.",
-      category: "REGULAR",
-      duration: "2–5 min",
-      status: "available",
-      privacy: "private",
-      persistence: "optional",
-    });
-    expect(resource?.sections?.map((section) => section.id)).toEqual([
-      "experience",
-      "history",
-    ]);
-  });
-
-  it("loads the canvas experience only through the client-side resource boundary", () => {
-    const source = readSource("src/components/ResourcesSection.jsx");
-
-    expect(source).toContain('"rio-dos-pensamentos": lazy(');
-    expect(source).toContain(
-      "@/features/interactive-resources/thought-river/ThoughtRiverExperience",
-    );
-  });
-
-  it("provides portal and saved-history routes through the typed experience surface", () => {
-    const page = readSource(
-      "src/app/portal/recursos/rio-dos-pensamentos/page.tsx",
-    );
-    const historyPage = readSource(
-      "src/app/portal/recursos/rio-dos-pensamentos/historico/page.tsx",
-    );
-
-    expect(page).toContain("<ThoughtRiverExperience />");
-    expect(historyPage).toContain(
-      '<ThoughtRiverExperience initialView="history" />',
-    );
-  });
+import {resourceCatalog,resolveResourceDestination} from "../resourceCatalog";
+const readSource=(path:string)=>readFileSync(join(process.cwd(),path),"utf8");
+describe("Paisagem consolidation",()=>{
+ it("retains garden and river as public modes of one self-guided resource",()=>{
+  expect(resourceCatalog.filter(item=>item.slug==="paisagem-de-pensamentos")).toHaveLength(1);
+  expect(resourceCatalog.find(item=>item.slug==="paisagem-de-pensamentos")).toMatchObject({access:"public",category:"PERCEBER",modes:["jardim","rio"]});
+  expect(resolveResourceDestination("rio-dos-pensamentos")).toEqual({slug:"paisagem-de-pensamentos",mode:"rio"});
+ });
+ it("keeps legacy leaf persistence outside the active experience",()=>{
+  const source=readSource("src/features/interactive-resources/v2/ThoughtLandscape.tsx");
+  expect(source).not.toMatch(/localStorage|sessionStorage/);
+  expect(source).toContain("thoughts:mode===\"jardim\" ? leaves.map(item => item.text) : []");
+ });
+ it("redirects old portal and history routes",()=>{
+  expect(readSource("src/app/portal/recursos/rio-dos-pensamentos/page.tsx")).toContain("/portal/recursos/paisagem-de-pensamentos?modo=rio");
+  expect(readSource("src/app/portal/recursos/rio-dos-pensamentos/historico/page.tsx")).toContain("/portal/recursos/meus-registros");
+ });
 });

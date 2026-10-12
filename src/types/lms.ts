@@ -98,6 +98,7 @@ export interface CourseDoc {
   // Metadata
   tags?: string[];
   details?: {
+    agenda?: import("@/features/courses/domain/course-agenda").CourseAgenda;
     frequency?: string;
     date?: string;
     time?: string;

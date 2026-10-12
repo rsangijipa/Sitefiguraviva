@@ -41,7 +41,7 @@ const Tip: React.FC<{ label: string; children: React.ReactNode }> = ({
     {children}
     <span
       className="pointer-events-none absolute bottom-full mb-2 left-1/2 -translate-x-1/2 whitespace-nowrap
-      rounded-lg bg-primary border border-primary/60 px-2 py-1 text-[10px] text-white shadow-xl
+      rounded-lg bg-primary border border-primary/60 px-2 py-1 text-[10px] text-paper
       opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-150 z-50"
     >
       {label}
@@ -106,8 +106,8 @@ export const PondControls: React.FC<PondControlsProps> = ({
         {isExpanded && (
           <div
             id="panel-expanded-controls"
-            className="w-full bg-white/95 backdrop-blur-xl text-text rounded-2xl
-              border border-stone-200 p-4 shadow-2xl
+            className="w-full bg-paper/95  text-text rounded-2xl
+              border border-nevoa p-4
               animate-slide-up"
           >
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs">
@@ -125,7 +125,7 @@ export const PondControls: React.FC<PondControlsProps> = ({
                     className={`min-h-11 flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg border text-[11px] font-medium transition-all duration-150 ${
                       config.showFish
                         ? "bg-amber-500/20 border-amber-400/50 text-amber-900"
-                        : "bg-stone-50 border-stone-200 text-text/80 hover:text-primary"
+                        : "bg-paper border-nevoa text-text/80 hover:text-primary"
                     }`}
                   >
                     <Fish className="w-3 h-3" />
@@ -139,7 +139,7 @@ export const PondControls: React.FC<PondControlsProps> = ({
                     className={`min-h-11 flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg border text-[11px] font-medium transition-all duration-150 ${
                       config.showLeaves
                         ? "bg-emerald-500/20 border-emerald-400/50 text-emerald-900"
-                        : "bg-stone-50 border-stone-200 text-text/80 hover:text-primary"
+                        : "bg-paper border-nevoa text-text/80 hover:text-primary"
                     }`}
                   >
                     <Leaf className="w-3 h-3" />
@@ -188,7 +188,7 @@ export const PondControls: React.FC<PondControlsProps> = ({
                         className={`min-h-11 min-w-11 p-1.5 rounded-lg border flex-1 flex justify-center items-center transition-all duration-150 ${
                           config.ambient === val
                             ? active
-                            : "bg-stone-50 border-stone-200 text-text/80 hover:text-primary"
+                            : "bg-paper border-nevoa text-text/80 hover:text-primary"
                         }`}
                       >
                         {icon}
@@ -280,7 +280,7 @@ export const PondControls: React.FC<PondControlsProps> = ({
                       quality: event.target.value as QualityProfile,
                     }))
                   }
-                  className="min-h-11 rounded-lg border border-stone-200 bg-white px-3 text-xs text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                  className="min-h-11 rounded-lg border border-nevoa bg-paper px-3 text-xs text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                 >
                   <option value="economy">Economia — melhor desempenho</option>
                   <option value="balanced">Balanceada — recomendada</option>
@@ -297,8 +297,8 @@ export const PondControls: React.FC<PondControlsProps> = ({
         {/* ── Primary Floating Dock ──────────────────────────────────── */}
         <div
           id="dock-primary-controls"
-          className="flex max-w-full flex-wrap justify-center items-center gap-1 sm:gap-1.5 bg-white/95 backdrop-blur-xl
-            border border-stone-200 p-1.5 rounded-full shadow-2xl text-text
+          className="flex max-w-full flex-wrap justify-center items-center gap-1 sm:gap-1.5 bg-paper/95
+            border border-nevoa p-1.5 rounded-full  text-text
             ring-1 ring-inset ring-black/5"
         >
           {/* Mode: Ondular */}
@@ -311,8 +311,8 @@ export const PondControls: React.FC<PondControlsProps> = ({
               aria-pressed={config.mode === "ripple"}
               className={`min-h-11 min-w-11 flex items-center justify-center gap-1.5 px-3 py-2 rounded-full text-[11px] font-semibold transition-all duration-150 ${
                 config.mode === "ripple"
-                  ? "bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/30"
-                  : "hover:bg-stone-100 text-text/80 hover:text-primary"
+                  ? "bg-cyan-500 text-slate-950  /30"
+                  : "hover:bg-paper text-text/80 hover:text-primary"
               }`}
             >
               <Waves className="w-3.5 h-3.5" />
@@ -333,8 +333,8 @@ export const PondControls: React.FC<PondControlsProps> = ({
               aria-pressed={config.mode === "stone"}
               className={`min-h-11 min-w-11 flex items-center justify-center gap-1.5 px-3 py-2 rounded-full text-[11px] font-semibold transition-all duration-150 ${
                 config.mode === "stone"
-                  ? "bg-amber-500 text-slate-950 shadow-md shadow-amber-500/30"
-                  : "hover:bg-stone-100 text-text/80 hover:text-primary"
+                  ? "bg-amber-500 text-slate-950  /30"
+                  : "hover:bg-paper text-text/80 hover:text-primary"
               }`}
             >
               <CircleDot className="w-3.5 h-3.5" />
@@ -352,8 +352,8 @@ export const PondControls: React.FC<PondControlsProps> = ({
               aria-pressed={config.mode === "feed"}
               className={`min-h-11 min-w-11 flex items-center justify-center gap-1.5 px-3 py-2 rounded-full text-[11px] font-semibold transition-all duration-150 ${
                 config.mode === "feed"
-                  ? "bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/30"
-                  : "hover:bg-stone-100 text-text/80 hover:text-primary"
+                  ? "bg-emerald-500 text-slate-950  /30"
+                  : "hover:bg-paper text-text/80 hover:text-primary"
               }`}
             >
               <Sparkles className="w-3.5 h-3.5" />
@@ -373,8 +373,8 @@ export const PondControls: React.FC<PondControlsProps> = ({
               aria-pressed={config.mode === "wind"}
               className={`min-h-11 min-w-11 flex items-center justify-center gap-1.5 px-3 py-2 rounded-full text-[11px] font-semibold transition-all duration-150 ${
                 config.mode === "wind"
-                  ? "bg-violet-500 text-slate-950 shadow-md shadow-violet-500/30"
-                  : "hover:bg-stone-100 text-text/80 hover:text-primary"
+                  ? "bg-violet-500 text-slate-950  /30"
+                  : "hover:bg-paper text-text/80 hover:text-primary"
               }`}
             >
               <Wind className="w-3.5 h-3.5" />
@@ -383,7 +383,7 @@ export const PondControls: React.FC<PondControlsProps> = ({
           </Tip>
 
           <div
-            className="w-px h-5 bg-stone-200 mx-0.5 flex-none"
+            className="w-px h-5 bg-paper mx-0.5 flex-none"
             aria-hidden="true"
           />
 
@@ -397,7 +397,7 @@ export const PondControls: React.FC<PondControlsProps> = ({
               className={`min-h-11 min-w-11 p-2 rounded-full transition-all duration-150 flex items-center justify-center relative ${
                 config.rainIntensity !== "none"
                   ? "bg-blue-500/25 text-blue-800 border border-blue-400/40"
-                  : "hover:bg-stone-100 text-text/80 hover:text-primary"
+                  : "hover:bg-paper text-text/80 hover:text-primary"
               }`}
             >
               <CloudRain className="w-3.5 h-3.5" />
@@ -434,7 +434,7 @@ export const PondControls: React.FC<PondControlsProps> = ({
               className={`min-w-11 min-h-11 p-2 rounded-full transition-all duration-150 flex items-center justify-center ${
                 config.soundEnabled
                   ? "bg-teal-500/25 text-teal-800 border border-teal-400/40"
-                  : "hover:bg-stone-100 text-text/80 hover:text-primary"
+                  : "hover:bg-paper text-text/80 hover:text-primary"
               }`}
             >
               {config.soundEnabled ? (
@@ -461,7 +461,7 @@ export const PondControls: React.FC<PondControlsProps> = ({
               type="button"
               onClick={onClearLake}
               aria-label="Acalmar ondas"
-              className="min-w-11 min-h-11 p-2 rounded-full hover:bg-stone-100 text-text/80 hover:text-primary transition-all duration-150 flex items-center justify-center"
+              className="min-w-11 min-h-11 p-2 rounded-full hover:bg-paper text-text/80 hover:text-primary transition-all duration-150 flex items-center justify-center"
             >
               <RotateCcw className="w-3.5 h-3.5" />
             </button>
@@ -477,8 +477,8 @@ export const PondControls: React.FC<PondControlsProps> = ({
               aria-label={isExpanded ? "Recolher ajustes" : "Expandir ajustes"}
               className={`min-h-11 min-w-11 p-2 rounded-full transition-all duration-150 flex items-center justify-center ${
                 isExpanded
-                  ? "bg-stone-200 text-primary"
-                  : "hover:bg-stone-100 text-text/80 hover:text-primary"
+                  ? "bg-paper text-primary"
+                  : "hover:bg-paper text-text/80 hover:text-primary"
               }`}
             >
               {isExpanded ? (

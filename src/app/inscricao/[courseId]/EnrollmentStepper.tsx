@@ -142,7 +142,7 @@ export default function EnrollmentStepper({
 
   // Handlers
   const handleLogin = () => {
-    router.push(`/auth?next=/inscricao/${courseId}`);
+    router.push(`/auth?courseId=${encodeURIComponent(courseId)}&next=${encodeURIComponent(`/inscricao/${courseId}`)}`);
   };
 
   const handleSignup = () => {
@@ -182,7 +182,7 @@ export default function EnrollmentStepper({
           "Sua sessão expirou. Faça login novamente para confirmar seu interesse.",
           "error",
         );
-        router.push(`/auth?next=/inscricao/${courseId}`);
+        router.push(`/auth?courseId=${encodeURIComponent(courseId)}&next=${encodeURIComponent(`/inscricao/${courseId}`)}`);
         return;
       }
 
@@ -219,7 +219,7 @@ export default function EnrollmentStepper({
           "Sua sessão expirou. Faça login novamente para continuar.",
           "error",
         );
-        router.push(`/auth?next=/inscricao/${courseId}`);
+        router.push(`/auth?courseId=${encodeURIComponent(courseId)}&next=${encodeURIComponent(`/inscricao/${courseId}`)}`);
         return;
       }
 

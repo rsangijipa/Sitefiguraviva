@@ -1,3 +1,4 @@
+import CourseAgendaSummary from "@/components/courses/CourseAgendaSummary";
 import { findPixOrder } from "@/lib/pix-order.server";
 import { verifySession } from "@/lib/auth/server";
 import EnrollmentStepper from "./EnrollmentStepper";
@@ -87,6 +88,7 @@ export default async function EnrollmentPage({
               {course.description || course.details?.intro}
             </p>
           )}
+          <div className="mt-6"><CourseAgendaSummary value={course.details?.agenda} /></div>
           <dl className="mt-8 space-y-4 border-t border-border pt-8 text-sm">
             {course.totalPriceCents != null && (
               <div className="flex justify-between gap-6">

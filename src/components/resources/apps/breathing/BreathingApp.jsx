@@ -101,7 +101,7 @@ export default function BreathingApp() {
         {steps.map((s) => (
           <div
             key={s}
-            className={`h-1.5 rounded-full transition-all duration-500 ${s <= step ? "w-6 bg-primary" : "w-2 bg-gray-200"}`}
+            className={`h-1.5 rounded-full transition-all duration-500 ${s <= step ? "w-6 bg-primary" : "w-2 bg-paper"}`}
           />
         ))}
       </div>
@@ -132,8 +132,8 @@ export default function BreathingApp() {
               x2="100%"
               y2="0%"
             >
-              <stop offset="0%" stopColor="#D4AF37" stopOpacity="0" />
-              <stop offset="100%" stopColor="#D4AF37" stopOpacity="0.8" />
+              <stop offset="0%" stopColor="#FED701" stopOpacity="0" />
+              <stop offset="100%" stopColor="#FED701" stopOpacity="0.8" />
             </linearGradient>
           </defs>
           <motion.circle
@@ -159,7 +159,7 @@ export default function BreathingApp() {
             cx="100"
             cy="100"
             r={radius}
-            className="stroke-stone-100"
+            className="stroke-paper"
             strokeWidth="4"
             fill="none"
           />
@@ -205,7 +205,7 @@ export default function BreathingApp() {
         <h1 className="text-3xl md:text-4xl font-serif text-primary mb-3 tracking-tight">
           Escolha sua Prática
         </h1>
-        <p className="text-lg font-sans text-gray-500">
+        <p className="text-lg font-sans text-mata">
           Selecione a técnica que melhor atende ao seu momento agora.
         </p>
       </header>
@@ -219,8 +219,8 @@ export default function BreathingApp() {
             className={clsx(
               "cursor-pointer group h-full flex flex-col transition-all duration-300 relative overflow-hidden",
               selectedTechniqueId === id
-                ? "ring-2 ring-primary border-transparent shadow-xl bg-white scale-[1.02]"
-                : "hover:bg-white/80 border-transparent",
+                ? "ring-2 ring-primary border-transparent  bg-paper scale-[1.02]"
+                : "hover:bg-paper/80 border-transparent",
             )}
           >
             <div className="flex justify-between items-start mb-6 relative z-10">
@@ -228,8 +228,8 @@ export default function BreathingApp() {
                 className={clsx(
                   "p-3 rounded-xl transition-colors",
                   selectedTechniqueId === id
-                    ? "bg-primary text-white"
-                    : "bg-gray-100 text-gray-400",
+                    ? "bg-primary text-paper"
+                    : "bg-paper text-mata",
                 )}
               >
                 {id === "4-6" ? <Timer size={24} /> : <Wind size={24} />}
@@ -244,7 +244,7 @@ export default function BreathingApp() {
             <h3 className="text-2xl font-serif font-bold text-primary mb-2 relative z-10">
               {tech.title}
             </h3>
-            <p className="font-sans text-gray-500 mb-6 relative z-10">
+            <p className="font-sans text-mata mb-6 relative z-10">
               {tech.subtitle}
             </p>
           </PaperCard>
@@ -253,7 +253,7 @@ export default function BreathingApp() {
 
       <button
         onClick={goToInstructions}
-        className="group relative inline-flex items-center justify-center px-10 py-5 font-serif text-xl font-bold text-white transition-all duration-300 bg-primary rounded-full shadow-lg hover:shadow-2xl hover:-translate-y-1 w-full md:w-auto"
+        className="group relative inline-flex items-center justify-center px-10 py-5 font-serif text-xl font-bold text-paper transition-all duration-300 bg-primary rounded-full  hover: hover:-translate-y-1 w-full md:w-auto"
       >
         <span>Continuar</span>
         <ArrowLeft className="rotate-180 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -274,12 +274,12 @@ export default function BreathingApp() {
         Antes de começar...
       </h2>
 
-      <div className="bg-white/60 p-8 rounded-3xl border border-white mb-8 w-full text-left space-y-4">
+      <div className="bg-paper/60 p-8 rounded-3xl border border-nevoa mb-8 w-full text-left space-y-4">
         <div className="flex items-start gap-4">
           <div className="bg-primary/10 p-2 rounded-full text-primary mt-1">
             <Leaf size={20} />
           </div>
-          <p className="text-gray-600">
+          <p className="text-mata">
             Encontre uma posição confortável, sentado ou deitado.
           </p>
         </div>
@@ -287,7 +287,7 @@ export default function BreathingApp() {
           <div className="bg-primary/10 p-2 rounded-full text-primary mt-1">
             <Wind size={20} />
           </div>
-          <p className="text-gray-600">
+          <p className="text-mata">
             Relaxe os ombros e destrave o maxilar.
           </p>
         </div>
@@ -295,7 +295,7 @@ export default function BreathingApp() {
           <div className="bg-primary/10 p-2 rounded-full text-primary mt-1">
             <Info size={20} />
           </div>
-          <p className="text-gray-600">
+          <p className="text-mata">
             Siga o ritmo da animação. Se sentir tontura, pare imediatamente.
           </p>
         </div>
@@ -304,13 +304,13 @@ export default function BreathingApp() {
       <div className="flex gap-4">
         <button
           onClick={() => setAppState("menu")}
-          className="px-6 py-3 text-gray-500 font-bold hover:bg-gray-100 rounded-full transition-colors"
+          className="px-6 py-3 text-mata font-bold hover:bg-paper rounded-full transition-colors"
         >
           Voltar
         </button>
         <button
           onClick={startSession}
-          className="px-10 py-3 bg-primary text-white font-bold rounded-full shadow-lg hover:bg-primary/90 transition-colors flex items-center gap-2"
+          className="px-10 py-3 bg-primary text-paper font-bold rounded-full  hover:bg-primary/90 transition-colors flex items-center gap-2"
         >
           <Play size={18} fill="currentColor" /> Iniciar Agora
         </button>
@@ -336,7 +336,7 @@ export default function BreathingApp() {
         <div className="mb-4 self-end">
           <button
             onClick={stopSession}
-            className="flex items-center gap-2 p-3 md:px-5 md:py-2.5 rounded-full bg-white border border-gray-200 text-gray-700 hover:text-red-500 hover:border-red-200 font-bold shadow-sm transition-all"
+            className="flex items-center gap-2 p-3 md:px-5 md:py-2.5 rounded-full bg-paper border border-nevoa text-mata hover:text-red-500 hover:border-red-200 font-bold  transition-all"
           >
             <Square size={16} aria-hidden="true" />
             <span>Encerrar prática</span>
@@ -368,7 +368,7 @@ export default function BreathingApp() {
                 ? () => setSessionActive(false)
                 : () => setSessionActive(true)
             }
-            className="w-16 h-16 rounded-full bg-stone-800 text-white flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all"
+            className="w-16 h-16 rounded-full bg-primary text-paper flex items-center justify-center  hover:scale-105 active:scale-95 transition-all"
             aria-label={sessionActive ? "Pausar prática" : "Continuar prática"}
             aria-pressed={!sessionActive}
           >
@@ -392,7 +392,7 @@ export default function BreathingApp() {
       <StepIndicator step={4} />
 
       <PaperCard
-        className="py-16 flex flex-col items-center bg-white/90"
+        className="py-16 flex flex-col items-center bg-paper/90"
       >
         <motion.div
           initial={{ scale: 0 }}
@@ -406,14 +406,14 @@ export default function BreathingApp() {
         <h2 className="text-4xl font-serif text-primary mb-4">
           Sessão Concluída
         </h2>
-        <p className="font-sans text-lg text-gray-600 mb-10 leading-relaxed max-w-xs mx-auto">
+        <p className="font-sans text-lg text-mata mb-10 leading-relaxed max-w-xs mx-auto">
           Você completou seus 2 minutos. Leve essa calma com você.
         </p>
 
         <div className="flex flex-col gap-4 w-full">
           <button
             onClick={resetSession}
-            className="bg-primary text-white py-4 px-10 rounded-full font-sans font-bold shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all"
+            className="bg-primary text-paper py-4 px-10 rounded-full font-sans font-bold  hover: hover:-translate-y-1 transition-all"
           >
             Voltar ao Início
           </button>
@@ -425,7 +425,7 @@ export default function BreathingApp() {
   return (
     <div className="relative z-0 flex h-full min-h-0 w-full flex-col bg-paper">
       {/* Background Elements */}
-      <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[radial-gradient(circle_at_20%_20%,rgba(38,43,34,.35)_1px,transparent_1px)] [background-size:18px_18px]" />
+      <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[radial-gradient(circle_at_20%_20%,rgb(38 43 34 / .35)_1px,transparent_1px)] [background-size:18px_18px]" />
       <div className="absolute top-0 left-0 h-full w-full pointer-events-none bg-gradient-to-br from-white/40 via-blue-50/5 to-accent/5" />
 
       <main className="relative z-10 flex flex-1 min-h-0 flex-col justify-center py-5">

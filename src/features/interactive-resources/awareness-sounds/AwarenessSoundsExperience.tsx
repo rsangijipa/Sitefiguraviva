@@ -114,7 +114,7 @@ export function AwarenessSoundsExperience({
           records.map((r) => (
             <article
               key={r.id}
-              className="rounded-3xl border border-[#D8CFBE] bg-white p-5"
+              className="rounded-3xl border border-[#D8CFBE] bg-paper p-5"
             >
               <div className="flex justify-between gap-3">
                 <p className="text-sm text-text/70">

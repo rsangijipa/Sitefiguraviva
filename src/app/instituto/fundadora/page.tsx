@@ -80,7 +80,7 @@ export default async function FounderPage() {
             Uma prática feita de relação.
           </h2>
           <p className="mt-7 whitespace-pre-line text-lg leading-relaxed text-primary/70">
-            {founder.bio ||
+            {(founder.bio && !/\.\.\.$/.test(founder.bio.trim()) ? founder.bio : DEFAULT_FOUNDER.bio) ||
               `${name} construiu sua trajetória a partir da escuta, da prática clínica e do compromisso com uma formação que reconhece a complexidade de cada encontro.`}
           </p>
         </article>
@@ -110,22 +110,22 @@ export default async function FounderPage() {
 
       {/* Currículo + CTA */}
       <div className="container mx-auto max-w-6xl px-6 pb-20">
-        <div className="rounded-[2rem] border border-primary/10 bg-[#eee9df] p-8 md:p-12">
+        <div className="rounded-[2rem] border border-primary/10 bg-areia p-8 md:p-12">
           <div className="flex flex-col items-start gap-6 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.24em] text-gold">
                 Currículo
               </p>
-              <p className="mt-3 max-w-xl leading-relaxed text-primary/70 dark:text-[#31513b]">
-                Trajetória documentada em detalhe na Plataforma Lattes.
+              <p className="mt-3 max-w-xl leading-relaxed text-primary/70">
+                Conheça a formação e a atuação que sustentam o trabalho no Instituto.
               </p>
             </div>
-            {founder.link && (
+            {founder.link && /^https:\/\/lattes\.cnpq\.br\/\d+/.test(founder.link) && (
               <a
                 href={founder.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex min-h-11 shrink-0 items-center gap-2 font-bold uppercase tracking-widest text-primary hover:text-gold dark:text-[#173522]"
+                className="inline-flex min-h-11 shrink-0 items-center gap-2 font-bold uppercase tracking-widest text-primary hover:text-gold"
               >
                 Ver currículo Lattes <ArrowRight size={15} />
               </a>
@@ -133,7 +133,7 @@ export default async function FounderPage() {
           </div>
           <Link
             href="/instituto"
-            className="mt-7 inline-flex min-h-11 items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary hover:text-gold dark:text-[#173522]"
+            className="mt-7 inline-flex min-h-11 items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary hover:text-gold"
           >
             <ArrowLeft size={15} /> Voltar ao Instituto
           </Link>

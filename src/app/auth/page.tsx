@@ -58,7 +58,9 @@ function AuthContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   // Helper hook for content (if used)
-  const { data: courses = [] } = useCourses();
+  const { data: allCourses = [], isLoading: coursesLoading, isError: coursesError } = useCourses();
+  const courses = allCourses.filter((course) => course.isPublished && course.status === "open" && course.enrollmentOpen !== false);
+  const googleEnabled = process.env.NEXT_PUBLIC_GOOGLE_AUTH_ENABLED === "true";
 
   const mode = searchParams.get("mode");
   const next = searchParams.get("next") || "";
@@ -69,8 +71,10 @@ function AuthContent() {
   // 1. Initial State
   const [isSignup, setIsSignup] = useState(mode === "signup");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [signupStep, setSignupStep] = useState(1);
   const [error, setError] = useState("");
-  const [confirmationSent, setConfirmationSent] = useState(false);
+  const [registrationSubmitted, setRegistrationSubmitted] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   // 2. Fields
@@ -85,8 +89,19 @@ function AuthContent() {
   useEffect(() => {
     setIsSignup(mode === "signup");
     setError("");
-    setConfirmationSent(false);
+    setRegistrationSubmitted(false);
+    setLoading(false);
+    setGoogleLoading(false);
+    setSignupStep(1);
   }, [mode]);
+
+  const authHref = (signup: boolean) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("oauth");
+    if (signup) params.set("mode", "signup"); else params.delete("mode");
+    if (selectedCourse) params.set("courseId", selectedCourse);
+    return `/auth?${params.toString()}`;
+  };
 
   // Se o usuário já estiver autenticado e acessar a tela de auth diretamente,
   // encaminha para seu respectivo destino (/admin para admins).
@@ -230,6 +245,10 @@ function AuthContent() {
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    if (isSignup && signupStep === 1) {
+      setSignupStep(2);
+      return;
+    }
     setLoading(true);
 
     try {
@@ -250,7 +269,7 @@ function AuthContent() {
           return;
         }
 
-        setConfirmationSent(true);
+        setRegistrationSubmitted(true);
         setPassword("");
         setLoading(false);
         return;
@@ -276,31 +295,28 @@ function AuthContent() {
       return;
     }
 
-    setLoading(true);
+    setGoogleLoading(true);
     const callbackUrl = new URL("/auth", window.location.origin);
+    callbackUrl.search = new URLSearchParams(searchParams.toString()).toString();
     callbackUrl.searchParams.set("oauth", "google");
-    if (isSignup) {
-      callbackUrl.searchParams.set("mode", "signup");
-      callbackUrl.searchParams.set("courseId", selectedCourse);
-    }
-    if (next.startsWith("/") && !next.startsWith("//")) {
-      callbackUrl.searchParams.set("next", next);
-    }
-
-    const supabase = createSupabaseBrowserClient();
-    const { error: googleError } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: callbackUrl.toString(),
-        queryParams: { prompt: "select_account" },
-      },
-    });
-
-    if (googleError) {
-      const msg =
-        getFriendlyErrorMessage(googleError.code) || googleError.message;
-      if (msg) setError(msg);
-      setLoading(false);
+    if (selectedCourse) callbackUrl.searchParams.set("courseId", selectedCourse);
+    const timeout = window.setTimeout(() => {
+      setGoogleLoading(false);
+      setError("O Google não respondeu. Tente novamente ou entre com e-mail e senha.");
+    }, 15000);
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const { data, error: googleError } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: callbackUrl.toString(), skipBrowserRedirect: true, queryParams: { prompt: "select_account" } },
+      });
+      if (googleError || !data.url) throw new Error("Não foi possível iniciar o login com Google.");
+      window.location.assign(data.url);
+    } catch {
+      setError("Não foi possível entrar com Google. Use seu e-mail e senha.");
+    } finally {
+      window.clearTimeout(timeout);
+      setGoogleLoading(false);
     }
   };
 
@@ -309,7 +325,7 @@ function AuthContent() {
       <nav className={styles.navigation} aria-label="Voltar ao site">
         <Link
           href="/"
-          className="inline-flex min-h-11 items-center gap-2 text-xs font-semibold text-primary transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border bg-paper/95 px-4 py-2 text-sm font-semibold text-primary shadow-sm transition-colors hover:bg-areia focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
           <ArrowRight className="rotate-180" size={16} /> Voltar ao Início
         </Link>
@@ -363,9 +379,10 @@ function AuthContent() {
             </p>
           </div>
 
+          {googleEnabled && !isSignup && <>
           <button
             onClick={handleGoogleAuth}
-            disabled={loading}
+            disabled={loading || googleLoading}
             className={`${styles.google} flex w-full items-center justify-center gap-3 rounded-md border border-border bg-paper py-3 text-sm font-bold text-text transition-colors hover:border-igarape hover:bg-areia active:scale-[0.98]`}
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -398,19 +415,30 @@ function AuthContent() {
             </div>
           </div>
 
-          {confirmationSent && (
+          </>}
+
+          {registrationSubmitted && (
             <div
               role="status"
               className="mb-6 rounded-md border border-border bg-areia p-4 text-sm text-text"
             >
-              Se o cadastro puder ser realizado, você receberá um e-mail de
-              confirmação. Abra o link para continuar sua inscrição. Verifique
-              também a pasta de spam. Se já tem conta, faça login.
+              Seu cadastro foi enviado para análise do Instituto. O acesso à
+              plataforma será liberado após a aprovação do administrador. Depois
+              da aprovação, entre com seu e-mail e senha.
             </div>
           )}
-          <form onSubmit={handleEmailAuth} className={styles.form}>
+          {registrationSubmitted && (
+            <Link href={authHref(false)} className="mb-5 inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-paper px-4 text-sm font-semibold text-primary hover:bg-areia">
+              Ir para o login
+            </Link>
+          )}
+          {isSignup && !registrationSubmitted && <div className={styles.steps} aria-label="Etapas do cadastro">
+            <span aria-current={signupStep === 1 ? "step" : undefined}>1. Seus dados</span>
+            <span aria-current={signupStep === 2 ? "step" : undefined}>2. Seu acesso</span>
+          </div>}
+          {!registrationSubmitted && <form onSubmit={handleEmailAuth} className={styles.form}>
             <AnimatePresence mode="wait">
-              {isSignup && (
+              {isSignup && signupStep === 1 && (
                 <motion.div
                   key="signup-fields"
                   initial={{ opacity: 0, height: 0 }}
@@ -422,6 +450,7 @@ function AuthContent() {
                     id="full-name"
                     name="name"
                     label="Nome Completo"
+                    minLength={3}
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     required
@@ -432,6 +461,7 @@ function AuthContent() {
                     name="phone"
                     label="Telefone (WhatsApp)"
                     type="tel"
+                    minLength={10}
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     required
@@ -441,11 +471,11 @@ function AuthContent() {
                   <div className="space-y-1">
                     <label
                       htmlFor="course-interest"
-                      className="ml-1 text-[10px] font-bold uppercase text-text/80"
+                      className="ml-1 text-sm font-bold text-text"
                     >
                       Curso desejado
                     </label>
-                    {courses.length > 0 ? (
+                    {coursesLoading ? <p role="status">Carregando turmas abertas…</p> : coursesError ? <p role="alert">Não foi possível carregar as turmas. Atualize a página para tentar novamente.</p> : courses.length > 0 ? (
                       <>
                         <div className="relative">
                           <select
@@ -468,7 +498,7 @@ function AuthContent() {
                             className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-muted"
                           />
                         </div>
-                        <p className="ml-1 pt-1 text-[10px] text-muted">
+                        <p className="ml-1 pt-1 text-sm text-muted">
                           A conta é criada junto com a sua inscrição no curso.
                         </p>
                       </>
@@ -483,6 +513,8 @@ function AuthContent() {
               )}
             </AnimatePresence>
 
+            {(!isSignup || signupStep === 2) && <>
+            {isSignup && <div className="rounded-xl border border-border bg-areia p-3 text-sm"><p className="font-semibold">{courses.find(course => course.id === selectedCourse)?.title || "Curso selecionado"}</p><p className="mt-1 text-muted">Confira seu e-mail: o link para continuar a inscrição será enviado para ele.</p></div>}
             <Input
               id="email"
               name="email"
@@ -506,6 +538,7 @@ function AuthContent() {
                   required
                   className="pr-12"
                   autoComplete={isSignup ? "new-password" : "current-password"}
+                  minLength={isSignup ? 8 : undefined}
                 />
                 <button
                   type="button"
@@ -524,7 +557,7 @@ function AuthContent() {
               {!isSignup && (
                 <div className="text-right">
                   <Link
-                    href="/auth/reset-password"
+                    href={`/auth/reset-password?${new URLSearchParams(searchParams.toString()).toString()}`}
                     className={`${styles.forgot} inline-flex min-h-8 items-center text-xs font-semibold text-primary underline-offset-4 hover:underline`}
                   >
                     Esqueceu a senha?
@@ -533,6 +566,8 @@ function AuthContent() {
               )}
             </div>
 
+            {isSignup && <p className="text-sm text-muted">Use pelo menos 8 caracteres para a senha.</p>}
+            </>}
             {error && (
               <div
                 role="alert"
@@ -545,26 +580,27 @@ function AuthContent() {
             <button
               type="submit"
               disabled={
-                loading || confirmationSent || (isSignup && !selectedCourse)
+                loading || googleLoading || registrationSubmitted || (isSignup && (!selectedCourse || !courses.some(course => course.id === selectedCourse)))
               }
               className="flex h-12 w-full items-center justify-center gap-2 rounded-md bg-primary text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loading ? (
                 <Loader2 className="animate-spin" size={18} />
               ) : isSignup ? (
-                "Criar Conta"
+                signupStep === 1 ? "Continuar" : "Criar conta e continuar inscrição"
               ) : (
                 "Entrar"
               )}
             </button>
-          </form>
+            {isSignup && signupStep === 2 && <button type="button" className="min-h-11 text-sm font-semibold text-primary" onClick={() => { setSignupStep(1); setError(""); }}>Voltar aos seus dados</button>}
+          </form>}
 
           <div
             className={`${styles.switcher} border-t border-border/70 text-center`}
           >
             <button
               onClick={() =>
-                router.push(isSignup ? "/auth" : "/auth?mode=signup")
+                router.push(authHref(!isSignup))
               }
               className="text-sm text-text/80 transition-colors hover:text-primary"
             >

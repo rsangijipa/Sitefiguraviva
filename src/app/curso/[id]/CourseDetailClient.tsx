@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { getMediatorDetails } from "@/utils/mediators";
 import { getImageSrc } from "@/lib/imageUtils";
+import CourseAgendaSummary from "@/components/courses/CourseAgendaSummary";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import MediatorDialog from "@/components/MediatorDialog";
@@ -154,7 +155,7 @@ export default function CourseDetailClient({ course }: { course: any }) {
                                 <img
                                   src={avatarSrc}
                                   alt={details.name}
-                                  className="w-full h-full object-cover"
+                                  className="w-full h-full object-contain"
                                 />
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center text-stone-400 text-xs font-bold">
@@ -277,12 +278,13 @@ export default function CourseDetailClient({ course }: { course: any }) {
                   )}
                 </section>
               )}
+              <CourseAgendaSummary value={course.details?.agenda} />
               {course.enrollmentOpen ? (
                 <button
                   onClick={() =>
                     router.push(`/inscricao/${encodeURIComponent(course.id)}`)
                   }
-                  className="w-full md:w-auto px-8 py-4 bg-primary text-paper rounded-xl font-bold uppercase tracking-[0.2em] text-xs shadow-xl hover:bg-gold hover:translate-y-[-2px] transition-all flex items-center justify-center gap-3"
+                  className="w-full md:w-auto px-8 py-4 bg-primary text-white rounded-xl font-bold uppercase tracking-[0.2em] text-xs shadow-xl hover:bg-gold hover:translate-y-[-2px] transition-all flex items-center justify-center gap-3"
                 >
                   Fazer Inscrição <ExternalLink size={14} />
                 </button>
@@ -292,7 +294,7 @@ export default function CourseDetailClient({ course }: { course: any }) {
                   className="rounded-xl border border-primary/15 bg-white p-4 text-sm leading-relaxed text-primary/75"
                 >
                   Novas inscrições estão encerradas. Alunos matriculados podem
-                  acompanhar sua inscrição e acessar o portal.
+                  acompanhar sua inscrição e acessar o portal. <a href={`/auth?next=${encodeURIComponent(`/inscricao/${course.id}`)}&courseId=${encodeURIComponent(course.id)}`} className="inline-flex min-h-11 items-center font-bold text-primary underline">Entrar para acompanhar</a>
                 </p>
               )}
             </motion.div>
@@ -309,7 +311,7 @@ export default function CourseDetailClient({ course }: { course: any }) {
                 <img
                   src={getCoverImage()}
                   alt={course.title}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-105"
                 />
               </div>
             </motion.button>

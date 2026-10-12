@@ -1,4 +1,5 @@
 import { usePublicContact } from "@/features/public-site/components/PublicContactProvider";
+import { readCourseAgenda, type CourseAgenda } from "@/features/courses/domain/course-agenda";
 import {
   Modal,
   ModalContent,
@@ -17,6 +18,7 @@ export interface CalendarCourse {
   link?: string;
   details?: {
     schedule?: string[];
+    agenda?: CourseAgenda;
   };
 }
 
@@ -61,7 +63,7 @@ export default function CalendarModal({
 
   const parseDate = (
     str: string | undefined | null,
-    defaultYear = 2026,
+    defaultYear = new Date().getFullYear(),
   ): Date | null => {
     if (!str) return null;
     str = str.toLowerCase().trim();
@@ -97,9 +99,17 @@ export default function CalendarModal({
     let events: any[] = [];
 
     courses.forEach((course) => {
+      const agenda = readCourseAgenda(course.details?.agenda);
+      if (agenda?.sessions.length) {
+        agenda.sessions.forEach(session => {
+          const parsed = new Date(session.date + "T12:00:00Z");
+          events.push({ timestamp: parsed.getTime(), displayDate: parsed.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", timeZone: "UTC" }), monthName: parsed.toLocaleDateString("pt-BR", { month: "long", timeZone: "UTC" }), weekday: parsed.toLocaleDateString("pt-BR", { weekday: "short", timeZone: "UTC" }), title: course.title + (session.title ? ` — ${session.title}` : ""), type: course.category || "Curso", time: `${session.startTime}–${session.endTime} · ${agenda.timezone}`, link: course.link });
+        });
+        return;
+      }
       // Determine course year contexts if possible, else 2026
       const yearContext =
-        course.date && course.date.includes("2025") ? 2025 : 2026;
+        Number(course.date?.match(/20\d{2}/)?.[0]) || new Date().getFullYear();
 
       // 1. Static Schedule Array
       if (course.details?.schedule && Array.isArray(course.details.schedule)) {
@@ -153,10 +163,10 @@ export default function CalendarModal({
   const headerTitle = (
     <div>
       <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-gold block mb-2">
-        Agenda 2026
+        Agenda de encontros
       </span>
       <h3 className="font-serif text-2xl md:text-3xl text-primary">
-        Próximos Encontros
+        Agenda de encontros
       </h3>
     </div>
   );

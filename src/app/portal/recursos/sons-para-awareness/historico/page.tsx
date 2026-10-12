@@ -1,2 +1,2 @@
-import { redirect } from "next/navigation";
-export default function ConsolidatedResourcePage() { redirect("/recursos/sala-de-pausa"); }
+import { permanentRedirect } from "next/navigation";
+export default function ConsolidatedResourcePage() { permanentRedirect("/portal/recursos/meus-registros"); }

@@ -112,7 +112,7 @@ export function InteractiveMap() {
         >
           {[
             { label: "Países", value: "3", icon: "🌍" },
-            { label: "Anos de Atuação", value: "85", icon: "📅" },
+            { label: "Anos de vida", value: "84", icon: "📅" },
             { label: "Cidades", value: "5", icon: "🏙️" },
             { label: "Gerações Formadas", value: "∞", icon: "👥" },
           ].map((stat, index) => (

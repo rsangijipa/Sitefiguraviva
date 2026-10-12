@@ -1,5 +1,6 @@
 import "server-only";
 import { z } from "zod";
+import { courseAgendaSchema } from "@/features/courses/domain/course-agenda";
 import { getCourseMediators } from "@/utils/mediators";
 import { validateCommercialFields } from "@/features/courses/domain/course-offer";
 
@@ -275,6 +276,7 @@ function mapThreadRow(row: ThreadRow): CommunityThreadDoc {
 function courseDetails(payload: MutablePayload) {
   const details = { ...payload.details };
   let changed = payload.details !== undefined;
+  if (details.agenda !== undefined) details.agenda = courseAgendaSchema.parse(details.agenda);
   for (const key of [
     "frequency",
     "date",

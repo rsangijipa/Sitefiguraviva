@@ -457,3 +457,22 @@
     animation: none !important;
   }
 }
+:global(.dark) .root {
+  --color-primary:124 200 148; --color-primary-solid:22 122 61; --color-primary-dark:14 92 44;
+  --color-paper:18 22 15; --color-surface:28 34 25; --color-areia:36 43 33;
+  --color-text:237 240 233; --color-muted:174 186 169; --color-border:68 81 63;
+  --admin-bg:#12160f; --admin-surface:#1c2219; --admin-ink:#edf0e9; --admin-muted:#aebaab; --admin-border:#44513f;
+  --admin-green:#7cc894; --admin-green-soft:#203e2a; --admin-blue:#99c0ef; --admin-blue-soft:#23374c;
+  --admin-amber:#e7be83; --admin-amber-soft:#49361f; --admin-violet:#c7b1e3; --admin-violet-soft:#382b4a;
+  color-scheme:dark;
+}
+:global(.dark) .root .navItem[aria-current="page"] { background:#166d39; }
+.root :where(section,article,fieldset,form) { min-width:0; }
+.root :where(input,select,textarea) { max-width:100%; }
+@media(max-width:639px) {
+  .root :global(.grid-cols-2),.root :global(.grid-cols-3) { grid-template-columns:minmax(0,1fr); }
+  .root :global(.col-span-2),.root :global(.col-span-3) { grid-column:1 / -1; }
+  .root :where([role="dialog"]) { max-width:calc(100vw - 24px); max-height:calc(100dvh - 24px); overflow-y:auto; }
+  .root :where([role="dialog"]) :is(button,a) { min-height:44px; }
+  .root .content { padding-bottom:110px; }
+}

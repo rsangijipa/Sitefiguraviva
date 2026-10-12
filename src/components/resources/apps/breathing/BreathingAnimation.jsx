@@ -55,7 +55,7 @@ const Mandala = ({ theme, scale, reducedMotion }) => {
                   background: `linear-gradient(135deg, ${theme.primary}66, ${theme.secondary}66)`,
                   transform: `rotate(${rotation}deg) translateY(-${ring.radius}px)`,
                   transformOrigin: "center center",
-                  border: "1px solid rgba(255,255,255,0.12)",
+                  border: "1px solid rgb(253 250 244 / 0.12)",
                 }}
               />
             );
@@ -69,10 +69,10 @@ const Mandala = ({ theme, scale, reducedMotion }) => {
           className="w-16 h-16 rounded-full flex items-center justify-center"
           style={{
             background: `conic-gradient(from 0deg, ${theme.primary}, ${theme.secondary}, ${theme.primary})`,
-            boxShadow: `0 0 32px ${theme.primary}70`,
+            boxShadow: "none",
           }}
         >
-          <div className="w-11 h-11 bg-white/15 backdrop-blur-md rounded-full border border-white/30" />
+          <div className="w-11 h-11 bg-paper/15  rounded-full border border-nevoa/30" />
         </div>
       </div>
 
@@ -155,8 +155,8 @@ export const BreathingAnimation = ({
   const mandalaTheme = useMemo(() => {
     const isCalming = technique.id === "4-7-8" || technique.id === "4-6";
     return {
-      primary: isCalming ? "#588157" : "#C45B50",
-      secondary: isCalming ? "#A3B18A" : "#E6AD9B",
+      primary: isCalming ? "#6B6B63" : "#96551F",
+      secondary: isCalming ? "#D8CFBE" : "#D8CFBE",
     };
   }, [technique.id]);
 

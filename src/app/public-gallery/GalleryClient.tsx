@@ -168,14 +168,15 @@ export default function GalleryClient({
                     event.currentTarget,
                   )
                 }
-                className="group relative block h-[52vh] w-full overflow-hidden border border-border text-left"
+                className="group relative block h-[340px] sm:h-[400px] w-full overflow-hidden border border-border text-left"
               >
                 <GalleryImage
                   src={featuredPhoto.src}
                   alt={featuredPhoto.title}
                   width={featuredPhoto.width}
                   height={featuredPhoto.height}
-                  imageClassName="opacity-95 transition-opacity group-hover:opacity-100"
+                  className="h-full"
+                  imageClassName="object-[center_68%] opacity-95 transition-opacity group-hover:opacity-100"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-mata/80 via-transparent to-transparent p-6 flex flex-col justify-end">
                   <h2 className="font-serif text-2xl leading-tight text-white md:text-3xl">
@@ -281,7 +282,8 @@ export default function GalleryClient({
                   alt={photo.title}
                   width={photo.width}
                   height={photo.height}
-                  imageClassName="opacity-95 transition-opacity group-hover:opacity-100"
+                  className="h-full"
+                  imageClassName="object-[center_68%] opacity-95 transition-opacity group-hover:opacity-100"
                 />
                 {/* Hover Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">

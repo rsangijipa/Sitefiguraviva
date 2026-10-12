@@ -101,6 +101,7 @@ export default function AdminShell({
       className={"fv-admin " + styles.root}
       data-collapsed={collapsed}
       data-menu-open={open}
+      data-admin-shell
     >
       {open && (
         <button

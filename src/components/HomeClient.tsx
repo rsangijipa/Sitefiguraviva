@@ -10,7 +10,6 @@ import Footer from "./Footer";
 import AlertBar from "./AlertBar";
 import HeroSection from "./sections/HeroSection";
 import CoursesSection from "./sections/CoursesSection";
-import FloatingControls from "./ui/FloatingControls";
 import { useSearchParams, useRouter } from "next/navigation";
 
 const BlogSection = dynamic(() => import("./sections/BlogSection"));
@@ -161,7 +160,6 @@ export default function HomeClient({ initialData }: HomeClientProps = {}) {
       </div>
 
       <Footer />
-      <FloatingControls />
 
       {/* MODALS */}
 

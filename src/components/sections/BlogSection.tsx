@@ -41,15 +41,11 @@ export default function BlogSection({
     const isLibrary =
       post.type === "library" ||
       post.category?.toLowerCase() === "biblioteca" ||
-      post.category?.toLowerCase() === "artigo acadêmico" ||
-      !post.image;
+      post.category?.toLowerCase() === "artigo acadêmico";
     return activeTab === "biblioteca" ? isLibrary : !isLibrary;
   });
 
-  // Se o filtro específico estiver vazio, usa os posts disponíveis
-  const displayPosts = (
-    filteredPosts.length > 0 ? filteredPosts : blogPosts
-  ).slice(0, 3);
+  const displayPosts = filteredPosts.slice(0, 3);
 
   return (
     <SectionShell

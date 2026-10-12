@@ -18,6 +18,7 @@ import {
   approveEnrollment,
   rejectEnrollment,
   getPendingEnrollmentsAction,
+  reviewRegistration,
 } from "./actions";
 import {
   AdminEmptyState,
@@ -28,6 +29,7 @@ import { AdminPageShell } from "@/components/admin/AdminPageShell";
 
 export default function ApprovalsPage() {
   const [pendingEnrollments, setPendingEnrollments] = useState<any[]>([]);
+  const [pendingRegistrations, setPendingRegistrations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const { addToast } = useToast();
@@ -38,7 +40,10 @@ export default function ApprovalsPage() {
     setLoadError(null);
     try {
       const result = await getPendingEnrollmentsAction();
-      if (result.success) setPendingEnrollments(result.enrollments);
+      if (result.success) {
+        setPendingEnrollments(result.enrollments);
+        setPendingRegistrations(result.registrations || []);
+      }
       else
         setLoadError(result.error || "Não foi possível carregar aprovações.");
     } catch {
@@ -51,6 +56,25 @@ export default function ApprovalsPage() {
   useEffect(() => {
     fetchPending();
   }, []);
+
+  const handleRegistrationReview = async (registration: any, approve: boolean) => {
+    const verb = approve ? "aprovar" : "rejeitar";
+    if (!confirm(`Deseja ${verb} o cadastro de ${registration.display_name || registration.email}?`)) return;
+    setProcessingId(registration.id);
+    try {
+      const result = await reviewRegistration(registration.id, approve);
+      if (result.success) {
+        addToast(approve ? "Cadastro aprovado. O aluno já pode entrar." : "Cadastro rejeitado.", approve ? "success" : "info");
+        await fetchPending();
+      } else {
+        addToast(result.error || "Não foi possível revisar o cadastro.", "error");
+      }
+    } catch {
+      addToast("Não foi possível revisar o cadastro.", "error");
+    } finally {
+      setProcessingId(null);
+    }
+  };
 
   const handleApprove = async (enrollment: any) => {
     if (enrollment.paymentMethod === "pix") {
@@ -119,26 +143,46 @@ export default function ApprovalsPage() {
   return (
     <AdminPageShell
       title="Aprovações"
-      description="Libere acessos pagos sem interromper o restante do painel."
+      description="Analise as inscrições e aprove ou rejeite o acesso dos alunos."
       breadcrumbs={[{ label: "Aprovações" }]}
     >
       <div className="space-y-4">
         <p className="text-sm text-stone-500">
-          {pendingEnrollments.length} matrículas aguardando análise e
-          conferência.
+          {pendingRegistrations.length} cadastros e {pendingEnrollments.length} matrículas aguardando decisão do Instituto.
         </p>
 
         {loading ? (
           <AdminLoadingState rows={4} />
         ) : loadError ? (
           <AdminErrorState title={loadError} retry={fetchPending} />
-        ) : pendingEnrollments.length === 0 ? (
+        ) : pendingEnrollments.length === 0 && pendingRegistrations.length === 0 ? (
           <AdminEmptyState
             title="Tudo em dia"
-            description="Nenhum aluno pago aguardando aprovação."
+            description="Nenhuma matrícula aguardando aprovação."
           />
         ) : (
           <div className="grid gap-6">
+            {pendingRegistrations.length > 0 && (
+              <section className="space-y-3" aria-labelledby="pending-registrations-title">
+                <h2 id="pending-registrations-title" className="text-lg font-semibold text-primary">Cadastros aguardando aprovação</h2>
+                {pendingRegistrations.map((registration) => (
+                  <Card key={registration.id} className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <div className="rounded-full bg-primary/5 p-2 text-primary"><User size={20} /></div>
+                      <div className="min-w-0">
+                        <h3 className="truncate font-semibold text-primary">{registration.display_name || "Novo aluno"}</h3>
+                        <p className="truncate text-sm text-stone-600">{registration.email}</p>
+                        <p className="text-xs text-stone-400">Solicitado em {new Date(registration.created_at).toLocaleDateString("pt-BR")}</p>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap justify-end gap-2">
+                      <Button variant="outline" color="danger" size="sm" leftIcon={<X size={16} />} onClick={() => handleRegistrationReview(registration, false)} disabled={processingId === registration.id}>Rejeitar cadastro</Button>
+                      <Button size="sm" leftIcon={processingId === registration.id ? <Clock className="animate-spin" /> : <Check size={16} />} onClick={() => handleRegistrationReview(registration, true)} disabled={processingId === registration.id}>Aprovar cadastro</Button>
+                    </div>
+                  </Card>
+                ))}
+              </section>
+            )}
             {pendingEnrollments.map((en) => (
               <Card
                 key={en.id}

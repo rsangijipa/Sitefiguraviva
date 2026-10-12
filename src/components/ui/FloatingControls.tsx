@@ -1,133 +1,73 @@
 "use client";
-
-import { usePublicContact } from "@/features/public-site/components/PublicContactProvider";
-import { useEffect, useRef, useState } from "react";
-import {
-  MessageCircle,
-  MonitorSmartphone,
-  Moon,
-  Music,
-  Pause,
-  Plus,
-  Sun,
-} from "lucide-react";
-
+import { useEffect, useId, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
+import { MessageCircle, MonitorSmartphone, Moon, Music, Pause, Plus, Sun, X } from "lucide-react";
 import { useTheme } from "@/components/providers/ThemeProvider";
-
+import { usePublicContact } from "@/features/public-site/components/PublicContactProvider";
+import styles from "./FloatingControls.module.css";
+const THEMES = [{ value: "light", label: "Claro", Icon: Sun }, { value: "dark", label: "Escuro", Icon: Moon }, { value: "system", label: "Sistema", Icon: MonitorSmartphone }] as const;
 export default function FloatingControls() {
   const config = usePublicContact();
-  const whatsappNumber = config.whatsappNumber || "";
-  const whatsappMessage = config.whatsappMessage || "";
-  const [isPlaying, setIsPlaying] = useState(false);
+  const pathname = usePathname() ?? "";
+  const resourceExperience = /^\/(portal\/)?recursos\/[^/]+/.test(pathname);
+  const { preference, setPreference } = useTheme();
   const [expanded, setExpanded] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [audioError, setAudioError] = useState("");
   const audioRef = useRef<HTMLAudioElement>(null);
-  const { theme, preference, setPreference, mounted } = useTheme();
-
-  const themeLabel =
-    preference === "system"
-      ? "Tema: seguindo o sistema"
-      : preference === "dark"
-        ? "Tema escuro"
-        : "Tema claro";
-
-  const cyclePreference = () => {
-    setPreference(preference === "light" ? "dark" : "light");
-  };
-
+  const rootRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const panelId = useId();
+  const showContact = !/^\/(admin|auth|login|signup|portal|inscricao)(\/|$)/.test(pathname) && Boolean(config.whatsappNumber);
+  useEffect(() => { setExpanded(false); if(resourceExperience)audioRef.current?.pause(); }, [pathname,resourceExperience]);
+  useEffect(() => {
+    if (!expanded) return;
+    panelRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
+    const outside = (event: PointerEvent) => {
+      if (event.target instanceof Node && !rootRef.current?.contains(event.target)) setExpanded(false);
+    };
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") { setExpanded(false); triggerRef.current?.focus(); }
+    };
+    document.addEventListener("pointerdown", outside);
+    document.addEventListener("keydown", escape);
+    return () => { document.removeEventListener("pointerdown", outside); document.removeEventListener("keydown", escape); };
+  }, [expanded]);
+  useEffect(() => {
+    const pause = () => audioRef.current?.pause();
+    const mediaStarted = (event: Event) => { if (event.target !== audioRef.current) pause(); };
+    const hidden = () => { if (document.hidden) pause(); };
+    window.addEventListener("fv:lesson-audio-start", pause);
+    document.addEventListener("play", mediaStarted, true);
+    document.addEventListener("visibilitychange", hidden);
+    return () => { window.removeEventListener("fv:lesson-audio-start", pause); document.removeEventListener("play", mediaStarted, true); document.removeEventListener("visibilitychange", hidden); };
+  }, []);
   const toggleAudio = async () => {
-    if (!audioRef.current) return;
-    if (isPlaying) audioRef.current.pause();
-    else await audioRef.current.play().catch(() => undefined);
-    setIsPlaying((current) => !current);
+    const audio = audioRef.current;
+    if (!audio) return;
+    setAudioError("");
+    if (!audio.paused) { audio.pause(); return; }
+    if (document.documentElement.dataset.lessonAudioPlaying === "true") {
+      setAudioError("Pause o áudio da aula antes de tocar o som ambiente."); return;
+    }
+    try { await audio.play(); } catch { setIsPlaying(false); setAudioError("Não foi possível tocar o som. Tente novamente."); }
   };
-
-  const whatsappUrl = `https://wa.me/${whatsappNumber.replace(/\D/g, "")}?text=${encodeURIComponent(whatsappMessage)}`;
-  const controlClass =
-    "flex h-11 w-11 items-center justify-center rounded-full border border-border bg-surface text-primary shadow-soft-sm transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
-
+  if(resourceExperience) return null;
   return (
-    <div className="pointer-events-none fixed bottom-6 right-6 z-[100] flex flex-col items-end">
-      {config.showAudioControl && (
-        <audio
-          ref={audioRef}
-          src="/assets/audio/meditation.mp3"
-          preload="metadata"
-          loop
-        />
-      )}
-      <div className="pointer-events-auto flex flex-col items-end gap-3">
-        <a
-          data-floating-whatsapp="true"
-          href={whatsappUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Falar com o Instituto no WhatsApp"
-          title="Falar no WhatsApp"
-          className="flex h-12 w-12 items-center justify-center rounded-full bg-[#25D366] text-white shadow-xl transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-        >
-          <MessageCircle size={24} aria-hidden="true" />
-        </a>
-
-        {expanded && (
-          <div
-            data-secondary-floating-control="true"
-            className="flex flex-col items-center gap-3"
-          >
-            <button
-              type="button"
-              onClick={cyclePreference}
-              aria-label={themeLabel}
-              title={themeLabel}
-              className={controlClass}
-            >
-              {!mounted ? (
-                <Sun size={18} aria-hidden="true" />
-              ) : preference === "system" ? (
-                <MonitorSmartphone size={18} aria-hidden="true" />
-              ) : theme === "dark" ? (
-                <Moon size={18} aria-hidden="true" />
-              ) : (
-                <Sun size={18} aria-hidden="true" />
-              )}
-            </button>
-            {config.showAudioControl && (
-              <button
-                type="button"
-                onClick={toggleAudio}
-                aria-label={
-                  isPlaying ? "Pausar som ambiente" : "Tocar som ambiente"
-                }
-                title={isPlaying ? "Pausar som ambiente" : "Tocar som ambiente"}
-                className={controlClass}
-              >
-                {isPlaying ? (
-                  <Pause size={18} aria-hidden="true" />
-                ) : (
-                  <Music size={18} aria-hidden="true" />
-                )}
-              </button>
-            )}
-          </div>
-        )}
-
-        <button
-          type="button"
-          data-secondary-floating-control="true"
-          onClick={() => setExpanded((current) => !current)}
-          aria-label={expanded ? "Fechar opções" : "Mais opções"}
-          aria-expanded={expanded}
-          className="z-10 flex h-11 w-11 items-center justify-center rounded-full bg-primary text-white shadow-lg transition-transform hover:scale-105 hover:bg-gold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-        >
-          <Plus
-            size={24}
-            aria-hidden="true"
-            className={
-              expanded
-                ? "rotate-45 transition-transform"
-                : "transition-transform"
-            }
-          />
-        </button>
+    <div ref={rootRef} className={styles.root} data-area={pathname.startsWith("/admin") ? "admin" : pathname.startsWith("/portal") ? "portal" : "public"} data-global-options>
+      {config.showAudioControl && <audio ref={audioRef} src="/assets/audio/meditation.mp3" preload="none" loop onPlay={() => setIsPlaying(true)} onPause={() => setIsPlaying(false)} onEnded={() => setIsPlaying(false)} onError={() => { setIsPlaying(false); setAudioError("Som ambiente indisponível no momento."); }} />}
+      {expanded && <div id={panelId} ref={panelRef} className={styles.panel} role="region" aria-label="Som e aparência" data-secondary-floating-control="true">
+        <p className={styles.title}>Aparência</p>
+        <div className={styles.themes} aria-label="Escolher tema">
+          {THEMES.map(({ value, label, Icon }) => <button key={value} type="button" aria-pressed={preference === value} onClick={() => setPreference(value)}><Icon size={18} aria-hidden="true" />{label}</button>)}
+        </div>
+        {config.showAudioControl && <button className={styles.audio} type="button" onClick={toggleAudio} aria-pressed={isPlaying}>{isPlaying ? <Pause size={18} aria-hidden="true" /> : <Music size={18} aria-hidden="true" />}{isPlaying ? "Pausar som ambiente" : "Tocar som ambiente"}</button>}
+        {audioError && <p className={styles.error} role="status">{audioError}</p>}
+      </div>}
+      <div className={styles.actions}>
+        {showContact && <a data-floating-whatsapp="true" className={styles.contact} href={`https://wa.me/${config.whatsappNumber.replace(/\D/g, "")}?text=${encodeURIComponent(config.whatsappMessage || "")}`} target="_blank" rel="noopener noreferrer" aria-label="Falar com o Instituto no WhatsApp"><MessageCircle size={23} aria-hidden="true" /></a>}
+        <button ref={triggerRef} type="button" className={styles.trigger} data-secondary-floating-control="true" aria-label={expanded ? "Fechar opções" : "Mais opções: som e tema"} aria-controls={panelId} aria-expanded={expanded} title="Som e tema" onClick={() => setExpanded(value => !value)}>{expanded ? <X size={23} aria-hidden="true" /> : <Plus size={23} aria-hidden="true" />}</button>
       </div>
     </div>
   );

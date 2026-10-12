@@ -3,6 +3,7 @@ import { DEFAULT_CONFIG, type ConfigSettings } from "@/lib/siteSettings";
 import { ArrowRight, Sparkles } from "lucide-react";
 import dynamic from "next/dynamic";
 import styles from "./HeroSection.module.css";
+import TreeAtmosphere from "../visual/TreeAtmosphere";
 
 const EnhancedLivingTree = dynamic(
   () => import("../visual/EnhancedLivingTree"),
@@ -83,6 +84,7 @@ export default function HeroSection({
         </div>
 
         <div className={styles.visual} aria-hidden="true" data-hero-tree>
+          <TreeAtmosphere />
           <EnhancedLivingTree
             className={styles.tree}
             theme="figura-viva"

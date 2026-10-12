@@ -33,6 +33,7 @@ interface Course {
   details?: { intro: string };
   category?: string;
   slug?: string;
+  enrollmentOpen?: boolean;
 }
 
 interface CoursesSectionProps {
@@ -121,7 +122,19 @@ export default function CoursesSection({
           ) : (
             courses.map((course, index) => {
               const isClosed =
-                course.status === "Encerrado" || course.status === "Esgotado";
+                course.enrollmentOpen === false || course.status === "closed" || course.status === "archived" || course.status === "Encerrado" || course.status === "Esgotado";
+              const statusLabels: Record<string, string> = {
+                open: "Inscrições abertas",
+                closed: "Inscrições encerradas",
+                archived: "Arquivado",
+              };
+              const normalizedCategory = course.category?.trim().toLocaleLowerCase("pt-BR");
+              const categoryLabel =
+                normalizedCategory === "formacao" || normalizedCategory === "formação"
+                  ? "Formação"
+                  : normalizedCategory === "grupoestudos" || normalizedCategory === "grupo de estudos"
+                    ? "Grupo de Estudos"
+                    : course.category;
               const courseUrl = `/curso/${course.slug || course.id}`;
 
               return (
@@ -153,16 +166,12 @@ export default function CoursesSection({
                         <div className="absolute top-2.5 left-2.5 flex flex-wrap gap-1.5 pointer-events-none">
                           {course.category && (
                             <span className="rounded-sm border border-border bg-paper/95 px-2.5 py-0.5 text-caption font-bold uppercase tracking-wider text-primary backdrop-blur-sm">
-                              {course.category === "Formacao"
-                                ? "Formação"
-                                : course.category === "GrupoEstudos"
-                                  ? "Grupo de Estudos"
-                                  : "Curso Livre"}
+                              {categoryLabel}
                             </span>
                           )}
                           {isClosed && (
                             <span className="rounded-sm bg-error/90 px-2.5 py-0.5 text-caption font-bold uppercase tracking-wider text-white backdrop-blur-sm">
-                              {course.status}
+                              {statusLabels[course.status] || (course.enrollmentOpen === false ? "Inscrições encerradas" : course.status)}
                             </span>
                           )}
                         </div>
@@ -179,7 +188,7 @@ export default function CoursesSection({
                             </p>
                           )}
                           <p className="text-caption font-bold uppercase tracking-wider text-fv-terra-barro">
-                            {course.date || "Início em breve"}
+                            {isClosed ? "Inscrições encerradas" : course.date || "Datas a confirmar"}
                           </p>
                         </div>
 
@@ -239,7 +248,7 @@ export default function CoursesSection({
           {courses.some((c) => Boolean(c.date)) && (
             <div className="flex flex-wrap items-center justify-center gap-2 max-w-2xl px-4">
               <span className="text-caption font-bold uppercase tracking-[0.16em] text-fv-terra-barro">
-                Próximos Inícios:
+                Datas e encontros:
               </span>
               {courses
                 .filter((c) => Boolean(c.date))

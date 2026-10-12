@@ -5,6 +5,7 @@ import {
   PUBLIC_TEAM_COLUMNS,
 } from "./public-content-columns";
 import { createSupabaseBrowserClient } from "@/infrastructure/supabase/client";
+import { readCourseAgenda } from "@/features/courses/domain/course-agenda";
 import { getCourseMediators } from "@/utils/mediators";
 import type { Json, TableRow } from "@/infrastructure/supabase/database.types";
 
@@ -56,7 +57,10 @@ function publicCourseDetails(source: Record<string, unknown>) {
     "location",
     "date",
     "frequency",
+    "time",
   ]);
+  const agenda = readCourseAgenda(source.agenda);
+  if (agenda) details.agenda = agenda;
   for (const key of ["format", "schedule"]) {
     if (typeof source[key] === "string") details[key] = source[key];
     else if (Array.isArray(source[key]))

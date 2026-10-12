@@ -20,7 +20,7 @@ export default function Footer() {
   const mapsHref = `https://maps.google.com/?q=${encodeURIComponent(address)}`;
 
   return (
-    <footer className="fv-bg fv-bg-footer relative overflow-hidden bg-primary-solid py-4 text-paper md:py-5">
+    <footer className="fv-bg fv-bg-footer relative overflow-hidden bg-primary-solid py-4 text-white md:py-5">
       <div className="fv-container relative z-10">
         <div className="grid gap-x-6 gap-y-4 border-b border-paper/15 pb-3 md:grid-cols-12 lg:gap-x-8">
           <div className="min-w-0 md:col-span-4 lg:col-span-3">
@@ -41,7 +41,7 @@ export default function Footer() {
                 />
               </a>
             </div>
-            <p className="max-w-sm text-sm leading-snug text-paper/70">
+            <p className="max-w-sm text-sm leading-snug text-white/70">
               Habitando a fronteira do encontro, cultivando awareness e
               transformando vidas através da Gestalt-Terapia.
             </p>
@@ -54,7 +54,7 @@ export default function Footer() {
             <h4 className="mb-1 font-sans text-caption font-bold uppercase tracking-[0.2em] text-gold-light">
               Explorar
             </h4>
-            <ul className="grid grid-cols-2 gap-x-3 text-sm text-paper/75">
+            <ul className="grid grid-cols-2 gap-x-3 text-sm text-white/75">
               {explorar.map((item) => (
                 <li key={item.href}>
                   <Link
@@ -75,7 +75,7 @@ export default function Footer() {
             <h4 className="mb-1 font-sans text-caption font-bold uppercase tracking-[0.2em] text-gold-light">
               Institucional
             </h4>
-            <ul className="flex flex-wrap gap-x-5 text-sm text-paper/75 md:block">
+            <ul className="flex flex-wrap gap-x-5 text-sm text-white/75 md:block">
               {institucional.map((item) => (
                 <li key={item.href}>
                   <Link
@@ -93,7 +93,7 @@ export default function Footer() {
             <h4 className="mb-1 font-sans text-caption font-bold uppercase tracking-[0.2em] text-gold-light">
               Contato
             </h4>
-            <div className="grid items-start gap-x-6 gap-y-1 text-sm text-paper/75 sm:grid-cols-2 lg:grid-cols-1">
+            <div className="grid items-start gap-x-6 gap-y-1 text-sm text-white/75 sm:grid-cols-2 lg:grid-cols-1">
               <p className="flex items-start gap-2 whitespace-pre-line leading-snug sm:row-span-2 lg:row-span-1">
                 <MapPin size={16} className="mt-1 shrink-0 text-gold-light" />
                 <span className="min-w-0 break-words">{address}</span>
@@ -130,7 +130,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-x-6 gap-y-1 pt-2 text-xs text-paper/70 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-x-6 gap-y-1 pt-2 text-xs text-white/70 md:flex-row md:items-center md:justify-between">
           <p className="leading-relaxed">
             &copy; {new Date().getFullYear()} Instituto Figura Viva &bull; Todos
             os direitos reservados

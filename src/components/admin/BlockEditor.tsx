@@ -245,7 +245,7 @@ export default function BlockEditor({ initialBlocks, onSave, isSaving }: BlockEd
                                         <option value="">Selecione uma ferramenta...</option>
                                         {CLINICAL_TOOLS_REGISTRY.map(tool => (
                                             <option key={tool.slug} value={tool.slug}>
-                                                {tool.name} ({tool.category} - {tool.estimatedMinutes}min)
+                                                {tool.name} ({tool.category} - {tool.estimatedMinutes}min{tool.pilotPending ? " - piloto pendente" : ""})
                                             </option>
                                         ))}
                                     </select>

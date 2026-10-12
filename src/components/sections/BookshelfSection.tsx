@@ -68,7 +68,7 @@ export default function BookshelfSection({ livros }: { livros: Livro[] }) {
   return (
     <section
       aria-label="Estante de preferidos"
-      className="fv-section fv-section--cream fv-bg border-t border-border"
+      className="fv-section--cream fv-bg border-t border-border pb-12"
     >
       <div className="mb-14">
         <PublicPageHero

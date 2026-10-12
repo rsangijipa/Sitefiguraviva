@@ -1,54 +1,32 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
-import { resourceCatalog, resourceAliases, resolveResourceSlug } from "../resourceCatalog";
-
-const root = process.cwd();
-const readSource = (path: string) => readFileSync(join(root, path), "utf8");
-
-describe("public resource deep links", () => {
-  it("gives every available catalog item a stable /recursos/[slug] URL", () => {
-    const source = readSource("src/components/ResourcesSection.jsx");
-
-    expect(resourceCatalog.some((item) => item.status === "available")).toBe(
-      true,
-    );
-    expect(source).toContain("href={`/recursos/${resource.slug}`}");
-  });
-
-  it("publishes exactly twelve implemented resources and no retired entries", () => {
-    expect(resourceCatalog).toHaveLength(12);
-    expect(resourceCatalog.every(item => item.status === "available")).toBe(true);
-    const slugs = resourceCatalog.map(item => item.slug);
-    expect(new Set(slugs).size).toBe(12);
-    for (const slug of ["quiz", "somascan", "duas-cadeiras", "polaridades", "fronteiras-de-contato", "caso-clinico"]) {
-      expect(slugs).not.toContain(slug);
-      expect(resourceAliases[slug]).toBeUndefined();
-    }
-  });
-
-  it("consolidates shared URLs into existing experiences", () => {
-    for (const [alias, target] of Object.entries(resourceAliases)) {
-      expect(resourceCatalog.some(item => item.slug === alias)).toBe(false);
-      expect(resourceCatalog.some(item => item.slug === target)).toBe(true);
-    }
-    expect(resourceAliases["intensidade-agora"]).toBe("body-map");
-    expect(resourceAliases["check-in"]).toBe("diario-aqui-e-agora");
-    expect(resourceAliases["jardim-de-pensamentos"]).toBe("rio-dos-pensamentos");
-    expect(resourceCatalog.find(item => item.slug === "sala-de-pausa")?.sections?.map(item => item.id)).toEqual(["pause", "breathing", "grounding", "sounds"]);
-  });
-
-  it("does not treat inherited object properties as aliases", () => {
-    for (const slug of ["constructor", "toString", "__proto__", "unknown-resource"]) {
-      expect(resolveResourceSlug(slug)).toBe(slug);
-    }
-  });
-
-  it("opens only available resources on refresh and returns to the catalog", () => {
-    const page = readSource("src/app/recursos/[slug]/page.tsx");
-    const section = readSource("src/components/ResourcesSection.jsx");
-
-    expect(page).toContain('resource.status !== "available"');
-    expect(page).toContain("initialActiveSlug={resource.slug}");
-    expect(section).toContain('router.push("/recursos")');
-  });
+import { resourceCatalog, resourceAliases, resolveResourceSlug,resolveResourceDestination,resourceHref,isPublicResource } from "../resourceCatalog";
+describe("Figura Viva v2 catalog and destinations",()=>{
+ it("registers fifteen consolidated and three draft learning resources",()=>{
+  expect(resourceCatalog).toHaveLength(18);
+  expect(resourceCatalog.filter(item=>item.visibility==="draft")).toHaveLength(3);
+  expect(resourceCatalog.filter(item=>item.visibility==="hidden").map(item=>item.slug)).toEqual(["instrumentos-em-estudo"]);
+  expect(new Set(resourceCatalog.map(item=>item.slug)).size).toBe(18);
+ });
+ it("exposes published self-guided experiences while keeping learning and case-study tools in formation",()=>{
+  expect(resourceCatalog.filter(isPublicResource).map(item=>item.slug)).toEqual([
+   "cartas-gestalticas","figura-e-fundo","chegada","mapa-do-corpo","roda-das-emocoes",
+   "necessidades-agora","paisagem-de-pensamentos","sons-para-awareness","sala-de-pausa","igarape",
+  ]);
+  expect(resourceCatalog.filter(item=>item.category==="APRENDER" && item.slug!=="cartas-gestalticas" && item.slug!=="figura-e-fundo").every(item=>!isPublicResource(item))).toBe(true);
+  expect(isPublicResource(resourceCatalog.find(item=>item.slug==="polaridades-e-cadeiras")!)).toBe(false);
+  for(const resource of resourceCatalog)expect(resourceHref(resource)).toBe(`${resource.access==="public"?"/recursos":"/portal/recursos"}/${resource.slug}`);
+ });
+ it("resolves each legacy alias to one registered resource and validates modes",()=>{
+  for(const [alias,target] of Object.entries(resourceAliases)){
+   expect(resourceCatalog.some(item=>item.slug===alias)).toBe(false);
+   expect(resolveResourceDestination(alias)).toEqual(target);
+   expect(resourceCatalog.some(item=>item.slug===target.slug)).toBe(true);
+  }
+  expect(resolveResourceDestination("check-in")).toEqual({slug:"chegada",mode:"completa"});
+  expect(resolveResourceDestination("somascan")).toEqual({slug:"mapa-do-corpo",mode:"percorrer"});
+  expect(resolveResourceDestination("lago","arbitrary")).toEqual({slug:"igarape"});
+  expect(resolveResourceDestination("chegada","breve")).toEqual({slug:"chegada",mode:"breve"});
+ });
+ it("does not use inherited object properties as aliases",()=>{
+  for(const slug of ["constructor","toString","__proto__","unknown-resource"])expect(resolveResourceSlug(slug)).toBe(slug);
+ });
 });

@@ -1,5 +1,8 @@
 "use client";
 
+import CourseAgendaEditor from "@/components/admin/courses/CourseAgendaEditor";
+import CourseWorkloadInput from "@/components/admin/courses/CourseWorkloadInput";
+import { agendaSummary, courseAgendaSchema, type CourseAgenda } from "@/features/courses/domain/course-agenda";
 import { useState, useEffect } from "react";
 import { CourseDoc } from "@/types/lms";
 import { getImageSrc } from "@/lib/imageUtils";
@@ -129,6 +132,10 @@ export default function CourseEditorClient({
     if (course.mediators?.some((m) => !m.name.trim())) {
       addToast("Informe o nome de cada mediadora.", "error");
       return;
+    }
+    if (course.details?.agenda) {
+      const valid = courseAgendaSchema.safeParse(course.details.agenda);
+      if (!valid.success) { addToast(valid.error.issues[0]?.message || "Confira os encontros.", "error"); return; }
     }
     setIsSaving(true);
     try {
@@ -470,28 +477,25 @@ export default function CourseEditorClient({
                             <option value="advanced">Avançado</option>
                           </select>
                         </div>
+                        <div className="col-span-2 min-w-0">
+                          <CourseAgendaEditor value={course.details?.agenda} legacyDate={course.date} legacyFrequency={course.frequency} onChange={agenda => updateCourse({ details: { ...course.details, agenda }, date: agendaSummary(agenda) })} />
+                        </div>
+                        <div className="col-span-2"><CourseWorkloadInput value={course.workload} onChange={workload => updateCourse({ workload })} /></div>
                         <div className="col-span-2 grid gap-4 md:grid-cols-2">
                           {[
-                            ["date", "Datas dos encontros"],
+
                             ["location", "Local ou plataforma"],
-                            ["workload", "Carga horária (minutos)"],
+
                           ].map(([key, label]) => (
                             <label key={key} className="text-sm">
                               {label}
                               <input
                                 className="block w-full p-3 border rounded-xl"
-                                type={key === "workload" ? "number" : "text"}
-                                min={key === "workload" ? 0 : undefined}
-                                step={key === "workload" ? 1 : undefined}
+                                type="text"
                                 value={course[key] ?? ""}
                                 onChange={(e) =>
                                   updateCourse({
-                                    [key]:
-                                      key === "workload"
-                                        ? e.target.value === ""
-                                          ? undefined
-                                          : Number(e.target.value)
-                                        : e.target.value,
+                                    [key]: e.target.value,
                                   })
                                 }
                               />

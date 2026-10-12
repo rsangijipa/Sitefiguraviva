@@ -4,9 +4,7 @@ import { headers } from "next/headers";
 import { z } from "zod";
 import {
   createSupabaseServiceClient,
-  createSupabaseAuthServerClient,
 } from "@/infrastructure/supabase/server";
-import { getAuthEmailRedirect } from "@/lib/auth/email-flow";
 import {
   getClientIdentifier,
   rateLimit,
@@ -49,7 +47,7 @@ export type SignupInput = z.infer<typeof signupSchema>;
 export interface SignupResult {
   success: boolean;
   courseId?: string;
-  requiresEmailConfirmation?: boolean;
+  requiresAdminApproval?: boolean;
   error?: string;
 }
 
@@ -93,7 +91,7 @@ export async function registerForCourseAction(
     if (!emailLimit.allowed)
       return {
         success: false,
-        error: "Aguarde antes de solicitar outra confirmação para este e-mail.",
+        error: "Aguarde antes de solicitar outro cadastro para este e-mail.",
       };
 
     const supabase = createSupabaseServiceClient();
@@ -117,36 +115,49 @@ export async function registerForCourseAction(
       };
     }
 
-    const auth = createSupabaseAuthServerClient();
-    const { data, error } = await auth.auth.signUp({
+    const { data, error } = await supabase.auth.admin.createUser({
       email,
       password,
-      options: {
-        emailRedirectTo: getAuthEmailRedirect("confirm", courseId),
-        data: { full_name: fullName, phone, course_interest: courseId },
-      },
+      email_confirm: true,
+      user_metadata: { full_name: fullName, phone, course_interest: courseId },
     });
 
     if (error) {
       return {
         success: false,
         error:
-          "Não foi possível enviar a confirmação. Tente novamente ou entre com uma conta existente.",
+          "Não foi possível solicitar o cadastro. Se já tem uma conta, entre com seus dados de acesso.",
       };
     }
-
-    // With confirmation enabled, Auth returns no session. Do not bootstrap
-    // profiles from this response: an existing email can return an obfuscated user.
-    if (data.session) {
-      await auth.auth.signOut();
+    if (!data.user) {
       return {
         success: false,
-        error:
-          "Cadastro temporariamente indisponível. Entre em contato com o Instituto.",
+        error: "Não foi possível concluir o cadastro. Tente novamente.",
       };
     }
 
-    return { success: true, courseId, requiresEmailConfirmation: true };
+    const { error: profileError } = await supabase.from("profiles").insert({
+      id: data.user.id,
+      email,
+      display_name: fullName,
+      phone_number: phone,
+      role: "student",
+      is_active: false,
+      registration_status: "pending",
+    });
+    if (profileError) {
+      const { error: deleteError } = await supabase.auth.admin.deleteUser(
+        data.user.id,
+      );
+      if (deleteError) {
+        await supabase.auth.admin.updateUserById(data.user.id, {
+          ban_duration: "876000h",
+        });
+      }
+      throw new Error("Não foi possível registrar a solicitação.");
+    }
+
+    return { success: true, courseId, requiresAdminApproval: true };
   } catch (error: any) {
     console.error("registerForCourseAction failed:", error);
     return {

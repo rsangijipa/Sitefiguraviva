@@ -35,7 +35,7 @@ const Results: React.FC<ResultsProps> = ({ data, onRestart }) => {
   return (
     <div className="flex flex-col h-full max-w-5xl mx-auto p-6 animate-fade-in overflow-y-auto">
       <div className="text-center mb-8 mt-4">
-        <h2 className="text-4xl font-serif italic text-stone-800">
+        <h2 className="text-4xl font-serif italic text-mata">
           Seu Mapa Corporal
         </h2>
         <div className="w-12 h-1 bg-clay mx-auto mt-4 rounded-full opacity-50"></div>
@@ -43,7 +43,7 @@ const Results: React.FC<ResultsProps> = ({ data, onRestart }) => {
 
       <div className="flex flex-col md:flex-row gap-12 items-center justify-center flex-1">
         {/* Visual Map */}
-        <div className="w-full max-w-xs h-[450px] bg-white rounded-[2rem] p-6 shadow-sm border border-stone-100">
+        <div className="w-full max-w-xs h-[450px] bg-paper rounded-[2rem] p-6  border border-nevoa">
           <BodyMap
             data={data}
             selectedPart={null}
@@ -61,9 +61,9 @@ const Results: React.FC<ResultsProps> = ({ data, onRestart }) => {
               aria-live="polite"
               aria-label="Preparando leitura reflexiva"
             >
-              <div className="h-4 bg-stone-200 rounded w-3/4"></div>
-              <div className="h-24 bg-stone-200 rounded-xl w-full"></div>
-              <div className="h-12 bg-stone-200 rounded-full w-1/2 mx-auto"></div>
+              <div className="h-4 bg-paper rounded w-3/4"></div>
+              <div className="h-24 bg-paper rounded-xl w-full"></div>
+              <div className="h-12 bg-paper rounded-full w-1/2 mx-auto"></div>
             </div>
           ) : (
             <>
@@ -71,27 +71,27 @@ const Results: React.FC<ResultsProps> = ({ data, onRestart }) => {
                 <span className="text-clay text-xs font-bold tracking-[0.2em] uppercase">
                   Observação
                 </span>
-                <p className="text-2xl font-serif text-stone-700 leading-snug">
+                <p className="text-2xl font-serif text-mata leading-snug">
                   {insight?.summary}
                 </p>
               </div>
 
-              <div className="bg-[#f0fdf4] border border-sage/20 p-8 rounded-[2rem] relative overflow-hidden">
+              <div className="bg-[#FDFAF4] border border-sage/20 p-8 rounded-[2rem] relative overflow-hidden">
                 {/* Decorative Circle */}
                 <div className="absolute -top-10 -right-10 w-32 h-32 bg-sage/10 rounded-full blur-2xl"></div>
 
                 <span className="text-sage text-xs font-bold tracking-[0.2em] uppercase block mb-3">
                   Sugestão
                 </span>
-                <p className="text-lg text-stone-600 font-light leading-relaxed">
+                <p className="text-lg text-mata font-light leading-relaxed">
                   {insight?.recommendation}
                 </p>
-                <p className="mt-4 text-xs leading-relaxed text-stone-500">
+                <p className="mt-4 text-xs leading-relaxed text-mata">
                   Esta leitura é apenas reflexiva, não é diagnóstico. Procure
                   atendimento profissional diante de sintomas intensos, súbitos
                   ou persistentes.
                 </p>
-                <div className="flex gap-6 mt-8 text-sm text-stone-500 border-t border-sage/20 pt-6">
+                <div className="flex gap-6 mt-8 text-sm text-mata border-t border-sage/20 pt-6">
                   <span className="flex items-center gap-2">
                     <Droplet className="w-4 h-4 text-ocean" /> Hidrate-se
                   </span>
@@ -108,20 +108,20 @@ const Results: React.FC<ResultsProps> = ({ data, onRestart }) => {
 
           <section
             aria-labelledby="recorded-regions-title"
-            className="border-t border-stone-200 pt-5"
+            className="border-t border-nevoa pt-5"
           >
             <h3
               id="recorded-regions-title"
-              className="text-xs font-bold uppercase tracking-[0.16em] text-stone-500"
+              className="text-xs font-bold uppercase tracking-[0.16em] text-mata"
             >
               Regiões registradas
             </h3>
             {recordedRegions.length ? (
-              <ul className="mt-3 space-y-2 text-sm text-stone-600">
+              <ul className="mt-3 space-y-2 text-sm text-mata">
                 {recordedRegions.map((region) => (
                   <li
                     key={region.id}
-                    className="flex justify-between gap-4 border-b border-stone-100 pb-2"
+                    className="flex justify-between gap-4 border-b border-nevoa pb-2"
                   >
                     <span>{region.label}</span>
                     <span className="capitalize">
@@ -131,7 +131,7 @@ const Results: React.FC<ResultsProps> = ({ data, onRestart }) => {
                 ))}
               </ul>
             ) : (
-              <p className="mt-3 text-sm text-stone-500">
+              <p className="mt-3 text-sm text-mata">
                 Nenhuma região foi registrada neste scan.
               </p>
             )}
@@ -140,7 +140,7 @@ const Results: React.FC<ResultsProps> = ({ data, onRestart }) => {
           <button
             type="button"
             onClick={onRestart}
-            className="w-full py-4 mt-8 flex items-center justify-center gap-2 text-stone-500 hover:text-stone-800 hover:bg-stone-100 rounded-full transition-all border border-transparent hover:border-stone-200 font-medium tracking-wide"
+            className="w-full py-4 mt-8 flex items-center justify-center gap-2 text-mata hover:text-mata hover:bg-paper rounded-full transition-all border border-transparent hover:border-nevoa font-medium tracking-wide"
           >
             <RefreshCcw className="w-4 h-4" /> Iniciar Novo Scan
           </button>

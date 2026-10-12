@@ -100,11 +100,11 @@
     padding-bottom: 40px;
   }
   .layout {
-    min-height: 480px;
+    min-height: 420px;
     gap: 56px;
   }
   .visual {
-    height: 520px;
+    height: 440px;
   }
 }
 

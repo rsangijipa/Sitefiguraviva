@@ -71,6 +71,10 @@ export default function AdminCalendarPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [viewMode, setViewMode] = useState<"calendar" | "list">("calendar");
 
+  useEffect(() => {
+    if (window.matchMedia("(max-width: 639px)").matches) setViewMode("list");
+  }, []);
+
   // Filter states
   const [selectedCourseFilter, setSelectedCourseFilter] =
     useState<string>("all");
@@ -437,9 +441,9 @@ export default function AdminCalendarPage() {
         </div>
       ) : viewMode === "calendar" ? (
         /* Monthly Calendar Grid View */
-        <div className="overflow-hidden rounded-2xl border border-[#D8CFBE] bg-white shadow-sm">
+        <div className="overflow-x-auto rounded-2xl border border-[#D8CFBE] bg-white shadow-sm">
           {/* Weekday headers */}
-          <div className="grid grid-cols-7 border-b border-[#D8CFBE] bg-[#F1E9DB]/60 text-center text-xs font-bold uppercase tracking-wider text-[#005A1F] py-3">
+          <div className="grid min-w-[640px] grid-cols-7 border-b border-[#D8CFBE] bg-[#F1E9DB]/60 text-center text-xs font-bold uppercase tracking-wider text-[#005A1F] py-3">
             {WEEKDAYS.map((day, idx) => (
               <div
                 key={day}
@@ -451,7 +455,7 @@ export default function AdminCalendarPage() {
           </div>
 
           {/* Days Grid */}
-          <div className="grid grid-cols-7 divide-x divide-y divide-[#D8CFBE]/60">
+          <div className="grid min-w-[640px] grid-cols-7 divide-x divide-y divide-[#D8CFBE]/60">
             {calendarDays.map((cell, idx) => {
               const dayEvents = getEventsForDate(
                 cell.year,

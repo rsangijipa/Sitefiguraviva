@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 const approve = jest.fn(),
   update = jest.fn(),
   revoke = jest.fn(),
@@ -36,21 +37,21 @@ const props = {
 };
 it("refreshes after completing existing access", async () => {
   const refreshed = jest.fn();
-  render(<EnrollmentCard {...props} onReviewed={refreshed} />);
+  renderCard(<EnrollmentCard {...props} onReviewed={refreshed} />);
   fireEvent.click(screen.getByTitle("Marcar como Concluído"));
   await waitFor(() => expect(refreshed).toHaveBeenCalledTimes(1));
 });
 it("shows rejection instead of claiming completion", async () => {
   update.mockResolvedValue({ success: false, error: "Bloqueado" });
   const refreshed = jest.fn();
-  render(<EnrollmentCard {...props} onReviewed={refreshed} />);
+  renderCard(<EnrollmentCard {...props} onReviewed={refreshed} />);
   fireEvent.click(screen.getByTitle("Marcar como Concluído"));
   await waitFor(() => expect(toast).toHaveBeenCalledWith("Bloqueado", "error"));
   expect(refreshed).not.toHaveBeenCalled();
 });
 it("refreshes after manual approval", async () => {
   const refreshed = jest.fn();
-  render(
+  renderCard(
     <EnrollmentCard
       {...props}
       enrollment={{ ...props.enrollment, status: "pending_approval" }}
@@ -62,13 +63,13 @@ it("refreshes after manual approval", async () => {
 });
 it("refreshes after revocation", async () => {
   const refreshed = jest.fn();
-  render(<EnrollmentCard {...props} onReviewed={refreshed} />);
+  renderCard(<EnrollmentCard {...props} onReviewed={refreshed} />);
   fireEvent.click(screen.getByTitle("Revogar Acesso"));
   await waitFor(() => expect(refreshed).toHaveBeenCalledTimes(1));
 });
 it("handles thrown action errors", async () => {
   update.mockRejectedValue(new Error("network"));
-  render(<EnrollmentCard {...props} />);
+  renderCard(<EnrollmentCard {...props} />);
   fireEvent.click(screen.getByTitle("Marcar como Concluído"));
   await waitFor(() =>
     expect(toast).toHaveBeenCalledWith(
@@ -81,7 +82,7 @@ it("handles thrown action errors", async () => {
 it.each(["pix", "stripe", null, "unknown"])(
   "does not offer ordinary approval for %s",
   (method) => {
-    render(
+    renderCard(
       <EnrollmentCard
         {...props}
         enrollment={{
@@ -94,3 +95,5 @@ it.each(["pix", "stripe", null, "unknown"])(
     expect(screen.queryByTitle("Aprovar Matrícula")).not.toBeInTheDocument();
   },
 );
+
+function renderCard(ui: React.ReactNode) { return render(<QueryClientProvider client={new QueryClient({defaultOptions:{queries:{retry:false}}})}>{ui}</QueryClientProvider>); }

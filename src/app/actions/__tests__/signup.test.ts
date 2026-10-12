@@ -16,12 +16,13 @@ jest.mock("@/lib/rateLimit", () => ({
 }));
 
 const mockCourseMaybeSingle = jest.fn();
-const mockSignUp = jest.fn();
-const mockSignOut = jest.fn();
-const mockProfileUpsert = jest.fn();
+const mockCreateUser = jest.fn();
+const mockDeleteUser = jest.fn();
+const mockProfileInsert = jest.fn();
 
 jest.mock("@/infrastructure/supabase/server", () => ({
   createSupabaseServiceClient: () => ({
+    auth: { admin: { createUser: mockCreateUser, deleteUser: mockDeleteUser, updateUserById: jest.fn() } },
     from: (table: string) => {
       if (table === "courses") {
         return {
@@ -30,11 +31,8 @@ jest.mock("@/infrastructure/supabase/server", () => ({
           }),
         };
       }
-      return { upsert: (...args: unknown[]) => mockProfileUpsert(...args) };
+      return { insert: (...args: unknown[]) => mockProfileInsert(...args) };
     },
-  }),
-  createSupabaseAuthServerClient: () => ({
-    auth: { signUp: mockSignUp, signOut: mockSignOut },
   }),
 }));
 
@@ -49,8 +47,7 @@ const validInput = {
 describe("registerForCourseAction", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    process.env.NEXT_PUBLIC_BASE_URL = "https://www.institutofiguraviva.com.br";
-    mockSignOut.mockResolvedValue({ error: null });
+    mockDeleteUser.mockResolvedValue({ error: null });
     mockRateLimit.mockResolvedValue({
       allowed: true,
       remaining: 4,
@@ -59,11 +56,11 @@ describe("registerForCourseAction", () => {
     mockCourseMaybeSingle.mockResolvedValue({
       data: { id: "curso-gestalt", is_published: true, status: "open" },
     });
-    mockSignUp.mockResolvedValue({
-      data: { user: { id: "uuid-123" }, session: null },
+    mockCreateUser.mockResolvedValue({
+      data: { user: { id: "uuid-123" } },
       error: null,
     });
-    mockProfileUpsert.mockResolvedValue({ error: null });
+    mockProfileInsert.mockResolvedValue({ error: null });
   });
 
   it("refuses to create an account without a course", async () => {
@@ -73,7 +70,7 @@ describe("registerForCourseAction", () => {
     });
 
     expect(result.success).toBe(false);
-    expect(mockSignUp).not.toHaveBeenCalled();
+    expect(mockCreateUser).not.toHaveBeenCalled();
   });
 
   it("refuses when the course does not exist", async () => {
@@ -82,7 +79,7 @@ describe("registerForCourseAction", () => {
     const result = await registerForCourseAction(validInput);
 
     expect(result.success).toBe(false);
-    expect(mockSignUp).not.toHaveBeenCalled();
+    expect(mockCreateUser).not.toHaveBeenCalled();
   });
 
   it("refuses when the course is not published", async () => {
@@ -93,7 +90,7 @@ describe("registerForCourseAction", () => {
     const result = await registerForCourseAction(validInput);
 
     expect(result.success).toBe(false);
-    expect(mockSignUp).not.toHaveBeenCalled();
+    expect(mockCreateUser).not.toHaveBeenCalled();
   });
 
   it("refuses a weak password before touching Supabase", async () => {
@@ -103,7 +100,7 @@ describe("registerForCourseAction", () => {
     });
 
     expect(result.success).toBe(false);
-    expect(mockSignUp).not.toHaveBeenCalled();
+    expect(mockCreateUser).not.toHaveBeenCalled();
   });
 
   it("refuses when the rate limit is exceeded", async () => {
@@ -116,30 +113,25 @@ describe("registerForCourseAction", () => {
     const result = await registerForCourseAction(validInput);
 
     expect(result.success).toBe(false);
-    expect(mockSignUp).not.toHaveBeenCalled();
+    expect(mockCreateUser).not.toHaveBeenCalled();
   });
 
-  it("requests email confirmation without writing profiles or granting a session", async () => {
+  it("creates an inactive account for administrator approval without sending confirmation mail", async () => {
     const result = await registerForCourseAction(validInput);
     expect(result).toEqual({
       success: true,
       courseId: "curso-gestalt",
-      requiresEmailConfirmation: true,
+      requiresAdminApproval: true,
     });
-    expect(mockSignUp).toHaveBeenCalledWith({
+    expect(mockCreateUser).toHaveBeenCalledWith({
       email: "maria@example.com",
       password: "senha-forte-123",
-      options: {
-        emailRedirectTo:
-          "https://www.institutofiguraviva.com.br/auth/confirm?courseId=curso-gestalt",
-        data: {
-          full_name: "Maria Souza",
-          phone: "(69) 99999-1234",
-          course_interest: "curso-gestalt",
-        },
-      },
+      email_confirm: true,
+      user_metadata: { full_name: "Maria Souza", phone: "(69) 99999-1234", course_interest: "curso-gestalt" },
     });
-    expect(mockProfileUpsert).not.toHaveBeenCalled();
+    expect(mockProfileInsert).toHaveBeenCalledWith(expect.objectContaining({
+      id: "uuid-123", email: "maria@example.com", is_active: false, registration_status: "pending",
+    }));
   });
   it("rejects a closed course and database failures", async () => {
     mockCourseMaybeSingle.mockResolvedValue({
@@ -152,32 +144,12 @@ describe("registerForCourseAction", () => {
       error: { message: "DB failure" },
     });
     expect((await registerForCourseAction(validInput)).success).toBe(false);
-    expect(mockSignUp).not.toHaveBeenCalled();
+    expect(mockCreateUser).not.toHaveBeenCalled();
   });
-  it("never writes an obfuscated existing account response into profiles", async () => {
-    mockSignUp.mockResolvedValue({
-      data: { user: { id: "fake-existing-id", identities: [] }, session: null },
-      error: null,
-    });
-    expect((await registerForCourseAction(validInput)).success).toBe(true);
-    expect(mockProfileUpsert).not.toHaveBeenCalled();
-  });
-  it("fails closed when confirmation is disabled and a session is returned", async () => {
-    mockSignUp.mockResolvedValue({
-      data: { user: { id: "uuid" }, session: { access_token: "unexpected" } },
-      error: null,
-    });
-    expect((await registerForCourseAction(validInput)).success).toBe(false);
-    expect(mockSignOut).toHaveBeenCalled();
-    expect(mockProfileUpsert).not.toHaveBeenCalled();
-  });
-  it("reports delivery failures without leaking provider details", async () => {
-    mockSignUp.mockResolvedValue({
-      data: { user: null, session: null },
-      error: { code: "smtp_error", message: "private SMTP detail" },
-    });
+  it("does not leave an authentication account when pending profile creation fails", async () => {
+    mockProfileInsert.mockResolvedValue({ error: { message: "db unavailable" } });
     const result = await registerForCourseAction(validInput);
     expect(result.success).toBe(false);
-    expect(result.error).not.toMatch(/private|smtp_error/);
+    expect(mockDeleteUser).toHaveBeenCalledWith("uuid-123");
   });
 });

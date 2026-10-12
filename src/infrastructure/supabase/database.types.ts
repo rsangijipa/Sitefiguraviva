@@ -121,6 +121,7 @@ export interface Database {
           photo_url: string | null;
           role: AppRole;
           is_active: boolean;
+          registration_status: "pending" | "approved" | "rejected";
           stripe_customer_id: string | null;
           bio: string | null;
           phone_number: string | null;
@@ -975,6 +976,10 @@ export interface Database {
           p_role: string | null;
           p_active: boolean | null;
         };
+        Returns: Json;
+      };
+      review_pending_registration: {
+        Args: { p_actor: string; p_target: string; p_approve: boolean };
         Returns: Json;
       };
       is_auth_session_active: {

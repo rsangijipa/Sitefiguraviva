@@ -30,7 +30,7 @@ export default async function InstitutePage() {
   const { institute, founder } = await getInstituteData();
   const title = institute.title || "Instituto Figura Viva";
   const manifesto =
-    institute.manifesto_text ||
+    (institute.manifesto_text && !/\.\.\.$/.test(institute.manifesto_text.trim()) ? institute.manifesto_text : DEFAULT_INSTITUTE.manifesto_text) ||
     "Aqui, Gestalt-terapia é caminho: estudo, prática e presença para quem deseja cuidar e se formar com densidade.";
 
   const timeline = [
@@ -166,7 +166,7 @@ export default async function InstitutePage() {
         </section>
 
         {/* 05 — Fundadora */}
-        <section className="mt-20 grid items-center gap-10 rounded-[2rem] bg-[#eee9df] p-8 md:grid-cols-[0.85fr_1.15fr] md:p-12">
+        <section className="mt-20 grid items-center gap-10 rounded-[2rem] bg-areia p-8 md:grid-cols-[0.85fr_1.15fr] md:p-12">
           {founder.image && (
             <div className="relative mx-auto aspect-[4/5] w-full max-w-xs overflow-hidden rounded-2xl md:mx-0">
               <Image
@@ -182,17 +182,17 @@ export default async function InstitutePage() {
             <p className="text-xs font-bold uppercase tracking-[0.24em] text-gold">
               05 — Fundadora
             </p>
-            <h2 className="mt-4 max-w-2xl font-serif text-4xl text-primary dark:text-[#173522]">
-              A memória da fundadora continua abrindo caminhos.
+            <h2 className="mt-4 max-w-2xl font-serif text-4xl text-primary">
+              A trajetória da fundadora abre caminhos.
             </h2>
-            <p className="mt-5 max-w-2xl leading-relaxed text-primary/70 dark:text-[#31513b]">
+            <p className="mt-5 max-w-2xl leading-relaxed text-primary/70">
               {founder.name
                 ? `${founder.name} conduz este campo com uma prática dedicada à formação e ao cuidado.`
                 : "Conheça quem sustenta este campo de presença, estudo e cuidado."}
             </p>
             <Link
               href="/instituto/fundadora"
-              className="mt-7 inline-flex min-h-11 items-center gap-2 font-bold uppercase tracking-widest text-primary hover:text-gold dark:text-[#173522]"
+              className="mt-7 inline-flex min-h-11 items-center gap-2 font-bold uppercase tracking-widest text-primary hover:text-gold"
             >
               Ler trajetória <ArrowRight size={15} />
             </Link>

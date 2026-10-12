@@ -93,8 +93,11 @@ function PostMeta({ post }: { post: any }) {
   );
 }
 
-export default async function BlogPage() {
-  const posts = await getPosts();
+export default async function BlogPage({ searchParams }: { searchParams: Promise<{ categoria?: string }> }) {
+  const params = await searchParams;
+  const selected = CATEGORIES.find(category => category === params.categoria) || "Todos";
+  const allPosts = await getPosts();
+  const posts = selected === "Todos" ? allPosts : allPosts.filter(post => categoryOf(post) === selected);
   const [first, second, third, ...rest] = posts;
   const highlighted = [second, third].filter(Boolean);
 
@@ -106,7 +109,7 @@ export default async function BlogPage() {
         description="Artigos, poesias e reflexões sobre a Gestalt-terapia e o viver humano."
         backgroundImage="/assets/fv/heroes/blog.webp"
       />
-      <div className="min-h-screen bg-paper pb-20 pt-16">
+      <div className="bg-paper pb-12 pt-10">
         <div className="max-w-7xl mx-auto px-6 md:px-12">
           {/* DESTAQUE */}
           {first && (
@@ -167,12 +170,14 @@ export default async function BlogPage() {
           {/* CATEGORIAS */}
           <div className="mb-10 flex flex-wrap gap-2">
             {CATEGORIES.map((cat) => (
-              <span
+              <Link
+                href={cat === "Todos" ? "/blog" : `/blog?categoria=${encodeURIComponent(cat)}`}
+                aria-current={selected === cat ? "page" : undefined}
                 key={cat}
-                className="rounded-full border border-stone-200 px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-primary/60"
+                className="inline-flex min-h-11 items-center rounded-full border border-border px-4 py-2 text-xs font-bold uppercase tracking-widest text-primary aria-[current=page]:bg-primary aria-[current=page]:text-white"
               >
                 {cat}
-              </span>
+              </Link>
             ))}
           </div>
 
@@ -223,7 +228,7 @@ export default async function BlogPage() {
           {posts.length === 0 && (
             <div className="text-center py-20">
               <p className="text-stone-400 font-light">
-                Nenhuma publicação encontrada.
+                Nenhuma publicação encontrada nesta seleção. Consulte também a Biblioteca Viva para textos e artigos do acervo.
               </p>
             </div>
           )}

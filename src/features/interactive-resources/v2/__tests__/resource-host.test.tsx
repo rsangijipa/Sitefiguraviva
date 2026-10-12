@@ -11,6 +11,23 @@ const snapshot={version:null,concepts:[],emotions:[],needs:[],cases:[]};
 describe("ResourceHost mode changes",()=>{
  beforeAll(()=>{HTMLDialogElement.prototype.showModal=function(){this.setAttribute("open","");};HTMLDialogElement.prototype.close=function(){this.removeAttribute("open");};});
  beforeEach(()=>push.mockClear());
+ it("shows the selected card-study mode even while editorial content is unavailable",()=>{
+  render(<ResourceHost slug="cartas-gestalticas" snapshot={snapshot}/>);
+  fireEvent.click(screen.getByRole("button",{name:/^revisar/}));
+  expect(screen.getByRole("button",{name:/^revisar/})).toHaveAttribute("aria-pressed","true");
+  expect(screen.getByText("Modo selecionado:").parentElement).toHaveTextContent("revisar");
+  fireEvent.click(screen.getByRole("button",{name:"Iniciar recurso"}));
+  expect(screen.getByRole("heading",{name:"O acervo aguarda revisão docente"})).toBeInTheDocument();
+ });
+ it("supports choosing a mode, starting, and returning to the mode screen",()=>{
+  render(<ResourceHost slug="figura-e-fundo" snapshot={snapshot}/>);
+  fireEvent.click(screen.getByRole("button",{name:/^sessao/}));
+  expect(screen.getByText("Modo selecionado:").parentElement).toHaveTextContent("sessao");
+  fireEvent.click(screen.getByRole("button",{name:"Iniciar recurso"}));
+  expect(screen.getByRole("heading",{name:"O acervo aguarda revisão docente"})).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button",{name:"Voltar à escolha do modo"}));
+  expect(screen.getByRole("button",{name:"Iniciar recurso"})).toBeInTheDocument();
+ });
  it("keeps the response until the learner confirms discarding it",()=>{
   render(<ResourceHost slug="chegada" snapshot={snapshot}/>);
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();

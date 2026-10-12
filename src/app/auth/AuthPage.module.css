@@ -28,7 +28,7 @@
   padding: 24px;
   border: 1px solid rgb(38 58 58 / 14%);
   border-radius: 20px;
-  background: rgb(255 253 249 / 94%);
+  background: rgb(var(--color-paper) / 96%);
   box-shadow: 0 16px 50px -24px rgb(38 58 58 / 30%);
 }
 
@@ -116,3 +116,8 @@
     min-height: 24px;
   }
 }
+
+.steps { display:flex; gap:12px; margin-bottom:20px; font-size:13px; color:rgb(var(--color-muted)); }
+.steps span { flex:1; border-bottom:2px solid rgb(var(--color-border)); padding-bottom:8px; }
+.steps span[aria-current=step] { color:rgb(var(--color-primary)); border-color:rgb(var(--color-primary)); font-weight:700; }
+:global(.dark) .card { border-color:rgb(var(--color-border)); box-shadow:0 16px 50px -24px #0008; }

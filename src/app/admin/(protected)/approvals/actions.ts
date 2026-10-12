@@ -42,7 +42,14 @@ export async function getPendingEnrollmentsAction() {
       createdAt: e.created_at,
     }));
 
-    return { success: true, enrollments: formatted };
+    const { data: registrations, error: registrationsError } = await supabase
+      .from("profiles")
+      .select("id,email,display_name,phone_number,created_at")
+      .eq("registration_status", "pending")
+      .order("created_at", { ascending: true });
+    if (registrationsError) throw registrationsError;
+
+    return { success: true, enrollments: formatted, registrations: registrations ?? [] };
   } catch (error: any) {
     rethrowRedirect(error);
     console.error("getPendingEnrollmentsAction Error:", error);
@@ -50,7 +57,27 @@ export async function getPendingEnrollmentsAction() {
       success: false,
       error: error?.message || "Falha ao carregar aprovações.",
       enrollments: [],
+      registrations: [],
     };
+  }
+}
+
+export async function reviewRegistration(targetUid: string, approve: boolean) {
+  try {
+    const actor = await requireAdmin();
+    if (!targetUid || typeof approve !== "boolean")
+      return { success: false, error: "Solicitação inválida." };
+    const { data, error } = await createSupabaseServiceClient().rpc(
+      "review_pending_registration",
+      { p_actor: actor.uid, p_target: targetUid, p_approve: approve },
+    );
+    if (error || !data)
+      return { success: false, error: "Cadastro pendente não encontrado." };
+    revalidatePath("/admin/approvals");
+    revalidatePath("/admin/users");
+    return { success: true };
+  } catch {
+    return { success: false, error: "Não foi possível revisar o cadastro." };
   }
 }
 

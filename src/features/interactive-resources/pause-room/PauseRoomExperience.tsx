@@ -331,7 +331,7 @@ export default function PauseRoomExperience() {
           role="alertdialog"
           aria-modal="true"
           aria-labelledby="switch-dialog-title"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(241,233,219,0.94)] p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[rgb(241 233 219 / 0.94)] p-4"
         >
           <div className="w-full max-w-md rounded-2xl border border-border/60 bg-paper p-6">
             <h2

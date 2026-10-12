@@ -590,6 +590,20 @@ html[data-cookie-consent="pending"] [data-floating-whatsapp] {
       var(--tw-gradient-via-position), var(--tw-gradient-to);
 }
 
+/* O calendário e algumas telas antigas do admin ainda usam cores literais da
+   paleta. Converta esses valores para os mesmos tokens do tema dentro do painel. */
+.dark #admin-content [class~="bg-white"],
+.dark #admin-content [class*="bg-[#FDFAF4]"] { background-color: rgb(var(--color-paper)) !important; }
+.dark #admin-content [class*="bg-[#F1E9DB]"] { background-color: rgb(var(--color-areia)) !important; }
+.dark #admin-content [class*="bg-[#005A1F]"] { background-color: rgb(var(--color-primary-solid)) !important; }
+.dark #admin-content [class*="bg-[#07614C]"]:hover { background-color: rgb(var(--color-igarape)) !important; }
+.dark #admin-content [class*="border-[#D8CFBE]"] { border-color: rgb(var(--color-border)) !important; }
+.dark #admin-content [class*="border-[#005A1F]"] { border-color: rgb(var(--color-primary)) !important; }
+.dark #admin-content [class*="text-[#262B22]"] { color: rgb(var(--color-text)) !important; }
+.dark #admin-content [class*="text-[#6B6B63]"] { color: rgb(var(--color-muted)) !important; }
+.dark #admin-content [class*="text-[#005A1F]"] { color: rgb(var(--color-primary)) !important; }
+.dark #admin-content [class*="text-[#96551F]"] { color: rgb(var(--color-terra)) !important; }
+
 /* Barras de rolagem seguem o tema */
 ::-webkit-scrollbar {
   width: 8px;
@@ -1303,6 +1317,54 @@ html[data-cookie-consent="pending"] [data-floating-whatsapp] {
   background: var(--fv-areia);
   border-color: var(--fv-verde-raiz);
 }
+
+.fv-resource-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--fv-nevoa);
+  border-radius: var(--fv-radius-md);
+  background: var(--fv-creme);
+  color: var(--fv-verde-raiz);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.fv-resource-back:hover {
+  background: var(--fv-areia);
+  border-color: var(--fv-verde-raiz);
+}
+
+.fv-resource-tools { display: flex; align-items: center; gap: var(--space-2); }
+
+.dark .fv-resource-overlay {
+  --fv-verde-raiz: #7cc894;
+  --fv-verde-igarape: #57b79e;
+  --fv-terra-barro: #d9995a;
+  --fv-creme: #12160f;
+  --fv-creme-papel: #12160f;
+  --fv-areia: #1b211a;
+  --fv-nevoa: #394537;
+  --fv-mata: #e4e8dc;
+  --fv-pedra: #abb6a4;
+  --fv-verde-raiz-rgb: 124 200 148;
+  --fv-creme-papel-rgb: 18 22 15;
+  --fv-areia-rgb: 27 33 26;
+  --fv-nevoa-rgb: 57 69 55;
+  --fv-mata-rgb: 228 232 220;
+  background: rgb(7 10 7 / .94);
+}
+
+.dark .fv-resource-icon-btn,
+.dark .fv-resource-back {
+  background: var(--fv-creme);
+  color: var(--fv-verde-raiz);
+}
+
+.dark .fv-resource-window { box-shadow: 0 24px 80px rgb(0 0 0 / .42); }
 
 .fv-resource-icon-btn:focus-visible {
   outline: 2px solid var(--fv-verde-raiz);

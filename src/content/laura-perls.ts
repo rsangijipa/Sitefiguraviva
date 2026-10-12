@@ -340,7 +340,7 @@ export const lauraPerlsContent = {
             "Body of Awareness - Expansão do trabalho sobre suporte",
           followers: [
             { name: "Marion Gill", role: "Formadora", location: "EUA" },
-            { name: "David H. F裔", role: "Pesquisador", location: "EUA" },
+
             { name: "Centro Somatic", location: "EUA" },
           ],
         },

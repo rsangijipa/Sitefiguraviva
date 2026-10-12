@@ -32,8 +32,8 @@ export function PauseExperience(props: ExperienceProps) {
   if(!started) return <><h2>Que tipo de pausa cabe agora?</h2><p>Você pode adaptar, trocar ou encerrar quando quiser.</p><div className="fv-options">{PRACTICES.map(item => <SelectableCard key={item.id} label={item.title} selected={practice===item.id} onSelect={() => setPractice(item.id)}><span>{item.text}</span></SelectableCard>)}</div><div className="fv-actions"><Button onClick={() => setStarted(true)}>Começar pausa</Button></div></>;
   return <><h2>{selected.title}</h2><p>{selected.text}</p><p aria-live="off">Tempo nesta pausa: {Math.floor(seconds/60)} min {seconds%60} s · sem meta</p>
     {practice==="pelos-sentidos" && <><h3>{SENSES[sense]}</h3><div className="fv-actions"><Button secondary onClick={() => setSense((sense+1)%SENSES.length)}>Próximo sentido</Button><Button secondary onClick={() => setSense((sense+1)%SENSES.length)}>Não sei</Button></div></>}
-    {practice==="desacelerar" && <><WaterStage /><Link href="/portal/recursos/igarape">Abrir experiência completa</Link></>}
-    {practice==="ouvir" && <Link href="/portal/recursos/sons-para-awareness">Abrir Sons para Awareness</Link>}
+    {practice==="desacelerar" && <><WaterStage /><Link href="/recursos/igarape">Abrir experiência completa</Link></>}
+    {practice==="ouvir" && <Link href="/recursos/sons-para-awareness">Abrir Sons para Awareness</Link>}
     <TextArea label="Uma percepção, se quiser" value={reflection} onChange={setReflection} /><div className="fv-actions"><Button secondary onClick={() => setPaused(value => !value)}>{paused ? "Retomar" : "Pausar"}</Button><Button secondary onClick={() => {setStarted(false);setPaused(false);setSeconds(0);}}>Trocar prática</Button><Button onClick={() => props.onComplete(payload)}>Encerrar pausa</Button></div>
   </>;
 }

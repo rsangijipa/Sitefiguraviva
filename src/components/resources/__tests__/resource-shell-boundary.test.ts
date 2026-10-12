@@ -24,10 +24,11 @@ describe("universal resource shell boundary", () => {
     }
   });
 
-  it("uses ResourceExperience as the only catalog shell", () => {
+  it("keeps the catalog separate from the protected common experience shell", () => {
     const source = readSource("src/components/ResourcesSection.jsx");
 
-    expect(source).toContain('from "./resources/ResourceExperience"');
+    expect(source).toContain("/v2/ResourceCatalog");
+    expect(source).not.toContain("apps/");
     expect(source).not.toContain("ResourceModalShell");
   });
 

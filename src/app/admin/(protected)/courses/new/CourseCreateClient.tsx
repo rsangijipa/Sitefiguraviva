@@ -1,6 +1,9 @@
 "use client";
 
 import { parseAmountCents } from "@/features/courses/domain/course-offer";
+import CourseAgendaEditor from "@/components/admin/courses/CourseAgendaEditor";
+import CourseWorkloadInput from "@/components/admin/courses/CourseWorkloadInput";
+import { agendaSummary, courseAgendaSchema, type CourseAgenda } from "@/features/courses/domain/course-agenda";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -42,6 +45,7 @@ export default function CourseCreateClient() {
     workload: "",
     date: "",
     location: "",
+    agenda: undefined as CourseAgenda | undefined,
     level: "beginner" as
       | "beginner"
       | "intermediate"
@@ -90,6 +94,10 @@ export default function CourseCreateClient() {
       return;
     }
 
+    if (formData.agenda) {
+      const valid = courseAgendaSchema.safeParse(formData.agenda);
+      if (!valid.success) { addToast(valid.error.issues[0]?.message || "Confira os encontros.", "error"); return; }
+    }
     setIsCreating(true);
     try {
       const payload: Partial<CourseDoc> = {
@@ -110,7 +118,7 @@ export default function CourseCreateClient() {
         image: formData.coverImage || "",
         syllabus: formData.topics,
         mediators: formData.mediators,
-        details: { syllabus: formData.topics } as CourseDoc["details"],
+        details: { syllabus: formData.topics, agenda: formData.agenda } as CourseDoc["details"],
         totalPriceCents:
           formData.billingType === "free"
             ? 0
@@ -185,20 +193,18 @@ export default function CourseCreateClient() {
           onSubmit={handleSubmit}
           className="p-4 sm:p-6 lg:p-8 bg-stone-50/30 space-y-6"
         >
+          <CourseAgendaEditor value={formData.agenda} onChange={agenda => setFormData(prev => ({ ...prev, agenda, date: agendaSummary(agenda) }))} />
           <div className="grid gap-4 md:grid-cols-2 mb-6">
             {[
-              ["frequency", "Frequência"],
-              ["date", "Datas dos encontros"],
+
               ["location", "Local ou plataforma"],
-              ["workload", "Carga horária (minutos)"],
+
             ].map(([key, label]) => (
               <label key={key} className="text-sm">
                 {label}
                 <input
                   className="block w-full p-3 border rounded-xl"
-                  type={key === "workload" ? "number" : "text"}
-                  min={key === "workload" ? 0 : undefined}
-                  step={key === "workload" ? 1 : undefined}
+                  type="text"
                   value={formData[key]}
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, [key]: e.target.value }))
@@ -206,6 +212,7 @@ export default function CourseCreateClient() {
                 />
               </label>
             ))}
+            <CourseWorkloadInput value={formData.workload === "" ? undefined : Number(formData.workload)} onChange={minutes => setFormData(prev => ({ ...prev, workload: minutes === undefined ? "" : String(minutes) }))} />
           </div>
 
           <div className="bg-amber-50/80 border border-amber-200 text-amber-900 p-4 rounded-xl flex items-start gap-3 shadow-xs">

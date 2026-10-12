@@ -18,6 +18,12 @@ it("never serializes formation-only acervos into public snapshots",async()=>{
  const snapshot=await resourceSnapshot("cartas-gestalticas");expect(snapshot.cases).toEqual([]);expect(snapshot.emotions).toEqual([]);expect(snapshot.needs).toEqual([]);
  expect(jest.mocked(publishedEditorial).mock.calls.every(([key])=>key==="cartas-gestalticas")).toBe(true);
 });
+it("loads published self-guided public resources without a formation session",async()=>{
+ jest.mocked(access.resourceSession).mockResolvedValue(null);
+ await expect(resourceSnapshot("chegada")).resolves.toMatchObject({version:null,emotions:[],needs:[],cases:[]});
+ expect(access.resourceSession).not.toHaveBeenCalled();
+ expect(jest.mocked(publishedEditorial).mock.calls.map(([key])=>key)).toEqual(["chegada","cartas-gestalticas","roda-das-emocoes","necessidades-agora"]);
+});
 it("independently guards private snapshot calls",async()=>{
  jest.mocked(access.resourceSession).mockResolvedValue(null);await expect(resourceSnapshot("casoteca")).rejects.toThrow();expect(publishedEditorial).not.toHaveBeenCalled();
 });

@@ -106,6 +106,8 @@ import JsonLd from "@/components/system/JsonLd";
 import GoogleAnalytics from "@/components/system/GoogleAnalytics";
 import CookieConsent from "@/components/system/CookieConsent";
 import BackToTop from "@/components/system/BackToTop";
+import FloatingControls from "@/components/ui/FloatingControls";
+import Script from "next/script";
 
 export default async function RootLayout({
   children,
@@ -118,10 +120,9 @@ export default async function RootLayout({
       lang="pt-BR"
       className={`${fraunces.variable} ${karla.variable}`}
       data-scroll-behavior="smooth"
-      data-theme="light"
-      style={{ colorScheme: "light" }}
       suppressHydrationWarning
     >
+      <head><Script src="/theme-init.js" strategy="beforeInteractive" /></head>
       <body className="antialiased bg-paper text-text overflow-x-hidden">
         <a href="#main-content" className="skip-to-content">
           Pular para o conteúdo principal
@@ -155,6 +156,7 @@ export default async function RootLayout({
               <LenisProvider>{children}</LenisProvider>
             </main>
             <BackToTop />
+            <FloatingControls />
           </PublicContactProvider>
         </Providers>
       </body>

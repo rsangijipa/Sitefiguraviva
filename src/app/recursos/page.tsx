@@ -6,11 +6,11 @@ import ResourcesSection from "@/components/ResourcesSection";
 export const metadata: Metadata = {
   title: "Recursos",
   description:
-    "Experiências interativas e materiais de reflexão do Instituto Figura Viva.",
+    "Experiências de percepção e pausa, além de materiais de reflexão do Instituto Figura Viva.",
   alternates: { canonical: "/recursos" },
   openGraph: {
     title: "Recursos | Figura Viva",
-    description: "Ferramentas para ampliar a percepção e o cuidado.",
+    description: "Experiências de percepção, pausa e estudo no seu ritmo.",
   },
 };
 
@@ -20,7 +20,7 @@ export default function ResourcesPage() {
       <PublicPageHero
         eyebrow="Experiências"
         title="Experiências de aprendizagem"
-        description="Cartas Gestálticas e Figura e Fundo do acervo revisado."
+        description="Experiências de percepção e pausa para explorar no seu ritmo."
         notice="Recursos educativos: não substituem acompanhamento profissional."
         backgroundImage="/assets/fv/heroes/recursos.webp"
       />

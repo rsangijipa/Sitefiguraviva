@@ -142,3 +142,9 @@ public/workbox-*.js.map
 
 # Isolated local review builds
 /.next-*/
+!/scripts/convert-resource-css.mjs
+!/scripts/lint-marca.mjs
+!/scripts/normalize-resource-brand.mjs
+!/scripts/resource-deletion-ledger.mjs
+!/scripts/resource-deletion-ledger.test.mjs
+!/scripts/check-resource-css.mjs
