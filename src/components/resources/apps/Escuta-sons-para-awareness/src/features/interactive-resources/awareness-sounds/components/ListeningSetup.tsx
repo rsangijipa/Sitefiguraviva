@@ -187,7 +187,7 @@ export const ListeningSetup: React.FC<ListeningSetupProps> = ({
           type="button"
           id="btn-activate-audio-start"
           onClick={() => onStartExperience(selectedMode, true)}
-          className="inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-full bg-[#005A1F] hover:bg-[#07614C] text-[#FDFAF4] text-sm sm:text-base font-semibold transition-colors shadow-none touch-target-min"
+          className="inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-full bg-[#005A1F] hover:bg-[#07614C] text-[#FDFAF4] text-sm sm:text-base font-semibold transition-colors  touch-target-min"
           aria-label="Ativar áudio e iniciar exploração dos sons"
         >
           <Volume2 className="w-5 h-5 text-[#FDFAF4]" strokeWidth={2} />

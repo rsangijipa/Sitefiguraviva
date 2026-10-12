@@ -67,7 +67,7 @@ export const ResourceCompletion: React.FC<ResourceCompletionProps> = ({
       </div>
 
       {/* Resumo Contemplativo da Sessão */}
-      <div className="w-full bg-[#FAF6EE] border-2 border-[#D8CFBE] rounded-3xl p-5 sm:p-6 text-left space-y-4">
+      <div className="w-full bg-[#FDFAF4] border-2 border-[#D8CFBE] rounded-3xl p-5 sm:p-6 text-left space-y-4">
         <div className="flex items-center justify-between border-b border-[#D8CFBE] pb-3 text-xs text-[#6B6B63]">
           <span>Tempo de escuta: {timeFormatted}</span>
           <span>Registro qualitativo</span>
@@ -126,7 +126,7 @@ export const ResourceCompletion: React.FC<ResourceCompletionProps> = ({
           <button
             id="btn-completion-view-diary"
             onClick={onOpenDiaryModal}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl border-2 border-[#005A1F] bg-[#F1E9DB] text-[#005A1F] font-medium text-sm hover:bg-[#EAE1CF] transition-all min-h-[44px]"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl border-2 border-[#005A1F] bg-[#F1E9DB] text-[#005A1F] font-medium text-sm hover:bg-[#F1E9DB] transition-all min-h-[44px]"
           >
             <BookOpen className="w-4 h-4 stroke-[2]" />
             <span>Ver no Meu Diário</span>

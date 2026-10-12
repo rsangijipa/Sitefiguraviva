@@ -1,4 +1,4 @@
-import { resourceCatalog } from "@/components/resources/resourceCatalog";
+import { resourceCatalog,isPublicResource } from "@/components/resources/resourceCatalog";
 jest.mock("@/infrastructure/supabase/server", () => ({
   createSupabaseAnonServerClient: jest.fn(),
 }));
@@ -7,7 +7,7 @@ import sitemap from "../sitemap";
 import robots from "../robots";
 const staticCount =
   13 +
-  resourceCatalog.filter((resource) => resource.status === "available").length;
+  resourceCatalog.filter(isPublicResource).length;
 const client = jest.mocked(createSupabaseAnonServerClient);
 describe("public discovery", () => {
   beforeEach(() => {

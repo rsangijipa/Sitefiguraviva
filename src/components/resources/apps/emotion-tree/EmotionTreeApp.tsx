@@ -29,7 +29,7 @@ import type { Quote } from "@/components/resources/apps/emotion-tree/types/quote
 const TreeScene = dynamic(() => import("@/components/resources/apps/emotion-tree/components/3d/TreeScene"), {
   ssr: false,
   loading: () => (
-    <div className="flex h-full w-full items-center justify-center text-xs tracking-[0.2em] uppercase text-[#DCE8F5]">
+    <div className="flex h-full w-full items-center justify-center text-xs tracking-[0.2em] uppercase text-[#F1E9DB]">
       Carregando atmosfera...
     </div>
   ),
@@ -435,7 +435,7 @@ export function EmotionTreeApp() {
   const loadingOverlayVisible = loadingQuotes || !sceneReady || treeSeed === null;
 
   return (
-    <section aria-label="Árvore das Emoções" className="emotion-tree-app relative h-full min-h-0 w-full overflow-hidden bg-[#0D1422] text-[#EAF2FB]">
+    <section aria-label="Árvore das Emoções" className="emotion-tree-app relative h-full min-h-0 w-full overflow-hidden bg-[#262B22] text-[#FDFAF4]">
       <h1 className="sr-only">Árvore das Emoções</h1>
       <p className="sr-only" aria-live="polite">
         Cada árvore é gerada do zero ao abrir a página. As folhas maiores e luminosas guardam
@@ -483,8 +483,8 @@ export function EmotionTreeApp() {
       </div>
 
       <div className="pointer-events-none absolute inset-0 z-10">
-        <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[#0D1422]/[0.16] to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#0D1422]/[0.8] to-transparent" />
+        <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[#262B22]/[0.16] to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#262B22]/[0.8] to-transparent" />
         <AnimatePresence>
           {panelOpen && activeQuote ? (
             <motion.div
@@ -492,7 +492,7 @@ export function EmotionTreeApp() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.4 }}
-              className="absolute inset-0 bg-black/[0.45] backdrop-blur-[2px]"
+              className="absolute inset-0 bg-primary/[0.45] -[2px]"
             />
           ) : null}
         </AnimatePresence>
@@ -536,7 +536,7 @@ export function EmotionTreeApp() {
                       onClick={() => setHudExpanded(true)}
                       aria-label="Abrir controles"
                       aria-expanded={false}
-                      className="hud-pill pointer-events-auto inline-flex h-10 items-center gap-2 px-3 text-[11px] font-semibold text-[#D6E2F0] backdrop-blur-md transition hover:text-white"
+                      className="hud-pill pointer-events-auto inline-flex h-10 items-center gap-2 px-3 text-[11px] font-semibold text-[#F1E9DB]  transition hover:text-paper"
                     >
                       <SlidersHorizontal className="h-4 w-4" aria-hidden />
                       <span className="max-w-[16ch] truncate">{themeContextLabel}</span>
@@ -545,7 +545,7 @@ export function EmotionTreeApp() {
                       type="button"
                       onClick={requestRandomLeaf}
                       aria-label={primaryActionLabel}
-                      className="hud-pill hud-pill--primary pointer-events-auto inline-flex h-10 items-center gap-2 px-3 text-[11px] font-semibold backdrop-blur-md transition"
+                      className="hud-pill hud-pill--primary pointer-events-auto inline-flex h-10 items-center gap-2 px-3 text-[11px] font-semibold  transition"
                     >
                       <Sparkles className="h-3.5 w-3.5" aria-hidden />
                       <span className="hidden sm:inline">{primaryActionLabel}</span>
@@ -566,10 +566,10 @@ export function EmotionTreeApp() {
                   >
                     <header className="flex items-start justify-between gap-3 px-4 pt-4">
                       <div>
-                        <p className="text-[9px] font-semibold tracking-[0.26em] uppercase text-[#8FA6BD]">
+                        <p className="text-[9px] font-semibold tracking-[0.26em] uppercase text-[#D8CFBE]">
                           Árvore das Emoções
                         </p>
-                        <p className="mt-1.5 max-w-[30ch] text-[13px] leading-snug text-[#E7EEF7]">
+                        <p className="mt-1.5 max-w-[30ch] text-[13px] leading-snug text-[#FDFAF4]">
                           Uma árvore nova a cada visita. As folhas maiores guardam mensagens.
                         </p>
                       </div>
@@ -578,7 +578,7 @@ export function EmotionTreeApp() {
                         type="button"
                         onClick={() => setHudExpanded(false)}
                         aria-label="Recolher painel"
-                        className="-mr-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[#93A8BE] transition hover:bg-white/[0.1] hover:text-white"
+                        className="-mr-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[#D8CFBE] transition hover:bg-paper/[0.1] hover:text-paper"
                       >
                         <ChevronRight className="h-4 w-4" />
                       </button>
@@ -590,7 +590,7 @@ export function EmotionTreeApp() {
                       <button
                         type="button"
                         onClick={requestRandomLeaf}
-                        className="inline-flex h-9 items-center gap-2 rounded-full bg-[#F2EFE8] px-4 text-[11px] font-bold tracking-[0.04em] text-[#1C1A17] shadow-[0_4px_16px_rgba(0,0,0,0.3)] transition hover:bg-white"
+                        className="inline-flex h-9 items-center gap-2 rounded-full bg-[#F1E9DB] px-4 text-[11px] font-bold tracking-[0.04em] text-[#262B22] -[0_4px_16px_rgb(38 43 34 / 0.3)] transition hover:bg-paper"
                       >
                         <Sparkles className="h-3.5 w-3.5" aria-hidden />
                         {primaryActionLabel}
@@ -600,7 +600,7 @@ export function EmotionTreeApp() {
                         <button
                           type="button"
                           onClick={dismissIntro}
-                          className="h-9 rounded-full border border-white/[0.15] px-3.5 text-[11px] font-medium text-white/[0.75] transition hover:bg-white/[0.1] hover:text-white"
+                          className="h-9 rounded-full border border-nevoa/[0.15] px-3.5 text-[11px] font-medium text-paper/[0.75] transition hover:bg-paper/[0.1] hover:text-paper"
                         >
                           Explorar
                         </button>
@@ -608,7 +608,7 @@ export function EmotionTreeApp() {
                     </div>
 
                     {showIntro ? (
-                      <ol className="mt-3.5 ml-4 space-y-1.5 px-4 text-[11px] leading-relaxed text-[#C7D6E6]/[0.85]">
+                      <ol className="mt-3.5 ml-4 space-y-1.5 px-4 text-[11px] leading-relaxed text-[#D8CFBE]/[0.85]">
                         <li>Procure as {MESSAGE_LEAF_COUNT} folhas maiores, com brilho dourado.</li>
                         <li>Toque em uma delas: ela se solta e traz a mensagem até você.</li>
                         <li>Guarde as frases que quiser revisitar depois.</li>
@@ -619,10 +619,10 @@ export function EmotionTreeApp() {
 
                     <section className="px-4 pt-3">
                       <div className="mb-2 flex items-baseline justify-between gap-2">
-                        <span className="text-[9px] font-semibold tracking-[0.22em] uppercase text-[#8FA6BD]">
+                        <span className="text-[9px] font-semibold tracking-[0.22em] uppercase text-[#D8CFBE]">
                           Tema
                         </span>
-                        <span className="truncate text-[11px] text-white/[0.55]">{themeContextLabel}</span>
+                        <span className="truncate text-[11px] text-paper/[0.55]">{themeContextLabel}</span>
                       </div>
                       <ThemeFilter themes={THEMES} value={themeFilter} onChange={handleThemeChange} />
                     </section>
@@ -633,18 +633,18 @@ export function EmotionTreeApp() {
                       <button
                         type="button"
                         onClick={() => setFavoritesOpen((current) => !current)}
-                        className="inline-flex h-8 items-center gap-2 rounded-full px-2.5 text-[11px] font-medium text-[#C7D6E6] transition hover:bg-white/[0.1] hover:text-white"
+                        className="inline-flex h-8 items-center gap-2 rounded-full px-2.5 text-[11px] font-medium text-[#D8CFBE] transition hover:bg-paper/[0.1] hover:text-paper"
                       >
                         <Heart className="h-3.5 w-3.5" aria-hidden />
                         Favoritas
                         {favorites.length > 0 ? (
-                          <span className="rounded-full bg-white/[0.12] px-1.5 py-px text-[10px] font-bold tabular-nums">
+                          <span className="rounded-full bg-paper/[0.12] px-1.5 py-px text-[10px] font-bold tabular-nums">
                             {favorites.length}
                           </span>
                         ) : null}
                       </button>
 
-                      <span className="text-[10px] tracking-[0.12em] text-white/[0.35]">
+                      <span className="text-[10px] tracking-[0.12em] text-paper/[0.35]">
                         {MESSAGE_LEAF_COUNT} folhas com mensagem
                       </span>
                     </footer>
@@ -661,7 +661,7 @@ export function EmotionTreeApp() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 6 }}
                 transition={{ duration: 0.3 }}
-                className="hud-badge pointer-events-none absolute bottom-24 left-1/2 -translate-x-1/2 px-4 py-2 text-[11px] tracking-[0.14em] uppercase text-[#DAE6F4]"
+                className="hud-badge pointer-events-none absolute bottom-24 left-1/2 -translate-x-1/2 px-4 py-2 text-[11px] tracking-[0.14em] uppercase text-[#F1E9DB]"
               >
                 {floatingHintLabel}
               </motion.div>
@@ -676,9 +676,9 @@ export function EmotionTreeApp() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center bg-[rgba(8,12,20,0.62)]"
+            className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center bg-[rgb(38 43 34 / 0.62)]"
           >
-            <p className="text-xs tracking-[0.24em] uppercase text-[#D8E5F4]">
+            <p className="text-xs tracking-[0.24em] uppercase text-[#F1E9DB]">
               {loadingQuotes ? "Carregando mensagens..." : "Plantando a árvore..."}
             </p>
           </motion.div>
@@ -692,7 +692,7 @@ export function EmotionTreeApp() {
             animate={{ opacity: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 1.2, ease: "easeOut" }}
-            className="pointer-events-none absolute inset-0 z-[25] bg-black"
+            className="pointer-events-none absolute inset-0 z-[25] bg-primary"
           />
         ) : null}
       </AnimatePresence>
@@ -725,7 +725,7 @@ export function EmotionTreeApp() {
           type="button"
           onClick={regenerateTree}
           aria-label="Gerar uma nova árvore"
-          className="hud-pill pointer-events-auto absolute right-3 top-3 z-30 flex h-10 items-center gap-2 px-3 text-[11px] font-semibold text-[#D6E2F0] backdrop-blur-md transition hover:text-white sm:right-5 sm:top-5"
+          className="hud-pill pointer-events-auto absolute right-3 top-3 z-30 flex h-10 items-center gap-2 px-3 text-[11px] font-semibold text-[#F1E9DB]  transition hover:text-paper sm:right-5 sm:top-5"
         >
           <RefreshCw className="h-3.5 w-3.5" aria-hidden />
           <span className="hidden sm:inline">Nova árvore</span>
@@ -744,7 +744,7 @@ export function EmotionTreeApp() {
           whileTap={{ scale: 0.97 }}
           type="button"
           onClick={requestRandomLeaf}
-          className="pointer-events-auto absolute bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-30 flex h-12 -translate-x-1/2 items-center gap-2 rounded-full bg-[#F2EFE8] px-5 text-[12px] font-bold text-[#1C1A17] shadow-[0_10px_30px_rgba(0,0,0,0.45)]"
+          className="pointer-events-auto absolute bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-30 flex h-12 -translate-x-1/2 items-center gap-2 rounded-full bg-[#F1E9DB] px-5 text-[12px] font-bold text-[#262B22] -[0_10px_30px_rgb(38 43 34 / 0.45)]"
         >
           <Sparkles className="h-4 w-4" aria-hidden />
           {primaryActionLabel}

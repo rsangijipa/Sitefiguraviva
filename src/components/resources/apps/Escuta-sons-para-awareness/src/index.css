@@ -1,24 +1,4 @@
-@import "tailwindcss";
-
-@theme {
-  --font-fraunces: "Fraunces", serif;
-  --font-karla: "Karla", sans-serif;
-
-  --color-creme: #FDFAF4;
-  --color-areia: #F1E9DB;
-  --color-verde-raiz: #005A1F;
-  --color-verde-igarape: #07614C;
-  --color-terra-barro: #96551F;
-  --color-mata: #262B22;
-  --color-nevoa: #D8CFBE;
-  --color-pedra: #6B6B63;
-  --color-grafite: #4B4B49;
-  --color-aurora: #FE538B;
-  --color-vazante: #FED701;
-  --color-broto: #01C94D;
-}
-
-:root {
+.fv-resources {
   --creme: #FDFAF4;
   --areia: #F1E9DB;
   --verde-raiz: #005A1F;
@@ -33,8 +13,8 @@
   --broto: #01C94D;
 }
 
-body {
-  font-family: 'Karla', sans-serif;
+.fv-resources {
+  font-family: var(--font-sans), sans-serif;
   color: #262B22;
   background-color: #FDFAF4;
   margin: 0;
@@ -42,30 +22,30 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3, h4, .font-heading {
-  font-family: 'Fraunces', serif;
+.fv-resources h1, .fv-resources h2, .fv-resources h3, .fv-resources h4, .fv-resources .font-heading {
+  font-family: var(--font-serif), serif;
 }
 
 /* Confluencia linear indicator / accent: Aurora -> Vazante -> Broto */
-.gradient-confluencia {
+.fv-resources .gradient-confluencia {
   background: linear-gradient(90deg, #FE538B 0%, #FED701 50%, #01C94D 100%);
 }
 
 /* Confluencia Card rule: radius 24px, 2px borders, no drop shadow, depth via Creme on Areia */
-.card-confluencia {
+.fv-resources .card-confluencia {
   border-radius: 24px;
   border-width: 2px;
   box-shadow: none !important;
 }
 
 /* Focus indicator compliant with WCAG AA */
-*:focus-visible {
+.fv-resources *:focus-visible {
   outline: 2px solid #005A1F !important;
   outline-offset: 3px !important;
 }
 
 /* Touch targets minimum 44px */
-.touch-target-min {
+.fv-resources .touch-target-min {
   min-height: 44px;
   min-width: 44px;
 }

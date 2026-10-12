@@ -46,7 +46,7 @@ export function createLeafMaterial(options: {
     metalness: 0,
     side: THREE.DoubleSide,
     vertexColors: options.vertexColors,
-    emissive: new THREE.Color(options.emissive ?? "#000000"),
+    emissive: new THREE.Color(options.emissive ?? "#262B22"),
     emissiveIntensity: options.emissiveIntensity ?? 1,
   });
 

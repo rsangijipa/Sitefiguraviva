@@ -15,10 +15,10 @@ export const WatercolorBackground: React.FC<WatercolorBackgroundProps> = ({
 }) => {
   // Color palette shifts per question step
   const blobColor1 =
-    currentQuestion?.themeColor.blobColor1 ?? "rgba(195, 208, 205, 0.40)";
+    currentQuestion?.themeColor.blobColor1 ?? "rgb(216 207 190 / 0.40)";
   const blobColor2 =
-    currentQuestion?.themeColor.blobColor2 ?? "rgba(230, 222, 212, 0.38)";
-  const accentNode = currentQuestion?.themeColor.accentNode ?? "#738a9c";
+    currentQuestion?.themeColor.blobColor2 ?? "rgb(241 233 219 / 0.38)";
+  const accentNode = currentQuestion?.themeColor.accentNode ?? "#6B6B63";
 
   const opacityMultiplier =
     intensity === "minimal" ? 0.4 : intensity === "soft" ? 1 : 0.75;
@@ -29,7 +29,7 @@ export const WatercolorBackground: React.FC<WatercolorBackgroundProps> = ({
       className="pointer-events-none absolute inset-0 z-0 overflow-hidden select-none"
     >
       {/* Base warm rice-paper subtle gradient */}
-      <div className="absolute inset-0 bg-[#fbf9f5] opacity-95 transition-colors duration-1000" />
+      <div className="absolute inset-0 bg-[#FDFAF4] opacity-95 transition-colors duration-1000" />
 
       {/* SVG filter for organic watercolor pigment bleeding */}
       <svg className="hidden">
@@ -117,10 +117,10 @@ export const WatercolorBackground: React.FC<WatercolorBackgroundProps> = ({
       />
 
       {/* Tiny organic specks/circles floating calmly */}
-      <div className="absolute top-[18%] left-[12%] h-1.5 w-1.5 rounded-full bg-[#8c827a]/20 blur-[0.5px]" />
-      <div className="absolute top-[32%] right-[14%] h-2.5 w-2.5 rounded-full bg-[#7a8b84]/20 blur-[1px]" />
-      <div className="absolute bottom-[24%] right-[22%] h-2 w-2 rounded-full bg-[#9e877a]/15 blur-[0.5px]" />
-      <div className="absolute bottom-[38%] left-[16%] h-3 w-3 rounded-full bg-[#88909e]/15 blur-[1px]" />
+      <div className="absolute top-[18%] left-[12%] h-1.5 w-1.5 rounded-full bg-[#6B6B63]/20 blur-[0.5px]" />
+      <div className="absolute top-[32%] right-[14%] h-2.5 w-2.5 rounded-full bg-[#6B6B63]/20 blur-[1px]" />
+      <div className="absolute bottom-[24%] right-[22%] h-2 w-2 rounded-full bg-[#6B6B63]/15 blur-[0.5px]" />
+      <div className="absolute bottom-[38%] left-[16%] h-3 w-3 rounded-full bg-[#6B6B63]/15 blur-[1px]" />
     </div>
   );
 };

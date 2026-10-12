@@ -321,7 +321,7 @@ export const SavedThoughtsList: React.FC<SavedThoughtsListProps> = ({
             role="dialog"
             aria-modal="true"
             aria-labelledby="delete-dialog-title"
-            className="fixed inset-0 z-50 bg-[#262B22]/40 backdrop-blur-xs flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-[#262B22]/40  flex items-center justify-center p-4"
           >
             <div className="bg-[#FDFAF4] border-2 border-[#96551F] rounded-[24px] max-w-md w-full p-6 text-center">
               <div className="w-12 h-12 rounded-full bg-[#F1E9DB] border-2 border-[#96551F] text-[#96551F] flex items-center justify-center mx-auto mb-3">
@@ -344,7 +344,7 @@ export const SavedThoughtsList: React.FC<SavedThoughtsListProps> = ({
                 <button
                   type="button"
                   onClick={handleConfirmDelete}
-                  className="px-5 py-2 text-xs font-medium bg-[#96551F] text-[#FDFAF4] rounded-full hover:bg-[#7a4214] min-h-[44px]"
+                  className="px-5 py-2 text-xs font-medium bg-[#96551F] text-[#FDFAF4] rounded-full hover:bg-[#96551F] min-h-[44px]"
                 >
                   Confirmar Exclusão
                 </button>
@@ -359,7 +359,7 @@ export const SavedThoughtsList: React.FC<SavedThoughtsListProps> = ({
             role="dialog"
             aria-modal="true"
             aria-labelledby="edit-dialog-title"
-            className="fixed inset-0 z-50 bg-[#262B22]/40 backdrop-blur-xs flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-[#262B22]/40  flex items-center justify-center p-4"
           >
             <form
               onSubmit={handleSaveEdit}

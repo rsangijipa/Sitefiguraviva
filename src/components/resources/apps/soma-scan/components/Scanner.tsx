@@ -51,7 +51,7 @@ const sensationConfig: Record<
     icon: Activity,
     label: "Tensão",
     textColor: "text-clay",
-    borderColor: "border-stone-200 group-hover:border-clay/40",
+    borderColor: "border-nevoa group-hover:border-clay/40",
     activeBorder: "border-clay bg-clay/5 ring-2 ring-clay/20",
     gradient: "from-clay/10 to-transparent",
   },
@@ -59,7 +59,7 @@ const sensationConfig: Record<
     icon: Thermometer,
     label: "Calor",
     textColor: "text-ochre",
-    borderColor: "border-stone-200 group-hover:border-ochre/40",
+    borderColor: "border-nevoa group-hover:border-ochre/40",
     activeBorder: "border-ochre bg-ochre/5 ring-2 ring-ochre/20",
     gradient: "from-ochre/10 to-transparent",
   },
@@ -67,7 +67,7 @@ const sensationConfig: Record<
     icon: Anchor,
     label: "Peso",
     textColor: "text-ocean",
-    borderColor: "border-stone-200 group-hover:border-ocean/40",
+    borderColor: "border-nevoa group-hover:border-ocean/40",
     activeBorder: "border-ocean bg-ocean/5 ring-2 ring-ocean/20",
     gradient: "from-ocean/10 to-transparent",
   },
@@ -75,7 +75,7 @@ const sensationConfig: Record<
     icon: Zap,
     label: "Formigar",
     textColor: "text-amber-500",
-    borderColor: "border-stone-200 group-hover:border-amber-500/40",
+    borderColor: "border-nevoa group-hover:border-amber-500/40",
     activeBorder: "border-amber-500 bg-amber-500/5 ring-2 ring-amber-500/20",
     gradient: "from-amber-500/10 to-transparent",
   },
@@ -83,16 +83,16 @@ const sensationConfig: Record<
     icon: Minus,
     label: "Neutro",
     textColor: "text-sage",
-    borderColor: "border-stone-200 group-hover:border-sage/40",
+    borderColor: "border-nevoa group-hover:border-sage/40",
     activeBorder: "border-sage bg-sage/5 ring-2 ring-sage/20",
     gradient: "from-sage/10 to-transparent",
   },
   numbness: {
     icon: Minus,
     label: "Dormência",
-    textColor: "text-stone-400",
-    borderColor: "border-stone-200 group-hover:border-stone-400/40",
-    activeBorder: "border-stone-400 bg-stone-400/5 ring-2 ring-stone-400/20",
+    textColor: "text-mata",
+    borderColor: "border-nevoa group-hover:border-nevoa/40",
+    activeBorder: "border-nevoa bg-primary/5 ring-2 ring-stone-400/20",
     gradient: "from-stone-400/10 to-transparent",
   },
 };
@@ -138,7 +138,7 @@ const SensationButton: React.FC<SensationButtonProps> = ({
 
       {/* Label */}
       <span
-        className={`text-xs font-bold uppercase tracking-widest relative z-10 ${isSelected ? "text-stone-800" : "text-stone-600 group-hover:text-stone-800"}`}
+        className={`text-xs font-bold uppercase tracking-widest relative z-10 ${isSelected ? "text-mata" : "text-mata group-hover:text-mata"}`}
       >
         {config.label}
       </span>
@@ -197,7 +197,7 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
     <div className="flex flex-col h-full relative">
       {/* Top Bar / Audio Controls */}
       <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-start z-10 pointer-events-none">
-        <div className="pointer-events-auto bg-white/60 backdrop-blur-md p-3 rounded-full border border-white shadow-sm">
+        <div className="pointer-events-auto bg-paper/60  p-3 rounded-full border border-nevoa ">
           <button
             type="button"
             onClick={togglePlayback}
@@ -205,7 +205,7 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
               isPlaying ? "Pausar áudio guiado" : "Reproduzir áudio guiado"
             }
             aria-pressed={isPlaying}
-            className="text-stone-600 hover:text-clay transition-colors flex items-center justify-center"
+            className="text-mata hover:text-clay transition-colors flex items-center justify-center"
           >
             {isPlaying ? (
               <Pause className="w-6 h-6 stroke-1" aria-hidden="true" />
@@ -222,7 +222,7 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
         <button
           type="button"
           onClick={() => onComplete(data)}
-          className="resource-action pointer-events-auto bg-stone-800 font-serif text-sm tracking-wide text-stone-100 hover:bg-stone-700"
+          className="resource-action pointer-events-auto bg-primary font-serif text-sm tracking-wide text-paper hover:bg-primary"
         >
           <Check className="w-4 h-4" aria-hidden="true" /> Concluir
         </button>
@@ -253,7 +253,7 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
 
       {/* Sensation Selector Modal / Sheet */}
       {selectedPart && (
-        <div className="absolute inset-0 z-20 bg-paper/80 backdrop-blur-md flex items-end md:items-center justify-center p-4 animate-fade-in">
+        <div className="absolute inset-0 z-20 bg-paper/80  flex items-end md:items-center justify-center p-4 animate-fade-in">
           <div
             ref={sheetRef}
             role="dialog"
@@ -266,16 +266,16 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
               event.stopPropagation();
               closeSheet();
             }}
-            className="relative flex max-h-[calc(100%-1rem)] w-full max-w-sm flex-col space-y-5 overflow-hidden rounded-[2rem] border border-white/50 bg-[#fafaf9] p-5 shadow-2xl sm:p-7"
+            className="relative flex max-h-[calc(100%-1rem)] w-full max-w-sm flex-col space-y-5 overflow-hidden rounded-[2rem] border border-nevoa/50 bg-[#FDFAF4] p-5  sm:p-7"
           >
             {/* Background blur orb */}
-            <div className="absolute -top-20 -left-20 w-40 h-40 bg-stone-200/50 rounded-full blur-3xl pointer-events-none"></div>
+            <div className="absolute -top-20 -left-20 w-40 h-40 bg-paper/50 rounded-full blur-3xl pointer-events-none"></div>
 
             {/* Header */}
             <div className="flex justify-between items-center mb-1 relative z-10 flex-shrink-0">
               <h3
                 id="soma-scan-sheet-title"
-                className="text-3xl font-serif italic text-stone-800"
+                className="text-3xl font-serif italic text-mata"
               >
                 <span className="capitalize">
                   {bodyPartTranslations[selectedPart] || selectedPart}
@@ -285,13 +285,13 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
                 type="button"
                 onClick={closeSheet}
                 aria-label="Fechar registro de sensação"
-                className="text-stone-400 hover:text-stone-800 transition-colors bg-white/50 p-2 rounded-full hover:bg-white"
+                className="text-mata hover:text-mata transition-colors bg-paper/50 p-2 rounded-full hover:bg-paper"
               >
                 <X className="w-5 h-5 stroke-1" aria-hidden="true" />
               </button>
             </div>
 
-            <p className="text-stone-500 text-sm font-light relative z-10">
+            <p className="text-mata text-sm font-light relative z-10">
               O que você está sentindo aqui?
             </p>
 
@@ -332,15 +332,15 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
             <div
               className={`space-y-4 transition-all duration-500 ease-in-out overflow-hidden relative z-10 ${tempSensation ? "opacity-100 max-h-40" : "opacity-0 max-h-0"}`}
             >
-              <div className="pt-2 border-t border-stone-200/60">
+              <div className="pt-2 border-t border-nevoa/60">
                 <div className="flex justify-between items-center mb-3">
                   <label
                     htmlFor="soma-scan-intensity"
-                    className="text-xs font-bold uppercase tracking-widest text-stone-500"
+                    className="text-xs font-bold uppercase tracking-widest text-mata"
                   >
                     Intensidade
                   </label>
-                  <span className="text-xs font-medium text-stone-400 bg-stone-100 px-2 py-1 rounded-md">
+                  <span className="text-xs font-medium text-mata bg-paper px-2 py-1 rounded-md">
                     {tempIntensity === 1
                       ? "Leve"
                       : tempIntensity === 5
@@ -358,9 +358,9 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
                   value={tempIntensity}
                   aria-valuetext={`${tempIntensity === 1 ? "Leve" : tempIntensity === 5 ? "Intensa" : tempIntensity}, ${tempIntensity} de 5`}
                   onChange={(e) => setTempIntensity(parseInt(e.target.value))}
-                  className="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-stone-600 hover:accent-clay transition-all"
+                  className="w-full h-2 bg-paper rounded-lg appearance-none cursor-pointer accent-stone-600 hover:accent-clay transition-all"
                 />
-                <div className="flex justify-between mt-2 text-[10px] text-stone-400 font-medium uppercase tracking-wider">
+                <div className="flex justify-between mt-2 text-[10px] text-mata font-medium uppercase tracking-wider">
                   <span>Sutil</span>
                   <span>Forte</span>
                 </div>
@@ -377,8 +377,8 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
                   w-full rounded-xl font-medium tracking-wide transition-all duration-300
                   ${
                     tempSensation
-                      ? "bg-stone-800 text-stone-50 shadow-lg hover:shadow-xl hover:bg-stone-700 translate-y-0"
-                      : "bg-stone-200 text-stone-400 cursor-not-allowed shadow-none"
+                      ? "bg-primary text-paper  hover: hover:bg-primary translate-y-0"
+                      : "bg-paper text-mata cursor-not-allowed "
                   }
                 `}
               >
@@ -397,7 +397,7 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
       {/* Floating Guidance */}
       {!selectedPart && (
         <div className="absolute bottom-8 left-0 right-0 text-center pointer-events-none">
-          <p className="text-stone-500 text-sm font-serif italic bg-white/70 inline-block px-6 py-3 rounded-full backdrop-blur-sm border border-white shadow-sm transition-all duration-500">
+          <p className="text-mata text-sm font-serif italic bg-paper/70 inline-block px-6 py-3 rounded-full  border border-nevoa  transition-all duration-500">
             {isPlaying
               ? "Ouça o guia. Toque no corpo para registrar sensações."
               : "Pausado. Toque no play para continuar."}

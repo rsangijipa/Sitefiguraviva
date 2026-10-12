@@ -62,7 +62,7 @@ export const RandomView: React.FC<RandomViewProps> = ({
             setSelectedCategory(e.target.value);
             setSelectedCard(null);
           }}
-          className="bg-[#FDFAF4] border border-[#E2D8CA] rounded-lg px-2.5 py-1 text-xs text-[#262B22] focus:outline-none focus:border-[#005A1F]"
+          className="bg-[#FDFAF4] border border-[#D8CFBE] rounded-lg px-2.5 py-1 text-xs text-[#262B22] focus:outline-none focus:border-[#005A1F]"
           title="Escolher outro tema"
         >
           <option value="ALL">Qualquer tema</option>
@@ -78,7 +78,7 @@ export const RandomView: React.FC<RandomViewProps> = ({
       <div className="flex-1 flex items-center justify-center py-6">
         {!selectedCard ? (
           /* Pre-draw Contemplative State */
-          <div className="max-w-md w-full text-center space-y-6 p-8 rounded-3xl bg-[#FDFAF4] border border-[#E2D8CA]">
+          <div className="max-w-md w-full text-center space-y-6 p-8 rounded-3xl bg-[#FDFAF4] border border-[#D8CFBE]">
             <div className="w-12 h-12 rounded-2xl bg-[#F1E9DB] flex items-center justify-center text-[#005A1F] mx-auto">
               <Shuffle className="w-6 h-6" strokeWidth={1.75} />
             </div>
@@ -95,7 +95,7 @@ export const RandomView: React.FC<RandomViewProps> = ({
 
             <button
               onClick={drawRandomCard}
-              className="px-6 py-3 bg-[#005A1F] hover:bg-[#004317] text-[#FDFAF4] text-xs font-sans font-medium rounded-xl transition-colors inline-flex items-center gap-2"
+              className="px-6 py-3 bg-[#005A1F] hover:bg-[#005A1F] text-[#FDFAF4] text-xs font-sans font-medium rounded-xl transition-colors inline-flex items-center gap-2"
             >
               <span>Sortear uma carta</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -121,7 +121,7 @@ export const RandomView: React.FC<RandomViewProps> = ({
         <div className="max-w-md mx-auto w-full flex items-center justify-between gap-3 pb-4">
           <button
             onClick={onExploreTheme}
-            className="flex-1 py-2.5 px-4 rounded-xl border border-[#E2D8CA] bg-[#FDFAF4] hover:bg-[#F1E9DB] text-[#262B22] text-xs font-sans font-medium flex items-center justify-center gap-1.5 transition-colors"
+            className="flex-1 py-2.5 px-4 rounded-xl border border-[#D8CFBE] bg-[#FDFAF4] hover:bg-[#F1E9DB] text-[#262B22] text-xs font-sans font-medium flex items-center justify-center gap-1.5 transition-colors"
           >
             <Compass className="w-3.5 h-3.5" />
             <span>Escolher outro tema</span>
@@ -129,7 +129,7 @@ export const RandomView: React.FC<RandomViewProps> = ({
 
           <button
             onClick={drawRandomCard}
-            className="flex-1 py-2.5 px-4 rounded-xl bg-[#005A1F] hover:bg-[#004317] text-[#FDFAF4] text-xs font-sans font-medium flex items-center justify-center gap-1.5 transition-colors"
+            className="flex-1 py-2.5 px-4 rounded-xl bg-[#005A1F] hover:bg-[#005A1F] text-[#FDFAF4] text-xs font-sans font-medium flex items-center justify-center gap-1.5 transition-colors"
           >
             <Shuffle className="w-3.5 h-3.5" />
             <span>Outra carta</span>

@@ -281,7 +281,7 @@ export const NeedsHistory: React.FC<NeedsHistoryProps> = ({
           role="dialog"
           aria-modal="true"
           aria-labelledby="delete-dialog-title"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#262B22]/60 backdrop-blur-xs"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#262B22]/60 "
         >
           <div className="bg-[#FDFAF4] rounded-[24px] border-2 border-[#96551F] p-6 max-w-md w-full text-left">
             <div className="flex items-start gap-3 mb-4">
@@ -318,7 +318,7 @@ export const NeedsHistory: React.FC<NeedsHistoryProps> = ({
                 type="button"
                 disabled={isDeleting}
                 onClick={handleConfirmDelete}
-                className="w-full sm:w-auto px-5 py-2.5 rounded-full text-sm font-semibold bg-[#96551F] text-[#FDFAF4] hover:bg-[#784318] transition-colors min-h-[44px]"
+                className="w-full sm:w-auto px-5 py-2.5 rounded-full text-sm font-semibold bg-[#96551F] text-[#FDFAF4] hover:bg-[#96551F] transition-colors min-h-[44px]"
               >
                 {isDeleting ? 'Excluindo...' : 'Sim, excluir registro'}
               </button>

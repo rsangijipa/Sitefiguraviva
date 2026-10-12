@@ -97,17 +97,25 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
     const updateDuration = () => setDuration(audio.duration);
     const onEnded = () => {
       setIsPlaying(false);
+      delete document.documentElement.dataset.lessonAudioPlaying;
       localStorage.removeItem(PERSISTENCE_KEY);
     };
 
     audio.addEventListener("timeupdate", updateProgress);
     audio.addEventListener("loadedmetadata", updateDuration);
     audio.addEventListener("ended", onEnded);
+    const onPlay = () => { document.documentElement.dataset.lessonAudioPlaying = "true"; window.dispatchEvent(new Event("fv:lesson-audio-start")); };
+    const onPause = () => { delete document.documentElement.dataset.lessonAudioPlaying; };
+    audio.addEventListener("play", onPlay);
+    audio.addEventListener("pause", onPause);
 
     return () => {
       audio.removeEventListener("timeupdate", updateProgress);
       audio.removeEventListener("loadedmetadata", updateDuration);
       audio.removeEventListener("ended", onEnded);
+      audio.removeEventListener("play", onPlay);
+      audio.removeEventListener("pause", onPause);
+      delete document.documentElement.dataset.lessonAudioPlaying;
     };
   }, []);
 

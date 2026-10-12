@@ -1,4 +1,4 @@
-﻿.answer-option {
+﻿.fv-resources .answer-option {
   width: 100%;
   display: flex;
   align-items: center;
@@ -17,7 +17,7 @@
     background-color var(--transition-fast),
     border-color var(--transition-fast),
     color var(--transition-fast);
-  font-family: var(--font-body);
+  font-family: var(--font-sans), sans-serif;
   font-size: 15px;
   color: var(--fv-mata);
   touch-action: manipulation;
@@ -29,36 +29,36 @@
 
 /* Hover — apenas em dispositivos com ponteiro fino */
 @media (hover: hover) and (pointer: fine) {
-  .answer-option:hover:not(.answer-option--selected) {
+  .fv-resources .answer-option:hover:not(.answer-option--selected) {
     background-color: var(--fv-areia);
     border-color: var(--fv-verde-raiz);
   }
 }
 
 /* Active — feedback instantâneo no toque */
-.answer-option:active:not(.answer-option--selected) {
+.fv-resources .answer-option:active:not(.answer-option--selected) {
   background-color: var(--fv-areia);
   border-color: var(--fv-verde-raiz);
   transform: scale(0.985);
 }
 
-.answer-option:focus-visible {
+.fv-resources .answer-option:focus-visible {
   outline: 3px solid var(--fv-verde-raiz);
   outline-offset: 2px;
 }
 
 /* Estado selecionado */
-.answer-option--selected {
+.fv-resources .answer-option--selected {
   background-color: var(--fv-areia);
   border: 2px solid var(--fv-verde-raiz);
 }
 
-.answer-option--selected:active {
+.fv-resources .answer-option--selected:active {
   transform: scale(0.985);
 }
 
 /* ── Radio ── */
-.answer-option__radio {
+.fv-resources .answer-option__radio {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -73,12 +73,12 @@
     background-color var(--transition-fast);
 }
 
-.answer-option--selected .answer-option__radio {
+.fv-resources .answer-option--selected .answer-option__radio {
   border-color: var(--fv-verde-raiz);
   background-color: var(--fv-verde-raiz);
 }
 
-.answer-option__radio-check {
+.fv-resources .answer-option__radio-check {
   width: 7px;
   height: 7px;
   background-color: var(--fv-creme-papel);
@@ -86,38 +86,38 @@
 }
 
 /* ── Label ── */
-.answer-option__label {
-  font-family: var(--font-body);
+.fv-resources .answer-option__label {
+  font-family: var(--font-sans), sans-serif;
   font-size: 15px;
   color: var(--fv-mata);
   font-weight: 500;
   line-height: 1.4;
 }
 
-.answer-option--selected .answer-option__label {
+.fv-resources .answer-option--selected .answer-option__label {
   color: var(--fv-verde-raiz);
   font-weight: 700;
 }
 
 /* ── Mobile ── */
 @media (max-width: 640px) {
-  .answer-option {
+  .fv-resources .answer-option {
     padding: 15px var(--space-md);
     min-height: 56px;
     border-radius: var(--radius-md);
     font-size: 15px;
   }
 
-  .answer-option__label {
+  .fv-resources .answer-option__label {
     font-size: 15px;
   }
 
-  .answer-option__radio {
+  .fv-resources .answer-option__radio {
     width: 22px;
     height: 22px;
   }
 
-  .answer-option__radio-check {
+  .fv-resources .answer-option__radio-check {
     width: 8px;
     height: 8px;
   }

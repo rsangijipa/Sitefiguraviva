@@ -2,17 +2,20 @@
 
 import { useEffect } from "react";
 import Lenis from "lenis";
+import {usePathname} from "next/navigation";
+import {isResourceLocation} from "@/lib/observability/resource-privacy";
 
 export default function LenisProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const resourcePage=isResourceLocation(usePathname());
   useEffect(() => {
     const isSmoothEnabled =
       process.env.NEXT_PUBLIC_ENABLE_SMOOTH_SCROLL === "1";
 
-    if (!isSmoothEnabled) return;
+    if (!isSmoothEnabled || resourcePage) return;
 
     // Check for reduced motion
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -46,18 +49,20 @@ export default function LenisProvider({
       attributeFilter: ["style", "class"],
     });
 
+    let frame=0;
     function raf(time: number) {
       lenis.raf(time);
-      requestAnimationFrame(raf);
+      frame=requestAnimationFrame(raf);
     }
 
-    requestAnimationFrame(raf);
+    frame=requestAnimationFrame(raf);
 
     return () => {
       observer.disconnect();
+      cancelAnimationFrame(frame);
       lenis.destroy();
     };
-  }, []);
+  }, [resourcePage]);
 
   return <>{children}</>;
 }

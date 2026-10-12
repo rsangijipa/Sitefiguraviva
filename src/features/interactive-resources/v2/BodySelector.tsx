@@ -2,19 +2,22 @@
 import { useState } from "react";
 import { BODY_REGIONS, SENSATIONS, type BodyPoint } from "./contracts";
 import { Button, RangeScale, SelectableCard, TextField } from "./ui";
+import type {EditorialItem} from "./editorial-schema";
 
-export function BodySelector({ value, onChange, currentRegion }: { value: BodyPoint[]; onChange: (points: BodyPoint[]) => void; currentRegion?: typeof BODY_REGIONS[number] }) {
+export function BodySelector({ value, onChange, currentRegion,illustrations=[] }: { value: BodyPoint[]; onChange: (points: BodyPoint[]) => void; currentRegion?: typeof BODY_REGIONS[number];illustrations?:EditorialItem[] }) {
   const [view, setView] = useState<"frente" | "costas">("frente");
   const [selected, setSelected] = useState<typeof BODY_REGIONS[number]>("cabeça");
   const [sensation, setSensation] = useState<typeof SENSATIONS[number]>("não sei");
   const [intensity, setIntensity] = useState(1);
   const [note, setNote] = useState("");
   const region = currentRegion ?? selected;
+  const art=illustrations.find(item=>item.format===view && !!item.asset);
   const register = () => {
     const point: BodyPoint = { region, view, sensation, intensity, note };
     onChange([...value.filter(item => item.region !== region || item.view !== view), point]);
   };
   return <div>
+    {art && <img className="fv-art" src={art.asset} alt={art.title}/>}
     <div className="fv-options" role="group" aria-label="Vista do corpo">{(["frente","costas"] as const).map(side => <SelectableCard key={side} label={side === "frente" ? "Frente" : "Costas"} selected={view === side} onSelect={() => setView(side)} />)}</div>
     {!currentRegion && <><h3>Regiões do corpo</h3><div className="fv-options" role="group" aria-label="Escolher região">{BODY_REGIONS.map(part => <SelectableCard key={part} label={part} selected={region === part} onSelect={() => { setSelected(part); const old = value.find(item => item.region === part && item.view === view); setSensation(old?.sensation ?? "não sei"); setIntensity(old?.intensity ?? 1); setNote(old?.note ?? ""); }} />)}</div></>}
     <h3 style={{marginTop:24}}>O que você percebe em {region}?</h3>

@@ -22,12 +22,12 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header
       id="app-header"
-      className="w-full max-w-xl mx-auto px-5 py-4 flex items-center justify-between border-b border-[#E8E6DF]/80 select-none"
+      className="w-full max-w-xl mx-auto px-5 py-4 flex items-center justify-between border-b border-[#F1E9DB]/80 select-none"
     >
       <div className="flex items-center gap-2.5">
         <span
           id="mode-badge"
-          className="text-xs px-2.5 py-0.5 rounded-full bg-[#ECEAE3] text-[#555E67] font-medium tracking-wide"
+          className="text-xs px-2.5 py-0.5 rounded-full bg-[#F1E9DB] text-[#6B6B63] font-medium tracking-wide"
           title="Modo padrão: foco na percepção sem necessidade de escrever ou gravar objetos"
         >
           Sem registrar
@@ -41,7 +41,7 @@ export const Header: React.FC<HeaderProps> = ({
             id="narration-play-pause-btn"
             type="button"
             onClick={onTogglePlayPauseNarration}
-            className="p-2 rounded-full text-[#434B54] hover:bg-[#EAE8E1] active:scale-95 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1E2328]/30"
+            className="p-2 rounded-full text-[#4B4B49] hover:bg-[#F1E9DB] active:scale-95 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#262B22]/30"
             aria-label={
               isSpeaking && !isPaused ? "Pausar narração" : "Ouvir instrução"
             }
@@ -50,9 +50,9 @@ export const Header: React.FC<HeaderProps> = ({
             }
           >
             {isSpeaking && !isPaused ? (
-              <Pause className="w-4 h-4 text-[#1E2328]" />
+              <Pause className="w-4 h-4 text-[#262B22]" />
             ) : (
-              <Play className="w-4 h-4 text-[#1E2328]" />
+              <Play className="w-4 h-4 text-[#262B22]" />
             )}
           </button>
         )}
@@ -62,7 +62,7 @@ export const Header: React.FC<HeaderProps> = ({
           id="audio-mute-btn"
           type="button"
           onClick={onToggleAudio}
-          className="p-2 rounded-full text-[#434B54] hover:bg-[#EAE8E1] active:scale-95 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1E2328]/30"
+          className="p-2 rounded-full text-[#4B4B49] hover:bg-[#F1E9DB] active:scale-95 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#262B22]/30"
           aria-label={
             settings.audioEnabled ? "Desativar áudio" : "Ativar áudio"
           }
@@ -75,7 +75,7 @@ export const Header: React.FC<HeaderProps> = ({
           {settings.audioEnabled ? (
             <Volume2 className="w-4 h-4" />
           ) : (
-            <VolumeX className="w-4 h-4 text-[#8C939B]" />
+            <VolumeX className="w-4 h-4 text-[#6B6B63]" />
           )}
         </button>
 
@@ -84,7 +84,7 @@ export const Header: React.FC<HeaderProps> = ({
           id="settings-btn"
           type="button"
           onClick={onOpenSettings}
-          className="p-2 rounded-full text-[#434B54] hover:bg-[#EAE8E1] active:scale-95 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1E2328]/30"
+          className="p-2 rounded-full text-[#4B4B49] hover:bg-[#F1E9DB] active:scale-95 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#262B22]/30"
           aria-label="Configurações do exercício"
           title="Configurações"
         >

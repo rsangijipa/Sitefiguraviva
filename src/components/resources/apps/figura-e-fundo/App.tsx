@@ -199,7 +199,7 @@ export default function App() {
   }, [currentRound, selectedElementId]);
 
   return (
-    <div className="min-h-full bg-[#F8F7F4] text-[#2C2A29] flex flex-col justify-between py-6 px-4 sm:px-8 max-w-5xl mx-auto">
+    <div className="min-h-full bg-[#FDFAF4] text-[#262B22] flex flex-col justify-between py-6 px-4 sm:px-8 max-w-5xl mx-auto">
       {/* Top Header */}
       <div className="space-y-6">
         <ControlsHeader
@@ -213,10 +213,10 @@ export default function App() {
         />
 
         {/* Sound toggle & subtle ambient bar */}
-        <div className="flex items-center justify-between text-xs text-[#8A847A] pt-1">
+        <div className="flex items-center justify-between text-xs text-[#6B6B63] pt-1">
           <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#8C6B4F]" />
-            <span className="font-serif italic text-xs text-[#6B655C]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#6B6B63]" />
+            <span className="font-serif italic text-xs text-[#6B6B63]">
               {currentRound.subtitle}
             </span>
           </div>
@@ -224,7 +224,7 @@ export default function App() {
           <button
             id="btn-sound-toggle"
             onClick={() => setSoundEnabled((v) => !v)}
-            className="flex items-center gap-1.5 hover:text-[#2C2A29] transition-colors py-1 px-2 rounded-lg hover:bg-[#EFECE5]"
+            className="flex items-center gap-1.5 hover:text-[#262B22] transition-colors py-1 px-2 rounded-lg hover:bg-[#F1E9DB]"
             title={
               soundEnabled
                 ? "Desativar sinal sonoro"
@@ -233,13 +233,13 @@ export default function App() {
           >
             {soundEnabled ? (
               <>
-                <Volume2 className="w-3.5 h-3.5 text-[#555048]" />
+                <Volume2 className="w-3.5 h-3.5 text-[#4B4B49]" />
                 <span className="text-[11px]">Som ativo</span>
               </>
             ) : (
               <>
-                <VolumeX className="w-3.5 h-3.5 text-[#A59F94]" />
-                <span className="text-[11px] text-[#969085]">Som discreto</span>
+                <VolumeX className="w-3.5 h-3.5 text-[#D8CFBE]" />
+                <span className="text-[11px] text-[#6B6B63]">Som discreto</span>
               </>
             )}
           </button>
@@ -252,30 +252,30 @@ export default function App() {
             <div className="text-center py-2 space-y-2 max-w-xl mx-auto">
               {stage === "contemplating" && (
                 <div className="space-y-3 animate-fade-in">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EFEBE3] text-xs text-[#736E65] font-medium tracking-wide">
-                    <Eye className="w-3.5 h-3.5 text-[#8C6B4F]" />
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F1E9DB] text-xs text-[#6B6B63] font-medium tracking-wide">
+                    <Eye className="w-3.5 h-3.5 text-[#6B6B63]" />
                     <span>MOMENTO DE CONTEMPLAÇÃO</span>
                   </div>
-                  <h2 className="text-2xl sm:text-3xl font-serif text-[#1F1E1D] font-normal tracking-tight">
+                  <h2 className="text-2xl sm:text-3xl font-serif text-[#262B22] font-normal tracking-tight">
                     “Observe sem procurar nada.”
                   </h2>
-                  <p className="text-xs sm:text-sm text-[#706B62] leading-relaxed">
+                  <p className="text-xs sm:text-sm text-[#6B6B63] leading-relaxed">
                     Permita que o olhar percorra as formas, linhas e manchas de
                     aquarela com respiração calma e sem esforço deliberado.
                   </p>
 
                   {/* Gentle contemplation progress bar */}
                   <div className="pt-2 flex flex-col items-center gap-2">
-                    <div className="w-48 h-1 bg-[#E7E2D7] rounded-full overflow-hidden">
+                    <div className="w-48 h-1 bg-[#F1E9DB] rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-[#8C6B4F] transition-all duration-100 ease-out"
+                        className="h-full bg-[#6B6B63] transition-all duration-100 ease-out"
                         style={{ width: `${contemplationProgress}%` }}
                       />
                     </div>
                     <button
                       id="btn-ready-to-select"
                       onClick={handleProceedToSelecting}
-                      className="text-xs text-[#7A7468] hover:text-[#1F1E1D] underline underline-offset-4 decoration-[#CCC4B5] transition-colors"
+                      className="text-xs text-[#6B6B63] hover:text-[#262B22] underline underline-offset-4 decoration-[#D8CFBE] transition-colors"
                     >
                       Estou pronto para responder
                     </button>
@@ -285,13 +285,13 @@ export default function App() {
 
               {stage === "selecting" && (
                 <div className="space-y-2 animate-fade-in">
-                  <span className="text-xs uppercase tracking-wider text-[#8A847A] font-semibold">
+                  <span className="text-xs uppercase tracking-wider text-[#6B6B63] font-semibold">
                     Percepção Imediata
                   </span>
-                  <h2 className="text-2xl sm:text-3xl font-serif text-[#1F1E1D] font-normal tracking-tight">
+                  <h2 className="text-2xl sm:text-3xl font-serif text-[#262B22] font-normal tracking-tight">
                     “O que apareceu primeiro para você?”
                   </h2>
-                  <p className="text-xs sm:text-sm text-[#706B62]">
+                  <p className="text-xs sm:text-sm text-[#6B6B63]">
                     Selecione tocando diretamente sobre o elemento no campo
                     abaixo.
                   </p>
@@ -300,17 +300,17 @@ export default function App() {
 
               {stage === "revealed" && selectedElement && (
                 <div className="space-y-2 animate-fade-in">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EBF0EB] text-xs text-[#3C5740] font-medium tracking-wide">
-                    <Sparkles className="w-3.5 h-3.5 text-[#4A6B4F]" />
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F1E9DB] text-xs text-[#4B4B49] font-medium tracking-wide">
+                    <Sparkles className="w-3.5 h-3.5 text-[#4B4B49]" />
                     <span>EMERSÃO DE FIGURA</span>
                   </div>
-                  <h2 className="text-xl sm:text-2xl font-serif text-[#1F1E1D] font-normal">
+                  <h2 className="text-xl sm:text-2xl font-serif text-[#262B22] font-normal">
                     <strong className="font-semibold">
                       {selectedElement.name}
                     </strong>{" "}
                     emergiu como Figura
                   </h2>
-                  <p className="text-xs sm:text-sm text-[#6E685F] max-w-lg mx-auto leading-relaxed">
+                  <p className="text-xs sm:text-sm text-[#6B6B63] max-w-lg mx-auto leading-relaxed">
                     A proeminência dos outros elementos foi reduzida, mas eles
                     permanecem como fundo ativo. Você pode clicar em qualquer
                     outro elemento para alternar.
@@ -334,12 +334,12 @@ export default function App() {
 
             {/* Clickable Elements Badges / Grid (Allows clicking either on SVG or in list) */}
             <div className="space-y-3">
-              <div className="flex items-center justify-between text-xs text-[#7A7468]">
+              <div className="flex items-center justify-between text-xs text-[#6B6B63]">
                 <span>
                   Elementos presentes no campo ({currentRound.elements.length}):
                 </span>
                 {stage === "revealed" && (
-                  <span className="text-[11px] italic text-[#8A847A]">
+                  <span className="text-[11px] italic text-[#6B6B63]">
                     Clique em outro elemento para mudar o foco
                   </span>
                 )}
@@ -363,23 +363,23 @@ export default function App() {
                       disabled={stage === "contemplating"}
                       className={`text-left p-3 rounded-xl border transition-all text-xs flex flex-col justify-between min-h-[78px] ${
                         isSelected
-                          ? "bg-[#FFFFFF] border-[#1F1E1D] shadow-sm ring-1 ring-[#1F1E1D]"
+                          ? "bg-[#FDFAF4] border-[#262B22]  ring-1 ring-[#262B22]"
                           : isHovered
-                            ? "bg-[#F2EEE6] border-[#CEC6B7]"
-                            : "bg-[#FBF9F5] border-[#E5E0D5] hover:bg-[#F3EFE7]"
+                            ? "bg-[#F1E9DB] border-[#D8CFBE]"
+                            : "bg-[#FDFAF4] border-[#F1E9DB] hover:bg-[#F1E9DB]"
                       } ${stage === "contemplating" ? "opacity-60 cursor-default" : "cursor-pointer"}`}
                     >
                       <div className="flex items-center justify-between gap-1 w-full">
-                        <span className="text-[10px] uppercase tracking-wider text-[#8A847A]">
+                        <span className="text-[10px] uppercase tracking-wider text-[#6B6B63]">
                           {el.category}
                         </span>
                         {isSelected && (
-                          <span className="text-[9px] font-semibold bg-[#2C2A29] text-[#FFFFFF] px-1.5 py-0.5 rounded">
+                          <span className="text-[9px] font-semibold bg-[#262B22] text-[#FDFAF4] px-1.5 py-0.5 rounded">
                             FIGURA
                           </span>
                         )}
                       </div>
-                      <span className="font-medium text-[#22201E] line-clamp-2 mt-1">
+                      <span className="font-medium text-[#262B22] line-clamp-2 mt-1">
                         {el.name}
                       </span>
                     </button>
@@ -390,10 +390,10 @@ export default function App() {
 
             {/* Bottom Controls / Next Round Action */}
             {stage === "revealed" && (
-              <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-[#E8E4DA] animate-fade-in">
-                <div className="text-xs text-[#6E685F] max-w-md">
+              <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-[#F1E9DB] animate-fade-in">
+                <div className="text-xs text-[#6B6B63] max-w-md">
                   <p>
-                    <strong className="text-[#1F1E1D]">
+                    <strong className="text-[#262B22]">
                       {currentRound.parameterName}:
                     </strong>{" "}
                     {currentRound.phenomenonNote}
@@ -403,7 +403,7 @@ export default function App() {
                 <button
                   id="btn-next-round"
                   onClick={handleNextRound}
-                  className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#2C2A29] hover:bg-[#1A1918] text-[#F8F7F4] text-xs font-medium tracking-wide flex items-center justify-center gap-2 transition-colors shadow-sm shrink-0"
+                  className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#262B22] hover:bg-[#262B22] text-[#FDFAF4] text-xs font-medium tracking-wide flex items-center justify-center gap-2 transition-colors  shrink-0"
                 >
                   <span>
                     {currentRoundIndex < ROUNDS_DATA.length - 1
@@ -450,12 +450,12 @@ export default function App() {
       </div>
 
       {/* Footer Reflection & Credits */}
-      <footer className="mt-12 pt-4 border-t border-[#E8E4DA] flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-[#948E84]">
+      <footer className="mt-12 pt-4 border-t border-[#F1E9DB] flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-[#6B6B63]">
         <span>Fenomenologia da Percepção • Gestalt & Edgar Rubin</span>
         <div className="flex items-center gap-4">
           <button
             onClick={() => setIsStudyOpen(true)}
-            className="hover:text-[#2C2A29] transition-colors underline underline-offset-2"
+            className="hover:text-[#262B22] transition-colors underline underline-offset-2"
           >
             Entender o conceito teórico
           </button>

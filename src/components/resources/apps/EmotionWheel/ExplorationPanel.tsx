@@ -82,7 +82,7 @@ export const ExplorationPanel: React.FC<ExplorationPanelProps> = ({
       </div>
 
       {/* Opção: Não encontrei uma palavra */}
-      <div className="bg-[#FAF6EE] p-3.5 rounded-2xl border-2 border-[#E5DDD0]">
+      <div className="bg-[#FDFAF4] p-3.5 rounded-2xl border-2 border-[#F1E9DB]">
         <div className="flex items-center justify-between">
           <label
             htmlFor="custom-emotion-toggle"
@@ -159,7 +159,7 @@ export const ExplorationPanel: React.FC<ExplorationPanelProps> = ({
 
       {/* Se não houver seleção ainda, orienta o usuário */}
       {!hasAnySelection && !isWritingCustom && (
-        <div className="p-4 rounded-2xl border-2 border-dashed border-[#D8CFBE] text-center bg-[#FAF6EE]">
+        <div className="p-4 rounded-2xl border-2 border-dashed border-[#D8CFBE] text-center bg-[#FDFAF4]">
           <p className="text-sm text-[#6B6B63] leading-relaxed">
             Toque ou selecione um dos quadrantes da Roda ao lado para desdobrar famílias, relações e nuances.
           </p>
@@ -192,7 +192,7 @@ export const ExplorationPanel: React.FC<ExplorationPanelProps> = ({
                   className={`text-xs px-3 py-2 rounded-xl border-2 transition-colors min-h-[44px] flex items-center justify-center font-medium ${
                     isSelected
                       ? 'bg-[#005A1F] text-[#FDFAF4] border-[#005A1F]'
-                      : 'bg-[#FAF6EE] text-[#262B22] border-[#D8CFBE] hover:bg-[#F1E9DB]'
+                      : 'bg-[#FDFAF4] text-[#262B22] border-[#D8CFBE] hover:bg-[#F1E9DB]'
                   }`}
                 >
                   {anchor.label}
@@ -232,7 +232,7 @@ export const ExplorationPanel: React.FC<ExplorationPanelProps> = ({
                   className={`flex flex-col items-center justify-center py-2.5 rounded-xl border-2 transition-colors min-h-[44px] ${
                     isSelected
                       ? 'border-[#96551F] bg-[#F1E9DB] font-bold text-[#96551F]'
-                      : 'border-[#D8CFBE] bg-[#FAF6EE] text-[#6B6B63] hover:bg-[#F1E9DB]'
+                      : 'border-[#D8CFBE] bg-[#FDFAF4] text-[#6B6B63] hover:bg-[#F1E9DB]'
                   }`}
                 >
                   <span className="text-sm">{item.level}</span>
@@ -278,7 +278,7 @@ export const ExplorationPanel: React.FC<ExplorationPanelProps> = ({
           className={`w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl font-medium text-sm transition-all min-h-[48px] border-2 ${
             isSavedToDiary
               ? 'bg-[#005A1F] text-[#FDFAF4] border-[#005A1F]'
-              : 'bg-[#F1E9DB] text-[#005A1F] border-[#005A1F] hover:bg-[#E8DFC8] active:bg-[#DED2BA]'
+              : 'bg-[#F1E9DB] text-[#005A1F] border-[#005A1F] hover:bg-[#F1E9DB] active:bg-[#D8CFBE]'
           } disabled:opacity-50 disabled:cursor-not-allowed`}
         >
           {isSavedToDiary ? (

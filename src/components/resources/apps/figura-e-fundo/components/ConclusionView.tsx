@@ -29,27 +29,27 @@ export const ConclusionView: React.FC<ConclusionViewProps> = ({
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto space-y-8 animate-fade-in text-[#2C2A29]">
+    <div className="w-full max-w-3xl mx-auto space-y-8 animate-fade-in text-[#262B22]">
       {/* Central Reflection Hero */}
-      <div className="text-center p-8 sm:p-12 rounded-3xl bg-[#FAF8F5] border border-[#E4DFD5] shadow-[0_8px_30px_rgba(0,0,0,0.03)] relative overflow-hidden">
+      <div className="text-center p-8 sm:p-12 rounded-3xl bg-[#FDFAF4] border border-[#F1E9DB] -[0_8px_30px_rgb(38 43 34 / 0.03)] relative overflow-hidden">
         {/* Subtle decorative watermark */}
-        <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-[#EAE5D9]/50 blur-2xl pointer-events-none" />
-        <div className="absolute -bottom-12 -left-12 w-48 h-48 rounded-full bg-[#E5DFD1]/50 blur-2xl pointer-events-none" />
+        <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-[#F1E9DB]/50 blur-2xl pointer-events-none" />
+        <div className="absolute -bottom-12 -left-12 w-48 h-48 rounded-full bg-[#F1E9DB]/50 blur-2xl pointer-events-none" />
 
         <div className="relative z-10 max-w-xl mx-auto space-y-5">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EFEBE3] text-xs text-[#736E65] font-medium tracking-wide">
-            <Sparkles className="w-3.5 h-3.5 text-[#8C6B4F]" />
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F1E9DB] text-xs text-[#6B6B63] font-medium tracking-wide">
+            <Sparkles className="w-3.5 h-3.5 text-[#6B6B63]" />
             <span>SÍNTESE DA EXPERIÊNCIA</span>
           </div>
 
-          <h2 className="text-2xl sm:text-4xl font-serif text-[#1F1E1D] font-medium leading-snug tracking-tight">
+          <h2 className="text-2xl sm:text-4xl font-serif text-[#262B22] font-medium leading-snug tracking-tight">
             “Quando algo se torna figura, o restante não desaparece:{" "}
-            <span className="italic font-normal text-[#6C5643]">
+            <span className="italic font-normal text-[#4B4B49]">
               permanece como fundo.”
             </span>
           </h2>
 
-          <p className="text-sm sm:text-base text-[#615C54] leading-relaxed max-w-lg mx-auto">
+          <p className="text-sm sm:text-base text-[#6B6B63] leading-relaxed max-w-lg mx-auto">
             A cada olhar, uma nova realidade se organiza. A figura destaca-se
             não por apagar o que a cerca, mas por se apoiar na presença
             silenciosa do campo que a acolhe.
@@ -58,9 +58,9 @@ export const ConclusionView: React.FC<ConclusionViewProps> = ({
       </div>
 
       {/* Trajectory across rounds */}
-      <div className="p-6 sm:p-8 rounded-2xl bg-[#FFFFFF] border border-[#E6E1D7] shadow-sm">
-        <h3 className="text-xs uppercase tracking-wider text-[#8A847A] font-semibold mb-4 flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-[#4A6452]" />
+      <div className="p-6 sm:p-8 rounded-2xl bg-[#FDFAF4] border border-[#F1E9DB] ">
+        <h3 className="text-xs uppercase tracking-wider text-[#6B6B63] font-semibold mb-4 flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 text-[#4B4B49]" />
           Seu Percurso Perceptivo Único
         </h3>
 
@@ -68,25 +68,25 @@ export const ConclusionView: React.FC<ConclusionViewProps> = ({
           {selections.map((item, idx) => (
             <div
               key={idx}
-              className="p-3.5 rounded-xl bg-[#FBF9F6] border border-[#ECE7DC] flex flex-col justify-between"
+              className="p-3.5 rounded-xl bg-[#FDFAF4] border border-[#F1E9DB] flex flex-col justify-between"
             >
               <div>
-                <span className="text-[11px] font-medium uppercase tracking-wider text-[#9E978C]">
+                <span className="text-[11px] font-medium uppercase tracking-wider text-[#6B6B63]">
                   Rodada {item.roundId} • {item.theme}
                 </span>
-                <p className="font-serif text-sm font-medium text-[#22201E] mt-0.5">
+                <p className="font-serif text-sm font-medium text-[#262B22] mt-0.5">
                   {item.roundTitle}
                 </p>
               </div>
 
-              <div className="mt-3 pt-2.5 border-t border-[#EDE8DE] flex items-center justify-between text-xs">
-                <div className="flex items-center gap-1.5 text-[#3F3B35]">
-                  <span className="w-2 h-2 rounded-full bg-[#8C6B4F]" />
+              <div className="mt-3 pt-2.5 border-t border-[#F1E9DB] flex items-center justify-between text-xs">
+                <div className="flex items-center gap-1.5 text-[#4B4B49]">
+                  <span className="w-2 h-2 rounded-full bg-[#6B6B63]" />
                   <span className="font-medium">
                     {item.selectedElementName}
                   </span>
                 </div>
-                <span className="text-[11px] text-[#8C867D]">
+                <span className="text-[11px] text-[#6B6B63]">
                   {item.secondsElapsed}s
                 </span>
               </div>
@@ -96,31 +96,31 @@ export const ConclusionView: React.FC<ConclusionViewProps> = ({
       </div>
 
       {/* Aggregated Session Metrics (Requirement: Registrar somente conclusão e tempo agregado) */}
-      <div className="p-5 sm:p-6 rounded-2xl bg-[#F7F5EE] border border-[#E3DDD0] flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="p-5 sm:p-6 rounded-2xl bg-[#FDFAF4] border border-[#F1E9DB] flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-[#EBE5D7] flex items-center justify-center text-[#595248]">
+          <div className="w-10 h-10 rounded-full bg-[#F1E9DB] flex items-center justify-center text-[#4B4B49]">
             <Clock className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-xs uppercase tracking-wider text-[#7A7468] font-semibold">
+            <p className="text-xs uppercase tracking-wider text-[#6B6B63] font-semibold">
               Registro de Conclusão e Tempo Agregado
             </p>
-            <p className="text-xs text-[#666056] mt-0.5">
+            <p className="text-xs text-[#6B6B63] mt-0.5">
               Tempo total acumulado de contemplação:{" "}
-              <strong className="text-[#1F1E1D]">
+              <strong className="text-[#262B22]">
                 {formatSeconds(stats.totalTimeSpentSeconds)}
               </strong>
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-4 text-xs text-[#5E574D]">
+        <div className="flex items-center gap-4 text-xs text-[#4B4B49]">
           <div className="text-right">
-            <span className="block font-serif text-lg font-medium text-[#1F1E1D]">
+            <span className="block font-serif text-lg font-medium text-[#262B22]">
               {stats.totalCompletions}{" "}
               {stats.totalCompletions === 1 ? "conclusão" : "conclusões"}
             </span>
-            <span className="text-[11px] text-[#8C8578]">
+            <span className="text-[11px] text-[#6B6B63]">
               registradas nesta sessão
             </span>
           </div>
@@ -132,7 +132,7 @@ export const ConclusionView: React.FC<ConclusionViewProps> = ({
         <button
           id="btn-restart-experience"
           onClick={onRestart}
-          className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#2C2A29] hover:bg-[#1A1918] text-[#F8F7F4] text-xs font-medium tracking-wide flex items-center justify-center gap-2 transition-colors shadow-sm"
+          className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#262B22] hover:bg-[#262B22] text-[#FDFAF4] text-xs font-medium tracking-wide flex items-center justify-center gap-2 transition-colors "
         >
           <RotateCcw className="w-4 h-4" />
           Reiniciar Experiência
@@ -141,9 +141,9 @@ export const ConclusionView: React.FC<ConclusionViewProps> = ({
         <button
           id="btn-enter-playground"
           onClick={onEnterPlayground}
-          className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#FFFFFF] hover:bg-[#F2EEE6] text-[#2C2A29] border border-[#DCD5C6] text-xs font-medium tracking-wide flex items-center justify-center gap-2 transition-colors"
+          className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#FDFAF4] hover:bg-[#F1E9DB] text-[#262B22] border border-[#D8CFBE] text-xs font-medium tracking-wide flex items-center justify-center gap-2 transition-colors"
         >
-          <Sliders className="w-4 h-4 text-[#7A7468]" />
+          <Sliders className="w-4 h-4 text-[#6B6B63]" />
           Laboratório de Parâmetros Livres
         </button>
       </div>

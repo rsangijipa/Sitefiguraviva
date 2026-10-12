@@ -19,8 +19,8 @@ export default function ResourcesPage() {
     <PublicSiteFrame>
       <PublicPageHero
         eyebrow="Experiências"
-        title="Recursos para a presença"
-        description="Ferramentas interativas para observar, sentir e refletir."
+        title="Experiências de aprendizagem"
+        description="Cartas Gestálticas e Figura e Fundo do acervo revisado."
         notice="Recursos educativos: não substituem acompanhamento profissional."
         backgroundImage="/assets/fv/heroes/recursos.webp"
       />

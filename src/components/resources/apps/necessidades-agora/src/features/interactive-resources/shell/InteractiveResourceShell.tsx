@@ -253,7 +253,7 @@ export const InteractiveResourceShell: React.FC<InteractiveResourceShellProps> =
           role="dialog"
           aria-modal="true"
           aria-labelledby="exit-dialog-title"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#262B22]/60 backdrop-blur-xs"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#262B22]/60 "
         >
           <div className="bg-[#FDFAF4] rounded-[24px] border-2 border-[#96551F] p-6 max-w-md w-full text-left">
             <div className="flex items-start gap-3 mb-4">
@@ -301,7 +301,7 @@ export const InteractiveResourceShell: React.FC<InteractiveResourceShellProps> =
           role="dialog"
           aria-modal="true"
           aria-labelledby="privacy-dialog-title"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#262B22]/60 backdrop-blur-xs"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#262B22]/60 "
         >
           <div className="bg-[#FDFAF4] rounded-[24px] border-2 border-[#005A1F] p-6 max-w-md w-full text-left">
             <div className="flex items-center justify-between mb-4">

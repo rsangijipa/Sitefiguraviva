@@ -157,7 +157,7 @@ export const SessionView: React.FC<SessionViewProps> = ({
 
     return (
       <div className="min-h-[calc(100vh-3.5rem)] bg-[#FDFAF4] flex items-center justify-center px-4 py-12">
-        <div className="max-w-md w-full text-center space-y-8 p-8 rounded-3xl bg-[#FDFAF4] border border-[#E2D8CA]">
+        <div className="max-w-md w-full text-center space-y-8 p-8 rounded-3xl bg-[#FDFAF4] border border-[#D8CFBE]">
           <div className="space-y-3">
             <span className="text-[11px] font-sans font-bold tracking-[0.16em] text-[#96551F] uppercase block">
               Fim da Exploração
@@ -173,7 +173,7 @@ export const SessionView: React.FC<SessionViewProps> = ({
           </div>
 
           {/* Stats without gamification */}
-          <div className="grid grid-cols-3 gap-2 py-4 border-y border-[#E2D8CA]/80">
+          <div className="grid grid-cols-3 gap-2 py-4 border-y border-[#D8CFBE]/80">
             <div className="flex flex-col items-center p-2">
               <span className="font-serif text-2xl text-[#262B22]">
                 {savedInSession}
@@ -182,7 +182,7 @@ export const SessionView: React.FC<SessionViewProps> = ({
                 guardadas
               </span>
             </div>
-            <div className="flex flex-col items-center p-2 border-x border-[#E2D8CA]/60">
+            <div className="flex flex-col items-center p-2 border-x border-[#D8CFBE]/60">
               <span className="font-serif text-2xl text-[#96551F]">
                 {reviewInSession}
               </span>
@@ -207,13 +207,13 @@ export const SessionView: React.FC<SessionViewProps> = ({
                 setShowSummaryScreen(false);
                 setCurrentIndex(0);
               }}
-              className="w-full py-3 bg-[#005A1F] hover:bg-[#004317] text-[#FDFAF4] text-xs font-sans font-medium rounded-xl transition-colors"
+              className="w-full py-3 bg-[#005A1F] hover:bg-[#005A1F] text-[#FDFAF4] text-xs font-sans font-medium rounded-xl transition-colors"
             >
               Continuar explorando
             </button>
             <button
               onClick={() => onNavigate("favorites")}
-              className="w-full py-3 bg-[#F1E9DB] hover:bg-[#E2D8CA] text-[#262B22] text-xs font-sans font-medium rounded-xl transition-colors"
+              className="w-full py-3 bg-[#F1E9DB] hover:bg-[#D8CFBE] text-[#262B22] text-xs font-sans font-medium rounded-xl transition-colors"
             >
               Ver cartas guardadas
             </button>
@@ -233,7 +233,7 @@ export const SessionView: React.FC<SessionViewProps> = ({
     <div className="min-h-[calc(100vh-3.5rem)] bg-[#FDFAF4] flex flex-col justify-between py-4 px-4 sm:px-6 relative">
       {/* Toast Notification (Discreet confirmation, no confetti) */}
       {toastMessage && (
-        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-[#262B22] text-[#FDFAF4] px-4 py-2 rounded-full text-xs font-sans shadow-none flex items-center gap-2 animate-fade-in">
+        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-[#262B22] text-[#FDFAF4] px-4 py-2 rounded-full text-xs font-sans  flex items-center gap-2 animate-fade-in">
           <CheckCircle2 className="w-3.5 h-3.5 text-[#01C94D]" />
           <span>{toastMessage}</span>
         </div>
@@ -258,8 +258,8 @@ export const SessionView: React.FC<SessionViewProps> = ({
           onClick={() => handleFavoriteToggle(currentCard.id)}
           className={`flex items-center gap-1.5 py-1 px-2.5 rounded-lg border transition-colors ${
             isFavorite
-              ? "bg-[#F1E9DB] text-[#96551F] border-[#E2D8CA]"
-              : "bg-[#FDFAF4] text-[#6B6B63] hover:text-[#262B22] border-transparent hover:border-[#E2D8CA]"
+              ? "bg-[#F1E9DB] text-[#96551F] border-[#D8CFBE]"
+              : "bg-[#FDFAF4] text-[#6B6B63] hover:text-[#262B22] border-transparent hover:border-[#D8CFBE]"
           }`}
         >
           <Bookmark
@@ -292,7 +292,7 @@ export const SessionView: React.FC<SessionViewProps> = ({
           <div className="flex items-center justify-center gap-2 pt-1 pb-2">
             <button
               onClick={handleKnown}
-              className="px-3 py-1.5 rounded-lg text-xs font-sans font-medium bg-[#FDFAF4] hover:bg-[#F1E9DB] border border-[#E2D8CA] text-[#005A1F] transition-colors"
+              className="px-3 py-1.5 rounded-lg text-xs font-sans font-medium bg-[#FDFAF4] hover:bg-[#F1E9DB] border border-[#D8CFBE] text-[#005A1F] transition-colors"
             >
               Já conheço
             </button>
@@ -301,14 +301,14 @@ export const SessionView: React.FC<SessionViewProps> = ({
               className={`px-3 py-1.5 rounded-lg text-xs font-sans font-medium border transition-colors ${
                 isMarkedForReview
                   ? "bg-[#F1E9DB] text-[#96551F] border-[#96551F]"
-                  : "bg-[#FDFAF4] text-[#262B22] border-[#E2D8CA] hover:bg-[#F1E9DB]"
+                  : "bg-[#FDFAF4] text-[#262B22] border-[#D8CFBE] hover:bg-[#F1E9DB]"
               }`}
             >
               {isMarkedForReview ? "Marcada para rever" : "Quero rever"}
             </button>
             <button
               onClick={() => handleFavoriteToggle(currentCard.id)}
-              className="px-3 py-1.5 rounded-lg text-xs font-sans font-medium bg-[#FDFAF4] hover:bg-[#F1E9DB] border border-[#E2D8CA] text-[#262B22] transition-colors"
+              className="px-3 py-1.5 rounded-lg text-xs font-sans font-medium bg-[#FDFAF4] hover:bg-[#F1E9DB] border border-[#D8CFBE] text-[#262B22] transition-colors"
             >
               {isFavorite ? "Guardada" : "Guardar"}
             </button>
@@ -322,8 +322,8 @@ export const SessionView: React.FC<SessionViewProps> = ({
             disabled={currentIndex === 0}
             className={`flex-1 sm:flex-initial sm:min-w-[120px] py-2.5 px-4 rounded-xl border text-xs font-sans font-medium flex items-center justify-center gap-1.5 transition-colors ${
               currentIndex === 0
-                ? "opacity-35 cursor-not-allowed border-[#E2D8CA] text-[#6B6B63]"
-                : "bg-[#FDFAF4] hover:bg-[#F1E9DB] border-[#E2D8CA] text-[#262B22]"
+                ? "opacity-35 cursor-not-allowed border-[#D8CFBE] text-[#6B6B63]"
+                : "bg-[#FDFAF4] hover:bg-[#F1E9DB] border-[#D8CFBE] text-[#262B22]"
             }`}
           >
             <ArrowLeft className="w-3.5 h-3.5" />
@@ -333,7 +333,7 @@ export const SessionView: React.FC<SessionViewProps> = ({
           {/* Central Button with slightly more visual weight */}
           <button
             onClick={() => setIsFlipped((prev) => !prev)}
-            className="flex-1 sm:flex-initial sm:min-w-[160px] py-2.5 px-5 rounded-xl bg-[#005A1F] hover:bg-[#004317] text-[#FDFAF4] text-xs font-sans font-medium flex items-center justify-center gap-2 transition-colors focus:outline-none focus:ring-1 focus:ring-[#005A1F]"
+            className="flex-1 sm:flex-initial sm:min-w-[160px] py-2.5 px-5 rounded-xl bg-[#005A1F] hover:bg-[#005A1F] text-[#FDFAF4] text-xs font-sans font-medium flex items-center justify-center gap-2 transition-colors focus:outline-none focus:ring-1 focus:ring-[#005A1F]"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>Virar carta</span>
@@ -341,7 +341,7 @@ export const SessionView: React.FC<SessionViewProps> = ({
 
           <button
             onClick={handleNext}
-            className="flex-1 sm:flex-initial sm:min-w-[120px] py-2.5 px-4 rounded-xl border border-[#E2D8CA] bg-[#FDFAF4] hover:bg-[#F1E9DB] text-[#262B22] text-xs font-sans font-medium flex items-center justify-center gap-1.5 transition-colors"
+            className="flex-1 sm:flex-initial sm:min-w-[120px] py-2.5 px-4 rounded-xl border border-[#D8CFBE] bg-[#FDFAF4] hover:bg-[#F1E9DB] text-[#262B22] text-xs font-sans font-medium flex items-center justify-center gap-1.5 transition-colors"
           >
             <span>
               {currentIndex === cards.length - 1 ? "Concluir" : "Próxima"}
@@ -355,10 +355,10 @@ export const SessionView: React.FC<SessionViewProps> = ({
       {showExitModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="fixed inset-0 bg-[#262B22]/30 backdrop-blur-[1px]"
+            className="fixed inset-0 bg-[#262B22]/30 -[1px]"
             onClick={() => setShowExitModal(false)}
           />
-          <div className="relative z-10 w-full max-w-sm bg-[#FDFAF4] border border-[#E2D8CA] rounded-2xl p-6 space-y-4 text-center">
+          <div className="relative z-10 w-full max-w-sm bg-[#FDFAF4] border border-[#D8CFBE] rounded-2xl p-6 space-y-4 text-center">
             <h3 className="font-serif text-xl text-[#005A1F] font-normal">
               Encerrar esta exploração?
             </h3>
@@ -368,7 +368,7 @@ export const SessionView: React.FC<SessionViewProps> = ({
             <div className="flex items-center justify-center gap-3 pt-2">
               <button
                 onClick={() => setShowExitModal(false)}
-                className="flex-1 py-2 rounded-lg border border-[#E2D8CA] text-xs font-sans text-[#262B22] hover:bg-[#F1E9DB] transition-colors"
+                className="flex-1 py-2 rounded-lg border border-[#D8CFBE] text-xs font-sans text-[#262B22] hover:bg-[#F1E9DB] transition-colors"
               >
                 Continuar
               </button>
@@ -377,7 +377,7 @@ export const SessionView: React.FC<SessionViewProps> = ({
                   setShowExitModal(false);
                   setShowSummaryScreen(true);
                 }}
-                className="flex-1 py-2 rounded-lg bg-[#005A1F] text-[#FDFAF4] text-xs font-sans font-medium hover:bg-[#004317] transition-colors"
+                className="flex-1 py-2 rounded-lg bg-[#005A1F] text-[#FDFAF4] text-xs font-sans font-medium hover:bg-[#005A1F] transition-colors"
               >
                 Encerrar
               </button>

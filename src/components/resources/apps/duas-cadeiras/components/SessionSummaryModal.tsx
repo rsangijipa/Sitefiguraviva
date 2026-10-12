@@ -78,23 +78,23 @@ export const SessionSummaryModal: React.FC<SessionSummaryModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="summary-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-stone-900/50 backdrop-blur-xs overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-primary/50  overflow-y-auto"
     >
-      <div className="w-full max-w-2xl my-auto rounded-2xl bg-white shadow-2xl border border-stone-200 overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="w-full max-w-2xl my-auto rounded-2xl bg-paper  border border-nevoa overflow-hidden flex flex-col max-h-[90vh]">
         {/* Modal Header */}
-        <div className="p-4 sm:p-5 border-b border-stone-100 flex items-center justify-between shrink-0 bg-stone-50/50">
+        <div className="p-4 sm:p-5 border-b border-nevoa flex items-center justify-between shrink-0 bg-paper/50">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-stone-900 text-stone-100">
+              <span className="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-primary text-paper">
                 Síntese da Sessão
               </span>
-              <span className="text-xs text-stone-400">
+              <span className="text-xs text-mata">
                 {session.turns.length} falas alternadas
               </span>
             </div>
             <h3
               id="summary-title"
-              className="text-base sm:text-lg font-semibold text-stone-900 mt-1"
+              className="text-base sm:text-lg font-semibold text-mata mt-1"
             >
               {session.title || "Experimento Dialógico"}
             </h3>
@@ -103,7 +103,7 @@ export const SessionSummaryModal: React.FC<SessionSummaryModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="text-stone-400 hover:text-stone-600 p-1.5 rounded-lg hover:bg-stone-200/60 transition-colors"
+            className="text-mata hover:text-mata p-1.5 rounded-lg hover:bg-paper/60 transition-colors"
             aria-label="Fechar resumo"
           >
             <X className="w-5 h-5" />
@@ -113,7 +113,7 @@ export const SessionSummaryModal: React.FC<SessionSummaryModalProps> = ({
         {/* Scrollable Content */}
         <div className="p-5 sm:p-6 overflow-y-auto space-y-5 print:p-0">
           {/* Notice */}
-          <div className="p-3 rounded-xl bg-stone-100/80 border border-stone-200/70 text-xs text-stone-600 flex items-center justify-between">
+          <div className="p-3 rounded-xl bg-paper/80 border border-nevoa/70 text-xs text-mata flex items-center justify-between">
             <div className="flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0" />
               <span>
@@ -125,28 +125,28 @@ export const SessionSummaryModal: React.FC<SessionSummaryModalProps> = ({
 
           {/* Perspectives Card */}
           <div className="grid grid-cols-2 gap-3 text-xs">
-            <div className="p-3 rounded-xl border border-stone-200 bg-stone-50/40">
-              <div className="text-[10px] font-bold uppercase text-stone-400">
+            <div className="p-3 rounded-xl border border-nevoa bg-paper/40">
+              <div className="text-[10px] font-bold uppercase text-mata">
                 Cadeira A
               </div>
-              <div className="font-semibold text-stone-900 text-sm mt-0.5">
+              <div className="font-semibold text-mata text-sm mt-0.5">
                 {session.chairA.name}
               </div>
               {session.chairA.sublabel && (
-                <div className="text-stone-500 text-[11px] mt-0.5">
+                <div className="text-mata text-[11px] mt-0.5">
                   {session.chairA.sublabel}
                 </div>
               )}
             </div>
-            <div className="p-3 rounded-xl border border-stone-200 bg-stone-50/40">
-              <div className="text-[10px] font-bold uppercase text-stone-400">
+            <div className="p-3 rounded-xl border border-nevoa bg-paper/40">
+              <div className="text-[10px] font-bold uppercase text-mata">
                 Cadeira B
               </div>
-              <div className="font-semibold text-stone-900 text-sm mt-0.5">
+              <div className="font-semibold text-mata text-sm mt-0.5">
                 {session.chairB.name}
               </div>
               {session.chairB.sublabel && (
-                <div className="text-stone-500 text-[11px] mt-0.5">
+                <div className="text-mata text-[11px] mt-0.5">
                   {session.chairB.sublabel}
                 </div>
               )}
@@ -155,19 +155,19 @@ export const SessionSummaryModal: React.FC<SessionSummaryModalProps> = ({
 
           {/* Transcript Preview */}
           <div>
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-stone-500 mb-2.5">
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-mata mb-2.5">
               Registro das perspectivas:
             </h4>
-            <div className="space-y-2.5 max-h-64 overflow-y-auto rounded-xl border border-stone-200 p-3 bg-stone-50/30">
+            <div className="space-y-2.5 max-h-64 overflow-y-auto rounded-xl border border-nevoa p-3 bg-paper/30">
               {session.turns.map((turn, i) => (
                 <div
                   key={turn.id}
-                  className="text-xs pb-2 border-b border-stone-100 last:border-b-0"
+                  className="text-xs pb-2 border-b border-nevoa last:border-b-0"
                 >
-                  <span className="font-semibold text-stone-900">
+                  <span className="font-semibold text-mata">
                     [{turn.speakerName}]
                   </span>{" "}
-                  <span className="text-stone-700 leading-relaxed whitespace-pre-wrap">
+                  <span className="text-mata leading-relaxed whitespace-pre-wrap">
                     {turn.text}
                   </span>
                 </div>
@@ -177,7 +177,7 @@ export const SessionSummaryModal: React.FC<SessionSummaryModalProps> = ({
 
           {/* Concluding Reflection Input */}
           <div>
-            <label className="block text-xs font-semibold text-stone-800 mb-1.5">
+            <label className="block text-xs font-semibold text-mata mb-1.5">
               Reflexão final ou síntese de observação:
             </label>
             <textarea
@@ -185,19 +185,19 @@ export const SessionSummaryModal: React.FC<SessionSummaryModalProps> = ({
               value={session.closingReflection || ""}
               onChange={(e) => onUpdateReflection(e.target.value)}
               placeholder="O que ficou claro ao alternar de lugar entre estas duas perspectivas? Qual ponto de equilíbrio ou novo sentimento emergiu?"
-              className="w-full rounded-xl border border-stone-200 bg-white p-3 text-xs text-stone-800 focus:border-stone-400 focus:outline-none leading-relaxed"
+              className="w-full rounded-xl border border-nevoa bg-paper p-3 text-xs text-mata focus:border-nevoa focus:outline-none leading-relaxed"
             />
           </div>
         </div>
 
         {/* Modal Footer Controls */}
-        <div className="p-4 sm:p-5 border-t border-stone-100 bg-stone-50/60 flex flex-wrap items-center justify-between gap-2.5 shrink-0">
+        <div className="p-4 sm:p-5 border-t border-nevoa bg-paper/60 flex flex-wrap items-center justify-between gap-2.5 shrink-0">
           <div className="flex items-center gap-1.5">
             <button
               type="button"
               id="btn-summary-save"
               onClick={handleSave}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-stone-200 bg-white text-xs font-medium text-stone-700 hover:bg-stone-100 transition-colors shadow-2xs"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-nevoa bg-paper text-xs font-medium text-mata hover:bg-paper transition-colors "
             >
               {savedSuccess ? (
                 <>
@@ -216,7 +216,7 @@ export const SessionSummaryModal: React.FC<SessionSummaryModalProps> = ({
               type="button"
               id="btn-summary-copy"
               onClick={handleCopy}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-stone-200 bg-white text-xs font-medium text-stone-700 hover:bg-stone-100 transition-colors shadow-2xs"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-nevoa bg-paper text-xs font-medium text-mata hover:bg-paper transition-colors "
             >
               {copied ? (
                 <>
@@ -235,7 +235,7 @@ export const SessionSummaryModal: React.FC<SessionSummaryModalProps> = ({
               type="button"
               id="btn-summary-download"
               onClick={handleDownload}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-stone-200 bg-white text-xs font-medium text-stone-700 hover:bg-stone-100 transition-colors shadow-2xs"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-nevoa bg-paper text-xs font-medium text-mata hover:bg-paper transition-colors "
               title="Baixar arquivo Markdown (.md)"
             >
               <Download className="w-3.5 h-3.5" />
@@ -248,7 +248,7 @@ export const SessionSummaryModal: React.FC<SessionSummaryModalProps> = ({
               type="button"
               id="btn-summary-new-session"
               onClick={onRestartNewSession}
-              className="px-3.5 py-1.5 rounded-lg bg-stone-900 hover:bg-stone-800 text-stone-50 text-xs font-semibold shadow-xs transition-colors"
+              className="px-3.5 py-1.5 rounded-lg bg-primary hover:bg-primary text-paper text-xs font-semibold  transition-colors"
             >
               Novo Experimento
             </button>

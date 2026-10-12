@@ -202,7 +202,7 @@ export const PerceptionForm: React.FC<PerceptionFormProps> = ({
             type="button"
             id="btn-reveal-scene"
             onClick={onRevealScene}
-            className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-full bg-[#F1E9DB] hover:bg-[#E5DBC7] text-[#005A1F] border border-[#005A1F] text-xs sm:text-sm font-semibold transition-colors touch-target-min"
+            className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-full bg-[#F1E9DB] hover:bg-[#D8CFBE] text-[#005A1F] border border-[#005A1F] text-xs sm:text-sm font-semibold transition-colors touch-target-min"
           >
             <Eye className="w-4 h-4 text-[#005A1F]" strokeWidth={2} />
             <span>Ver como o som foi posicionado</span>

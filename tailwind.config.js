@@ -33,7 +33,10 @@ module.exports = {
   darkMode: "class",
   theme: {
     extend: {
+      spacing: Object.fromEntries(Array.from({length:8},(_,index)=>[`fv-${index+1}`,`var(--fv-space-${index+1})`])),
+      transitionDuration: { "fv-fast":"var(--fv-motion-rapido)","fv-base":"var(--fv-motion-base)" },
       colors: {
+        ...Object.fromEntries(["verde-raiz","verde-igarape","terra-barro","creme-papel","mata","areia","nevoa","pedra","grafite","aurora","vazante","broto"].map(name=>[`fv-${name}`,`rgb(var(--fv-${name}-rgb) / <alpha-value>)`])),
         stone: neutral,
         gray: neutral,
         primary: token("primary"),
@@ -70,6 +73,15 @@ module.exports = {
         mata: token("text"),
         pedra: token("muted"),
         nevoa: token("border"),
+        "creme-papel": token("paper"),
+        "verde-raiz": token("primary"),
+        "verde-raiz-dark": token("primary"),
+        "verde-raiz-light": token("areia"),
+        "verde-igarape": token("igarape"),
+        "terra-barro": token("terra"),
+        "nevoa-clara": token("areia"),
+        "pedra-clara": token("muted"),
+        "grafite": token("text"),
         // Tema fechado do Portal do aluno: intencionalmente fixo, não inverte
         ink: "#0d0c0b",
         agedGold: "#c5a05b",
@@ -83,6 +95,8 @@ module.exports = {
       fontFamily: {
         serif: ["var(--font-serif)", "serif"],
         sans: ["var(--font-sans)", "sans-serif"],
+        fraunces: ["var(--font-serif)", "serif"],
+        karla: ["var(--font-sans)", "sans-serif"],
       },
       // Escala do Design System (3.2), traduzida do impresso para a tela.
       // Fraunces tem altura-x bem maior que a Cormorant que ela substitui, então
@@ -161,6 +175,7 @@ module.exports = {
       // `md` é 6px, e como o raio aparece tanto em classe quanto em CSS puro,
       // dois valores diferentes deixavam cartão e campo desalinhados por 2px.
       borderRadius: {
+        "fv-institucional":"var(--fv-radius-institucional)","fv-confluencia":"var(--fv-radius-confluencia)","fv-current":"var(--fv-radius)",
         md: "var(--fv-radius-md)",
         sm: "var(--fv-radius-sm)",
         "organic-1": "60% 40% 30% 70% / 60% 30% 70% 40%",

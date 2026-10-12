@@ -47,8 +47,8 @@ uniform int u_ambience;   // 0: Manhã Serena, 1: Tarde Dourada, 2: Crepúsculo
 // Paleta Confluência em espaço linear aproximado
 const vec3 C_DEEP = vec3(0.027, 0.380, 0.298);       // Verde Igarapé #07614C
 const vec3 C_DARK = vec3(0.0, 0.353, 0.122);         // Verde Raiz #005A1F
-const vec3 C_MID = vec3(0.040, 0.440, 0.345);        // Verde Correnteza #0a6d56
-const vec3 C_LIGHT = vec3(0.055, 0.510, 0.400);      // Verde Água Suave #0d7d63
+const vec3 C_MID = vec3(0.040, 0.440, 0.345);        // Verde Correnteza #07614C
+const vec3 C_LIGHT = vec3(0.055, 0.510, 0.400);      // Verde Água Suave #07614C
 const vec3 C_SAND = vec3(0.945, 0.914, 0.859);       // Areia #F1E9DB
 const vec3 C_EARTH = vec3(0.588, 0.333, 0.122);      // Terra Barro #96551F
 const vec3 C_CREME = vec3(0.992, 0.980, 0.957);      // Creme Papel #FDFAF4

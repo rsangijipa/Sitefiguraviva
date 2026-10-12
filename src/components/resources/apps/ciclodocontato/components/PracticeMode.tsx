@@ -54,7 +54,7 @@ export function PracticeMode({ scenarios, stages }: PracticeModeProps) {
         </span>
       </div>
 
-      <div className="rounded-[24px] border-2 border-[#F1E9DB] bg-[#FDFAF4] p-6 sm:p-10 shadow-none">
+      <div className="rounded-[24px] border-2 border-[#F1E9DB] bg-[#FDFAF4] p-6 sm:p-10 ">
         <div className="rounded-2xl border-2 border-[#D8CFBE] bg-[#F1E9DB]/40 p-5 mb-6">
           <span className="block font-semibold text-xs uppercase tracking-wider text-[#96551F] mb-1">
             Situação

@@ -11,6 +11,18 @@
   --fv-aurora: #FE538B;
   --fv-vazante: #FED701;
   --fv-broto: #01C94D;
+  --fv-verde-raiz-rgb: 0 90 31;
+  --fv-verde-igarape-rgb: 7 97 76;
+  --fv-terra-barro-rgb: 150 85 31;
+  --fv-creme-papel-rgb: 253 250 244;
+  --fv-mata-rgb: 38 43 34;
+  --fv-areia-rgb: 241 233 219;
+  --fv-nevoa-rgb: 216 207 190;
+  --fv-pedra-rgb: 107 107 99;
+  --fv-grafite-rgb: 75 75 73;
+  --fv-aurora-rgb: 254 83 139;
+  --fv-vazante-rgb: 254 215 1;
+  --fv-broto-rgb: 1 201 77;
   --fv-gradiente-confluencia: linear-gradient(90deg, #FE538B, #FED701, #01C94D);
   --fv-radius-institucional: 0px;
   --fv-radius-confluencia: 24px;
@@ -18,8 +30,9 @@
   --fv-radius-pill: 999px;
   --fv-stroke-fino: 2px;
   --fv-stroke-ramo: 3px;
-  --fv-motion-rapido: 160ms;
-  --fv-motion-base: 240ms;
+  /* Web transition durations remain disabled until their extension is approved. */
+  --fv-motion-rapido: 0ms;
+  --fv-motion-base: 0ms;
   --fv-toque-min: 44px;
   --fv-largura-conteudo: 1200px;
   --fv-space-1: 4px; --fv-space-2: 8px; --fv-space-3: 16px; --fv-space-4: 24px;

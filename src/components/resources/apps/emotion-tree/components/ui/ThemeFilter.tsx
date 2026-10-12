@@ -21,7 +21,7 @@ export function ThemeFilter({ themes, value, onChange }: ThemeFilterProps) {
         label="Todos"
         active={value === "all"}
         onClick={() => onChange("all")}
-        color="#9FB4C8"
+        color="#D8CFBE"
       />
       {themes.map((theme) => (
         <FilterChip
@@ -56,10 +56,10 @@ function FilterChip({
       onClick={onClick}
       className="relative h-8 shrink-0 rounded-full px-3.5 text-[11px] font-semibold tracking-[0.08em] transition"
       style={{
-        border: `1px solid ${active ? `${color}70` : "rgba(209, 220, 236, 0.14)"}`,
-        background: active ? `${color}2E` : "rgba(255, 255, 255, 0.04)",
-        color: active ? "#F8F4EA" : "#B6C4D6",
-        boxShadow: active ? `0 0 0 1px ${color}22, 0 4px 14px ${color}20` : "none",
+        border: `1px solid ${active ? `${color}70` : "rgb(241 233 219 / 0.14)"}`,
+        background: active ? `${color}2E` : "rgb(253 250 244 / 0.04)",
+        color: active ? "#FDFAF4" : "#D8CFBE",
+        boxShadow: "none",
       }}
     >
       {/* ponto de cor: identifica o tema mesmo quando o chip esta inativo */}

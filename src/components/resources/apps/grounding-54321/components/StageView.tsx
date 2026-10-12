@@ -34,11 +34,11 @@ export const StageView: React.FC<StageViewProps> = ({
       className="w-full max-w-lg mx-auto flex-1 flex flex-col justify-between px-6 py-6 sm:py-8 select-none"
     >
       {/* Top stage sense label */}
-      <div className="flex items-center justify-between text-xs text-[#7B828B] font-karla uppercase tracking-widest pt-2">
-        <span id="stage-sense-badge" className="font-semibold text-[#485058]">
+      <div className="flex items-center justify-between text-xs text-[#6B6B63] font-karla uppercase tracking-widest pt-2">
+        <span id="stage-sense-badge" className="font-semibold text-[#4B4B49]">
           Etapa {currentIndex + 1} de {totalStages} · {stage.sense}
         </span>
-        <span className="text-[#8E959E]">Ritmo livre</span>
+        <span className="text-[#6B6B63]">Ritmo livre</span>
       </div>
 
       {/* Main Focus Area: Big Fraunces number & Karla instruction */}
@@ -46,7 +46,7 @@ export const StageView: React.FC<StageViewProps> = ({
         {/* Large Fraunces numeral */}
         <div
           id="stage-number-display"
-          className="font-fraunces text-8xl sm:text-9xl font-light text-[#191E23] leading-none mb-2 tracking-tight select-none"
+          className="font-fraunces text-8xl sm:text-9xl font-light text-[#262B22] leading-none mb-2 tracking-tight select-none"
         >
           {stage.number}
         </div>
@@ -54,7 +54,7 @@ export const StageView: React.FC<StageViewProps> = ({
         {/* Title */}
         <h2
           id="stage-title"
-          className="font-fraunces text-2xl sm:text-3xl text-[#1E2328] font-medium tracking-tight mb-3"
+          className="font-fraunces text-2xl sm:text-3xl text-[#262B22] font-medium tracking-tight mb-3"
         >
           {stage.title}
         </h2>
@@ -62,7 +62,7 @@ export const StageView: React.FC<StageViewProps> = ({
         {/* Instruction in Karla */}
         <p
           id="stage-instruction"
-          className="font-karla text-base sm:text-lg text-[#373F47] leading-relaxed max-w-md font-normal mb-3"
+          className="font-karla text-base sm:text-lg text-[#4B4B49] leading-relaxed max-w-md font-normal mb-3"
         >
           {stage.instruction}
         </p>
@@ -70,7 +70,7 @@ export const StageView: React.FC<StageViewProps> = ({
         {/* Grounding tip focused on the real surroundings */}
         <p
           id="stage-grounding-tip"
-          className="font-karla text-xs sm:text-sm text-[#666E78] max-w-sm italic leading-normal"
+          className="font-karla text-xs sm:text-sm text-[#6B6B63] max-w-sm italic leading-normal"
         >
           {stage.groundingTip}
         </p>
@@ -86,7 +86,7 @@ export const StageView: React.FC<StageViewProps> = ({
       </div>
 
       {/* Footer Navigation: Manual advance, free pace, progress tracker */}
-      <div className="pt-4 border-t border-[#E8E6DF]/80 flex flex-col gap-4">
+      <div className="pt-4 border-t border-[#F1E9DB]/80 flex flex-col gap-4">
         {/* Step dots indicator */}
         <div
           className="flex items-center justify-center gap-2"
@@ -101,10 +101,10 @@ export const StageView: React.FC<StageViewProps> = ({
                 key={`step-dot-${stepNum}`}
                 className={`h-2 rounded-full transition-all duration-300 ${
                   isCurrent
-                    ? "w-7 bg-[#232A31]"
+                    ? "w-7 bg-[#262B22]"
                     : isCompleted
-                      ? "w-2 bg-[#707882]"
-                      : "w-2 bg-[#D8D5CD]"
+                      ? "w-2 bg-[#6B6B63]"
+                      : "w-2 bg-[#D8CFBE]"
                 }`}
                 title={`Etapa ${stepNum}`}
               />
@@ -122,7 +122,7 @@ export const StageView: React.FC<StageViewProps> = ({
             className={`flex items-center gap-1.5 px-4 py-3 rounded-xl font-karla text-sm font-medium transition-all ${
               currentIndex === 0
                 ? "opacity-0 pointer-events-none"
-                : "text-[#485059] hover:bg-[#ECEAE3] active:scale-98"
+                : "text-[#4B4B49] hover:bg-[#F1E9DB] active:scale-98"
             }`}
             aria-label="Voltar para etapa anterior"
           >
@@ -134,12 +134,12 @@ export const StageView: React.FC<StageViewProps> = ({
             id="next-step-btn"
             type="button"
             onClick={onNext}
-            className="flex-1 sm:flex-initial sm:min-w-[170px] flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-karla text-sm font-semibold tracking-wide bg-[#21272E] hover:bg-[#161A1F] active:bg-[#0E1114] text-[#F8F7F4] shadow-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#21272E]/40"
+            className="flex-1 sm:flex-initial sm:min-w-[170px] flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-karla text-sm font-semibold tracking-wide bg-[#262B22] hover:bg-[#262B22] active:bg-[#262B22] text-[#FDFAF4]  transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#262B22]/40"
             aria-label={isLastStage ? "Concluir exercício" : "Próxima etapa"}
           >
             {isLastStage ? (
               <>
-                <CheckCircle2 className="w-4 h-4 text-[#A7B4C4]" />
+                <CheckCircle2 className="w-4 h-4 text-[#D8CFBE]" />
                 <span>Concluir</span>
               </>
             ) : (

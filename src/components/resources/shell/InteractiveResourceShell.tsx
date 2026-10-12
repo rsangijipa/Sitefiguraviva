@@ -38,7 +38,7 @@ export const ResourceHeader: React.FC<ResourceHeaderProps> = ({
           id="btn-back-to-resources"
           onClick={onBack}
           aria-label="Voltar para o catálogo de Recursos Interativos"
-          className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-[#005A1F] hover:bg-[#F1E9DB] active:bg-[#E9E3D5] text-sm font-medium transition-colors min-h-[44px] min-w-[44px]"
+          className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-[#005A1F] hover:bg-[#F1E9DB] active:bg-[#F1E9DB] text-sm font-medium transition-colors min-h-[44px] min-w-[44px]"
         >
           <ArrowLeft className="w-5 h-5 text-[#005A1F] stroke-[2]" />
           <span className="hidden sm:inline">Recursos</span>
@@ -75,7 +75,7 @@ export const ResourceHeader: React.FC<ResourceHeaderProps> = ({
             onClick={onToggleAudio}
             aria-label={isAudioMuted ? 'Ativar ressonância sonora sutil' : 'Silenciar áudio'}
             title={isAudioMuted ? 'Ativar som' : 'Silenciar'}
-            className="inline-flex items-center justify-center p-2.5 rounded-xl border-2 border-[#D8CFBE] text-[#262B22] hover:bg-[#F1E9DB] active:bg-[#E9E3D5] transition-colors min-h-[44px] min-w-[44px]"
+            className="inline-flex items-center justify-center p-2.5 rounded-xl border-2 border-[#D8CFBE] text-[#262B22] hover:bg-[#F1E9DB] active:bg-[#F1E9DB] transition-colors min-h-[44px] min-w-[44px]"
           >
             {isAudioMuted ? (
               <VolumeX className="w-5 h-5 text-[#6B6B63] stroke-[2]" />
@@ -109,7 +109,7 @@ export const ResourceHeader: React.FC<ResourceHeaderProps> = ({
           id="btn-close-experience"
           onClick={onCloseExperience}
           aria-label="Encerrar experiência"
-          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border-2 border-[#96551F] text-[#96551F] hover:bg-[#F1E9DB] active:bg-[#E9E3D5] text-xs sm:text-sm font-medium transition-colors min-h-[44px]"
+          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border-2 border-[#96551F] text-[#96551F] hover:bg-[#F1E9DB] active:bg-[#F1E9DB] text-xs sm:text-sm font-medium transition-colors min-h-[44px]"
         >
           <X className="w-4 h-4 text-[#96551F] stroke-[2]" />
           <span>Encerrar experiência</span>

@@ -30,7 +30,7 @@ describe("public performance budgets", () => {
 
   it("does not eagerly preload ambient audio", () => {
     expect(read("src/components/ui/FloatingControls.tsx")).toContain(
-      'preload="metadata"',
+      'preload="none"',
     );
   });
 

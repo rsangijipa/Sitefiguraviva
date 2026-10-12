@@ -60,7 +60,7 @@ export const FilterDrawer: React.FC<FilterDrawerProps> = ({
     <div className="fixed inset-0 z-50 flex justify-end">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-[#262B22]/30 backdrop-blur-[2px] transition-opacity"
+        className="fixed inset-0 bg-[#262B22]/30 -[2px] transition-opacity"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -70,10 +70,10 @@ export const FilterDrawer: React.FC<FilterDrawerProps> = ({
         role="dialog"
         aria-modal="true"
         aria-label="Filtros da coleção"
-        className="relative z-10 w-full max-w-sm bg-[#FDFAF4] border-l border-[#E2D8CA] h-full flex flex-col overflow-hidden"
+        className="relative z-10 w-full max-w-sm bg-[#FDFAF4] border-l border-[#D8CFBE] h-full flex flex-col overflow-hidden"
       >
         {/* Header */}
-        <div className="p-5 border-b border-[#E2D8CA] flex items-center justify-between">
+        <div className="p-5 border-b border-[#D8CFBE] flex items-center justify-between">
           <div className="flex items-center gap-2">
             <h2 className="font-serif text-lg font-normal text-[#005A1F]">
               Filtros da Coleção
@@ -120,7 +120,7 @@ export const FilterDrawer: React.FC<FilterDrawerProps> = ({
                   className={`px-3 py-2 rounded-lg text-left transition-colors border ${
                     filters.filterBy === opt.id
                       ? "bg-[#005A1F] text-[#FDFAF4] border-[#005A1F] font-medium"
-                      : "bg-[#FDFAF4] text-[#262B22] border-[#E2D8CA] hover:bg-[#F1E9DB]"
+                      : "bg-[#FDFAF4] text-[#262B22] border-[#D8CFBE] hover:bg-[#F1E9DB]"
                   }`}
                 >
                   {opt.label}
@@ -140,7 +140,7 @@ export const FilterDrawer: React.FC<FilterDrawerProps> = ({
                 className={`px-2.5 py-1.5 rounded-lg border transition-colors ${
                   filters.category === "ALL"
                     ? "bg-[#005A1F] text-[#FDFAF4] border-[#005A1F] font-medium"
-                    : "bg-[#FDFAF4] text-[#262B22] border-[#E2D8CA] hover:bg-[#F1E9DB]"
+                    : "bg-[#FDFAF4] text-[#262B22] border-[#D8CFBE] hover:bg-[#F1E9DB]"
                 }`}
               >
                 Todas
@@ -152,7 +152,7 @@ export const FilterDrawer: React.FC<FilterDrawerProps> = ({
                   className={`px-2.5 py-1.5 rounded-lg border transition-colors ${
                     filters.category === cat
                       ? "bg-[#005A1F] text-[#FDFAF4] border-[#005A1F] font-medium"
-                      : "bg-[#FDFAF4] text-[#262B22] border-[#E2D8CA] hover:bg-[#F1E9DB]"
+                      : "bg-[#FDFAF4] text-[#262B22] border-[#D8CFBE] hover:bg-[#F1E9DB]"
                   }`}
                 >
                   {cat}
@@ -172,7 +172,7 @@ export const FilterDrawer: React.FC<FilterDrawerProps> = ({
                 className={`px-2.5 py-1.5 rounded-lg border transition-colors ${
                   filters.type === "ALL"
                     ? "bg-[#96551F] text-[#FDFAF4] border-[#96551F] font-medium"
-                    : "bg-[#FDFAF4] text-[#262B22] border-[#E2D8CA] hover:bg-[#F1E9DB]"
+                    : "bg-[#FDFAF4] text-[#262B22] border-[#D8CFBE] hover:bg-[#F1E9DB]"
                 }`}
               >
                 Todos
@@ -184,7 +184,7 @@ export const FilterDrawer: React.FC<FilterDrawerProps> = ({
                   className={`px-2.5 py-1.5 rounded-lg border transition-colors ${
                     filters.type === tp
                       ? "bg-[#96551F] text-[#FDFAF4] border-[#96551F] font-medium"
-                      : "bg-[#FDFAF4] text-[#262B22] border-[#E2D8CA] hover:bg-[#F1E9DB]"
+                      : "bg-[#FDFAF4] text-[#262B22] border-[#D8CFBE] hover:bg-[#F1E9DB]"
                   }`}
                 >
                   {tp}
@@ -204,7 +204,7 @@ export const FilterDrawer: React.FC<FilterDrawerProps> = ({
                 onChange={(e) =>
                   onFilterChange({ ...filters, author: e.target.value })
                 }
-                className="w-full bg-[#FDFAF4] border border-[#E2D8CA] rounded-lg p-2 text-xs text-[#262B22] focus:outline-none focus:border-[#005A1F]"
+                className="w-full bg-[#FDFAF4] border border-[#D8CFBE] rounded-lg p-2 text-xs text-[#262B22] focus:outline-none focus:border-[#005A1F]"
               >
                 <option value="ALL">Todos os autores</option>
                 {authors.map((auth) => (
@@ -227,7 +227,7 @@ export const FilterDrawer: React.FC<FilterDrawerProps> = ({
                 onChange={(e) =>
                   onFilterChange({ ...filters, deck: e.target.value })
                 }
-                className="w-full bg-[#FDFAF4] border border-[#E2D8CA] rounded-lg p-2 text-xs text-[#262B22] focus:outline-none focus:border-[#005A1F]"
+                className="w-full bg-[#FDFAF4] border border-[#D8CFBE] rounded-lg p-2 text-xs text-[#262B22] focus:outline-none focus:border-[#005A1F]"
               >
                 <option value="ALL">Todos os decks</option>
                 {decks.map((dk) => (
@@ -241,7 +241,7 @@ export const FilterDrawer: React.FC<FilterDrawerProps> = ({
         </div>
 
         {/* Footer actions */}
-        <div className="p-4 border-t border-[#E2D8CA] flex items-center justify-between bg-[#FDFAF4]">
+        <div className="p-4 border-t border-[#D8CFBE] flex items-center justify-between bg-[#FDFAF4]">
           <button
             onClick={onResetFilters}
             className="text-xs text-[#6B6B63] hover:text-[#262B22] flex items-center gap-1.5 transition-colors"
@@ -252,7 +252,7 @@ export const FilterDrawer: React.FC<FilterDrawerProps> = ({
 
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-[#005A1F] text-[#FDFAF4] text-xs font-medium rounded-lg hover:bg-[#004317] transition-colors"
+            className="px-4 py-2 bg-[#005A1F] text-[#FDFAF4] text-xs font-medium rounded-lg hover:bg-[#005A1F] transition-colors"
           >
             Aplicar
           </button>

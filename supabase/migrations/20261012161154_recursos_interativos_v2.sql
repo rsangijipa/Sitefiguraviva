@@ -24,6 +24,7 @@ create table public.resource_art_approvals (
 );
 create table public.resource_release_checks (
  id text primary key check(id='history-v2'),
+ release_id uuid not null default gen_random_uuid(),
  backup_max_days integer not null default 30 check(backup_max_days between 1 and 30),
  restoration_verified_at timestamptz, ledger_verified_at timestamptz, purge_verified_at timestamptz,
  enabled boolean not null default false,
@@ -60,7 +61,8 @@ create or replace function private.fv_record_owner(p_owner uuid,p_expiry timesta
 returns boolean language sql stable security invoker set search_path=pg_catalog,public,private
 as $$ select p_owner=(select auth.uid()) and p_expiry>now()
  and (select private.current_auth_session_is_active())
- and not (select private.current_user_can_staff()) $$;
+ and not (select private.current_user_can_staff())
+ and not exists(select 1 from public.resource_editorial_roles r where r.user_id=(select auth.uid())) $$;
 revoke all on function private.fv_record_owner(uuid,timestamptz) from public;
 grant execute on function private.fv_record_owner(uuid,timestamptz) to authenticated,service_role;
 
@@ -97,10 +99,11 @@ begin
     when 'check-in' then 'chegada' when 'diario-aqui-e-agora' then 'chegada' when 'intensidade-agora' then 'chegada'
     when 'body-map' then 'mapa-do-corpo' when 'mapa-corporal' then 'mapa-do-corpo' when 'somascan' then 'mapa-do-corpo' when 'soma-scan' then 'mapa-do-corpo'
     when 'duas-cadeiras' then 'polaridades-e-cadeiras' when 'polaridades' then 'polaridades-e-cadeiras'
-    when 'banco-de-microcasos' then 'casoteca' when 'caso-clinico' then 'casoteca'
-    when 'jardim-de-pensamentos' then 'paisagem-de-pensamentos' when 'rio-dos-pensamentos' then 'paisagem-de-pensamentos'
+    when 'banco-de-microcasos' then 'casoteca' when 'caso-clinico' then 'casoteca' when 'casoclinicointerativo' then 'casoteca'
+    when 'jardim-de-pensamentos' then 'paisagem-de-pensamentos' when 'rio-dos-pensamentos' then 'paisagem-de-pensamentos' when 'rios-dos-pensamentos' then 'paisagem-de-pensamentos'
     when 'emotion-tree' then 'cartas-gestalticas' when 'arvore-das-emocoes' then 'cartas-gestalticas'
-    when 'breathing' then 'sala-de-pausa' when 'grounding-54321' then 'sala-de-pausa'
+    when 'breathing' then 'sala-de-pausa' when 'respiracao' then 'sala-de-pausa' when 'grounding-54321' then 'sala-de-pausa'
+    when 'EmotionWheel' then 'roda-das-emocoes' when 'ciclodocontato' then 'ciclo-do-contato'
     when 'lago' then 'igarape' else resource_slug end)::public.fv_resource_key;
    -- Archived local/backend records remain private and exportable until expiry.
    alter table public.interactive_resource_entries alter column resource_slug drop not null;
@@ -111,6 +114,7 @@ begin
   execute format('alter table public.%I alter column legacy_record set default false',t);
  end loop;
  foreach t in array array['arrival_records','polarity_records','phenomenology_lab_records','interactive_resource_entries','need_records','listening_sessions','pause_sessions','river_sessions'] loop
+  execute format('alter table public.%I add column display_labels jsonb not null default ''[]''::jsonb check(jsonb_typeof(display_labels)=''array'' and octet_length(display_labels::text)<=16384)',t);
   execute format('alter table public.%I add constraint fv_payload_limit check(jsonb_typeof(payload)=''object'' and octet_length(payload::text)<=16384)',t);
   execute format('alter table public.%I add constraint fv_record_version check((legacy_record and schema_version=0) or (not legacy_record and schema_version=1 and formation_id is not null))',t);
   execute format('create unique index %I on public.%I(user_id,client_request_id)', 'fv_'||t||'_request',t);
@@ -123,7 +127,8 @@ begin
   -- Mutations go through server authentication, strict resource schemas and
   -- the external deletion ledger. No browser write path bypasses validation.
   execute format('revoke all on public.%I from anon,authenticated',t);
-  execute format('grant select on public.%I to authenticated',t);
+  -- Reads also go through the authenticated server: browser access cannot bypass
+  -- the release lock stored outside the restorable database.
   execute format('grant all on public.%I to service_role',t);
  end loop;
 end $$;
@@ -178,6 +183,29 @@ end $$;
 create trigger fv_retention_bounds before insert or update on public.resource_formation_retention for each row execute function private.fv_shorten_retention();
 revoke all on function private.fv_shorten_retention() from public;
 
+create or replace function private.fv_bound_record_retention()
+returns trigger language plpgsql security invoker set search_path=pg_catalog,public,private
+as $$ declare deadline timestamptz; begin
+ if tg_op='UPDATE' then
+  if new.user_id<>old.user_id or new.resource_key<>old.resource_key or new.payload is distinct from old.payload or new.display_labels is distinct from old.display_labels or new.formation_id is distinct from old.formation_id or new.schema_version<>old.schema_version or new.legacy_record<>old.legacy_record then raise exception 'Personal records are immutable'; end if;
+  new.expires_at:=least(new.expires_at,old.expires_at);return new;
+ end if;
+ if new.legacy_record then raise exception 'Legacy insertion forbidden'; end if;
+ select least(r.end_date,coalesce(r.departure_date,r.end_date))+interval '6 months' into deadline
+ from public.resource_formation_retention r join public.enrollments e on e.id=r.enrollment_id join public.courses c on c.id=e.course_id
+ where r.enrollment_id=new.formation_id and r.user_id=new.user_id and e.user_id=new.user_id and e.status in ('active','completed') and c.is_published and c.status in ('open','closed');
+ if deadline is null or deadline<=now() then raise exception 'Valid formation deadline required'; end if;
+ new.expires_at:=least(new.expires_at,deadline);return new;
+end $$;
+revoke all on function private.fv_bound_record_retention() from public;
+do $$ declare t text; key text; begin
+ foreach t in array array['arrival_records','polarity_records','phenomenology_lab_records','interactive_resource_entries','need_records','listening_sessions','pause_sessions','river_sessions'] loop
+  execute format('create trigger fv_record_retention before insert or update on public.%I for each row execute function private.fv_bound_record_retention()',t);
+  key:=case t when 'arrival_records' then 'chegada' when 'polarity_records' then 'polaridades-e-cadeiras' when 'phenomenology_lab_records' then 'laboratorio-fenomenologico' when 'need_records' then 'necessidades-agora' when 'listening_sessions' then 'sons-para-awareness' when 'pause_sessions' then 'sala-de-pausa' when 'river_sessions' then 'paisagem-de-pensamentos' end;
+  if key is not null then execute format('alter table public.%I add constraint fv_table_resource check(resource_key::text=%L)',t,key);end if;
+ end loop;
+end $$;
+
 create or replace function private.fv_departure_retention()
 returns trigger language plpgsql security invoker set search_path=pg_catalog,public,private
 as $$ begin
@@ -222,6 +250,11 @@ as $$ begin
  new.updated_at:=clock_timestamp(); return new;
 end $$;
 create trigger fv_content_immutable before update on public.resource_content_versions for each row execute function private.fv_preserve_published_content();
+create or replace function private.fv_no_published_delete() returns trigger language plpgsql security invoker set search_path=pg_catalog,public,private as $$ begin
+ if old.status in ('published','archived') then raise exception 'Published content is immutable'; end if; return old;
+end $$;
+create trigger fv_content_no_delete before delete on public.resource_content_versions for each row execute function private.fv_no_published_delete();
+revoke all on function private.fv_no_published_delete() from public;
 revoke all on function private.fv_preserve_published_content() from public;
 
 create or replace function public.fv_resource_transition(
@@ -265,7 +298,7 @@ begin
    update public.resource_content_versions set status='submitted' where id=current_row.id returning * into current_row;
   elsif p_action='review' then
    select * into reviewer from public.resource_editorial_roles where user_id=p_actor and role='docente_revisor';
-   if reviewer.user_id is null or current_row.status<>'submitted' then raise exception 'Reviewer permission required'; end if;
+   if reviewer.user_id is null or current_row.status<>'submitted' or current_row.authored_by=p_actor then raise exception 'Independent reviewer permission required'; end if;
    update public.resource_content_versions set status='reviewed',reviewer_id=p_actor,reviewer_name=reviewer.name,reviewer_crp=reviewer.crp,reviewed_at=now() where id=current_row.id returning * into current_row;
   else
    if not admin_ok or current_row.status<>'reviewed' then raise exception 'Signed version and publisher required'; end if;
@@ -283,4 +316,13 @@ grant execute on function public.fv_resource_transition(uuid,text,public.fv_reso
 insert into public.resource_content_versions(resource_key,version,configuration)
 select key,1,jsonb_build_object('schemaVersion',1,'resourceKey',key,'items','[]'::jsonb,'audio','[]'::jsonb,'artApprovalId',null)
 from unnest(enum_range(null::public.fv_resource_key)) key;
+create table public.resource_pilots (
+ resource_key public.fv_resource_key primary key check(resource_key in ('laboratorio-fenomenologico','atelie-do-experimento','escuta-dialogica')),
+ passed_at timestamptz not null, verified_by uuid not null references public.profiles(id),
+ content_version uuid not null references public.resource_content_versions(id),
+ evidence text not null check(char_length(evidence) between 1 and 2000)
+);
+alter table public.resource_pilots enable row level security;
+revoke all on public.resource_pilots from anon,authenticated;
+grant all on public.resource_pilots to service_role;
 commit;

@@ -12,7 +12,7 @@ export function SelectableCard({ label, selected, onSelect, children }: { label:
 }
 export function TextArea({ label, value, onChange, maxLength = 500 }: { label: string; value: string; onChange: (value: string) => void; maxLength?: number }) {
   const id = useId();
-  return <label className="fv-field" htmlFor={id}><span>{label}</span><textarea id={id} value={value} onChange={event => onChange(event.target.value)} maxLength={maxLength} aria-describedby={id + "-count"} /><span className="fv-counter" id={id + "-count"}>{value.length} de {maxLength} caracteres</span></label>;
+  return <label className="fv-field" htmlFor={id}><span>{label}</span><textarea id={id} aria-label={label} value={value} onChange={event => onChange(event.target.value)} maxLength={maxLength} aria-describedby={id + "-count"} /><span className="fv-counter" id={id + "-count"}>{value.length} de {maxLength} caracteres</span></label>;
 }
 export function TextField({ label, value, onChange, maxLength = 120 }: { label: string; value: string; onChange: (value: string) => void; maxLength?: number }) {
   const id = useId();
@@ -20,7 +20,7 @@ export function TextField({ label, value, onChange, maxLength = 120 }: { label: 
 }
 export function RangeScale({ label, value, onChange, min = 0, max = 10, ends = ["0", "10"] }: { label: string; value: number; onChange: (value: number) => void; min?: number; max?: number; ends?: [string, string] }) {
   const id = useId();
-  return <label className="fv-field fv-scale" htmlFor={id}><span>{label}: {value}</span><input id={id} type="range" min={min} max={max} step={1} value={value} aria-valuetext={`${value} de ${max}`} onChange={event => onChange(Number(event.target.value))} /><span className="fv-scale-ends"><span>{ends[0]}</span><span>{ends[1]}</span></span></label>;
+  return <label className="fv-field fv-scale" htmlFor={id}><span>{label}: {value}</span><input id={id} type="range" min={min} max={max} step={1} value={value} aria-label={label} aria-valuetext={`${value} de ${max}`} onChange={event => onChange(Number(event.target.value))} /><span className="fv-scale-ends"><span>{ends[0]}</span><span>{ends[1]}</span></span></label>;
 }
 export function ReferenceLine({ item }: { item: EditorialItem }) {
   return <div className="fv-reference">{item.references.map((reference, index) => <p key={index}>{reference.author} · {reference.work} · {reference.year}{reference.edition ? ` · ${reference.edition}` : ""}{reference.pages ? ` · p. ${reference.pages}` : ""}</p>)}</div>;

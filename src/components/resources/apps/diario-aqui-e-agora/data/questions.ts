@@ -18,10 +18,10 @@ export const QUESTIONS: QuestionConfig[] = [
       "Tensão visual",
     ],
     themeColor: {
-      primary: "#5d6d7e",
-      blobColor1: "rgba(180, 198, 204, 0.45)",
-      blobColor2: "rgba(215, 227, 222, 0.40)",
-      accentNode: "#738a9c",
+      primary: "#6B6B63",
+      blobColor1: "rgb(216 207 190 / 0.45)",
+      blobColor2: "rgb(241 233 219 / 0.40)",
+      accentNode: "#6B6B63",
     },
   },
   {
@@ -41,10 +41,10 @@ export const QUESTIONS: QuestionConfig[] = [
       "Coluna suave",
     ],
     themeColor: {
-      primary: "#7d6b5c",
-      blobColor1: "rgba(218, 198, 182, 0.45)",
-      blobColor2: "rgba(235, 222, 211, 0.40)",
-      accentNode: "#9e8470",
+      primary: "#6B6B63",
+      blobColor1: "rgb(216 207 190 / 0.45)",
+      blobColor2: "rgb(241 233 219 / 0.40)",
+      accentNode: "#6B6B63",
     },
   },
   {
@@ -64,10 +64,10 @@ export const QUESTIONS: QuestionConfig[] = [
       "Gratidão discreta",
     ],
     themeColor: {
-      primary: "#5f7970",
-      blobColor1: "rgba(188, 212, 202, 0.45)",
-      blobColor2: "rgba(210, 226, 218, 0.40)",
-      accentNode: "#6e8f84",
+      primary: "#6B6B63",
+      blobColor1: "rgb(216 207 190 / 0.45)",
+      blobColor2: "rgb(241 233 219 / 0.40)",
+      accentNode: "#6B6B63",
     },
   },
   {
@@ -87,10 +87,10 @@ export const QUESTIONS: QuestionConfig[] = [
       "Sentir segurança",
     ],
     themeColor: {
-      primary: "#856a5d",
-      blobColor1: "rgba(224, 201, 187, 0.45)",
-      blobColor2: "rgba(240, 220, 200, 0.38)",
-      accentNode: "#a88675",
+      primary: "#6B6B63",
+      blobColor1: "rgb(216 207 190 / 0.45)",
+      blobColor2: "rgb(241 233 219 / 0.38)",
+      accentNode: "#6B6B63",
     },
   },
   {
@@ -109,10 +109,10 @@ export const QUESTIONS: QuestionConfig[] = [
       "Clareza serena",
     ],
     themeColor: {
-      primary: "#6b6e82",
-      blobColor1: "rgba(196, 201, 220, 0.45)",
-      blobColor2: "rgba(223, 216, 227, 0.40)",
-      accentNode: "#7f839d",
+      primary: "#6B6B63",
+      blobColor1: "rgb(216 207 190 / 0.45)",
+      blobColor2: "rgb(241 233 219 / 0.40)",
+      accentNode: "#6B6B63",
     },
   },
 ];

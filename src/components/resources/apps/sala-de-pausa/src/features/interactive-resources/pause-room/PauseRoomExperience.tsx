@@ -114,7 +114,7 @@ export const PauseRoomExperience: React.FC<PauseRoomExperienceProps> = ({
               id="btn-confirm-start-pause"
               type="button"
               onClick={handleStartPractice}
-              className="inline-flex items-center gap-2 px-8 py-3 rounded-2xl bg-[#005A1F] text-[#FDFAF4] hover:bg-[#07614C] transition-colors font-medium text-base min-h-[48px] shadow-none focus:outline-none focus:ring-2 focus:ring-[#005A1F]"
+              className="inline-flex items-center gap-2 px-8 py-3 rounded-2xl bg-[#005A1F] text-[#FDFAF4] hover:bg-[#07614C] transition-colors font-medium text-base min-h-[48px]  focus:outline-none focus:ring-2 focus:ring-[#005A1F]"
             >
               <span>Entrar na pausa com {currentPractice.title}</span>
               <ArrowRight className="w-5 h-5 text-[#FDFAF4]" strokeWidth={2} />

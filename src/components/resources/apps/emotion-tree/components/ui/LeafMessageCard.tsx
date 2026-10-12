@@ -127,7 +127,7 @@ export function LeafMessageCard({
                     ? `calc(clamp(1.05rem, 4.3cqw, 1.7rem) * ${font.size})`
                     : `calc(clamp(1.35rem, 2.4cqw, 2.4rem) * ${font.size})`,
                   lineHeight: 1.32,
-                  textShadow: "0 1px 0 rgba(255,255,255,0.45)",
+                  textShadow: "0 1px 0 rgb(253 250 244 / 0.45)",
                 }}
               >
                 {quote.text}
@@ -144,7 +144,7 @@ export function LeafMessageCard({
                         color: ink,
                         opacity: 0.72,
                         border: `1px solid color-mix(in srgb, ${ink} 26%, transparent)`,
-                        background: "rgba(255,255,255,0.22)",
+                        background: "rgb(253 250 244 / 0.22)",
                       }}
                     >
                       {label}
@@ -169,7 +169,7 @@ export function LeafMessageCard({
                       initial={{ opacity: 0, y: 6 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 4 }}
-                      className="rounded-full border border-white/[0.12] bg-black/[0.55] px-3 py-1 text-[11px] text-[#F0DFB4] backdrop-blur-md"
+                      className="rounded-full border border-nevoa/[0.12] bg-primary/[0.55] px-3 py-1 text-[11px] text-[#D8CFBE] "
                     >
                       {favoriteFeedback}
                     </motion.p>
@@ -183,7 +183,7 @@ export function LeafMessageCard({
                 tres pilulas soltas de peso visual identico — o usuario tinha
                 que ler as tres para achar a que queria.
               */}
-              <div className="flex items-center gap-1 rounded-full border border-white/[0.14] bg-black/[0.55] p-1 shadow-[0_10px_34px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+              <div className="flex items-center gap-1 rounded-full border border-nevoa/[0.14] bg-primary/[0.55] p-1 -[0_10px_34px_rgb(38 43 34 / 0.45)] ">
                 <ControlButton
                   onClick={onFavorite}
                   ariaPressed={isFavorite}
@@ -198,7 +198,7 @@ export function LeafMessageCard({
                   label="Outra folha"
                 />
 
-                <span className="mx-0.5 h-6 w-px bg-white/[0.12]" aria-hidden />
+                <span className="mx-0.5 h-6 w-px bg-paper/[0.12]" aria-hidden />
 
                 <ControlButton
                   onClick={onClose}
@@ -211,7 +211,7 @@ export function LeafMessageCard({
               <button
                 type="button"
                 onClick={onOpenFavorites}
-                className="rounded-full px-3 py-1 text-[10px] font-semibold tracking-[0.18em] uppercase text-white/[0.5] transition hover:bg-white/[0.1] hover:text-white/[0.9]"
+                className="rounded-full px-3 py-1 text-[10px] font-semibold tracking-[0.18em] uppercase text-paper/[0.5] transition hover:bg-paper/[0.1] hover:text-paper/[0.9]"
               >
                 Favoritas ({favoriteCount})
               </button>
@@ -247,10 +247,10 @@ function ControlButton({
       aria-label={label}
       className={`flex h-11 items-center gap-2 rounded-full px-4 text-[11px] font-bold tracking-[0.1em] uppercase transition ${
         active
-          ? "bg-[#E6C978] text-[#241B08]"
+          ? "bg-[#D8CFBE] text-[#262B22]"
           : compact
-            ? "text-white/[0.6] hover:bg-white/[0.1] hover:text-white"
-            : "text-white/[0.85] hover:bg-white/[0.12] hover:text-white"
+            ? "text-paper/[0.6] hover:bg-paper/[0.1] hover:text-paper"
+            : "text-paper/[0.85] hover:bg-paper/[0.12] hover:text-paper"
       }`}
     >
       {icon}

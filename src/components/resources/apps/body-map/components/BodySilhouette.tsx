@@ -86,7 +86,7 @@ export function BodySilhouette({
             <stop offset="72%" stopColor="rgb(var(--color-primary) / 0.012)" />
             <stop offset="100%" stopColor="rgb(var(--color-primary) / 0)" />
           </radialGradient>
-          <filter id="body-shadow" x="-20%" y="-10%" width="140%" height="130%">
+          <filter id="body-" x="-20%" y="-10%" width="140%" height="130%">
             <feDropShadow
               dx="0"
               dy="3"
@@ -102,7 +102,7 @@ export function BodySilhouette({
           strokeWidth="1.1"
           strokeLinecap="round"
           strokeLinejoin="round"
-          filter="url(#body-shadow)"
+          filter="url(#body-)"
         >
           <path d={headPath} />
           <ellipse cx="79.5" cy="56" rx="3.8" ry="8.5" />

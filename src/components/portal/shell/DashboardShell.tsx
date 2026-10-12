@@ -216,7 +216,7 @@ export const DashboardShell = ({ children }: { children: React.ReactNode }) => {
           {[
             { href: ROUTES.portal, label: "Início", icon: House },
             { href: ROUTES.courses, label: "Cursos", icon: BookOpen },
-            { href: "/recursos", label: "Recursos", icon: Compass },
+            { href: "/portal/recursos", label: "Recursos", icon: Compass },
             {
               href: ROUTES.community,
               label: "Comunidade",

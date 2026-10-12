@@ -260,7 +260,7 @@ export function createLeafDetailTexture(resolution = 512): THREE.CanvasTexture |
   }
 
   // enquanto o SVG nao decodifica, a folha usa a lamina lisa — nunca um vazio
-  context.fillStyle = "#CFC8BE";
+  context.fillStyle = "#D8CFBE";
   context.fillRect(0, 0, canvas.width, canvas.height);
 
   const texture = new THREE.CanvasTexture(canvas);

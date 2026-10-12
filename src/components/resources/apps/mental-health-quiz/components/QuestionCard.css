@@ -1,10 +1,10 @@
-.question-card {
+.fv-resources .question-card {
   border-top: 1px solid var(--fv-nevoa);
   padding: var(--space-lg) 0 var(--space-md);
 }
 
-.question-card__text {
-  font-family: var(--font-display);
+.fv-resources .question-card__text {
+  font-family: var(--font-serif), serif;
   /* Tamanho fluido: 20px–26px */
   font-size: clamp(20px, 4vw, 26px);
   font-weight: 600;
@@ -13,19 +13,19 @@
   margin-bottom: var(--space-sm);
 }
 
-.question-card__description {
-  font-family: var(--font-body);
+.fv-resources .question-card__description {
+  font-family: var(--font-sans), sans-serif;
   font-size: 14px;
   color: var(--fv-pedra);
   line-height: 1.55;
 }
 
 @media (max-width: 640px) {
-  .question-card {
+  .fv-resources .question-card {
     padding: var(--space-md) 0 var(--space-sm);
   }
 
-  .question-card__description {
+  .fv-resources .question-card__description {
     font-size: 13px;
   }
 }

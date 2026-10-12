@@ -74,7 +74,7 @@ export const CompletionView: React.FC<CompletionViewProps> = ({
       <div className="text-center mb-6">
         <svg
           viewBox="0 0 60 28"
-          className="mx-auto w-12 h-6 text-[#7a8b83] opacity-60 mb-2"
+          className="mx-auto w-12 h-6 text-[#6B6B63] opacity-60 mb-2"
           fill="none"
           stroke="currentColor"
           strokeWidth="1.5"
@@ -86,35 +86,35 @@ export const CompletionView: React.FC<CompletionViewProps> = ({
           <path d="M 36 14 C 38 18, 44 20, 45 22" />
         </svg>
 
-        <span className="text-xs uppercase tracking-widest text-[#78716c] font-medium">
+        <span className="text-xs uppercase tracking-widest text-[#6B6B63] font-medium">
           Ciclo concluído · Aqui e Agora
         </span>
-        <h2 className="font-serif-awareness text-3xl sm:text-4xl text-[#282624] font-normal mt-2 mb-3">
+        <h2 className="font-serif-awareness text-3xl sm:text-4xl text-[#262B22] font-normal mt-2 mb-3">
           Sua percepção do instante
         </h2>
-        <p className="text-sm sm:text-base text-[#68625d] max-w-md mx-auto leading-relaxed">
+        <p className="text-sm sm:text-base text-[#6B6B63] max-w-md mx-auto leading-relaxed">
           Você dedicou um tempo para pausar, sentir e acolher o momento tal como
           se apresenta.
         </p>
       </div>
 
       {/* Synthesis summary card */}
-      <div className="bg-[#ffffff]/75 border border-[#e8e0d4] rounded-2xl p-5 sm:p-6 mb-6 shadow-2xs backdrop-blur-xs space-y-4">
+      <div className="bg-[#FDFAF4]/75 border border-[#F1E9DB] rounded-2xl p-5 sm:p-6 mb-6   space-y-4">
         {items.map((item, idx) => (
           <div
             key={item.key}
             className={`pb-3.5 ${
-              idx < items.length - 1 ? "border-b border-[#f0eae0]" : ""
+              idx < items.length - 1 ? "border-b border-[#F1E9DB]" : ""
             }`}
           >
-            <div className="text-xs uppercase tracking-wider text-[#8a8177] font-medium mb-1">
+            <div className="text-xs uppercase tracking-wider text-[#6B6B63] font-medium mb-1">
               {item.label}
             </div>
-            <div className="text-sm sm:text-base text-[#38332f] font-normal leading-relaxed">
+            <div className="text-sm sm:text-base text-[#262B22] font-normal leading-relaxed">
               {item.value ? (
                 <span>{item.value}</span>
               ) : (
-                <span className="italic text-[#a49b91]">
+                <span className="italic text-[#D8CFBE]">
                   Apenas experienciado em silêncio
                 </span>
               )}
@@ -126,11 +126,11 @@ export const CompletionView: React.FC<CompletionViewProps> = ({
       {/* Privacy Notice Card */}
       <div
         id="privacy-notice-box"
-        className="flex items-start gap-3 bg-[#f5f1eb]/85 border border-[#e5ded2] rounded-xl p-4 mb-6"
+        className="flex items-start gap-3 bg-[#FDFAF4]/85 border border-[#F1E9DB] rounded-xl p-4 mb-6"
       >
-        <ShieldCheck className="w-5 h-5 text-[#5e776d] shrink-0 mt-0.5" />
-        <div className="text-xs sm:text-sm text-[#585149] leading-relaxed">
-          <strong className="font-medium text-[#2d2925] block mb-0.5">
+        <ShieldCheck className="w-5 h-5 text-[#6B6B63] shrink-0 mt-0.5" />
+        <div className="text-xs sm:text-sm text-[#4B4B49] leading-relaxed">
+          <strong className="font-medium text-[#262B22] block mb-0.5">
             Registro íntimo e estritamente pessoal
           </strong>
           Este conteúdo não é compartilhado com administradores nem processado
@@ -147,7 +147,7 @@ export const CompletionView: React.FC<CompletionViewProps> = ({
               id="btn-finish-without-saving"
               type="button"
               onClick={onFinishWithoutSaving}
-              className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full border border-[#d6cbbe] text-sm text-[#665e55] hover:bg-[#ede5da] transition-colors"
+              className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full border border-[#D8CFBE] text-sm text-[#6B6B63] hover:bg-[#F1E9DB] transition-colors"
             >
               <EyeOff className="w-4 h-4 opacity-75" />
               <span>Finalizar sem salvar</span>
@@ -157,23 +157,23 @@ export const CompletionView: React.FC<CompletionViewProps> = ({
               id="btn-save-perception"
               type="button"
               onClick={onSave}
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-[#2b2724] text-[#fbf9f5] hover:bg-[#1a1816] text-sm font-medium shadow-xs transition-colors"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-[#262B22] text-[#FDFAF4] hover:bg-[#262B22] text-sm font-medium  transition-colors"
             >
               <BookmarkCheck className="w-4 h-4" />
               <span>Guardar esta percepção</span>
             </button>
           </div>
         ) : (
-          <div className="bg-[#eef3f0] border border-[#d4e1da] rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="flex items-center gap-2 text-sm text-[#3b594d] font-medium">
-              <Check className="w-4 h-4 text-[#2d6e50]" />
+          <div className="bg-[#FDFAF4] border border-[#F1E9DB] rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-sm text-[#4B4B49] font-medium">
+              <Check className="w-4 h-4 text-[#07614C]" />
               <span>Percepção guardada com segurança no seu dispositivo.</span>
             </div>
             <button
               id="btn-start-new-after-save"
               type="button"
               onClick={onStartNew}
-              className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs text-[#3b594d] hover:text-[#1e3d31] font-medium border border-[#bcd2c6] rounded-lg hover:bg-[#e4ede8] transition-colors"
+              className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs text-[#4B4B49] hover:text-[#262B22] font-medium border border-[#D8CFBE] rounded-lg hover:bg-[#F1E9DB] transition-colors"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Nova prática</span>
@@ -183,13 +183,13 @@ export const CompletionView: React.FC<CompletionViewProps> = ({
       </div>
 
       {/* JSON Payload viewer and exporter */}
-      <div className="border-t border-[#ebe4d8] pt-4">
-        <div className="flex items-center justify-between text-xs text-[#8c827a] mb-3">
+      <div className="border-t border-[#F1E9DB] pt-4">
+        <div className="flex items-center justify-between text-xs text-[#6B6B63] mb-3">
           <button
             id="btn-toggle-json-viewer"
             type="button"
             onClick={() => setShowJsonCode(!showJsonCode)}
-            className="inline-flex items-center gap-1 hover:text-[#38332f] transition-colors"
+            className="inline-flex items-center gap-1 hover:text-[#262B22] transition-colors"
           >
             <Code2 className="w-3.5 h-3.5" />
             <span>
@@ -202,7 +202,7 @@ export const CompletionView: React.FC<CompletionViewProps> = ({
               id="btn-copy-json"
               type="button"
               onClick={handleCopyJson}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md hover:bg-[#ede5da] transition-colors"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md hover:bg-[#F1E9DB] transition-colors"
               title="Copiar JSON para área de transferência"
             >
               {copied ? (
@@ -222,7 +222,7 @@ export const CompletionView: React.FC<CompletionViewProps> = ({
               id="btn-download-json"
               type="button"
               onClick={handleDownloadJson}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md hover:bg-[#ede5da] transition-colors"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md hover:bg-[#F1E9DB] transition-colors"
               title="Baixar arquivo JSON"
             >
               <Download className="w-3.5 h-3.5" />
@@ -236,7 +236,7 @@ export const CompletionView: React.FC<CompletionViewProps> = ({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="text-xs bg-[#242220] text-[#ded8cf] p-4 rounded-xl overflow-x-auto font-mono leading-relaxed"
+            className="text-xs bg-[#262B22] text-[#D8CFBE] p-4 rounded-xl overflow-x-auto font-mono leading-relaxed"
           >
             {jsonString}
           </motion.pre>
@@ -250,7 +250,7 @@ export const CompletionView: React.FC<CompletionViewProps> = ({
             id="btn-restart-awareness"
             type="button"
             onClick={onStartNew}
-            className="inline-flex items-center gap-1.5 text-xs text-[#8c827a] hover:text-[#38332f] transition-colors py-1"
+            className="inline-flex items-center gap-1.5 text-xs text-[#6B6B63] hover:text-[#262B22] transition-colors py-1"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>Recomeçar travessia</span>

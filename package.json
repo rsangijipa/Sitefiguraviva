@@ -10,6 +10,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint src tests e2e",
+    "lint:marca": "node scripts/lint-marca.mjs",
     "seed": "node scripts/sync_data.mjs",
     "test": "jest",
     "test:e2e": "playwright test",

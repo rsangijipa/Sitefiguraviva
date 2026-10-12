@@ -1,22 +1,15 @@
-@import "tailwindcss";
-
-@theme {
-  --font-serif: 'Fraunces', serif;
-  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-}
-
-body {
-  font-family: var(--font-sans);
-  color: #262422;
-  background-color: #F8F7F4;
+.fv-resources {
+  font-family: var(--font-sans), sans-serif;
+  color: #262B22;
+  background-color: #FDFAF4;
   margin: 0;
   padding: 0;
 }
 
-.font-serif {
-  font-family: var(--font-serif);
+.fv-resources .font-serif {
+  font-family: var(--font-serif), serif;
 }
 
-.font-sans {
-  font-family: var(--font-sans);
+.fv-resources .font-sans {
+  font-family: var(--font-sans), sans-serif;
 }

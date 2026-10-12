@@ -49,7 +49,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
     <div className="min-h-[calc(100vh-3.5rem)] bg-[#FDFAF4] py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Editorial Header */}
-        <div className="space-y-2 border-b border-[#E2D8CA] pb-6">
+        <div className="space-y-2 border-b border-[#D8CFBE] pb-6">
           <span className="text-[11px] font-sans font-bold tracking-[0.16em] text-[#96551F] uppercase block">
             Registro Pessoal
           </span>
@@ -64,7 +64,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
 
         {/* 4 Discrete Metric Blocks (No gamification, no "percentual dominado") */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
-          <div className="p-4 rounded-2xl bg-[#FDFAF4] border border-[#E2D8CA] flex flex-col justify-between h-28">
+          <div className="p-4 rounded-2xl bg-[#FDFAF4] border border-[#D8CFBE] flex flex-col justify-between h-28">
             <span className="text-[11px] font-sans font-medium text-[#6B6B63] uppercase tracking-wider">
               Cartas Exploradas
             </span>
@@ -78,7 +78,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
 
           <div
             onClick={onNavigateFavorites}
-            className="p-4 rounded-2xl bg-[#FDFAF4] hover:bg-[#F1E9DB] border border-[#E2D8CA] transition-colors cursor-pointer flex flex-col justify-between h-28"
+            className="p-4 rounded-2xl bg-[#FDFAF4] hover:bg-[#F1E9DB] border border-[#D8CFBE] transition-colors cursor-pointer flex flex-col justify-between h-28"
           >
             <span className="text-[11px] font-sans font-medium text-[#6B6B63] uppercase tracking-wider">
               Favoritos
@@ -94,7 +94,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
 
           <div
             onClick={onNavigateReview}
-            className="p-4 rounded-2xl bg-[#FDFAF4] hover:bg-[#F1E9DB] border border-[#E2D8CA] transition-colors cursor-pointer flex flex-col justify-between h-28"
+            className="p-4 rounded-2xl bg-[#FDFAF4] hover:bg-[#F1E9DB] border border-[#D8CFBE] transition-colors cursor-pointer flex flex-col justify-between h-28"
           >
             <span className="text-[11px] font-sans font-medium text-[#6B6B63] uppercase tracking-wider">
               Para Rever
@@ -108,7 +108,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
             </span>
           </div>
 
-          <div className="p-4 rounded-2xl bg-[#FDFAF4] border border-[#E2D8CA] flex flex-col justify-between h-28">
+          <div className="p-4 rounded-2xl bg-[#FDFAF4] border border-[#D8CFBE] flex flex-col justify-between h-28">
             <span className="text-[11px] font-sans font-medium text-[#6B6B63] uppercase tracking-wider">
               Tempo de Estudo
             </span>
@@ -122,7 +122,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
         </div>
 
         {/* Categorias Mais Visitadas */}
-        <div className="p-6 rounded-3xl bg-[#FDFAF4] border border-[#E2D8CA] space-y-4">
+        <div className="p-6 rounded-3xl bg-[#FDFAF4] border border-[#D8CFBE] space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="font-serif text-lg text-[#005A1F] font-normal">
               Categorias Visitadas
@@ -145,7 +145,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                 return (
                   <div
                     key={catName}
-                    className="p-3 rounded-xl bg-[#F1E9DB]/50 border border-[#E2D8CA] flex items-center justify-between"
+                    className="p-3 rounded-xl bg-[#F1E9DB]/50 border border-[#D8CFBE] flex items-center justify-between"
                   >
                     <div className="flex items-center gap-2.5">
                       <CategoryGlyph category={catName as any} size={20} />
@@ -183,7 +183,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                 <div
                   key={card.id}
                   onClick={() => onOpenCard(card)}
-                  className="p-4 rounded-xl bg-[#FDFAF4] hover:bg-[#F1E9DB] border border-[#E2D8CA] transition-colors cursor-pointer flex flex-col justify-between h-32"
+                  className="p-4 rounded-xl bg-[#FDFAF4] hover:bg-[#F1E9DB] border border-[#D8CFBE] transition-colors cursor-pointer flex flex-col justify-between h-32"
                 >
                   <div className="flex items-center justify-between text-[10px] font-mono text-[#96551F]">
                     <span>{card.code}</span>

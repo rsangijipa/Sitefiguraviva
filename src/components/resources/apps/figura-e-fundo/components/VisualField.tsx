@@ -354,7 +354,7 @@ export const VisualField: React.FC<VisualFieldProps> = ({
             cy={el.position.y + 60}
             r={50}
             fill="none"
-            stroke="#1F1E1D"
+            stroke="#262B22"
             strokeWidth="0.75"
             strokeDasharray="4 4"
             className="anim-pulse-gaze opacity-50 pointer-events-none"
@@ -365,7 +365,7 @@ export const VisualField: React.FC<VisualFieldProps> = ({
   };
 
   return (
-    <div className="relative w-full aspect-[16/11] max-h-[560px] rounded-2xl overflow-hidden border border-[#E3DFD5] bg-[#FBF9F5] shadow-[0_4px_24px_rgba(0,0,0,0.03)] select-none">
+    <div className="relative w-full aspect-[16/11] max-h-[560px] rounded-2xl overflow-hidden border border-[#F1E9DB] bg-[#FDFAF4] -[0_4px_24px_rgb(38 43 34 / 0.03)] select-none">
       {/* Subtle paper grain background */}
       <div className="absolute inset-0 paper-texture pointer-events-none opacity-60" />
 
@@ -384,7 +384,7 @@ export const VisualField: React.FC<VisualFieldProps> = ({
             cy="220"
             r="180"
             fill="none"
-            stroke="#222"
+            stroke="#262B22"
             strokeWidth="0.8"
           />
           <circle
@@ -392,7 +392,7 @@ export const VisualField: React.FC<VisualFieldProps> = ({
             cy="220"
             r="280"
             fill="none"
-            stroke="#222"
+            stroke="#262B22"
             strokeWidth="0.5"
             strokeDasharray="3 6"
           />
@@ -408,17 +408,17 @@ export const VisualField: React.FC<VisualFieldProps> = ({
 
       {/* Dynamic Status Badge (Figure vs Ground indicator) */}
       {isRevealed && selectedElementId && (
-        <div className="absolute bottom-4 left-4 right-4 sm:right-auto z-20 flex items-center gap-3 bg-[#FFFFFF]/90 backdrop-blur-md px-4 py-2.5 rounded-xl border border-[#E3DFD5] shadow-sm text-xs text-[#4A4744]">
+        <div className="absolute bottom-4 left-4 right-4 sm:right-auto z-20 flex items-center gap-3 bg-[#FDFAF4]/90  px-4 py-2.5 rounded-xl border border-[#F1E9DB]  text-xs text-[#4B4B49]">
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#2C2A29]" />
-            <span className="font-medium text-[#1F1E1D]">Figura:</span>
+            <span className="w-2.5 h-2.5 rounded-full bg-[#262B22]" />
+            <span className="font-medium text-[#262B22]">Figura:</span>
             <span>
               {elements.find((e) => e.id === selectedElementId)?.name}
             </span>
           </div>
-          <span className="text-[#C4BEB3]">|</span>
-          <div className="flex items-center gap-1.5 text-[#6E6A65]">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#C4BEB3]/60" />
+          <span className="text-[#D8CFBE]">|</span>
+          <div className="flex items-center gap-1.5 text-[#6B6B63]">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#D8CFBE]/60" />
             <span>Fundo: Demais elementos recuados</span>
           </div>
         </div>
@@ -426,7 +426,7 @@ export const VisualField: React.FC<VisualFieldProps> = ({
 
       {/* Gentle helper tooltip when in selecting mode */}
       {isSelecting && !selectedElementId && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 pointer-events-none bg-[#FFFFFF]/85 backdrop-blur-sm px-4 py-2 rounded-full border border-[#E3DFD5] shadow-sm text-xs text-[#5E5A55] tracking-wide animate-fade-in">
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 pointer-events-none bg-[#FDFAF4]/85  px-4 py-2 rounded-full border border-[#F1E9DB]  text-xs text-[#6B6B63] tracking-wide animate-fade-in">
           Toque ou clique no elemento que saltou primeiro aos seus olhos
         </div>
       )}

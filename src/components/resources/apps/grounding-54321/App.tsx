@@ -227,7 +227,7 @@ export default function App() {
     Array(currentStage.number).fill(false);
 
   return (
-    <div className="min-h-full bg-[#F7F6F2] flex flex-col justify-between text-[#1E2328] selection:bg-[#E2DED4]">
+    <div className="min-h-full bg-[#FDFAF4] flex flex-col justify-between text-[#262B22] selection:bg-[#F1E9DB]">
       {/* Header with audio controls, mode indicator & settings */}
       <Header
         settings={settings}

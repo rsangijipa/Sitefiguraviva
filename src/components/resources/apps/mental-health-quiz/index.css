@@ -1,19 +1,17 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,600&family=Karla:wght@400;500;600;700&display=swap');
-
 /* ═══════════════════════════════════════════════════════════════
    FIGURA VIVA DESIGN SYSTEM v1.1 — escopado em .quiz-bank
    Este bloco de variáveis fica no :root pois são apenas custom
    properties (aditivas, não alteram nada fora do escopo do quiz).
    ═══════════════════════════════════════════════════════════════ */
-:root {
+.fv-resources {
   /* CORES */
   --fv-verde-raiz:    #005A1F;
   --fv-verde-igarape: #07614C;
-  --fv-verde-suave:   rgba(0, 90, 31, 0.08);
+  --fv-verde-suave:   rgb(0 90 31 / 0.08);
   --fv-terra-barro:   #96551F;
   --fv-creme-papel:   #FDFAF4;
   --fv-areia:         #F1E9DB;
-  --fv-areia-escura:  #E8DDD0;
+  --fv-areia-escura:  #F1E9DB;
   --fv-nevoa:         #D8CFBE;
   --fv-mata:          #262B22;
   --fv-pedra:         #6B6B63;
@@ -23,11 +21,11 @@
   --fv-aurora:  #FE538B;
   --fv-vazante: #FED701;
   --fv-broto:   #01C94D;
-  --fv-alerta:  #C0432E;
+  --fv-alerta:  #96551F;
 
   /* TIPOGRAFIA */
-  --font-display: 'Fraunces', serif;
-  --font-body:    'Karla', sans-serif;
+  --font-display: var(--font-serif);
+  --font-body:    var(--font-serif);
 
   /* ESPAÇAMENTO */
   --space-xs:  4px;
@@ -61,13 +59,13 @@
 /* ═══════════════════════════════════════════════════════════════
    RESET & BASE — escopado a .quiz-bank para não vazar no resto do site
    ═══════════════════════════════════════════════════════════════ */
-.quiz-bank, .quiz-bank *, .quiz-bank *::before, .quiz-bank *::after {
+.fv-resources .quiz-bank, .fv-resources .quiz-bank *, .fv-resources .quiz-bank *::before, .fv-resources .quiz-bank *::after {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
 }
 
-.quiz-bank {
-  font-family: var(--font-body);
+.fv-resources .quiz-bank {
+  font-family: var(--font-sans), sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--fv-creme-papel);
@@ -81,38 +79,38 @@
 /* ═══════════════════════════════════════════════════════════════
    TIPOGRAFIA
    ═══════════════════════════════════════════════════════════════ */
-.quiz-bank h1 {
-  font-family: var(--font-display);
+.fv-resources .quiz-bank h1 {
+  font-family: var(--font-serif), serif;
   font-weight: 700;
   line-height: 1.05;
 }
 
-.quiz-bank h2 {
-  font-family: var(--font-display);
+.fv-resources .quiz-bank h2 {
+  font-family: var(--font-serif), serif;
   font-weight: 700;
   line-height: 1.15;
 }
 
-.quiz-bank h3 {
-  font-family: var(--font-display);
+.fv-resources .quiz-bank h3 {
+  font-family: var(--font-serif), serif;
   font-weight: 600;
   line-height: 1.2;
 }
 
-.quiz-bank p {
-  font-family: var(--font-body);
+.fv-resources .quiz-bank p {
+  font-family: var(--font-sans), sans-serif;
   font-size: 15px;
   line-height: 1.6;
   color: var(--fv-mata);
 }
 
-.quiz-bank small, .quiz-bank .text-small {
+.fv-resources .quiz-bank small, .fv-resources .quiz-bank .text-small {
   font-size: 13px;
   color: var(--fv-pedra);
 }
 
-.quiz-bank label, .quiz-bank .label {
-  font-family: var(--font-body);
+.fv-resources .quiz-bank label, .fv-resources .quiz-bank .label {
+  font-family: var(--font-sans), sans-serif;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -123,19 +121,19 @@
 /* ═══════════════════════════════════════════════════════════════
    CONTAINER
    ═══════════════════════════════════════════════════════════════ */
-.quiz-bank .qz-app-container {
+.fv-resources .quiz-bank .qz-app-container {
   width: min(100% - 48px, 1180px);
   margin-inline: auto;
 }
 
 @media (max-width: 768px) {
-  .quiz-bank .qz-app-container {
+  .fv-resources .quiz-bank .qz-app-container {
     width: min(100% - 32px, 100%);
   }
 }
 
 @media (max-width: 480px) {
-  .quiz-bank .qz-app-container {
+  .fv-resources .quiz-bank .qz-app-container {
     width: min(100% - 32px, 100%);
   }
 }
@@ -143,8 +141,8 @@
 /* ═══════════════════════════════════════════════════════════════
    BOTÕES — Sistema unificado com touch targets adequados
    ═══════════════════════════════════════════════════════════════ */
-.quiz-bank .qz-btn {
-  font-family: var(--font-body);
+.fv-resources .quiz-bank .qz-btn {
+  font-family: var(--font-sans), sans-serif;
   font-weight: 700;
   border: none;
   border-radius: var(--radius-sm);
@@ -168,53 +166,53 @@
   touch-action: manipulation;
 }
 
-.quiz-bank .qz-btn:focus-visible {
+.fv-resources .quiz-bank .qz-btn:focus-visible {
   outline: 3px solid var(--fv-verde-raiz);
   outline-offset: 3px;
 }
 
-.quiz-bank .qz-btn:disabled {
+.fv-resources .quiz-bank .qz-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 
-.quiz-bank .qz-btn:active:not(:disabled) {
+.fv-resources .quiz-bank .qz-btn:active:not(:disabled) {
   transform: scale(0.97);
 }
 
-.quiz-bank .qz-btn-primary {
+.fv-resources .quiz-bank .qz-btn-primary {
   background-color: var(--fv-verde-raiz);
   color: var(--fv-creme-papel);
 }
 
-.quiz-bank .qz-btn-primary:hover:not(:disabled) {
+.fv-resources .quiz-bank .qz-btn-primary:hover:not(:disabled) {
   background-color: var(--fv-verde-igarape);
 }
 
-.quiz-bank .qz-btn-primary:active:not(:disabled) {
-  background-color: #004018;
+.fv-resources .quiz-bank .qz-btn-primary:active:not(:disabled) {
+  background-color: #005A1F;
 }
 
-.quiz-bank .qz-btn-secondary {
+.fv-resources .quiz-bank .qz-btn-secondary {
   background-color: transparent;
   color: var(--fv-mata);
   border: 1.5px solid var(--fv-nevoa);
 }
 
-.quiz-bank .qz-btn-secondary:hover:not(:disabled) {
+.fv-resources .quiz-bank .qz-btn-secondary:hover:not(:disabled) {
   border-color: var(--fv-verde-raiz);
   color: var(--fv-verde-raiz);
   background-color: var(--fv-verde-suave);
 }
 
-.quiz-bank .qz-btn-ghost {
+.fv-resources .quiz-bank .qz-btn-ghost {
   background-color: transparent;
   color: var(--fv-pedra);
   padding: 10px 14px;
   min-height: var(--touch-min);
 }
 
-.quiz-bank .qz-btn-ghost:hover:not(:disabled) {
+.fv-resources .quiz-bank .qz-btn-ghost:hover:not(:disabled) {
   background-color: var(--fv-areia);
   color: var(--fv-mata);
 }
@@ -222,16 +220,16 @@
 /* ═══════════════════════════════════════════════════════════════
    CARD BASE
    ═══════════════════════════════════════════════════════════════ */
-.quiz-bank .qz-card {
+.fv-resources .quiz-bank .qz-card {
   background-color: var(--fv-creme-papel);
   border: 1px solid var(--fv-nevoa);
   border-radius: var(--radius-md);
   padding: var(--space-lg);
   transition: background-color var(--transition-fast), border-color var(--transition-fast);
-  box-shadow: 0 8px 20px rgba(38, 43, 34, 0.08);
+  box-shadow: none;
 }
 
-.quiz-bank .qz-card:hover {
+.fv-resources .quiz-bank .qz-card:hover {
   background-color: var(--fv-areia);
   border-color: var(--fv-verde-raiz);
 }
@@ -239,23 +237,23 @@
 /* ═══════════════════════════════════════════════════════════════
    UTILITÁRIOS
    ═══════════════════════════════════════════════════════════════ */
-.quiz-bank .qz-divider {
+.fv-resources .quiz-bank .qz-divider {
   height: 1px;
   background-color: var(--fv-nevoa);
 }
 
-.quiz-bank .qz-divider-left {
+.fv-resources .quiz-bank .qz-divider-left {
   width: 48px;
   height: 2px;
   background-color: var(--fv-verde-raiz);
   border-radius: 1px;
 }
 
-.quiz-bank .qz-section-spacing {
+.fv-resources .quiz-bank .qz-section-spacing {
   margin-bottom: var(--space-3xl);
 }
 
-.quiz-bank .sr-only {
+.fv-resources .quiz-bank .sr-only {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -268,7 +266,7 @@
 }
 
 @media (max-width: 640px) {
-  .quiz-bank .qz-section-spacing {
+  .fv-resources .quiz-bank .qz-section-spacing {
     margin-bottom: var(--space-2xl);
   }
 }

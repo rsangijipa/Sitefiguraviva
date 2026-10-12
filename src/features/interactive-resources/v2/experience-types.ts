@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect,useRef } from "react";
 import type { EditorialItem, EditorialVersion } from "./editorial-schema";
 export interface ExperienceProps {
   mode: string; version: EditorialVersion | null; concepts: EditorialItem[];
@@ -8,5 +8,7 @@ export interface ExperienceProps {
 // Reporting is in-memory only. No storage, telemetry or request is performed.
 export function useExperienceDraft(payload: unknown, report: ExperienceProps["onDraft"]) {
   const serialized = JSON.stringify(payload);
-  useEffect(() => { report(JSON.parse(serialized)); }, [serialized, report]);
+  const initial=useRef(serialized);
+  const previous=useRef(serialized);
+  useEffect(() => { if(serialized!==previous.current){previous.current=serialized;report(serialized===initial.current?null:JSON.parse(serialized));} }, [serialized, report]);
 }

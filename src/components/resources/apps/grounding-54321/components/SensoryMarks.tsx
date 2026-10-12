@@ -41,8 +41,8 @@ export const SensoryMarks: React.FC<SensoryMarksProps> = ({
               onClick={() => onToggle(index)}
               className={`relative flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full transition-all duration-300 focus:outline-none focus-visible:ring-3 focus-visible:ring-[#2C333A]/40 active:scale-95 ${
                 isChecked
-                  ? "bg-[#232A31] text-[#F8F7F4] shadow-sm"
-                  : "bg-[#F1EFEA] border border-[#D5D2C8] text-[#717882] hover:border-[#A8A499] hover:bg-[#EAE8E1]"
+                  ? "bg-[#262B22] text-[#FDFAF4] "
+                  : "bg-[#F1E9DB] border border-[#D8CFBE] text-[#6B6B63] hover:border-[#D8CFBE] hover:bg-[#F1E9DB]"
               } ${!isChecked && !reducedMotion ? delayClass : ""}`}
               aria-pressed={isChecked}
               aria-label={`${index + 1}º item de ${senseLabel}: ${
@@ -56,7 +56,7 @@ export const SensoryMarks: React.FC<SensoryMarksProps> = ({
                   }`}
                 />
               ) : (
-                <span className="font-karla text-sm font-semibold tracking-wider text-[#686E77]">
+                <span className="font-karla text-sm font-semibold tracking-wider text-[#6B6B63]">
                   {index + 1}
                 </span>
               )}
@@ -73,7 +73,7 @@ export const SensoryMarks: React.FC<SensoryMarksProps> = ({
       </div>
 
       {/* Mindful prompt under marks */}
-      <p className="text-xs text-[#6E757F] text-center max-w-xs font-karla tracking-wide">
+      <p className="text-xs text-[#6B6B63] text-center max-w-xs font-karla tracking-wide">
         Toque conforme percebe itens reais no seu ambiente.
       </p>
     </div>

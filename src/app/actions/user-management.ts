@@ -8,6 +8,7 @@ import { getAuthEmailRedirect } from "@/lib/auth/email-flow";
 import { rateLimit, RateLimitPresets } from "@/lib/rateLimit";
 import type { UserRole, UserStatus } from "@/types/user";
 import { revalidatePath } from "next/cache";
+import { prepareResourceAccountErasure } from "@/features/interactive-resources/v2/maintenance.server";
 
 async function readProfile(targetUid: string) {
   const { data, error } = await createSupabaseServiceClient()
@@ -109,6 +110,7 @@ export async function deleteUser(targetUid: string) {
         "Esta conta tem inscrições ou histórico. Desative o acesso para preservar os registros.",
       );
     await govern(actor.uid, targetUid, null, false);
+    await prepareResourceAccountErasure(targetUid);
     const { error } = await db.auth.admin.deleteUser(targetUid);
     if (error)
       throw new Error(

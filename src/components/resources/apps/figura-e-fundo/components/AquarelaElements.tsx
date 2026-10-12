@@ -66,10 +66,10 @@ export const WatercolorFilters: React.FC = () => {
         <feColorMatrix
           type="matrix"
           values="0 0 0 0 0.1   0 0 0 0 0.1   0 0 0 0 0.1   0 0 0 0.15 0"
-          result="shadow"
+          result=""
         />
         <feMerge>
-          <feMergeNode in="shadow" />
+          <feMergeNode in="" />
           <feMergeNode in="SourceGraphic" />
         </feMerge>
       </filter>
@@ -90,40 +90,40 @@ export const WatercolorFilters: React.FC = () => {
 
       {/* Radial soft watercolor gradient 1: Terracotta / Ochre */}
       <radialGradient id="grad-ochre" cx="40%" cy="40%" r="65%">
-        <stop offset="0%" stopColor="#C97A4A" stopOpacity="0.85" />
-        <stop offset="50%" stopColor="#D99B6A" stopOpacity="0.65" />
-        <stop offset="85%" stopColor="#E2B895" stopOpacity="0.3" />
-        <stop offset="100%" stopColor="#E2B895" stopOpacity="0" />
+        <stop offset="0%" stopColor="#96551F" stopOpacity="0.85" />
+        <stop offset="50%" stopColor="#FE538B" stopOpacity="0.65" />
+        <stop offset="85%" stopColor="#D8CFBE" stopOpacity="0.3" />
+        <stop offset="100%" stopColor="#D8CFBE" stopOpacity="0" />
       </radialGradient>
 
       {/* Radial soft watercolor gradient 2: Indigo / Mineral Slate */}
       <radialGradient id="grad-indigo" cx="35%" cy="35%" r="65%">
-        <stop offset="0%" stopColor="#2E3C48" stopOpacity="0.88" />
-        <stop offset="45%" stopColor="#4A5D6E" stopOpacity="0.62" />
-        <stop offset="85%" stopColor="#6C8296" stopOpacity="0.25" />
-        <stop offset="100%" stopColor="#6C8296" stopOpacity="0" />
+        <stop offset="0%" stopColor="#4B4B49" stopOpacity="0.88" />
+        <stop offset="45%" stopColor="#6B6B63" stopOpacity="0.62" />
+        <stop offset="85%" stopColor="#6B6B63" stopOpacity="0.25" />
+        <stop offset="100%" stopColor="#6B6B63" stopOpacity="0" />
       </radialGradient>
 
       {/* Radial soft watercolor gradient 3: Olive / Sage */}
       <radialGradient id="grad-sage" cx="45%" cy="45%" r="65%">
-        <stop offset="0%" stopColor="#556554" stopOpacity="0.85" />
-        <stop offset="50%" stopColor="#7B8F7A" stopOpacity="0.55" />
-        <stop offset="90%" stopColor="#A4B7A3" stopOpacity="0.2" />
-        <stop offset="100%" stopColor="#A4B7A3" stopOpacity="0" />
+        <stop offset="0%" stopColor="#6B6B63" stopOpacity="0.85" />
+        <stop offset="50%" stopColor="#6B6B63" stopOpacity="0.55" />
+        <stop offset="90%" stopColor="#D8CFBE" stopOpacity="0.2" />
+        <stop offset="100%" stopColor="#D8CFBE" stopOpacity="0" />
       </radialGradient>
 
       {/* Radial soft watercolor gradient 4: Warm Sand / Linen */}
       <radialGradient id="grad-sand" cx="50%" cy="50%" r="60%">
-        <stop offset="0%" stopColor="#B39E82" stopOpacity="0.75" />
-        <stop offset="55%" stopColor="#C8B8A2" stopOpacity="0.45" />
-        <stop offset="100%" stopColor="#D8CDBE" stopOpacity="0" />
+        <stop offset="0%" stopColor="#D8CFBE" stopOpacity="0.75" />
+        <stop offset="55%" stopColor="#D8CFBE" stopOpacity="0.45" />
+        <stop offset="100%" stopColor="#D8CFBE" stopOpacity="0" />
       </radialGradient>
 
       {/* Deep Sepia Graphite Wash */}
       <radialGradient id="grad-graphite" cx="35%" cy="35%" r="70%">
-        <stop offset="0%" stopColor="#1E1C1A" stopOpacity="0.9" />
-        <stop offset="60%" stopColor="#3C3835" stopOpacity="0.5" />
-        <stop offset="100%" stopColor="#5A544F" stopOpacity="0" />
+        <stop offset="0%" stopColor="#262B22" stopOpacity="0.9" />
+        <stop offset="60%" stopColor="#4B4B49" stopOpacity="0.5" />
+        <stop offset="100%" stopColor="#4B4B49" stopOpacity="0" />
       </radialGradient>
     </defs>
   );

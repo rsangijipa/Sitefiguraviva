@@ -27,13 +27,13 @@ type FoliageProps = {
 
 /** folhas comuns: gradiente de verdes, do interior sombreado a borda ensolarada */
 const COMMON_TONES = [
-  new THREE.Color("#2F5228"),
-  new THREE.Color("#3D6A2E"),
-  new THREE.Color("#4E8236"),
-  new THREE.Color("#5F9A3D"),
-  new THREE.Color("#74AE49"),
-  new THREE.Color("#8CC155"),
-  new THREE.Color("#A6CE68"),
+  new THREE.Color("#262B22"),
+  new THREE.Color("#4B4B49"),
+  new THREE.Color("#6B6B63"),
+  new THREE.Color("#6B6B63"),
+  new THREE.Color("#6B6B63"),
+  new THREE.Color("#6B6B63"),
+  new THREE.Color("#D8CFBE"),
 ];
 
 /**
@@ -42,9 +42,9 @@ const COMMON_TONES = [
  * so muda a resolucao.
  */
 
-const MESSAGE_HOVER = new THREE.Color("#FBEAC0");
-const MESSAGE_READ = new THREE.Color("#7A6A57");
-const AUTUMN_TONE = new THREE.Color("#C9A65A");
+const MESSAGE_HOVER = new THREE.Color("#F1E9DB");
+const MESSAGE_READ = new THREE.Color("#6B6B63");
+const AUTUMN_TONE = new THREE.Color("#D8CFBE");
 
 /**
  * Rede de seguranca: com `vertexColors` ligado, uma geometria sem o atributo
@@ -171,8 +171,8 @@ export function Foliage({
    */
   const [materials] = useState(() => ({
       common: createLeafMaterial({
-        color: "#ffffff",
-        subsurfaceColor: "#9ED063",
+        color: "#FDFAF4",
+        subsurfaceColor: "#D8CFBE",
         subsurfaceIntensity: 0.9,
         roughness: 0.72,
         vertexColors: true,
@@ -180,14 +180,14 @@ export function Foliage({
         cacheKey: "leaf-common-v2",
       }),
       message: createLeafMaterial({
-        color: "#ffffff",
-        subsurfaceColor: "#F0E39A",
+        color: "#FDFAF4",
+        subsurfaceColor: "#D8CFBE",
         subsurfaceIntensity: 1.25,
         roughness: 0.58,
         vertexColors: true,
         windStrength: windStrength * 0.55,
         cacheKey: "leaf-message-v2",
-        emissive: "#2A3410",
+        emissive: "#262B22",
         emissiveIntensity: 0.55,
       }),
   }));
@@ -235,9 +235,9 @@ export function Foliage({
     }
 
     const gradient = context.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-    gradient.addColorStop(0, "rgba(255,232,182,0.88)");
-    gradient.addColorStop(0.35, "rgba(232,178,106,0.34)");
-    gradient.addColorStop(1, "rgba(232,178,106,0)");
+    gradient.addColorStop(0, "rgb(241 233 219 / 0.88)");
+    gradient.addColorStop(0.35, "rgb(216 207 190 / 0.34)");
+    gradient.addColorStop(1, "rgb(216 207 190 / 0)");
     context.fillStyle = gradient;
     context.fillRect(0, 0, size, size);
 

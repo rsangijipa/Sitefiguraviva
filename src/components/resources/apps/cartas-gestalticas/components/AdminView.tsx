@@ -204,13 +204,13 @@ export const AdminView: React.FC<AdminViewProps> = ({
     <div className="min-h-[calc(100vh-3.5rem)] bg-[#FDFAF4] text-[#262B22] p-4 sm:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Top Institutional Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E2D8CA] pb-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#D8CFBE] pb-5">
           <div>
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-mono uppercase tracking-widest text-[#96551F]">
                 ÁREA ADMINISTRATIVA
               </span>
-              <span className="text-[10px] bg-[#E2D8CA] px-2 py-0.5 rounded-full font-mono text-[#262B22]">
+              <span className="text-[10px] bg-[#D8CFBE] px-2 py-0.5 rounded-full font-mono text-[#262B22]">
                 v1.2 · Acervo
               </span>
             </div>
@@ -225,7 +225,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                 setImportStep(1);
                 setIsImportModalOpen(true);
               }}
-              className="px-3.5 py-2 rounded-xl bg-[#FDFAF4] hover:bg-[#F1E9DB] border border-[#E2D8CA] text-xs font-sans font-medium flex items-center gap-1.5 transition-colors"
+              className="px-3.5 py-2 rounded-xl bg-[#FDFAF4] hover:bg-[#F1E9DB] border border-[#D8CFBE] text-xs font-sans font-medium flex items-center gap-1.5 transition-colors"
             >
               <Upload className="w-3.5 h-3.5" />
               <span>Importar cartas</span>
@@ -233,7 +233,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
 
             <button
               onClick={handleCreateNew}
-              className="px-4 py-2 rounded-xl bg-[#005A1F] hover:bg-[#004317] text-[#FDFAF4] text-xs font-sans font-medium flex items-center gap-1.5 transition-colors"
+              className="px-4 py-2 rounded-xl bg-[#005A1F] hover:bg-[#005A1F] text-[#FDFAF4] text-xs font-sans font-medium flex items-center gap-1.5 transition-colors"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Nova carta</span>
@@ -250,7 +250,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
         </div>
 
         {/* Filters and Search Bar */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 bg-[#FDFAF4] p-4 rounded-2xl border border-[#E2D8CA]">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 bg-[#FDFAF4] p-4 rounded-2xl border border-[#D8CFBE]">
           {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#6B6B63]" />
@@ -259,7 +259,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
               placeholder="Buscar no acervo..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-[#FDFAF4] border border-[#E2D8CA] rounded-xl pl-9 pr-3 py-1.5 text-xs text-[#262B22] focus:outline-none focus:border-[#005A1F]"
+              className="w-full bg-[#FDFAF4] border border-[#D8CFBE] rounded-xl pl-9 pr-3 py-1.5 text-xs text-[#262B22] focus:outline-none focus:border-[#005A1F]"
             />
           </div>
 
@@ -267,7 +267,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
-            className="bg-[#FDFAF4] border border-[#E2D8CA] rounded-xl px-3 py-1.5 text-xs text-[#262B22] focus:outline-none focus:border-[#005A1F]"
+            className="bg-[#FDFAF4] border border-[#D8CFBE] rounded-xl px-3 py-1.5 text-xs text-[#262B22] focus:outline-none focus:border-[#005A1F]"
           >
             <option value="ALL">Todos os Tipos</option>
             <option value="CONCEITO">Conceito</option>
@@ -282,7 +282,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
           <select
             value={filterDeck}
             onChange={(e) => setFilterDeck(e.target.value)}
-            className="bg-[#FDFAF4] border border-[#E2D8CA] rounded-xl px-3 py-1.5 text-xs text-[#262B22] focus:outline-none focus:border-[#005A1F]"
+            className="bg-[#FDFAF4] border border-[#D8CFBE] rounded-xl px-3 py-1.5 text-xs text-[#262B22] focus:outline-none focus:border-[#005A1F]"
           >
             <option value="ALL">Todos os Decks</option>
             {decks.map((d) => (
@@ -296,7 +296,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="bg-[#FDFAF4] border border-[#E2D8CA] rounded-xl px-3 py-1.5 text-xs text-[#262B22] focus:outline-none focus:border-[#005A1F]"
+            className="bg-[#FDFAF4] border border-[#D8CFBE] rounded-xl px-3 py-1.5 text-xs text-[#262B22] focus:outline-none focus:border-[#005A1F]"
           >
             <option value="ALL">Todos os Status</option>
             <option value="publicado">Publicado</option>
@@ -306,11 +306,11 @@ export const AdminView: React.FC<AdminViewProps> = ({
         </div>
 
         {/* Dense Institutional DataTable */}
-        <div className="bg-[#FDFAF4] border border-[#E2D8CA] rounded-2xl overflow-hidden shadow-none">
+        <div className="bg-[#FDFAF4] border border-[#D8CFBE] rounded-2xl overflow-hidden ">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs font-sans border-collapse">
               <thead>
-                <tr className="border-b border-[#E2D8CA] bg-[#F1E9DB]/50 text-[#6B6B63] uppercase tracking-wider font-semibold">
+                <tr className="border-b border-[#D8CFBE] bg-[#F1E9DB]/50 text-[#6B6B63] uppercase tracking-wider font-semibold">
                   <th className="py-3 px-4">Código</th>
                   <th className="py-3 px-4">Título</th>
                   <th className="py-3 px-4">Tipo</th>
@@ -321,7 +321,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                   <th className="py-3 px-4 text-right">Ações</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#E2D8CA]/60 text-[#262B22]">
+              <tbody className="divide-y divide-[#D8CFBE]/60 text-[#262B22]">
                 {filteredCards.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="py-8 text-center text-[#6B6B63]">
@@ -357,10 +357,10 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         <span
                           className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${
                             card.status === "publicado"
-                              ? "bg-[#E7EFE9] text-[#005A1F]"
+                              ? "bg-[#F1E9DB] text-[#005A1F]"
                               : card.status === "rascunho"
                                 ? "bg-[#FED701]/20 text-[#96551F]"
-                                : "bg-[#E2D8CA] text-[#6B6B63]"
+                                : "bg-[#D8CFBE] text-[#6B6B63]"
                           }`}
                         >
                           {card.status}
@@ -404,13 +404,13 @@ export const AdminView: React.FC<AdminViewProps> = ({
       {editingCard && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6">
           <div
-            className="fixed inset-0 bg-[#262B22]/40 backdrop-blur-[2px]"
+            className="fixed inset-0 bg-[#262B22]/40 -[2px]"
             onClick={() => setEditingCard(null)}
           />
 
-          <div className="relative z-10 w-full max-w-6xl h-[90vh] bg-[#FDFAF4] border border-[#E2D8CA] rounded-3xl flex flex-col overflow-hidden shadow-none">
+          <div className="relative z-10 w-full max-w-6xl h-[90vh] bg-[#FDFAF4] border border-[#D8CFBE] rounded-3xl flex flex-col overflow-hidden ">
             {/* Modal Header */}
-            <div className="p-4 sm:p-5 border-b border-[#E2D8CA] flex items-center justify-between bg-[#FDFAF4]">
+            <div className="p-4 sm:p-5 border-b border-[#D8CFBE] flex items-center justify-between bg-[#FDFAF4]">
               <div>
                 <span className="text-[10px] font-mono tracking-widest text-[#96551F] uppercase block">
                   Editor de Carta Gestáltica
@@ -424,7 +424,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                 <button
                   type="button"
                   onClick={() => setEditingCard(null)}
-                  className="px-3 py-1.5 border border-[#E2D8CA] rounded-lg text-xs font-sans text-[#6B6B63] hover:bg-[#F1E9DB] transition-colors"
+                  className="px-3 py-1.5 border border-[#D8CFBE] rounded-lg text-xs font-sans text-[#6B6B63] hover:bg-[#F1E9DB] transition-colors"
                 >
                   Cancelar
                 </button>
@@ -434,7 +434,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     onSaveCard(editingCard);
                     setEditingCard(null);
                   }}
-                  className="px-4 py-1.5 bg-[#005A1F] hover:bg-[#004317] text-[#FDFAF4] rounded-lg text-xs font-sans font-medium transition-colors"
+                  className="px-4 py-1.5 bg-[#005A1F] hover:bg-[#005A1F] text-[#FDFAF4] rounded-lg text-xs font-sans font-medium transition-colors"
                 >
                   Salvar Carta
                 </button>
@@ -444,7 +444,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
             {/* Split Content: 60% Editor / 40% Live Preview */}
             <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
               {/* 60% Left Form Editor */}
-              <div className="lg:w-[60%] h-full overflow-y-auto custom-card-scroll p-6 space-y-4 border-b lg:border-b-0 lg:border-r border-[#E2D8CA]">
+              <div className="lg:w-[60%] h-full overflow-y-auto custom-card-scroll p-6 space-y-4 border-b lg:border-b-0 lg:border-r border-[#D8CFBE]">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Tipo */}
                   <div>
@@ -468,7 +468,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                           category: cat,
                         });
                       }}
-                      className="w-full bg-[#FDFAF4] border border-[#E2D8CA] rounded-lg p-2 text-xs text-[#262B22] focus:outline-none focus:border-[#005A1F]"
+                      className="w-full bg-[#FDFAF4] border border-[#D8CFBE] rounded-lg p-2 text-xs text-[#262B22] focus:outline-none focus:border-[#005A1F]"
                     >
                       <option value="CONCEITO">CONCEITO</option>
                       <option value="AUTOR">AUTOR</option>
@@ -490,7 +490,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       onChange={(e) =>
                         setEditingCard({ ...editingCard, code: e.target.value })
                       }
-                      className="w-full bg-[#FDFAF4] border border-[#E2D8CA] rounded-lg p-2 text-xs text-[#262B22] font-mono focus:outline-none focus:border-[#005A1F]"
+                      className="w-full bg-[#FDFAF4] border border-[#D8CFBE] rounded-lg p-2 text-xs text-[#262B22] font-mono focus:outline-none focus:border-[#005A1F]"
                     />
                   </div>
                 </div>
@@ -506,7 +506,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     onChange={(e) =>
                       setEditingCard({ ...editingCard, title: e.target.value })
                     }
-                    className="w-full bg-[#FDFAF4] border border-[#E2D8CA] rounded-lg p-2 text-xs sm:text-sm text-[#262B22] font-serif focus:outline-none focus:border-[#005A1F]"
+                    className="w-full bg-[#FDFAF4] border border-[#D8CFBE] rounded-lg p-2 text-xs sm:text-sm text-[#262B22] font-serif focus:outline-none focus:border-[#005A1F]"
                   />
                 </div>
 
@@ -521,7 +521,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     onChange={(e) =>
                       setEditingCard({ ...editingCard, body: e.target.value })
                     }
-                    className="w-full bg-[#FDFAF4] border border-[#E2D8CA] rounded-lg p-2 text-xs sm:text-sm text-[#262B22] font-sans leading-relaxed focus:outline-none focus:border-[#005A1F]"
+                    className="w-full bg-[#FDFAF4] border border-[#D8CFBE] rounded-lg p-2 text-xs sm:text-sm text-[#262B22] font-sans leading-relaxed focus:outline-none focus:border-[#005A1F]"
                   />
                 </div>
 
@@ -540,7 +540,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       })
                     }
                     placeholder="Pergunta curta para ressoar..."
-                    className="w-full bg-[#F1E9DB]/60 border border-[#E2D8CA] rounded-lg p-2 text-xs italic text-[#262B22] focus:outline-none focus:border-[#005A1F]"
+                    className="w-full bg-[#F1E9DB]/60 border border-[#D8CFBE] rounded-lg p-2 text-xs italic text-[#262B22] focus:outline-none focus:border-[#005A1F]"
                   />
                 </div>
 
@@ -559,7 +559,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                           author: e.target.value,
                         })
                       }
-                      className="w-full bg-[#FDFAF4] border border-[#E2D8CA] rounded-lg p-2 text-xs text-[#262B22] focus:outline-none focus:border-[#005A1F]"
+                      className="w-full bg-[#FDFAF4] border border-[#D8CFBE] rounded-lg p-2 text-xs text-[#262B22] focus:outline-none focus:border-[#005A1F]"
                     />
                   </div>
                   <div>
@@ -572,7 +572,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       onChange={(e) =>
                         setEditingCard({ ...editingCard, work: e.target.value })
                       }
-                      className="w-full bg-[#FDFAF4] border border-[#E2D8CA] rounded-lg p-2 text-xs text-[#262B22] focus:outline-none focus:border-[#005A1F]"
+                      className="w-full bg-[#FDFAF4] border border-[#D8CFBE] rounded-lg p-2 text-xs text-[#262B22] focus:outline-none focus:border-[#005A1F]"
                     />
                   </div>
                   <div>
@@ -585,7 +585,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       onChange={(e) =>
                         setEditingCard({ ...editingCard, year: e.target.value })
                       }
-                      className="w-full bg-[#FDFAF4] border border-[#E2D8CA] rounded-lg p-2 text-xs text-[#262B22] font-mono focus:outline-none focus:border-[#005A1F]"
+                      className="w-full bg-[#FDFAF4] border border-[#D8CFBE] rounded-lg p-2 text-xs text-[#262B22] font-mono focus:outline-none focus:border-[#005A1F]"
                     />
                   </div>
                 </div>
@@ -604,7 +604,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         reference: e.target.value,
                       })
                     }
-                    className="w-full bg-[#FDFAF4] border border-[#E2D8CA] rounded-lg p-2 text-xs text-[#262B22] focus:outline-none focus:border-[#005A1F]"
+                    className="w-full bg-[#FDFAF4] border border-[#D8CFBE] rounded-lg p-2 text-xs text-[#262B22] focus:outline-none focus:border-[#005A1F]"
                   />
                 </div>
 
@@ -620,7 +620,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                       onChange={(e) =>
                         setEditingCard({ ...editingCard, deck: e.target.value })
                       }
-                      className="w-full bg-[#FDFAF4] border border-[#E2D8CA] rounded-lg p-2 text-xs text-[#262B22] focus:outline-none focus:border-[#005A1F]"
+                      className="w-full bg-[#FDFAF4] border border-[#D8CFBE] rounded-lg p-2 text-xs text-[#262B22] focus:outline-none focus:border-[#005A1F]"
                     />
                   </div>
 
@@ -636,7 +636,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                           status: e.target.value as CardStatus,
                         })
                       }
-                      className="w-full bg-[#FDFAF4] border border-[#E2D8CA] rounded-lg p-2 text-xs text-[#262B22] focus:outline-none focus:border-[#005A1F]"
+                      className="w-full bg-[#FDFAF4] border border-[#D8CFBE] rounded-lg p-2 text-xs text-[#262B22] focus:outline-none focus:border-[#005A1F]"
                     >
                       <option value="publicado">Publicado</option>
                       <option value="rascunho">Rascunho</option>
@@ -659,7 +659,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         expandedNotes: e.target.value,
                       })
                     }
-                    className="w-full bg-[#FDFAF4] border border-[#E2D8CA] rounded-lg p-2 text-xs text-[#262B22] leading-relaxed focus:outline-none focus:border-[#005A1F]"
+                    className="w-full bg-[#FDFAF4] border border-[#D8CFBE] rounded-lg p-2 text-xs text-[#262B22] leading-relaxed focus:outline-none focus:border-[#005A1F]"
                   />
                 </div>
               </div>
@@ -696,13 +696,13 @@ export const AdminView: React.FC<AdminViewProps> = ({
       {isImportModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="fixed inset-0 bg-[#262B22]/40 backdrop-blur-[2px]"
+            className="fixed inset-0 bg-[#262B22]/40 -[2px]"
             onClick={() => setIsImportModalOpen(false)}
           />
 
-          <div className="relative z-10 w-full max-w-2xl bg-[#FDFAF4] border border-[#E2D8CA] rounded-3xl p-6 space-y-6 overflow-hidden">
+          <div className="relative z-10 w-full max-w-2xl bg-[#FDFAF4] border border-[#D8CFBE] rounded-3xl p-6 space-y-6 overflow-hidden">
             {/* Steps Header */}
-            <div className="flex items-center justify-between border-b border-[#E2D8CA] pb-4">
+            <div className="flex items-center justify-between border-b border-[#D8CFBE] pb-4">
               <div>
                 <h3 className="font-serif text-xl text-[#005A1F] font-normal">
                   Importar Cartas em Lote
@@ -761,20 +761,20 @@ RETROFLEXÃO; CONCEITO; Erving Polster; Gestalt Therapy; 1973; O represamento da
 Laura Perls; AUTOR; Laura Perls; Living at the Boundary; 1992; Co-fundadora da abordagem; Quanto suporte você precisa?`}
                   value={importRawText}
                   onChange={(e) => setImportRawText(e.target.value)}
-                  className="w-full bg-[#FDFAF4] border border-[#E2D8CA] rounded-xl p-3 text-xs font-mono leading-relaxed focus:outline-none focus:border-[#005A1F]"
+                  className="w-full bg-[#FDFAF4] border border-[#D8CFBE] rounded-xl p-3 text-xs font-mono leading-relaxed focus:outline-none focus:border-[#005A1F]"
                 />
 
                 <div className="flex justify-end gap-2">
                   <button
                     onClick={() => setIsImportModalOpen(false)}
-                    className="px-4 py-2 border border-[#E2D8CA] text-xs font-sans text-[#6B6B63] rounded-xl"
+                    className="px-4 py-2 border border-[#D8CFBE] text-xs font-sans text-[#6B6B63] rounded-xl"
                   >
                     Cancelar
                   </button>
                   <button
                     disabled={!importRawText.trim()}
                     onClick={handleProcessImportFile}
-                    className="px-4 py-2 bg-[#005A1F] text-[#FDFAF4] text-xs font-sans font-medium rounded-xl hover:bg-[#004317] disabled:opacity-40 transition-colors"
+                    className="px-4 py-2 bg-[#005A1F] text-[#FDFAF4] text-xs font-sans font-medium rounded-xl hover:bg-[#005A1F] disabled:opacity-40 transition-colors"
                   >
                     Conferir registros
                   </button>
@@ -803,7 +803,7 @@ Laura Perls; AUTOR; Laura Perls; Living at the Boundary; 1992; Co-fundadora da a
                     <span className="text-[11px] font-sans font-bold uppercase tracking-wider text-[#96551F] block">
                       Erros de Validação por Linha
                     </span>
-                    <div className="max-h-40 overflow-y-auto border border-[#E2D8CA] rounded-xl p-3 bg-[#FDFAF4] space-y-1.5 text-xs font-mono">
+                    <div className="max-h-40 overflow-y-auto border border-[#D8CFBE] rounded-xl p-3 bg-[#FDFAF4] space-y-1.5 text-xs font-mono">
                       {importValidationResults.errors.map((err, i) => (
                         <div
                           key={i}
@@ -824,7 +824,7 @@ Laura Perls; AUTOR; Laura Perls; Living at the Boundary; 1992; Co-fundadora da a
                   <span className="text-[11px] font-sans font-bold uppercase tracking-wider text-[#6B6B63] block">
                     Prévia de Importação
                   </span>
-                  <div className="max-h-44 overflow-y-auto border border-[#E2D8CA] rounded-xl divide-y divide-[#E2D8CA] text-xs font-sans">
+                  <div className="max-h-44 overflow-y-auto border border-[#D8CFBE] rounded-xl divide-y divide-[#D8CFBE] text-xs font-sans">
                     {importValidationResults.valid.map((card, i) => (
                       <div
                         key={i}
@@ -857,14 +857,14 @@ Laura Perls; AUTOR; Laura Perls; Living at the Boundary; 1992; Co-fundadora da a
                   <div className="flex gap-2">
                     <button
                       onClick={() => setIsImportModalOpen(false)}
-                      className="px-4 py-2 border border-[#E2D8CA] text-xs text-[#6B6B63] rounded-xl"
+                      className="px-4 py-2 border border-[#D8CFBE] text-xs text-[#6B6B63] rounded-xl"
                     >
                       Cancelar
                     </button>
                     <button
                       disabled={importValidationResults.valid.length === 0}
                       onClick={handleConfirmImport}
-                      className="px-4 py-2 bg-[#005A1F] text-[#FDFAF4] text-xs font-medium rounded-xl hover:bg-[#004317] disabled:opacity-40 transition-colors"
+                      className="px-4 py-2 bg-[#005A1F] text-[#FDFAF4] text-xs font-medium rounded-xl hover:bg-[#005A1F] disabled:opacity-40 transition-colors"
                     >
                       Confirmar Importação (
                       {importValidationResults.valid.length})

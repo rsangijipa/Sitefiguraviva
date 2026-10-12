@@ -52,7 +52,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               {/* 1. Explorar */}
               <button
                 onClick={() => onNavigate("explore")}
-                className="text-left p-4 rounded-2xl bg-[#FDFAF4] hover:bg-[#F1E9DB] border border-[#E2D8CA] transition-colors group flex flex-col justify-between h-[120px]"
+                className="text-left p-4 rounded-2xl bg-[#FDFAF4] hover:bg-[#F1E9DB] border border-[#D8CFBE] transition-colors group flex flex-col justify-between h-[120px]"
               >
                 <div className="flex items-center justify-between w-full">
                   <div className="w-8 h-8 rounded-lg bg-[#F1E9DB] group-hover:bg-[#FDFAF4] flex items-center justify-center text-[#005A1F] transition-colors">
@@ -73,14 +73,14 @@ export const HomeView: React.FC<HomeViewProps> = ({
               {/* 2. Revisar */}
               <button
                 onClick={() => onNavigate("review")}
-                className="text-left p-4 rounded-2xl bg-[#FDFAF4] hover:bg-[#F1E9DB] border border-[#E2D8CA] transition-colors group flex flex-col justify-between h-[120px]"
+                className="text-left p-4 rounded-2xl bg-[#FDFAF4] hover:bg-[#F1E9DB] border border-[#D8CFBE] transition-colors group flex flex-col justify-between h-[120px]"
               >
                 <div className="flex items-center justify-between w-full">
                   <div className="w-8 h-8 rounded-lg bg-[#F1E9DB] group-hover:bg-[#FDFAF4] flex items-center justify-center text-[#96551F] transition-colors">
                     <Clock className="w-4 h-4" strokeWidth={2} />
                   </div>
                   {reviewCount > 0 ? (
-                    <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-[#E2D8CA] text-[#262B22]">
+                    <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-[#D8CFBE] text-[#262B22]">
                       {reviewCount} para rever
                     </span>
                   ) : (
@@ -100,7 +100,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               {/* 3. Aleatório */}
               <button
                 onClick={() => onNavigate("random")}
-                className="text-left p-4 rounded-2xl bg-[#FDFAF4] hover:bg-[#F1E9DB] border border-[#E2D8CA] transition-colors group flex flex-col justify-between h-[120px]"
+                className="text-left p-4 rounded-2xl bg-[#FDFAF4] hover:bg-[#F1E9DB] border border-[#D8CFBE] transition-colors group flex flex-col justify-between h-[120px]"
               >
                 <div className="flex items-center justify-between w-full">
                   <div className="w-8 h-8 rounded-lg bg-[#F1E9DB] group-hover:bg-[#FDFAF4] flex items-center justify-center text-[#005A1F] transition-colors">
@@ -121,14 +121,14 @@ export const HomeView: React.FC<HomeViewProps> = ({
               {/* 4. Favoritos */}
               <button
                 onClick={() => onNavigate("favorites")}
-                className="text-left p-4 rounded-2xl bg-[#FDFAF4] hover:bg-[#F1E9DB] border border-[#E2D8CA] transition-colors group flex flex-col justify-between h-[120px]"
+                className="text-left p-4 rounded-2xl bg-[#FDFAF4] hover:bg-[#F1E9DB] border border-[#D8CFBE] transition-colors group flex flex-col justify-between h-[120px]"
               >
                 <div className="flex items-center justify-between w-full">
                   <div className="w-8 h-8 rounded-lg bg-[#F1E9DB] group-hover:bg-[#FDFAF4] flex items-center justify-center text-[#96551F] transition-colors">
                     <Bookmark className="w-4 h-4" strokeWidth={2} />
                   </div>
                   {savedCount > 0 ? (
-                    <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-[#E2D8CA] text-[#262B22]">
+                    <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-[#D8CFBE] text-[#262B22]">
                       {savedCount} guardadas
                     </span>
                   ) : (
@@ -153,7 +153,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               {/* Back Card 3 */}
               {sampleCards[2] && (
                 <div
-                  className="absolute inset-0 bg-[#F1E9DB] border border-[#E2D8CA] rounded-[24px] p-6 transform translate-x-6 -translate-y-4 opacity-70 pointer-events-none select-none"
+                  className="absolute inset-0 bg-[#F1E9DB] border border-[#D8CFBE] rounded-[24px] p-6 transform translate-x-6 -translate-y-4 opacity-70 pointer-events-none select-none"
                   style={{
                     backgroundColor: "#F1E9DB",
                   }}
@@ -171,7 +171,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               {/* Back Card 2 */}
               {sampleCards[1] && (
                 <div
-                  className="absolute inset-0 bg-[#FDFAF4] border border-[#E2D8CA] rounded-[24px] p-6 transform translate-x-3 -translate-y-2 opacity-85 pointer-events-none select-none"
+                  className="absolute inset-0 bg-[#FDFAF4] border border-[#D8CFBE] rounded-[24px] p-6 transform translate-x-3 -translate-y-2 opacity-85 pointer-events-none select-none"
                   style={{
                     backgroundColor: "#FDFAF4",
                   }}
@@ -190,7 +190,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               {sampleCards[0] && (
                 <div
                   onClick={() => onOpenCard(sampleCards[0])}
-                  className="absolute inset-0 bg-[#FDFAF4] border border-[#E2D8CA] rounded-[24px] p-6 sm:p-7 flex flex-col justify-between cursor-pointer hover:border-[#005A1F]/40 transition-colors select-none"
+                  className="absolute inset-0 bg-[#FDFAF4] border border-[#D8CFBE] rounded-[24px] p-6 sm:p-7 flex flex-col justify-between cursor-pointer hover:border-[#005A1F]/40 transition-colors select-none"
                   style={{
                     backgroundColor: "#FDFAF4",
                   }}
@@ -200,7 +200,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                     className="absolute top-0 right-0 w-28 h-28 pointer-events-none opacity-40 rounded-tr-[24px]"
                     style={{
                       background:
-                        "radial-gradient(circle at 100% 0%, #FED701 0%, #01C94D 45%, #FE538B 85%, transparent 100%)",
+                        "radial-gradient(circle at 100% 0%, #FE538B 0%, #FED701 45%, #01C94D 85%, transparent 100%)",
                       filter: "blur(20px)",
                     }}
                   />
@@ -233,7 +233,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   </div>
 
                   {/* Bottom: Discreet prompt */}
-                  <div className="relative z-10 pt-3 border-t border-[#E2D8CA]/70 flex items-center justify-between text-xs font-sans text-[#6B6B63]">
+                  <div className="relative z-10 pt-3 border-t border-[#D8CFBE]/70 flex items-center justify-between text-xs font-sans text-[#6B6B63]">
                     <span>Toque para explorar</span>
                     <span className="text-[10px] font-mono bg-[#F1E9DB] px-2 py-0.5 rounded-full text-[#262B22]">
                       Coleção viva

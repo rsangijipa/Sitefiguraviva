@@ -1,4 +1,5 @@
 import * as Sentry from "@sentry/nextjs";
+import { containsResourceLocation } from "@/lib/observability/resource-privacy";
 
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
@@ -15,4 +16,7 @@ Sentry.init({
 
   // Disable Sentry in development
   enabled: process.env.NODE_ENV === "production",
+  sendDefaultPii: false,
+  beforeSend(event) { return containsResourceLocation(event) ? null : event; },
+  beforeSendTransaction(event) { return containsResourceLocation(event) ? null : event; },
 });

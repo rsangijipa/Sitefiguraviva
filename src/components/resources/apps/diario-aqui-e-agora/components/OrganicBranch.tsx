@@ -46,9 +46,9 @@ export const OrganicBranch: React.FC<OrganicBranchProps> = ({
             y2="0"
             gradientUnits="userSpaceOnUse"
           >
-            <stop offset="0%" stopColor="#8d847a" stopOpacity="0.4" />
-            <stop offset="50%" stopColor="#7a8b83" stopOpacity="0.55" />
-            <stop offset="100%" stopColor="#8a7e93" stopOpacity="0.4" />
+            <stop offset="0%" stopColor="#6B6B63" stopOpacity="0.4" />
+            <stop offset="50%" stopColor="#6B6B63" stopOpacity="0.55" />
+            <stop offset="100%" stopColor="#6B6B63" stopOpacity="0.4" />
           </linearGradient>
 
           <filter id="gentle-glow" x="-20%" y="-20%" width="140%" height="140%">
@@ -69,28 +69,28 @@ export const OrganicBranch: React.FC<OrganicBranchProps> = ({
         {/* Delicate secondary branchlets / tiny organic twigs */}
         <path
           d="M 95 24 C 105 16, 115 14, 122 17"
-          stroke="#8d847a"
+          stroke="#6B6B63"
           strokeWidth="1"
           strokeLinecap="round"
           opacity="0.3"
         />
         <path
           d="M 180 30 C 190 38, 202 42, 212 39"
-          stroke="#7a8b83"
+          stroke="#6B6B63"
           strokeWidth="1"
           strokeLinecap="round"
           opacity="0.35"
         />
         <path
           d="M 270 27 C 278 19, 290 17, 298 20"
-          stroke="#856a5d"
+          stroke="#6B6B63"
           strokeWidth="1"
           strokeLinecap="round"
           opacity="0.3"
         />
         <path
           d="M 360 25 C 370 32, 382 35, 390 32"
-          stroke="#6b6e82"
+          stroke="#6B6B63"
           strokeWidth="1"
           strokeLinecap="round"
           opacity="0.35"
@@ -99,12 +99,12 @@ export const OrganicBranch: React.FC<OrganicBranchProps> = ({
         {/* Little organic leaves/sprouts */}
         <path
           d="M 122 17 C 125 13, 129 14, 128 18 C 127 21, 123 20, 122 17 Z"
-          fill="#7a8b83"
+          fill="#6B6B63"
           opacity="0.45"
         />
         <path
           d="M 298 20 C 302 16, 306 18, 304 22 C 302 24, 299 23, 298 20 Z"
-          fill="#856a5d"
+          fill="#6B6B63"
           opacity="0.4"
         />
 
@@ -155,16 +155,16 @@ export const OrganicBranch: React.FC<OrganicBranchProps> = ({
                 cx={pos.x}
                 cy={pos.y}
                 r={isActive ? 7 : isPassed ? 5.5 : 4.5}
-                fill={isPassed ? "#fbf9f5" : "#fbf9f5"}
+                fill={isPassed ? "#FDFAF4" : "#FDFAF4"}
                 stroke={
                   isActive
                     ? q.themeColor.primary
                     : isPassed
-                      ? "#69746e"
-                      : "#bfb8ad"
+                      ? "#6B6B63"
+                      : "#D8CFBE"
                 }
                 strokeWidth={isActive ? 2 : 1.5}
-                className="transition-all duration-500 group-hover:stroke-[#4a4744]"
+                className="transition-all duration-500 group-hover:stroke-[#4B4B49]"
               />
 
               {/* Node inner core */}
@@ -176,8 +176,8 @@ export const OrganicBranch: React.FC<OrganicBranchProps> = ({
                   isActive
                     ? q.themeColor.primary
                     : isPassed
-                      ? "#69746e"
-                      : "#bfb8ad"
+                      ? "#6B6B63"
+                      : "#D8CFBE"
                 }
                 className="transition-all duration-500"
               />
@@ -190,7 +190,7 @@ export const OrganicBranch: React.FC<OrganicBranchProps> = ({
       </svg>
 
       {/* Discreet step indicator label */}
-      <div className="flex justify-between items-center gap-1 px-2 text-[10px] sm:text-[11px] text-[#625d56] font-medium">
+      <div className="flex justify-between items-center gap-1 px-2 text-[10px] sm:text-[11px] text-[#6B6B63] font-medium">
         <span>Chegada</span>
         <span>Corpo</span>
         <span>Sensação</span>

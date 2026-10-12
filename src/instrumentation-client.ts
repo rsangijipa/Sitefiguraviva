@@ -1,7 +1,11 @@
 import * as Sentry from "@sentry/nextjs";
+import { isResourceLocation } from "@/lib/observability/resource-privacy";
 
 // Action Required for navigations
-export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
+export const onRouterTransitionStart:typeof Sentry.captureRouterTransitionStart = (...args) => {
+  if (isResourceLocation(window.location.pathname) || isResourceLocation(args[0])) return;
+  Sentry.captureRouterTransitionStart(...args);
+};
 
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
@@ -23,6 +27,11 @@ Sentry.init({
 
   // Disable Sentry in development
   enabled: process.env.NODE_ENV === "production",
+  sendDefaultPii: false,
+  replaysSessionSampleRate: 0,
+  replaysOnErrorSampleRate: 0,
+  beforeBreadcrumb(breadcrumb) { return isResourceLocation(window.location.pathname) ? null : breadcrumb; },
+  beforeSendTransaction(event) { return isResourceLocation(window.location.pathname) ? null : event; },
 
   // Filter out common noise
   ignoreErrors: [
@@ -46,7 +55,8 @@ Sentry.init({
     "moz-extension://",
   ],
 
-  beforeSend(event, hint) {
+  beforeSend(event) {
+    if (isResourceLocation(window.location.pathname)) return null;
     // Check if it is an exception, and if so, show the report dialog
     if (event.exception && process.env.NODE_ENV === "production") {
       Sentry.showReportDialog({ eventId: event.event_id });

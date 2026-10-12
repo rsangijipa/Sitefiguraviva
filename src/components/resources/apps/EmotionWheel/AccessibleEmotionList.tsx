@@ -47,7 +47,7 @@ export const AccessibleEmotionList: React.FC<AccessibleEmotionListProps> = ({
               className={`rounded-2xl border-2 transition-colors overflow-hidden ${
                 isFamilySelected
                   ? 'border-[#005A1F] bg-[#F1E9DB]'
-                  : 'border-[#D8CFBE] bg-[#FAF6EE] hover:bg-[#F4ECE0]'
+                  : 'border-[#D8CFBE] bg-[#FDFAF4] hover:bg-[#F1E9DB]'
               }`}
             >
               {/* Botão da Família */}
@@ -99,7 +99,7 @@ export const AccessibleEmotionList: React.FC<AccessibleEmotionListProps> = ({
                           className={`p-2.5 rounded-xl border-2 transition-colors ${
                             isSecSelected
                               ? 'border-[#96551F] bg-[#F1E9DB]'
-                              : 'border-[#D8CFBE] bg-[#FDFAF4] hover:bg-[#F8F3EA]'
+                              : 'border-[#D8CFBE] bg-[#FDFAF4] hover:bg-[#FDFAF4]'
                           }`}
                         >
                           <button
@@ -130,7 +130,7 @@ export const AccessibleEmotionList: React.FC<AccessibleEmotionListProps> = ({
                                   className={`w-full text-left p-1.5 rounded-lg text-[11px] transition-colors flex items-center justify-between min-h-[32px] ${
                                     isNuanceSelected
                                       ? 'bg-[#005A1F] text-[#FDFAF4] font-semibold'
-                                      : 'text-[#4B4B49] hover:bg-[#EBE2D0]'
+                                      : 'text-[#4B4B49] hover:bg-[#F1E9DB]'
                                   }`}
                                 >
                                   <span>{nuance.name}</span>

@@ -1,4 +1,4 @@
-.assessment-page {
+.fv-resources .assessment-page {
   background-color: var(--fv-creme-papel);
   min-height: 100dvh;
   min-height: 100vh;
@@ -7,7 +7,7 @@
 }
 
 /* ── Intro ── */
-.assessment-page__main {
+.fv-resources .assessment-page__main {
   flex: 1;
   display: flex;
   align-items: center;
@@ -15,7 +15,7 @@
   padding: var(--space-xl) 0;
 }
 
-.assessment-page__intro {
+.fv-resources .assessment-page__intro {
   width: 100%;
   max-width: 640px;
   display: flex;
@@ -23,7 +23,7 @@
   gap: var(--space-xl);
 }
 
-.assessment-page__intro-header {
+.fv-resources .assessment-page__intro-header {
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
@@ -31,8 +31,8 @@
   border-bottom: 1px solid var(--fv-nevoa);
 }
 
-.assessment-page__intro-title {
-  font-family: var(--font-display);
+.fv-resources .assessment-page__intro-title {
+  font-family: var(--font-serif), serif;
   font-size: clamp(24px, 5vw, 34px);
   font-weight: 700;
   color: var(--fv-verde-raiz);
@@ -40,16 +40,16 @@
   margin: 0;
 }
 
-.assessment-page__intro-subtitle {
+.fv-resources .assessment-page__intro-subtitle {
   font-size: 15px;
   color: var(--fv-pedra);
-  font-family: var(--font-body);
+  font-family: var(--font-sans), sans-serif;
   margin: 0;
   line-height: 1.5;
 }
 
 /* Grid de metadados */
-.assessment-page__intro-info {
+.fv-resources .assessment-page__intro-info {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--space-md);
@@ -58,23 +58,23 @@
   padding: var(--space-md) var(--space-lg);
 }
 
-.assessment-page__intro-item {
+.fv-resources .assessment-page__intro-item {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.assessment-page__intro-label {
+.fv-resources .assessment-page__intro-label {
   font-size: 10px;
   font-weight: 700;
-  font-family: var(--font-body);
+  font-family: var(--font-sans), sans-serif;
   color: var(--fv-pedra);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
 
-.assessment-page__intro-value {
-  font-family: var(--font-display);
+.fv-resources .assessment-page__intro-value {
+  font-family: var(--font-serif), serif;
   font-size: 15px;
   font-weight: 600;
   color: var(--fv-verde-raiz);
@@ -83,20 +83,20 @@
 }
 
 /* Ações da intro */
-.assessment-page__intro-actions {
+.fv-resources .assessment-page__intro-actions {
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
 }
 
-.assessment-page__button {
+.fv-resources .assessment-page__button {
   width: 100%;
   padding: 15px;
   border: none;
   border-radius: var(--radius-md);
   font-size: 16px;
   font-weight: 700;
-  font-family: var(--font-body);
+  font-family: var(--font-sans), sans-serif;
   cursor: pointer;
   min-height: 52px;
   display: flex;
@@ -110,37 +110,37 @@
     transform var(--transition-fast);
 }
 
-.assessment-page__button:active {
+.fv-resources .assessment-page__button:active {
   transform: scale(0.97);
 }
 
-.assessment-page__button:focus-visible {
+.fv-resources .assessment-page__button:focus-visible {
   outline: 3px solid var(--fv-verde-raiz);
   outline-offset: 2px;
 }
 
-.assessment-page__button--primary {
+.fv-resources .assessment-page__button--primary {
   background-color: var(--fv-verde-raiz);
   color: var(--fv-creme-papel);
 }
 
-.assessment-page__button--primary:hover {
+.fv-resources .assessment-page__button--primary:hover {
   background-color: var(--fv-verde-igarape);
 }
 
-.assessment-page__button--secondary {
+.fv-resources .assessment-page__button--secondary {
   background-color: transparent;
   color: var(--fv-mata);
   border: 1.5px solid var(--fv-nevoa);
 }
 
-.assessment-page__button--secondary:hover {
+.fv-resources .assessment-page__button--secondary:hover {
   border-color: var(--fv-verde-raiz);
   color: var(--fv-verde-raiz);
 }
 
 /* ── Questões ── */
-.assessment-page__questions {
+.fv-resources .assessment-page__questions {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -152,23 +152,23 @@
 }
 
 /* Hint de resposta obrigatória */
-.assessment-page__answer-hint {
+.fv-resources .assessment-page__answer-hint {
   font-size: 13px;
   color: var(--fv-verde-raiz);
   font-weight: 600;
-  font-family: var(--font-body);
+  font-family: var(--font-sans), sans-serif;
   text-align: center;
   margin: 0;
 }
 
 /* ── Navegação ── */
-.assessment-page__navigation {
+.fv-resources .assessment-page__navigation {
   display: flex;
   gap: var(--space-sm);
   margin-top: var(--space-sm);
 }
 
-.assessment-page__nav-button {
+.fv-resources .assessment-page__nav-button {
   flex: 1;
   padding: 14px var(--space-md);
   border: 1.5px solid var(--fv-verde-raiz);
@@ -177,7 +177,7 @@
   border-radius: var(--radius-md);
   font-size: 15px;
   font-weight: 700;
-  font-family: var(--font-body);
+  font-family: var(--font-sans), sans-serif;
   cursor: pointer;
   min-height: 52px;
   display: flex;
@@ -194,33 +194,33 @@
     transform var(--transition-fast);
 }
 
-.assessment-page__nav-button:active:not([disabled]) {
+.fv-resources .assessment-page__nav-button:active:not([disabled]) {
   transform: scale(0.97);
 }
 
-.assessment-page__nav-button:focus-visible {
+.fv-resources .assessment-page__nav-button:focus-visible {
   outline: 3px solid var(--fv-verde-raiz);
   outline-offset: 2px;
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .assessment-page__nav-button:hover:not([disabled]):not(.assessment-page__nav-button--disabled) {
+  .fv-resources .assessment-page__nav-button:hover:not([disabled]):not(.assessment-page__nav-button--disabled) {
     background-color: var(--fv-verde-suave);
   }
 }
 
-.assessment-page__nav-button--next {
+.fv-resources .assessment-page__nav-button--next {
   background-color: var(--fv-verde-raiz);
   color: var(--fv-creme-papel);
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .assessment-page__nav-button--next:hover:not([disabled]) {
+  .fv-resources .assessment-page__nav-button--next:hover:not([disabled]) {
     background-color: var(--fv-verde-igarape);
   }
 }
 
-.assessment-page__nav-button--disabled {
+.fv-resources .assessment-page__nav-button--disabled {
   opacity: 0.45;
   cursor: not-allowed;
   background-color: var(--fv-areia);
@@ -230,12 +230,12 @@
 
 /* Navegação sticky no mobile */
 @media (max-width: 640px) {
-  .assessment-page__questions {
+  .fv-resources .assessment-page__questions {
     padding-top: var(--space-lg);
     padding-bottom: calc(var(--space-lg) + 84px);
   }
 
-  .assessment-page__navigation {
+  .fv-resources .assessment-page__navigation {
     position: fixed;
     bottom: 0;
     left: 0;
@@ -244,25 +244,25 @@
     margin: 0;
     padding: var(--space-md);
     padding-bottom: calc(var(--space-md) + env(safe-area-inset-bottom));
-    background-color: rgba(253, 250, 244, 0.97);
-    backdrop-filter: blur(12px);
+    background-color: rgb(253 250 244 / 0.97);
+    backdrop-filter: none;
     -webkit-backdrop-filter: blur(12px);
     border-top: 1px solid var(--fv-nevoa);
   }
 
-  .assessment-page__nav-button {
+  .fv-resources .assessment-page__nav-button {
     min-height: 52px;
     font-size: 16px;
   }
 
-  .assessment-page__intro-info {
+  .fv-resources .assessment-page__intro-info {
     grid-template-columns: 1fr;
     padding: var(--space-md);
   }
 }
 
 /* ── Telas de erro ── */
-.assessment-page__error-container {
+.fv-resources .assessment-page__error-container {
   flex: 1;
   display: flex;
   align-items: center;
@@ -270,7 +270,7 @@
   padding: var(--space-xl) 0;
 }
 
-.assessment-page__error-box {
+.fv-resources .assessment-page__error-box {
   text-align: center;
   max-width: 440px;
   display: flex;
@@ -283,27 +283,27 @@
   border: 1px solid var(--fv-nevoa);
 }
 
-.assessment-page__error-icon {
+.fv-resources .assessment-page__error-icon {
   color: var(--fv-pedra);
 }
 
-.assessment-page__error-title {
-  font-family: var(--font-display);
+.fv-resources .assessment-page__error-title {
+  font-family: var(--font-serif), serif;
   font-size: 20px;
   font-weight: 700;
   color: var(--fv-mata);
   margin: 0;
 }
 
-.assessment-page__error-text {
+.fv-resources .assessment-page__error-text {
   font-size: 14px;
   color: var(--fv-pedra);
-  font-family: var(--font-body);
+  font-family: var(--font-sans), sans-serif;
   margin: 0;
   line-height: 1.5;
 }
 
-.assessment-page__error-detail {
+.fv-resources .assessment-page__error-detail {
   display: block;
   margin-top: var(--space-xs);
   font-size: 12px;

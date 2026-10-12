@@ -151,7 +151,7 @@ export default function App({
   };
 
   return (
-    <div className="min-h-full flex flex-col bg-[#F8F7F4] text-[#242220]">
+    <div className="min-h-full flex flex-col bg-[#FDFAF4] text-[#262B22]">
       {/* Main Content Body */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {isLoading ? (
@@ -162,10 +162,10 @@ export default function App({
           >
             <div className="flex flex-col items-center gap-2">
               <div
-                className="w-8 h-8 rounded-full border-2 border-[#8F7B67] border-t-transparent animate-spin"
+                className="w-8 h-8 rounded-full border-2 border-[#6B6B63] border-t-transparent animate-spin"
                 aria-hidden="true"
               />
-              <span className="text-xs text-[#7A7061]">
+              <span className="text-xs text-[#6B6B63]">
                 Carregando laboratório de contato...
               </span>
             </div>
@@ -286,10 +286,10 @@ export default function App({
       </main>
 
       {/* Subtle Footer */}
-      <footer className="border-t border-[#E3DDD1] bg-[#FAF8F5] py-5 px-4 sm:px-6 mt-12">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#7A7163]">
+      <footer className="border-t border-[#F1E9DB] bg-[#FDFAF4] py-5 px-4 sm:px-6 mt-12">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#6B6B63]">
           <div className="flex items-center gap-2">
-            <span className="font-serif font-medium text-[#40382E]">
+            <span className="font-serif font-medium text-[#262B22]">
               Fronteiras de Contato
             </span>
             <span>•</span>
@@ -298,7 +298,7 @@ export default function App({
             <span>Instituto de Estudos Relacionais</span>
           </div>
 
-          <div className="flex items-center gap-4 text-[11px] text-[#8C8375]">
+          <div className="flex items-center gap-4 text-[11px] text-[#6B6B63]">
             <span>Escolhas livres de registro obrigatório</span>
             <span>•</span>
             <span>Diário armazenado neste dispositivo</span>

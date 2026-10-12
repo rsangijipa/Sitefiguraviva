@@ -158,7 +158,7 @@ export default function LagoApp() {
 
       {webglError && (
         <div
-          className="absolute inset-x-4 top-20 z-20 mx-auto max-w-lg rounded-xl border border-warning/30 bg-white/95 p-4 text-sm text-text shadow-xl"
+          className="absolute inset-x-4 top-20 z-20 mx-auto max-w-lg rounded-xl border border-warning/30 bg-paper/95 p-4 text-sm text-text "
           role="alert"
         >
           <strong className="block text-warning">
@@ -173,7 +173,7 @@ export default function LagoApp() {
         className={`absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none z-20
           transition-opacity duration-700 ${isLoaded ? "opacity-100" : "opacity-0"}`}
       >
-        <div className="pointer-events-auto flex items-center gap-3 bg-white/90 backdrop-blur-md border border-stone-200 px-3.5 py-1.5 rounded-full shadow-lg">
+        <div className="pointer-events-auto flex items-center gap-3 bg-paper/90  border border-nevoa px-3.5 py-1.5 rounded-full ">
           <Droplets className="w-3.5 h-3.5 text-accent" aria-hidden="true" />
           <span className="text-[11px] text-text/60 leading-none">
             {modeHints[config.mode]}
@@ -182,7 +182,7 @@ export default function LagoApp() {
 
         <div className="pointer-events-auto flex items-center gap-2">
           {/* Ambient badge */}
-          <span className="hidden sm:flex items-center gap-1.5 bg-white/80 backdrop-blur-md border border-stone-200 px-2.5 py-1 rounded-full text-[10px] text-text/60 tracking-wider select-none">
+          <span className="hidden sm:flex items-center gap-1.5 bg-paper/80  border border-nevoa px-2.5 py-1 rounded-full text-[10px] text-text/60 tracking-wider select-none">
             <span
               className={`w-1.5 h-1.5 rounded-full ${
                 config.ambient === "day"
@@ -200,7 +200,7 @@ export default function LagoApp() {
             type="button"
             ref={infoOpenerRef}
             onClick={() => setShowInfo(true)}
-            className="bg-white/90 backdrop-blur-md border border-stone-200 p-2 rounded-full text-text/60 hover:text-primary hover:border-stone-300 transition-all shadow-lg"
+            className="bg-paper/90  border border-nevoa p-2 rounded-full text-text/60 hover:text-primary hover:border-nevoa transition-all "
             title="Sobre a Simulação"
             aria-label="Abrir informações sobre a simulação"
           >
@@ -212,8 +212,8 @@ export default function LagoApp() {
       <div
         className={`absolute left-3 top-14 z-20 hidden rounded-full border border-white/20 bg-slate-950/55 px-3 py-1.5 text-[11px] text-white/80 backdrop-blur-md transition-opacity sm:block ${isLoaded ? "opacity-100" : "opacity-0"}`}
       >
-        Teclado: <kbd className="font-semibold text-white">P</kbd> pedra ·{" "}
-        <kbd className="font-semibold text-white">C</kbd> serenar
+        Teclado: <kbd className="font-semibold text-paper">P</kbd> pedra ·{" "}
+        <kbd className="font-semibold text-paper">C</kbd> serenar
       </div>
 
       {/* Controls — fades in after load */}
@@ -232,7 +232,7 @@ export default function LagoApp() {
       {/* Info Modal */}
       {showInfo && (
         <div
-          className="absolute inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+          className="absolute inset-0 z-50 flex items-center justify-center p-4 bg-primary/40 "
           role="dialog"
           aria-modal="true"
           aria-labelledby="modal-title"
@@ -241,9 +241,9 @@ export default function LagoApp() {
             id="modal-info"
             ref={infoDialogRef}
             tabIndex={-1}
-            className="w-full max-w-md bg-white border border-stone-200 rounded-2xl p-6 text-text shadow-2xl space-y-4 animate-modal-in"
+            className="w-full max-w-md bg-paper border border-nevoa rounded-2xl p-6 text-text  space-y-4 animate-modal-in"
           >
-            <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+            <div className="flex items-center justify-between border-b border-nevoa pb-3">
               <div className="flex items-center gap-2">
                 <Sparkles
                   className="w-4.5 h-4.5 text-accent"
@@ -261,7 +261,7 @@ export default function LagoApp() {
                 type="button"
                 ref={infoCloseRef}
                 onClick={() => setShowInfo(false)}
-                className="p-1.5 rounded-lg text-text/50 hover:text-primary hover:bg-stone-100 transition-colors"
+                className="p-1.5 rounded-lg text-text/50 hover:text-primary hover:bg-paper transition-colors"
                 aria-label="Fechar modal"
               >
                 <X className="w-4 h-4" />
@@ -326,7 +326,7 @@ export default function LagoApp() {
               id="btn-understand-info"
               type="button"
               onClick={() => setShowInfo(false)}
-              className="w-full py-2.5 px-4 bg-accent hover:bg-accent-light active:scale-[0.98] text-white font-semibold text-xs rounded-xl transition-all shadow-md"
+              className="w-full py-2.5 px-4 bg-accent hover:bg-accent-light active:scale-[0.98] text-paper font-semibold text-xs rounded-xl transition-all "
             >
               Retornar ao Lago
             </button>

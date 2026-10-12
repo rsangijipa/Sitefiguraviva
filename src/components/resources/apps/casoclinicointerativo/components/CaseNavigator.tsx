@@ -43,34 +43,34 @@ const THEME_COLORS: Record<
   { bg: string; text: string; border: string; icon: string }
 > = {
   ansiedade: {
-    bg: "#FEF3E2",
-    text: "#C47A2E",
-    border: "#F0D8B8",
-    icon: "#D48B3A",
+    bg: "#F1E9DB",
+    text: "#96551F",
+    border: "#D8CFBE",
+    icon: "#96551F",
   },
   depressao: {
-    bg: "#E8EBF0",
-    text: "#3E5568",
-    border: "#D0D8E0",
-    icon: "#5A7BA3",
+    bg: "#F1E9DB",
+    text: "#4B4B49",
+    border: "#D8CFBE",
+    icon: "#6B6B63",
   },
   trauma: {
-    bg: "#F0E8EB",
-    text: "#7A4A5A",
-    border: "#E0D0D5",
-    icon: "#9C6B7A",
+    bg: "#F1E9DB",
+    text: "#6B6B63",
+    border: "#D8CFBE",
+    icon: "#6B6B63",
   },
   relacionamento: {
-    bg: "#E8F0E8",
-    text: "#3E6B3E",
-    border: "#D0E0D0",
-    icon: "#5A8B5A",
+    bg: "#F1E9DB",
+    text: "#4B4B49",
+    border: "#D8CFBE",
+    icon: "#6B6B63",
   },
   identidade: {
-    bg: "#F0EBE8",
-    text: "#6B5A4A",
-    border: "#E0D8D0",
-    icon: "#8B7A6A",
+    bg: "#F1E9DB",
+    text: "#6B6B63",
+    border: "#D8CFBE",
+    icon: "#6B6B63",
   },
 };
 
@@ -125,31 +125,29 @@ export const CaseNavigator: React.FC<CaseNavigatorProps> = ({
                 aria-label={`${caseItem.title}${isDone ? ", concluído" : ""}${isCurrent ? ", atual" : ""}`}
                 className={`relative flex-shrink-0 w-40 sm:w-48 p-3 rounded-xl border-2 transition-all text-left group ${
                   isCurrent
-                    ? `border-2 shadow-md`
+                    ? `border-2 `
                     : isDone
-                      ? "bg-[#EBF0EB] border-[#D0E0D0] hover:border-[#B8D0B8]"
-                      : "bg-[#FAF8F5] border-[#E8E4DA] hover:border-[#D4CEC3] hover:bg-[#F3F0E8]"
+                      ? "bg-[#F1E9DB] border-[#D8CFBE] hover:border-[#D8CFBE]"
+                      : "bg-[#FDFAF4] border-[#F1E9DB] hover:border-[#D8CFBE] hover:bg-[#F1E9DB]"
                 } ${themeColors.border}`}
                 style={{
                   borderColor: isCurrent ? themeColors.icon : undefined,
-                  boxShadow: isCurrent
-                    ? `0 0 0 2px ${themeColors.bg}`
-                    : undefined,
+                  boxShadow: "none",
                 }}
               >
                 <div className="flex items-center gap-2 mb-2">
                   <span style={{ color: isCurrent ? "white" : undefined }}>
                     <ThemeIcon
                       className={`w-4 h-4 transition-transform group-hover:scale-110 ${
-                        isCurrent ? "text-white" : "text-[#8C867D]"
+                        isCurrent ? "text-paper" : "text-[#6B6B63]"
                       }`}
                     />
                   </span>
-                  <span className="font-medium text-sm text-[#1F1E1D] line-clamp-1 flex-1">
+                  <span className="font-medium text-sm text-[#262B22] line-clamp-1 flex-1">
                     {caseItem.title}
                   </span>
                 </div>
-                <div className="flex items-center justify-between text-[10px] text-[#7A7468]">
+                <div className="flex items-center justify-between text-[10px] text-[#6B6B63]">
                   <span
                     className="px-1.5 py-0.5 rounded text-[9px] font-medium border"
                     style={{
@@ -163,13 +161,13 @@ export const CaseNavigator: React.FC<CaseNavigatorProps> = ({
                   </span>
                   {isDone && (
                     <CheckCircle2
-                      className="w-3.5 h-3.5 text-[#4A6B4F]"
+                      className="w-3.5 h-3.5 text-[#4B4B49]"
                       aria-hidden="true"
                     />
                   )}
                 </div>
                 {caseAnalysis && (
-                  <div className="mt-2 pt-2 border-t border-current/20 text-[10px] text-[#8C867D]">
+                  <div className="mt-2 pt-2 border-t border-current/20 text-[10px] text-[#6B6B63]">
                     {formatTime(caseAnalysis.timeSpentSeconds)} •{" "}
                     {caseAnalysis.selectedFocusAreas.length} áreas
                   </div>
@@ -181,7 +179,7 @@ export const CaseNavigator: React.FC<CaseNavigatorProps> = ({
       </div>
 
       {/* Current Case Detail */}
-      <div className="p-4 rounded-xl bg-white border border-[#E8E4DA] shadow-sm animate-fade-in-up">
+      <div className="p-4 rounded-xl bg-paper border border-[#F1E9DB]  animate-fade-in-up">
         <div className="flex items-start gap-3">
           <div
             className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
@@ -210,19 +208,19 @@ export const CaseNavigator: React.FC<CaseNavigatorProps> = ({
                   currentCase.theme.slice(1)}
               </span>
               {isCompleted && (
-                <span className="flex items-center gap-1 text-[10px] font-medium text-[#4A6B4F]">
+                <span className="flex items-center gap-1 text-[10px] font-medium text-[#4B4B49]">
                   <CheckCircle2 className="w-3 h-3" />
                   Concluído
                 </span>
               )}
             </div>
-            <h3 className="font-serif text-base font-medium text-[#1F1E1D] mb-1">
+            <h3 className="font-serif text-base font-medium text-[#262B22] mb-1">
               {currentCase.title}
             </h3>
-            <p className="text-sm text-[#6B655C] line-clamp-2">
+            <p className="text-sm text-[#6B6B63] line-clamp-2">
               {currentCase.subtitle}
             </p>
-            <div className="flex items-center gap-3 mt-2 text-[11px] text-[#9E978C]">
+            <div className="flex items-center gap-3 mt-2 text-[11px] text-[#6B6B63]">
               <span className="flex items-center gap-1">
                 <Clock className="w-3 h-3" />~{currentCase.estimatedTimeMinutes}{" "}
                 min
@@ -236,24 +234,24 @@ export const CaseNavigator: React.FC<CaseNavigatorProps> = ({
         </div>
 
         {analysis && (
-          <div className="mt-3 pt-3 border-t border-[#EDE8DE] grid grid-cols-3 gap-3 text-center">
-            <div className="p-2 rounded-lg bg-[#FAF8F5]">
-              <p className="font-serif text-lg font-medium text-[#1F1E1D]">
+          <div className="mt-3 pt-3 border-t border-[#F1E9DB] grid grid-cols-3 gap-3 text-center">
+            <div className="p-2 rounded-lg bg-[#FDFAF4]">
+              <p className="font-serif text-lg font-medium text-[#262B22]">
                 {analysis.selectedFocusAreas.length}
               </p>
-              <p className="text-[10px] text-[#8C867D]">Áreas</p>
+              <p className="text-[10px] text-[#6B6B63]">Áreas</p>
             </div>
-            <div className="p-2 rounded-lg bg-[#FAF8F5]">
-              <p className="font-serif text-lg font-medium text-[#1F1E1D]">
+            <div className="p-2 rounded-lg bg-[#FDFAF4]">
+              <p className="font-serif text-lg font-medium text-[#262B22]">
                 {formatTime(analysis.timeSpentSeconds)}
               </p>
-              <p className="text-[10px] text-[#8C867D]">Tempo</p>
+              <p className="text-[10px] text-[#6B6B63]">Tempo</p>
             </div>
-            <div className="p-2 rounded-lg bg-[#FAF8F5]">
-              <p className="font-serif text-lg font-medium text-[#1F1E1D]">
+            <div className="p-2 rounded-lg bg-[#FDFAF4]">
+              <p className="font-serif text-lg font-medium text-[#262B22]">
                 {analysis.reflectionNotes.length}
               </p>
-              <p className="text-[10px] text-[#8C867D]">Caracteres</p>
+              <p className="text-[10px] text-[#6B6B63]">Caracteres</p>
             </div>
           </div>
         )}
@@ -264,21 +262,21 @@ export const CaseNavigator: React.FC<CaseNavigatorProps> = ({
         <button
           onClick={onPrev}
           disabled={currentIndex === 0 || disabled}
-          className="flex-1 sm:w-auto px-4 py-2.5 rounded-xl bg-white border border-[#E3DFD5] text-[#4F4B44] text-sm font-medium tracking-wide flex items-center justify-center gap-1.5 transition-colors hover:bg-[#F2ECE2] hover:border-[#D5CEBF] disabled:opacity-50 disabled:cursor-not-allowed focus-visible-ring"
+          className="flex-1 sm:w-auto px-4 py-2.5 rounded-xl bg-paper border border-[#F1E9DB] text-[#4B4B49] text-sm font-medium tracking-wide flex items-center justify-center gap-1.5 transition-colors hover:bg-[#F1E9DB] hover:border-[#D8CFBE] disabled:opacity-50 disabled:cursor-not-allowed focus-visible-ring"
           aria-label="Caso anterior"
         >
           <ChevronLeft className="w-4 h-4" />
           <span className="hidden sm:inline">Anterior</span>
         </button>
 
-        <div className="flex-1 text-center text-sm text-[#7A7468]">
+        <div className="flex-1 text-center text-sm text-[#6B6B63]">
           Caso {currentIndex + 1} de {cases.length}
         </div>
 
         <button
           onClick={onNext}
           disabled={currentIndex === cases.length - 1 || disabled}
-          className="flex-1 sm:w-auto px-4 py-2.5 rounded-xl bg-white border border-[#E3DFD5] text-[#4F4B44] text-sm font-medium tracking-wide flex items-center justify-center gap-1.5 transition-colors hover:bg-[#F2ECE2] hover:border-[#D5CEBF] disabled:opacity-50 disabled:cursor-not-allowed focus-visible-ring"
+          className="flex-1 sm:w-auto px-4 py-2.5 rounded-xl bg-paper border border-[#F1E9DB] text-[#4B4B49] text-sm font-medium tracking-wide flex items-center justify-center gap-1.5 transition-colors hover:bg-[#F1E9DB] hover:border-[#D8CFBE] disabled:opacity-50 disabled:cursor-not-allowed focus-visible-ring"
           aria-label="Próximo caso"
         >
           <span className="hidden sm:inline">Próximo</span>

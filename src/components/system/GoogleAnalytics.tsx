@@ -1,6 +1,8 @@
 "use client";
 import Script from "next/script";
 import { useEffect, useRef } from "react";
+import {usePathname} from "next/navigation";
+import {isResourceLocation} from "@/lib/observability/resource-privacy";
 import { useCookieConsent } from "@/lib/consent";
 import { disableAnalytics, validAnalyticsId } from "@/lib/analytics-consent";
 type AnalyticsWindow = Window & {
@@ -9,10 +11,11 @@ type AnalyticsWindow = Window & {
 };
 export default function GoogleAnalytics() {
   const { consent, ready } = useCookieConsent();
+  const resourcePage=isResourceLocation(usePathname());
   const id = validAnalyticsId(process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID);
   const initialized = useRef(false);
   useEffect(() => {
-    if (!id || !ready || consent !== "granted") {
+    if (!id || !ready || consent !== "granted" || resourcePage) {
       disableAnalytics();
       return;
     }
@@ -43,8 +46,8 @@ export default function GoogleAnalytics() {
       allow_ad_personalization_signals: false,
     });
     return disableAnalytics;
-  }, [id, ready, consent]);
-  if (!id || !ready || consent !== "granted") return null;
+  }, [id, ready, consent,resourcePage]);
+  if (!id || !ready || consent !== "granted" || resourcePage) return null;
   return (
     <Script
       id="figure-viva-analytics-loader"

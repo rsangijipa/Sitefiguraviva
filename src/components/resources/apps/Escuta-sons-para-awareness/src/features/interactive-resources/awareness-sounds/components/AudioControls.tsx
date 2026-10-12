@@ -50,7 +50,7 @@ export const AudioControls: React.FC<AudioControlsProps> = ({
           onClick={onTogglePlay}
           className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-semibold transition-colors touch-target-min ${
             isPlaying
-              ? 'bg-[#96551F] text-[#FDFAF4] hover:bg-[#7D4518]'
+              ? 'bg-[#96551F] text-[#FDFAF4] hover:bg-[#96551F]'
               : 'bg-[#005A1F] text-[#FDFAF4] hover:bg-[#07614C]'
           } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
           aria-label={isPlaying ? 'Pausar reprodução de som' : 'Iniciar reprodução de som'}

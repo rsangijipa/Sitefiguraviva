@@ -50,34 +50,34 @@ const THEME_COLORS: Record<
   { bg: string; text: string; border: string; icon: string }
 > = {
   ansiedade: {
-    bg: "#FEF3E2",
-    text: "#C47A2E",
-    border: "#F0D8B8",
-    icon: "#D48B3A",
+    bg: "#F1E9DB",
+    text: "#96551F",
+    border: "#D8CFBE",
+    icon: "#96551F",
   },
   depressao: {
-    bg: "#E8EBF0",
-    text: "#3E5568",
-    border: "#D0D8E0",
-    icon: "#5A7BA3",
+    bg: "#F1E9DB",
+    text: "#4B4B49",
+    border: "#D8CFBE",
+    icon: "#6B6B63",
   },
   trauma: {
-    bg: "#F0E8EB",
-    text: "#7A4A5A",
-    border: "#E0D0D5",
-    icon: "#9C6B7A",
+    bg: "#F1E9DB",
+    text: "#6B6B63",
+    border: "#D8CFBE",
+    icon: "#6B6B63",
   },
   relacionamento: {
-    bg: "#E8F0E8",
-    text: "#3E6B3E",
-    border: "#D0E0D0",
-    icon: "#5A8B5A",
+    bg: "#F1E9DB",
+    text: "#4B4B49",
+    border: "#D8CFBE",
+    icon: "#6B6B63",
   },
   identidade: {
-    bg: "#F0EBE8",
-    text: "#6B5A4A",
-    border: "#E0D8D0",
-    icon: "#8B7A6A",
+    bg: "#F1E9DB",
+    text: "#6B6B63",
+    border: "#D8CFBE",
+    icon: "#6B6B63",
   },
 };
 
@@ -102,24 +102,24 @@ export const ConclusionView: React.FC<ConclusionViewProps> = ({
   const isAllCompleted = completedCount >= totalCases;
 
   return (
-    <div className="w-full max-w-3xl mx-auto space-y-8 animate-fade-in-up text-[#2C2A29]">
+    <div className="w-full max-w-3xl mx-auto space-y-8 animate-fade-in-up text-[#262B22]">
       {/* Central Reflection Hero */}
-      <div className="text-center p-8 sm:p-12 rounded-3xl bg-white border border-[#E4DFD5] shadow-[0_8px_30px_rgba(0,0,0,0.03)] relative overflow-hidden">
+      <div className="text-center p-8 sm:p-12 rounded-3xl bg-paper border border-[#F1E9DB] -[0_8px_30px_rgb(38 43 34 / 0.03)] relative overflow-hidden">
         {/* Subtle decorative watermark */}
-        <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-[#EAE5D9]/50 blur-2xl pointer-events-none" />
-        <div className="absolute -bottom-12 -left-12 w-48 h-48 rounded-full bg-[#E5DFD1]/50 blur-2xl pointer-events-none" />
+        <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-[#F1E9DB]/50 blur-2xl pointer-events-none" />
+        <div className="absolute -bottom-12 -left-12 w-48 h-48 rounded-full bg-[#F1E9DB]/50 blur-2xl pointer-events-none" />
 
         <div className="relative z-10 max-w-xl mx-auto space-y-5">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EBF0EB] text-[#3C5740] text-xs font-medium tracking-wide">
-            <CheckCircle2 className="w-3.5 h-3.5 text-[#4A6B4F]" />
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F1E9DB] text-[#4B4B49] text-xs font-medium tracking-wide">
+            <CheckCircle2 className="w-3.5 h-3.5 text-[#4B4B49]" />
             <span>CASO CONCLUÍDO</span>
           </div>
 
-          <h2 className="text-2xl sm:text-4xl font-serif text-[#1F1E1D] font-medium leading-snug tracking-tight">
+          <h2 className="text-2xl sm:text-4xl font-serif text-[#262B22] font-medium leading-snug tracking-tight">
             {currentCase.title}
           </h2>
 
-          <p className="text-lg text-[#6B655C] font-serif italic">
+          <p className="text-lg text-[#6B6B63] font-serif italic">
             {currentCase.subtitle}
           </p>
 
@@ -144,9 +144,9 @@ export const ConclusionView: React.FC<ConclusionViewProps> = ({
 
       {/* Case Journey - All Completed Cases */}
       {analyses.length > 0 && (
-        <div className="p-6 sm:p-8 rounded-2xl bg-white border border-[#E6E1D7] shadow-sm">
-          <h3 className="text-xs uppercase tracking-wider text-[#8A847A] font-semibold mb-5 flex items-center gap-2">
-            <BookOpen className="w-4 h-4 text-[#8C6B4F]" />
+        <div className="p-6 sm:p-8 rounded-2xl bg-paper border border-[#F1E9DB] ">
+          <h3 className="text-xs uppercase tracking-wider text-[#6B6B63] font-semibold mb-5 flex items-center gap-2">
+            <BookOpen className="w-4 h-4 text-[#6B6B63]" />
             Sua Jornada Clínica: {analyses.length} Caso
             {analyses.length > 1 ? "s" : ""} Analisado
             {analyses.length > 1 ? "s" : ""}
@@ -159,7 +159,7 @@ export const ConclusionView: React.FC<ConclusionViewProps> = ({
               return (
                 <div
                   key={analysis.caseId}
-                  className="p-3.5 rounded-xl bg-[#FBF9F6] border border-[#ECE7DC] flex flex-col justify-between animate-fade-in-up"
+                  className="p-3.5 rounded-xl bg-[#FDFAF4] border border-[#F1E9DB] flex flex-col justify-between animate-fade-in-up"
                   style={{ animationDelay: `${idx * 0.08}s` }}
                 >
                   <div>
@@ -175,13 +175,13 @@ export const ConclusionView: React.FC<ConclusionViewProps> = ({
                           analysis.theme.slice(1)}
                       </span>
                     </div>
-                    <p className="font-serif text-sm font-medium text-[#22201E] line-clamp-1">
+                    <p className="font-serif text-sm font-medium text-[#262B22] line-clamp-1">
                       {analysis.caseTitle}
                     </p>
                   </div>
 
-                  <div className="mt-3 pt-2.5 border-t border-[#EDE8DE] flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-1.5 text-[#3F3B35]">
+                  <div className="mt-3 pt-2.5 border-t border-[#F1E9DB] flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-1.5 text-[#4B4B49]">
                       <span
                         className="w-2 h-2 rounded-full"
                         style={{ backgroundColor: caseThemeColors.icon }}
@@ -190,7 +190,7 @@ export const ConclusionView: React.FC<ConclusionViewProps> = ({
                         {analysis.selectedFocusAreas.length} áreas
                       </span>
                     </div>
-                    <span className="text-[11px] text-[#8C867D]">
+                    <span className="text-[11px] text-[#6B6B63]">
                       {formatTime(analysis.timeSpentSeconds)}
                     </span>
                   </div>
@@ -202,16 +202,16 @@ export const ConclusionView: React.FC<ConclusionViewProps> = ({
       )}
 
       {/* Current Case Analysis Summary */}
-      <div className="p-5 rounded-2xl bg-white border border-[#E6E1D7] shadow-sm space-y-4">
-        <h3 className="text-xs uppercase tracking-wider text-[#8A847A] font-semibold flex items-center gap-2">
-          <FileText className="w-4 h-4 text-[#8C6B4F]" />
+      <div className="p-5 rounded-2xl bg-paper border border-[#F1E9DB]  space-y-4">
+        <h3 className="text-xs uppercase tracking-wider text-[#6B6B63] font-semibold flex items-center gap-2">
+          <FileText className="w-4 h-4 text-[#6B6B63]" />
           Síntese da Sua Análise Atual
         </h3>
 
         <div className="space-y-4">
           {/* Focus Areas */}
           <div>
-            <p className="text-[11px] uppercase tracking-wider text-[#9E978C] mb-2">
+            <p className="text-[11px] uppercase tracking-wider text-[#6B6B63] mb-2">
               Áreas de Foco Selecionadas
             </p>
             <div className="flex flex-wrap gap-2">
@@ -234,14 +234,14 @@ export const ConclusionView: React.FC<ConclusionViewProps> = ({
 
           {/* Key Learning Points */}
           <div>
-            <p className="text-[11px] uppercase tracking-wider text-[#9E978C] mb-2">
+            <p className="text-[11px] uppercase tracking-wider text-[#6B6B63] mb-2">
               Principais Aprendizados
             </p>
             <ul className="space-y-1.5" role="list">
               {currentCase.learningPoints.slice(0, 3).map((point, idx) => (
                 <li
                   key={idx}
-                  className="flex items-start gap-2 text-sm text-[#4A4744] leading-relaxed"
+                  className="flex items-start gap-2 text-sm text-[#4B4B49] leading-relaxed"
                 >
                   <span
                     className="w-1.5 h-1.5 mt-1.5 rounded-full"
@@ -254,11 +254,11 @@ export const ConclusionView: React.FC<ConclusionViewProps> = ({
           </div>
 
           {/* Next Steps */}
-          <div className="pt-2 border-t border-[#EDE8DE]">
-            <p className="text-[11px] uppercase tracking-wider text-[#9E978C] mb-2">
+          <div className="pt-2 border-t border-[#F1E9DB]">
+            <p className="text-[11px] uppercase tracking-wider text-[#6B6B63] mb-2">
               Próximos Passos Clínicos
             </p>
-            <ul className="space-y-1 text-sm text-[#5A554E]" role="list">
+            <ul className="space-y-1 text-sm text-[#4B4B49]" role="list">
               <li className="flex items-start gap-2">
                 • Discutir em supervisão clínica
               </li>
@@ -277,17 +277,17 @@ export const ConclusionView: React.FC<ConclusionViewProps> = ({
       </div>
 
       {/* Aggregated Session Metrics */}
-      <div className="p-5 sm:p-6 rounded-2xl bg-[#F7F5EE] border border-[#E3DDD0] flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="p-5 sm:p-6 rounded-2xl bg-[#FDFAF4] border border-[#F1E9DB] flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-[#EBE5D7] flex items-center justify-center text-[#595248]">
+          <div className="w-10 h-10 rounded-full bg-[#F1E9DB] flex items-center justify-center text-[#4B4B49]">
             <Clock className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-xs uppercase tracking-wider text-[#7A7468] font-semibold">
+            <p className="text-xs uppercase tracking-wider text-[#6B6B63] font-semibold">
               Tempo Total de Estudo
             </p>
-            <p className="text-xs text-[#666056] mt-0.5">
-              <strong className="text-[#1F1E1D]">
+            <p className="text-xs text-[#6B6B63] mt-0.5">
+              <strong className="text-[#262B22]">
                 {formatTime(stats.totalTimeSpentSeconds)}
               </strong>{" "}
               acumulados
@@ -295,28 +295,28 @@ export const ConclusionView: React.FC<ConclusionViewProps> = ({
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 text-xs text-[#5E574D]">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 text-xs text-[#4B4B49]">
           <div className="text-center sm:text-left">
-            <span className="block font-serif text-lg font-medium text-[#1F1E1D]">
+            <span className="block font-serif text-lg font-medium text-[#262B22]">
               {stats.totalCasesCompleted}{" "}
               {stats.totalCasesCompleted === 1 ? "caso" : "casos"}
             </span>
-            <span className="text-[11px] text-[#8C8578]">
+            <span className="text-[11px] text-[#6B6B63]">
               concluídos nesta sessão
             </span>
           </div>
           <div className="text-center sm:text-left">
-            <span className="block font-serif text-lg font-medium text-[#1F1E1D]">
+            <span className="block font-serif text-lg font-medium text-[#262B22]">
               {stats.themesExplored.length}
             </span>
-            <span className="text-[11px] text-[#8C8578]">temas explorados</span>
+            <span className="text-[11px] text-[#6B6B63]">temas explorados</span>
           </div>
           {stats.lastCompletedAt && (
             <div className="text-center sm:text-left">
-              <span className="block font-serif text-lg font-medium text-[#1F1E1D]">
+              <span className="block font-serif text-lg font-medium text-[#262B22]">
                 {new Date(stats.lastCompletedAt).toLocaleDateString("pt-BR")}
               </span>
-              <span className="text-[11px] text-[#8C8578]">
+              <span className="text-[11px] text-[#6B6B63]">
                 última conclusão
               </span>
             </div>
@@ -326,9 +326,9 @@ export const ConclusionView: React.FC<ConclusionViewProps> = ({
 
       {/* Themes Explored Badges */}
       {stats.themesExplored.length > 0 && (
-        <div className="p-5 rounded-2xl bg-white border border-[#E6E1D7] shadow-sm">
-          <p className="text-xs uppercase tracking-wider text-[#8A847A] font-semibold mb-3 flex items-center gap-2">
-            <Award className="w-3.5 h-3.5 text-[#8C6B4F]" />
+        <div className="p-5 rounded-2xl bg-paper border border-[#F1E9DB] ">
+          <p className="text-xs uppercase tracking-wider text-[#6B6B63] font-semibold mb-3 flex items-center gap-2">
+            <Award className="w-3.5 h-3.5 text-[#6B6B63]" />
             Temas Explorados
           </p>
           <div className="flex flex-wrap gap-2">
@@ -362,16 +362,16 @@ export const ConclusionView: React.FC<ConclusionViewProps> = ({
           <>
             <button
               onClick={onRestart}
-              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#2C2A29] hover:bg-[#1A1918] text-[#F8F7F4] text-sm font-medium tracking-wide flex items-center justify-center gap-2 transition-colors shadow-sm focus-visible-ring"
+              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#262B22] hover:bg-[#262B22] text-[#FDFAF4] text-sm font-medium tracking-wide flex items-center justify-center gap-2 transition-colors  focus-visible-ring"
             >
               <RotateCcw className="w-4 h-4" />
               Reiniciar Jornada Completa
             </button>
             <button
               onClick={onNextCase}
-              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-white hover:bg-[#F2EEE6] text-[#2C2A29] border border-[#DCD5C6] text-sm font-medium tracking-wide flex items-center justify-center gap-2 transition-colors focus-visible-ring"
+              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-paper hover:bg-[#F1E9DB] text-[#262B22] border border-[#D8CFBE] text-sm font-medium tracking-wide flex items-center justify-center gap-2 transition-colors focus-visible-ring"
             >
-              <BookOpen className="w-4 h-4 text-[#7A7468]" />
+              <BookOpen className="w-4 h-4 text-[#6B6B63]" />
               Revisar Casos
             </button>
           </>
@@ -379,7 +379,7 @@ export const ConclusionView: React.FC<ConclusionViewProps> = ({
           <>
             <button
               onClick={onNextCase}
-              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#2C2A29] hover:bg-[#1A1918] text-[#F8F7F4] text-sm font-medium tracking-wide flex items-center justify-center gap-2 transition-colors shadow-sm focus-visible-ring"
+              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#262B22] hover:bg-[#262B22] text-[#FDFAF4] text-sm font-medium tracking-wide flex items-center justify-center gap-2 transition-colors  focus-visible-ring"
             >
               <span>
                 Próximo Caso ({completedCount + 1}/{totalCases})
@@ -388,7 +388,7 @@ export const ConclusionView: React.FC<ConclusionViewProps> = ({
             </button>
             <button
               onClick={onRestart}
-              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-white hover:bg-[#F2EEE6] text-[#2C2A29] border border-[#DCD5C6] text-sm font-medium tracking-wide flex items-center justify-center gap-2 transition-colors focus-visible-ring"
+              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-paper hover:bg-[#F1E9DB] text-[#262B22] border border-[#D8CFBE] text-sm font-medium tracking-wide flex items-center justify-center gap-2 transition-colors focus-visible-ring"
             >
               <RotateCcw className="w-4 h-4" />
               Reiniciar Jornada
@@ -398,8 +398,8 @@ export const ConclusionView: React.FC<ConclusionViewProps> = ({
       </div>
 
       {/* Footer Reflection */}
-      <footer className="mt-8 pt-4 border-t border-[#E8E4DA] text-center text-xs text-[#948E84]">
-        <p className="font-serif italic text-[#6B655C]">
+      <footer className="mt-8 pt-4 border-t border-[#F1E9DB] text-center text-xs text-[#6B6B63]">
+        <p className="font-serif italic text-[#6B6B63]">
           "A prática clínica é arte de acompanhar o outro no encontro consigo
           mesmo."
         </p>

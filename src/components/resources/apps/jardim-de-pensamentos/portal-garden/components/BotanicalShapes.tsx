@@ -18,7 +18,7 @@ export function BotanicalShape({
 }: BotanicalShapeProps) {
   // Stroke colors based on Design System Figura Viva: Verde Raiz (#005A1F) or Terra Barro (#96551F)
   const strokeColor = isSelected ? '#005A1F' : '#07614C';
-  const fillColor = isSelected ? 'rgba(1, 201, 77, 0.15)' : 'rgba(7, 97, 76, 0.08)';
+  const fillColor = isSelected ? 'rgb(1 201 77 / 0.15)' : 'rgb(7 97 76 / 0.08)';
   const accentVeinColor = isSelected ? '#96551F' : '#6B6B63';
 
   return (
@@ -100,7 +100,7 @@ export function BotanicalShape({
             />
             <path
               d="M93 21 Q105 10 108 8 Q102 20 95 21 Z"
-              fill="rgba(150, 85, 31, 0.15)"
+              fill="rgb(150 85 31 / 0.15)"
               stroke="#96551F"
               strokeWidth="1.5"
             />
@@ -130,7 +130,7 @@ export function BotanicalShape({
               cx="58"
               cy="60"
               r="12"
-              fill="rgba(254, 215, 1, 0.15)"
+              fill="rgb(254 215 1 / 0.15)"
               stroke="#96551F"
               strokeWidth="1.5"
             />

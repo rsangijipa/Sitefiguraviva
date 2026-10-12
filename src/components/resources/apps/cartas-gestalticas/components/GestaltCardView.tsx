@@ -105,7 +105,7 @@ export const GestaltCardView: React.FC<GestaltCardViewProps> = ({
       >
         {/* ================= FRENTE DA CARTA ================= */}
         <div
-          className="absolute inset-0 w-full h-full backface-hidden bg-[#FDFAF4] border border-[#E2D8CA] rounded-[24px] flex flex-col justify-between p-6 sm:p-8 overflow-hidden"
+          className="absolute inset-0 w-full h-full backface-hidden bg-[#FDFAF4] border border-[#D8CFBE] rounded-[24px] flex flex-col justify-between p-6 sm:p-8 overflow-hidden"
           style={{
             backgroundColor: "#FDFAF4",
           }}
@@ -115,7 +115,7 @@ export const GestaltCardView: React.FC<GestaltCardViewProps> = ({
             className="absolute top-0 right-0 w-36 h-36 pointer-events-none opacity-40"
             style={{
               background:
-                "radial-gradient(circle at 100% 0%, #FED701 0%, #01C94D 40%, #FE538B 75%, transparent 100%)",
+                "radial-gradient(circle at 100% 0%, #FE538B 0%, #FED701 40%, #01C94D 75%, transparent 100%)",
               filter: "blur(28px)",
             }}
           />
@@ -171,7 +171,7 @@ export const GestaltCardView: React.FC<GestaltCardViewProps> = ({
           </div>
 
           {/* Bottom: Discreet instruction */}
-          <div className="relative z-10 flex items-center justify-between pt-4 border-t border-[#E2D8CA]/60">
+          <div className="relative z-10 flex items-center justify-between pt-4 border-t border-[#D8CFBE]/60">
             <span className="text-xs font-sans text-[#6B6B63] flex items-center gap-1.5">
               <RotateCcw
                 className="w-3.5 h-3.5 text-[#96551F]"
@@ -188,13 +188,13 @@ export const GestaltCardView: React.FC<GestaltCardViewProps> = ({
 
         {/* ================= VERSO DA CARTA ================= */}
         <div
-          className="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-[#FDFAF4] border border-[#E2D8CA] rounded-[24px] flex flex-col justify-between p-6 sm:p-8 overflow-hidden"
+          className="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-[#FDFAF4] border border-[#D8CFBE] rounded-[24px] flex flex-col justify-between p-6 sm:p-8 overflow-hidden"
           style={{
             backgroundColor: "#FDFAF4",
           }}
         >
           {/* Top Header: Reduced Type and Title */}
-          <div className="flex items-center justify-between pb-3 border-b border-[#E2D8CA]/80">
+          <div className="flex items-center justify-between pb-3 border-b border-[#D8CFBE]/80">
             <div className="flex flex-col">
               <span className="text-[10px] font-sans font-bold tracking-[0.14em] text-[#96551F] uppercase">
                 {card.type} · {card.code}
@@ -244,7 +244,7 @@ export const GestaltCardView: React.FC<GestaltCardViewProps> = ({
 
             {/* Metadata Zone */}
             {(card.author || card.work || card.reference) && (
-              <div className="pt-2 border-t border-[#E2D8CA]/60 flex flex-col gap-1 text-[12px] font-sans">
+              <div className="pt-2 border-t border-[#D8CFBE]/60 flex flex-col gap-1 text-[12px] font-sans">
                 {card.author && (
                   <div className="flex items-baseline gap-2">
                     <span className="text-[#6B6B63] font-medium w-14 shrink-0">
@@ -284,7 +284,7 @@ export const GestaltCardView: React.FC<GestaltCardViewProps> = ({
 
             {/* Block Areia: Para ficar com isso */}
             {card.reflection && (
-              <div className="bg-[#F1E9DB] p-3.5 rounded-xl border border-[#E2D8CA]/60">
+              <div className="bg-[#F1E9DB] p-3.5 rounded-xl border border-[#D8CFBE]/60">
                 <span className="block text-[11px] font-sans font-semibold tracking-wider text-[#96551F] uppercase mb-1">
                   Para ficar com isso
                 </span>
@@ -297,7 +297,7 @@ export const GestaltCardView: React.FC<GestaltCardViewProps> = ({
 
           {/* Bottom Actions of the Back: Aprofundar + Virar de volta */}
           <div
-            className="pt-3 border-t border-[#E2D8CA]/80 flex items-center justify-between"
+            className="pt-3 border-t border-[#D8CFBE]/80 flex items-center justify-between"
             onClick={(e) => e.stopPropagation()}
           >
             <button
@@ -313,7 +313,7 @@ export const GestaltCardView: React.FC<GestaltCardViewProps> = ({
               <button
                 type="button"
                 onClick={() => onDeepen(card)}
-                className="px-3 py-1.5 bg-[#F1E9DB] hover:bg-[#E2D8CA] text-[#005A1F] text-xs font-sans font-medium rounded-lg inline-flex items-center gap-1 transition-colors"
+                className="px-3 py-1.5 bg-[#F1E9DB] hover:bg-[#D8CFBE] text-[#005A1F] text-xs font-sans font-medium rounded-lg inline-flex items-center gap-1 transition-colors"
               >
                 <span>Aprofundar</span>
                 <ArrowUpRight className="w-3.5 h-3.5" strokeWidth={2} />

@@ -19,10 +19,10 @@ const VIEW_HEIGHT = 2048;
 const HORIZON = VIEW_HEIGHT / 2;
 
 /** cor do horizonte: usada tambem pela neblina da cena, para casar tudo */
-export const HORIZON_COLOR = "#E6F2F8";
-export const SKY_TOP_COLOR = "#3E92D8";
-export const GRASS_NEAR_COLOR = "#2F6D25";
-export const GRASS_FAR_COLOR = "#8FC05A";
+export const HORIZON_COLOR = "#FDFAF4";
+export const SKY_TOP_COLOR = "#6B6B63";
+export const GRASS_NEAR_COLOR = "#005A1F";
+export const GRASS_FAR_COLOR = "#6B6B63";
 
 type Cloud = {
   x: number;

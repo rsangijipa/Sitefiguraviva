@@ -126,7 +126,7 @@ export function LeafSvg({ id, className }: LeafSvgProps) {
         </radialGradient>
 
         <filter id={`${id}-shadow`} x="-8%" y="-24%" width="118%" height="156%">
-          <feDropShadow dx="0" dy="18" stdDeviation="20" floodColor="#0A1207" floodOpacity="0.42" />
+          <feDropShadow dx="0" dy="18" stdDeviation="20" floodColor="#262B22" floodOpacity="0.42" />
         </filter>
 
         {/* grao: fractalNoise em soft-light da a lamina a aspereza do papel */}

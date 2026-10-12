@@ -17,7 +17,7 @@ export function OpeningScreen({
 }: OpeningScreenProps) {
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:py-16">
-      <div className="rounded-[24px] border-2 border-[#F1E9DB] bg-[#FDFAF4] p-6 sm:p-10 shadow-none">
+      <div className="rounded-[24px] border-2 border-[#F1E9DB] bg-[#FDFAF4] p-6 sm:p-10 ">
         <div className="inline-flex items-center gap-2 rounded-xl bg-[#F1E9DB] px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-[#96551F]">
           <Sparkles size={14} aria-hidden="true" />
           Aprender · Gestalt-terapia

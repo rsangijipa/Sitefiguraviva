@@ -15,6 +15,7 @@ import {
   Flame,
   Star,
   Headphones,
+  Compass,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
@@ -134,6 +135,7 @@ export const SidebarNav = ({ className }: { className?: string }) => {
     { label: "Certificados", icon: Award, href: ROUTES.certificates },
     { label: "Comunidade", icon: MessageSquare, href: ROUTES.community },
     { label: "Materiais", icon: FileText, href: ROUTES.materials },
+    { label: "Recursos", icon: Compass, href: "/portal/recursos" },
     { label: "Ao Vivo", icon: Calendar, href: ROUTES.events },
   ];
 

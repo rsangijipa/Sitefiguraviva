@@ -25,14 +25,14 @@ const DEFAULT_CHAIR_A: ChairConfig = {
   id: "A",
   name: "Voz Autocrítica",
   sublabel: "Exigências e cobranças",
-  accentColor: "#1c1917", // stone-900
+  accentColor: "#262B22", // stone-900
 };
 
 const DEFAULT_CHAIR_B: ChairConfig = {
   id: "B",
   name: "Voz Compassiva",
   sublabel: "Acolhimento e compreensão",
-  accentColor: "#b45309", // amber-700
+  accentColor: "#96551F", // amber-700
 };
 
 export default function App() {
@@ -150,15 +150,15 @@ export default function App() {
   const otherConfig = activeChair === "A" ? session.chairB : session.chairA;
 
   return (
-    <div className="min-h-full bg-stone-50 text-stone-900 font-sans flex flex-col antialiased selection:bg-amber-100 selection:text-amber-900">
-      <div className="border-b border-stone-200/80 bg-white/90">
+    <div className="min-h-full bg-paper text-mata font-sans flex flex-col antialiased selection:bg-amber-100 selection:text-amber-900">
+      <div className="border-b border-nevoa/80 bg-paper/90">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 min-h-14 flex items-center justify-end">
           <div className="flex items-center gap-2">
             <button
               type="button"
               id="btn-open-naming-modal"
               onClick={() => setIsNamingOpen(true)}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-stone-200 text-xs font-medium text-stone-700 hover:bg-stone-100 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-nevoa text-xs font-medium text-mata hover:bg-paper transition-colors cursor-pointer"
               title="Renomear e definir as perspectivas das duas cadeiras"
             >
               <Settings2 className="w-3.5 h-3.5" />
@@ -169,7 +169,7 @@ export default function App() {
               type="button"
               id="btn-open-history-modal"
               onClick={() => setIsHistoryOpen(true)}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-stone-200 text-xs font-medium text-stone-700 hover:bg-stone-100 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-nevoa text-xs font-medium text-mata hover:bg-paper transition-colors cursor-pointer"
               title="Ver reflexões salvas no navegador"
             >
               <History className="w-3.5 h-3.5" />
@@ -210,16 +210,16 @@ export default function App() {
         <section
           id="stage-chairs-area"
           aria-label="Palco das Duas Cadeiras"
-          className="rounded-2xl border border-stone-200/80 bg-white/70 backdrop-blur-xs p-3 sm:p-5 shadow-2xs space-y-3"
+          className="rounded-2xl border border-nevoa/80 bg-paper/70  p-3 sm:p-5  space-y-3"
         >
           <div className="flex items-center justify-between px-2 pt-1">
-            <h2 className="text-xs font-semibold tracking-wider uppercase text-stone-400">
+            <h2 className="text-xs font-semibold tracking-wider uppercase text-mata">
               Espaço Dialógico &bull; Alternância de Perspectiva
             </h2>
             <button
               type="button"
               onClick={() => setIsNamingOpen(true)}
-              className="text-xs text-stone-500 hover:text-stone-800 underline underline-offset-2 decoration-stone-300 transition-colors"
+              className="text-xs text-mata hover:text-mata underline underline-offset-2 decoration-stone-300 transition-colors"
             >
               Alterar perspectivas
             </button>
@@ -275,16 +275,16 @@ export default function App() {
       </main>
 
       {/* Footer / Privacy & Philosophy notice */}
-      <footer className="mt-auto border-t border-stone-200/80 bg-stone-100/50 py-4 px-4 text-center text-xs text-stone-500">
+      <footer className="mt-auto border-t border-nevoa/80 bg-paper/50 py-4 px-4 text-center text-xs text-mata">
         <div className="max-w-2xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5 text-stone-600">
-            <Shield className="w-3.5 h-3.5 text-stone-500" />
+          <div className="flex items-center gap-1.5 text-mata">
+            <Shield className="w-3.5 h-3.5 text-mata" />
             <span>
               Privacidade estrita: nada é gravado ou enviado enquanto você não
               escolher salvar. Nenhum dado vai para IA ou administradores.
             </span>
           </div>
-          <span className="text-stone-400 text-[11px]">
+          <span className="text-mata text-[11px]">
             Inspirado no método dialógico gestáltico
           </span>
         </div>

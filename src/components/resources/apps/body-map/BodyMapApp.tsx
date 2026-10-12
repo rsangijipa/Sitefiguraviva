@@ -201,7 +201,7 @@ export default function BodyMapApp() {
               onClick={() => setSelectedRegion(region.id)}
               className={`absolute h-11 w-11 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold ${region.position} ${
                 marks[region.id]
-                  ? "border-paper bg-terra shadow-[0_0_0_3px_rgba(132,84,57,0.2)]"
+                  ? "border-paper bg-terra -[0_0_0_3px_rgb(150 85 31 / 0.2)]"
                   : "border-primary/30 bg-paper/90 hover:border-terra"
               }`}
             >

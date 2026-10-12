@@ -12,8 +12,8 @@ export const COLORS = {
   areia: '#F1E9DB',
   verdeRaiz: '#005A1F',
   verdeIgarape: '#07614C',
-  verdeAguaSuave: '#0d7d63',
-  verdeCorrenteza: '#0a6d56',
+  verdeAguaSuave: '#07614C',
+  verdeCorrenteza: '#07614C',
   terraBarro: '#96551F',
   mata: '#262B22',
   nevoa: '#D8CFBE',
@@ -62,7 +62,7 @@ export function drawRiverBed(
 
   // 2. Ondulações da correnteza (curvas sutis e serenas de água em Verde Igarapé claro)
   ctx.save();
-  ctx.strokeStyle = 'rgba(253, 250, 244, 0.08)'; // Creme papel com opacidade baixa
+  ctx.strokeStyle = 'rgb(253 250 244 / 0.08)'; // Creme papel com opacidade baixa
   ctx.lineWidth = 2;
 
   const waveCount = 5;
@@ -201,7 +201,7 @@ export function drawLeafRipples(
 
   // Esteira de fluxo na popa da folha (à esquerda)
   const wakeLen = 42 * leaf.scale;
-  ctx.strokeStyle = 'rgba(253, 250, 244, 0.12)';
+  ctx.strokeStyle = 'rgb(253 250 244 / 0.12)';
   ctx.beginPath();
   ctx.moveTo(x - 20, y);
   ctx.lineTo(x - 20 - wakeLen, y - 6);
@@ -241,7 +241,7 @@ export function drawLeaf(
   ctx.translate(x + 8, y + 14);
   ctx.rotate(totalAngle);
   ctx.scale(leaf.scale * 1.05, leaf.scale * 0.95);
-  ctx.fillStyle = 'rgba(0, 35, 20, 0.28)';
+  ctx.fillStyle = 'rgb(38 43 34 / 0.28)';
   ctx.beginPath();
   ctx.moveTo(-length * 0.45, 0);
   ctx.bezierCurveTo(-length * 0.2, -halfWidth, length * 0.25, -halfWidth * 0.9, length * 0.5, 0);
@@ -285,7 +285,7 @@ export function drawLeaf(
   ctx.beginPath();
   ctx.moveTo(-length * 0.45, 0);
   ctx.lineTo(length * 0.45, 0);
-  ctx.strokeStyle = 'rgba(150, 85, 31, 0.45)'; // Terra barro suave
+  ctx.strokeStyle = 'rgb(150 85 31 / 0.45)'; // Terra barro suave
   ctx.lineWidth = 1.5;
   ctx.stroke();
 
@@ -298,7 +298,7 @@ export function drawLeaf(
     ctx.lineTo(rx + 10, -halfWidth * 0.5);
     ctx.moveTo(rx, 0);
     ctx.lineTo(rx + 10, halfWidth * 0.5);
-    ctx.strokeStyle = 'rgba(150, 85, 31, 0.25)';
+    ctx.strokeStyle = 'rgb(150 85 31 / 0.25)';
     ctx.lineWidth = 1;
     ctx.stroke();
   }
@@ -320,7 +320,7 @@ export function drawLeaf(
   // 5. Gotícula de orvalho na folha (micro-detalhe translúcido de água)
   ctx.beginPath();
   ctx.arc(length * 0.12, -halfWidth * 0.28, 2.5, 0, Math.PI * 2);
-  ctx.fillStyle = 'rgba(7, 97, 76, 0.35)';
+  ctx.fillStyle = 'rgb(7 97 76 / 0.35)';
   ctx.fill();
   ctx.beginPath();
   ctx.arc(length * 0.11, -halfWidth * 0.29, 0.9, 0, Math.PI * 2);
@@ -364,7 +364,7 @@ export function drawAquaticFlora(
     // Sombra do nenúfar
     ctx.beginPath();
     ctx.arc(px + 3, py + 4, pad.radius, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(0, 30, 15, 0.25)';
+    ctx.fillStyle = 'rgb(38 43 34 / 0.25)';
     ctx.fill();
 
     // Nenúfar com fenda botânica em V

@@ -35,22 +35,22 @@ export const RelationalFieldCanvas: React.FC<RelationalFieldCanvasProps> = ({
   const isClear = boundaryState === "clear";
 
   // Shapes colors: organic earth/mineral palette
-  const selfColor = isRigid ? "#96705B" : isConfluent ? "#BD7B5C" : "#A0785D"; // Terracotta clay
+  const selfColor = isRigid ? "#6B6B63" : isConfluent ? "#96551F" : "#6B6B63"; // Terracotta clay
 
-  const otherColor = isRigid ? "#5B6E67" : isConfluent ? "#4E7F72" : "#5C766F"; // Sage mineral
+  const otherColor = isRigid ? "#6B6B63" : isConfluent ? "#6B6B63" : "#6B6B63"; // Sage mineral
 
   return (
     <div
       id="relational-field-container"
-      className="relative w-full rounded-2xl bg-gradient-to-b from-[#FAF8F5] via-[#F4F1EA] to-[#ECE7DD] border border-[#E3DDD1] p-5 sm:p-7 shadow-xs overflow-hidden"
+      className="relative w-full rounded-2xl bg-gradient-to-b from-[#FDFAF4] via-[#FDFAF4] to-[#F1E9DB] border border-[#F1E9DB] p-5 sm:p-7  overflow-hidden"
     >
       {/* Subtle background ambient contour lines */}
       <div className="absolute inset-0 pointer-events-none opacity-20">
         <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <radialGradient id="field-glow" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#C9BEAC" stopOpacity="0.3" />
-              <stop offset="100%" stopColor="#C9BEAC" stopOpacity="0" />
+              <stop offset="0%" stopColor="#D8CFBE" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="#D8CFBE" stopOpacity="0" />
             </radialGradient>
           </defs>
           <rect width="100%" height="100%" fill="url(#field-glow)" />
@@ -60,7 +60,7 @@ export const RelationalFieldCanvas: React.FC<RelationalFieldCanvasProps> = ({
             rx="180"
             ry="90"
             fill="none"
-            stroke="#C9BEAC"
+            stroke="#D8CFBE"
             strokeWidth="0.8"
             strokeDasharray="3 4"
           />
@@ -70,7 +70,7 @@ export const RelationalFieldCanvas: React.FC<RelationalFieldCanvasProps> = ({
             rx="280"
             ry="140"
             fill="none"
-            stroke="#C9BEAC"
+            stroke="#D8CFBE"
             strokeWidth="0.6"
             strokeDasharray="4 6"
           />
@@ -78,27 +78,27 @@ export const RelationalFieldCanvas: React.FC<RelationalFieldCanvasProps> = ({
       </div>
 
       {/* Top Header: Relational State Status */}
-      <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-[#E4DDD1]">
+      <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-[#F1E9DB]">
         <div className="flex items-center gap-2">
           <div
             className={`w-2.5 h-2.5 rounded-full transition-all duration-500 ${
               isConfluent
-                ? "bg-[#BD7B5C] ring-4 ring-[#BD7B5C]/20"
+                ? "bg-[#96551F] ring-4 ring-[#96551F]/20"
                 : isWithdrawn
-                  ? "bg-[#5B6E67] ring-4 ring-[#5B6E67]/20"
-                  : "bg-[#688176] ring-4 ring-[#688176]/20"
+                  ? "bg-[#6B6B63] ring-4 ring-[#6B6B63]/20"
+                  : "bg-[#6B6B63] ring-4 ring-[#6B6B63]/20"
             }`}
           />
-          <span className="text-xs font-semibold tracking-wider uppercase text-[#6B6357]">
+          <span className="text-xs font-semibold tracking-wider uppercase text-[#6B6B63]">
             {fieldDynamic?.label || "Campo Relacional em Equilíbrio"}
           </span>
         </div>
 
-        <div className="flex items-center gap-3 text-xs text-[#7A7164]">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#EDE8DF] border border-[#DDD5C7]">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#8F8474]" />
+        <div className="flex items-center gap-3 text-xs text-[#6B6B63]">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#F1E9DB] border border-[#D8CFBE]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#6B6B63]" />
             Tensão no Campo:{" "}
-            <strong className="font-medium text-[#4D4539] capitalize">
+            <strong className="font-medium text-[#4B4B49] capitalize">
               {tension === "low"
                 ? "Baixa / Serena"
                 : tension === "moderate"
@@ -106,9 +106,9 @@ export const RelationalFieldCanvas: React.FC<RelationalFieldCanvasProps> = ({
                   : "Alta / Retratil"}
             </strong>
           </span>
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#EDE8DF] border border-[#DDD5C7]">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#F1E9DB] border border-[#D8CFBE]">
             Distância:{" "}
-            <strong className="font-medium text-[#4D4539]">
+            <strong className="font-medium text-[#4B4B49]">
               {Math.round(currentDistance)} unidades
             </strong>
           </span>
@@ -125,14 +125,14 @@ export const RelationalFieldCanvas: React.FC<RelationalFieldCanvasProps> = ({
           <defs>
             {/* Gradients for Organism A (Eu) */}
             <linearGradient id="grad-self" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#C49B80" stopOpacity="0.85" />
-              <stop offset="100%" stopColor="#8C634B" stopOpacity="0.95" />
+              <stop offset="0%" stopColor="#D8CFBE" stopOpacity="0.85" />
+              <stop offset="100%" stopColor="#6B6B63" stopOpacity="0.95" />
             </linearGradient>
 
             {/* Gradients for Organism B (Outro) */}
             <linearGradient id="grad-other" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#7E9E94" stopOpacity="0.85" />
-              <stop offset="100%" stopColor="#4A655D" stopOpacity="0.95" />
+              <stop offset="0%" stopColor="#6B6B63" stopOpacity="0.85" />
+              <stop offset="100%" stopColor="#4B4B49" stopOpacity="0.95" />
             </linearGradient>
 
             {/* Filter for subtle biological organic blur */}
@@ -153,7 +153,7 @@ export const RelationalFieldCanvas: React.FC<RelationalFieldCanvasProps> = ({
             y1="140"
             x2="520"
             y2="140"
-            stroke="#D6CDBD"
+            stroke="#D8CFBE"
             strokeWidth="1"
             strokeDasharray="2 4"
             opacity="0.6"
@@ -169,7 +169,7 @@ export const RelationalFieldCanvas: React.FC<RelationalFieldCanvasProps> = ({
               cy="140"
               rx={Math.max(10, 60 - halfGap)}
               ry="45"
-              fill="#A98871"
+              fill="#6B6B63"
               opacity="0.3"
               filter="url(#organic-softness)"
             />
@@ -205,21 +205,21 @@ export const RelationalFieldCanvas: React.FC<RelationalFieldCanvasProps> = ({
                   : "M -48 -8 C -48 -40, -18 -54, 14 -48 C 42 -42, 54 -15, 48 18 C 42 46, 12 54, -18 46 C -44 38, -48 16, -48 -8 Z"
               }
               fill="url(#grad-self)"
-              stroke={isRigid ? "#6E4933" : isClear ? "#EADBCF" : "#8A5E44"}
+              stroke={isRigid ? "#4B4B49" : isClear ? "#F1E9DB" : "#96551F"}
               strokeWidth={isRigid ? "2.5" : "1.5"}
               strokeDasharray={isConfluent ? "4 2" : "none"}
               className="transition-colors duration-700"
             />
 
             {/* Core nucleus */}
-            <circle cx="0" cy="0" r="5" fill="#FAF6F0" opacity="0.8" />
+            <circle cx="0" cy="0" r="5" fill="#FDFAF4" opacity="0.8" />
 
             {/* Label */}
             <text
               x="0"
               y="72"
               textAnchor="middle"
-              className="text-[11px] font-medium tracking-wide uppercase fill-[#6E5748]"
+              className="text-[11px] font-medium tracking-wide uppercase fill-[#6B6B63]"
             >
               Campo do Eu
             </text>
@@ -244,17 +244,17 @@ export const RelationalFieldCanvas: React.FC<RelationalFieldCanvasProps> = ({
                   y1="75"
                   x2="300"
                   y2="205"
-                  stroke="#7A6D5D"
+                  stroke="#6B6B63"
                   strokeWidth="1.8"
                   strokeLinecap="round"
                   strokeDasharray="2 3"
                 />
-                <circle cx="300" cy="140" r="4" fill="#6E5D4B" />
+                <circle cx="300" cy="140" r="4" fill="#6B6B63" />
                 <text
                   x="300"
                   y="62"
                   textAnchor="middle"
-                  className="text-[10px] font-semibold uppercase tracking-wider fill-[#736353]"
+                  className="text-[10px] font-semibold uppercase tracking-wider fill-[#6B6B63]"
                 >
                   Fronteira Viva
                 </text>
@@ -268,7 +268,7 @@ export const RelationalFieldCanvas: React.FC<RelationalFieldCanvasProps> = ({
                   x="300"
                   y="70"
                   textAnchor="middle"
-                  className="text-[10px] font-semibold uppercase tracking-wider fill-[#995535]"
+                  className="text-[10px] font-semibold uppercase tracking-wider fill-[#96551F]"
                 >
                   Confluência / Perda de Limite
                 </text>
@@ -283,7 +283,7 @@ export const RelationalFieldCanvas: React.FC<RelationalFieldCanvasProps> = ({
                   y1="140"
                   x2={300 + halfGap - 20}
                   y2="140"
-                  stroke="#A89F91"
+                  stroke="#D8CFBE"
                   strokeWidth="1.2"
                   strokeDasharray="3 3"
                 />
@@ -291,7 +291,7 @@ export const RelationalFieldCanvas: React.FC<RelationalFieldCanvasProps> = ({
                   x="300"
                   y="125"
                   textAnchor="middle"
-                  className="text-[10px] font-semibold uppercase tracking-wider fill-[#807669]"
+                  className="text-[10px] font-semibold uppercase tracking-wider fill-[#6B6B63]"
                 >
                   Vácuo / Afastamento
                 </text>
@@ -339,21 +339,21 @@ export const RelationalFieldCanvas: React.FC<RelationalFieldCanvasProps> = ({
                   : "M -14 -48 C 18 -48, 48 -18, 48 14 C 42 42, 14 54, -14 48 C -42 42, -54 14, -48 -14 C -42 -42, -30 -48, -14 -48 Z"
               }
               fill="url(#grad-other)"
-              stroke={isRigid ? "#3A4C46" : isClear ? "#DCE8E3" : "#4E6861"}
+              stroke={isRigid ? "#4B4B49" : isClear ? "#F1E9DB" : "#6B6B63"}
               strokeWidth={isRigid ? "2.5" : "1.5"}
               strokeDasharray={isConfluent ? "4 2" : "none"}
               className="transition-colors duration-700"
             />
 
             {/* Core nucleus */}
-            <circle cx="0" cy="0" r="5" fill="#FAF6F0" opacity="0.8" />
+            <circle cx="0" cy="0" r="5" fill="#FDFAF4" opacity="0.8" />
 
             {/* Label */}
             <text
               x="0"
               y="72"
               textAnchor="middle"
-              className="text-[11px] font-medium tracking-wide uppercase fill-[#465A54]"
+              className="text-[11px] font-medium tracking-wide uppercase fill-[#4B4B49]"
             >
               Campo do Outro
             </text>
@@ -362,9 +362,9 @@ export const RelationalFieldCanvas: React.FC<RelationalFieldCanvasProps> = ({
       </div>
 
       {/* Dynamic description of the visual phenomenon */}
-      <div className="relative z-10 mt-3 pt-3 border-t border-[#E5DFD4] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
-        <p className="text-[#595247] leading-relaxed max-w-xl">
-          <strong className="font-semibold text-[#3D362C]">
+      <div className="relative z-10 mt-3 pt-3 border-t border-[#F1E9DB] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+        <p className="text-[#4B4B49] leading-relaxed max-w-xl">
+          <strong className="font-semibold text-[#262B22]">
             Morfologia Relacional:{" "}
           </strong>
           {fieldDynamic?.organicDescription ||
@@ -373,8 +373,8 @@ export const RelationalFieldCanvas: React.FC<RelationalFieldCanvasProps> = ({
 
         {/* Interactive exploration slider */}
         {interactiveMode && onDistanceChange && (
-          <div className="flex items-center gap-2 bg-[#EDE8DE] px-3 py-1.5 rounded-lg border border-[#DDD5C7] w-full sm:w-auto shrink-0">
-            <span className="text-[11px] text-[#6E6558] font-medium whitespace-nowrap">
+          <div className="flex items-center gap-2 bg-[#F1E9DB] px-3 py-1.5 rounded-lg border border-[#D8CFBE] w-full sm:w-auto shrink-0">
+            <span className="text-[11px] text-[#6B6B63] font-medium whitespace-nowrap">
               Distância manual:
             </span>
             <input
@@ -383,9 +383,9 @@ export const RelationalFieldCanvas: React.FC<RelationalFieldCanvasProps> = ({
               max="220"
               value={Math.round(currentDistance)}
               onChange={(e) => onDistanceChange(Number(e.target.value))}
-              className="w-24 sm:w-28 accent-[#7E6A55] cursor-pointer"
+              className="w-24 sm:w-28 accent-[#6B6B63] cursor-pointer"
             />
-            <span className="text-[11px] font-mono font-medium text-[#4D4539] w-7 text-right">
+            <span className="text-[11px] font-mono font-medium text-[#4B4B49] w-7 text-right">
               {Math.round(currentDistance)}
             </span>
           </div>

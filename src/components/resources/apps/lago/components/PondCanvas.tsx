@@ -433,10 +433,10 @@ export const PondCanvas = forwardRef<PondCanvasHandle, PondCanvasProps>(
           underCtx.drawImage(riverbedCanvasRef.current, 0, 0, W, H);
 
           if (cfg.ambient === "sunset") {
-            underCtx.fillStyle = "rgba(120, 50, 40, 0.22)";
+            underCtx.fillStyle = "rgb(150 85 31 / 0.22)";
             underCtx.fillRect(0, 0, W, H);
           } else if (cfg.ambient === "night") {
-            underCtx.fillStyle = "rgba(5, 12, 28, 0.55)";
+            underCtx.fillStyle = "rgb(38 43 34 / 0.55)";
             underCtx.fillRect(0, 0, W, H);
           }
 
@@ -444,9 +444,9 @@ export const PondCanvas = forwardRef<PondCanvasHandle, PondCanvasProps>(
             underCtx.save();
             underCtx.beginPath();
             underCtx.arc(food.x, food.y, 3.5, 0, Math.PI * 2);
-            underCtx.fillStyle = "#9e6231";
+            underCtx.fillStyle = "#96551F";
             underCtx.fill();
-            underCtx.strokeStyle = "#5a3517";
+            underCtx.strokeStyle = "#262B22";
             underCtx.lineWidth = 1;
             underCtx.stroke();
             underCtx.restore();

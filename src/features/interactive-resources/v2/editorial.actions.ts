@@ -6,6 +6,7 @@ import { resourceDatabase, type ContentRow } from "./database.server";
 import { contentVersion } from "./editorial.server";
 import { ResourceKeySchema, type ResourceResult } from "./contracts";
 import { EditorialConfigSchema, assertPublishable, emptyEditorialConfig, type EditorialVersion } from "./editorial-schema";
+import {verifyApprovedAssets} from "./art.server";
 
 export async function listEditorialVersions(key: unknown): Promise<ResourceResult<EditorialVersion[]>> {
   const session = await resourceSession();
@@ -46,9 +47,11 @@ export async function transitionEditorialVersion(input: unknown): Promise<Resour
       configuration = EditorialConfigSchema.parse(current.data.configuration);
       assertPublishable(configuration);
       if (configuration.artApprovalId) {
-        const approval = await db.from("resource_art_approvals").select("id").eq("id", configuration.artApprovalId).maybeSingle();
+        const approval = await db.from("resource_art_approvals").select("assets").eq("id", configuration.artApprovalId).maybeSingle();
         if (approval.error || !approval.data) return { ok: false, code: "invalid", error: "Curadoria da arte ainda não registrada." };
+        await verifyApprovedAssets(configuration, approval.data.assets);
       }
+      if (configuration.audio.length && !configuration.artApprovalId) return { ok: false, code: "invalid", error: "Registre a curadoria dos arquivos de áudio." };
     }
     const { data, error } = await db.rpc("fv_resource_transition", {
       p_actor: session.uid, p_action: params.action, p_resource_key: params.resourceKey,

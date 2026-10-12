@@ -400,7 +400,7 @@ export const CurrentNeedsExperience: React.FC<CurrentNeedsExperienceProps> = ({
             role="dialog"
             aria-modal="true"
             aria-labelledby="custom-need-title"
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#262B22]/60 backdrop-blur-xs"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#262B22]/60 "
           >
             <form
               onSubmit={handleAddCustomNeed}

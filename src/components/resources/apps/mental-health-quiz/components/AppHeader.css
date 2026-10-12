@@ -1,9 +1,9 @@
-.app-header {
+.fv-resources .app-header {
   position: sticky;
   top: 0;
   z-index: 100;
-  background-color: rgba(253, 250, 244, 0.92);
-  backdrop-filter: blur(14px);
+  background-color: rgb(253 250 244 / 0.92);
+  backdrop-filter: none;
   -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--fv-nevoa);
   height: var(--header-height);
@@ -14,7 +14,7 @@
   padding-right: env(safe-area-inset-right);
 }
 
-.app-header__inner {
+.fv-resources .app-header__inner {
   width: 100%;
   display: flex;
   align-items: center;
@@ -23,7 +23,7 @@
   gap: var(--space-sm);
 }
 
-.app-header__left {
+.fv-resources .app-header__left {
   display: flex;
   align-items: center;
   gap: var(--space-md);
@@ -31,7 +31,7 @@
 }
 
 /* ── Botão back com área de toque generosa ── */
-.app-header__back-btn {
+.fv-resources .app-header__back-btn {
   background: none;
   border: none;
   /* Área mínima WCAG 44×44 */
@@ -55,41 +55,41 @@
   margin-left: -10px;
 }
 
-.app-header__back-btn:hover {
+.fv-resources .app-header__back-btn:hover {
   background-color: var(--fv-areia);
   color: var(--fv-verde-raiz);
 }
 
-.app-header__back-btn:active {
+.fv-resources .app-header__back-btn:active {
   background-color: var(--fv-areia-escura);
   color: var(--fv-verde-raiz);
 }
 
-.app-header__back-btn:focus-visible {
+.fv-resources .app-header__back-btn:focus-visible {
   outline: 3px solid var(--fv-verde-raiz);
   outline-offset: 2px;
 }
 
 /* ── Logo ── */
-.app-header__logo {
-  font-family: var(--font-display);
+.fv-resources .app-header__logo {
+  font-family: var(--font-serif), serif;
   font-size: 19px;
   font-weight: 700;
   letter-spacing: -0.025em;
   white-space: nowrap;
 }
 
-.app-header__logo-mente {
+.fv-resources .app-header__logo-mente {
   color: var(--fv-verde-raiz);
 }
 
-.app-header__logo-quiz {
+.fv-resources .app-header__logo-quiz {
   color: var(--fv-terra-barro);
 }
 
 /* ── Subtítulo direita ── */
-.app-header__right {
-  font-family: var(--font-body);
+.fv-resources .app-header__right {
+  font-family: var(--font-sans), sans-serif;
   font-size: 12px;
   font-weight: 500;
   color: var(--fv-pedra);
@@ -100,13 +100,13 @@
 
 /* ── Mobile ── */
 @media (max-width: 640px) {
-  :root { --header-height: 52px; }
+  .fv-resources { --header-height: 52px; }
 
-  .app-header__logo {
+  .fv-resources .app-header__logo {
     font-size: 17px;
   }
 
-  .app-header__right {
+  .fv-resources .app-header__right {
     display: none;
   }
 }

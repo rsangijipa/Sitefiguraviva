@@ -137,7 +137,7 @@ export function JardimCanvas({
               isReducedMotion ? 'duration-150' : 'duration-500 ease-out'
             } ${
               isSelected
-                ? 'z-30 filter drop-shadow-none'
+                ? 'z-30 filter '
                 : 'z-20 hover:opacity-100 hover:scale-105'
             }`}
           >

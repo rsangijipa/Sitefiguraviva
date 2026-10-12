@@ -9,13 +9,22 @@ export const RESOURCE_KEYS = [
 export type ResourceKey = typeof RESOURCE_KEYS[number];
 export const ResourceKeySchema = z.enum(RESOURCE_KEYS);
 export const MAX_RECORD_BYTES = 16 * 1024;
+export function stableRecordJson(value:unknown):string {
+  const canonical=(input:unknown):unknown=>Array.isArray(input)?input.map(canonical):input && typeof input==="object" ? Object.fromEntries(Object.entries(input).sort(([a],[b])=>a.localeCompare(b)).map(([key,item])=>[key,canonical(item)])):input;
+  return JSON.stringify(canonical(value));
+}
+export function postgresPayloadBytes(value:unknown):number {
+  const json=JSON.stringify(value);let separators=0;let quoted=false;let escaped=false;
+  for(const char of json){if(escaped){escaped=false;continue;}if(quoted && char==="\\"){escaped=true;continue;}if(char==='"'){quoted=!quoted;continue;}if(!quoted && (char==="," || char===":"))separators++;}
+  return new TextEncoder().encode(json).byteLength+separators;
+}
 const shortText = z.string().max(500);
 const itemId = z.string().min(1).max(80);
 export const BODY_REGIONS = ["cabeça", "pescoço", "ombros", "peito", "abdômen", "braços", "mãos", "quadril", "pernas", "pés"] as const;
 export const SENSATIONS = ["tensão", "calor", "frio", "peso", "leveza", "formigamento", "pulsação", "pouca percepção", "não sei", "outra"] as const;
 export const BodyPointSchema = z.strictObject({
   region: z.enum(BODY_REGIONS), view: z.enum(["frente", "costas"]),
-  sensation: z.enum(SENSATIONS), intensity: z.number().int().min(1).max(5), note: z.string().max(120),
+  sensation: z.enum(SENSATIONS), intensity: z.number().int().min(1).max(5).nullable(), note: z.string().max(120),
 });
 export type BodyPoint = z.infer<typeof BodyPointSchema>;
 export const EXPERIMENT_STEPS = ["preparar", "consenso", "graduacao", "energia", "execucao", "fechamento"] as const;
@@ -25,7 +34,7 @@ export const recordSchemas = {
   "roda-das-emocoes": z.strictObject({ emotionId: itemId, intensity: z.number().int().min(1).max(5), reflection: shortText }),
   "necessidades-agora": z.strictObject({ ids: z.array(itemId).max(3), reflection: shortText }),
   "paisagem-de-pensamentos": z.strictObject({ mode: z.enum(["jardim", "rio"]), thoughts: z.array(shortText).max(20), reflection: shortText }).refine(value => value.mode !== "rio" || value.thoughts.length === 0, "As folhas do Rio são efêmeras."),
-  "polaridades-e-cadeiras": z.strictObject({ names: z.tuple([z.string().max(60), z.string().max(60)]), position: z.number().int().min(0).max(10), turns: z.array(z.strictObject({ side: z.union([z.literal(0), z.literal(1)]), text: shortText })).max(12), reflection: shortText }),
+  "polaridades-e-cadeiras": z.strictObject({ names: z.tuple([z.string().max(60), z.string().max(60)]), position: z.number().int().min(0).max(10).nullable(), turns: z.array(z.strictObject({ side: z.union([z.literal(0), z.literal(1)]), text: shortText })).max(12), reflection: shortText }),
   "sala-de-pausa": z.strictObject({ practice: z.enum(["respirar", "observar", "pelos-sentidos", "ouvir", "movimentar", "desacelerar"]), seconds: z.number().int().min(0).max(86400), reflection: shortText }),
   "sons-para-awareness": z.strictObject({ sceneId: z.string().max(80), observations: z.array(shortText).max(10), reflection: shortText }),
   "cartas-gestalticas": z.strictObject({ favorites: z.array(itemId).max(60), review: z.array(itemId).max(60), known: z.array(itemId).max(60), reflection: shortText }),
@@ -38,7 +47,7 @@ export const recordSchemas = {
 } satisfies Partial<Record<ResourceKey, z.ZodType>>;
 export type RecordResourceKey = keyof typeof recordSchemas;
 export const RecordEnvelopeSchema = z.strictObject({
-  resourceKey: ResourceKeySchema, schemaVersion: z.literal(1), formationId: z.string().min(1).max(120),
+  resourceKey: ResourceKeySchema, schemaVersion: z.literal(1), formationId: z.uuid(),
   clientRequestId: z.uuid(), contentVersion: z.uuid().nullable(), payload: z.unknown(),
 });
 export function validateRecord(input: unknown) {
@@ -46,13 +55,14 @@ export function validateRecord(input: unknown) {
   if (!Object.prototype.hasOwnProperty.call(recordSchemas, envelope.resourceKey)) throw new Error("Este recurso não guarda registros.");
   const schema = recordSchemas[envelope.resourceKey as RecordResourceKey];
   const payload = schema.parse(envelope.payload);
-  if (new TextEncoder().encode(JSON.stringify(payload)).byteLength > MAX_RECORD_BYTES) throw new Error("Registro maior que o limite permitido.");
+  if (postgresPayloadBytes(payload) > MAX_RECORD_BYTES) throw new Error("Registro maior que o limite permitido.");
   return { ...envelope, payload };
 }
 export type RecordInput = z.infer<typeof RecordEnvelopeSchema>;
 export interface PrivateRecord {
   id: string; resourceKey: ResourceKey; schemaVersion: number; formationId: string | null;
   payload: unknown; createdAt: string; expiresAt: string; legacy: boolean;
+  labels?:{id:string;title:string}[];
 }
 export interface FormationOption { id: string; title: string; endDate: string; expiresAt: string }
 export type ResourceResult<T> = { ok: true; data: T } | { ok: false; code: "unauthenticated" | "forbidden" | "invalid" | "unavailable" | "release_pending" | "expired"; error: string };

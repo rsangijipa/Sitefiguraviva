@@ -24,8 +24,8 @@ export const AbstractChairs: React.FC<AbstractChairsProps> = ({
       {/* Visual stage / ambient background */}
       <div className="relative flex items-center justify-between min-h-[190px] sm:min-h-[220px]">
         {/* Subtle ground plane / connection line */}
-        <div className="absolute inset-x-8 bottom-6 h-px bg-stone-300/70" />
-        <div className="absolute left-1/2 -translate-x-1/2 bottom-5 w-2 h-2 rounded-full bg-stone-300" />
+        <div className="absolute inset-x-8 bottom-6 h-px bg-paper/70" />
+        <div className="absolute left-1/2 -translate-x-1/2 bottom-5 w-2 h-2 rounded-full bg-paper" />
 
         {/* Spatial Spotlight Focus Indicator */}
         <motion.div
@@ -63,8 +63,8 @@ export const AbstractChairs: React.FC<AbstractChairsProps> = ({
             <span
               className={`text-xs font-medium tracking-wide uppercase px-2.5 py-0.5 rounded-full transition-colors ${
                 isA
-                  ? "bg-stone-900 text-stone-100 shadow-sm"
-                  : "bg-stone-200/80 text-stone-500"
+                  ? "bg-primary text-paper "
+                  : "bg-paper/80 text-mata"
               }`}
             >
               {isA ? "Voz Ativa" : "Em Escuta"}
@@ -88,7 +88,7 @@ export const AbstractChairs: React.FC<AbstractChairsProps> = ({
                 y1="22"
                 x2="34"
                 y2="58"
-                className={isA ? "stroke-stone-900" : "stroke-stone-400"}
+                className={isA ? "stroke-mata" : "stroke-mata"}
               />
               <line
                 x1="30"
@@ -96,7 +96,7 @@ export const AbstractChairs: React.FC<AbstractChairsProps> = ({
                 x2="30"
                 y2="52"
                 strokeWidth="1.8"
-                className={isA ? "stroke-amber-700/80" : "stroke-stone-300"}
+                className={isA ? "stroke-amber-700/80" : "stroke-paper"}
               />
               {/* Seat: horizontal cantilever plane extending right */}
               <line
@@ -105,7 +105,7 @@ export const AbstractChairs: React.FC<AbstractChairsProps> = ({
                 x2="72"
                 y2="58"
                 strokeWidth="2.8"
-                className={isA ? "stroke-stone-900" : "stroke-stone-400"}
+                className={isA ? "stroke-mata" : "stroke-mata"}
               />
               {/* Front leg */}
               <line
@@ -113,7 +113,7 @@ export const AbstractChairs: React.FC<AbstractChairsProps> = ({
                 y1="58"
                 x2="66"
                 y2="88"
-                className={isA ? "stroke-stone-800" : "stroke-stone-400"}
+                className={isA ? "stroke-mata" : "stroke-mata"}
               />
               {/* Back leg angled */}
               <line
@@ -121,7 +121,7 @@ export const AbstractChairs: React.FC<AbstractChairsProps> = ({
                 y1="58"
                 x2="28"
                 y2="88"
-                className={isA ? "stroke-stone-800" : "stroke-stone-400"}
+                className={isA ? "stroke-mata" : "stroke-mata"}
               />
               {/* Slender ground shadow line */}
               <ellipse
@@ -129,7 +129,7 @@ export const AbstractChairs: React.FC<AbstractChairsProps> = ({
                 cy="89"
                 rx="24"
                 ry="3"
-                className={isA ? "fill-stone-300/60" : "fill-stone-200/40"}
+                className={isA ? "fill-paper/60" : "fill-paper/40"}
                 stroke="none"
               />
             </svg>
@@ -146,14 +146,14 @@ export const AbstractChairs: React.FC<AbstractChairsProps> = ({
 
           {/* Perspective Label */}
           <div className="text-center mt-1 w-full max-w-[170px]">
-            <p className="text-xs tracking-wider uppercase text-stone-500 font-semibold">
+            <p className="text-xs tracking-wider uppercase text-mata font-semibold">
               Cadeira A
             </p>
-            <p className="text-sm font-semibold text-stone-900 truncate">
+            <p className="text-sm font-semibold text-mata truncate">
               {chairA.name || "Perspectiva A"}
             </p>
             {chairA.sublabel && (
-              <p className="text-xs text-stone-500 truncate mt-0.5">
+              <p className="text-xs text-mata truncate mt-0.5">
                 {chairA.sublabel}
               </p>
             )}
@@ -162,7 +162,7 @@ export const AbstractChairs: React.FC<AbstractChairsProps> = ({
 
         {/* Center Tension / Exchange Axis Indicator */}
         <div className="flex flex-col items-center justify-center px-2 z-10">
-          <div className="flex items-center space-x-1.5 py-1 px-3 rounded-full bg-stone-100 border border-stone-200 text-stone-500 text-xs shadow-xs">
+          <div className="flex items-center space-x-1.5 py-1 px-3 rounded-full bg-paper border border-nevoa text-mata text-xs ">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-600 animate-pulse" />
             <span className="font-mono text-[11px]">Diálogo</span>
           </div>
@@ -190,8 +190,8 @@ export const AbstractChairs: React.FC<AbstractChairsProps> = ({
             <span
               className={`text-xs font-medium tracking-wide uppercase px-2.5 py-0.5 rounded-full transition-colors ${
                 !isA
-                  ? "bg-stone-900 text-stone-100 shadow-sm"
-                  : "bg-stone-200/80 text-stone-500"
+                  ? "bg-primary text-paper "
+                  : "bg-paper/80 text-mata"
               }`}
             >
               {!isA ? "Voz Ativa" : "Em Escuta"}
@@ -215,7 +215,7 @@ export const AbstractChairs: React.FC<AbstractChairsProps> = ({
                 y1="22"
                 x2="66"
                 y2="58"
-                className={!isA ? "stroke-stone-900" : "stroke-stone-400"}
+                className={!isA ? "stroke-mata" : "stroke-mata"}
               />
               <line
                 x1="70"
@@ -223,7 +223,7 @@ export const AbstractChairs: React.FC<AbstractChairsProps> = ({
                 x2="70"
                 y2="52"
                 strokeWidth="1.8"
-                className={!isA ? "stroke-amber-700/80" : "stroke-stone-300"}
+                className={!isA ? "stroke-amber-700/80" : "stroke-paper"}
               />
               {/* Seat: horizontal cantilever plane extending left */}
               <line
@@ -232,7 +232,7 @@ export const AbstractChairs: React.FC<AbstractChairsProps> = ({
                 x2="28"
                 y2="58"
                 strokeWidth="2.8"
-                className={!isA ? "stroke-stone-900" : "stroke-stone-400"}
+                className={!isA ? "stroke-mata" : "stroke-mata"}
               />
               {/* Front leg */}
               <line
@@ -240,7 +240,7 @@ export const AbstractChairs: React.FC<AbstractChairsProps> = ({
                 y1="58"
                 x2="34"
                 y2="88"
-                className={!isA ? "stroke-stone-800" : "stroke-stone-400"}
+                className={!isA ? "stroke-mata" : "stroke-mata"}
               />
               {/* Back leg angled */}
               <line
@@ -248,7 +248,7 @@ export const AbstractChairs: React.FC<AbstractChairsProps> = ({
                 y1="58"
                 x2="72"
                 y2="88"
-                className={!isA ? "stroke-stone-800" : "stroke-stone-400"}
+                className={!isA ? "stroke-mata" : "stroke-mata"}
               />
               {/* Slender ground shadow line */}
               <ellipse
@@ -256,7 +256,7 @@ export const AbstractChairs: React.FC<AbstractChairsProps> = ({
                 cy="89"
                 rx="24"
                 ry="3"
-                className={!isA ? "fill-stone-300/60" : "fill-stone-200/40"}
+                className={!isA ? "fill-paper/60" : "fill-paper/40"}
                 stroke="none"
               />
             </svg>
@@ -273,14 +273,14 @@ export const AbstractChairs: React.FC<AbstractChairsProps> = ({
 
           {/* Perspective Label */}
           <div className="text-center mt-1 w-full max-w-[170px]">
-            <p className="text-xs tracking-wider uppercase text-stone-500 font-semibold">
+            <p className="text-xs tracking-wider uppercase text-mata font-semibold">
               Cadeira B
             </p>
-            <p className="text-sm font-semibold text-stone-900 truncate">
+            <p className="text-sm font-semibold text-mata truncate">
               {chairB.name || "Perspectiva B"}
             </p>
             {chairB.sublabel && (
-              <p className="text-xs text-stone-500 truncate mt-0.5">
+              <p className="text-xs text-mata truncate mt-0.5">
                 {chairB.sublabel}
               </p>
             )}

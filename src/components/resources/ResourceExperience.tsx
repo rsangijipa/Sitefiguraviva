@@ -73,8 +73,8 @@ export function ResourceExperience({
                           onClick={() => onSectionChange?.(section.id)}
                           className={`inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold ${
                             isActive
-                              ? "bg-primary text-white"
-                              : "border border-primary/15 bg-white/85 text-primary hover:border-terra hover:text-terra"
+                              ? "bg-primary text-paper"
+                              : "border border-primary/15 bg-paper/85 text-primary hover:border-terra hover:text-terra"
                           }`}
                           aria-current={isActive ? "page" : undefined}
                         >

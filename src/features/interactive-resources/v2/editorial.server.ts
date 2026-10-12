@@ -2,6 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { resourceDatabase, type ContentRow } from "./database.server";
 import { EditorialConfigSchema, assertPublishable, type EditorialVersion } from "./editorial-schema";
+import {verifyApprovedAssets} from "./art.server";
 import type { ResourceKey } from "./contracts";
 
 export function contentVersion(row: ContentRow): EditorialVersion {
@@ -21,9 +22,11 @@ export const publishedEditorial = cache(async (key: ResourceKey): Promise<Editor
     if (version.configuration.resourceKey !== key) return null;
     assertPublishable(version.configuration);
     if (version.configuration.artApprovalId) {
-      const art = await db.from("resource_art_approvals").select("id").eq("id", version.configuration.artApprovalId).maybeSingle();
+      const art = await db.from("resource_art_approvals").select("assets").eq("id", version.configuration.artApprovalId).maybeSingle();
       if (art.error || !art.data) return null;
+      await verifyApprovedAssets(version.configuration, art.data.assets);
     }
+    if (version.configuration.audio.length && !version.configuration.artApprovalId) return null;
     return version;
   } catch { return null; } // Unapplied migration/unavailable database never publishes legacy data.
 });

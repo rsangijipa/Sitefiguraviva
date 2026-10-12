@@ -21,6 +21,7 @@ const modes = new Set([
   "security",
   "build",
   "smoke",
+  "brand",
 ]);
 const requested = process.argv.slice(2);
 if (requested.some((mode) => !modes.has(mode)))
@@ -43,7 +44,7 @@ if (
   );
 const checks = requested.length
   ? requested
-  : ["lint", "scripts", "unit", "types", "security", "build"];
+  : ["lint", "scripts", "unit", "types", "security", "brand", "build"];
 const fixture = await createCiFixture();
 const results = [];
 try {
@@ -67,6 +68,7 @@ try {
       env.FIGURA_CI_VALIDATED = "1";
     }
     const commands = {
+      brand: ["scripts/lint-marca.mjs"],
       lint: [packageBin("eslint", "eslint"), "src", "tests", "e2e"],
       scripts: [
         "--test",

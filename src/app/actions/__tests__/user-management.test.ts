@@ -22,6 +22,7 @@ jest.mock("@/lib/rateLimit", () => ({
   RateLimitPresets: { PASSWORD_RESET: { maxRequests: 3, windowMs: 600000 } },
 }));
 jest.mock("next/cache", () => ({ revalidatePath: jest.fn() }));
+jest.mock("@/features/interactive-resources/v2/maintenance.server",()=>({prepareResourceAccountErasure:jest.fn().mockResolvedValue(undefined)}));
 import {
   updateUserRole,
   toggleUserStatus,

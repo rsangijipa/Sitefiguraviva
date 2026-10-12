@@ -25,9 +25,9 @@ const getFillColor = (
   intensity: number = 0,
   isSelected: boolean = false,
 ): string => {
-  if (isSelected) return "#ffffff"; // Selected highlight
+  if (isSelected) return "#FDFAF4"; // Selected highlight
 
-  if (!sensation) return "rgba(231, 229, 228, 0.4)"; // Default stone-200ish
+  if (!sensation) return "rgb(241 233 219 / 0.4)"; // Default stone-200ish
 
   // Opacity based on intensity (1-5)
   const opacity = 0.5 + intensity / 10;
@@ -46,7 +46,7 @@ const getFillColor = (
     case "neutral":
       return `rgba(141, 163, 153, ${opacity})`; // Sage
     default:
-      return "rgba(231, 229, 228, 0.4)";
+      return "rgb(241 233 219 / 0.4)";
   }
 };
 
@@ -80,12 +80,12 @@ const BodyMap: React.FC<BodyMapProps> = ({
     ),
     transition: "fill 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
     cursor: readOnly ? "default" : "pointer",
-    stroke: selectedPart === part ? "#57534e" : "transparent", // Stone-600
+    stroke: selectedPart === part ? "#4B4B49" : "transparent", // Stone-600
     strokeWidth: 1.5,
   });
 
   // Base silhouette color for the background layer
-  const baseClass = "fill-[#e7e5e4] opacity-50";
+  const baseClass = "fill-[#F1E9DB] opacity-50";
 
   // Path Definitions for a Realistic Silhouette
   // Coordinate space: 0 0 300 700
@@ -131,7 +131,7 @@ const BodyMap: React.FC<BodyMapProps> = ({
       className={
         readOnly
           ? undefined
-          : "focus-visible:outline-none focus-visible:stroke-stone-800"
+          : "focus-visible:outline-none focus-visible:stroke-mata"
       }
     />
   );
@@ -142,7 +142,7 @@ const BodyMap: React.FC<BodyMapProps> = ({
     <svg
       viewBox="0 0 300 700"
       preserveAspectRatio="xMidYMid meet"
-      className="h-full w-auto max-h-[70vh] mx-auto filter drop-shadow-lg"
+      className="h-full w-auto max-h-[70vh] mx-auto filter "
       role={readOnly ? "img" : "group"}
       aria-label={
         readOnly
@@ -198,7 +198,7 @@ const BodyMap: React.FC<BodyMapProps> = ({
           className={
             readOnly
               ? undefined
-              : "focus-visible:outline-none focus-visible:stroke-stone-800"
+              : "focus-visible:outline-none focus-visible:stroke-mata"
           }
         >
           <path

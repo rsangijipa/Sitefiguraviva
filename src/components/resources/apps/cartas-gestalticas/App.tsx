@@ -432,7 +432,7 @@ export default function App({
         )}
       </main>
 
-      <footer className="border-t border-[#E2D8CA]/70 px-4 py-4 text-center">
+      <footer className="border-t border-[#D8CFBE]/70 px-4 py-4 text-center">
         <p className="text-[11px] leading-relaxed text-[#6B6B63]">
           Favoritos, revisões e histórico de estudo ficam somente neste
           navegador.
@@ -450,7 +450,7 @@ export default function App({
         <p
           role="status"
           aria-live="polite"
-          className="fixed bottom-4 left-1/2 z-40 -translate-x-1/2 rounded-full border border-[#005A1F]/25 bg-[#FDFAF4] px-4 py-2 text-xs font-medium text-[#005A1F] shadow-lg"
+          className="fixed bottom-4 left-1/2 z-40 -translate-x-1/2 rounded-full border border-[#005A1F]/25 bg-[#FDFAF4] px-4 py-2 text-xs font-medium text-[#005A1F] "
         >
           {statusMessage}
         </p>

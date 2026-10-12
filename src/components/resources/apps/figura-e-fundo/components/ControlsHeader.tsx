@@ -22,16 +22,16 @@ export const ControlsHeader: React.FC<ControlsHeaderProps> = ({
   isPlaygroundMode = false,
 }) => {
   return (
-    <div className="w-full flex items-center justify-end gap-2 sm:gap-3 pb-4 border-b border-[#E8E4DA]">
+    <div className="w-full flex items-center justify-end gap-2 sm:gap-3 pb-4 border-b border-[#F1E9DB]">
       {!isPlaygroundMode && stage !== "conclusion" && (
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#FFFFFF] border border-[#E3DFD5] text-xs text-[#6B665E] shadow-2xs">
-          <span className="font-serif font-medium text-[#1F1E1D]">
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#FDFAF4] border border-[#F1E9DB] text-xs text-[#6B6B63] ">
+          <span className="font-serif font-medium text-[#262B22]">
             Rodada {currentRoundIndex + 1}
           </span>
-          <span className="text-[#CCC5BA]">/</span>
-          <span className="text-[#969085]">{totalRounds}</span>
-          <span className="hidden md:inline text-[#C0B9AC]">•</span>
-          <span className="hidden md:inline text-[#555048] font-medium">
+          <span className="text-[#D8CFBE]">/</span>
+          <span className="text-[#6B6B63]">{totalRounds}</span>
+          <span className="hidden md:inline text-[#D8CFBE]">•</span>
+          <span className="hidden md:inline text-[#4B4B49] font-medium">
             {currentRound.parameterName}
           </span>
         </div>
@@ -43,8 +43,8 @@ export const ControlsHeader: React.FC<ControlsHeaderProps> = ({
           onClick={onTogglePlayground}
           className={`px-3 py-1.5 rounded-xl border text-xs font-medium tracking-wide flex items-center gap-1.5 transition-all ${
             isPlaygroundMode
-              ? "bg-[#2C2A29] text-[#FAF8F5] border-[#2C2A29]"
-              : "bg-[#FFFFFF] hover:bg-[#F4EFE6] text-[#555048] border-[#E3DFD5]"
+              ? "bg-[#262B22] text-[#FDFAF4] border-[#262B22]"
+              : "bg-[#FDFAF4] hover:bg-[#F1E9DB] text-[#4B4B49] border-[#F1E9DB]"
           }`}
           title="Ajustar parâmetros livremente"
         >
@@ -57,9 +57,9 @@ export const ControlsHeader: React.FC<ControlsHeaderProps> = ({
       <button
         id="btn-open-study"
         onClick={onOpenStudy}
-        className="px-3 py-1.5 rounded-xl bg-[#FFFFFF] hover:bg-[#F2ECE2] text-[#4F4B44] border border-[#E3DFD5] text-xs font-medium tracking-wide flex items-center gap-1.5 transition-all shadow-2xs hover:border-[#D5CEBF]"
+        className="px-3 py-1.5 rounded-xl bg-[#FDFAF4] hover:bg-[#F1E9DB] text-[#4B4B49] border border-[#F1E9DB] text-xs font-medium tracking-wide flex items-center gap-1.5 transition-all  hover:border-[#D8CFBE]"
       >
-        <BookOpen className="w-3.5 h-3.5 text-[#8C6B4F]" />
+        <BookOpen className="w-3.5 h-3.5 text-[#6B6B63]" />
         <span>Entender o conceito</span>
       </button>
     </div>

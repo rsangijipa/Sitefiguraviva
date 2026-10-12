@@ -124,7 +124,7 @@ export function GuidedMode({
       </div>
 
       {/* Main Card */}
-      <div className="rounded-[24px] border-2 border-[#F1E9DB] bg-[#FDFAF4] p-6 sm:p-10 shadow-none">
+      <div className="rounded-[24px] border-2 border-[#F1E9DB] bg-[#FDFAF4] p-6 sm:p-10 ">
         <h2 className="font-serif text-3xl font-bold text-[#262B22]">
           {stage.label}
         </h2>

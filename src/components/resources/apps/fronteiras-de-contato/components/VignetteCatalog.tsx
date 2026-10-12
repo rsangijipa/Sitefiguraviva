@@ -49,17 +49,17 @@ export const VignetteCatalog: React.FC<VignetteCatalogProps> = ({
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E3DDD1]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#F1E9DB]">
         <div>
           <div className="flex items-center gap-2">
-            <span className="p-1.5 rounded-lg bg-[#EFE9DF] text-[#554D40]">
+            <span className="p-1.5 rounded-lg bg-[#F1E9DB] text-[#4B4B49]">
               <BookOpen className="w-4 h-4" />
             </span>
-            <h2 className="font-serif text-2xl text-[#26231F] font-normal tracking-tight">
+            <h2 className="font-serif text-2xl text-[#262B22] font-normal tracking-tight">
               Catálogo de Vinhetas Relacionais
             </h2>
           </div>
-          <p className="text-xs sm:text-sm text-[#70675A] mt-1">
+          <p className="text-xs sm:text-sm text-[#6B6B63] mt-1">
             Situações cotidianas de contato com 3 desdobramentos fenomênicos e
             perguntas de auto-observação.
           </p>
@@ -68,7 +68,7 @@ export const VignetteCatalog: React.FC<VignetteCatalogProps> = ({
         {showAdmin ? (
           <button
             onClick={onOpenNewVignetteModal}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#3C362F] text-[#FAF8F5] text-xs font-medium hover:bg-[#2B2721] transition-colors shadow-xs self-start sm:self-auto shrink-0"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#262B22] text-[#FDFAF4] text-xs font-medium hover:bg-[#262B22] transition-colors  self-start sm:self-auto shrink-0"
           >
             <Sparkles className="w-3.5 h-3.5" />
             <span>Criar Nova Vinheta</span>
@@ -86,8 +86,8 @@ export const VignetteCatalog: React.FC<VignetteCatalogProps> = ({
               onClick={() => setSelectedCategory(cat)}
               className={`px-3 py-1.5 rounded-lg text-xs transition-all ${
                 selectedCategory === cat
-                  ? "bg-[#40382E] text-white font-medium shadow-xs"
-                  : "bg-[#EDE7DC] text-[#696052] hover:bg-[#E2DACB]"
+                  ? "bg-[#262B22] text-paper font-medium "
+                  : "bg-[#F1E9DB] text-[#6B6B63] hover:bg-[#D8CFBE]"
               }`}
             >
               {cat}
@@ -97,13 +97,13 @@ export const VignetteCatalog: React.FC<VignetteCatalogProps> = ({
 
         {/* Search input */}
         <div className="relative w-full md:w-64 shrink-0">
-          <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#948B7D]" />
+          <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#6B6B63]" />
           <input
             type="text"
             placeholder="Buscar por palavras-chave..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-3 py-1.5 text-xs bg-white rounded-lg border border-[#DDD5C7] focus:outline-none focus:border-[#7A6B59] text-[#292520] placeholder:text-[#A19788]"
+            className="w-full pl-9 pr-3 py-1.5 text-xs bg-paper rounded-lg border border-[#D8CFBE] focus:outline-none focus:border-[#6B6B63] text-[#262B22] placeholder:text-[#6B6B63]"
           />
         </div>
       </div>
@@ -114,38 +114,38 @@ export const VignetteCatalog: React.FC<VignetteCatalogProps> = ({
           <article
             key={vignette.id}
             id={`vignette-card-${vignette.id}`}
-            className="bg-white rounded-2xl border border-[#E1D9CC] p-5 sm:p-6 shadow-xs flex flex-col justify-between hover:border-[#C7BDAD] transition-all group"
+            className="bg-paper rounded-2xl border border-[#D8CFBE] p-5 sm:p-6  flex flex-col justify-between hover:border-[#D8CFBE] transition-all group"
           >
             <div className="space-y-3">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-md bg-[#EFE9DE] text-[#554B3E] border border-[#DDD4C5]">
+                <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-md bg-[#F1E9DB] text-[#4B4B49] border border-[#D8CFBE]">
                   {vignette.category}
                 </span>
                 {vignette.isDefault === false && (
-                  <span className="text-[10px] text-[#7A6B59] font-medium">
+                  <span className="text-[10px] text-[#6B6B63] font-medium">
                     Personalizada
                   </span>
                 )}
               </div>
 
-              <h3 className="font-serif text-lg text-[#25221E] font-normal group-hover:text-[#7A6149] transition-colors">
+              <h3 className="font-serif text-lg text-[#262B22] font-normal group-hover:text-[#6B6B63] transition-colors">
                 {vignette.title}
               </h3>
 
-              <p className="text-xs text-[#5D5548] leading-relaxed line-clamp-2">
+              <p className="text-xs text-[#4B4B49] leading-relaxed line-clamp-2">
                 {vignette.situation}
               </p>
 
               {/* Responses overview */}
-              <div className="pt-2 border-t border-[#F0ECE4] space-y-1.5">
-                <span className="text-[10px] uppercase font-semibold tracking-wider text-[#8A7F70] block">
+              <div className="pt-2 border-t border-[#F1E9DB] space-y-1.5">
+                <span className="text-[10px] uppercase font-semibold tracking-wider text-[#6B6B63] block">
                   Movimentos em jogo:
                 </span>
                 <div className="flex flex-wrap gap-1.5">
                   {vignette.responses.map((r, i) => (
                     <span
                       key={r.id || i}
-                      className="text-[10px] px-2 py-0.5 rounded bg-[#FAF7F2] text-[#635A4D] border border-[#E5DFD4]"
+                      className="text-[10px] px-2 py-0.5 rounded bg-[#FDFAF4] text-[#4B4B49] border border-[#F1E9DB]"
                     >
                       {r.relationalMovementLabel.split("/")[0].trim()}
                     </span>
@@ -155,15 +155,15 @@ export const VignetteCatalog: React.FC<VignetteCatalogProps> = ({
             </div>
 
             {/* Bottom action */}
-            <div className="mt-5 pt-3 border-t border-[#F0ECE4] flex items-center justify-between">
-              <span className="text-xs text-[#7B7264] italic truncate max-w-[220px]">
+            <div className="mt-5 pt-3 border-t border-[#F1E9DB] flex items-center justify-between">
+              <span className="text-xs text-[#6B6B63] italic truncate max-w-[220px]">
                 "{vignette.reflectiveQuestion}"
               </span>
 
               <button
                 id={`btn-explore-${vignette.id}`}
                 onClick={() => onSelectVignette(vignette.id)}
-                className="inline-flex items-center gap-1 text-xs font-medium text-[#383127] hover:text-[#7A6047] group/btn shrink-0"
+                className="inline-flex items-center gap-1 text-xs font-medium text-[#262B22] hover:text-[#6B6B63] group/btn shrink-0"
               >
                 <span>Experimentar</span>
                 <ChevronRight className="w-3.5 h-3.5 transition-transform group-hover/btn:translate-x-0.5" />
@@ -174,7 +174,7 @@ export const VignetteCatalog: React.FC<VignetteCatalogProps> = ({
       </div>
 
       {filtered.length === 0 && (
-        <div className="text-center py-12 bg-white rounded-2xl border border-[#E3DDD1] text-xs text-[#7A7163]">
+        <div className="text-center py-12 bg-paper rounded-2xl border border-[#F1E9DB] text-xs text-[#6B6B63]">
           Nenhuma vinheta corresponde ao filtro selecionado.
         </div>
       )}

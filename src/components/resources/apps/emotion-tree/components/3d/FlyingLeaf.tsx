@@ -99,14 +99,14 @@ export function FlyingLeaf({
     texture: THREE.CanvasTexture | null;
   }>(() => {
     const material = createLeafMaterial({
-      color: "#C8AE7A",
-      subsurfaceColor: "#F6EAB6",
+      color: "#D8CFBE",
+      subsurfaceColor: "#F1E9DB",
       subsurfaceIntensity: 1.4,
       roughness: 0.5,
       vertexColors: true,
       windStrength: 0.012,
       cacheKey: "leaf-hero-v2",
-      emissive: "#2A2110",
+      emissive: "#262B22",
       emissiveIntensity: 0.45,
     });
 

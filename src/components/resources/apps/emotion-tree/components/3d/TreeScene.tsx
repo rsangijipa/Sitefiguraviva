@@ -151,14 +151,14 @@ function Ground({ receiveShadow }: { receiveShadow: boolean }) {
       {/* terra exposta no pe da arvore */}
       <mesh position={[0, 0.004, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <circleGeometry args={[0.85, 48]} />
-        <meshStandardMaterial color="#5C5136" roughness={1} metalness={0} />
+        <meshStandardMaterial color="#4B4B49" roughness={1} metalness={0} />
       </mesh>
 
       {/* sombra de contato: so quando nao ha shadow map, para nao dobrar a sombra */}
       {receiveShadow ? null : (
         <mesh position={[0, 0.008, 0]} rotation={[-Math.PI / 2, 0, 0]}>
           <circleGeometry args={[1.6, 48]} />
-          <meshBasicMaterial color="#1B2A14" transparent opacity={0.26} depthWrite={false} />
+          <meshBasicMaterial color="#262B22" transparent opacity={0.26} depthWrite={false} />
         </mesh>
       )}
     </group>
@@ -438,15 +438,15 @@ function SceneContent({
       <fog attach="fog" args={[HORIZON_COLOR, framing.distance * 1.4, framing.distance * 5]} />
 
       {/* ceu difuso + luz do solo refletida */}
-      <hemisphereLight intensity={1.15} color="#CFE2F2" groundColor="#6B7C4A" />
-      <ambientLight intensity={0.38} color="#D7E6F3" />
+      <hemisphereLight intensity={1.15} color="#F1E9DB" groundColor="#6B6B63" />
+      <ambientLight intensity={0.38} color="#F1E9DB" />
 
       {/* sol artificial: reposicionado a cada frame para ficar do lado de quem observa */}
       <directionalLight
         ref={sunRef}
         position={[SUN_POSITION.x, SUN_POSITION.y, SUN_POSITION.z]}
         intensity={3.1}
-        color="#FFE7BE"
+        color="#F1E9DB"
         castShadow={quality.shadows}
         shadow-mapSize-width={quality.shadowMapSize}
         shadow-mapSize-height={quality.shadowMapSize}
@@ -463,7 +463,7 @@ function SceneContent({
       />
 
       {/* preenchimento frio do lado oposto, para a silhueta nao fechar em preto */}
-      <directionalLight position={[-6, 4.5, -5]} intensity={0.6} color="#9FBEDA" />
+      <directionalLight position={[-6, 4.5, -5]} intensity={0.6} color="#D8CFBE" />
 
       <group position={TREE_OFFSET}>
         <TreeBark

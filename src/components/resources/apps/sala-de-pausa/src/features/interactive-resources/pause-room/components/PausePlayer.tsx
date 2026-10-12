@@ -102,7 +102,7 @@ export const PausePlayer: React.FC<PausePlayerProps> = ({
       {/* Barra de status e tempo monotônico */}
       <div 
         id="player-timer-status"
-        className="w-full max-w-xl mb-4 px-4 py-3 bg-[#F1E9DB] border-2 border-[#D8CFBE] rounded-2xl flex items-center justify-between shadow-xs"
+        className="w-full max-w-xl mb-4 px-4 py-3 bg-[#F1E9DB] border-2 border-[#D8CFBE] rounded-2xl flex items-center justify-between "
       >
         <div className="flex items-center gap-2 text-sm text-[#005A1F] font-semibold">
           <Clock className="w-4 h-4 text-[#005A1F]" strokeWidth={2} />
@@ -225,12 +225,12 @@ export const PausePlayer: React.FC<PausePlayerProps> = ({
       {/* Diálogo Acessível de Confirmação de Troca de Prática */}
       {showSwitchConfirm && (
         <div 
-          className="fixed inset-0 z-50 bg-[#262B22]/40 flex items-center justify-center p-4 backdrop-blur-xs"
+          className="fixed inset-0 z-50 bg-[#262B22]/40 flex items-center justify-center p-4 "
           role="dialog"
           aria-modal="true"
           aria-labelledby="switch-dialog-title"
         >
-          <div className="bg-[#FDFAF4] border-2 border-[#96551F] rounded-[24px] p-6 max-w-md w-full shadow-lg text-left">
+          <div className="bg-[#FDFAF4] border-2 border-[#96551F] rounded-[24px] p-6 max-w-md w-full  text-left">
             <div className="flex items-center gap-3 mb-3 text-[#96551F]">
               <AlertTriangle className="w-6 h-6" strokeWidth={2} />
               <h3 id="switch-dialog-title" className="font-serif font-bold text-lg text-[#96551F]">

@@ -1,25 +1,25 @@
-.progress-bar {
+.fv-resources .progress-bar {
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
 }
 
-.progress-bar__info {
+.fv-resources .progress-bar__info {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-.progress-bar__label {
-  font-family: var(--font-body);
+.fv-resources .progress-bar__label {
+  font-family: var(--font-sans), sans-serif;
   font-size: 13px;
   font-weight: 600;
   color: var(--fv-pedra);
   letter-spacing: 0.01em;
 }
 
-.progress-bar__percent {
-  font-family: var(--font-body);
+.fv-resources .progress-bar__percent {
+  font-family: var(--font-sans), sans-serif;
   font-size: 12px;
   font-weight: 700;
   color: var(--fv-verde-raiz);
@@ -27,7 +27,7 @@
 }
 
 /* Trilho */
-.progress-bar__track {
+.fv-resources .progress-bar__track {
   width: 100%;
   height: 6px;
   background-color: var(--fv-areia);
@@ -36,7 +36,7 @@
 }
 
 /* Preenchimento */
-.progress-bar__fill {
+.fv-resources .progress-bar__fill {
   height: 100%;
   background-color: var(--fv-verde-raiz);
   border-radius: 99px;
@@ -50,11 +50,11 @@
 }
 
 @media (max-width: 640px) {
-  .progress-bar__track {
+  .fv-resources .progress-bar__track {
     height: 5px;
   }
 
-  .progress-bar__label {
+  .fv-resources .progress-bar__label {
     font-size: 12px;
   }
 }

@@ -37,9 +37,9 @@ function createSpriteTexture() {
   }
 
   const gradient = context.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-  gradient.addColorStop(0, "rgba(255,252,238,1)");
-  gradient.addColorStop(0.35, "rgba(255,246,214,0.55)");
-  gradient.addColorStop(1, "rgba(255,240,200,0)");
+  gradient.addColorStop(0, "rgb(253 250 244 / 1)");
+  gradient.addColorStop(0.35, "rgb(241 233 219 / 0.55)");
+  gradient.addColorStop(1, "rgb(241 233 219 / 0)");
 
   context.fillStyle = gradient;
   context.fillRect(0, 0, size, size);
@@ -178,7 +178,7 @@ export function WindParticles({ count, seed, reduceMotion, dimmed }: WindParticl
       <pointsMaterial
         ref={materialRef}
         map={texture}
-        color="#FFF3D6"
+        color="#F1E9DB"
         size={0.075}
         sizeAttenuation
         transparent

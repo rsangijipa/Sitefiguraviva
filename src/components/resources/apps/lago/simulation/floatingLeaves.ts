@@ -110,7 +110,7 @@ export function renderLeavesOnCanvas(
     ctx.rotate(leaf.angle);
     ctx.beginPath();
     ctx.arc(0, 0, leaf.radius, 0, Math.PI * 2);
-    ctx.fillStyle = "rgba(10, 18, 14, 0.4)";
+    ctx.fillStyle = "rgb(38 43 34 / 0.4)";
     ctx.filter = "blur(8px)";
     ctx.fill();
     ctx.restore();
@@ -127,9 +127,9 @@ export function renderLeavesOnCanvas(
       drawLilyPad(ctx, leaf.radius);
 
       if (leaf.type === "pink_lotus") {
-        drawLotusFlower(ctx, leaf.radius * 0.65, "#f078a6", "#fff0f5");
+        drawLotusFlower(ctx, leaf.radius * 0.65, "#FE538B", "#FDFAF4");
       } else if (leaf.type === "white_lotus") {
-        drawLotusFlower(ctx, leaf.radius * 0.65, "#fff", "#eef9ff");
+        drawLotusFlower(ctx, leaf.radius * 0.65, "#FDFAF4", "#FDFAF4");
       }
     } else if (leaf.type === "cherry_petal") {
       drawCherryPetal(ctx, leaf.radius);
@@ -158,16 +158,16 @@ function drawLilyPad(ctx: CanvasRenderingContext2D, r: number) {
     0,
     r,
   );
-  padGrad.addColorStop(0, "#53a059");
-  padGrad.addColorStop(0.65, "#3b7a42");
-  padGrad.addColorStop(0.95, "#285830");
-  padGrad.addColorStop(1, "#1b3d21");
+  padGrad.addColorStop(0, "#6B6B63");
+  padGrad.addColorStop(0.65, "#4B4B49");
+  padGrad.addColorStop(0.95, "#005A1F");
+  padGrad.addColorStop(1, "#262B22");
 
   ctx.fillStyle = padGrad;
   ctx.fill();
 
   // Delicate radial vein lines
-  ctx.strokeStyle = "rgba(170, 230, 180, 0.35)";
+  ctx.strokeStyle = "rgb(216 207 190 / 0.35)";
   ctx.lineWidth = 1.2;
   const veins = 9;
   for (let i = 0; i < veins; i++) {
@@ -179,18 +179,18 @@ function drawLilyPad(ctx: CanvasRenderingContext2D, r: number) {
   }
 
   // Pad rim rimlight
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
+  ctx.strokeStyle = "rgb(253 250 244 / 0.25)";
   ctx.lineWidth = 1.4;
   ctx.stroke();
 
   // Tiny water bead rolling on the pad
   ctx.beginPath();
   ctx.arc(r * 0.3, -r * 0.2, 3.5, 0, Math.PI * 2);
-  ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+  ctx.fillStyle = "rgb(253 250 244 / 0.85)";
   ctx.fill();
   ctx.beginPath();
   ctx.arc(r * 0.28, -r * 0.22, 1.2, 0, Math.PI * 2);
-  ctx.fillStyle = "#fff";
+  ctx.fillStyle = "#FDFAF4";
   ctx.fill();
 }
 
@@ -220,7 +220,7 @@ function drawLotusFlower(
   // Golden stamen center
   ctx.beginPath();
   ctx.arc(0, 0, size * 0.25, 0, Math.PI * 2);
-  ctx.fillStyle = "#ffcf33";
+  ctx.fillStyle = "#FED701";
   ctx.fill();
   ctx.restore();
 }
@@ -253,8 +253,8 @@ function drawCherryPetal(ctx: CanvasRenderingContext2D, r: number) {
   ctx.closePath();
 
   const grad = ctx.createLinearGradient(0, 0, 0, r * 1.3);
-  grad.addColorStop(0, "#ffcad4");
-  grad.addColorStop(1, "#f72585");
+  grad.addColorStop(0, "#F1E9DB");
+  grad.addColorStop(1, "#FE538B");
   ctx.fillStyle = grad;
   ctx.fill();
 }
@@ -269,9 +269,9 @@ function drawAutumnLeaf(ctx: CanvasRenderingContext2D, r: number) {
   ctx.closePath();
 
   const grad = ctx.createLinearGradient(0, -r, 0, r);
-  grad.addColorStop(0, "#e07a5f");
-  grad.addColorStop(0.6, "#d48c3b");
-  grad.addColorStop(1, "#a84224");
+  grad.addColorStop(0, "#FE538B");
+  grad.addColorStop(0.6, "#96551F");
+  grad.addColorStop(1, "#96551F");
   ctx.fillStyle = grad;
   ctx.fill();
 
@@ -279,7 +279,7 @@ function drawAutumnLeaf(ctx: CanvasRenderingContext2D, r: number) {
   ctx.beginPath();
   ctx.moveTo(0, -r * 0.8);
   ctx.lineTo(0, r * 0.8);
-  ctx.strokeStyle = "rgba(70, 20, 10, 0.4)";
+  ctx.strokeStyle = "rgb(38 43 34 / 0.4)";
   ctx.lineWidth = 1;
   ctx.stroke();
 }

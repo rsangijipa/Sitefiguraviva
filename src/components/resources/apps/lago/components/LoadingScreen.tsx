@@ -79,7 +79,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
               cx="80"
               cy="80"
               r={r}
-              stroke="rgba(34,211,238,0.18)"
+              stroke="rgb(1 201 77 / 0.18)"
               strokeWidth="1.5"
               fill="none"
               style={{
@@ -96,7 +96,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
             cy="80"
             rx="14"
             ry="6"
-            fill="rgba(251,146,60,0.75)"
+            fill="rgb(254 215 1 / 0.75)"
             style={{ animation: "lago-koi-swim 4s ease-in-out infinite" }}
           />
           <ellipse
@@ -104,18 +104,18 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
             cy="76"
             rx="10"
             ry="4.5"
-            fill="rgba(248,250,252,0.55)"
+            fill="rgb(253 250 244 / 0.55)"
             style={{
               animation: "lago-koi-swim 4s ease-in-out infinite",
               animationDelay: "1.6s",
             }}
           />
           {/* Lily pad */}
-          <circle cx="68" cy="68" r="5" fill="rgba(52,163,74,0.65)" />
+          <circle cx="68" cy="68" r="5" fill="rgb(1 201 77 / 0.65)" />
           <defs>
             <radialGradient id="pondGrad" cx="40%" cy="38%" r="70%">
-              <stop offset="0%" stopColor="#164e63" />
-              <stop offset="100%" stopColor="#0a1628" />
+              <stop offset="0%" stopColor="#07614C" />
+              <stop offset="100%" stopColor="#262B22" />
             </radialGradient>
           </defs>
         </svg>

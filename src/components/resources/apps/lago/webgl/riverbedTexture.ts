@@ -16,9 +16,9 @@ export function createRiverbedCanvas(
 
   // 1. Base underwater river sand / silt
   const baseGrad = ctx.createLinearGradient(0, 0, width, height);
-  baseGrad.addColorStop(0, "#1c2e28");
-  baseGrad.addColorStop(0.5, "#243b32");
-  baseGrad.addColorStop(1, "#1b2d26");
+  baseGrad.addColorStop(0, "#262B22");
+  baseGrad.addColorStop(0.5, "#262B22");
+  baseGrad.addColorStop(1, "#262B22");
   ctx.fillStyle = baseGrad;
   ctx.fillRect(0, 0, width, height);
 
@@ -36,14 +36,14 @@ export function createRiverbedCanvas(
   // 3. Layered River Stones (Pedras de Rio)
   // Stone color palettes: Slate greys, warm terracotta/sandstones, river moss greens, smooth dark basalt
   const stonePalettes = [
-    { base: "#3d4e48", light: "#5b7068", dark: "#232d29" },
-    { base: "#554f47", light: "#736b61", dark: "#312d28" },
-    { base: "#425157", light: "#5e7178", dark: "#222d33" },
-    { base: "#685c4d", light: "#867967", dark: "#3d3429" },
-    { base: "#32483d", light: "#496657", dark: "#1b2721" },
-    { base: "#5d6872", light: "#7b8793", dark: "#373f47" },
-    { base: "#4b4845", light: "#6b6662", dark: "#2b2927" },
-    { base: "#746252", light: "#96816f", dark: "#44372c" },
+    { base: "#4B4B49", light: "#6B6B63", dark: "#262B22" },
+    { base: "#4B4B49", light: "#6B6B63", dark: "#262B22" },
+    { base: "#4B4B49", light: "#6B6B63", dark: "#262B22" },
+    { base: "#6B6B63", light: "#6B6B63", dark: "#262B22" },
+    { base: "#4B4B49", light: "#4B4B49", dark: "#262B22" },
+    { base: "#6B6B63", light: "#6B6B63", dark: "#4B4B49" },
+    { base: "#4B4B49", light: "#6B6B63", dark: "#262B22" },
+    { base: "#6B6B63", light: "#6B6B63", dark: "#262B22" },
   ];
 
   // Pseudo-random deterministic distribution of river stones
@@ -87,7 +87,7 @@ export function createRiverbedCanvas(
     ctx.rotate(s.angle);
     ctx.beginPath();
     ctx.ellipse(4, 6, s.rx + 3, s.ry + 3, 0, 0, Math.PI * 2);
-    ctx.fillStyle = "rgba(10, 16, 14, 0.45)";
+    ctx.fillStyle = "rgb(38 43 34 / 0.45)";
     ctx.filter = "blur(5px)";
     ctx.fill();
     ctx.restore();
@@ -131,7 +131,7 @@ export function createRiverbedCanvas(
     ctx.fill();
 
     // Subtle edge contour
-    ctx.strokeStyle = "rgba(15, 20, 18, 0.4)";
+    ctx.strokeStyle = "rgb(38 43 34 / 0.4)";
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
@@ -147,7 +147,7 @@ export function createRiverbedCanvas(
         0,
         Math.PI * 2,
       );
-      ctx.fillStyle = "rgba(38, 77, 48, 0.42)";
+      ctx.fillStyle = "rgb(38 43 34 / 0.42)";
       ctx.fill();
     }
 
@@ -155,7 +155,7 @@ export function createRiverbedCanvas(
   }
 
   // Draw smaller gravel scatter over crevices
-  ctx.fillStyle = "#22302a";
+  ctx.fillStyle = "#262B22";
   for (let g = 0; g < 160; g++) {
     const gx = Math.random() * width;
     const gy = Math.random() * height;
@@ -185,21 +185,21 @@ export function createSkyCanvas(
 
   const grad = ctx.createLinearGradient(0, 0, 0, height);
   if (mode === "day") {
-    grad.addColorStop(0, "#74a7d4"); // Zenith blue
-    grad.addColorStop(0.5, "#99c2e6"); // Sky mid
-    grad.addColorStop(0.85, "#dbebf7"); // Low horizon
-    grad.addColorStop(1, "#ffffff"); // Sun haze
+    grad.addColorStop(0, "#D8CFBE"); // Zenith blue
+    grad.addColorStop(0.5, "#D8CFBE"); // Sky mid
+    grad.addColorStop(0.85, "#F1E9DB"); // Low horizon
+    grad.addColorStop(1, "#FDFAF4"); // Sun haze
   } else if (mode === "sunset") {
-    grad.addColorStop(0, "#2d2146"); // Twilight indigo
-    grad.addColorStop(0.4, "#87405c"); // Magenta
-    grad.addColorStop(0.7, "#d6683b"); // Warm sunset amber
-    grad.addColorStop(1, "#ffc470"); // Golden horizon
+    grad.addColorStop(0, "#262B22"); // Twilight indigo
+    grad.addColorStop(0.4, "#6B6B63"); // Magenta
+    grad.addColorStop(0.7, "#96551F"); // Warm sunset amber
+    grad.addColorStop(1, "#D8CFBE"); // Golden horizon
   } else {
     // Night
-    grad.addColorStop(0, "#0a101d"); // Midnight deep blue
-    grad.addColorStop(0.6, "#111d2e");
-    grad.addColorStop(0.9, "#1a2a40");
-    grad.addColorStop(1, "#2c4366"); // Moonlit horizon
+    grad.addColorStop(0, "#262B22"); // Midnight deep blue
+    grad.addColorStop(0.6, "#262B22");
+    grad.addColorStop(0.9, "#262B22");
+    grad.addColorStop(1, "#4B4B49"); // Moonlit horizon
   }
 
   ctx.fillStyle = grad;
@@ -208,8 +208,8 @@ export function createSkyCanvas(
   // Soft ambient cloud wisps
   ctx.fillStyle =
     mode === "night"
-      ? "rgba(255, 255, 255, 0.04)"
-      : "rgba(255, 255, 255, 0.15)";
+      ? "rgb(253 250 244 / 0.04)"
+      : "rgb(253 250 244 / 0.15)";
   ctx.beginPath();
   ctx.arc(width * 0.35, height * 0.3, width * 0.4, 0, Math.PI * 2);
   ctx.filter = "blur(40px)";

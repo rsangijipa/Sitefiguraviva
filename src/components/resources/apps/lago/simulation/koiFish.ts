@@ -226,7 +226,7 @@ export function renderKoiFishOnCanvas(
     ctx.lineWidth = size * 0.75;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
-    ctx.strokeStyle = "rgba(10, 18, 14, 0.4)";
+    ctx.strokeStyle = "rgb(38 43 34 / 0.4)";
     ctx.filter = "blur(10px)";
     ctx.stroke();
     ctx.restore();
@@ -314,7 +314,7 @@ export function renderKoiFishOnCanvas(
     ctx.closePath();
 
     // Body Base Color (Pearly White or Metallic Gold)
-    const baseColor = variety === "yamabuki" ? "#ffaa2b" : "#f5f4ef";
+    const baseColor = variety === "yamabuki" ? "#FED701" : "#FDFAF4";
     ctx.fillStyle = baseColor;
     ctx.fill();
 
@@ -327,16 +327,16 @@ export function renderKoiFishOnCanvas(
       rightFlank[2]?.x || 0,
       rightFlank[2]?.y || 0,
     );
-    fishGrad.addColorStop(0, "rgba(0, 0, 0, 0.22)");
-    fishGrad.addColorStop(0.5, "rgba(255, 255, 255, 0.35)");
-    fishGrad.addColorStop(1, "rgba(0, 0, 0, 0.28)");
+    fishGrad.addColorStop(0, "rgb(38 43 34 / 0.22)");
+    fishGrad.addColorStop(0.5, "rgb(253 250 244 / 0.35)");
+    fishGrad.addColorStop(1, "rgb(38 43 34 / 0.28)");
     ctx.fillStyle = fishGrad;
     ctx.fill();
 
     // 7. Paint Distinctive Japanese Koi Pattern Markings (Hi & Sumi)
     if (variety === "kohaku") {
       // Vivid Red-Orange (Hi) patches on white body
-      ctx.fillStyle = "#eb4023";
+      ctx.fillStyle = "#96551F";
       // Head patch (Tancho or standard crown)
       ctx.beginPath();
       ctx.ellipse(
@@ -374,7 +374,7 @@ export function renderKoiFishOnCanvas(
       ctx.fill();
     } else if (variety === "sanke") {
       // Red markings
-      ctx.fillStyle = "#e8391d";
+      ctx.fillStyle = "#96551F";
       ctx.beginPath();
       ctx.ellipse(
         bodyPoints[1].x,
@@ -398,7 +398,7 @@ export function renderKoiFishOnCanvas(
       );
       ctx.fill();
       // Black Sumi patches
-      ctx.fillStyle = "#222326";
+      ctx.fillStyle = "#262B22";
       ctx.beginPath();
       ctx.ellipse(
         bodyPoints[3].x,
@@ -423,7 +423,7 @@ export function renderKoiFishOnCanvas(
       ctx.fill();
     } else if (variety === "shiro_bekko") {
       // Ink black markings on white
-      ctx.fillStyle = "#1e2024";
+      ctx.fillStyle = "#262B22";
       ctx.beginPath();
       ctx.ellipse(
         bodyPoints[3].x,
@@ -448,7 +448,7 @@ export function renderKoiFishOnCanvas(
       ctx.fill();
     } else if (variety === "yamabuki") {
       // Golden highlights
-      ctx.fillStyle = "#ff8800";
+      ctx.fillStyle = "#FED701";
       ctx.beginPath();
       ctx.ellipse(
         bodyPoints[2].x,
@@ -465,7 +465,7 @@ export function renderKoiFishOnCanvas(
     // Eyes
     const eyeOffsetX = Math.cos(angle + Math.PI * 0.5) * (size * 0.24);
     const eyeOffsetY = Math.sin(angle + Math.PI * 0.5) * (size * 0.24);
-    ctx.fillStyle = "#111";
+    ctx.fillStyle = "#262B22";
     ctx.beginPath();
     ctx.arc(head.x + eyeOffsetX, head.y + eyeOffsetY, 2.2, 0, Math.PI * 2);
     ctx.arc(head.x - eyeOffsetX, head.y - eyeOffsetY, 2.2, 0, Math.PI * 2);
@@ -492,7 +492,7 @@ export function renderKoiFishOnCanvas(
       ctx.save();
       ctx.beginPath();
       ctx.arc(head.x, head.y, size * 1.4, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(70, 190, 255, 0.08)";
+      ctx.fillStyle = "rgb(216 207 190 / 0.08)";
       ctx.filter = "blur(12px)";
       ctx.fill();
       ctx.restore();
@@ -529,10 +529,10 @@ function drawFin(
   ctx.closePath();
   ctx.fillStyle =
     variety === "yamabuki"
-      ? "rgba(255, 185, 60, 0.65)"
-      : "rgba(255, 255, 255, 0.65)";
+      ? "rgb(254 215 1 / 0.65)"
+      : "rgb(253 250 244 / 0.65)";
   ctx.fill();
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
+  ctx.strokeStyle = "rgb(253 250 244 / 0.4)";
   ctx.lineWidth = 1;
   ctx.stroke();
 }
@@ -575,10 +575,10 @@ function drawTailFin(
 
   ctx.fillStyle =
     variety === "yamabuki"
-      ? "rgba(255, 175, 50, 0.7)"
-      : "rgba(255, 255, 255, 0.7)";
+      ? "rgb(254 215 1 / 0.7)"
+      : "rgb(253 250 244 / 0.7)";
   ctx.fill();
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
+  ctx.strokeStyle = "rgb(253 250 244 / 0.5)";
   ctx.lineWidth = 1.2;
   ctx.stroke();
 }

@@ -5,6 +5,7 @@ import { BodySelector } from "./BodySelector";
 import { Button, TextField, TextArea, RangeScale, SelectableCard, EmptyContent, ReferenceLine } from "./ui";
 import { useExperienceDraft, type ExperienceProps } from "./experience-types";
 import type { EditorialItem } from "./editorial-schema";
+import { EmotionWheel } from "./EmotionWheel";
 
 function ItemSelection({ items, value, onChange, max = 1 }: { items: EditorialItem[]; value: string[]; onChange: (ids: string[]) => void; max?: number }) {
   return !items.length ? <p className="fv-support">As opções deste acervo aguardam revisão docente. Você pode pular esta etapa.</p> :
@@ -39,19 +40,20 @@ export function BodyExperience(props: ExperienceProps) {
   const payload = { regions,mode };
   useExperienceDraft(payload,props.onDraft);
   return <><h2>{mode === "percorrer" ? `Percorrer: ${BODY_REGIONS[index]}` : "Perceber o corpo"}</h2>
-    <p>Você pode não perceber uma região. “Não sei” também cabe aqui.</p><BodySelector value={regions} onChange={setRegions} currentRegion={mode==="percorrer" ? BODY_REGIONS[index] : undefined} />
+    <p>Você pode não perceber uma região. “Não sei” também cabe aqui.</p><BodySelector value={regions} onChange={setRegions} illustrations={props.version?.configuration.items} currentRegion={mode==="percorrer" ? BODY_REGIONS[index] : undefined} />
     {mode==="percorrer" && <p className="fv-note">O roteiro permanece em texto. Áudio docente aparece quando houver gravação revisada e licenciada.</p>}
     <div className="fv-actions">{mode==="percorrer" && index<BODY_REGIONS.length-1 ? <><Button onClick={() => setIndex(index+1)}>Próxima região</Button><Button secondary onClick={() => setIndex(index+1)}>Pular região</Button></> : <Button onClick={() => props.onComplete(payload)}>Concluir percepção</Button>}{index>0 && mode==="percorrer" && <Button secondary onClick={() => setIndex(index-1)}>Região anterior</Button>}</div>
   </>;
 }
 export function EmotionExperience(props: ExperienceProps) {
+  const [listOnly,setListOnly] = useState(props.mode==="lista");
   const [emotionId,setEmotion] = useState(""); const [intensity,setIntensity] = useState(1); const [reflection,setReflection] = useState("");
   const payload = { emotionId,intensity,reflection };
   useExperienceDraft(payload,props.onDraft);
   const items = props.version?.configuration.items.filter(item => item.kind==="emotion") ?? [];
   if (!items.length) return <EmptyContent />;
   const item = items.find(value => value.id===emotionId);
-  return <><h2>Encontre uma palavra, se quiser</h2><ItemSelection items={items} value={emotionId ? [emotionId] : []} onChange={ids => setEmotion(ids[0] ?? "")} /><RangeScale label="Intensidade" min={1} max={5} value={intensity} onChange={setIntensity} ends={["1","5"]} /><TextArea label="Uma percepção, se quiser" value={reflection} onChange={setReflection} />{item && <ReferenceLine item={item} />}<div className="fv-actions"><Button onClick={() => props.onComplete(payload)}>Concluir</Button><Button secondary onClick={() => props.onComplete(null)}>Não sei · encerrar sem registrar</Button></div></>;
+  return <><h2>Encontre uma palavra, se quiser</h2><Button secondary aria-pressed={listOnly} onClick={()=>setListOnly(value=>!value)}>{listOnly?"Ver a roda":"Usar apenas a lista"}</Button>{!listOnly && <EmotionWheel items={items} selected={emotionId} onSelect={setEmotion}/>}<ItemSelection items={items} value={emotionId ? [emotionId] : []} onChange={ids => setEmotion(ids[0] ?? "")} /><RangeScale label="Intensidade" min={1} max={5} value={intensity} onChange={setIntensity} ends={["1","5"]} /><TextArea label="Uma percepção, se quiser" value={reflection} onChange={setReflection} />{item && <ReferenceLine item={item} />}<div className="fv-actions"><Button onClick={() => props.onComplete(payload)}>Concluir</Button><Button secondary onClick={() => props.onComplete(null)}>Não sei · encerrar sem registrar</Button></div></>;
 }
 export function NeedsExperience(props: ExperienceProps) {
   const [ids,setIds] = useState<string[]>([]); const [reflection,setReflection] = useState("");

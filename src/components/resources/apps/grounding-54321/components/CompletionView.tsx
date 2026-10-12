@@ -27,20 +27,20 @@ export const CompletionView: React.FC<CompletionViewProps> = ({
     >
       <div className="my-auto flex flex-col items-center text-center px-4">
         {/* Soft icon indicator */}
-        <div className="w-16 h-16 rounded-full bg-[#EAE7DE] flex items-center justify-center text-[#2F3740] mb-6">
+        <div className="w-16 h-16 rounded-full bg-[#F1E9DB] flex items-center justify-center text-[#262B22] mb-6">
           <Heart className="w-7 h-7 stroke-[1.75]" />
         </div>
 
         {/* Serif title */}
         <h2
           id="completion-title"
-          className="font-fraunces text-3xl sm:text-4xl text-[#1E2328] font-medium tracking-tight mb-3"
+          className="font-fraunces text-3xl sm:text-4xl text-[#262B22] font-medium tracking-tight mb-3"
         >
           Você está ancorado no agora.
         </h2>
 
         {/* Instruction in Karla */}
-        <p className="font-karla text-base text-[#404852] leading-relaxed max-w-sm mb-6">
+        <p className="font-karla text-base text-[#4B4B49] leading-relaxed max-w-sm mb-6">
           Seus sentidos se conectaram com o ambiente presente ao seu redor.
           Inspire profundamente e solte o ar com suavidade.
         </p>
@@ -51,36 +51,36 @@ export const CompletionView: React.FC<CompletionViewProps> = ({
             !settings.reducedMotion ? "animate-subtle-breathe" : ""
           }`}
         >
-          <span className="text-xs uppercase tracking-widest text-[#666D77] font-semibold block mb-1">
+          <span className="text-xs uppercase tracking-widest text-[#6B6B63] font-semibold block mb-1">
             Respiração de ancoragem
           </span>
-          <p className="font-fraunces text-lg text-[#20252B] italic">
+          <p className="font-fraunces text-lg text-[#262B22] italic">
             Inspire a presença. Solte as tensões.
           </p>
         </div>
 
         {/* Duration badge */}
-        <div className="flex items-center gap-2 text-xs text-[#5D6570] font-karla bg-[#EDEAE2] px-3.5 py-1.5 rounded-full mb-3">
+        <div className="flex items-center gap-2 text-xs text-[#6B6B63] font-karla bg-[#F1E9DB] px-3.5 py-1.5 rounded-full mb-3">
           <span>Tempo de prática:</span>
-          <strong className="font-semibold text-[#20252B]">
+          <strong className="font-semibold text-[#262B22]">
             {formatDuration(durationSeconds)}
           </strong>
         </div>
 
         {/* Privacy note as specified in prompt */}
-        <div className="flex items-center gap-1.5 text-xs text-[#6F7782] max-w-xs">
-          <ShieldCheck className="w-4 h-4 text-[#4A535E] flex-shrink-0" />
+        <div className="flex items-center gap-1.5 text-xs text-[#6B6B63] max-w-xs">
+          <ShieldCheck className="w-4 h-4 text-[#4B4B49] flex-shrink-0" />
           <span>Nada desta prática é armazenado ou enviado.</span>
         </div>
       </div>
 
       {/* Action buttons */}
-      <div className="pt-4 border-t border-[#E8E6DF]/80 flex flex-col sm:flex-row items-center justify-center gap-3">
+      <div className="pt-4 border-t border-[#F1E9DB]/80 flex flex-col sm:flex-row items-center justify-center gap-3">
         <button
           id="restart-exercise-btn"
           type="button"
           onClick={onRestart}
-          className="w-full sm:w-auto flex-1 flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-karla text-sm font-semibold bg-[#21272E] hover:bg-[#161A1F] active:bg-[#0E1114] text-[#F8F7F4] shadow-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#21272E]/40"
+          className="w-full sm:w-auto flex-1 flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-karla text-sm font-semibold bg-[#262B22] hover:bg-[#262B22] active:bg-[#262B22] text-[#FDFAF4]  transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#262B22]/40"
         >
           <RotateCcw className="w-4 h-4" />
           <span>Fazer novamente</span>

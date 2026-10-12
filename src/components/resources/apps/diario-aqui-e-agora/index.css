@@ -1,13 +1,10 @@
-@import "tailwindcss";
 
-@layer base {
-  body {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  .fv-resources {
+    font-family: var(--font-sans), sans-serif;
   }
-}
 
-.font-serif-awareness {
-  font-family: 'Newsreader', Georgia, Cambria, serif;
+.fv-resources .font-serif-awareness {
+  font-family: var(--font-serif), serif;
 }
 
 /* Subtle watercolor breathing drift */
@@ -29,10 +26,10 @@
   }
 }
 
-.animate-watercolor-1 {
+.fv-resources .animate-watercolor-1 {
   animation: watercolorFloat1 18s ease-in-out infinite;
 }
 
-.animate-watercolor-2 {
+.fv-resources .animate-watercolor-2 {
   animation: watercolorFloat2 24s ease-in-out infinite;
 }

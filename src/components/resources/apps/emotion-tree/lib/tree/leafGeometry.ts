@@ -64,8 +64,8 @@ export function createLeafGeometry(options: LeafGeometryOptions): THREE.BufferGe
     droop,
     waves,
     veinStrength = 0.2,
-    baseColor = "#ffffff",
-    veinColor = "#20301a",
+    baseColor = "#FDFAF4",
+    veinColor = "#262B22",
   } = options;
 
   const positions: number[] = [];
@@ -217,6 +217,6 @@ export function createHeroLeafGeometry(): THREE.BufferGeometry {
     droop: 0.1,
     waves: 0.022,
     veinStrength: 0.38,
-    veinColor: "#1d2c17",
+    veinColor: "#262B22",
   });
 }

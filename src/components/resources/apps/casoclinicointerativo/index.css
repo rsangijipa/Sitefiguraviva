@@ -6,64 +6,64 @@
    Fonts come from the site's global stack (Tailwind `font-serif` utility),
    so the original body/h1/h2/h3 font-family overrides are intentionally dropped. */
 
-.casoclinicointerativo-app .anim-float-1 {
+.fv-resources .casoclinicointerativo-app .anim-float-1 {
   animation: subtleFloat1 12s ease-in-out infinite;
 }
 
-.casoclinicointerativo-app .anim-float-2 {
+.fv-resources .casoclinicointerativo-app .anim-float-2 {
   animation: subtleFloat2 15s ease-in-out infinite;
 }
 
-.casoclinicointerativo-app .anim-gentle-pulse {
+.fv-resources .casoclinicointerativo-app .anim-gentle-pulse {
   animation: gentlePulse 4s ease-in-out infinite;
 }
 
-.casoclinicointerativo-app .animate-fade-in-up {
+.fv-resources .casoclinicointerativo-app .animate-fade-in-up {
   animation: fadeInUp 0.6s ease-out forwards;
 }
 
-.casoclinicointerativo-app .anim-slide-in-right {
+.fv-resources .casoclinicointerativo-app .anim-slide-in-right {
   animation: slideInRight 0.5s ease-out forwards;
 }
 
 /* Staggered animation delays */
-.casoclinicointerativo-app .delay-1 { animation-delay: 0.1s; }
-.casoclinicointerativo-app .delay-2 { animation-delay: 0.2s; }
-.casoclinicointerativo-app .delay-3 { animation-delay: 0.3s; }
-.casoclinicointerativo-app .delay-4 { animation-delay: 0.4s; }
-.casoclinicointerativo-app .delay-5 { animation-delay: 0.5s; }
+.fv-resources .casoclinicointerativo-app .delay-1 { animation-delay: 0.1s; }
+.fv-resources .casoclinicointerativo-app .delay-2 { animation-delay: 0.2s; }
+.fv-resources .casoclinicointerativo-app .delay-3 { animation-delay: 0.3s; }
+.fv-resources .casoclinicointerativo-app .delay-4 { animation-delay: 0.4s; }
+.fv-resources .casoclinicointerativo-app .delay-5 { animation-delay: 0.5s; }
 
 /* Texture overlay for fine paper grain */
-.casoclinicointerativo-app .paper-texture {
-  background-color: #F8F6F0;
-  background-image: radial-gradient(#E8E4D9 0.75px, transparent 0.75px), radial-gradient(#E8E4D9 0.75px, #F8F6F0 0.75px);
+.fv-resources .casoclinicointerativo-app .paper-texture {
+  background-color: #FDFAF4;
+  background-image: radial-gradient(#F1E9DB 0.75px, transparent 0.75px), radial-gradient(#F1E9DB 0.75px, #FDFAF4 0.75px);
   background-size: 30px 30px;
   background-position: 0 0, 15px 15px;
 }
 
 /* Focus visible styles for accessibility */
-.casoclinicointerativo-app .focus-visible-ring:focus-visible {
+.fv-resources .casoclinicointerativo-app .focus-visible-ring:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px #F8F6F0, 0 0 0 4px #8C6B4F;
+  box-shadow: none;
 }
 
 /* Scrollbar styling (scoped: the same class name exists globally in globals.css) */
-.casoclinicointerativo-app .custom-scrollbar::-webkit-scrollbar {
+.fv-resources .casoclinicointerativo-app .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
 }
 
-.casoclinicointerativo-app .custom-scrollbar::-webkit-scrollbar-track {
-  background: #F0EDE5;
+.fv-resources .casoclinicointerativo-app .custom-scrollbar::-webkit-scrollbar-track {
+  background: #F1E9DB;
   border-radius: 3px;
 }
 
-.casoclinicointerativo-app .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #C4BEB3;
+.fv-resources .casoclinicointerativo-app .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #D8CFBE;
   border-radius: 3px;
 }
 
-.casoclinicointerativo-app .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #A8A195;
+.fv-resources .casoclinicointerativo-app .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #D8CFBE;
 }
 
 @keyframes subtleFloat1 {
@@ -119,7 +119,7 @@
 
 /* Print styles */
 @media print {
-  .casoclinicointerativo-app .no-print {
+  .fv-resources .casoclinicointerativo-app .no-print {
     display: none !important;
   }
 }

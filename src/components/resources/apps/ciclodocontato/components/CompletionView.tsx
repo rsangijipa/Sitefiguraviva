@@ -15,7 +15,7 @@ export function CompletionView({
 }: CompletionViewProps) {
   return (
     <div className="mx-auto max-w-3xl px-4 py-12 sm:py-16 text-center">
-      <div className="rounded-[24px] border-2 border-[#F1E9DB] bg-[#FDFAF4] p-8 sm:p-12 shadow-none">
+      <div className="rounded-[24px] border-2 border-[#F1E9DB] bg-[#FDFAF4] p-8 sm:p-12 ">
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full border-2 border-[#005A1F] bg-[#005A1F]/10 text-[#005A1F] mx-auto mb-6">
           <Sparkles size={28} aria-hidden="true" />
         </div>

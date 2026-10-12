@@ -155,7 +155,7 @@ export const EmotionWheelSvg: React.FC<EmotionWheelSvgProps> = ({
     <div className="relative w-full max-w-[560px] mx-auto aspect-square flex items-center justify-center p-2 select-none">
       <svg
         viewBox="0 0 600 600"
-        className="w-full h-full drop-shadow-none"
+        className="w-full h-full "
         role="region"
         aria-label="Roda interativa das emoções em três camadas"
       >
@@ -190,21 +190,21 @@ export const EmotionWheelSvg: React.FC<EmotionWheelSvgProps> = ({
                 const centerPos = polarToCartesian(cx, cy, (r3In + r3Out) / 2, nuance.midAngle);
 
                 // Estilos por tokens Confluência
-                let fill = '#FAF6EE';
+                let fill = '#FDFAF4';
                 let stroke = '#D8CFBE';
                 let strokeWidth = 1.5;
 
                 if (isSelected) {
-                  fill = '#E7DEC8';
+                  fill = '#D8CFBE';
                   stroke = '#005A1F';
                   strokeWidth = 3.5;
                 } else if (isSecondarySelected) {
-                  fill = '#F4EDE0';
+                  fill = '#F1E9DB';
                   stroke = '#96551F';
                   strokeWidth = 2;
                 } else if (isFamilySelected) {
-                  fill = '#F7F2E8';
-                  stroke = '#C2B8A3';
+                  fill = '#FDFAF4';
+                  stroke = '#D8CFBE';
                   strokeWidth = 1.5;
                 }
 
@@ -288,16 +288,16 @@ export const EmotionWheelSvg: React.FC<EmotionWheelSvgProps> = ({
 
               const centerPos = polarToCartesian(cx, cy, (r2In + r2Out) / 2, secondary.midAngle);
 
-              let fill = '#F3ECE0';
+              let fill = '#F1E9DB';
               let stroke = '#D8CFBE';
               let strokeWidth = 2;
 
               if (isSelected) {
-                fill = '#E5D8BE';
+                fill = '#D8CFBE';
                 stroke = '#005A1F';
                 strokeWidth = 3.5;
               } else if (isFamilySelected) {
-                fill = '#EFE6D5';
+                fill = '#F1E9DB';
                 stroke = '#6B6B63';
                 strokeWidth = 2;
               }
@@ -370,12 +370,12 @@ export const EmotionWheelSvg: React.FC<EmotionWheelSvgProps> = ({
             const path = describeArc(cx, cy, r1In, r1Out, family.startAngle, family.endAngle);
             const centerPos = polarToCartesian(cx, cy, (r1In + r1Out) / 2, family.midAngle);
 
-            let fill = '#EBE2D0';
+            let fill = '#F1E9DB';
             let stroke = '#D8CFBE';
             let strokeWidth = 2;
 
             if (isSelected) {
-              fill = '#DECEB2';
+              fill = '#D8CFBE';
               stroke = '#005A1F';
               strokeWidth = 4;
             }

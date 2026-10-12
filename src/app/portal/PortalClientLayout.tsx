@@ -6,6 +6,7 @@ import { OfflineIndicator } from "@/components/portal/OfflineIndicator";
 import { OnboardingModal } from "@/components/portal/OnboardingModal";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { gamificationService } from "@/services/gamificationService";
 import { useGamificationFeedback } from "@/context/GamificationContext";
 
@@ -15,11 +16,12 @@ export function PortalClientLayout({
   children: React.ReactNode;
 }) {
   const { user } = useAuth();
+  const pathname = usePathname() ?? "";
   const { showXpGain, showLevelUp, showBadgeEarned } =
     useGamificationFeedback();
 
   useEffect(() => {
-    if (user?.uid) {
+    if (user?.uid && !pathname.startsWith("/portal/recursos")) {
       gamificationService.updateStreak(user.uid).then((result) => {
         if (result?.xpResult) {
           if (result.xpResult.xpAwarded > 0) {
@@ -45,7 +47,7 @@ export function PortalClientLayout({
         }
       });
     }
-  }, [user?.uid, showXpGain, showLevelUp, showBadgeEarned]);
+  }, [user?.uid, pathname, showXpGain, showLevelUp, showBadgeEarned]);
 
   return (
     <DashboardShell>

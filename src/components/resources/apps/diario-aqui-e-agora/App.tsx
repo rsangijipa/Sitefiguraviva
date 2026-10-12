@@ -267,15 +267,15 @@ export default function App() {
         <div className="flex items-center gap-3">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] uppercase tracking-[0.2em] text-[#827a72] font-semibold">
+              <span className="text-[11px] uppercase tracking-[0.2em] text-[#6B6B63] font-semibold">
                 Recurso · Aqui e Agora
               </span>
-              <span className="text-[#a8a198] text-xs">/</span>
-              <span className="text-[11px] uppercase tracking-[0.18em] text-[#69746e] font-semibold">
+              <span className="text-[#D8CFBE] text-xs">/</span>
+              <span className="text-[11px] uppercase tracking-[0.18em] text-[#6B6B63] font-semibold">
                 Perceber
               </span>
             </div>
-            <h2 className="font-serif-awareness text-lg sm:text-xl text-[#332f2b] font-normal leading-tight">
+            <h2 className="font-serif-awareness text-lg sm:text-xl text-[#262B22] font-normal leading-tight">
               Check-in e Diário do Aqui e Agora
             </h2>
           </div>
@@ -290,8 +290,8 @@ export default function App() {
             onClick={toggleSound}
             className={`p-2 rounded-full transition-colors ${
               soundEnabled
-                ? "text-[#58635e] hover:bg-[#eae4d9]"
-                : "text-[#a8a096] hover:bg-[#eae4d9]"
+                ? "text-[#6B6B63] hover:bg-[#F1E9DB]"
+                : "text-[#D8CFBE] hover:bg-[#F1E9DB]"
             }`}
             title={soundEnabled ? "Sino suave ativado" : "Sino desativado"}
             aria-label={
@@ -310,7 +310,7 @@ export default function App() {
             id="btn-toggle-watercolor"
             type="button"
             onClick={cycleWatercolor}
-            className="p-2 rounded-full text-[#756e66] hover:bg-[#eae4d9] transition-colors"
+            className="p-2 rounded-full text-[#6B6B63] hover:bg-[#F1E9DB] transition-colors"
             title={`Aquarela: ${watercolorMode}`}
             aria-label="Ajustar intensidade da aquarela"
           >
@@ -322,7 +322,7 @@ export default function App() {
             id="btn-privacy-info"
             type="button"
             onClick={() => setIsPrivacyNoticeOpen(true)}
-            className="p-2 rounded-full text-[#756e66] hover:bg-[#eae4d9] transition-colors"
+            className="p-2 rounded-full text-[#6B6B63] hover:bg-[#F1E9DB] transition-colors"
             title="Garantia de privacidade"
             aria-label="Abrir termo de privacidade"
           >
@@ -334,13 +334,13 @@ export default function App() {
             id="btn-open-saved-modal"
             type="button"
             onClick={() => setIsSavedModalOpen(true)}
-            className="relative p-2 rounded-full text-[#756e66] hover:bg-[#eae4d9] transition-colors"
+            className="relative p-2 rounded-full text-[#6B6B63] hover:bg-[#F1E9DB] transition-colors"
             title="Percepções guardadas"
             aria-label="Abrir percepções guardadas"
           >
             <Archive className="w-4 h-4" />
             {savedPerceptions.length > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-[#7a8b83] text-[#fbf9f5] rounded-full text-[10px] flex items-center justify-center font-medium">
+              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-[#6B6B63] text-[#FDFAF4] rounded-full text-[10px] flex items-center justify-center font-medium">
                 {savedPerceptions.length}
               </span>
             )}
@@ -357,7 +357,7 @@ export default function App() {
         {storageError && (
           <p
             role="alert"
-            className="relative z-10 mx-auto mb-2 max-w-xl px-4 text-center text-xs text-[#a4553f]"
+            className="relative z-10 mx-auto mb-2 max-w-xl px-4 text-center text-xs text-[#96551F]"
           >
             Não foi possível guardar neste navegador. A percepção permanece
             apenas nesta tela.
@@ -400,7 +400,7 @@ export default function App() {
       {/* Footer reassurance */}
       <footer
         id="app-footer"
-        className="relative z-10 w-full max-w-xl mx-auto px-4 py-4 text-center text-xs text-[#91877c] select-none"
+        className="relative z-10 w-full max-w-xl mx-auto px-4 py-4 text-center text-xs text-[#6B6B63] select-none"
       >
         <p className="flex items-center justify-center gap-1.5 font-normal">
           <Shield className="w-3.5 h-3.5 opacity-70" />
@@ -424,7 +424,7 @@ export default function App() {
       {isPrivacyNoticeOpen && (
         <div
           id="privacy-dialog-backdrop"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1a1918]/45 backdrop-blur-xs"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#262B22]/45 "
           onClick={() => setIsPrivacyNoticeOpen(false)}
           onKeyDown={(event) => {
             if (event.key !== "Escape") return;
@@ -441,18 +441,18 @@ export default function App() {
             aria-labelledby="privacy-dialog-title"
             tabIndex={-1}
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-md bg-[#fbf9f5] border border-[#e8dfd2] rounded-3xl p-6 shadow-xl"
+            className="w-full max-w-md bg-[#FDFAF4] border border-[#F1E9DB] rounded-3xl p-6 "
           >
-            <div className="flex items-center gap-2.5 text-[#5e776d] mb-3">
+            <div className="flex items-center gap-2.5 text-[#6B6B63] mb-3">
               <Shield className="w-5 h-5" aria-hidden="true" />
               <h3
                 id="privacy-dialog-title"
-                className="font-serif-awareness text-xl text-[#282624]"
+                className="font-serif-awareness text-xl text-[#262B22]"
               >
                 Privacidade local
               </h3>
             </div>
-            <div className="text-sm text-[#585149] space-y-3 leading-relaxed">
+            <div className="text-sm text-[#4B4B49] space-y-3 leading-relaxed">
               <p>
                 O recurso <strong>Aqui e Agora</strong> foi concebido para o seu
                 momento presente e reflexão genuína.
@@ -477,7 +477,7 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setIsPrivacyNoticeOpen(false)}
-                className="px-5 py-2 text-xs font-medium rounded-full bg-[#2b2724] text-[#fbf9f5] hover:bg-[#1a1816] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5e776d]"
+                className="px-5 py-2 text-xs font-medium rounded-full bg-[#262B22] text-[#FDFAF4] hover:bg-[#262B22] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6B6B63]"
               >
                 Compreendido
               </button>

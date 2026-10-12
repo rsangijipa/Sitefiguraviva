@@ -23,7 +23,7 @@ export function ResourceNavigation({
       <button
         type="button"
         onClick={onBack}
-        className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-1.5 rounded-lg border border-primary/15 bg-white px-3 py-2 text-xs font-bold uppercase tracking-wider text-primary transition hover:border-terra hover:text-terra focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+        className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-1.5 rounded-lg border border-primary/15 bg-paper px-3 py-2 text-xs font-bold uppercase tracking-wider text-primary transition hover:border-terra hover:text-terra focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
         aria-label={`Voltar para ${backLabel}`}
       >
         <ArrowLeft size={16} aria-hidden="true" />

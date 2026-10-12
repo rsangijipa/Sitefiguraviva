@@ -71,7 +71,7 @@ export const FavoritesView: React.FC<FavoritesViewProps> = ({
     <div className="min-h-[calc(100vh-3.5rem)] bg-[#FDFAF4] py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Editorial Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#E2D8CA] pb-6">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#D8CFBE] pb-6">
           <div className="space-y-2">
             <span className="text-[11px] font-sans font-bold tracking-[0.16em] text-[#96551F] uppercase block">
               Biblioteca Pessoal
@@ -92,7 +92,7 @@ export const FavoritesView: React.FC<FavoritesViewProps> = ({
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as SortOption)}
-                  className="bg-[#FDFAF4] border border-[#E2D8CA] rounded-lg px-2.5 py-1.5 text-[#262B22] focus:outline-none focus:border-[#005A1F]"
+                  className="bg-[#FDFAF4] border border-[#D8CFBE] rounded-lg px-2.5 py-1.5 text-[#262B22] focus:outline-none focus:border-[#005A1F]"
                 >
                   <option value="recentes">Mais recentes</option>
                   <option value="tipo">Tipo</option>
@@ -110,7 +110,7 @@ export const FavoritesView: React.FC<FavoritesViewProps> = ({
                 className={`px-3 py-1.5 rounded-lg border transition-colors ${
                   isOrganizing
                     ? "bg-[#F1E9DB] border-[#96551F] text-[#96551F] font-medium"
-                    : "bg-[#FDFAF4] border-[#E2D8CA] text-[#262B22] hover:bg-[#F1E9DB]"
+                    : "bg-[#FDFAF4] border-[#D8CFBE] text-[#262B22] hover:bg-[#F1E9DB]"
                 }`}
               >
                 {isOrganizing ? "Cancelar" : "Organizar"}
@@ -121,7 +121,7 @@ export const FavoritesView: React.FC<FavoritesViewProps> = ({
 
         {/* Batch Action Bar if organizing */}
         {isOrganizing && (
-          <div className="p-3 bg-[#F1E9DB] rounded-xl border border-[#E2D8CA] flex items-center justify-between text-xs font-sans">
+          <div className="p-3 bg-[#F1E9DB] rounded-xl border border-[#D8CFBE] flex items-center justify-between text-xs font-sans">
             <span className="text-[#262B22] font-medium">
               {selectedIds.length}{" "}
               {selectedIds.length === 1
@@ -137,7 +137,7 @@ export const FavoritesView: React.FC<FavoritesViewProps> = ({
                     setSelectedIds(savedCards.map((c) => c.id));
                   }
                 }}
-                className="px-2.5 py-1 rounded bg-[#FDFAF4] border border-[#E2D8CA] text-[#262B22]"
+                className="px-2.5 py-1 rounded bg-[#FDFAF4] border border-[#D8CFBE] text-[#262B22]"
               >
                 {selectedIds.length === savedCards.length
                   ? "Desmarcar todas"
@@ -160,7 +160,7 @@ export const FavoritesView: React.FC<FavoritesViewProps> = ({
           /* Empty State according to spec:
              “Você ainda não guardou nenhuma carta.”
              “Quando alguma quiser ficar com você, escolha Guardar.” */
-          <div className="text-center py-20 px-4 bg-[#FDFAF4] rounded-3xl border border-dashed border-[#E2D8CA] max-w-lg mx-auto space-y-4">
+          <div className="text-center py-20 px-4 bg-[#FDFAF4] rounded-3xl border border-dashed border-[#D8CFBE] max-w-lg mx-auto space-y-4">
             <div className="w-12 h-12 rounded-2xl bg-[#F1E9DB] flex items-center justify-center text-[#96551F] mx-auto">
               <Bookmark className="w-6 h-6" strokeWidth={1.75} />
             </div>
@@ -174,7 +174,7 @@ export const FavoritesView: React.FC<FavoritesViewProps> = ({
             </div>
             <button
               onClick={onExplore}
-              className="mt-4 px-5 py-2.5 bg-[#005A1F] hover:bg-[#004317] text-[#FDFAF4] text-xs font-sans font-medium rounded-xl inline-flex items-center gap-2 transition-colors"
+              className="mt-4 px-5 py-2.5 bg-[#005A1F] hover:bg-[#005A1F] text-[#FDFAF4] text-xs font-sans font-medium rounded-xl inline-flex items-center gap-2 transition-colors"
             >
               <span>Explorar a coleção</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -198,7 +198,7 @@ export const FavoritesView: React.FC<FavoritesViewProps> = ({
                   className={`group relative text-left p-5 rounded-2xl border transition-colors cursor-pointer flex flex-col justify-between h-[210px] ${
                     isSelected
                       ? "bg-[#F1E9DB] border-[#96551F]"
-                      : "bg-[#FDFAF4] hover:bg-[#F1E9DB] border-[#E2D8CA]"
+                      : "bg-[#FDFAF4] hover:bg-[#F1E9DB] border-[#D8CFBE]"
                   }`}
                 >
                   {/* Top Bar */}
@@ -243,7 +243,7 @@ export const FavoritesView: React.FC<FavoritesViewProps> = ({
                   </div>
 
                   {/* Bottom Line */}
-                  <div className="flex items-center justify-between pt-2 border-t border-[#E2D8CA]/60 text-[10px] font-sans text-[#6B6B63]">
+                  <div className="flex items-center justify-between pt-2 border-t border-[#D8CFBE]/60 text-[10px] font-sans text-[#6B6B63]">
                     <span className="font-medium tracking-wider uppercase text-[#96551F]">
                       {card.type}
                     </span>

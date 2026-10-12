@@ -17,7 +17,7 @@ export const ReviewView: React.FC<ReviewViewProps> = ({
 
   return (
     <div className="min-h-[calc(100vh-3.5rem)] bg-[#FDFAF4] flex items-center justify-center p-6 sm:p-8">
-      <div className="max-w-md w-full text-center space-y-8 p-8 sm:p-10 rounded-3xl bg-[#FDFAF4] border border-[#E2D8CA]">
+      <div className="max-w-md w-full text-center space-y-8 p-8 sm:p-10 rounded-3xl bg-[#FDFAF4] border border-[#D8CFBE]">
         {/* Top Tag & Icon */}
         <div className="flex flex-col items-center space-y-3">
           <div className="w-12 h-12 rounded-2xl bg-[#F1E9DB] flex items-center justify-center text-[#96551F]">
@@ -37,7 +37,7 @@ export const ReviewView: React.FC<ReviewViewProps> = ({
         {/* Count & Actions */}
         {count > 0 ? (
           <div className="space-y-6 pt-2">
-            <div className="p-4 rounded-2xl bg-[#F1E9DB]/70 border border-[#E2D8CA] inline-block w-full">
+            <div className="p-4 rounded-2xl bg-[#F1E9DB]/70 border border-[#D8CFBE] inline-block w-full">
               <span className="font-serif text-3xl text-[#262B22] block font-normal">
                 {count} {count === 1 ? "carta" : "cartas"}
               </span>
@@ -48,7 +48,7 @@ export const ReviewView: React.FC<ReviewViewProps> = ({
 
             <button
               onClick={onStartReview}
-              className="w-full py-3.5 px-6 rounded-xl bg-[#005A1F] hover:bg-[#004317] text-[#FDFAF4] text-xs font-sans font-medium flex items-center justify-center gap-2 transition-colors focus:outline-none focus:ring-2 focus:ring-[#005A1F]"
+              className="w-full py-3.5 px-6 rounded-xl bg-[#005A1F] hover:bg-[#005A1F] text-[#FDFAF4] text-xs font-sans font-medium flex items-center justify-center gap-2 transition-colors focus:outline-none focus:ring-2 focus:ring-[#005A1F]"
             >
               <Play className="w-4 h-4 fill-current" />
               <span>Começar revisão</span>
@@ -57,7 +57,7 @@ export const ReviewView: React.FC<ReviewViewProps> = ({
         ) : (
           /* Empty state according to spec: "Nenhuma carta está marcada para revisão." */
           <div className="space-y-6 pt-2">
-            <div className="p-5 rounded-2xl bg-[#F1E9DB]/50 border border-dashed border-[#E2D8CA]">
+            <div className="p-5 rounded-2xl bg-[#F1E9DB]/50 border border-dashed border-[#D8CFBE]">
               <p className="font-serif text-base text-[#262B22]">
                 Nenhuma carta está marcada para revisão.
               </p>
@@ -69,7 +69,7 @@ export const ReviewView: React.FC<ReviewViewProps> = ({
 
             <button
               onClick={onExploreCards}
-              className="w-full py-3 px-6 rounded-xl bg-[#F1E9DB] hover:bg-[#E2D8CA] text-[#005A1F] text-xs font-sans font-medium flex items-center justify-center gap-2 transition-colors"
+              className="w-full py-3 px-6 rounded-xl bg-[#F1E9DB] hover:bg-[#D8CFBE] text-[#005A1F] text-xs font-sans font-medium flex items-center justify-center gap-2 transition-colors"
             >
               <BookOpen className="w-4 h-4" />
               <span>Explorar o acervo</span>

@@ -50,5 +50,5 @@ export function ListeningExperience(props: ExperienceProps) {
 }
 export function WaterExperience(props: ExperienceProps) {
   useExperienceDraft(null,props.onDraft);
-  return <><WaterStage /><div className="fv-actions"><Button onClick={() => props.onComplete(null)}>Encerrar experiência</Button></div></>;
+  return <><WaterStage forceStatic={props.mode==="estatico"} /><div className="fv-actions"><Button onClick={() => props.onComplete(null)}>Encerrar experiência</Button></div></>;
 }

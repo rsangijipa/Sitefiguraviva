@@ -1,10 +1,10 @@
-.home {
+.fv-resources .home {
   background-color: var(--fv-creme-papel);
   min-height: 100dvh;
   min-height: 100vh;
 }
 
-.home__main {
+.fv-resources .home__main {
   padding-top: var(--space-2xl);
   padding-bottom: calc(var(--space-2xl) + env(safe-area-inset-bottom));
   display: flex;
@@ -13,7 +13,7 @@
 }
 
 /* ══ HERO ══════════════════════════════════════════════════════ */
-.home__hero {
+.fv-resources .home__hero {
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
@@ -21,8 +21,8 @@
   border-bottom: 1px solid var(--fv-nevoa);
 }
 
-.home__hero-label {
-  font-family: var(--font-body);
+.fv-resources .home__hero-label {
+  font-family: var(--font-sans), sans-serif;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -30,8 +30,8 @@
   color: var(--fv-terra-barro);
 }
 
-.home__hero-title {
-  font-family: var(--font-display);
+.fv-resources .home__hero-title {
+  font-family: var(--font-serif), serif;
   /* Fluido: 26px em 320px → 42px em 1180px */
   font-size: clamp(26px, 5.5vw, 42px);
   color: var(--fv-verde-raiz);
@@ -39,7 +39,7 @@
   letter-spacing: -0.02em;
 }
 
-.home__hero-text {
+.fv-resources .home__hero-text {
   font-size: clamp(14px, 2vw, 16px);
   color: var(--fv-pedra);
   max-width: 560px;
@@ -47,42 +47,40 @@
   margin: 0;
 }
 
-.home__hero-divider,
-.home__hero-visual,
-.home__hero-decoration {
+.fv-resources .home__hero-divider, .fv-resources .home__hero-visual, .fv-resources .home__hero-decoration {
   display: none;
 }
 
 /* ══ CATÁLOGO ═══════════════════════════════════════════════════ */
-.home__catalog {
+.fv-resources .home__catalog {
   display: flex;
   flex-direction: column;
   gap: var(--space-2xl);
 }
 
-.home__category-section {
+.fv-resources .home__category-section {
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
 }
 
-.home__category-header {
+.fv-resources .home__category-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-md);
 }
 
-.home__category-title {
-  font-family: var(--font-display);
+.fv-resources .home__category-title {
+  font-family: var(--font-serif), serif;
   font-size: clamp(16px, 2.5vw, 20px);
   color: var(--fv-verde-raiz);
   font-weight: 600;
   white-space: nowrap;
 }
 
-.home__category-link {
-  font-family: var(--font-body);
+.fv-resources .home__category-link {
+  font-family: var(--font-sans), sans-serif;
   font-size: 13px;
   color: var(--fv-terra-barro);
   text-decoration: none;
@@ -96,45 +94,45 @@
   align-items: center;
 }
 
-.home__category-link:hover { color: var(--fv-verde-raiz); }
+.fv-resources .home__category-link:hover { color: var(--fv-verde-raiz); }
 
-.home__category-link:focus-visible {
+.fv-resources .home__category-link:focus-visible {
   outline: 3px solid var(--fv-verde-raiz);
   outline-offset: 2px;
   border-radius: 2px;
 }
 
 /* Grid fluido: 3 col > 2 col > 1 col */
-.home__quiz-grid {
+.fv-resources .home__quiz-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--space-md);
 }
 
-.home__category-section {
+.fv-resources .home__category-section {
   padding: var(--space-lg);
   border: 1px solid var(--fv-nevoa);
   border-radius: var(--radius-lg);
   background: var(--fv-creme-papel);
-  box-shadow: 0 12px 28px rgba(38, 43, 34, 0.08);
+  box-shadow: none;
 }
 
 /* ══ RODAPÉ EDUCATIVO ═══════════════════════════════════════════ */
-.home__footer-notice {
+.fv-resources .home__footer-notice {
   background-color: var(--fv-areia);
   border: 1px solid var(--fv-nevoa);
   padding: var(--space-md) var(--space-lg);
   border-radius: var(--radius-md);
 }
 
-.home__footer-content {
+.fv-resources .home__footer-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-xl);
 }
 
-.home__footer-text {
+.fv-resources .home__footer-text {
   font-size: 13px;
   color: var(--fv-pedra);
   line-height: 1.5;
@@ -142,13 +140,13 @@
   margin: 0;
 }
 
-.home__footer-text strong {
+.fv-resources .home__footer-text strong {
   font-weight: 700;
   color: var(--fv-mata);
 }
 
-.home__footer-link {
-  font-family: var(--font-body);
+.fv-resources .home__footer-link {
+  font-family: var(--font-sans), sans-serif;
   font-size: 13px;
   font-weight: 700;
   color: var(--fv-verde-raiz);
@@ -162,9 +160,9 @@
   align-items: center;
 }
 
-.home__footer-link:hover { color: var(--fv-verde-igarape); }
+.fv-resources .home__footer-link:hover { color: var(--fv-verde-igarape); }
 
-.home__footer-link:focus-visible {
+.fv-resources .home__footer-link:focus-visible {
   outline: 3px solid var(--fv-verde-raiz);
   outline-offset: 2px;
   border-radius: 2px;
@@ -172,23 +170,23 @@
 
 /* ══ RESPONSIVO ════════════════════════════════════════════════ */
 @media (max-width: 1024px) {
-  .home__quiz-grid {
+  .fv-resources .home__quiz-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 768px) {
-  .home__main {
+  .fv-resources .home__main {
     padding-top: var(--space-xl);
     gap: var(--space-xl);
   }
 
-  .home__quiz-grid {
+  .fv-resources .home__quiz-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: var(--space-sm);
   }
 
-  .home__footer-content {
+  .fv-resources .home__footer-content {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--space-md);
@@ -196,34 +194,34 @@
 }
 
 @media (max-width: 640px) {
-  .home__main {
+  .fv-resources .home__main {
     padding-top: var(--space-lg);
     gap: var(--space-xl);
   }
 
-  .home__hero {
+  .fv-resources .home__hero {
     padding-bottom: var(--space-lg);
     gap: var(--space-xs);
   }
 
   /* Uma coluna em mobile pequeno */
-  .home__quiz-grid {
+  .fv-resources .home__quiz-grid {
     grid-template-columns: 1fr;
     gap: var(--space-sm);
   }
 
-  .home__footer-notice {
+  .fv-resources .home__footer-notice {
     padding: var(--space-md);
   }
 
-  .home__footer-text {
+  .fv-resources .home__footer-text {
     font-size: 12px;
   }
 }
 
 /* Telas muito pequenas (320px) */
 @media (max-width: 360px) {
-  .home__main {
+  .fv-resources .home__main {
     padding-top: var(--space-md);
     gap: var(--space-lg);
   }

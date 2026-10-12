@@ -196,7 +196,7 @@ export const SoundStage: React.FC<SoundStageProps> = ({
         {/* Centro: Posição do Ouvinte (Verde Raiz) */}
         <div
           id="stage-listener-node"
-          className="relative z-10 w-11 h-11 rounded-full bg-[#005A1F] text-[#FDFAF4] flex items-center justify-center border-2 border-[#FDFAF4] shadow-none"
+          className="relative z-10 w-11 h-11 rounded-full bg-[#005A1F] text-[#FDFAF4] flex items-center justify-center border-2 border-[#FDFAF4] "
           title="Você no centro da escuta"
           role="img"
           aria-label="Você, posicionado no centro do palco"

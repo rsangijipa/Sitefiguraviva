@@ -1,4 +1,5 @@
 import * as Sentry from "@sentry/nextjs";
+import { containsResourceLocation } from "@/lib/observability/resource-privacy";
 
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
@@ -13,6 +14,7 @@ Sentry.init({
 
   // PII Scrubbing (SEN-01)
   beforeSend(event) {
+    if (containsResourceLocation(event)) return null;
     // 1. Scrub User Data
     if (event.user) {
       delete event.user.email;
@@ -36,4 +38,5 @@ Sentry.init({
 
     return event;
   },
+  beforeSendTransaction(event) { return containsResourceLocation(event) ? null : event; },
 });

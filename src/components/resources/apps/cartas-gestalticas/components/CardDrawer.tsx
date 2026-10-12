@@ -55,7 +55,7 @@ export const CardDrawer: React.FC<CardDrawerProps> = ({
     <div className="fixed inset-0 z-50 flex justify-end">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-[#262B22]/30 backdrop-blur-[2px] transition-opacity animate-fade-in"
+        className="fixed inset-0 bg-[#262B22]/30 -[2px] transition-opacity animate-fade-in"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -65,10 +65,10 @@ export const CardDrawer: React.FC<CardDrawerProps> = ({
         role="dialog"
         aria-modal="true"
         aria-label={`Aprofundamento de ${card.title}`}
-        className="relative z-10 w-full max-w-md sm:max-w-lg bg-[#FDFAF4] border-l border-[#E2D8CA] h-full flex flex-col shadow-none overflow-hidden"
+        className="relative z-10 w-full max-w-md sm:max-w-lg bg-[#FDFAF4] border-l border-[#D8CFBE] h-full flex flex-col  overflow-hidden"
       >
         {/* Drawer Header */}
-        <div className="p-5 sm:p-6 border-b border-[#E2D8CA] flex items-center justify-between bg-[#FDFAF4]">
+        <div className="p-5 sm:p-6 border-b border-[#D8CFBE] flex items-center justify-between bg-[#FDFAF4]">
           <div className="flex items-center gap-3">
             <CategoryGlyph category={card.category} size={24} />
             <div>
@@ -127,7 +127,7 @@ export const CardDrawer: React.FC<CardDrawerProps> = ({
 
           {/* Explicação Expandida */}
           {card.expandedNotes && (
-            <section className="space-y-2 bg-[#F1E9DB]/60 p-4 rounded-xl border border-[#E2D8CA]/70">
+            <section className="space-y-2 bg-[#F1E9DB]/60 p-4 rounded-xl border border-[#D8CFBE]/70">
               <h3 className="text-xs font-sans font-semibold tracking-wider text-[#005A1F] uppercase flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-[#96551F]" />
                 Comentário de Aprofundamento
@@ -140,7 +140,7 @@ export const CardDrawer: React.FC<CardDrawerProps> = ({
 
           {/* Para ficar com isso */}
           {card.reflection && (
-            <section className="space-y-2 bg-[#F1E9DB] p-4 rounded-xl border border-[#E2D8CA]">
+            <section className="space-y-2 bg-[#F1E9DB] p-4 rounded-xl border border-[#D8CFBE]">
               <span className="text-[11px] font-sans font-semibold tracking-wider text-[#96551F] uppercase block">
                 Para ficar com isso
               </span>
@@ -151,7 +151,7 @@ export const CardDrawer: React.FC<CardDrawerProps> = ({
           )}
 
           {/* Referências Bibliográficas */}
-          <section className="space-y-2 pt-2 border-t border-[#E2D8CA]/60">
+          <section className="space-y-2 pt-2 border-t border-[#D8CFBE]/60">
             <h3 className="text-xs font-sans font-semibold tracking-wider text-[#6B6B63] uppercase flex items-center gap-1.5">
               <BookOpen className="w-3.5 h-3.5 text-[#96551F]" />
               Fontes & Citações
@@ -186,7 +186,7 @@ export const CardDrawer: React.FC<CardDrawerProps> = ({
 
           {/* Hipertexto Gestaltista: Continue explorando (Relacionada a) */}
           {relatedCards.length > 0 && (
-            <section className="space-y-3 pt-2 border-t border-[#E2D8CA]/60">
+            <section className="space-y-3 pt-2 border-t border-[#D8CFBE]/60">
               <div className="flex items-center justify-between">
                 <h3 className="text-xs font-sans font-semibold tracking-wider text-[#6B6B63] uppercase">
                   Continue explorando · Relacionada a
@@ -204,7 +204,7 @@ export const CardDrawer: React.FC<CardDrawerProps> = ({
                       onSelectCard(relCard);
                       onClose();
                     }}
-                    className="w-full text-left p-3 rounded-xl bg-[#FDFAF4] hover:bg-[#F1E9DB] border border-[#E2D8CA] transition-colors group flex items-center justify-between"
+                    className="w-full text-left p-3 rounded-xl bg-[#FDFAF4] hover:bg-[#F1E9DB] border border-[#D8CFBE] transition-colors group flex items-center justify-between"
                   >
                     <div className="space-y-0.5">
                       <span className="text-[10px] font-sans tracking-wider text-[#96551F] uppercase block">
@@ -223,7 +223,7 @@ export const CardDrawer: React.FC<CardDrawerProps> = ({
 
           {/* Tags */}
           {card.tags && card.tags.length > 0 && (
-            <div className="pt-2 border-t border-[#E2D8CA]/60 flex flex-wrap gap-1.5">
+            <div className="pt-2 border-t border-[#D8CFBE]/60 flex flex-wrap gap-1.5">
               {card.tags.map((tag) => (
                 <span
                   key={tag}

@@ -13,11 +13,11 @@ import { radiusAtParam, type BranchSegment } from "@/components/resources/apps/e
  * - Tampa na base do tronco e nas raizes para nao aparecer tubo oco.
  */
 
-const WOOD_DEEP = new THREE.Color("#3B2418");
-const WOOD_MID = new THREE.Color("#6A4630");
-const WOOD_LIGHT = new THREE.Color("#9C7551");
-const WOOD_YOUNG = new THREE.Color("#7C7248");
-const MOSS = new THREE.Color("#42502C");
+const WOOD_DEEP = new THREE.Color("#262B22");
+const WOOD_MID = new THREE.Color("#4B4B49");
+const WOOD_LIGHT = new THREE.Color("#6B6B63");
+const WOOD_YOUNG = new THREE.Color("#6B6B63");
+const MOSS = new THREE.Color("#4B4B49");
 
 export type BarkQuality = {
   /** multiplicador de tesselacao (0.55 - 1) */

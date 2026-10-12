@@ -165,7 +165,7 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
                 setFilters({ ...filters, search: e.target.value })
               }
               placeholder="Buscar conceito, autor ou palavra…"
-              className="w-full bg-[#FDFAF4] border border-[#E2D8CA] rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-[#262B22] placeholder-[#6B6B63] focus:outline-none focus:border-[#005A1F] transition-colors"
+              className="w-full bg-[#FDFAF4] border border-[#D8CFBE] rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-[#262B22] placeholder-[#6B6B63] focus:outline-none focus:border-[#005A1F] transition-colors"
             />
             {filters.search && (
               <button
@@ -184,7 +184,7 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
               className={`px-3.5 py-2.5 rounded-xl border text-xs font-sans font-medium flex items-center gap-2 transition-colors ${
                 activeFilterCount > 0
                   ? "bg-[#F1E9DB] border-[#005A1F] text-[#005A1F]"
-                  : "bg-[#FDFAF4] border-[#E2D8CA] text-[#262B22] hover:bg-[#F1E9DB]"
+                  : "bg-[#FDFAF4] border-[#D8CFBE] text-[#262B22] hover:bg-[#F1E9DB]"
               }`}
             >
               <SlidersHorizontal className="w-3.5 h-3.5" strokeWidth={2} />
@@ -234,7 +234,7 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
                   <button
                     key={cat.name}
                     onClick={() => setSelectedTerritory(cat.name)}
-                    className="text-left p-5 rounded-2xl bg-[#FDFAF4] hover:bg-[#F1E9DB] border border-[#E2D8CA] transition-colors group flex items-start justify-between"
+                    className="text-left p-5 rounded-2xl bg-[#FDFAF4] hover:bg-[#F1E9DB] border border-[#D8CFBE] transition-colors group flex items-start justify-between"
                   >
                     <div className="space-y-1.5 pr-3">
                       <span className="text-[10px] font-sans font-bold tracking-widest text-[#96551F] uppercase block">
@@ -261,11 +261,11 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
           </div>
         ) : (
           /* Territory Active Breadcrumb / Header */
-          <div className="flex items-center justify-between p-4 rounded-2xl bg-[#F1E9DB]/70 border border-[#E2D8CA]">
+          <div className="flex items-center justify-between p-4 rounded-2xl bg-[#F1E9DB]/70 border border-[#D8CFBE]">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setSelectedTerritory(null)}
-                className="w-8 h-8 rounded-full bg-[#FDFAF4] border border-[#E2D8CA] flex items-center justify-center text-[#262B22] hover:bg-[#E2D8CA] transition-colors"
+                className="w-8 h-8 rounded-full bg-[#FDFAF4] border border-[#D8CFBE] flex items-center justify-center text-[#262B22] hover:bg-[#D8CFBE] transition-colors"
                 title="Voltar a todos os territórios"
               >
                 <ArrowLeft className="w-4 h-4" />
@@ -297,7 +297,7 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
 
         {/* Collection Grid: 3-4 Desktop, 2-3 Tablet, 1-2 Mobile */}
         <div className="space-y-4 pt-4">
-          <div className="flex items-center justify-between border-b border-[#E2D8CA]/80 pb-2">
+          <div className="flex items-center justify-between border-b border-[#D8CFBE]/80 pb-2">
             <span className="text-xs font-sans font-medium text-[#6B6B63]">
               Exibindo {filteredCards.length}{" "}
               {filteredCards.length === 1 ? "carta" : "cartas"}
@@ -306,7 +306,7 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
 
           {filteredCards.length === 0 ? (
             /* Empty State according to spec: "Nenhuma carta encontrada com esses filtros." */
-            <div className="text-center py-16 px-4 bg-[#FDFAF4] rounded-2xl border border-dashed border-[#E2D8CA]">
+            <div className="text-center py-16 px-4 bg-[#FDFAF4] rounded-2xl border border-dashed border-[#D8CFBE]">
               <p className="font-serif text-lg text-[#262B22]">
                 Nenhuma carta encontrada com esses filtros.
               </p>
@@ -316,7 +316,7 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
               </p>
               <button
                 onClick={handleResetFilters}
-                className="mt-4 px-4 py-2 bg-[#F1E9DB] text-[#005A1F] rounded-lg text-xs font-sans font-medium hover:bg-[#E2D8CA] transition-colors"
+                className="mt-4 px-4 py-2 bg-[#F1E9DB] text-[#005A1F] rounded-lg text-xs font-sans font-medium hover:bg-[#D8CFBE] transition-colors"
               >
                 Limpar todos os filtros
               </button>
@@ -332,7 +332,7 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
                   <div
                     key={card.id}
                     onClick={() => onOpenCard(card)}
-                    className="group relative text-left p-5 rounded-2xl bg-[#FDFAF4] hover:bg-[#F1E9DB] border border-[#E2D8CA] transition-colors cursor-pointer flex flex-col justify-between h-[210px]"
+                    className="group relative text-left p-5 rounded-2xl bg-[#FDFAF4] hover:bg-[#F1E9DB] border border-[#D8CFBE] transition-colors cursor-pointer flex flex-col justify-between h-[210px]"
                   >
                     {/* Top line: Code & Favorite */}
                     <div className="flex items-center justify-between">
@@ -381,7 +381,7 @@ export const ExploreView: React.FC<ExploreViewProps> = ({
                     </div>
 
                     {/* Bottom: Type & Category icon */}
-                    <div className="flex items-center justify-between pt-2 border-t border-[#E2D8CA]/60 text-[10px] font-sans text-[#6B6B63]">
+                    <div className="flex items-center justify-between pt-2 border-t border-[#D8CFBE]/60 text-[10px] font-sans text-[#6B6B63]">
                       <span className="font-medium tracking-wider uppercase text-[#96551F]">
                         {card.type}
                       </span>
