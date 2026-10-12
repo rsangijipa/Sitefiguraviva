@@ -14,6 +14,7 @@ import {
 import Button from "@/components/ui/Button";
 import { useToast } from "@/context/ToastContext";
 import ImageUpload from "@/components/admin/ImageUpload";
+import BookCategoryField from "@/components/admin/BookCategoryField";
 import { saveBookAction } from "@/app/actions/books";
 import { AdminPageShell } from "@/components/admin/AdminPageShell";
 import { FormShell, FormSection } from "@/components/admin/FormShell";
@@ -33,6 +34,7 @@ export default function NewBookPage() {
     coverStoragePath: "",
     purchaseUrl: "",
     publicationYear: "",
+    category: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -255,6 +257,12 @@ export default function NewBookPage() {
                     </div>
                   </div>
 
+                  <BookCategoryField
+                    value={formData.category}
+                    onChange={(category) =>
+                      setFormData((prev) => ({ ...prev, category }))
+                    }
+                  />
                   <div>
                     <label
                       htmlFor="book-purchase-url"

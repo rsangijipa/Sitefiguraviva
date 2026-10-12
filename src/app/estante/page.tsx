@@ -22,35 +22,39 @@ async function getBooks() {
     const { data, error } = await createSupabaseAnonServerClient()
       .from("book_recommendations")
       .select(
-        "id, title, author, description, cover_image_url, purchase_url, publication_year",
+        "id, title, author, description, cover_image_url, purchase_url, publication_year, category",
       )
       .eq("is_published", true)
       .order("sort_order", { ascending: true });
 
     if (error) throw error;
 
-    return (data ?? []).map((book) => ({
-      id: book.id,
-      title: book.title,
-      author: book.author,
-      description: book.description,
-      coverImageUrl: book.cover_image_url,
-      purchaseUrl: book.purchase_url,
-      publicationYear: book.publication_year,
-    }));
+    return {
+      loadError: false,
+      books: (data ?? []).map((book) => ({
+        id: book.id,
+        title: book.title,
+        author: book.author,
+        description: book.description,
+        coverImageUrl: book.cover_image_url,
+        purchaseUrl: book.purchase_url,
+        publicationYear: book.publication_year,
+        category: book.category,
+      })),
+    };
   } catch (error) {
     console.error("Error fetching book recommendations:", error);
-    return [];
+    return { loadError: true, books: [] };
   }
 }
 
 export default async function EstantePage() {
-  const books = await getBooks();
+  const { books, loadError } = await getBooks();
 
   return (
-    <div className="min-h-screen bg-paper pt-24 pb-12">
+    <div className="min-h-screen bg-paper">
       <Navbar />
-      <BookshelfSection livros={books} />
+      <BookshelfSection livros={books} loadError={loadError} />
       <Footer />
     </div>
   );

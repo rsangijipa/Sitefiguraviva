@@ -23,6 +23,7 @@ const bookInput = z.object({
   publicationYear: z
     .union([z.number().int().min(0).max(9999), z.null()])
     .optional(),
+  category: z.string().trim().max(80).nullable().optional(),
 });
 
 function revalidateBookPaths() {
@@ -46,6 +47,9 @@ export async function saveBookAction(id: string | null, data: unknown) {
       cover_storage_path: input.coverStoragePath,
       purchase_url: input.purchaseUrl,
       publication_year: input.publicationYear ?? null,
+      ...(input.category !== undefined
+        ? { category: input.category || null }
+        : {}),
       updated_at: new Date().toISOString(),
     };
 
@@ -192,5 +196,3 @@ export async function getBookAction(id: string) {
     return { success: false, error: error.message, data: null };
   }
 }
-
-

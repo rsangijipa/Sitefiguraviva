@@ -17,6 +17,7 @@ import {
 import Button from "@/components/ui/Button";
 import { useToast } from "@/context/ToastContext";
 import ImageUpload from "@/components/admin/ImageUpload";
+import BookCategoryField from "@/components/admin/BookCategoryField";
 import {
   getBookAction,
   saveBookAction,
@@ -50,6 +51,7 @@ export default function EditBookPage({
     coverStoragePath: "",
     purchaseUrl: "",
     publicationYear: "",
+    category: "",
   });
 
   useEffect(() => {
@@ -66,6 +68,7 @@ export default function EditBookPage({
             coverImageUrl: book.cover_image_url || "",
             coverStoragePath: book.cover_storage_path || "",
             purchaseUrl: book.purchase_url || "",
+            category: book.category || "",
             publicationYear:
               book.publication_year != null
                 ? String(book.publication_year)
@@ -387,6 +390,12 @@ export default function EditBookPage({
                       </div>
                     </div>
 
+                    <BookCategoryField
+                      value={formData.category}
+                      onChange={(category) =>
+                        setFormData((prev) => ({ ...prev, category }))
+                      }
+                    />
                     <div>
                       <label
                         htmlFor="edit-book-purchase-url"

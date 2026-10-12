@@ -1,301 +1,262 @@
 "use client";
-
-import { useEffect, useMemo, useState } from "react";
-import { createPortal } from "react-dom";
-import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
-import { ExternalLink, X } from "lucide-react";
+import { useMemo, useState } from "react";
 import PublicPageHero from "@/features/public-site/components/PublicPageHero";
+import { ArrowDown, ArrowUpRight, Search, X } from "lucide-react";
+import BookCover from "./bookshelf/BookCover";
+import BookDetails from "./bookshelf/BookDetails";
+import styles from "./bookshelf/Bookshelf.module.css";
 
-/**
- * Estante pública — curadoria administrada em /admin/books.
- * Capas só existem aqui quando a equipe confirma autorização de uso no
- * formulário do Admin; o componente em si não valida isso, apenas exibe
- * o que já foi aprovado editorialmente.
- */
 export interface Livro {
   id: string;
   title: string;
   author: string;
-  description?: string;
-  coverImageUrl: string;
-  purchaseUrl: string;
+  description?: string | null;
+  coverImageUrl: string | null;
+  purchaseUrl: string | null;
   publicationYear?: number | null;
+  category?: string | null;
 }
+const normalize = (value: string) =>
+  value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("pt-BR");
 
-const THEMES = [
-  "Todos",
-  "Gestalt",
-  "Fenomenologia",
-  "Clínica",
-  "Corpo",
-  "Arte",
-  "Território",
-] as const;
-type Theme = (typeof THEMES)[number];
-
-function matchesTheme(livro: Livro, theme: Theme): boolean {
-  if (theme === "Todos") return true;
-  const haystack =
-    `${livro.title} ${livro.description ?? ""} ${livro.author}`.toLowerCase();
-  return haystack.includes(theme.toLowerCase());
-}
-
-export default function BookshelfSection({ livros }: { livros: Livro[] }) {
+export default function BookshelfSection({
+  livros,
+  loadError = false,
+}: {
+  livros: Livro[];
+  loadError?: boolean;
+}) {
   const [selected, setSelected] = useState<Livro | null>(null);
-  const [theme, setTheme] = useState<Theme>("Todos");
-
-  const [featured, ...rest] = livros;
-  const filtered = useMemo(
-    () => rest.filter((livro) => matchesTheme(livro, theme)),
-    [rest, theme],
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState<string | null>(null);
+  const categories = useMemo(
+    () =>
+      [
+        ...new Set(
+          livros
+            .map((book) => book.category?.trim())
+            .filter((value): value is string => !!value),
+        ),
+      ].sort((a, b) => a.localeCompare(b, "pt-BR")),
+    [livros],
   );
-
-  useEffect(() => {
-    if (!selected) return;
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setSelected(null);
-    };
-    window.addEventListener("keydown", handleEsc);
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      window.removeEventListener("keydown", handleEsc);
-      document.body.style.overflow = originalOverflow;
-    };
-  }, [selected]);
-
+  const filtered = useMemo(() => {
+    const search = normalize(query.trim());
+    return livros.filter(
+      (book) =>
+        (!category || book.category?.trim() === category) &&
+        (!search || normalize(`${book.title} ${book.author}`).includes(search)),
+    );
+  }, [livros, query, category]);
+  const featured = livros[0];
   return (
-    <section
-      aria-label="Estante de preferidos"
-      className="fv-section--cream fv-bg border-t border-border pb-12"
-    >
-      <div className="mb-14">
-        <PublicPageHero
-          eyebrow="Leituras"
-          title="Estante de preferidos"
-          description="Obras que atravessam a formação e a clínica no Instituto. As referências levam ao catálogo do editor — o acervo em texto integral fica na Biblioteca."
-          backgroundImage="/assets/fv/heroes/estante.webp"
-        />
-      </div>
-
-      <div className="fv-container">
-        {livros.length === 0 ? (
-          <div className="rounded-md border border-dashed border-border bg-paper px-6 py-16 text-center">
-            <p className="fv-lead text-text/60">Estante em preparação.</p>
-          </div>
-        ) : (
-          <>
-            {/* CURADORIA DO MÊS */}
-            {featured && (
-              <div className="mb-14">
-                <p className="mb-4 text-xs font-bold uppercase tracking-[0.24em] text-gold">
-                  Curadoria do mês
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setSelected(featured)}
-                  aria-label={`Ver detalhes de ${featured.title}, de ${featured.author}`}
-                  className="grid w-full gap-8 border border-border bg-paper p-6 text-left transition-colors hover:border-igarape md:grid-cols-[auto_1fr] md:p-10"
-                >
-                  <div className="relative mx-auto aspect-[2/3] w-full max-w-[180px] overflow-hidden bg-areia md:mx-0">
-                    <Image
-                      src={featured.coverImageUrl}
-                      alt={`Capa do livro ${featured.title}`}
-                      fill
-                      className="object-cover"
-                      sizes="180px"
-                    />
-                  </div>
-                  <div className="flex flex-col justify-center">
-                    <h3 className="font-serif text-2xl text-primary md:text-3xl">
-                      {featured.title}
-                    </h3>
-                    <p className="mt-1 text-sm text-text/70">
-                      {featured.author}
-                      {featured.publicationYear
-                        ? ` · ${featured.publicationYear}`
-                        : ""}
-                    </p>
-                    {featured.description && (
-                      <p className="mt-4 line-clamp-3 text-sm leading-relaxed text-text/65">
-                        {featured.description}
-                      </p>
-                    )}
-                    <span className="mt-5 inline-flex w-fit items-center gap-1.5 text-caption font-bold uppercase tracking-widest text-primary">
-                      Saiba mais
-                    </span>
-                  </div>
-                </button>
-              </div>
-            )}
-
-            {/* TEMAS */}
-            <div className="mb-10 flex flex-wrap gap-2">
-              {THEMES.map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => setTheme(option)}
-                  aria-pressed={theme === option}
-                  className={`min-h-11 rounded-sm border px-4 py-2 text-caption font-bold uppercase tracking-wider transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
-                    theme === option
-                      ? "border-primary bg-primary text-white"
-                      : "border-border bg-paper text-text/70 hover:border-igarape hover:bg-areia hover:text-primary"
-                  }`}
-                >
-                  {option}
-                </button>
-              ))}
+    <div className={styles.page}>
+      <PublicPageHero
+        eyebrow="Leituras"
+        title="Uma estante de encontros"
+        description="Livros que atravessam a clínica, acompanham a formação e ampliam nossos modos de estar no mundo."
+        backgroundImage="/assets/fv/heroes/estante.webp"
+        actions={
+          <a href="#acervo" className={styles.textLink}>
+            Percorrer a estante <ArrowDown size={16} aria-hidden="true" />
+          </a>
+        }
+      />
+      <div className={styles.container}>
+        {featured && (
+          <section
+            className={styles.featured}
+            aria-labelledby="featured-heading"
+          >
+            <div className={styles.featuredCover}>
+              <button
+                type="button"
+                onClick={() => setSelected(featured)}
+                aria-label={`Ver detalhes de ${featured.title}, de ${featured.author}`}
+                className={styles.featuredTrigger}
+                aria-haspopup="dialog"
+              >
+                <BookCover
+                  book={featured}
+                  sizes="(max-width: 639px) 180px, 240px"
+                />
+              </button>
             </div>
-
-            {/* PRATELEIRA */}
-            <ul className="book-shelf grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-              {filtered.map((livro) => (
-                <li key={livro.id} className="book-card group flex">
+            <div className={styles.featuredCopy}>
+              <p className={styles.eyebrow}>Um encontro para começar</p>
+              <h2 id="featured-heading">{featured.title}</h2>
+              <p className={styles.author}>
+                {featured.author}
+                {featured.publicationYear != null
+                  ? ` · ${featured.publicationYear}`
+                  : ""}
+              </p>
+              <p className={styles.featuredDescription}>
+                {featured.description?.trim() ||
+                  "Uma das leituras escolhidas pela equipe do Instituto para acompanhar nossos encontros com a clínica e a formação."}
+              </p>
+              <button
+                type="button"
+                className={styles.textLink}
+                onClick={() => setSelected(featured)}
+              >
+                Conhecer esta leitura{" "}
+                <ArrowUpRight size={18} aria-hidden="true" />
+              </button>
+            </div>
+          </section>
+        )}
+        <section
+          id="acervo"
+          aria-labelledby="shelf-heading"
+          className={styles.collection}
+        >
+          <div className={styles.collectionHeading}>
+            <div>
+              <p className={styles.eyebrow}>Escolhas que nos acompanham</p>
+              <h2 id="shelf-heading">Na nossa estante</h2>
+            </div>
+            <p>
+              Escolha uma capa.
+              <br />
+              Deixe a leitura abrir uma conversa.
+            </p>
+          </div>
+          {livros.length > 0 && (
+            <div className={styles.tools}>
+              <label className={styles.search}>
+                <Search size={19} aria-hidden="true" />
+                <span className="sr-only">Buscar por título ou autor</span>
+                <input
+                  type="search"
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Buscar por título ou autor"
+                  aria-controls="bookshelf-results"
+                />
+              </label>
+              <div
+                className={styles.filters}
+                role="group"
+                aria-label="Filtrar por categoria"
+              >
+                <button
+                  type="button"
+                  aria-pressed={category === null}
+                  onClick={() => setCategory(null)}
+                >
+                  Todas as leituras
+                </button>
+                {categories.map((value) => (
+                  <button
+                    key={value}
+                    type="button"
+                    aria-pressed={category === value}
+                    onClick={() => setCategory(value)}
+                  >
+                    {value}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          <p
+            className={styles.resultCount}
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {filtered.length} {filtered.length === 1 ? "leitura" : "leituras"}
+            {query || category
+              ? filtered.length === 1
+                ? " encontrada"
+                : " encontradas"
+              : " na estante"}
+          </p>
+          <div id="bookshelf-results">
+            {filtered.length > 0 ? (
+              <ul className={styles.shelves} aria-label="Livros da estante">
+                {filtered.map((book) => (
+                  <li key={book.id} className={styles.book}>
+                    <button
+                      type="button"
+                      className={styles.coverTrigger}
+                      onClick={() => setSelected(book)}
+                      aria-label={`Ver detalhes de ${book.title}, de ${book.author}`}
+                      aria-haspopup="dialog"
+                    >
+                      <span className={styles.cover}>
+                        <BookCover
+                          book={book}
+                          sizes="(max-width: 449px) 42vw, (max-width: 699px) 28vw, (max-width: 999px) 21vw, (max-width: 1199px) 17vw, (max-width: 1399px) 14vw, 170px"
+                        />
+                      </span>
+                    </button>
+                    <div className={styles.caption}>
+                      <h3>{book.title}</h3>
+                      <p>{book.author}</p>
+                      <p className={styles.bookDescription}>
+                        {book.description}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className={styles.empty}>
+                <h3>
+                  {loadError
+                    ? "A estante está temporariamente indisponível."
+                    : livros.length === 0
+                      ? "Nossa estante está em preparação."
+                      : "Ainda não encontramos essa leitura."}
+                </h3>
+                <p>
+                  {loadError
+                    ? "Tente carregar a página novamente em alguns instantes."
+                    : livros.length === 0
+                      ? "Em breve, novas referências para nossos encontros."
+                      : "Experimente outro título, autor ou categoria."}
+                </p>
+                {(query || category) && (
                   <button
                     type="button"
-                    onClick={() => setSelected(livro)}
-                    aria-label={`Ver detalhes de ${livro.title}, de ${livro.author}`}
-                    className="touch-manipulation flex w-full flex-col overflow-hidden rounded-md border border-border bg-paper text-left outline-offset-4 transition-colors duration-300 hover:border-igarape focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+                    className={styles.textLink}
+                    onClick={() => {
+                      setQuery("");
+                      setCategory(null);
+                    }}
                   >
-                    {/* Proporção fixa 2:3 + object-cover: toda capa enviada no Admin
-                        é recortada para este mesmo tamanho, independente das
-                        dimensões originais do arquivo. */}
-                    <div className="relative aspect-[2/3] w-full overflow-hidden bg-areia">
-                      <Image
-                        src={livro.coverImageUrl}
-                        alt={`Capa do livro ${livro.title}`}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 18vw"
-                      />
-                    </div>
-                    {/* Prateleira: linha Areia/Névoa simulando o apoio do livro */}
-                    <div className="h-1.5 border-t border-border bg-areia" />
-
-                    <div className="flex flex-1 flex-col gap-1 p-3">
-                      <span className="font-serif text-sm font-semibold leading-snug text-primary">
-                        {livro.title}
-                      </span>
-                      <span className="text-xs text-text/70">
-                        {livro.author}
-                      </span>
-                      {livro.description && (
-                        <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-text/60">
-                          {livro.description}
-                        </p>
-                      )}
-                      <span className="mt-2 flex items-center gap-1.5 text-caption font-bold uppercase tracking-widest text-primary">
-                        Saiba mais
-                      </span>
-                    </div>
+                    Limpar busca e filtros <X size={16} aria-hidden="true" />
                   </button>
-                </li>
-              ))}
-            </ul>
-
-            {filtered.length === 0 && (
-              <div className="rounded-md border border-dashed border-border bg-paper px-6 py-16 text-center">
-                <p className="fv-lead text-text/60">
-                  Nenhum livro encontrado para este tema.
-                </p>
+                )}
               </div>
             )}
-          </>
-        )}
+          </div>
+        </section>
+        <aside className={styles.invitation}>
+          <p className={styles.eyebrow}>Uma leitura leva a outra</p>
+          <h2>
+            Há sempre um novo
+            <br />
+            encontro entre as páginas.
+          </h2>
+          <p>
+            Volte a esta estante. Nossa curadoria acompanha as perguntas que
+            nascem na clínica, na formação e na vida.
+          </p>
+          <a href="#acervo" className={styles.textLink}>
+            Descobrir outras leituras{" "}
+            <ArrowUpRight size={18} aria-hidden="true" />
+          </a>
+        </aside>
       </div>
-
-      {typeof document !== "undefined" &&
-        createPortal(
-          <AnimatePresence>
-            {selected && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 z-50 overflow-y-auto overscroll-contain bg-primary/30 backdrop-blur-sm"
-                onClick={() => setSelected(null)}
-              >
-                <div className="flex min-h-full items-center justify-center p-0 sm:p-4 sm:py-8">
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.98 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.98 }}
-                    role="dialog"
-                    aria-modal="true"
-                    aria-labelledby="book-detail-title"
-                    onClick={(e) => e.stopPropagation()}
-                    className="flex w-full max-w-2xl flex-col overflow-hidden overscroll-contain bg-paper shadow-2xl sm:flex-row sm:rounded-xl h-full max-h-dvh sm:h-auto sm:max-h-[calc(100dvh-4rem)]"
-                  >
-                    <div className="relative flex w-full shrink-0 items-center justify-center border-b border-border bg-areia p-6 sm:w-60 sm:border-b-0 sm:border-r">
-                      <div className="relative aspect-[2/3] w-full max-w-[190px] overflow-hidden rounded-md border border-border shadow-md">
-                        <Image
-                          src={selected.coverImageUrl}
-                          alt={`Capa do livro ${selected.title}`}
-                          fill
-                          className="object-cover"
-                          sizes="(max-width: 640px) 60vw, 190px"
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setSelected(null)}
-                        aria-label="Fechar"
-                        className="touch-manipulation absolute right-2 top-2 flex h-11 w-11 items-center justify-center rounded-full bg-primary/70 text-white backdrop-blur-sm transition-colors hover:bg-primary active:bg-primary sm:hidden"
-                      >
-                        <X size={18} />
-                      </button>
-                    </div>
-
-                    <div className="flex flex-1 flex-col overflow-y-auto overscroll-contain bg-paper p-6">
-                      <div className="mb-2 flex items-start justify-between gap-4">
-                        <h3
-                          id="book-detail-title"
-                          className="font-serif text-2xl font-semibold leading-snug text-primary"
-                        >
-                          {selected.title}
-                        </h3>
-                        <button
-                          type="button"
-                          onClick={() => setSelected(null)}
-                          aria-label="Fechar"
-                          className="touch-manipulation hidden h-11 w-11 shrink-0 items-center justify-center rounded-full text-text/40 transition-colors hover:bg-areia hover:text-primary active:bg-areia sm:flex"
-                        >
-                          <X size={18} />
-                        </button>
-                      </div>
-
-                      <p className="text-sm text-text/70">{selected.author}</p>
-                      <p className="mt-1 text-xs font-bold uppercase tracking-widest text-text/40">
-                        {selected.publicationYear
-                          ? `Publicado em ${selected.publicationYear}`
-                          : "Ano de publicação não informado"}
-                      </p>
-
-                      {selected.description && (
-                        <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-text/70">
-                          {selected.description}
-                        </p>
-                      )}
-
-                      <a
-                        href={selected.purchaseUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="touch-manipulation mt-6 flex w-full items-center justify-center gap-2 rounded-md bg-primary px-5 py-3.5 text-caption font-bold uppercase tracking-widest text-white transition-colors hover:bg-gold active:bg-gold sm:w-fit sm:justify-start"
-                      >
-                        Onde encontrar
-                        <ExternalLink size={12} aria-hidden />
-                      </a>
-                    </div>
-                  </motion.div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>,
-          document.body,
-        )}
-    </section>
+      {selected && (
+        <BookDetails book={selected} onClose={() => setSelected(null)} />
+      )}
+    </div>
   );
 }

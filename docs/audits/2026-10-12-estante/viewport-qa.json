@@ -1,0 +1,68 @@
+[
+  {
+    "buttonTouchHeight": 48,
+    "columns": 2,
+    "descriptionLines": "3",
+    "dialogFits": true,
+    "equalCoverFrames": true,
+    "imageFill": "cover",
+    "noHorizontalOverflow": true,
+    "titleLines": "2",
+    "width": 320
+  },
+  {
+    "buttonTouchHeight": 48,
+    "columns": 2,
+    "descriptionLines": "3",
+    "dialogFits": true,
+    "equalCoverFrames": true,
+    "imageFill": "cover",
+    "noHorizontalOverflow": true,
+    "titleLines": "2",
+    "width": 360
+  },
+  {
+    "buttonTouchHeight": 48,
+    "columns": 2,
+    "descriptionLines": "3",
+    "dialogFits": true,
+    "equalCoverFrames": true,
+    "imageFill": "cover",
+    "noHorizontalOverflow": true,
+    "titleLines": "2",
+    "width": 390
+  },
+  {
+    "buttonTouchHeight": 48,
+    "columns": 4,
+    "descriptionLines": "3",
+    "dialogFits": true,
+    "equalCoverFrames": true,
+    "imageFill": "cover",
+    "noHorizontalOverflow": true,
+    "titleLines": "2",
+    "width": 768
+  },
+  {
+    "buttonTouchHeight": 48,
+    "columns": 5,
+    "descriptionLines": "3",
+    "dialogFits": true,
+    "equalCoverFrames": true,
+    "imageFill": "cover",
+    "noHorizontalOverflow": true,
+    "titleLines": "2",
+    "width": 1024
+  },
+  {
+    "buttonTouchHeight": 48,
+    "columns": 7,
+    "descriptionLines": "3",
+    "dialogFits": true,
+    "equalCoverFrames": true,
+    "imageFill": "cover",
+    "noHorizontalOverflow": true,
+    "titleLines": "2",
+    "width": 1440
+  }
+]
