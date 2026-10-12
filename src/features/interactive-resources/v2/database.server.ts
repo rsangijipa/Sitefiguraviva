@@ -16,10 +16,14 @@ export interface ContentRow {
   created_at: string; updated_at: string;
 }
 type Table<Row> = { Row: Row & Record<string, unknown>; Insert: Partial<Row> & Record<string, unknown>; Update: Partial<Row> & Record<string, unknown>; Relationships: [] };
-type ResourceDatabase = Omit<Database, "public"> & {
-  public: Omit<Database["public"], "Tables"> & { Tables: Omit<Database["public"]["Tables"], "interactive_resource_entries"> & {
+type ResourceDatabase = Omit<Database, "public" | "__InternalSupabase"> & {
+  public: { Views: Record<string, never>; Enums: Database["public"]["Enums"]; CompositeTypes: Record<string, never>; Functions: {
+    fv_resource_transition: { Args: { p_actor: string; p_action: string; p_resource_key: ResourceKey; p_version_id: string | null; p_configuration: Json | null; p_expected_updated_at: string | null }; Returns: Json };
+  }; Tables: {
     arrival_records: Table<RecordRow>; polarity_records: Table<RecordRow>; phenomenology_lab_records: Table<RecordRow>;
-    interactive_resource_entries: Table<RecordRow>;
+    interactive_resource_entries: Table<RecordRow>; need_records: Table<RecordRow>;
+    listening_sessions: Table<RecordRow>; pause_sessions: Table<RecordRow>; river_sessions: Table<RecordRow>;
+    enrollments: Table<{ id: string; user_id: string; status: string }>;
     resource_content_versions: Table<ContentRow>;
     resource_editorial_roles: Table<{ user_id: string; role: "docente_autor" | "docente_revisor"; crp: string; name: string }>;
     resource_formation_retention: Table<{ enrollment_id: string; user_id: string; course_id: string; title: string; end_date: string; departure_date: string | null }>;
@@ -30,10 +34,14 @@ type ResourceDatabase = Omit<Database, "public"> & {
 // Reuse the existing privileged client. This single boundary describes unapplied
 // local migrations without creating a second client or exposing its key.
 export function resourceDatabase() { return createSupabaseServiceClient() as unknown as SupabaseClient<ResourceDatabase>; }
-export function recordTable(key: ResourceKey) {
+export function recordTable(key: ResourceKey, mode?: string) {
   if (key === "chegada") return "arrival_records" as const;
   if (key === "polaridades-e-cadeiras") return "polarity_records" as const;
   if (key === "laboratorio-fenomenologico") return "phenomenology_lab_records" as const;
+  if (key === "necessidades-agora") return "need_records" as const;
+  if (key === "sons-para-awareness") return "listening_sessions" as const;
+  if (key === "sala-de-pausa") return "pause_sessions" as const;
+  if (key === "paisagem-de-pensamentos" && mode === "rio") return "river_sessions" as const;
   return "interactive_resource_entries" as const;
 }
-export const RECORD_TABLES = ["arrival_records", "polarity_records", "phenomenology_lab_records", "interactive_resource_entries"] as const;
+export const RECORD_TABLES = ["arrival_records", "polarity_records", "phenomenology_lab_records", "interactive_resource_entries", "need_records", "listening_sessions", "pause_sessions", "river_sessions"] as const;

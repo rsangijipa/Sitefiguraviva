@@ -9,7 +9,7 @@ export function contentVersion(row: ContentRow): EditorialVersion {
     id: row.id, resourceKey: row.resource_key, version: row.version,
     status: row.status as EditorialVersion["status"],
     configuration: EditorialConfigSchema.parse(row.configuration), authoredBy: row.authored_by,
-    reviewerName: row.reviewer_name, reviewerCrp: row.reviewer_crp, reviewedAt: row.reviewed_at,
+    reviewerName: row.reviewer_name, reviewerCrp: row.reviewer_crp, reviewedAt: row.reviewed_at, updatedAt: row.updated_at,
   };
 }
 export const publishedEditorial = cache(async (key: ResourceKey): Promise<EditorialVersion | null> => {

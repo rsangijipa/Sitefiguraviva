@@ -1,0 +1,52 @@
+"use client";
+
+class ResourceAudioManager {
+  private context: AudioContext | null = null;
+  private channels = new Map<string, { source: AudioBufferSourceNode; gain: GainNode }>();
+  private muted = true;
+  private listening = false;
+  async activateFromGesture() {
+    if (typeof window === "undefined" || !window.AudioContext) return false;
+    this.context ??= new AudioContext();
+    if (!this.listening) {
+      document.addEventListener("visibilitychange", () => { if (document.hidden) this.stopAll(); });
+      window.addEventListener("fv:lesson-audio-start", () => this.stopAll());
+      this.listening = true;
+    }
+    await this.context.resume();
+    this.muted = false;
+    return true;
+  }
+  isMuted() { return this.muted; }
+  mute() { this.muted = true; this.stopAll(); }
+  async play(channel: string, path: string) {
+    if (this.muted || !this.context || document.hidden) return false;
+    // Lessons have priority even when an older player does not emit the event.
+    if (Array.from(document.querySelectorAll("video,audio")).some(element => element instanceof HTMLMediaElement && !element.paused && !element.muted)) return false;
+    if (!path.startsWith("/brand/audio/")) return false;
+    this.stop(channel);
+    const response = await fetch(path, { signal: AbortSignal.timeout(10000) });
+    if (!response.ok) return false;
+    const buffer = await this.context.decodeAudioData(await response.arrayBuffer());
+    if (this.muted || document.hidden) return false;
+    const source = this.context.createBufferSource();
+    const gain = this.context.createGain();
+    source.buffer = buffer;
+    gain.gain.setValueAtTime(0, this.context.currentTime);
+    gain.gain.linearRampToValueAtTime(.15, this.context.currentTime + .1);
+    source.connect(gain); gain.connect(this.context.destination);
+    this.channels.set(channel, { source, gain });
+    source.onended = () => { source.disconnect(); gain.disconnect(); if (this.channels.get(channel)?.source === source) this.channels.delete(channel); };
+    source.start();
+    return true;
+  }
+  stop(channel: string) {
+    const sound = this.channels.get(channel);
+    if (!sound) return;
+    this.channels.delete(channel);
+    try { sound.source.stop(); } catch { /* already ended */ }
+    sound.source.disconnect(); sound.gain.disconnect();
+  }
+  stopAll() { for (const key of this.channels.keys()) this.stop(key); }
+}
+export const resourceAudioManager = new ResourceAudioManager();

@@ -40,7 +40,7 @@ export interface EditorialVersion {
   id: string; resourceKey: string; version: number;
   status: "draft" | "submitted" | "reviewed" | "published" | "archived";
   configuration: EditorialConfig; authoredBy: string | null;
-  reviewerName: string | null; reviewerCrp: string | null; reviewedAt: string | null;
+  reviewerName: string | null; reviewerCrp: string | null; reviewedAt: string | null; updatedAt: string;
 }
 export function emptyEditorialConfig(resourceKey: z.infer<typeof ResourceKeySchema>): EditorialConfig {
   return { schemaVersion: 1, resourceKey, items: [], audio: [], artApprovalId: null };

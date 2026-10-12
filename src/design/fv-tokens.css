@@ -1,0 +1,27 @@
+:root {
+  --fv-verde-raiz: #005A1F;
+  --fv-verde-igarape: #07614C;
+  --fv-terra-barro: #96551F;
+  --fv-creme-papel: #FDFAF4;
+  --fv-mata: #262B22;
+  --fv-areia: #F1E9DB;
+  --fv-nevoa: #D8CFBE;
+  --fv-pedra: #6B6B63;
+  --fv-grafite: #4B4B49;
+  --fv-aurora: #FE538B;
+  --fv-vazante: #FED701;
+  --fv-broto: #01C94D;
+  --fv-gradiente-confluencia: linear-gradient(90deg, #FE538B, #FED701, #01C94D);
+  --fv-radius-institucional: 0px;
+  --fv-radius-confluencia: 24px;
+  --fv-radius-etiqueta-inst: 4px;
+  --fv-radius-pill: 999px;
+  --fv-stroke-fino: 2px;
+  --fv-stroke-ramo: 3px;
+  --fv-motion-rapido: 160ms;
+  --fv-motion-base: 240ms;
+  --fv-toque-min: 44px;
+  --fv-largura-conteudo: 1200px;
+  --fv-space-1: 4px; --fv-space-2: 8px; --fv-space-3: 16px; --fv-space-4: 24px;
+  --fv-space-5: 32px; --fv-space-6: 48px; --fv-space-7: 64px; --fv-space-8: 96px;
+}

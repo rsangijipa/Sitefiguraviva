@@ -39,7 +39,7 @@ export async function savePrivateResourceRecord(input: unknown): Promise<Resourc
       if (!published || published.id !== parsed.contentVersion) return failure("invalid", "O acervo mudou. Reabra o recurso antes de guardar.");
     }
     const db = resourceDatabase();
-    const table = recordTable(parsed.resourceKey);
+    const table = recordTable(parsed.resourceKey, "mode" in parsed.payload ? String(parsed.payload.mode) : undefined);
     const values = {
       user_id: session.uid, resource_key: parsed.resourceKey, schema_version: 1,
       formation_id: formation.id, client_request_id: parsed.clientRequestId,
@@ -86,5 +86,6 @@ export async function deletePrivateResourceRecord(key: unknown, id: string): Pro
 }
 export async function exportPrivateResourceRecords(): Promise<ResourceResult<string>> {
   const result = await listPrivateResourceRecords();
-  return result.ok ? { ok: true, data: JSON.stringify({ schemaVersion: 1, records: result.data }, null, 2) } : result;
+  if (result.ok === false) return result;
+  return { ok: true, data: JSON.stringify({ schemaVersion: 1, records: result.data }, null, 2) };
 }

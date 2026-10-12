@@ -7,7 +7,7 @@ export interface DeletionReceipt {
   deletedAt: string;
   records: { table: typeof RECORD_TABLES[number]; id: string }[];
 }
-export async function appendDeletionReceipt(records: DeletionReceipt["records"], requestId = randomUUID()) {
+export async function appendDeletionReceipt(records: DeletionReceipt["records"], requestId: string = randomUUID()) {
   const endpoint = process.env.FV_RESOURCE_DELETION_LEDGER_URL;
   const token = process.env.FV_RESOURCE_DELETION_LEDGER_TOKEN;
   if (!endpoint || !token || !endpoint.startsWith("https://")) throw new Error("Manifesto externo indisponível.");

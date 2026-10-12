@@ -26,7 +26,7 @@ export const recordSchemas = {
   "necessidades-agora": z.strictObject({ ids: z.array(itemId).max(3), reflection: shortText }),
   "paisagem-de-pensamentos": z.strictObject({ mode: z.enum(["jardim", "rio"]), thoughts: z.array(shortText).max(20), reflection: shortText }).refine(value => value.mode !== "rio" || value.thoughts.length === 0, "As folhas do Rio são efêmeras."),
   "polaridades-e-cadeiras": z.strictObject({ names: z.tuple([z.string().max(60), z.string().max(60)]), position: z.number().int().min(0).max(10), turns: z.array(z.strictObject({ side: z.union([z.literal(0), z.literal(1)]), text: shortText })).max(12), reflection: shortText }),
-  "sala-de-pausa": z.strictObject({ practice: z.enum(["respirar", "observar", "pelos-sentidos", "ouvir", "movimentar", "desacelerar"]), seconds: z.number().int().min(0).max(3600), reflection: shortText }),
+  "sala-de-pausa": z.strictObject({ practice: z.enum(["respirar", "observar", "pelos-sentidos", "ouvir", "movimentar", "desacelerar"]), seconds: z.number().int().min(0).max(86400), reflection: shortText }),
   "sons-para-awareness": z.strictObject({ sceneId: z.string().max(80), observations: z.array(shortText).max(10), reflection: shortText }),
   "cartas-gestalticas": z.strictObject({ favorites: z.array(itemId).max(60), review: z.array(itemId).max(60), known: z.array(itemId).max(60), reflection: shortText }),
   "ciclo-do-contato": z.strictObject({ itemId, model: z.enum(["zinker", "phg", "ribeiro"]), sequence: z.array(itemId).max(12), reflection: shortText }),
