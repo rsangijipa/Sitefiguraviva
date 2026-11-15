@@ -16,7 +16,7 @@ export default function CookieConsent() {
       aria-modal="false"
       aria-labelledby="cookie-consent-title"
       aria-describedby="cookie-consent-description"
-      className="fixed inset-x-0 bottom-0 z-[120] p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-6"
+      className="fixed inset-x-0 bottom-0 z-[130] p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-6"
     >
       <div className="mx-auto flex max-h-[min(44vh,360px)] max-w-3xl flex-col gap-4 overflow-y-auto rounded-2xl border border-stone-200 bg-white/95 p-4 shadow-2xl backdrop-blur-md sm:max-h-none sm:flex-row sm:items-center sm:gap-5 sm:p-6">
         <div className="flex gap-4 flex-1">
