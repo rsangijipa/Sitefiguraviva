@@ -77,6 +77,8 @@ try {
         "scripts/e2e-preflight.test.mjs",
         "scripts/supabase-environment.test.mjs",
         "scripts/check-release-secrets.test.mjs",
+        "tests/dependency-security/deepmerge.test.cjs",
+        "tests/dependency-security/minimatch.test.cjs",
       ],
       unit: [packageBin("jest", "jest"), "--runInBand"],
       types: [

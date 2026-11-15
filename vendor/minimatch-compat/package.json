@@ -1,0 +1,10 @@
+{
+  "name": "minimatch",
+  "version": "11.0.4-fv.1",
+  "private": true,
+  "description": "Callable CommonJS facade for patched Minimatch used by legacy lint tooling",
+  "main": "index.cjs",
+  "license": "MIT",
+  "engines": { "node": ">=24" },
+  "dependencies": { "minimatch-modern": "npm:minimatch@11.0.4" }
+}

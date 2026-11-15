@@ -1,0 +1,9 @@
+{
+  "name": "deepmerge",
+  "version": "4.3.1",
+  "source": "https://registry.npmjs.org/deepmerge/-/deepmerge-4.3.1.tgz",
+  "file": "dist/cjs.js",
+  "sha256": "2e5160f84a1141bd927264afe4d15766f1e6cf07daef182b37ff53fea121de7d",
+  "advisory": "GHSA-gcqx-w48m-w2h4",
+  "patch": "Define own data properties for all three destination writes; never invoke __proto__ setter."
+}
