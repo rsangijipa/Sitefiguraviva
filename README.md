@@ -39,6 +39,7 @@ npm run dev
 - `npm run lint`: valida regras ESLint.
 - `npm run typecheck`: validacao TypeScript sem emitir artefatos.
 - `npm test`: testes Jest (unitarios/integracao).
+- `npm run test:dependency-security`: regressões de protótipo e compatibilidade dos pacotes locais em `vendor/`; também executadas pelo check de scripts da CI.
 - `npm run test:e2e`: testes Playwright (executar separadamente).
 - `$env:NEXT_DIST_DIR='.next-audit'; npm run build`: build isolada para auditorias sem interromper um servidor local.
 - `npm run seed`: carga inicial de dados utilitarios.

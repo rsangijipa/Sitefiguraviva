@@ -4,6 +4,7 @@ import nextVitals from "eslint-config-next/core-web-vitals";
 const eslintConfig = defineConfig([
   ...nextVitals,
   {
+    files: ["**/*.{js,jsx,ts,tsx,mjs,mts,cts}"],
     rules: {
       "@next/next/no-img-element": "off",
       "react-hooks/exhaustive-deps": "warn",

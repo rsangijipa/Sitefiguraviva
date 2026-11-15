@@ -5,7 +5,7 @@ Usar Node 24 indicado em .nvmrc e instalar dependências com npm ci. O lockfile 
 ## Executores separados
 
 - npm run test:unit: Jest de src/tests, com execução sequencial. Não coleta scripts node:test nem Playwright. Os testes de regras Firestore ficam ignorados sem emulador.
-- npm run test:scripts: node:test dos utilitários de capas e da configuração isolada de E2E/CI. Usa doubles e dados fictícios; não faz upload nem gravação em serviços reais.
+- npm run test:scripts: node:test dos utilitários de capas, da configuração isolada de E2E/CI e das regressões/compatibilidade dos pacotes locais de segurança em vendor. Usa doubles e dados fictícios; não faz upload nem gravação em serviços reais.
 - npm run test:rules: comando legado que precisa da CLI Firebase e emulador. A CI instala uma CLI com versão explícita e Java 21, usa o projeto demo-sitefiguraviva e roda a suíte correspondente. Não é prova de RLS Supabase.
 - npm run test:e2e: Playwright. Projeto public cobre navegação sem login; chromium cobre as jornadas que dependem de contas de teste. O conjunto ainda contém placeholders/fixme e não demonstra a jornada completa de inscrição/Pix.
 
