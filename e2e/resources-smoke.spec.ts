@@ -26,6 +26,10 @@ test.describe("Resources catalog and experiences", () => {
   });
 
   test("global floating controls stay available inside a resource", async ({ page }) => {
+    // A phone-sized screen makes the resource scroll whatever its published
+    // content (CI fixtures are shorter than production), so the back-to-top
+    // control is actually exercised.
+    await page.setViewportSize({ width: 390, height: 700 });
     await open(page, "/recursos/figura-e-fundo");
     const options = page.getByRole("button", { name: "Mais opções: tema" });
     await expect(options).toBeVisible();
