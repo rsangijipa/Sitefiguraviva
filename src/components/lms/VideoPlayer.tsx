@@ -40,6 +40,7 @@ export function VideoPlayer({
   const playerRef = useRef<any>(null);
   const maxWatchedRef = useRef<number>(Math.max(initialMaxWatchedSecond, 0));
   const lastUpdateTs = useRef<number>(Date.now());
+  const lastCompletionFailure = useRef<number>(0);
   const hasResumed = useRef(false);
 
   // Auto-dismiss notification
@@ -95,21 +96,31 @@ export function VideoPlayer({
 
   const markAsCompleted = useCallback(async () => {
     if (isCompleted || loading) return;
+    // Polling calls this every tick past 90%; after a failed save, wait
+    // before retrying so a network outage does not stack error toasts.
+    if (Date.now() - lastCompletionFailure.current < 15000) return;
 
     setLoading(true);
     try {
-      await updateLessonProgress(courseId, moduleId, lessonId, {
+      // The action reports failures in its result instead of throwing, so
+      // completion is only announced once the server has stored it.
+      const result = await updateLessonProgress(courseId, moduleId, lessonId, {
         status: "completed",
         percent: 100,
         maxWatchedSecond: playerRef.current?.getDuration() || 0,
       });
+      if (!result?.success) throw new Error(result?.error || "progress-not-saved");
       setIsCompleted(true);
       showToast("Aula concluída!", "success");
       trackEvent("video_complete", lessonId, { courseId, moduleId });
       if (onCompleted) onCompleted();
     } catch (err) {
+      lastCompletionFailure.current = Date.now();
       console.error("Failed to mark progress", err);
-      showToast("Erro ao salvar progresso.", "error");
+      showToast(
+        "Não foi possível salvar a conclusão. Vamos tentar de novo em instantes.",
+        "error",
+      );
     } finally {
       setLoading(false);
     }

@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { Video, FileText, AlertCircle, CheckCircle, Info, ExternalLink, Image as ImageIcon, Sparkles } from 'lucide-react';
 import { VideoPlayer } from './VideoPlayer';
 import { getClinicalTool } from '@/features/interactive-resources/clinicalToolsRegistry';
+import { getYouTubeVideoId, safeContentUrl } from '@/lib/course-content/media';
 
 interface BlockRendererProps {
     block: Block;
@@ -30,13 +31,14 @@ export function BlockRenderer({ block, courseId, moduleId, lessonId, isLessonCom
 
         case 'video':
             // Smart Video Player
-            const videoId = block.content.videoId || (block.content.url ? block.content.url.split('v=')[1] : null);
-            if (!videoId && block.content.url) {
-                return (
-                    <div className="bg-stone-100 p-4 rounded text-center">Video URL not supported yet: {block.content.url}</div>
-                )
+            const videoId = getYouTubeVideoId(block.content.videoId) || getYouTubeVideoId(block.content.url);
+            if (!videoId) {
+                return block.content.url ? (
+                    <div role="note" className="bg-stone-100 p-4 rounded-xl text-center text-sm text-stone-600">
+                        Este vídeo não pôde ser exibido. Avise a equipe pelo suporte do portal.
+                    </div>
+                ) : null;
             }
-            if (!videoId) return null;
 
             if (courseId && moduleId && lessonId) {
                 // Return tracked player
@@ -70,12 +72,13 @@ export function BlockRenderer({ block, courseId, moduleId, lessonId, isLessonCom
                 </div>
             );
 
-        case 'image':
+        case 'image': {
+            const imageUrl = safeContentUrl(block.content.url);
             return (
                 <div className="flex flex-col gap-2">
                     <div className="rounded-xl overflow-hidden border border-stone-100">
-                        {block.content.url ? (
-                            <img src={block.content.url} alt={block.title || 'Imagem da aula'} className="w-full h-auto" />
+                        {imageUrl ? (
+                            <img src={imageUrl} alt={block.title || 'Imagem da aula'} loading="lazy" className="w-full h-auto" />
                         ) : (
                             <div className="bg-stone-100 h-64 flex items-center justify-center text-stone-400">
                                 <ImageIcon size={32} />
@@ -87,30 +90,38 @@ export function BlockRenderer({ block, courseId, moduleId, lessonId, isLessonCom
                     )}
                 </div>
             );
+        }
 
         case 'pdf':
-        case 'file': // Legacy compat?
+        case 'file': { // Legacy compat?
+            const fileUrl = safeContentUrl(block.content.url);
+            if (!fileUrl) return null;
             return (
-                <a href={block.content.url} target="_blank" rel="noopener noreferrer" className="block cursor-pointer group">
+                <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="block cursor-pointer group">
                     <div className="bg-white p-4 rounded-xl border border-stone-200 hover:border-primary/30 hover:bg-primary/5 transition-all flex items-center gap-4">
                         <div className="w-12 h-12 bg-red-50 text-red-500 rounded-lg flex items-center justify-center group-hover:bg-red-100 transition-colors">
                             <FileText size={20} />
                         </div>
                         <div className="flex-1">
                             <h4 className="font-bold text-stone-700 group-hover:text-primary transition-colors">{block.title || 'Arquivo PDF'}</h4>
-                            <p className="text-xs text-stone-400">Clique para visualizar ou baixar</p>
+                            <p className="text-xs text-stone-400">Clique para visualizar ou baixar <span className="sr-only">(abre em nova aba)</span></p>
                         </div>
-                        <ExternalLink size={16} className="text-stone-300 group-hover:text-primary" />
+                        <ExternalLink size={16} aria-hidden="true" className="text-stone-300 group-hover:text-primary" />
                     </div>
                 </a>
             );
-        case 'link':
+        }
+        case 'link': {
+            const linkUrl = safeContentUrl(block.content.url);
+            if (!linkUrl) return null;
             return (
-                <a href={block.content.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary hover:underline font-medium">
-                    <ExternalLink size={16} />
-                    {block.title || block.content.url}
+                <a href={linkUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary hover:underline font-medium">
+                    <ExternalLink size={16} aria-hidden="true" />
+                    {block.title || linkUrl}
+                    <span className="sr-only"> (abre em nova aba)</span>
                 </a>
             );
+        }
 
         case 'divider':
             return <hr className="border-t border-stone-100 my-8" />;
@@ -140,7 +151,7 @@ export function BlockRenderer({ block, courseId, moduleId, lessonId, isLessonCom
             const tool = getClinicalTool(toolSlug);
             const toolName = block.content.toolTitle || tool?.name || block.title || 'Exercício Clínico Interativo';
             const toolDesc = tool?.description || 'Prática terapêutica interativa recomendada para esta aula.';
-            const toolUrl = tool?.path || `/recursos/${toolSlug}`;
+            const toolUrl = tool?.path || `/recursos/${encodeURIComponent(toolSlug)}`;
 
             return (
                 <div className="rounded-2xl border-2 border-gold/30 bg-gradient-to-br from-gold/10 via-white to-stone-50 p-6 shadow-sm my-4">
