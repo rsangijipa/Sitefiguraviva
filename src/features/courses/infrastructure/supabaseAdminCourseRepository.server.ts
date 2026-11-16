@@ -348,7 +348,7 @@ function coursePayloadToInsert(
     pix_price_cents: payload.pixPriceCents ?? null,
     total_price_cents: payload.totalPriceCents ?? null,
     installment_count: payload.installments ?? null,
-    billing_type: billing.type || "free",
+    billing_type: billing.type || "one_time",
     stripe_price_id: billing.priceId,
     stripe_product_id: billing.productId,
     tags: Array.isArray(payload.tags) ? payload.tags : [],
@@ -500,6 +500,117 @@ export async function bumpAdminCourseRevision(
   if (typeof data !== "number")
     throw new Error("Course revision was not returned.");
   return data;
+}
+
+export type DuplicateCourseResult = {
+  courseId: string;
+  modules: number;
+  lessons: number;
+};
+
+/**
+ * Copies a course as a new draft: course row, modules, lessons (with their
+ * content blocks) and mediators. Enrollments, community and private lesson
+ * materials stay with the original (files belong to that course's storage
+ * paths). If any copy step fails the new course is deleted; modules and
+ * lessons go with it through the cascading foreign keys.
+ */
+export async function duplicateAdminCourse(
+  sourceId: string,
+): Promise<DuplicateCourseResult> {
+  const supabase = createSupabaseServiceClient();
+  const { data: source, error: sourceError } = await supabase
+    .from("courses")
+    .select("*")
+    .eq("id", sourceId)
+    .maybeSingle();
+  if (sourceError) throw sourceError;
+  if (!source) throw new Error("Curso não encontrado.");
+
+  const [modulesResult, lessonsResult, mediatorsResult] = await Promise.all([
+    supabase.from("course_modules").select("*").eq("course_id", sourceId),
+    supabase.from("lessons").select("*").eq("course_id", sourceId),
+    supabase.from("course_mediators").select("*").eq("course_id", sourceId),
+  ]);
+  for (const result of [modulesResult, lessonsResult, mediatorsResult])
+    if (result.error) throw result.error;
+
+  const newCourseId = randomUUID();
+  const {
+    id: _id,
+    created_at: _created,
+    updated_at: _updated,
+    ...courseFields
+  } = source;
+  const { error: insertError } = await supabase.from("courses").insert({
+    ...courseFields,
+    id: newCourseId,
+    title: `Cópia de ${source.title}`.slice(0, 300),
+    slug: null,
+    status: "draft",
+    is_published: false,
+    content_revision: 1,
+    stripe_price_id: null,
+    stripe_product_id: null,
+    stats: { lessonsCount: 0, studentsCount: 0 },
+  } as TableInsert<"courses">);
+  if (insertError) throw insertError;
+
+  try {
+    const moduleIds = new Map<string, string>();
+    const modules = (modulesResult.data ?? []).map((row: ModuleRow) => {
+      const id = randomUUID();
+      moduleIds.set(row.id, id);
+      const { created_at: _c, updated_at: _u, ...fields } = row as ModuleRow & {
+        created_at?: string;
+        updated_at?: string;
+      };
+      return { ...fields, id, course_id: newCourseId };
+    });
+    if (modules.length) {
+      const { error } = await supabase.from("course_modules").insert(modules);
+      if (error) throw error;
+    }
+
+    const lessons = (lessonsResult.data ?? [])
+      .filter((row: LessonRow) => moduleIds.has(row.module_id))
+      .map((row: LessonRow) => {
+        const { created_at: _c, updated_at: _u, ...fields } = row as LessonRow & {
+          created_at?: string;
+          updated_at?: string;
+        };
+        return {
+          ...fields,
+          id: randomUUID(),
+          course_id: newCourseId,
+          module_id: moduleIds.get(row.module_id)!,
+        };
+      });
+    if (lessons.length) {
+      const { error } = await supabase.from("lessons").insert(lessons);
+      if (error) throw error;
+    }
+
+    const mediators = (mediatorsResult.data ?? []).map(
+      (row: { mediator_id: string }) => ({
+        course_id: newCourseId,
+        mediator_id: row.mediator_id,
+      }),
+    );
+    if (mediators.length) {
+      const { error } = await supabase.from("course_mediators").insert(mediators);
+      if (error) throw error;
+    }
+
+    return {
+      courseId: newCourseId,
+      modules: modules.length,
+      lessons: lessons.length,
+    };
+  } catch (error) {
+    await supabase.from("courses").delete().eq("id", newCourseId);
+    throw error;
+  }
 }
 
 export async function deleteAdminCourse(courseId: string): Promise<void> {

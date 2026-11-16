@@ -18,6 +18,7 @@ import {
   createAdminModule,
   createAdminLesson,
   deleteAdminCourse,
+  duplicateAdminCourse,
   deleteAdminLesson,
   deleteAdminMaterial,
   deleteAdminModule,
@@ -239,6 +240,37 @@ export async function deleteCourseAction(courseId: string): Promise<void> {
   revalidatePath("/admin/courses");
   revalidatePath("/");
   revalidatePath("/curso");
+}
+
+export type DuplicateCourseActionResult =
+  | { success: true; courseId: string; modules: number; lessons: number }
+  | { success: false; message: string };
+
+/**
+ * Creates a draft copy of a course (content, modules, lessons, mediators) so
+ * a new class starts from the previous one. Students, enrollments and private
+ * materials are not copied.
+ */
+export async function duplicateCourseAction(
+  courseId: string,
+): Promise<DuplicateCourseActionResult> {
+  await requireAdmin();
+  if (typeof courseId !== "string" || !courseId.trim())
+    return { success: false, message: "Curso inválido." };
+  try {
+    const result = await duplicateAdminCourse(courseId);
+    revalidatePath("/admin/courses");
+    return { success: true, ...result };
+  } catch (error) {
+    console.error("duplicateCourseAction error:", error);
+    return {
+      success: false,
+      message:
+        error instanceof Error && error.message === "Curso não encontrado."
+          ? error.message
+          : "Não foi possível duplicar o curso. Nada foi criado; tente novamente.",
+    };
+  }
 }
 
 // --- MODULES ---

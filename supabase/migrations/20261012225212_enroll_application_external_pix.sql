@@ -107,4 +107,4 @@ end $$;
 revoke all on function public.enroll_application_external_pix(uuid, text, boolean) from public, anon, authenticated;
 grant execute on function public.enroll_application_external_pix(uuid, text, boolean) to service_role;
 notify pgrst, 'reload schema';
-commit;
+commit;;

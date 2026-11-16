@@ -78,7 +78,10 @@ export const LessonSidebar = ({
               className="rounded-xl overflow-hidden border border-stone-100 bg-stone-50/50"
             >
               <button
+                type="button"
                 onClick={() => toggleModule(module.id)}
+                aria-expanded={isOpen}
+                aria-controls={`module-lessons-${module.id}`}
                 className="w-full flex items-center justify-between p-4 bg-white hover:bg-stone-50 transition-colors text-left"
               >
                 <div>
@@ -106,16 +109,29 @@ export const LessonSidebar = ({
                     exit={{ height: 0 }}
                     className="overflow-hidden"
                   >
-                    <div className="p-2 space-y-1">
+                    <div id={`module-lessons-${module.id}`} className="p-2 space-y-1">
                       {module.lessons.map((lesson) => {
                         const isActive = lesson.id === currentLessonId;
+                        const durationLabel =
+                          typeof lesson.duration === "number" &&
+                          lesson.duration > 0
+                            ? `${lesson.duration} min`
+                            : null;
+                        const statusLabel = lesson.isLocked
+                          ? "bloqueada"
+                          : lesson.isCompleted
+                            ? "concluída"
+                            : "não concluída";
                         return (
                           <button
+                            type="button"
                             key={lesson.id}
                             onClick={() =>
                               !lesson.isLocked && onSelectLesson(lesson.id)
                             }
                             disabled={lesson.isLocked}
+                            aria-current={isActive ? "page" : undefined}
+                            aria-label={`${lesson.title}, ${statusLabel}${durationLabel ? `, ${durationLabel}` : ""}`}
                             className={cn(
                               "w-full flex items-center gap-3 p-3 rounded-lg text-left transition-all text-sm group",
                               isActive
@@ -153,14 +169,14 @@ export const LessonSidebar = ({
                               >
                                 {lesson.title}
                               </p>
-                              {lesson.duration && (
+                              {durationLabel && (
                                 <p
                                   className={cn(
                                     "text-[10px] mt-0.5 opacity-60",
                                     isActive ? "text-white" : "",
                                   )}
                                 >
-                                  {lesson.duration}
+                                  {durationLabel}
                                 </p>
                               )}
                             </div>

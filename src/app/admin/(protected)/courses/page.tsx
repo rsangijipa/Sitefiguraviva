@@ -2,7 +2,16 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Trash2, Edit, Calendar, Search, Pencil } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  Edit,
+  Calendar,
+  Search,
+  Pencil,
+  Copy,
+  History,
+} from "lucide-react";
 import { motion } from "framer-motion";
 import Button from "@/components/ui/Button";
 import { adminCourseService } from "@/services/adminCourseService";
@@ -10,6 +19,13 @@ import { CourseDoc } from "@/types/lms";
 import { useToast } from "@/context/ToastContext";
 import { AdminPageShell } from "@/components/admin/AdminPageShell";
 import MediatorsRegistry from "@/components/admin/courses/MediatorsRegistry";
+import { CourseOfferAlerts } from "@/components/admin/courses/CourseOfferAlerts";
+import { duplicateCourseAction } from "@/app/actions/admin/course-mutations";
+import {
+  formatHistoryMonth,
+  getCourseLastDate,
+  splitCoursesByTimeline,
+} from "@/features/courses/domain/course-timeline";
 
 export default function CoursesPage() {
   const router = useRouter();
@@ -17,6 +33,7 @@ export default function CoursesPage() {
   const [courses, setCourses] = useState<CourseDoc[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
 
   const loadCourses = useCallback(async () => {
     setLoading(true);
@@ -68,6 +85,34 @@ export default function CoursesPage() {
     }
   };
 
+  const handleDuplicate = async (e: React.MouseEvent, course: CourseDoc) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (
+      !confirm(
+        `Duplicar "${course.title}"?\n\nA cópia nasce como rascunho, com o mesmo conteúdo, módulos, aulas e mediadoras. Alunos, matrículas, comunidade e materiais privados (arquivos) não são copiados.`,
+      )
+    )
+      return;
+    setDuplicatingId(course.id);
+    try {
+      const result = await duplicateCourseAction(course.id);
+      if ("message" in result) {
+        addToast(result.message, "error");
+        return;
+      }
+      addToast(
+        `Cópia criada com ${result.modules} módulo(s) e ${result.lessons} aula(s). Abrindo editor...`,
+        "success",
+      );
+      router.push(`/admin/courses/${result.courseId}`);
+    } catch {
+      addToast("Não foi possível duplicar o curso.", "error");
+    } finally {
+      setDuplicatingId(null);
+    }
+  };
+
   const filteredCourses = courses
     .filter(
       (c) =>
@@ -79,6 +124,9 @@ export default function CoursesPage() {
       const dateB = (b.createdAt as any)?.seconds || 0;
       return dateB - dateA;
     });
+  // Turmas com datas passadas ficam num histórico compacto, abaixo.
+  const { current: currentCourses, past: pastCourses } =
+    splitCoursesByTimeline(filteredCourses);
 
   return (
     <AdminPageShell
@@ -96,6 +144,7 @@ export default function CoursesPage() {
       }
     >
       {/* Filters */}
+      {!loading && <CourseOfferAlerts courses={courses} />}
       <MediatorsRegistry />
       <div className="flex gap-4 items-center bg-white p-2 pl-4 rounded-xl border border-stone-100 w-full md:w-fit">
         <Search size={18} className="text-stone-400" />
@@ -134,7 +183,7 @@ export default function CoursesPage() {
           </motion.div>
 
           {/* Course Cards */}
-          {filteredCourses.map((course) => (
+          {currentCourses.map((course) => (
             <motion.div
               key={course.id}
               layout
@@ -213,6 +262,16 @@ export default function CoursesPage() {
                   </span>
                   <div className="flex gap-2">
                     <button
+                      type="button"
+                      onClick={(e) => handleDuplicate(e, course)}
+                      disabled={duplicatingId !== null}
+                      className="p-2 hover:bg-stone-100 hover:text-primary rounded-lg transition-colors z-20 disabled:opacity-50"
+                      title="Duplicar curso"
+                      aria-label={`Duplicar ${course.title}`}
+                    >
+                      <Copy size={16} aria-hidden="true" />
+                    </button>
+                    <button
                       onClick={(e) => handleDelete(e, course.id)}
                       className="p-2 hover:bg-red-50 hover:text-red-500 rounded-lg transition-colors z-20"
                       title="Excluir"
@@ -232,6 +291,80 @@ export default function CoursesPage() {
             </motion.div>
           ))}
         </div>
+      )}
+
+      {!loading && pastCourses.length > 0 && (
+        <section
+          aria-labelledby="admin-course-history"
+          className="border-t border-stone-200 pt-8"
+        >
+          <h2
+            id="admin-course-history"
+            className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-stone-500"
+          >
+            <History size={14} aria-hidden="true" />
+            Histórico de turmas ({pastCourses.length})
+          </h2>
+          <p className="mt-1 text-sm text-stone-500">
+            Cursos cujas datas já passaram. No site eles aparecem no histórico,
+            sem botão de inscrição. Para uma nova turma, use Duplicar e ajuste
+            datas e valores.
+          </p>
+          <ul className="mt-4 divide-y divide-stone-100 rounded-2xl border border-stone-200 bg-white">
+            {pastCourses.map((course) => {
+              const lastDate = getCourseLastDate(course);
+              return (
+                <li
+                  key={course.id}
+                  className="flex items-center gap-3 px-4 py-3 grayscale"
+                >
+                  <div className="flex h-10 w-14 shrink-0 items-center justify-center overflow-hidden rounded-md bg-stone-100 text-stone-400">
+                    {course.coverImage || course.thumbnail ? (
+                      <img
+                        src={course.coverImage || course.thumbnail}
+                        alt=""
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <History size={14} aria-hidden="true" />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-stone-700">
+                      {course.title}
+                    </p>
+                    <p className="flex items-center gap-1 text-[11px] uppercase tracking-widest text-stone-500">
+                      <Calendar size={11} aria-hidden="true" />
+                      {lastDate
+                        ? `Realizado em ${formatHistoryMonth(lastDate)}`
+                        : "Encerrado"}
+                      {course.status === "open" && " · ainda aberto"}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={(e) => handleDuplicate(e, course)}
+                    disabled={duplicatingId !== null}
+                    aria-label={`Duplicar ${course.title}`}
+                    title="Duplicar para nova turma"
+                    className="rounded-md p-1.5 text-stone-500 hover:bg-stone-100 hover:text-stone-800 disabled:opacity-50"
+                  >
+                    <Copy size={14} aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => handleOpenEdit(e, course)}
+                    aria-label={`Editar ${course.title}`}
+                    title="Editar"
+                    className="rounded-md p-1.5 text-stone-500 hover:bg-stone-100 hover:text-stone-800"
+                  >
+                    <Edit size={14} aria-hidden="true" />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
       )}
     </AdminPageShell>
   );

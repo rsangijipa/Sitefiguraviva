@@ -3,22 +3,25 @@ import {
   CheckCircle,
   ChevronLeft,
   ChevronRight,
+  ClipboardList,
+  Clock,
   Menu,
   X,
 } from "lucide-react";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { VideoPlayer } from "../lms/VideoPlayer";
+import { BlockRenderer } from "../lms/BlockRenderer";
 import { LessonSidebar } from "./LessonSidebar";
 import { Lesson, Module } from "@/types/lms";
 import Button from "../ui/Button";
 import { cn } from "@/lib/utils";
 import { SafeHtml } from "../SafeHtml";
-import { useProgress } from "@/hooks/useProgress";
 import { trackEvent } from "@/actions/analytics";
 import { EmptyState } from "../ui/EmptyState";
 import { Skeleton } from "../ui/Skeleton";
-import { AlertCircle, VideoOff } from "lucide-react";
+import { VideoOff } from "lucide-react";
+import { getYouTubeVideoId } from "@/lib/course-content/media";
 
 interface CoursePlayerProps {
   course: {
@@ -33,10 +36,18 @@ interface CoursePlayerProps {
   nextLessonId?: string;
   prevLessonId?: string;
   loading?: boolean;
-  // New props for Video-First features
   initialMaxWatchedSecond?: number;
   onVideoCompleted?: () => void;
 }
+
+const SIDEBAR_ID = "lesson-sidebar";
+
+const isDesktopViewport = () =>
+  typeof window !== "undefined" &&
+  window.matchMedia("(min-width: 768px)").matches;
+
+const formatDuration = (minutes?: number) =>
+  typeof minutes === "number" && minutes > 0 ? `${minutes} min` : null;
 
 // Wrapper component to isolate hook usage per lesson
 const CourseVideoWrapper = ({
@@ -54,28 +65,15 @@ const CourseVideoWrapper = ({
   initialMaxWatchedSecond?: number;
   onVideoCompleted?: () => void;
 }) => {
-  // FIX: useProgress now requires moduleId (PRG-02)
-  // We are deprecating useProgress hook in favor of direct VideoPlayer logic for SSoT
-  // But keeping it for now if it does other things, but VideoPlayer is self-contained.
-
-  // We are replacing the old VideoPlayer usage with the Refactored VideoPlayer
-  // The Refactored VideoPlayer takes: videoId, courseId, moduleId, lessonId, initialCompleted, initialMaxWatchedSecond, onCompleted
-
-  // Check if lesson.type is strictly video to avoid errors
-  const videoUrl = (lesson as any).videoUrl || "";
-  // Extract video ID from URL (basic regex for youtube)
-  const videoId =
-    videoUrl.match(
-      /(?:youtu\.be\/|youtube\.com\/watch\?v=|youtube\.com\/embed\/)([^#&?]*)/,
-    )?.[1] || "";
+  const videoId = getYouTubeVideoId(lesson.videoUrl);
 
   if (!videoId)
     return (
       <div className="aspect-video bg-stone-900 flex items-center justify-center text-white p-6">
         <EmptyState
           icon={VideoOff}
-          title="Vídeo Indisponível"
-          description="O link do vídeo para esta aula não foi configurado ou é inválido."
+          title="Vídeo indisponível"
+          description="O vídeo desta aula ainda não foi configurado. Avise a equipe pelo suporte do portal."
           className="bg-transparent border-none shadow-none text-white"
         />
       </div>
@@ -109,8 +107,21 @@ export const CoursePlayer = ({
   initialMaxWatchedSecond,
   onVideoCompleted,
 }: CoursePlayerProps) => {
-  // ...
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  // null = follow the viewport (closed on phones, open on desktop) so the
+  // lesson list never covers the content on first load in a phone.
+  const [sidebarOpen, setSidebarOpen] = useState<boolean | null>(null);
+  // Starts false on server and first client render to keep hydration stable;
+  // the CSS default for the "auto" state already shows the list on desktop.
+  const [isDesktop, setIsDesktop] = useState(false);
+  const isSidebarOpen = sidebarOpen ?? isDesktop;
+
+  useEffect(() => {
+    const query = window.matchMedia("(min-width: 768px)");
+    const sync = () => setIsDesktop(query.matches);
+    sync();
+    query.addEventListener("change", sync);
+    return () => query.removeEventListener("change", sync);
+  }, []);
 
   useEffect(() => {
     if (activeLesson?.id) {
@@ -118,9 +129,40 @@ export const CoursePlayer = ({
     }
   }, [activeLesson?.id, course.id]);
 
+  const toggleSidebar = useCallback(
+    () => setSidebarOpen((prev) => !(prev ?? isDesktopViewport())),
+    [],
+  );
+
+  const selectLesson = useCallback(
+    (lessonId: string) => {
+      if (!isDesktopViewport()) setSidebarOpen(false);
+      onSelectLesson(lessonId);
+    },
+    [onSelectLesson],
+  );
+
+  const allLessons = useMemo(
+    () => modules.flatMap((module) => module.lessons),
+    [modules],
+  );
+  const lessonPosition = activeLesson
+    ? allLessons.findIndex((lesson) => lesson.id === activeLesson.id) + 1
+    : 0;
+  const completedCount = allLessons.filter((lesson) => lesson.isCompleted)
+    .length;
+
+  const blocks = useMemo(
+    () =>
+      [...(activeLesson?.blocks ?? [])]
+        .filter((block) => block && block.isPublished !== false)
+        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0)),
+    [activeLesson?.blocks],
+  );
+
   if (loading) {
     return (
-      <div className="h-[calc(100vh-4rem)] flex flex-col bg-[#FDFCF9] animate-pulse">
+      <div className="h-[calc(100dvh-4rem)] flex flex-col bg-[#FDFCF9] animate-pulse">
         <header className="h-16 bg-white border-b border-stone-100 flex items-center px-4">
           <Skeleton className="w-10 h-10 rounded-full mr-4" />
           <div className="space-y-2">
@@ -146,7 +188,6 @@ export const CoursePlayer = ({
     );
   }
 
-  // Helper to resolve Module ID
   const getModuleId = (lesson: Lesson) => {
     if (lesson.moduleId) return lesson.moduleId;
     const parent = modules.find((m) =>
@@ -155,160 +196,224 @@ export const CoursePlayer = ({
     return parent?.id || "";
   };
 
+  const activeModule = activeLesson
+    ? modules.find((module) => module.id === getModuleId(activeLesson))
+    : undefined;
+  // Text, library and live lessons only get a video frame when one was set;
+  // a video lesson without a link still shows the "unavailable" notice.
+  const hasVideo =
+    !!activeLesson &&
+    (activeLesson.type === "video" || !!activeLesson.videoUrl?.trim());
+  const description = activeLesson?.description?.trim();
+  const isQuizWithoutAssessment = activeLesson?.type === "quiz";
+  const hasContent = hasVideo || !!description || blocks.length > 0;
+  const duration = formatDuration(activeLesson?.duration);
+
   return (
-    <div className="h-[calc(100vh-4rem)] flex flex-col bg-[#FDFCF9] overflow-hidden">
+    <div className="h-[calc(100dvh-4rem)] flex flex-col bg-[#FDFCF9] overflow-hidden">
       {/* Top Bar */}
-      <header className="h-16 bg-white border-b border-stone-100 flex items-center justify-between px-4 shrink-0 z-20 relative">
-        <div className="flex items-center gap-4">
+      <header className="h-16 bg-white border-b border-stone-100 flex items-center justify-between gap-2 px-4 shrink-0 z-20 relative">
+        <div className="flex items-center gap-3 min-w-0">
           <Link
             href={course.backLink}
-            className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-stone-50 text-stone-400 transition-colors"
+            aria-label="Voltar para a página do curso"
+            className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full hover:bg-stone-50 text-stone-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft size={20} aria-hidden="true" />
           </Link>
-          <div>
-            <h1 className="font-bold text-primary text-sm md:text-base line-clamp-1">
+          <div className="min-w-0">
+            <p className="font-bold text-primary text-sm md:text-base line-clamp-1">
               {course.title}
-            </h1>
-            {activeLesson && (
-              <p className="text-xs text-stone-500 hidden md:block">
-                {activeLesson.title}
+            </p>
+            {lessonPosition > 0 && (
+              <p className="text-xs text-stone-500 line-clamp-1">
+                Aula {lessonPosition} de {allLessons.length}
+                <span className="hidden sm:inline">
+                  {" "}
+                  · {completedCount} concluída{completedCount === 1 ? "" : "s"}
+                </span>
               </p>
             )}
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 hover:bg-stone-50 rounded-lg text-primary md:hidden"
-          >
-            {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="hidden md:flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-widest text-primary hover:bg-stone-50 rounded-lg transition-colors border border-stone-100"
-          >
-            {sidebarOpen ? "Expandir Tela" : "Ver Conteúdo"}
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={toggleSidebar}
+          aria-expanded={isSidebarOpen}
+          aria-controls={SIDEBAR_ID}
+          aria-label={
+            isSidebarOpen ? "Fechar lista de aulas" : "Abrir lista de aulas"
+          }
+          className="shrink-0 flex items-center gap-2 p-2 md:px-4 md:py-2 text-xs font-bold uppercase tracking-widest text-primary hover:bg-stone-50 rounded-lg transition-colors md:border md:border-stone-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        >
+          <span className="md:hidden" aria-hidden="true">
+            {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
+          </span>
+          <span className="hidden md:inline" aria-hidden="true">
+            {isSidebarOpen ? "Expandir tela" : "Ver aulas"}
+          </span>
+        </button>
       </header>
 
       {/* Main Layout */}
       <div className="flex-1 flex overflow-hidden relative">
-        {/* Content Area */}
         <main className="flex-1 overflow-y-auto custom-scrollbar bg-black/5 relative">
           <div className="max-w-5xl mx-auto w-full min-h-full flex flex-col">
-            {/* Video Section */}
-            <div
-              className={cn(
-                "w-full bg-black transition-all duration-300 ease-in-out",
-                sidebarOpen
-                  ? "aspect-video md:aspect-video"
-                  : "aspect-video md:h-[60vh]",
-              )}
-            >
-              {activeLesson && (
+            {activeLesson && hasVideo && (
+              <div
+                className={cn(
+                  "w-full bg-black transition-all duration-300 ease-in-out",
+                  isSidebarOpen ? "aspect-video" : "aspect-video md:h-[60vh]",
+                )}
+              >
                 <CourseVideoWrapper
                   courseId={course.id}
-                  moduleId={getModuleId(activeLesson)} // Pass Module ID
+                  moduleId={getModuleId(activeLesson)}
                   lesson={activeLesson}
                   onMarkComplete={onMarkComplete}
                   initialMaxWatchedSecond={initialMaxWatchedSecond}
                   onVideoCompleted={onVideoCompleted}
                 />
-              )}
-            </div>
+              </div>
+            )}
 
-            {/* Lesson Content */}
             <div className="flex-1 bg-[#FDFCF9] p-6 md:p-12">
               {activeLesson ? (
-                <div className="space-y-8 max-w-4xl mx-auto">
+                <article
+                  aria-labelledby="lesson-title"
+                  className="space-y-8 max-w-4xl mx-auto"
+                >
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-stone-100 pb-8">
                     <div>
-                      <h2 className="font-serif text-3xl text-primary mb-2">
+                      {activeModule?.title && (
+                        <p className="text-xs font-bold uppercase tracking-widest text-stone-500 mb-2">
+                          {activeModule.title}
+                        </p>
+                      )}
+                      <h1
+                        id="lesson-title"
+                        className="font-serif text-3xl text-primary mb-2"
+                      >
                         {activeLesson.title}
-                      </h2>
-                      <p className="text-stone-500 font-light text-sm">
-                        Atualizado em 12 de Jan
-                      </p>
+                      </h1>
+                      {duration && (
+                        <p className="flex items-center gap-1.5 text-stone-500 text-sm">
+                          <Clock size={14} aria-hidden="true" />
+                          {duration}
+                        </p>
+                      )}
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-col items-start md:items-end gap-2">
                       {activeLesson.isCompleted ? (
-                        <Button
-                          variant="outline"
-                          className="border-green-500 text-green-600 hover:bg-green-50"
-                          disabled
-                          leftIcon={<CheckCircle size={16} />}
+                        <p
+                          role="status"
+                          className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-md border border-green-500 px-4 h-10 text-sm font-bold text-green-700"
                         >
-                          Concluída
+                          <CheckCircle size={16} aria-hidden="true" />
+                          Aula concluída
+                        </p>
+                      ) : activeLesson.type === "video" ? (
+                        <p className="text-xs text-stone-500 max-w-[16rem] md:text-right">
+                          A aula é marcada como concluída quando você assiste a
+                          90% do vídeo.
+                        </p>
+                      ) : isQuizWithoutAssessment ? null : (
+                        <Button
+                          data-testid="mark-lesson-complete"
+                          onClick={() =>
+                            onMarkComplete(
+                              activeLesson.id,
+                              getModuleId(activeLesson),
+                            )
+                          }
+                          variant="primary"
+                        >
+                          Marcar como concluída
                         </Button>
-                      ) : (
-                        // Verify if we should hide this too (VP-01)
-                        // Assuming this Player uses its own Video checking, but manual override exists.
-                        // Let's keep it consistent with LessonPlayer and HIDE if video.
-                        // Condition: !isCompleted && type != 'video'
-                        activeLesson.type !== "video" && (
-                          <Button
-                            data-testid="mark-lesson-complete"
-                            onClick={() =>
-                              onMarkComplete(
-                                activeLesson.id,
-                                getModuleId(activeLesson),
-                              )
-                            }
-                            variant="primary"
-                          >
-                            Marcar como Concluída
-                          </Button>
-                        )
                       )}
                     </div>
                   </div>
 
-                  {/* Description */}
-                  <div className="prose prose-stone max-w-none">
-                    {(activeLesson as any).description ? (
-                      <SafeHtml html={(activeLesson as any).description} />
-                    ) : (
-                      <p className="text-stone-400 italic">
-                        Sem descrição para esta aula.
+                  {isQuizWithoutAssessment && (
+                    <div
+                      role="note"
+                      className="flex gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"
+                    >
+                      <ClipboardList
+                        size={20}
+                        className="shrink-0"
+                        aria-hidden="true"
+                      />
+                      <p>
+                        A avaliação desta aula ainda não está disponível. Você
+                        pode seguir para as próximas aulas e voltar aqui depois.
                       </p>
-                    )}
-                  </div>
+                    </div>
+                  )}
+
+                  {description && (
+                    <div className="prose prose-stone max-w-none">
+                      <SafeHtml html={description} />
+                    </div>
+                  )}
+
+                  {blocks.length > 0 && (
+                    <div className="space-y-8">
+                      {blocks.map((block) => (
+                        <BlockRenderer
+                          key={block.id}
+                          block={block}
+                          courseId={course.id}
+                          moduleId={getModuleId(activeLesson)}
+                          lessonId={activeLesson.id}
+                          isLessonCompleted={activeLesson.isCompleted}
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  {!hasContent && !isQuizWithoutAssessment && (
+                    <p className="rounded-xl bg-stone-50 p-8 text-center text-stone-500">
+                      O conteúdo desta aula ainda não foi publicado.
+                    </p>
+                  )}
 
                   {/* Navigation Footer */}
-                  <div className="flex items-center justify-between pt-12 border-t border-stone-100">
+                  <nav
+                    aria-label="Navegação entre aulas"
+                    className="flex items-center justify-between gap-4 pt-12 border-t border-stone-100"
+                  >
                     <Button
                       variant="ghost"
                       disabled={!prevLessonId}
-                      onClick={() =>
-                        prevLessonId && onSelectLesson(prevLessonId)
-                      }
-                      leftIcon={<ChevronLeft size={16} />}
+                      onClick={() => prevLessonId && selectLesson(prevLessonId)}
+                      leftIcon={<ChevronLeft size={16} aria-hidden="true" />}
                     >
-                      Aula Anterior
+                      Aula anterior
                     </Button>
 
                     <Button
-                      variant="ghost"
-                      disabled={!nextLessonId}
-                      onClick={() =>
-                        nextLessonId && onSelectLesson(nextLessonId)
+                      variant={
+                        activeLesson.isCompleted && nextLessonId
+                          ? "primary"
+                          : "ghost"
                       }
-                      rightIcon={<ChevronRight size={16} />}
+                      disabled={!nextLessonId}
+                      onClick={() => nextLessonId && selectLesson(nextLessonId)}
+                      rightIcon={<ChevronRight size={16} aria-hidden="true" />}
                     >
-                      Próxima Aula
+                      Próxima aula
                     </Button>
-                  </div>
-                </div>
+                  </nav>
+                </article>
               ) : (
                 <div className="h-full flex items-center justify-center py-20">
                   <EmptyState
                     icon={Menu}
-                    title="Selecione uma Aula"
-                    description="Escolha um dos tópicos no menu lateral para iniciar seus estudos."
+                    title="Selecione uma aula"
+                    description="Escolha um dos tópicos na lista de aulas para iniciar seus estudos."
                     className="bg-transparent border-none shadow-none"
                   />
                 </div>
@@ -317,19 +422,22 @@ export const CoursePlayer = ({
           </div>
         </main>
 
-        {/* Sidebar */}
         <aside
+          id={SIDEBAR_ID}
+          aria-label="Aulas do curso"
           className={cn(
             "absolute md:relative right-0 top-0 bottom-0 z-10 w-full md:w-96 bg-white shadow-2xl md:shadow-none transition-all duration-300 ease-in-out transform",
-            sidebarOpen
-              ? "translate-x-0"
-              : "translate-x-full md:w-0 overflow-hidden",
+            sidebarOpen === null
+              ? "translate-x-full invisible md:visible md:translate-x-0"
+              : sidebarOpen
+                ? "translate-x-0"
+                : "translate-x-full invisible md:w-0 overflow-hidden",
           )}
         >
           <LessonSidebar
             modules={modules}
             currentLessonId={activeLesson?.id || ""}
-            onSelectLesson={onSelectLesson}
+            onSelectLesson={selectLesson}
           />
         </aside>
       </div>

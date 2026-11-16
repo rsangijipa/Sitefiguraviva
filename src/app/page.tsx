@@ -13,6 +13,7 @@ import {
 } from "@/features/content/infrastructure/supabaseContentRepository";
 import HomeClient from "@/components/HomeClient";
 import { createSupabaseAnonServerClient } from "@/infrastructure/supabase/server";
+import { isCoursePast } from "@/features/courses/domain/course-timeline";
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
@@ -52,7 +53,7 @@ async function getHomeData() {
         .eq("is_published", true)
         .in("status", ["open", "closed"])
         .order("created_at", { ascending: false })
-        .limit(3),
+        .limit(12),
       supabase
         .from("posts")
         .select(PUBLIC_POST_COLUMNS)
@@ -61,7 +62,11 @@ async function getHomeData() {
         .limit(3),
     ]);
 
-    const courses = (courseRows ?? []).map(mapPublicCourse);
+    // Past-dated courses live in the catalog history, not on the home page.
+    const courses = (courseRows ?? [])
+      .map(mapPublicCourse)
+      .filter((course) => !isCoursePast(course))
+      .slice(0, 3);
     const posts = (postRows ?? []).map(mapPublicPost);
 
     return {
