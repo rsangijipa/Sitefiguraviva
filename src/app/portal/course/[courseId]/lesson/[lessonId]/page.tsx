@@ -6,6 +6,11 @@ import { Lesson, Module } from "@/types/lms";
 import { deepSafeSerialize } from "@/lib/utils";
 import { AccessError } from "@/lib/auth/access-types";
 import { requireSession } from "@/lib/auth/server";
+import {
+  computeLessonLocks,
+  describeLessonLock,
+  readContentRelease,
+} from "@/features/courses/domain/content-release";
 
 export const dynamic = "force-dynamic";
 
@@ -68,6 +73,30 @@ export default async function LessonPage({
 
   if (currentIndex === -1) redirect(`/portal/course/${courseId}`);
 
+  // Content release rules (sequential / module dates) are enforced here, on
+  // the server, so a locked lesson cannot be opened by typing its URL.
+  const locks = outline?.preview
+    ? new Map()
+    : computeLessonLocks(
+        courseData.modules.map((m: any) => ({
+          id: m.id,
+          lessons: m.lessons.map((l: any) => ({
+            id: l.id,
+            isCompleted: progressMap[l.id]?.status === "completed",
+          })),
+        })),
+        readContentRelease((courseData as any).details),
+      );
+  const lockOf = (id: string) => {
+    const lock = locks.get(id);
+    return lock?.locked ? describeLessonLock(lock) : null;
+  };
+  if (lockOf(lessonId)) {
+    redirect(
+      `/portal/course/${encodeURIComponent(courseId)}?tab=modules&bloqueada=${encodeURIComponent(lessonId)}`,
+    );
+  }
+
   const activeLesson = allLessons[currentIndex];
 
   // Lesson blocks are provided by the Supabase lesson adapter.
@@ -84,12 +113,18 @@ export default async function LessonPage({
     ...m,
     lessons: m.lessons.map((l: any) => {
       const prog = progressMap[l.id];
+      const lockReason = lockOf(l.id);
       return {
         ...l,
         isCompleted: prog?.status === "completed",
+        isLocked: !!lockReason,
+        lockReason: lockReason ?? undefined,
       };
     }),
   }));
+  const nextLessonLockReason = nextLessonId
+    ? (lockOf(nextLessonId) ?? undefined)
+    : undefined;
 
   // FETCH ASSESSMENT (if quiz)
   let assessment = null;
@@ -163,6 +198,7 @@ export default async function LessonPage({
       submission={deepSafeSerialize(submission)}
       prevLessonId={prevLessonId}
       nextLessonId={nextLessonId}
+      nextLessonLockReason={nextLessonLockReason}
     />
   );
 }

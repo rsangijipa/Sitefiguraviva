@@ -5,6 +5,7 @@ import {
   ChevronRight,
   ClipboardList,
   Clock,
+  Lock,
   Menu,
   X,
 } from "lucide-react";
@@ -35,6 +36,8 @@ interface CoursePlayerProps {
   onMarkComplete: (lessonId: string, moduleId: string) => void;
   nextLessonId?: string;
   prevLessonId?: string;
+  /** Set when the next lesson exists but is still locked for this student. */
+  nextLessonLockReason?: string;
   loading?: boolean;
   initialMaxWatchedSecond?: number;
   onVideoCompleted?: () => void;
@@ -103,6 +106,7 @@ export const CoursePlayer = ({
   onMarkComplete,
   nextLessonId,
   prevLessonId,
+  nextLessonLockReason,
   loading = false,
   initialMaxWatchedSecond,
   onVideoCompleted,
@@ -394,18 +398,41 @@ export const CoursePlayer = ({
                       Aula anterior
                     </Button>
 
-                    <Button
-                      variant={
-                        activeLesson.isCompleted && nextLessonId
-                          ? "primary"
-                          : "ghost"
-                      }
-                      disabled={!nextLessonId}
-                      onClick={() => nextLessonId && selectLesson(nextLessonId)}
-                      rightIcon={<ChevronRight size={16} aria-hidden="true" />}
-                    >
-                      Próxima aula
-                    </Button>
+                    <div className="flex flex-col items-end gap-1">
+                      <Button
+                        variant={
+                          activeLesson.isCompleted &&
+                          nextLessonId &&
+                          !nextLessonLockReason
+                            ? "primary"
+                            : "ghost"
+                        }
+                        disabled={!nextLessonId || !!nextLessonLockReason}
+                        aria-describedby={
+                          nextLessonLockReason ? "next-lesson-lock" : undefined
+                        }
+                        onClick={() =>
+                          nextLessonId && selectLesson(nextLessonId)
+                        }
+                        rightIcon={
+                          nextLessonLockReason ? (
+                            <Lock size={16} aria-hidden="true" />
+                          ) : (
+                            <ChevronRight size={16} aria-hidden="true" />
+                          )
+                        }
+                      >
+                        Próxima aula
+                      </Button>
+                      {nextLessonLockReason && (
+                        <p
+                          id="next-lesson-lock"
+                          className="text-xs text-stone-500 text-right"
+                        >
+                          {nextLessonLockReason}
+                        </p>
+                      )}
+                    </div>
                   </nav>
                 </article>
               ) : (

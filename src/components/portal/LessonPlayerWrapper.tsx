@@ -15,6 +15,7 @@ interface LessonPlayerWrapperProps {
   activeLesson: Lesson;
   prevLessonId?: string;
   nextLessonId?: string;
+  nextLessonLockReason?: string;
   assessment?: any;
   submission?: any;
 }
@@ -107,7 +108,7 @@ export function LessonPlayerWrapper(props: LessonPlayerWrapperProps) {
   const handleVideoCompleted = () => {
     // Refresh data implicitly happens via server action revalidation in VideoPlayer
     // but here we handle navigation
-    if (autoAdvance && props.nextLessonId) {
+    if (autoAdvance && props.nextLessonId && !props.nextLessonLockReason) {
       setTimeout(() => {
         router.push(
           `/portal/course/${props.course.id}/lesson/${props.nextLessonId}`,

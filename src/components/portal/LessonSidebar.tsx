@@ -118,7 +118,7 @@ export const LessonSidebar = ({
                             ? `${lesson.duration} min`
                             : null;
                         const statusLabel = lesson.isLocked
-                          ? "bloqueada"
+                          ? `bloqueada. ${lesson.lockReason ?? ""}`.trim()
                           : lesson.isCompleted
                             ? "concluída"
                             : "não concluída";
@@ -169,15 +169,21 @@ export const LessonSidebar = ({
                               >
                                 {lesson.title}
                               </p>
-                              {durationLabel && (
-                                <p
-                                  className={cn(
-                                    "text-[10px] mt-0.5 opacity-60",
-                                    isActive ? "text-white" : "",
-                                  )}
-                                >
-                                  {durationLabel}
+                              {lesson.isLocked && lesson.lockReason ? (
+                                <p className="text-[10px] mt-0.5 text-stone-500">
+                                  {lesson.lockReason}
                                 </p>
+                              ) : (
+                                durationLabel && (
+                                  <p
+                                    className={cn(
+                                      "text-[10px] mt-0.5 opacity-60",
+                                      isActive ? "text-white" : "",
+                                    )}
+                                  >
+                                    {durationLabel}
+                                  </p>
+                                )
                               )}
                             </div>
                           </button>

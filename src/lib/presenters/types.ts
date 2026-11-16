@@ -56,6 +56,8 @@ export interface LessonDTO {
   // User Context
   isCompleted: boolean;
   isLocked: boolean;
+  /** Student-facing reason when isLocked (content release rules). */
+  lockReason?: string;
   progressPercent: number; // 0-100 (for video watch time)
 
   // Meta

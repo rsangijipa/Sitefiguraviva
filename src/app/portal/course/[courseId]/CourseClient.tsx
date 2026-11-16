@@ -18,6 +18,7 @@ import {
   ArrowRight,
   CheckCircle2,
   MessageSquare,
+  GraduationCap,
   Layout,
   List,
   Bell,
@@ -31,6 +32,7 @@ import { communityService } from "@/services/communityService";
 import { certificateService } from "@/services/certificateService";
 import { CertificateDoc } from "@/types/lms";
 import { CertificateIssueCard } from "@/components/portal/CertificateIssueCard";
+import { CourseGradesPanel } from "@/components/portal/CourseGradesPanel";
 
 const CourseCommunity = dynamic(
   () => import("@/components/community/CourseCommunity"),
@@ -67,6 +69,8 @@ function CourseContent({ initialData }: { initialData?: any }) {
   const courseId = typeof routeId === "string" ? routeId : "";
 
   const initialTab = searchParams.get("tab") || "overview";
+  // Set by the lesson page when it redirects away from a locked lesson.
+  const lockedLessonId = searchParams.get("bloqueada");
 
   // State
   const {
@@ -129,13 +133,24 @@ function CourseContent({ initialData }: { initialData?: any }) {
   };
 
   const getContinueLessonId = () => {
-    if (enrollment?.progressSummary?.lastLessonId)
-      return enrollment.progressSummary.lastLessonId;
+    const last = enrollment?.progressSummary?.lastLessonId;
+    const lastLesson = last
+      ? allLessons.find((lesson: any) => lesson.id === last)
+      : undefined;
+    if (lastLesson && !lastLesson.isLocked) return lastLesson.id;
+    // Otherwise the first open lesson still to do, then the first lesson.
+    const next = allLessons.find(
+      (lesson: any) => !lesson.isLocked && !lesson.isCompleted,
+    );
+    if (next) return next.id;
     if (allLessons.length > 0) return allLessons[0].id;
     return null;
   };
 
   const lastLessonId = getContinueLessonId();
+  const lockedLesson = lockedLessonId
+    ? allLessons.find((lesson: any) => lesson.id === lockedLessonId)
+    : undefined;
   const progressPercent = Math.round(enrollment?.progressSummary?.percent || 0);
   const lessonHref = (lessonId: string) =>
     `/portal/course/${courseId}/lesson/${encodeURIComponent(lessonId)}`;
@@ -204,6 +219,7 @@ function CourseContent({ initialData }: { initialData?: any }) {
             { id: "overview", label: "Visão Geral", icon: Layout },
             { id: "modules", label: "Conteúdo", icon: List },
             { id: "materials", label: "Materiais", icon: FileText },
+            { id: "grades", label: "Notas", icon: GraduationCap },
             { id: "community", label: "Comunidade", icon: MessageSquare },
           ].map((tab) => (
             <button
@@ -390,6 +406,19 @@ function CourseContent({ initialData }: { initialData?: any }) {
         {/* TAB: MODULES */}
         {activeTab === "modules" && (
           <div className="space-y-6 max-w-3xl">
+            {lockedLessonId && (
+              <div
+                role="status"
+                className="flex gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"
+              >
+                <Lock size={18} className="shrink-0" aria-hidden="true" />
+                <p>
+                  {lockedLesson?.lockReason
+                    ? `A aula “${lockedLesson.title}” ainda não está liberada. ${lockedLesson.lockReason}.`
+                    : "Essa aula ainda não está liberada para você."}
+                </p>
+              </div>
+            )}
             {modules.map((module: any) => (
               <div
                 key={module.id}
@@ -404,6 +433,9 @@ function CourseContent({ initialData }: { initialData?: any }) {
                 <ul className="divide-y divide-stone-50">
                   {module.lessons.map((lesson: any) => {
                     const isCurrent = lesson.id === lastLessonId;
+                    // Course access denied, or this lesson held back by the
+                    // course's release rules (sequence / module date).
+                    const blocked = isAccessDenied || !!lesson.isLocked;
                     const row = (
                       <>
                         <span
@@ -413,11 +445,11 @@ function CourseContent({ initialData }: { initialData?: any }) {
                             lesson.isCompleted &&
                               "bg-green-100 text-green-600 border-green-200",
                             isCurrent &&
-                              !isAccessDenied &&
+                              !blocked &&
                               "bg-primary text-white border-primary",
                           )}
                         >
-                          {isAccessDenied ? (
+                          {blocked ? (
                             <Lock size={14} />
                           ) : lesson.isCompleted ? (
                             <CheckCircle2 size={14} />
@@ -428,9 +460,9 @@ function CourseContent({ initialData }: { initialData?: any }) {
                         <span
                           className={cn(
                             "flex-1 text-sm font-medium text-stone-600",
-                            !isAccessDenied && "group-hover:text-primary",
+                            !blocked && "group-hover:text-primary",
                             isCurrent &&
-                              !isAccessDenied &&
+                              !blocked &&
                               "font-bold text-primary",
                           )}
                         >
@@ -438,11 +470,16 @@ function CourseContent({ initialData }: { initialData?: any }) {
                           {lesson.isCompleted && (
                             <span className="sr-only"> (concluída)</span>
                           )}
-                          {isCurrent && !isAccessDenied && (
+                          {isCurrent && !blocked && (
                             <span className="sr-only"> (última aula acessada)</span>
                           )}
+                          {!isAccessDenied && lesson.isLocked && lesson.lockReason && (
+                            <span className="block text-xs font-normal text-stone-500">
+                              {lesson.lockReason}
+                            </span>
+                          )}
                         </span>
-                        {!isAccessDenied && (
+                        {!blocked && (
                           <ArrowRight
                             size={14}
                             aria-hidden="true"
@@ -452,8 +489,14 @@ function CourseContent({ initialData }: { initialData?: any }) {
                       </>
                     );
                     return (
-                      <li key={lesson.id}>
-                        {isAccessDenied ? (
+                      <li
+                        key={lesson.id}
+                        id={`lesson-row-${lesson.id}`}
+                        className={cn(
+                          lockedLessonId === lesson.id && "bg-amber-50",
+                        )}
+                      >
+                        {blocked ? (
                           <div className="p-4 flex items-center gap-4 text-stone-400">
                             {row}
                           </div>
@@ -517,6 +560,15 @@ function CourseContent({ initialData }: { initialData?: any }) {
         )}
 
         {/* TAB: COMMUNITY */}
+        {activeTab === "grades" &&
+          (isAccessDenied ? (
+            <p className="max-w-3xl rounded-xl bg-amber-50 p-4 text-sm text-amber-900">
+              Suas notas ficam disponíveis com a matrícula ativa.
+            </p>
+          ) : (
+            <CourseGradesPanel courseId={courseId} />
+          ))}
+
         {activeTab === "community" && (
           <CourseCommunity courseId={courseId} user={user} />
         )}

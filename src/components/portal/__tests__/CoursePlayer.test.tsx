@@ -129,6 +129,18 @@ it("shows completion state and promotes the next lesson", () => {
   expect(props.onSelectLesson).toHaveBeenCalledWith("l2");
 });
 
+it("keeps the next lesson closed and explains why when release rules hold it", () => {
+  const props = renderPlayer(lesson({ description: "x" }), {
+    nextLessonLockReason: "Disponível após concluir a aula anterior",
+  });
+  const nav = screen.getByRole("navigation", { name: "Navegação entre aulas" });
+  const next = within(nav).getByRole("button", { name: /Próxima aula/ });
+  expect(next).toBeDisabled();
+  expect(next).toHaveAccessibleDescription("Disponível após concluir a aula anterior");
+  fireEvent.click(next);
+  expect(props.onSelectLesson).not.toHaveBeenCalled();
+});
+
 it("starts with the lesson list closed on phones and closes it after picking a lesson", () => {
   const props = renderPlayer(lesson({ description: "x" }));
   const toggle = screen.getByRole("button", { name: "Abrir lista de aulas" });
