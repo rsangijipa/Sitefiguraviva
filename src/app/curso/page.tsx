@@ -28,7 +28,13 @@ export default async function CoursesPage() {
   const courses = await getCourses();
   // Courses whose dates already passed move to the history section; the
   // split runs on the server so every visitor sees the same Brazilian date.
-  const { current, past } = splitCoursesByTimeline(courses);
+  const split = splitCoursesByTimeline(courses);
+  const past = split.past;
+  // The first course is the featured card: prefer one open for enrollment
+  // (stable sort keeps the newest-first order inside each group).
+  const current = [...split.current].sort(
+    (a, b) => Number(!!b.enrollmentOpen) - Number(!!a.enrollmentOpen),
+  );
   const pastCourses = past.map((course) => ({
     ...course,
     enrollmentOpen: false,

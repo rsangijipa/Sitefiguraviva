@@ -6,6 +6,9 @@
 |---|---|---|---|---|---|
 | `institutofiguraviva.com.br` | Registro.br, criado em 04/02/2026, vence em 04/02/2028 | UOL (`ns1/ns2/ns3.dominios.uol.com.br`) | **Nenhum MX** — o domínio não recebe e-mail | Ausentes | Ausente (`resend._domainkey` não existe) |
 | `figuraviva.com` | Name.com, criado em 24/01/2026 | Name.com | — | — | — |
+| `figuraviva.com.br` | — | **não existe no DNS** | — | — | — |
+
+> O site exibia `contato@figuraviva.com.br` no rodapé e no suporte do portal. Como esse domínio não existe, **toda mensagem enviada a esse endereço voltava**. A partir desta versão o endereço público é `contato@institutofiguraviva.com.br` (`src/features/public-site/content/contact.ts`), que passa a funcionar assim que a caixa do passo 1 for criada. Crie essa caixa **antes** de publicar a versão.
 
 Conclusões:
 
