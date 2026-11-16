@@ -16,6 +16,7 @@ import {
   Download,
   PlayCircle,
   ArrowRight,
+  CheckCircle2,
   MessageSquare,
   Layout,
   List,
@@ -135,6 +136,23 @@ function CourseContent({ initialData }: { initialData?: any }) {
   };
 
   const lastLessonId = getContinueLessonId();
+  const progressPercent = Math.round(enrollment?.progressSummary?.percent || 0);
+  const lessonHref = (lessonId: string) =>
+    `/portal/course/${courseId}/lesson/${encodeURIComponent(lessonId)}`;
+  // A blocked student used to get a button into the lesson, which only
+  // redirected back here. Without access, the only action offered is the
+  // enrollment form (when there is no enrollment yet).
+  const canStudy = !isAccessDenied && !!lastLessonId;
+  const studyLabel =
+    progressPercent >= 100
+      ? "Revisar o curso"
+      : enrollment?.progressSummary?.lastLessonId || progressPercent > 0
+        ? "Continuar de onde parei"
+        : "Começar o curso";
+  const enrollHref =
+    isAccessDenied && status === "none"
+      ? `/inscricao/${encodeURIComponent(courseId)}`
+      : null;
 
   // --- RENDER ---
 
@@ -163,23 +181,25 @@ function CourseContent({ initialData }: { initialData?: any }) {
           <h1 className="font-serif font-bold text-stone-800 truncate pl-4 flex-1 text-center md:text-left">
             {course.title}
           </h1>
-          {lastLessonId && (
+          {canStudy && lastLessonId && (
             <Button
               size="sm"
               onClick={() => handleSelectLesson(lastLessonId)}
-              leftIcon={
-                isAccessDenied ? <Lock size={14} /> : <PlayCircle size={14} />
-              }
+              leftIcon={<PlayCircle size={14} aria-hidden="true" />}
               className="hidden md:flex ml-4"
-              variant={isAccessDenied ? "outline" : "primary"}
+              variant="primary"
             >
-              {isAccessDenied ? "Ver Detalhes" : "Continuar"}
+              {progressPercent >= 100 ? "Revisar" : "Continuar"}
             </Button>
           )}
         </div>
 
         {/* Tabs */}
-        <div className="max-w-5xl mx-auto px-4 md:px-6 flex gap-6 overflow-x-auto no-scrollbar">
+        <div
+          role="tablist"
+          aria-label="Seções do curso"
+          className="max-w-5xl mx-auto px-4 md:px-6 flex gap-6 overflow-x-auto no-scrollbar"
+        >
           {[
             { id: "overview", label: "Visão Geral", icon: Layout },
             { id: "modules", label: "Conteúdo", icon: List },
@@ -187,6 +207,11 @@ function CourseContent({ initialData }: { initialData?: any }) {
             { id: "community", label: "Comunidade", icon: MessageSquare },
           ].map((tab) => (
             <button
+              type="button"
+              role="tab"
+              id={`course-tab-${tab.id}`}
+              aria-selected={activeTab === tab.id}
+              aria-controls="course-tab-panel"
               key={tab.id}
               onClick={() => handleTabChange(tab.id)}
               className={cn(
@@ -196,47 +221,70 @@ function CourseContent({ initialData }: { initialData?: any }) {
                   : "border-transparent text-stone-500 hover:text-stone-800",
               )}
             >
-              <tab.icon size={16} />
+              <tab.icon size={16} aria-hidden="true" />
               {tab.label}
             </button>
           ))}
         </div>
       </div>
 
-      <main className="max-w-5xl mx-auto px-4 md:px-6 py-8">
+      <main
+        id="course-tab-panel"
+        role="tabpanel"
+        aria-labelledby={`course-tab-${activeTab}`}
+        className="max-w-5xl mx-auto px-4 md:px-6 py-8"
+      >
         {/* TAB: OVERVIEW */}
         {activeTab === "overview" && (
           <div className="grid md:grid-cols-3 gap-8">
             <div className="md:col-span-2 space-y-8">
               {/* Course Intro */}
               <section>
-                <div
-                  className="aspect-video bg-stone-100 rounded-xl overflow-hidden mb-6 relative group cursor-pointer"
-                  onClick={() =>
-                    lastLessonId && handleSelectLesson(lastLessonId)
-                  }
-                >
-                  {course.coverImage || course.image ? (
-                    <Image
-                      src={course.coverImage || course.image}
-                      alt={course.title}
-                      fill
-                      className="object-cover"
-                      priority
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 50vw"
-                    />
+                {(() => {
+                  const cover = (
+                    <>
+                      {course.coverImage || course.image ? (
+                        <Image
+                          src={course.coverImage || course.image}
+                          alt=""
+                          fill
+                          className="object-cover"
+                          priority
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 50vw"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-stone-300">
+                          <BookOpen size={48} aria-hidden="true" />
+                        </div>
+                      )}
+                      {canStudy && (
+                        <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity flex items-center justify-center">
+                          <PlayCircle
+                            size={64}
+                            aria-hidden="true"
+                            className="text-white drop-shadow-lg scale-90 group-hover:scale-100 transition-transform"
+                          />
+                        </div>
+                      )}
+                    </>
+                  );
+                  const coverClass =
+                    "block aspect-video bg-stone-100 rounded-xl overflow-hidden mb-6 relative group";
+                  return canStudy && lastLessonId ? (
+                    <Link
+                      href={lessonHref(lastLessonId)}
+                      aria-label={`${studyLabel}: ${course.title}`}
+                      className={cn(
+                        coverClass,
+                        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+                      )}
+                    >
+                      {cover}
+                    </Link>
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-stone-300">
-                      <BookOpen size={48} />
-                    </div>
-                  )}
-                  <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <PlayCircle
-                      size={64}
-                      className="text-white drop-shadow-lg scale-90 group-hover:scale-100 transition-transform"
-                    />
-                  </div>
-                </div>
+                    <div className={coverClass}>{cover}</div>
+                  );
+                })()}
                 <h2 className="text-2xl font-serif text-primary mb-4">
                   Bem-vindo ao Curso
                 </h2>
@@ -281,30 +329,43 @@ function CourseContent({ initialData }: { initialData?: any }) {
                   </div>
                 )}
                 <div className="mb-2 flex justify-between text-xs font-bold text-stone-500">
-                  <span>Concluído</span>
+                  <span id="course-progress-label">Concluído</span>
                   <span data-testid="course-progress-percent">
-                    {Math.round(enrollment?.progressSummary?.percent || 0)}%
+                    {progressPercent}%
                   </span>
                 </div>
-                <div className="h-2 w-full bg-stone-100 rounded-full overflow-hidden mb-4">
+                <div
+                  role="progressbar"
+                  aria-labelledby="course-progress-label"
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={progressPercent}
+                  className="h-2 w-full bg-stone-100 rounded-full overflow-hidden mb-4"
+                >
                   <div
                     className="h-full bg-green-500"
                     style={{
-                      width: `${enrollment?.progressSummary?.percent || 0}%`,
+                      width: `${Math.min(progressPercent, 100)}%`,
                     }}
                   />
                 </div>
-                {lastLessonId && (
+                {canStudy && lastLessonId && (
                   <Button
                     className="w-full"
                     onClick={() => handleSelectLesson(lastLessonId)}
-                    variant={isAccessDenied ? "outline" : "primary"}
-                    leftIcon={isAccessDenied ? <Lock size={14} /> : undefined}
+                    variant="primary"
                   >
-                    {isAccessDenied
-                      ? "Matricule-se para Acessar"
-                      : "Continuar Estudando"}
+                    {studyLabel}
                   </Button>
+                )}
+                {enrollHref && (
+                  <Link
+                    href={enrollHref}
+                    className="flex h-12 w-full items-center justify-center gap-2 rounded-md border border-border text-sm font-bold text-primary hover:border-igarape hover:bg-areia focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  >
+                    <Lock size={14} aria-hidden="true" />
+                    Fazer inscrição
+                  </Link>
                 )}
               </Card>
 
@@ -340,42 +401,74 @@ function CourseContent({ initialData }: { initialData?: any }) {
                     {module.lessons.length} aulas
                   </span>
                 </div>
-                <div className="divide-y divide-stone-50">
-                  {module.lessons.map((lesson: any) => (
-                    <div
-                      key={lesson.id}
-                      onClick={() => handleSelectLesson(lesson.id)}
-                      className="p-4 hover:bg-stone-50 transition-colors cursor-pointer flex items-center gap-4 group"
-                    >
-                      <div
-                        className={cn(
-                          "w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-stone-300 border border-stone-100",
-                          lesson.isCompleted &&
-                            "bg-green-100 text-green-600 border-green-200",
-                          lesson.id === lastLessonId &&
-                            "bg-primary text-white border-primary",
+                <ul className="divide-y divide-stone-50">
+                  {module.lessons.map((lesson: any) => {
+                    const isCurrent = lesson.id === lastLessonId;
+                    const row = (
+                      <>
+                        <span
+                          aria-hidden="true"
+                          className={cn(
+                            "w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-stone-300 border border-stone-100",
+                            lesson.isCompleted &&
+                              "bg-green-100 text-green-600 border-green-200",
+                            isCurrent &&
+                              !isAccessDenied &&
+                              "bg-primary text-white border-primary",
+                          )}
+                        >
+                          {isAccessDenied ? (
+                            <Lock size={14} />
+                          ) : lesson.isCompleted ? (
+                            <CheckCircle2 size={14} />
+                          ) : (
+                            <PlayCircle size={14} />
+                          )}
+                        </span>
+                        <span
+                          className={cn(
+                            "flex-1 text-sm font-medium text-stone-600",
+                            !isAccessDenied && "group-hover:text-primary",
+                            isCurrent &&
+                              !isAccessDenied &&
+                              "font-bold text-primary",
+                          )}
+                        >
+                          {lesson.title}
+                          {lesson.isCompleted && (
+                            <span className="sr-only"> (concluída)</span>
+                          )}
+                          {isCurrent && !isAccessDenied && (
+                            <span className="sr-only"> (última aula acessada)</span>
+                          )}
+                        </span>
+                        {!isAccessDenied && (
+                          <ArrowRight
+                            size={14}
+                            aria-hidden="true"
+                            className="text-stone-300 group-hover:text-primary"
+                          />
                         )}
-                      >
+                      </>
+                    );
+                    return (
+                      <li key={lesson.id}>
                         {isAccessDenied ? (
-                          <Lock size={14} />
-                        ) : lesson.isCompleted ? (
-                          <ArrowRight size={14} />
+                          <div className="p-4 flex items-center gap-4 text-stone-400">
+                            {row}
+                          </div>
                         ) : (
-                          <PlayCircle size={14} />
+                          <Link
+                            href={lessonHref(lesson.id)}
+                            className="p-4 hover:bg-stone-50 transition-colors flex items-center gap-4 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
+                          >
+                            {row}
+                          </Link>
                         )}
-                      </div>
-                      <span
-                        className={cn(
-                          "text-sm font-medium text-stone-600 group-hover:text-primary",
-                          lesson.id === lastLessonId &&
-                            "font-bold text-primary",
-                        )}
-                      >
-                        {lesson.title}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+                      </li>
+                    );
+                  })}
+                </ul>
               </div>
             ))}
           </div>
@@ -407,9 +500,10 @@ function CourseContent({ initialData }: { initialData?: any }) {
                     href={item.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-2 text-stone-300 hover:text-primary transition-colors"
+                    aria-label={`Abrir ${item.title} (nova aba)`}
+                    className="p-2 text-stone-400 hover:text-primary transition-colors rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   >
-                    <Download size={20} />
+                    <Download size={20} aria-hidden="true" />
                   </a>
                 </div>
               ))
