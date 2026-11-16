@@ -53,7 +53,8 @@ export default function CourseCreateClient() {
       | "all_levels",
     coverImage: "",
     introVideoUrl: "",
-    billingType: "free" as "free" | "one_time" | "subscription",
+    // O instituto não oferece cursos gratuitos: todo curso nasce com valor.
+    billingType: "one_time" as "one_time" | "subscription",
     price: "",
     installments: 1,
     topics: [] as string[],
@@ -94,6 +95,18 @@ export default function CourseCreateClient() {
       return;
     }
 
+    let totalPriceCents: number | null;
+    try {
+      totalPriceCents = parseAmountCents(formData.price);
+    } catch (error) {
+      addToast(error instanceof Error ? error.message : "Valor inválido.", "error");
+      return;
+    }
+    if (!totalPriceCents || totalPriceCents <= 0) {
+      addToast("Informe o valor integral do curso.", "error");
+      return;
+    }
+
     if (formData.agenda) {
       const valid = courseAgendaSchema.safeParse(formData.agenda);
       if (!valid.success) { addToast(valid.error.issues[0]?.message || "Confira os encontros.", "error"); return; }
@@ -119,20 +132,13 @@ export default function CourseCreateClient() {
         syllabus: formData.topics,
         mediators: formData.mediators,
         details: { syllabus: formData.topics, agenda: formData.agenda } as CourseDoc["details"],
-        totalPriceCents:
-          formData.billingType === "free"
-            ? 0
-            : parseAmountCents(formData.price),
+        totalPriceCents,
         installments: formData.installments,
         status: "draft",
         isPublished: false,
         billing: {
           type:
-            formData.billingType === "subscription"
-              ? "subscription"
-              : formData.billingType === "free"
-                ? "free"
-                : "one_time",
+            formData.billingType === "subscription" ? "subscription" : "one_time",
         },
       };
 
@@ -464,17 +470,12 @@ export default function CourseCreateClient() {
 
               <FormSection
                 title="Precificação & Acesso"
-                description="Defina se o curso é gratuito, assinatura ou pagamento único"
+                description="Todo curso tem valor: escolha pagamento único (com parcelas) ou assinatura"
                 className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm"
               >
                 <div className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {[
-                      {
-                        id: "free",
-                        label: "Gratuito",
-                        desc: "Acesso livre para alunos",
-                      },
                       {
                         id: "one_time",
                         label: "Pagamento Único",
@@ -512,14 +513,14 @@ export default function CourseCreateClient() {
                     ))}
                   </div>
 
-                  {formData.billingType !== "free" && (
+                  {(
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                       <div>
                         <label
                           htmlFor="course-price"
                           className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5"
                         >
-                          Valor integral do curso (R$)
+                          Valor integral do curso (R$) *
                         </label>
                         <div className="relative">
                           <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 font-bold text-sm">
@@ -537,6 +538,8 @@ export default function CourseCreateClient() {
                               }))
                             }
                             placeholder="0,00"
+                            required
+                            aria-required="true"
                             className="w-full rounded-xl border border-stone-200 bg-white pl-10 pr-4 py-2.5 text-sm font-semibold focus:border-primary focus:outline-none"
                           />
                         </div>

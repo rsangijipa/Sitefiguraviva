@@ -3,9 +3,10 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { Calendar, Clock, ArrowRight } from "lucide-react";
+import { Calendar, Clock, ArrowRight, History } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { CourseCover } from "@/components/courses/CourseCover";
+import { formatHistoryMonth } from "@/features/courses/domain/course-timeline";
 
 const CalendarModal = dynamic(() => import("@/components/CalendarModal"), {
   ssr: false,
@@ -61,7 +62,69 @@ function CourseMeta({ course }: { course: any }) {
   );
 }
 
-export default function CoursesListClient({ courses }: { courses: any[] }) {
+function CourseHistory({ courses }: { courses: any[] }) {
+  if (courses.length === 0) return null;
+  return (
+    <section
+      aria-labelledby="course-history-title"
+      className="mt-20 border-t border-stone-200 pt-10"
+    >
+      <h2
+        id="course-history-title"
+        className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-stone-500"
+      >
+        <History size={14} aria-hidden="true" />
+        Histórico de formações
+      </h2>
+      <p className="mt-2 text-sm font-light text-stone-500">
+        Turmas que já aconteceram. As inscrições para estas datas estão
+        encerradas.
+      </p>
+      <ul className="mt-6 grid gap-3 md:grid-cols-2">
+        {courses.map((course) => (
+          <li key={course.id}>
+            <Link
+              href={`/curso/${course.slug || course.id}`}
+              className="group flex items-center gap-4 rounded-xl border border-stone-200 bg-white/60 p-3 grayscale transition hover:grayscale-0 focus-visible:grayscale-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-500"
+            >
+              <div className="relative flex h-12 w-16 shrink-0 items-center justify-center overflow-hidden rounded-md bg-stone-100 text-stone-400">
+                {course.image ? (
+                  <CourseCover src={course.image} alt="" />
+                ) : (
+                  <History size={16} aria-hidden="true" />
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-serif text-base text-stone-700">
+                  {course.title}
+                </p>
+                <p className="mt-0.5 flex items-center gap-1.5 text-[11px] uppercase tracking-widest text-stone-500">
+                  <Calendar size={11} aria-hidden="true" />
+                  {course.lastDate
+                    ? `Realizado em ${formatHistoryMonth(course.lastDate)}`
+                    : "Turma encerrada"}
+                </p>
+              </div>
+              <ArrowRight
+                size={12}
+                aria-hidden="true"
+                className="shrink-0 text-stone-400"
+              />
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+export default function CoursesListClient({
+  courses,
+  pastCourses = [],
+}: {
+  courses: any[];
+  pastCourses?: any[];
+}) {
   const [filter, setFilter] = useState<Filter>("Todos");
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
@@ -172,16 +235,20 @@ export default function CoursesListClient({ courses }: { courses: any[] }) {
         {filtered.length === 0 && (
           <div className="py-20 text-center">
             <p className="font-light text-stone-400">
-              Nenhum curso encontrado para este filtro.
+              {featured
+                ? "Nenhum curso encontrado para este filtro."
+                : "Novas turmas serão anunciadas em breve."}
             </p>
           </div>
         )}
+
+        <CourseHistory courses={pastCourses} />
       </div>
 
       <CalendarModal
         isOpen={isCalendarOpen}
         onClose={() => setIsCalendarOpen(false)}
-        courses={courses}
+        courses={[...courses, ...pastCourses]}
       />
     </div>
   );

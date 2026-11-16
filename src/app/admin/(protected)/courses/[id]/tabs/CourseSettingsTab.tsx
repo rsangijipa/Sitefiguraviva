@@ -32,9 +32,12 @@ export default function CourseSettingsTab({
       : "",
   );
   const [installments, setInstallments] = useState(course.installments ?? 1);
-  const [billingType, setBillingType] = useState(
-    course.billing?.type ?? "one_time",
+  // Cursos antigos podem ter "free" gravado; o instituto não oferece cursos
+  // gratuitos, então a tela passa a tratá-los como pagamento único.
+  const [billingType, setBillingType] = useState<"one_time" | "subscription">(
+    course.billing?.type === "subscription" ? "subscription" : "one_time",
   );
+  const isOnSale = course.status === "open" || course.isPublished === true;
   const [communityEnabled, setCommunityEnabled] = useState(
     course.communityEnabled !== false,
   ); // Default true
@@ -57,6 +60,10 @@ export default function CourseSettingsTab({
         installments > 120
       )
         throw new Error("Valor Pix ou número de parcelas inválido.");
+      if (isOnSale && (!total || total <= 0))
+        throw new Error(
+          "Curso publicado precisa de valor integral. Informe o valor antes de salvar.",
+        );
     } catch (error) {
       addToast(
         error instanceof Error ? error.message : "Valor inválido.",
@@ -274,14 +281,14 @@ export default function CourseSettingsTab({
                       Valor integral / parcelamento
                     </option>
                     <option value="subscription">Recorrente</option>
-                    <option value="free">Gratuito</option>
                   </select>
                 </label>
                 <p className="text-xs text-stone-500">
                   O Pix inicial é independente do valor integral. Estes dados
                   não geram cobranças das parcelas seguintes nem uma assinatura
-                  automática. Deixe o valor integral vazio enquanto estiver em
-                  definição.
+                  automática. Não há cursos gratuitos: o valor integral é
+                  obrigatório para cursos publicados e pode ficar vazio só em
+                  rascunho.
                 </p>
               </div>
               {/* Community Toggle */}

@@ -6,6 +6,7 @@ import CourseDetailClient from "./CourseDetailClient";
 import { getCourseById } from "@/data/courses";
 import { publicContentPath } from "@/lib/public-site-url";
 import { deepSafeSerialize } from "@/lib/utils";
+import { isCoursePast } from "@/features/courses/domain/course-timeline";
 
 export async function generateMetadata({
   params,
@@ -49,7 +50,11 @@ async function CourseContent({ id }: { id: string }) {
       notFound();
     }
 
-    return <CourseDetailClient course={deepSafeSerialize(course)} />;
+    // A class whose dates already passed is shown as history: no enrollment
+    // button, even while the admin has not closed it yet.
+    const isPast = isCoursePast(course);
+    const view = isPast ? { ...course, enrollmentOpen: false, isPast } : course;
+    return <CourseDetailClient course={deepSafeSerialize(view)} />;
   } catch (error) {
     console.error("❌ Course Fetch Error:", error);
     notFound();

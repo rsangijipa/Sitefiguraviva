@@ -22,6 +22,7 @@ import { getAdminDashboardKPIs } from "@/app/actions/metrics";
 import { getAuditLogs } from "@/actions/audit";
 import type { AdminDashboardKpisData } from "@/lib/metrics/kpi";
 import { SupabaseSyncHealth } from "@/components/admin/SupabaseSyncHealth";
+import { CourseOfferAlerts } from "@/components/admin/courses/CourseOfferAlerts";
 import styles from "./Dashboard.module.css";
 
 type AuditLog = {
@@ -254,6 +255,8 @@ export default function AdminDashboard() {
           </span>
         </div>
       )}
+
+      <CourseOfferAlerts />
 
       <section
         className={styles.stats}
