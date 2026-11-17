@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin as assertIsAdmin } from "@/lib/auth/server";
 import { createSupabaseServiceClient } from "@/infrastructure/supabase/server";
 import { z } from "zod";
+import { mergeGalleryLegacyPayload } from "@/features/public-site/gallery/gallery-payload";
 
 const galleryInput = z.object({
   title: z.string().trim().min(1).max(160),
@@ -11,6 +12,20 @@ const galleryInput = z.object({
   caption: z.string().trim().max(1000).optional().default(""),
   tags: z.string().optional().default(""),
   category: z.string().trim().max(80).optional(),
+  year: z
+    .union([z.number(), z.string()])
+    .optional()
+    .transform((value) => String(value ?? "").trim())
+    .refine(
+      (value) =>
+        value === "" ||
+        (/^\d{4}$/.test(value) &&
+          Number(value) >= 1900 &&
+          Number(value) <= new Date().getFullYear() + 1),
+      "Ano deve ter quatro dígitos (ex.: 2024).",
+    ),
+  /** Cor predominante calculada no navegador após o upload (#rrggbb). */
+  dominant_color: z.string().optional().nullable(),
 });
 
 export async function saveGalleryItemAction(id: string | null, data: unknown) {
@@ -18,6 +33,19 @@ export async function saveGalleryItemAction(id: string | null, data: unknown) {
     await assertIsAdmin();
 
     const input = galleryInput.parse(data);
+    const supabase = createSupabaseServiceClient();
+    let currentLegacy: unknown = {};
+    let imageChanged = true;
+    if (id) {
+      const { data: current, error } = await supabase
+        .from("gallery_items")
+        .select("legacy_payload, image_url")
+        .eq("id", id)
+        .maybeSingle();
+      if (error) throw error;
+      currentLegacy = current?.legacy_payload ?? {};
+      imageChanged = current?.image_url !== input.src;
+    }
     const payload = {
       image_url: input.src,
       title: input.title,
@@ -27,10 +55,12 @@ export async function saveGalleryItemAction(id: string | null, data: unknown) {
         .map((tag) => tag.trim())
         .filter(Boolean),
       is_published: true,
-      legacy_payload: input.category ? { category: input.category } : {},
+      legacy_payload: mergeGalleryLegacyPayload(currentLegacy, {
+        ...input,
+        imageChanged,
+      }) as never,
       updated_at: new Date().toISOString(),
     };
-    const supabase = createSupabaseServiceClient();
 
     if (id) {
       const { error } = await supabase

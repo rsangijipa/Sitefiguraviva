@@ -7,6 +7,8 @@ import Button from "@/components/ui/Button";
 import Link from "next/link";
 import { useToast } from "@/context/ToastContext";
 import ImageUpload from "@/components/admin/ImageUpload";
+import { GalleryColorSwatch } from "@/components/admin/GalleryColorSwatch";
+import { computeDominantColorFromUrl } from "@/features/public-site/gallery/dominant-color";
 import { saveGalleryItemAction } from "@/app/actions/gallery";
 import { AdminPageShell } from "@/components/admin/AdminPageShell";
 import { FormShell, FormSection } from "@/components/admin/FormShell";
@@ -20,10 +22,22 @@ export default function NewGalleryImagePage() {
   const [formData, setFormData] = useState({
     title: "",
     category: "Geral",
+    year: new Date().getFullYear().toString(),
     tags: "",
     caption: "",
     src: "",
+    dominant_color: null as string | null,
   });
+  const [computingColor, setComputingColor] = useState(false);
+
+  // A cor predominante é calculada uma vez aqui e guardada com a foto.
+  const updateDominantColor = async (url: string) => {
+    if (!url) return;
+    setComputingColor(true);
+    const color = await computeDominantColorFromUrl(url);
+    setFormData((prev) => (prev.src === url ? { ...prev, dominant_color: color } : prev));
+    setComputingColor(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,12 +121,17 @@ export default function NewGalleryImagePage() {
                     <ImageUpload
                       onUploadingChange={setIsUploading}
                       defaultImage={formData.src}
-                      onUpload={(url) =>
-                        setFormData((prev) => ({ ...prev, src: url }))
-                      }
+                      onUpload={(url) => {
+                        setFormData((prev) => ({ ...prev, src: url, dominant_color: null }));
+                        void updateDominantColor(url);
+                      }}
                       className="w-full h-full object-cover"
                     />
                   </div>
+                  <GalleryColorSwatch
+                    color={formData.dominant_color}
+                    computing={computingColor}
+                  />
                   <p className="text-xs text-stone-400">
                     Formatos suportados: PNG, JPG ou WebP. Proporção
                     recomendada: 4:3 ou 16:9.
@@ -152,30 +171,60 @@ export default function NewGalleryImagePage() {
                     />
                   </div>
 
-                  <div>
-                    <label
-                      htmlFor="photo-category"
-                      className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5"
-                    >
-                      Categoria
-                    </label>
-                    <select
-                      id="photo-category"
-                      value={formData.category}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          category: e.target.value,
-                        }))
-                      }
-                      className="w-full rounded-xl border border-stone-200 bg-white px-3.5 py-2.5 text-sm font-medium focus:border-primary focus:outline-none"
-                    >
-                      <option value="Geral">Geral</option>
-                      <option value="Eventos">Eventos</option>
-                      <option value="Workshops">Workshops</option>
-                      <option value="Espaço">Espaço</option>
-                      <option value="Encontros">Encontros</option>
-                    </select>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label
+                        htmlFor="photo-category"
+                        className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5"
+                      >
+                        Categoria
+                      </label>
+                      <select
+                        id="photo-category"
+                        value={formData.category}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            category: e.target.value,
+                          }))
+                        }
+                        className="w-full rounded-xl border border-stone-200 bg-white px-3.5 py-2.5 text-sm font-medium focus:border-primary focus:outline-none"
+                      >
+                        <option value="Geral">Geral</option>
+                        <option value="Eventos">Eventos</option>
+                        <option value="Workshops">Workshops</option>
+                        <option value="Espaço">Espaço</option>
+                        <option value="Encontros">Encontros</option>
+                        <option value="Formação">Formação</option>
+                        <option value="Vivências">Vivências</option>
+                        <option value="Comunidade">Comunidade</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="photo-year"
+                        className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-1.5"
+                      >
+                        Ano do Registro
+                      </label>
+                      <input
+                        id="photo-year"
+                          inputMode="numeric"
+                          pattern="[0-9]{4}"
+                          maxLength={4}
+                        type="text"
+                        value={formData.year}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            year: e.target.value,
+                          }))
+                        }
+                        placeholder="Ex: 2026"
+                        className="w-full rounded-xl border border-stone-200 bg-white px-3.5 py-2.5 text-sm font-medium focus:border-primary focus:outline-none"
+                      />
+                    </div>
                   </div>
 
                   <div>

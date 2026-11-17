@@ -8,6 +8,8 @@ import { createSupabaseBrowserClient } from "@/infrastructure/supabase/client";
 import { readCourseAgenda } from "@/features/courses/domain/course-agenda";
 import { getCourseMediators } from "@/utils/mediators";
 import type { Json, TableRow } from "@/infrastructure/supabase/database.types";
+import { normalizeHexColor } from "@/features/public-site/gallery/dominant-color";
+import { galleryYearFromLegacy } from "@/features/public-site/gallery/gallery-payload";
 
 export type ContentKind =
   | "courses"
@@ -169,8 +171,9 @@ export function mapPublicCourse(row: TableRow<"courses">): ContentRecord {
 }
 
 export function mapPublicPost(row: TableRow<"posts">): ContentRecord {
+  const legacy = jsonObject(row.legacy_payload);
   return {
-    ...editorialText(jsonObject(row.legacy_payload), [
+    ...editorialText(legacy, [
       "author",
       "authorImage",
       "date",
@@ -189,6 +192,12 @@ export function mapPublicPost(row: TableRow<"posts">): ContentRecord {
     externalUrl: row.external_url,
     pdfUrl: row.pdf_url,
     tags: row.tags,
+    // Campos do diário visual (/blog), guardados em legacy_payload.
+    post_format: typeof legacy.post_format === "string" ? legacy.post_format : null,
+    youtube_url: typeof legacy.youtube_url === "string" ? legacy.youtube_url : null,
+    quote_author: typeof legacy.quote_author === "string" ? legacy.quote_author : null,
+    card_size: typeof legacy.card_size === "string" ? legacy.card_size : null,
+    tone: typeof legacy.tone === "string" ? legacy.tone : null,
     isPublished: row.is_published,
     publishedAt: row.published_at,
     createdAt: row.created_at,
@@ -199,6 +208,9 @@ export function mapPublicPost(row: TableRow<"posts">): ContentRecord {
 }
 
 function mapGalleryItem(row: TableRow<"gallery_items">): ContentRecord {
+  const legacy = jsonObject(row.legacy_payload);
+  const year = galleryYearFromLegacy(legacy);
+
   return {
     id: row.id,
     src: row.image_url,
@@ -209,6 +221,10 @@ function mapGalleryItem(row: TableRow<"gallery_items">): ContentRecord {
     width: row.width,
     height: row.height,
     isPublished: row.is_published,
+    year,
+    ano: year,
+    category: typeof legacy.category === "string" ? legacy.category : null,
+    dominantColor: normalizeHexColor(legacy.dominant_color),
     createdAt: row.created_at,
     created_at: row.created_at,
     updatedAt: row.updated_at,

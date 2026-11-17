@@ -1,138 +1,200 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { X, Search, Filter, ArrowRight } from "lucide-react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
+import { motion } from "framer-motion";
+import { Maximize2, Search, X } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PublicPageHero from "@/features/public-site/components/PublicPageHero";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { GalleryImage } from "@/features/public-site/gallery/GalleryImage";
 import { normalizeGalleryMedia } from "@/features/public-site/gallery/gallery-media";
+import {
+  GALLERY_FALLBACK_COLOR,
+  computeDominantColorFromUrl,
+  overlayBackground,
+} from "@/features/public-site/gallery/dominant-color";
+import {
+  GalleryLightbox,
+  photoTags,
+  type LightboxPhoto,
+} from "@/features/public-site/gallery/GalleryLightbox";
+import styles from "./gallery.module.css";
 
-const CATEGORIES = [
-  "Todos",
+const THEMES = [
   "Formação",
   "Encontros",
   "Vivências",
   "Comunidade",
-] as const;
-type Category = (typeof CATEGORIES)[number];
+  "Workshops",
+  "Eventos",
+  "Espaço",
+];
+
+type GalleryPhoto = LightboxPhoto & { dominantColor?: string | null };
+
+const normalizeText = (value: string) =>
+  value.normalize("NFD").replace(/[̀-ͯ]/g, "").toLocaleLowerCase("pt-BR");
+
+function matchesTheme(photo: GalleryPhoto, theme: string) {
+  const haystack = normalizeText(
+    `${photo.category ?? ""} ${photoTags(photo.tags).join(" ")} ${photo.title} ${photo.caption ?? ""}`,
+  );
+  return haystack.includes(normalizeText(theme));
+}
+
+// Cores calculadas no navegador para fotos antigas, uma vez por visita.
+const computedColors = new Map<string, Promise<string | null>>();
+
+function GalleryGridCard({
+  photo,
+  onOpen,
+}: {
+  photo: GalleryPhoto;
+  onOpen: (trigger: HTMLButtonElement) => void;
+}) {
+  const [color, setColor] = useState<string>(
+    photo.dominantColor || GALLERY_FALLBACK_COLOR,
+  );
+  const tags = photoTags(photo.tags);
+  const year = photo.year ?? photo.ano;
+
+  // Só calcula quando a pessoa chega na foto e não há cor guardada.
+  const ensureColor = useCallback(() => {
+    if (photo.dominantColor || !photo.src) return;
+    let pending = computedColors.get(photo.src);
+    if (!pending) {
+      pending = computeDominantColorFromUrl(photo.src);
+      computedColors.set(photo.src, pending);
+    }
+    void pending.then((value) => value && setColor(value));
+  }, [photo.dominantColor, photo.src]);
+
+  return (
+    <button
+      type="button"
+      aria-label={`Abrir foto: ${photo.title}${year ? `, ${year}` : ""}`}
+      className={`${styles.card} group relative block w-full overflow-hidden rounded-2xl border border-stone-200 bg-stone-100 text-left shadow-md transition-shadow duration-300 hover:shadow-xl focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-primary`}
+      onPointerEnter={ensureColor}
+      onFocus={ensureColor}
+      onClick={(event) => onOpen(event.currentTarget)}
+    >
+      <GalleryImage
+        src={photo.src}
+        alt=""
+        width={4}
+        height={3}
+        className="h-full w-full"
+        imageClassName="object-cover transition-transform duration-700 ease-out group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+      />
+
+      {year && (
+        <span className="absolute right-2.5 top-2.5 z-10 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm">
+          {year}
+        </span>
+      )}
+      <span
+        aria-hidden="true"
+        className="absolute left-2.5 top-2.5 z-10 inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/85 text-primary shadow-sm"
+      >
+        <Maximize2 size={12} />
+      </span>
+
+      <div
+        className={`${styles.overlay} absolute inset-0 flex flex-col justify-end p-4 backdrop-blur-[2px]`}
+        style={{ backgroundColor: overlayBackground(color) }}
+      >
+        <div className={styles.overlayContent}>
+          {photo.category && (
+            <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-white/80">
+              {photo.category}
+            </p>
+          )}
+          <p className="line-clamp-2 font-serif text-lg font-medium leading-snug text-white">
+            {photo.title}
+          </p>
+          {tags.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {tags.slice(0, 3).map((tag) => (
+                <span
+                  key={tag}
+                  className="rounded-md border border-white/30 bg-white/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </button>
+  );
+}
 
 export default function GalleryClient({
   initialGallery,
 }: {
   initialGallery: any[];
 }) {
-  // Showroom State
-  const [filter, setFilter] = useState<Category>("Todos");
-  const [showFilters, setShowFilters] = useState(false);
+  const [theme, setTheme] = useState<string>("Todos");
   const [search, setSearch] = useState("");
-  const [sort, setSort] = useState("curadoria"); // curadoria | az
-  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(
-    null,
-  );
-  const lastTriggerRef = useRef<HTMLButtonElement | null>(null);
-  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+  const [selected, setSelected] = useState<number | null>(null);
+  const lastTrigger = useRef<HTMLButtonElement | null>(null);
 
-  const safeGallery = useMemo(
+  const photos = useMemo<GalleryPhoto[]>(
     () =>
       (Array.isArray(initialGallery) ? initialGallery : []).map((photo) => ({
         ...photo,
         ...normalizeGalleryMedia(photo),
+        id: String(photo.id),
       })),
     [initialGallery],
   );
 
-  const featuredPhoto = safeGallery[0];
-  const restGallery = safeGallery;
+  const themes = useMemo(
+    () => [
+      "Todos",
+      ...THEMES.filter((name) =>
+        photos.some((photo) => matchesTheme(photo, name)),
+      ),
+    ],
+    [photos],
+  );
 
-  // Helper to check if photo belongs to an editorial category
-  const hasCategory = (photo: any, category: Category) => {
-    if (category === "Todos") return true;
-    const tagsList = Array.isArray(photo.tags)
-      ? photo.tags
-      : typeof photo.tags === "string"
-        ? photo.tags.split(",").map((t: string) => t.trim())
-        : [];
-    const haystack =
-      `${photo.title ?? ""} ${photo.caption ?? ""} ${tagsList.join(" ")}`.toLowerCase();
-    return haystack.includes(category.toLowerCase());
+  const filtered = useMemo(() => {
+    const query = normalizeText(search.trim());
+    return photos.filter(
+      (photo) =>
+        (theme === "Todos" || matchesTheme(photo, theme)) &&
+        (!query ||
+          normalizeText(
+            `${photo.title} ${photo.caption ?? ""} ${photoTags(photo.tags).join(" ")}`,
+          ).includes(query)),
+    );
+  }, [photos, theme, search]);
+
+  const featured = photos[0];
+
+  const open = (index: number, trigger: HTMLButtonElement) => {
+    lastTrigger.current = trigger;
+    setSelected(index);
   };
 
-  // Filtering Logic
-  const filteredPhotos = useMemo(() => {
-    let result = [...restGallery];
-
-    // Filter by Category
-    if (filter !== "Todos") {
-      result = result.filter((p) => hasCategory(p, filter));
-    }
-
-    // Filter by Search
-    if (search) {
-      const q = search.toLowerCase();
-      result = result.filter((p) => {
-        const titleMatch = p.title?.toLowerCase().includes(q);
-        const captionMatch = p.caption?.toLowerCase().includes(q);
-        const tagsList = Array.isArray(p.tags)
-          ? p.tags
-          : typeof p.tags === "string"
-            ? p.tags.split(",").map((t: string) => t.trim())
-            : [];
-        const tagMatch = tagsList.some((t: string) =>
-          t.toLowerCase().includes(q),
-        );
-        return titleMatch || captionMatch || tagMatch;
-      });
-    }
-
-    // Sorting
-    if (sort === "az") {
-      result.sort((a, b) => a.title.localeCompare(b.title));
-    }
-
-    return result;
-  }, [filter, search, sort, restGallery]);
-
-  // Lightbox Handlers
-  const openLightbox = (index: number, trigger: HTMLButtonElement) => {
-    lastTriggerRef.current = trigger;
-    setSelectedPhotoIndex(index);
-  };
-  const closeLightbox = () => {
-    setSelectedPhotoIndex(null);
-    window.requestAnimationFrame(() => lastTriggerRef.current?.focus());
-  };
-  const nextPhoto = () => {
-    if (selectedPhotoIndex !== null) {
-      setSelectedPhotoIndex((selectedPhotoIndex + 1) % filteredPhotos.length);
-    }
-  };
-  const prevPhoto = () => {
-    if (selectedPhotoIndex !== null) {
-      setSelectedPhotoIndex(
-        (selectedPhotoIndex - 1 + filteredPhotos.length) %
-          filteredPhotos.length,
-      );
-    }
+  const close = () => {
+    setSelected(null);
+    window.requestAnimationFrame(() => lastTrigger.current?.focus());
   };
 
-  useEffect(() => {
-    if (selectedPhotoIndex === null) {
-      return;
-    }
-
-    closeButtonRef.current?.focus();
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") closeLightbox();
-      if (event.key === "ArrowRight") nextPhoto();
-      if (event.key === "ArrowLeft") prevPhoto();
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  });
+  // O destaque abre dentro da lista completa, mesmo que um filtro o esconda.
+  const [lightboxPhotos, setLightboxPhotos] = useState<GalleryPhoto[]>([]);
+  const openFrom = (
+    list: GalleryPhoto[],
+    index: number,
+    trigger: HTMLButtonElement,
+  ) => {
+    setLightboxPhotos(list);
+    open(index, trigger);
+  };
 
   return (
     <div className="fv-bg fv-bg-gallery flex min-h-screen flex-col bg-paper">
@@ -145,297 +207,150 @@ export default function GalleryClient({
         backgroundImage="/assets/fv/heroes/galeria.webp"
       />
 
-      <div className="fv-container flex-1 pt-14">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="space-y-12"
-        >
-          {/* MOMENTO EM DESTAQUE */}
-          {featuredPhoto && (
-            <section>
-              <p className="mb-4 text-xs font-bold uppercase tracking-[0.24em] text-gold">
+      <div className="fv-container flex-1 pb-20 pt-12">
+        <div className="space-y-10">
+          {featured && (
+            <section aria-labelledby="gallery-featured-title">
+              <p className="mb-3 text-xs font-bold uppercase tracking-[0.24em] text-gold-dark">
                 Momento em destaque
               </p>
               <button
                 type="button"
-                aria-label={`Abrir imagem: ${featuredPhoto.title}`}
-                onClick={(event) =>
-                  openLightbox(
-                    filteredPhotos.indexOf(featuredPhoto) >= 0
-                      ? filteredPhotos.indexOf(featuredPhoto)
-                      : 0,
-                    event.currentTarget,
-                  )
-                }
-                className="group relative block h-[340px] sm:h-[400px] w-full overflow-hidden border border-border text-left"
+                onClick={(event) => openFrom(photos, 0, event.currentTarget)}
+                aria-label={`Abrir foto em destaque: ${featured.title}`}
+                className="group relative block h-[340px] w-full overflow-hidden rounded-3xl border border-stone-200 text-left shadow-xl focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-4 focus-visible:outline-primary sm:h-[460px]"
               >
-                <GalleryImage
-                  src={featuredPhoto.src}
-                  alt={featuredPhoto.title}
-                  width={featuredPhoto.width}
-                  height={featuredPhoto.height}
-                  className="h-full"
-                  imageClassName="object-[center_68%] opacity-95 transition-opacity group-hover:opacity-100"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-mata/80 via-transparent to-transparent p-6 flex flex-col justify-end">
-                  <h2 className="font-serif text-2xl leading-tight text-white md:text-3xl">
-                    {featuredPhoto.title}
+                <div className={styles.kenBurns}>
+                  <GalleryImage
+                    src={featured.src}
+                    alt=""
+                    width={featured.width}
+                    height={featured.height}
+                    priority
+                    sizes="100vw"
+                    className="h-full w-full"
+                    imageClassName="object-cover"
+                  />
+                </div>
+                <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/75 via-black/25 to-transparent p-6 sm:p-10">
+                  <span className="mb-2 text-xs font-bold uppercase tracking-widest text-white/85">
+                    {[featured.category, featured.year ?? featured.ano]
+                      .filter(Boolean)
+                      .join(" · ") || "Destaque"}
+                  </span>
+                  <h2
+                    id="gallery-featured-title"
+                    className="max-w-2xl font-serif text-2xl leading-tight text-white drop-shadow md:text-4xl"
+                  >
+                    {featured.title}
                   </h2>
+                  {featured.caption && (
+                    <p className="mt-2 line-clamp-2 max-w-xl text-sm text-white/85 sm:text-base">
+                      {featured.caption}
+                    </p>
+                  )}
                 </div>
               </button>
             </section>
           )}
 
-          {/* CATEGORIAS + FILTRAR */}
-          <section className="flex flex-col gap-6 border-y border-border py-6">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="flex flex-wrap gap-2">
-                {CATEGORIES.map((cat) => (
-                  <button
-                    key={cat}
-                    onClick={() => setFilter(cat)}
-                    aria-pressed={filter === cat}
-                    className={`min-h-11 rounded-sm border px-4 py-2 text-[10px] font-bold uppercase tracking-wider transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
-                      filter === cat
-                        ? "border-primary bg-primary text-white"
-                        : "border-border bg-paper text-text/70 hover:border-igarape hover:bg-areia hover:text-primary"
-                    }`}
-                  >
-                    {cat}
-                  </button>
+          {/* Barra de navegação por temas */}
+          <nav
+            aria-label="Temas da galeria"
+            className="sticky top-20 z-20 rounded-2xl border border-stone-200 bg-white/95 p-2 shadow-md backdrop-blur-md sm:p-3"
+          >
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+              <ul className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 lg:flex-wrap lg:overflow-visible lg:pb-0">
+                {themes.map((name) => (
+                  <li key={name} className="shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setTheme(name)}
+                      aria-pressed={theme === name}
+                      className={`min-h-11 rounded-xl border px-4 py-2 text-xs font-bold uppercase tracking-wider transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+                        theme === name
+                          ? "border-primary bg-primary text-white shadow-sm"
+                          : "border-stone-200 bg-stone-50 text-stone-700 hover:border-primary/40 hover:text-primary"
+                      }`}
+                    >
+                      {name}
+                    </button>
+                  </li>
                 ))}
+              </ul>
+              <div className="relative w-full lg:max-w-xs">
+                <Search
+                  size={16}
+                  aria-hidden="true"
+                  className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-500"
+                />
+                <input
+                  type="search"
+                  aria-label="Buscar momentos"
+                  placeholder="Buscar fotos…"
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  className="h-11 w-full rounded-xl border border-stone-200 bg-white pl-10 pr-10 text-sm text-stone-800 outline-none placeholder:text-stone-500 focus:border-primary focus:ring-2 focus:ring-primary/15"
+                />
+                {search && (
+                  <button
+                    type="button"
+                    onClick={() => setSearch("")}
+                    aria-label="Limpar busca"
+                    className="absolute right-1 top-1/2 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-stone-500 hover:text-primary"
+                  >
+                    <X size={14} aria-hidden="true" />
+                  </button>
+                )}
               </div>
-
-              <button
-                type="button"
-                onClick={() => setShowFilters((v) => !v)}
-                aria-expanded={showFilters}
-                className="inline-flex min-h-11 items-center gap-2 rounded-sm border border-border px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-text/70 transition-colors hover:border-igarape hover:bg-areia hover:text-primary"
-              >
-                <Filter size={12} /> Filtrar
-              </button>
             </div>
+          </nav>
 
-            {showFilters && (
-              <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="relative group w-full max-w-md">
-                  <Search
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-muted transition-colors group-focus-within:text-primary"
-                    size={18}
-                  />
-                  <input
-                    type="text"
-                    aria-label="Buscar momentos"
-                    placeholder="Buscar momentos..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="h-12 w-full rounded-md border border-border bg-paper pl-12 pr-4 text-primary outline-none transition-colors placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/15"
-                  />
-                </div>
-                <div className="flex items-center gap-4">
-                  <p className="text-xs font-bold uppercase tracking-widest text-muted">
-                    {filteredPhotos.length} Registros
-                  </p>
-                  <div className="h-4 w-px bg-border" aria-hidden></div>
-                  <div className="flex gap-4 text-xs font-bold uppercase tracking-widest text-text/70">
-                    <button
-                      onClick={() => setSort("curadoria")}
-                      className={
-                        sort === "curadoria"
-                          ? "min-h-11 text-primary underline decoration-2 underline-offset-4"
-                          : "min-h-11 hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                      }
-                    >
-                      Recentes
-                    </button>
-                    <button
-                      onClick={() => setSort("az")}
-                      className={
-                        sort === "az"
-                          ? "min-h-11 text-primary underline decoration-2 underline-offset-4"
-                          : "min-h-11 hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                      }
-                    >
-                      A-Z
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </section>
+          <p
+            className="text-xs font-semibold uppercase tracking-widest text-stone-600"
+            role="status"
+          >
+            {filtered.length} {filtered.length === 1 ? "registro" : "registros"}
+          </p>
 
-          {/* GRID CONTENT */}
-          <div className="grid grid-cols-1 gap-6 pb-12 sm:grid-cols-2 xl:grid-cols-3">
-            {filteredPhotos.map((photo, index) => (
-              <motion.button
-                type="button"
-                key={photo.id}
-                layoutId={photo.id}
-                aria-label={`Abrir imagem: ${photo.title}`}
-                className="group relative block w-full cursor-pointer overflow-hidden rounded-2xl border border-border bg-areia text-left shadow-sm transition-all duration-500 hover:-translate-y-1 hover:border-igarape hover:shadow-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                onClick={(event) => openLightbox(index, event.currentTarget)}
-                whileHover={{ y: -5 }}
-              >
-                <GalleryImage
-                  src={photo.src}
-                  alt={photo.title}
-                  width={photo.width}
-                  height={photo.height}
-                  className="h-full"
-                  imageClassName="object-[center_68%] opacity-95 transition-opacity group-hover:opacity-100"
+          <motion.ul
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3"
+          >
+            {filtered.map((photo, index) => (
+              <li key={photo.id}>
+                <GalleryGridCard
+                  photo={photo}
+                  onOpen={(trigger) => openFrom(filtered, index, trigger)}
                 />
-                {/* Hover Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
-                  <h3 className="text-white font-serif text-lg leading-tight mb-2 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                    {photo.title}
-                  </h3>
-                  <div className="flex gap-2 translate-y-4 group-hover:translate-y-0 transition-transform duration-300 delay-75">
-                    {(Array.isArray(photo.tags)
-                      ? photo.tags
-                      : typeof photo.tags === "string"
-                        ? photo.tags
-                            .split(",")
-                            .map((t: string) => t.trim())
-                            .filter(Boolean)
-                        : []
-                    )
-                      .slice(0, 2)
-                      .map((tag: string, i: number) => (
-                        <span
-                          key={i}
-                          className="rounded-sm bg-paper/25 px-2 py-1 text-[9px] font-bold uppercase tracking-widest text-white"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                  </div>
-                </div>
-              </motion.button>
+              </li>
             ))}
+          </motion.ul>
 
-            {filteredPhotos.length === 0 && (
-              <div className="col-span-full rounded-md border border-dashed border-border bg-areia/50 py-20">
-                <EmptyState
-                  icon={Search}
-                  title="Nenhum Momento Encontrado"
-                  description="Não encontramos imagens para os filtros selecionados. Tente ajustar sua busca ou categoria."
-                  className="bg-transparent border-none shadow-none"
-                />
-              </div>
-            )}
-          </div>
-        </motion.div>
+          {filtered.length === 0 && (
+            <div className="rounded-2xl border border-dashed border-stone-300 bg-stone-50/70 py-16">
+              <EmptyState
+                icon={Search}
+                title="Nenhuma foto encontrada"
+                description="Tente outro tema ou outra palavra na busca."
+                className="border-none bg-transparent shadow-none"
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       <Footer />
 
-      {/* LIGHTBOX */}
-      <AnimatePresence>
-        {selectedPhotoIndex !== null && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-mata/95 flex items-center justify-center p-4"
-            onClick={closeLightbox}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="gallery-dialog-title"
-          >
-            <button
-              ref={closeButtonRef}
-              type="button"
-              onClick={closeLightbox}
-              aria-label="Fechar imagem ampliada"
-              className="absolute right-4 top-4 z-[110] inline-flex min-h-11 min-w-11 items-center justify-center rounded-full bg-black/30 text-white/70 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-white sm:right-6 sm:top-6"
-            >
-              <X size={32} />
-            </button>
-
-            <div
-              className="relative flex max-h-[90vh] w-[min(96vw,1280px)] flex-col overflow-hidden rounded-2xl bg-paper shadow-2xl lg:flex-row"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Image Container */}
-              <div className="relative flex min-h-[45vh] min-w-0 flex-1 items-center justify-center bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.55),transparent_65%),#e9dfcf] p-4 sm:p-8">
-                <div className="h-[min(68vh,760px)] w-full max-w-[920px]">
-                  <GalleryImage
-                    src={filteredPhotos[selectedPhotoIndex].src}
-                    alt={filteredPhotos[selectedPhotoIndex].title}
-                    width={filteredPhotos[selectedPhotoIndex].width}
-                    height={filteredPhotos[selectedPhotoIndex].height}
-                    fit="contain"
-                    sizes="(max-width: 1024px) 100vw, 70vw"
-                    className="h-full w-full rounded-md"
-                    imageClassName="object-contain"
-                  />
-                </div>
-
-                {/* Nav Buttons */}
-                <button
-                  type="button"
-                  aria-label="Imagem anterior"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    prevPhoto();
-                  }}
-                  className="absolute left-4 top-1/2 min-h-11 min-w-11 -translate-y-1/2 rounded-full bg-paper/90 p-4 text-primary backdrop-blur transition-colors hover:bg-primary hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
-                >
-                  <ArrowRight className="rotate-180" size={24} />
-                </button>
-                <button
-                  type="button"
-                  aria-label="Próxima imagem"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    nextPhoto();
-                  }}
-                  className="absolute right-4 top-1/2 min-h-11 min-w-11 -translate-y-1/2 rounded-full bg-paper/90 p-4 text-primary backdrop-blur transition-colors hover:bg-primary hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
-                >
-                  <ArrowRight size={24} />
-                </button>
-              </div>
-
-              {/* Sidebar Info */}
-              <div className="flex max-h-[38vh] w-full shrink-0 flex-col overflow-y-auto border-t border-border bg-paper p-6 sm:p-8 lg:max-h-none lg:w-[min(34vw,380px)] lg:border-l lg:border-t-0">
-                <h3
-                  id="gallery-dialog-title"
-                  className="font-serif text-2xl text-primary mb-4 leading-tight"
-                >
-                  {filteredPhotos[selectedPhotoIndex].title}
-                </h3>
-                <div className="mb-6 h-px w-10 bg-terra" aria-hidden></div>
-                <p className="mb-8 whitespace-pre-line text-sm leading-relaxed text-text/80">
-                  {filteredPhotos[selectedPhotoIndex].caption ||
-                    "Sem descrição disponível."}
-                </p>
-                <div className="mt-auto">
-                  <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-muted">
-                    Tags
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {(Array.isArray(filteredPhotos[selectedPhotoIndex].tags)
-                      ? filteredPhotos[selectedPhotoIndex].tags
-                      : typeof filteredPhotos[selectedPhotoIndex].tags ===
-                          "string"
-                        ? filteredPhotos[selectedPhotoIndex].tags.split(",")
-                        : []
-                    ).map((tag: any) => (
-                      <span
-                        key={tag}
-                        className="rounded-sm bg-areia px-2.5 py-1 text-[9px] uppercase tracking-widest text-primary"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {selected !== null && lightboxPhotos[selected] && (
+        <GalleryLightbox
+          photos={lightboxPhotos}
+          index={selected}
+          onIndexChange={setSelected}
+          onClose={close}
+        />
+      )}
     </div>
   );
 }
