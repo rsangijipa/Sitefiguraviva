@@ -1,86 +1,139 @@
 import { test, expect } from "@playwright/test";
+import { readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import path from "node:path";
+import { loginAsStudent } from "./helpers";
 
-/**
- * E2E Tests for Enrollment Gate (Orbital 07)
- * Proves that access is synchronized between Admin and Student.
- *
- * MARKED FIXME: these are placeholders, not working tests. Every case leaves
- * its setup as a comment ("Simulate Stripe Webhook...", "Setup enrollment with
- * accessUntil in the past") and then asserts against invented ids such as
- * demo-course and draft-course, on a /cursos route that does not exist. They
- * cannot pass, so they were failing the e2e command on every run.
- *
- * They are kept rather than deleted because they describe the access rules
- * worth covering. Implementing them needs seeded fixtures and a signed-in
- * context; until then fixme keeps the intent visible without a red pipeline.
- * Note that the project docs list this file as completed E2E verification of
- * the enrollment gate — it is not.
- */
-test.describe.fixme("Enrollment Gate SSoT", () => {
-  test("PIX Flow: Pending enrollment blocks access, Admin approval grants it", async ({
-    page,
-  }) => {
-    // 1. Student requests PIX access (Assuming a button exists)
-    // For E2E, we might simulate the enrollment state in DB directly if no UI exists yet
-    // But the requirement says "prove synchronization in the real world"
+type Fixture = {
+  courseId: string;
+  lessonId: string;
+  lessonTitle: string;
+  privateText: string;
+};
+type GateFixtures = Record<"active" | "pending" | "expired" | "draft", Fixture>;
+const fixturePath = process.env.E2E_ENROLLMENT_FIXTURE;
+const fixtures: GateFixtures | undefined = fixturePath
+  ? JSON.parse(readFileSync(fixturePath, "utf8"))
+  : undefined;
 
-    // Mocking/Setup: In a real E2E, we'd go through the UI.
-    // Here we'll describe the steps as requested.
-
-    await page.goto("/cursos");
-    // Click PIX button...
-    // Expect enrollment state: pending
-
-    await page.goto("/portal/course/demo-course");
-    await expect(page.locator("text=Aguardando Aprovação PIX")).toBeVisible();
-
-    // Attempt lesson access
-    await page.goto("/portal/course/demo-course/lesson/intro");
-    await expect(page).toHaveURL(/.*checkout|.*error|.*pending/);
-  });
-
-  test("Stripe Flow: Webhook confirmation grants immediate access", async ({
-    page,
-  }) => {
-    // 1. Simulate Stripe Webhook (via API call or CLI)
-    // ...
-
-    await page.goto("/portal/course/demo-course");
-    await expect(page.locator("text=Assistir Aula")).toBeVisible();
-  });
-
-  test("Subscription: Expiration blocks access server-side", async ({
-    page,
-  }) => {
-    // 1. Setup enrollment with accessUntil in the past
-    // ...
-
-    await page.goto("/portal/course/demo-course");
-    await expect(page.locator("text=Sua assinatura expirou")).toBeVisible();
-
-    // Anti-bypass check
-    const response = await page.goto(
-      "/api/course/demo-course/lesson/intro/content",
+// These are real read-only browser journeys against explicitly provisioned staging.
+// Local action/guard transitions are covered separately in enrollment-access-lifecycle.test.ts.
+test.describe("Enrollment access with explicit fixtures", () => {
+  test.skip(
+    !fixtures,
+    "Configure E2E_ENROLLMENT_FIXTURE in isolated staging; these journeys are not validated locally.",
+  );
+  test.beforeAll(() => {
+    execFileSync(
+      process.execPath,
+      [path.resolve(__dirname, "../scripts/e2e-preflight.mjs")],
+      {
+        env: process.env,
+        windowsHide: true,
+        timeout: 10000,
+      },
     );
-    expect(response?.status()).toBe(403);
+    if (!/^[a-f0-9]{7,40}$/.test(process.env.E2E_RELEASE_SHA ?? ""))
+      throw new Error("Configure E2E_RELEASE_SHA for the version under test");
+    if (
+      !process.env.SECOND_STUDENT_EMAIL ||
+      !process.env.SECOND_STUDENT_PASSWORD
+    )
+      throw new Error("Configure the second isolated student account");
+    if (process.env.SECOND_STUDENT_EMAIL === process.env.STUDENT_EMAIL)
+      throw new Error("The second student must be a distinct account");
+    for (const name of ["active", "pending", "expired", "draft"] as const) {
+      const fixture = fixtures?.[name];
+      if (
+        !fixture ||
+        ![fixture.courseId, fixture.lessonId].every((id) =>
+          /^[A-Za-z0-9_-]{1,128}$/.test(id),
+        ) ||
+        !fixture.lessonTitle?.trim() ||
+        !fixture.privateText?.trim()
+      )
+        throw new Error(`Invalid enrollment fixture: ${name}`);
+    }
+    if (
+      new Set(Object.values(fixtures!).map((fixture) => fixture.courseId))
+        .size !== 4
+    )
+      throw new Error("Each enrollment state needs a distinct fixture course");
+  });
+  test.beforeEach(async ({ page }, info) => {
+    info.annotations.push({
+      type: "release",
+      description: process.env.E2E_RELEASE_SHA!,
+    });
+    await loginAsStudent(page);
   });
 
-  test("URL Bypass: Direct navigation without enrollment is blocked", async ({
+  test("an active enrollment can read its published lesson", async ({
     page,
   }) => {
-    await page.goto("/portal/course/unauthorized-course/lesson/secret");
-    await expect(page).toHaveURL(/.*checkout|.*login/);
-  });
-
-  test("Publication Gate: Active enrollment on draft course is blocked", async ({
-    page,
-  }) => {
-    // 1. User has active enrollment
-    // 2. Admin marks course as Draft
-
-    await page.goto("/portal/course/draft-course");
+    const fixture = fixtures!.active;
+    await page.goto(
+      `/portal/course/${fixture.courseId}/lesson/${fixture.lessonId}`,
+    );
     await expect(
-      page.locator("text=Este curso não está disponível no momento"),
+      page.getByRole("heading", { name: fixture.lessonTitle, exact: true }),
     ).toBeVisible();
+    await expect(
+      page.getByText(fixture.privateText, { exact: true }),
+    ).toBeVisible();
+  });
+  for (const status of ["pending", "expired", "draft"] as const) {
+    test(`${status} blocks a direct lesson URL`, async ({ page }) => {
+      const fixture = fixtures![status];
+      const response = await page.goto(
+        `/portal/course/${fixture.courseId}/lesson/${fixture.lessonId}`,
+      );
+      expect(response?.status()).toBeLessThan(500);
+      await expect(page).toHaveURL(
+        (url) =>
+          url.pathname.startsWith("/portal") &&
+          !url.pathname.includes("/lesson/"),
+      );
+      await expect(
+        page.getByText(fixture.privateText, { exact: true }),
+      ).toHaveCount(0);
+    });
+  }
+  test("the second student cannot read the first student's lesson", async ({
+    browser,
+  }) => {
+    const context = await browser.newContext({
+      storageState: { cookies: [], origins: [] },
+    });
+    try {
+      const page = await context.newPage();
+      await page.goto(new URL("/auth", process.env.BASE_URL).href);
+      await page
+        .locator('input[type="email"]')
+        .fill(process.env.SECOND_STUDENT_EMAIL!);
+      await page
+        .locator('input[type="password"]')
+        .fill(process.env.SECOND_STUDENT_PASSWORD!);
+      await page.getByRole("button", { name: "Entrar", exact: true }).click();
+      await expect(page).toHaveURL((url) => url.pathname.startsWith("/portal"));
+      const fixture = fixtures!.active;
+      const response = await page.goto(
+        new URL(
+          `/portal/course/${fixture.courseId}/lesson/${fixture.lessonId}`,
+          process.env.BASE_URL,
+        ).href,
+      );
+      expect(response?.status()).toBeLessThan(500);
+      await expect(page).toHaveURL(
+        (url) =>
+          url.pathname.startsWith("/portal") &&
+          !url.pathname.includes("/lesson/"),
+      );
+      await expect(
+        page.getByText(fixture.privateText, { exact: true }),
+      ).toHaveCount(0);
+    } finally {
+      await context.close();
+    }
   });
 });

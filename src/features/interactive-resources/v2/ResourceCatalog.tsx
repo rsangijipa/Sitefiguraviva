@@ -20,7 +20,7 @@ const COVERS={
  "fronteiras-de-contato":SLOTS.fronteira,casoteca:conceptSlot("campo"),"polaridades-e-cadeiras":SLOTS.cadeiras,
  chegada:{path:"/brand/recursos/chegada/abertura.webp",ratio:"16:9" as const,alt:"",brief:""},"mapa-do-corpo":conceptSlot("corpo"),"roda-das-emocoes":conceptSlot("polaridades"),
  "necessidades-agora":conceptSlot("presenca"),"paisagem-de-pensamentos":conceptSlot("territorio"),
- "sons-para-awareness":SLOTS.practice("ouvir"),"sala-de-pausa":SLOTS.practice("respirar"),igarape:SLOTS.practice("desacelerar"),
+ "sons-para-awareness":SLOTS.practice("ouvir"),"sala-de-pausa":SLOTS.practice("respirar"),igarape:SLOTS.practice("desacelerar"),"ambientes-imersivos":conceptSlot("territorio"),
  "laboratorio-fenomenologico":conceptSlot("descricao"),"atelie-do-experimento":conceptSlot("ajustamento"),"escuta-dialogica":conceptSlot("eu-tu"),
 };
 export function ResourceCatalog({formation=false,preview=false,released=[]}:{formation?:boolean;preview?:boolean;released?:string[]}) {

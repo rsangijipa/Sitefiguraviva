@@ -47,11 +47,14 @@ export default function QuizTaker({
   const [startTime, setStartTime] = useState<number>(Date.now());
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   const handleSubmitRef = useRef<() => Promise<void>>(async () => {});
 
   const loadAssessment = useCallback(async () => {
     if (!user) return;
+    setLoading(true);
+    setLoadError(false);
 
     try {
       const data = await assessmentService.getAssessment(assessmentId);
@@ -68,11 +71,20 @@ export default function QuizTaker({
         data.courseId,
       );
       if (!startResult.success || !startResult.submissionId) {
+        setLoadError(true);
         addToast(startResult.error || "Erro ao iniciar avaliação", "error");
         return;
       }
       const submissionId = startResult.submissionId;
       setCurrentSubmissionId(submissionId);
+      setAnswers(
+        Object.fromEntries(
+          (startResult.answers ?? []).map((answer) => [
+            answer.questionId,
+            answer,
+          ]),
+        ),
+      );
       setStartTime(Date.now());
 
       trackEvent("quiz_start", assessmentId, { courseId: data.courseId });
@@ -96,9 +108,12 @@ export default function QuizTaker({
       }
 
       setLoading(false);
-    } catch (error) {
-      console.error("Load Assessment Error:", error);
+    } catch {
+      setLoadError(true);
+      console.error("Assessment could not be loaded");
       addToast("Erro ao carregar avaliação", "error");
+    } finally {
+      setLoading(false);
     }
   }, [user, assessmentId, addToast]);
 
@@ -149,7 +164,7 @@ export default function QuizTaker({
       // Convert answers to array
       const answersArray = Object.values(answers);
 
-      // Submit to Firestore
+      // Submit and grade through the canonical server lifecycle.
       const submitResult = await submitAssessmentAttempt(
         currentSubmissionId,
         answersArray,
@@ -221,10 +236,29 @@ export default function QuizTaker({
     );
   }
 
-  if (!assessment) {
+  if (!assessment && !loadError) {
     return (
       <div className="text-center py-20 text-stone-400">
         Avaliação não encontrada
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div role="status" className="rounded-xl border border-stone-200 p-6">
+        <p>
+          Não foi possível abrir uma tentativa. Confira seu acesso ou consulte
+          as avaliações já enviadas.
+        </p>
+        <Button
+          className="mt-4"
+          onClick={() => {
+            void loadAssessment();
+          }}
+        >
+          Tentar novamente
+        </Button>
       </div>
     );
   }

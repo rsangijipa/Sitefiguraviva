@@ -1,176 +1,158 @@
+const session = jest.fn(),
+  access = jest.fn(),
+  reads = jest.fn(),
+  start = jest.fn(),
+  submit = jest.fn(),
+  limited = jest.fn();
+const query = {
+  select: jest.fn().mockReturnThis(),
+  eq: jest.fn().mockReturnThis(),
+  maybeSingle: () => reads(),
+};
+jest.mock("@/lib/auth/server", () => ({ verifySession: () => session() }));
+jest.mock("@/lib/auth/access-gate", () => ({
+  assertCanAccessCourse: (...args: unknown[]) => access(...args),
+}));
+jest.mock("@/infrastructure/supabase/server", () => ({
+  createSupabaseServiceClient: () => ({ from: () => query }),
+}));
+jest.mock("@/app/actions/assessment", () => ({
+  startAttempt: (...args: unknown[]) => start(...args),
+  submitAssessment: (...args: unknown[]) => submit(...args),
+}));
+jest.mock("@/lib/rateLimit", () => ({
+  rateLimit: () => limited(),
+  RateLimitPresets: { SUBMIT_ASSIGNMENT: {} },
+}));
+jest.mock("next/cache", () => ({ revalidatePath: jest.fn() }));
 import {
   startAssessmentAttempt,
   submitAssessmentAttempt,
-} from "@/actions/assessment";
-import { verifySession } from "@/lib/auth/server";
+  gradeAssessment,
+} from "../assessment";
 
-jest.mock("@/lib/auth/server", () => ({ verifySession: jest.fn() }));
-
-jest.mock("next/headers", () => ({
-  cookies: jest.fn(() =>
-    Promise.resolve({
-      get: jest.fn((name) => {
-        if (name === "session") return { value: "valid-token" };
-        return undefined;
-      }),
-    }),
-  ),
-}));
-
-jest.mock("next/cache", () => ({
-  revalidatePath: jest.fn(),
-}));
-
-jest.mock("@/lib/rateLimit", () => ({
-  rateLimit: jest.fn(async () => ({
-    allowed: true,
-    remaining: 999,
-    resetAt: Date.now() + 60_000,
-  })),
-  RateLimitPresets: {
-    SUBMIT_ASSIGNMENT: { points: 5, windowMs: 60_000 },
-  },
-}));
-
-jest.mock("@/lib/firebase/admin", () => {
-  const assessmentDocGet = jest.fn();
-  const submissionDocGet = jest.fn();
-  const submissionDocUpdate = jest.fn();
-  const assessmentSubmissionsWhereGet = jest.fn();
-  const assessmentSubmissionsAdd = jest.fn();
-
-  const assessmentSubmissionsCollection = {
-    where: jest.fn(() => ({
-      where: jest.fn(() => ({
-        get: assessmentSubmissionsWhereGet,
-      })),
-    })),
-    add: assessmentSubmissionsAdd,
-    doc: jest.fn(() => ({
-      get: submissionDocGet,
-      update: submissionDocUpdate,
-    })),
-  };
-
-  const assessmentsCollection = {
-    doc: jest.fn(() => ({
-      get: assessmentDocGet,
-    })),
-  };
-
-  const collectionMock = jest.fn((name: string) => {
-    if (name === "assessments") return assessmentsCollection;
-    if (name === "assessmentSubmissions")
-      return assessmentSubmissionsCollection;
-    throw new Error(`Unexpected collection: ${name}`);
+beforeEach(() => {
+  jest.clearAllMocks();
+  reads.mockReset();
+  session.mockResolvedValue({ uid: "student", isActive: true });
+  access.mockResolvedValue({});
+  limited.mockResolvedValue({ allowed: true });
+  start.mockResolvedValue({
+    success: true,
+    submissionId: "attempt",
+    answers: [],
   });
-
-  return {
-    auth: {
-      verifySessionCookie: jest.fn(),
-    },
-    adminDb: {
-      collection: collectionMock,
-    },
-    __mocks: {
-      assessmentDocGet,
-      submissionDocGet,
-      submissionDocUpdate,
-      assessmentSubmissionsWhereGet,
-      assessmentSubmissionsAdd,
-      collectionMock,
-    },
-  };
+  submit.mockResolvedValue({
+    success: true,
+    submissionId: "attempt",
+    progressSaved: true,
+  });
 });
-
-const firebaseModule = jest.requireMock("@/lib/firebase/admin");
-const mocks = firebaseModule.__mocks as {
-  assessmentDocGet: jest.Mock;
-  submissionDocGet: jest.Mock;
-  submissionDocUpdate: jest.Mock;
-  assessmentSubmissionsWhereGet: jest.Mock;
-  assessmentSubmissionsAdd: jest.Mock;
-  collectionMock: jest.Mock;
-};
-
-describe("assessment attempts server actions", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    (verifySession as jest.Mock).mockResolvedValue({
-      uid: "user-123",
-      role: "student",
-      isActive: true,
-      isAdmin: false,
-      isStaff: false,
-    });
+afterEach(() => jest.restoreAllMocks());
+function pending() {
+  reads.mockResolvedValueOnce({
+    data: {
+      id: "attempt",
+      user_id: "student",
+      course_id: "course",
+      assessment_id: "quiz",
+      status: "pending",
+    },
   });
-
-  describe("startAssessmentAttempt", () => {
-    it("creates a new submission with incremented attempt number", async () => {
-      mocks.assessmentDocGet.mockResolvedValue({
-        exists: true,
-        data: () => ({ id: "a1", courseId: "course-1" }),
-      });
-      mocks.assessmentSubmissionsWhereGet.mockResolvedValue({
-        docs: [{ data: () => ({ attemptNumber: 1 }) }],
-      });
-      mocks.assessmentSubmissionsAdd.mockResolvedValue({ id: "sub-2" });
-
-      const result = await startAssessmentAttempt("a1", "course-1");
-
-      expect(result).toEqual({ success: true, submissionId: "sub-2" });
-      expect(mocks.assessmentSubmissionsAdd).toHaveBeenCalledWith(
-        expect.objectContaining({
-          assessmentId: "a1",
-          userId: "user-123",
-          courseId: "course-1",
-          status: "pending",
-          attemptNumber: 2,
-        }),
-      );
-    });
-
-    it("rejects when assessment course does not match", async () => {
-      mocks.assessmentDocGet.mockResolvedValue({
-        exists: true,
-        data: () => ({ id: "a1", courseId: "other-course" }),
-      });
-
-      const result = await startAssessmentAttempt("a1", "course-1");
-      expect(result).toEqual({ error: "Curso da avaliação inválido" });
-    });
+}
+it("uses the canonical idempotent draft rather than a second persistence system", async () => {
+  expect(await startAssessmentAttempt("quiz", "course")).toMatchObject({
+    success: true,
+    submissionId: "attempt",
   });
-
-  describe("submitAssessmentAttempt", () => {
-    it("updates submission for owner", async () => {
-      mocks.submissionDocGet.mockResolvedValue({
-        exists: true,
-        data: () => ({ userId: "user-123", assessmentId: "a1" }),
+  expect(start).toHaveBeenCalledWith("quiz", "course");
+});
+it("does not acknowledge a failed draft write", async () => {
+  start.mockRejectedValueOnce(new Error("private backend details"));
+  jest.spyOn(console, "error").mockImplementation(() => {});
+  expect(await startAssessmentAttempt("quiz", "course")).toHaveProperty(
+    "error",
+  );
+});
+it("checks ownership and access and discards client supplied grades", async () => {
+  pending();
+  expect(
+    await submitAssessmentAttempt("attempt", [
+      {
+        questionId: "q",
+        booleanAnswer: false,
+        pointsEarned: 1000,
+        isCorrect: true,
+      },
+    ]),
+  ).toMatchObject({ success: true });
+  expect(query.eq).toHaveBeenCalledWith("user_id", "student");
+  expect(access).toHaveBeenCalledWith("student", "course");
+  expect(submit).toHaveBeenCalledWith("quiz", { q: false }, "attempt");
+});
+it("preserves private attachment metadata for canonical ownership validation", async () => {
+  pending();
+  const file = {
+    storagePath: "student/attempt/q/file.pdf",
+    fileName: "file.pdf",
+    mimeType: "application/pdf",
+    fileSize: 10,
+  };
+  await submitAssessmentAttempt("attempt", [{ questionId: "q", ...file }]);
+  expect(submit).toHaveBeenCalledWith("quiz", { q: file }, "attempt");
+});
+it.each(["missing", "access", "database", "closed"])(
+  "rejects %s attempts before submitting",
+  async (mode) => {
+    jest.spyOn(console, "error").mockImplementation(() => {});
+    if (mode === "missing") reads.mockResolvedValue({ data: null });
+    else if (mode === "database")
+      reads.mockResolvedValue({ data: null, error: new Error("offline") });
+    else {
+      reads.mockResolvedValue({
+        data: {
+          id: "attempt",
+          course_id: "course",
+          status: mode === "closed" ? "graded" : "pending",
+        },
       });
-      mocks.submissionDocUpdate.mockResolvedValue(undefined);
-
-      const result = await submitAssessmentAttempt("sub-1", [
-        { questionId: "q1", selectedOptions: ["opt1"] },
-      ]);
-
-      expect(result).toEqual({ success: true });
-      expect(mocks.submissionDocUpdate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: "submitted",
-          answers: [{ questionId: "q1", selectedOptions: ["opt1"] }],
-        }),
-      );
-    });
-
-    it("rejects spoofed submission updates from another user", async () => {
-      mocks.submissionDocGet.mockResolvedValue({
-        exists: true,
-        data: () => ({ userId: "attacker-target" }),
-      });
-
-      const result = await submitAssessmentAttempt("sub-1", []);
-      expect(result).toEqual({ error: "Acesso negado" });
-      expect(mocks.submissionDocUpdate).not.toHaveBeenCalled();
-    });
+      if (mode === "access")
+        access.mockRejectedValueOnce(new Error("Forbidden"));
+    }
+    expect(await submitAssessmentAttempt("attempt", [])).toHaveProperty(
+      "error",
+    );
+    expect(submit).not.toHaveBeenCalled();
+  },
+);
+it("keeps grading result reads idempotent", async () => {
+  reads.mockImplementation(async () => ({
+    data: {
+      course_id: "course",
+      assessment_id: "quiz",
+      status: "graded",
+      score: 10,
+      percentage: 100,
+      passed: true,
+      total_points: 10,
+    },
+  }));
+  expect(await gradeAssessment("attempt")).toMatchObject({
+    percentage: 100,
+    passed: true,
+    requiresManualReview: false,
   });
+  expect(await gradeAssessment("attempt")).toMatchObject({ percentage: 100 });
+  expect(submit).not.toHaveBeenCalled();
+});
+it("cannot submit when persistence fails or rate limiting denies the request", async () => {
+  jest.spyOn(console, "error").mockImplementation(() => {});
+  pending();
+  submit.mockRejectedValueOnce(new Error("offline"));
+  expect(await submitAssessmentAttempt("attempt", [])).toHaveProperty("error");
+  submit.mockClear();
+  pending();
+  limited.mockResolvedValueOnce({ allowed: false });
+  expect(await submitAssessmentAttempt("attempt", [])).toHaveProperty("error");
+  expect(submit).not.toHaveBeenCalled();
 });

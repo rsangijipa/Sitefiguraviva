@@ -1,17 +1,18 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useEffect, useRef, useState } from "react";
 import {
-  ArrowLeft,
   Download,
   ExternalLink,
-  FileText,
-  Loader2,
+  Highlighter,
+  Moon,
+  Printer,
+  Sun,
   X,
+  Palette,
 } from "lucide-react";
-import Tooltip from "./ui/Tooltip";
 import { SafeHtml } from "./SafeHtml";
+import styles from "./PDFReader.module.css";
 
 interface PDFReaderProps {
   isOpen: boolean;
@@ -21,167 +22,297 @@ interface PDFReaderProps {
     pdfUrl?: string;
     pdf_url?: string;
     content?: string;
+    subtitle?: string;
+    author?: string;
   } | null;
 }
 
-const PDFReader = ({ isOpen, onClose, article }: PDFReaderProps) => {
-  const [loading, setLoading] = useState(true);
+export default function PDFReader({ isOpen, onClose, article }: PDFReaderProps) {
+  // Themes: "pastel" (default soft pastel tone) or "black" (black mode)
+  const [theme, setTheme] = useState<"pastel" | "black">("pastel");
   const [failed, setFailed] = useState(false);
-  const pdfUrl = article?.pdf_url || article?.pdfUrl || "";
-  // Firefox honors toolbar=0; Chromium keeps its native controls. The site
-  // chrome therefore only provides context and a return action, while file
-  // controls stay in one place: the document viewer.
-  const viewerUrl = pdfUrl ? `${pdfUrl}#toolbar=0&navpanes=0&view=FitH` : "";
+  const [notice, setNotice] = useState("");
+  const [highlightCount, setHighlightCount] = useState(0);
 
-  const handleFrameLoad = (event: React.SyntheticEvent<HTMLIFrameElement>) => {
-    // Supabase Storage returns JSON errors with HTTP 4xx inside an iframe.
-    // The iframe's load event still fires, so inspect the rendered document
-    // when same-origin access is available and keep a safe fallback otherwise.
-    setLoading(false);
-    try {
-      const bodyText =
-        event.currentTarget.contentDocument?.body?.textContent || "";
-      if (/bucket not found|no such bucket|object not found/i.test(bodyText)) {
-        setFailed(true);
-      }
-    } catch {
-      // Cross-origin PDF documents cannot be inspected; the browser PDF
-      // viewer will remain visible and its explicit open/download actions are
-      // available if the embedded viewer cannot render.
-    }
-  };
+  const dialog = useRef<HTMLDialogElement>(null);
+  const content = useRef<HTMLDivElement>(null);
+  const ranges = useRef<Range[]>([]);
+  const pdfFrameRef = useRef<HTMLIFrameElement>(null);
+
+  const pdf = article?.pdf_url || article?.pdfUrl || "";
 
   useEffect(() => {
     if (!isOpen) return;
-    setLoading(Boolean(pdfUrl));
-    setFailed(false);
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+    const node = dialog.current;
+    const opener = document.activeElement as HTMLElement | null;
+    node?.showModal();
+    return () => {
+      node?.close();
+      opener?.focus();
     };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [isOpen, pdfUrl, onClose]);
+  }, [isOpen]);
 
-  if (!article) return null;
+  useEffect(() => {
+    setFailed(false);
+    setNotice("");
+    setHighlightCount(0);
+    ranges.current = [];
+    if (typeof CSS !== "undefined" && "highlights" in CSS) {
+      CSS.highlights.delete("fv-reader-highlight");
+    }
+    return () => {
+      if (typeof CSS !== "undefined" && "highlights" in CSS) {
+        CSS.highlights.delete("fv-reader-highlight");
+      }
+    };
+  }, [article]);
+
+  const highlight = () => {
+    const selection = window.getSelection();
+    if (
+      !selection ||
+      selection.isCollapsed ||
+      !content.current?.contains(selection.anchorNode) ||
+      !content.current.contains(selection.focusNode)
+    ) {
+      setNotice("Selecione um trecho do texto antes de marcar.");
+      return;
+    }
+
+    try {
+      const range = selection.getRangeAt(0);
+
+      if (typeof CSS !== "undefined" && "highlights" in CSS && typeof Highlight !== "undefined") {
+        ranges.current.push(range.cloneRange());
+        CSS.highlights.set("fv-reader-highlight", new Highlight(...ranges.current));
+        selection.removeAllRanges();
+        setHighlightCount(ranges.current.length);
+        setNotice(`Trecho marcado! (${ranges.current.length} trecho${ranges.current.length > 1 ? "s" : ""})`);
+      } else {
+        // Fallback: wrap selection in mark element
+        const mark = document.createElement("mark");
+        mark.className = styles.fallbackMark || "fv-reader-mark";
+        mark.style.backgroundColor = theme === "black" ? "#fcd34d" : "#fed701";
+        mark.style.color = "#1a2016";
+        mark.style.borderRadius = "3px";
+        mark.style.padding = "1px 3px";
+        range.surroundContents(mark);
+        selection.removeAllRanges();
+        setHighlightCount((c) => c + 1);
+        setNotice("Trecho marcado no texto!");
+      }
+    } catch {
+      setNotice("Não foi possível marcar este trecho específico. Tente selecionar dentro de um único parágrafo.");
+    }
+  };
+
+  const clearHighlights = () => {
+    ranges.current = [];
+    if (typeof CSS !== "undefined" && "highlights" in CSS) {
+      CSS.highlights.delete("fv-reader-highlight");
+    }
+    if (content.current) {
+      const marks = content.current.querySelectorAll(`.${styles.fallbackMark || "fv-reader-mark"}`);
+      marks.forEach((m) => {
+        const parent = m.parentNode;
+        while (m.firstChild) parent?.insertBefore(m.firstChild, m);
+        parent?.removeChild(m);
+      });
+    }
+    setHighlightCount(0);
+    setNotice("Marcações removidas.");
+  };
+
+  const handlePrint = () => {
+    if (pdf && pdfFrameRef.current) {
+      try {
+        pdfFrameRef.current.contentWindow?.focus();
+        pdfFrameRef.current.contentWindow?.print();
+      } catch {
+        window.open(pdf, "_blank");
+      }
+    } else {
+      window.print();
+    }
+  };
+
+  if (!isOpen || !article) return null;
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-[100] flex flex-col bg-paper text-primary">
-          <header className="z-10 flex shrink-0 items-center gap-3 border-b border-primary/10 bg-primary px-4 py-3 text-white shadow-sm md:px-8">
-            <button
-              onClick={onClose}
-              className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-md px-2 text-xs font-bold uppercase tracking-wider text-white/85 transition hover:bg-white/10 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-            >
-              <ArrowLeft size={17} />
-              <span className="hidden sm:inline">Biblioteca</span>
-            </button>
-            <div className="min-w-0 flex-1 border-l border-white/20 pl-3">
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold">
-                Leitura
-              </p>
-              <h2 className="truncate font-serif text-base font-semibold text-white md:text-lg">
-                {article.title}
-              </h2>
-            </div>
-            <div className="flex shrink-0 items-center gap-2">
-              <Tooltip content="Fechar Leitor">
-                <button
-                  onClick={onClose}
-                  aria-label="Fechar leitor"
-                  className="inline-flex size-10 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                >
-                  <X size={20} />
-                </button>
-              </Tooltip>
-            </div>
-          </header>
+    <dialog
+      ref={dialog}
+      className={styles.dialog}
+      data-reader-theme={theme}
+      aria-labelledby="reader-title"
+      onCancel={(event) => {
+        event.preventDefault();
+        onClose();
+      }}
+    >
+      <header className={styles.header}>
+        <div className={styles.headerTitleWrap}>
+          <span className={styles.eyebrowTag}>Biblioteca Viva · Modo Leitura</span>
+          <h2 id="reader-title" className={styles.headerTitle}>
+            {article.title}
+          </h2>
+        </div>
 
-          <div className="relative flex min-h-0 flex-1 overflow-hidden bg-areia/60 p-3 md:p-6">
-            {pdfUrl && !failed ? (
-              <div className="relative mx-auto flex h-full w-full max-w-7xl flex-col overflow-hidden rounded-lg border border-primary/15 bg-white shadow-lg">
-                {loading && (
-                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-paper/95 px-6 text-center text-primary">
-                    <Loader2 className="animate-spin text-gold" size={28} />
-                    <div>
-                      <p className="font-serif text-2xl">Abrindo documento</p>
-                      <p className="mt-1 max-w-md text-sm text-primary/60">
-                        Se a prévia não carregar, use os botões acima para abrir
-                        em nova aba ou baixar o arquivo.
-                      </p>
-                    </div>
-                  </div>
+        <div className={styles.actions}>
+          {/* Marcador de texto para artigos */}
+          {!pdf && (
+            <div className={styles.toolGroup}>
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={highlight}
+                className={styles.actionBtn}
+                title="Selecione o texto e clique para marcar"
+              >
+                <Highlighter size={16} />
+                <span>Marcar texto</span>
+                {highlightCount > 0 && (
+                  <span className={styles.counterBadge}>{highlightCount}</span>
                 )}
-                <iframe
-                  src={viewerUrl}
-                  className="block h-full w-full flex-1 border-none bg-white"
-                  title={article.title}
-                  referrerPolicy="no-referrer"
-                  onLoad={handleFrameLoad}
-                  onError={() => {
-                    setLoading(false);
-                    setFailed(true);
-                  }}
-                />
+              </button>
+              {highlightCount > 0 && (
+                <button
+                  type="button"
+                  onClick={clearHighlights}
+                  className={styles.subActionBtn}
+                  title="Limpar marcações"
+                >
+                  Limpar
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Seletor Tom Pastel / Black Mode */}
+          <div className={styles.themeToggleGroup} role="group" aria-label="Tema de leitura">
+            <button
+              type="button"
+              aria-pressed={theme === "pastel"}
+              onClick={() => setTheme("pastel")}
+              className={`${styles.themeOption} ${theme === "pastel" ? styles.themeOptionActive : ""}`}
+              title="Ler com fundo tom pastel suave"
+            >
+              <Palette size={14} />
+              <span>Tom Pastel</span>
+            </button>
+            <button
+              type="button"
+              aria-pressed={theme === "black"}
+              onClick={() => setTheme("black")}
+              className={`${styles.themeOption} ${theme === "black" ? styles.themeOptionActive : ""}`}
+              title="Ler em black mode"
+            >
+              <Moon size={14} />
+              <span>Black Mode</span>
+            </button>
+          </div>
+
+          {/* Botão Imprimir */}
+          <button
+            type="button"
+            onClick={handlePrint}
+            className={styles.actionBtn}
+            title="Imprimir este documento"
+          >
+            <Printer size={16} />
+            <span>Imprimir</span>
+          </button>
+
+          {/* Link para PDF se disponível */}
+          {pdf && (
+            <a
+              href={pdf}
+              target="_blank"
+              rel="noreferrer"
+              className={styles.actionBtn}
+              title="Abrir arquivo PDF em nova aba"
+            >
+              <ExternalLink size={16} />
+              <span>Abrir PDF</span>
+            </a>
+          )}
+
+          {/* Fechar */}
+          <button
+            type="button"
+            aria-label="Fechar janela de leitura"
+            onClick={onClose}
+            className={styles.closeBtn}
+          >
+            <X size={20} />
+          </button>
+        </div>
+      </header>
+
+      <div className={styles.body}>
+        {pdf && !failed ? (
+          <>
+            <div className={styles.pdfBanner}>
+              <p className={styles.note}>
+                Visualizando documento digital. Para imprimir ou marcar diretamente no PDF, use os controles integrados do leitor.
+              </p>
+              <div className="flex gap-2">
+                <a
+                  href={pdf}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={styles.pdfLinkBtn}
+                >
+                  <Download size={14} /> Baixar PDF
+                </a>
+              </div>
+            </div>
+            <iframe
+              ref={pdfFrameRef}
+              src={pdf}
+              title={article.title}
+              className={styles.frame}
+              onError={() => setFailed(true)}
+            />
+          </>
+        ) : (
+          <div ref={content} className={styles.paper}>
+            <header className={styles.paperHeader}>
+              <p className={styles.paperCategory}>Instituto Figura Viva · Leitura</p>
+              <h1>{article.title}</h1>
+              {article.subtitle && (
+                <p className={styles.paperSubtitle}>{article.subtitle}</p>
+              )}
+              {article.author && (
+                <p className={styles.paperAuthor}>Por {article.author}</p>
+              )}
+              <hr className={styles.paperDivider} />
+            </header>
+
+            {failed ? (
+              <div className={styles.failedBox}>
+                <p>Não foi possível carregar o visualizador embutido.</p>
+                <a href={pdf} target="_blank" rel="noreferrer" className={styles.actionBtn}>
+                  <Download size={16} /> Abrir arquivo externamente
+                </a>
+              </div>
+            ) : article.content ? (
+              <div className={styles.articleContent}>
+                <SafeHtml html={article.content} />
               </div>
             ) : (
-              <div className="h-full overflow-y-auto p-4 md:p-12 scrollbar-hide">
-                <div className="mx-auto min-h-full max-w-4xl rounded-2xl bg-white p-8 shadow-soft-xl md:p-16">
-                  <header className="text-center mb-12">
-                    <h1 className="font-serif text-3xl md:text-5xl text-primary leading-tight mb-6">
-                      {article.title}
-                    </h1>
-                    <div className="w-24 h-px bg-gold/20 mx-auto" />
-                  </header>
-                  <div className="prose-organic px-2 md:px-4">
-                    {failed ? (
-                      <div className="mx-auto flex max-w-xl flex-col items-center rounded-md border border-primary/10 bg-areia/40 px-6 py-10 text-center">
-                        <FileText className="mb-4 text-gold" size={36} />
-                        <p className="text-lg font-semibold text-primary">
-                          A prévia do PDF não abriu neste navegador.
-                        </p>
-                        <p className="mt-2 text-sm leading-relaxed text-primary/65">
-                          O arquivo continua disponível. Abra em uma nova aba ou
-                          baixe para ler com o visualizador do seu dispositivo.
-                        </p>
-                        {pdfUrl && (
-                          <div className="mt-6 flex flex-wrap justify-center gap-3">
-                            <a
-                              href={pdfUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="inline-flex min-h-11 items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary/90"
-                            >
-                              <ExternalLink size={16} />
-                              Abrir documento
-                            </a>
-                            <a
-                              href={pdfUrl}
-                              download
-                              className="inline-flex min-h-11 items-center gap-2 rounded-md border border-primary/15 px-4 py-2 text-sm font-semibold text-primary transition hover:bg-primary/5"
-                            >
-                              <Download size={16} />
-                              Baixar PDF
-                            </a>
-                          </div>
-                        )}
-                      </div>
-                    ) : article.content ? (
-                      <SafeHtml html={article.content} />
-                    ) : (
-                      <p className="text-center text-primary/40 italic">
-                        Conteúdo não disponível.
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
+              <p className={styles.emptyNote}>
+                {article.subtitle || "Conteúdo do artigo disponível para leitura."}
+              </p>
             )}
           </div>
+        )}
+      </div>
+
+      {notice && (
+        <div className={styles.toastNotice} role="status">
+          <span>{notice}</span>
         </div>
       )}
-    </AnimatePresence>
+    </dialog>
   );
-};
-
-export default PDFReader;
+}

@@ -18,15 +18,21 @@ import Button from "@/components/ui/Button";
 export default function PortalEventsPage() {
   const { user } = useAuth();
   const [events, setEvents] = useState<EventDoc[]>([]);
+  const [error, setError] = useState("");
+  const [retry, setRetry] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user?.uid) return;
-    eventService.getUpcomingEvents(20).then((data) => {
-      setEvents(data);
-      setLoading(false);
-    });
-  }, [user?.uid]);
+    let active = true;
+    if (!user?.uid) { setLoading(false); setEvents([]); return; }
+    setLoading(true); setError(""); setEvents([]);
+    eventService.getUpcomingEvents(20).then(data => {
+      if (active) setEvents(data);
+    }).catch(() => {
+      if (active) setError("Não foi possível carregar a agenda. Verifique sua conexão e tente novamente.");
+    }).finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [user?.uid, retry]);
 
   const formatDate = (ts: any) => {
     const date = ts?.toDate ? ts.toDate() : new Date(ts);
@@ -57,7 +63,7 @@ export default function PortalEventsPage() {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-serif text-stone-800">Agenda Viva</h1>
           <p className="text-stone-500 mt-1">
@@ -75,6 +81,7 @@ export default function PortalEventsPage() {
         </Link>
       </div>
 
+      {error && <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5"><p role="alert" className="text-amber-950">{error}</p><button type="button" onClick={() => setRetry(value => value + 1)} className="mt-2 min-h-12 font-semibold text-amber-950 underline">Tentar novamente</button></div>}
       <div className="grid grid-cols-1 gap-6">
         {events.length > 0 ? (
           events.map((event) => {
@@ -171,7 +178,7 @@ export default function PortalEventsPage() {
               </div>
             );
           })
-        ) : (
+        ) : !error ? (
           <div className="flex flex-col items-center justify-center py-20 bg-stone-50 rounded-3xl border border-dashed border-stone-200">
             <Calendar size={48} className="text-stone-300 mb-4" />
             <h3 className="text-lg font-bold text-stone-700">
@@ -182,7 +189,7 @@ export default function PortalEventsPage() {
               notificações!
             </p>
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );

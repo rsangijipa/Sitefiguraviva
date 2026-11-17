@@ -12,7 +12,7 @@ describe("public accessibility contracts", () => {
       'aria-label="Buscar na biblioteca"',
     );
     expect(read("src/app/public-gallery/GalleryClient.tsx")).toContain(
-      'aria-label="Buscar momentos"',
+      'aria-label="Buscar momentos fotográficos"',
     );
   });
 

@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef } from "react";
-import { ExternalLink, X } from "lucide-react";
+import { ExternalLink, X, BookOpen, Calendar, User } from "lucide-react";
 import type { Livro } from "../BookshelfSection";
 import BookCover, { safeBookUrl } from "./BookCover";
 import styles from "./Bookshelf.module.css";
@@ -26,7 +26,9 @@ export default function BookDetails({
       opener?.focus();
     };
   }, []);
+
   const purchaseUrl = safeBookUrl(book.purchaseUrl);
+
   return (
     <dialog
       ref={dialog}
@@ -45,8 +47,9 @@ export default function BookDetails({
           event.clientX > rect.right ||
           event.clientY < rect.top ||
           event.clientY > rect.bottom
-        )
+        ) {
           onClose();
+        }
       }}
       onKeyDown={(event) => {
         if (event.key !== "Tab") return;
@@ -66,8 +69,16 @@ export default function BookDetails({
         }
       }}
     >
+      {/* Barra superior com o título do livro */}
       <header className={styles.dialogHeader}>
-        <p className={styles.eyebrow}>Um livro, um encontro</p>
+        <div className={styles.dialogHeaderCopy}>
+          <p className={styles.eyebrow}>
+            {book.category || "Gestalt-Terapia · Literatura Clínica"}
+          </p>
+          <h2 id="book-detail-title" className={styles.dialogTopTitle}>
+            {book.title}
+          </h2>
+        </div>
         <button
           type="button"
           onClick={onClose}
@@ -77,35 +88,70 @@ export default function BookDetails({
           <X size={22} aria-hidden="true" />
         </button>
       </header>
+
       <div className={styles.dialogBody} data-lenis-prevent>
-        <div className={styles.dialogCover}>
-          <BookCover book={book} sizes="(max-width: 639px) 150px, 210px" />
+        {/* Capa do livro preenchendo todo o espaço */}
+        <div className={styles.dialogCoverFull}>
+          <BookCover
+            book={book}
+            sizes="(max-width: 639px) 100vw, 360px"
+            fillContainer={true}
+          />
         </div>
+
+        {/* Detalhes, autores e ano em destaque */}
         <div className={styles.dialogCopy}>
-          {book.category && <p className={styles.eyebrow}>{book.category}</p>}
-          <h2 id="book-detail-title">{book.title}</h2>
-          <p className={styles.author}>{book.author}</p>
-          <p className={styles.year}>
-            {book.publicationYear != null
-              ? `Publicado em ${book.publicationYear}`
-              : "Ano de publicação não informado"}
-          </p>
-          <p className={styles.description}>
-            {book.description?.trim() ||
-              "A apresentação desta obra será compartilhada em breve pela nossa equipe."}
-          </p>
+          {/* Card de destaque de autores e ano */}
+          <div className={styles.metaHighlightCard}>
+            <div className={styles.metaHighlightItem}>
+              <span className={styles.metaLabel}>
+                <User size={13} aria-hidden="true" /> Autoria
+              </span>
+              <p className={styles.metaAuthor}>{book.author}</p>
+            </div>
+
+            <div className={styles.metaHighlightItem}>
+              <span className={styles.metaLabel}>
+                <Calendar size={13} aria-hidden="true" /> Ano de Publicação
+              </span>
+              <p className={styles.metaYear}>
+                {book.publicationYear != null ? (
+                  <span className={styles.yearBadge}>{book.publicationYear}</span>
+                ) : (
+                  <span className={styles.yearMuted}>Não informado</span>
+                )}
+              </p>
+            </div>
+          </div>
+
+          {/* Texto e sinopse da obra abaixo */}
+          <div className={styles.descriptionBlock}>
+            <h3 className={styles.descriptionSectionTitle}>
+              <BookOpen size={16} aria-hidden="true" /> Sobre esta Leitura
+            </h3>
+            <p className={styles.description}>
+              {book.description?.trim() ||
+                "Uma das referências fundamentais selecionadas pela equipe do Instituto Figura Viva para o diálogo com a clínica, o pensamento gestáltico e a sensibilidade humana."}
+            </p>
+          </div>
+
           {purchaseUrl ? (
-            <a
-              href={purchaseUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.purchase}
-            >
-              Onde encontrar <ExternalLink size={17} aria-hidden="true" />
-              <span className="sr-only"> (abre em nova aba)</span>
-            </a>
+            <div className={styles.dialogActionWrap}>
+              <a
+                href={purchaseUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.purchase}
+              >
+                Onde encontrar / Adquirir obra
+                <ExternalLink size={17} aria-hidden="true" />
+                <span className="sr-only"> (abre em nova aba)</span>
+              </a>
+            </div>
           ) : (
-            <p className={styles.year}>Link externo indisponível no momento.</p>
+            <p className={styles.yearMuted}>
+              Link externo indisponível no momento.
+            </p>
           )}
         </div>
       </div>

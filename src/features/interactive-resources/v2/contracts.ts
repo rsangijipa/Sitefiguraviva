@@ -4,7 +4,7 @@ export const RESOURCE_KEYS = [
   "cartas-gestalticas", "figura-e-fundo", "ciclo-do-contato", "fronteiras-de-contato",
   "casoteca", "polaridades-e-cadeiras", "chegada", "mapa-do-corpo", "roda-das-emocoes",
   "necessidades-agora", "paisagem-de-pensamentos", "sons-para-awareness", "sala-de-pausa",
-  "igarape", "laboratorio-fenomenologico", "atelie-do-experimento", "escuta-dialogica",
+  "igarape", "laboratorio-fenomenologico", "atelie-do-experimento", "escuta-dialogica", "ambientes-imersivos",
 ] as const;
 export type ResourceKey = typeof RESOURCE_KEYS[number];
 export const ResourceKeySchema = z.enum(RESOURCE_KEYS);

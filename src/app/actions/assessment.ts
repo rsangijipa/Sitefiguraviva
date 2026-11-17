@@ -57,6 +57,39 @@ async function context(assessmentId: string, raw: Record<string, unknown>) {
       if (typeof value !== "boolean") throw new Error("Invalid boolean answer");
       return { questionId: question.id, booleanAnswer: value };
     }
+    if (
+      question.type === "practical" &&
+      value &&
+      typeof value === "object" &&
+      !Array.isArray(value)
+    ) {
+      const file = value as Record<string, unknown>;
+      if (
+        typeof file.storagePath !== "string" ||
+        file.storagePath.length > 600 ||
+        typeof file.fileName !== "string" ||
+        file.fileName.length > 120 ||
+        typeof file.mimeType !== "string" ||
+        file.mimeType.length > 150 ||
+        !Number.isSafeInteger(file.fileSize) ||
+        Number(file.fileSize) < 1 ||
+        Number(file.fileSize) > 10 * 1024 * 1024 ||
+        (file.textAnswer !== undefined &&
+          (typeof file.textAnswer !== "string" ||
+            file.textAnswer.length > 20000))
+      )
+        throw new Error("Invalid attachment");
+      return {
+        questionId: question.id,
+        storagePath: file.storagePath,
+        fileName: file.fileName,
+        mimeType: file.mimeType,
+        fileSize: Number(file.fileSize),
+        ...(file.textAnswer !== undefined
+          ? { textAnswer: file.textAnswer as string }
+          : {}),
+      };
+    }
     if (typeof value !== "string" || value.length > 20000)
       throw new Error("Invalid text answer");
     return { questionId: question.id, textAnswer: value };
@@ -68,7 +101,7 @@ async function draft(ctx: Awaited<ReturnType<typeof context>>) {
   const { supabase, assessment, uid } = ctx;
   const { data: last, error } = await supabase
     .from("assessment_submissions")
-    .select("id,status,attempt_number,started_at")
+    .select("id,status,attempt_number,started_at,answers")
     .eq("user_id", uid)
     .eq("assessment_id", assessment.id)
     .order("attempt_number", { ascending: false })
@@ -98,7 +131,37 @@ async function draft(ctx: Awaited<ReturnType<typeof context>>) {
       { onConflict: "id", ignoreDuplicates: true },
     );
   if (insertError) throw insertError;
-  return { id, status: "pending", attempt_number: attempt };
+  return { id, status: "pending", attempt_number: attempt, answers: [] };
+}
+
+function assertAttachmentPaths(
+  ctx: Awaited<ReturnType<typeof context>>,
+  submissionId: string,
+) {
+  for (const answer of ctx.answers) {
+    if (!answer.storagePath) continue;
+    const prefix = `${ctx.uid}/${submissionId}/${answer.questionId}/`;
+    const filename = answer.storagePath.slice(prefix.length);
+    if (
+      !answer.storagePath.startsWith(prefix) ||
+      !/^[A-Za-z0-9_-][A-Za-z0-9._-]*$/.test(filename) ||
+      filename.includes("..")
+    )
+      throw new Error("Invalid attachment ownership");
+  }
+}
+
+/** Compatibility entry point for quiz players, using the same canonical draft. */
+export async function startAttempt(assessmentId: string, courseId: string) {
+  const ctx = await context(assessmentId, {});
+  if (ctx.assessment.course_id !== courseId)
+    throw new Error("Curso da avaliação inválido");
+  const pending = await draft(ctx);
+  return {
+    success: true,
+    submissionId: pending.id,
+    answers: pending.answers as unknown as StudentAnswer[],
+  };
 }
 
 export async function saveDraft(
@@ -107,6 +170,7 @@ export async function saveDraft(
 ) {
   const ctx = await context(assessmentId, raw);
   const pending = await draft(ctx);
+  assertAttachmentPaths(ctx, pending.id);
   const savedAt = new Date().toISOString();
   const { data, error } = await ctx.supabase
     .from("assessment_submissions")
@@ -124,9 +188,13 @@ export async function saveDraft(
 export async function submitAssessment(
   assessmentId: string,
   raw: Record<string, unknown>,
+  expectedSubmissionId?: string,
 ) {
   const ctx = await context(assessmentId, raw);
   const pending = await draft(ctx);
+  if (expectedSubmissionId && pending.id !== expectedSubmissionId)
+    throw new Error("Attempt mismatch");
+  assertAttachmentPaths(ctx, pending.id);
   let score = 0;
   let total = 0;
   let requiresManualGrading = false;
@@ -194,10 +262,7 @@ export async function submitAssessment(
       { onConflict: "user_id,assessment_id" },
     );
   if (progressError)
-    console.error(
-      "Assessment progress summary could not be saved",
-      progressError,
-    );
+    console.error("Assessment progress summary could not be saved");
   let progressSaved = !progressError;
   if (passed && ctx.assessment.lesson_id) {
     const { data: lesson, error: lessonError } = await ctx.supabase

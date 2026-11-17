@@ -1,6 +1,5 @@
 "use client";
 import {useEffect,useRef,useState} from "react";
-import FiguraVivaTree from "./FiguraVivaTree";
 import styles from "./HeroTree3D.module.css";
 
 export default function HeroTree3D({background=false}:{background?:boolean}) {
@@ -16,7 +15,6 @@ export default function HeroTree3D({background=false}:{background?:boolean}) {
   return ()=>{disposed=true;summon.current=null;cleanup?.();};
  },[background]);
  return <div className={styles.wrapper}>
-  {!background && (!ready || failed) && <div className={styles.fallback} aria-hidden="true"><FiguraVivaTree animated={false}/></div>}
   <div ref={root} className={styles.stage}>
    <canvas data-tree-node="scene" className={styles.canvas} tabIndex={background ? -1 : 0} aria-label={background ? undefined : "Árvore Figura Viva em três dimensões. Toque em uma folha ou pressione Enter para receber uma mensagem."} aria-hidden={background || undefined}/>
    <div className={styles.hidden} aria-hidden="true"><div data-tree-node="loading"><span data-tree-node="loading-text"/></div><span data-tree-node="hint"/><button data-tree-node="btn-msg" type="button" tabIndex={-1}/><button data-tree-node="btn-gust" type="button" tabIndex={-1}/><button data-tree-node="btn-dock" type="button" tabIndex={-1}/><div data-tree-node="dock"/><input data-tree-node="wind" type="range" tabIndex={-1}/><span data-tree-node="wind-out"/><input data-tree-node="fall" type="range" tabIndex={-1}/><span data-tree-node="fall-out"/><input data-tree-node="auto" type="checkbox" tabIndex={-1}/><span data-tree-node="phrase-live"/></div>

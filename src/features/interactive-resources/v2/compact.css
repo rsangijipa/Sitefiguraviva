@@ -1,0 +1,46 @@
+/* Densidade compacta para todos os recursos: controles de 36–38 px (acima do mínimo AA de 24 px),
+   texto-base menor e menos respiro. Carregado por último para prevalecer sobre os estilos de cada recurso. */
+.fv-resources { font-size:15px; line-height:1.5; }
+.fv-resources h1 { font-size:clamp(1.5rem,3vw,2rem); margin:6px 0 10px; }
+.fv-resources h2 { font-size:clamp(1.2rem,2vw,1.5rem); margin:0 0 10px; }
+.fv-resources h3 { font-size:1.05rem; margin:0 0 6px; }
+.fv-resources .fv-content { padding:16px 20px 32px; }
+.fv-resources .fv-header { margin-bottom:16px; }
+.fv-resources .fv-stage-grid { gap:14px; }
+.fv-resources .fv-stage, .fv-resources .fv-aside { padding:16px; }
+.fv-resources .fv-actions { gap:8px; margin-top:14px; }
+.fv-resources .fv-note, .fv-resources .fv-support, .fv-resources .fv-mode-status { font-size:.85rem; }
+
+.fv-resources .fv-button, .fv-resources .fv-card-action, .fv-resources .im-toolbar .fv-button, .fv-resources .fg-image-tools > .fv-button, .fv-resources .ar-flow-top > .fv-button, .fv-resources .im-water-controls .fv-button, .fv-resources .fv-resource-card .fv-card-action {
+  min-height:36px; padding:6px 16px; font-size:.875rem; border-width:1.5px; border-radius:999px; gap:6px;
+}
+.fv-resources .fv-chips .fv-button, .fv-resources .fv-catalog-filter .fv-button { min-height:32px; padding:4px 12px; font-size:.8rem; }
+.fv-resources .fv-link-button, .fv-resources summary, .fv-resources .fv-checkbox, .fv-resources .fv-accessibility-more summary, .fv-resources .cy-references summary, .fv-resources .fg-image-tools summary { min-height:32px; }
+.fv-resources .ar-step-choices button, .fv-resources .ar-suggestions button, .fv-resources .ar-edit, .fv-resources .cy-model-options button, .fv-resources .cy-phases button,
+.fv-resources .im-selected button, .fv-resources .im-body .fv-body-regions button, .fv-resources .cg-selection button, .fv-resources .cg-card-actions button, .fv-resources .cg-pagination button, .fv-resources .cg-read-more, .fv-resources .cg-related button, .fv-resources .sound-scene-touch { min-height:36px; padding-top:5px; padding-bottom:5px; font-size:.85rem; }
+.fv-resources .ar-intensity button { min-height:38px; }
+.fv-resources .cg-tabs button, .fv-resources .cg-flip { min-height:38px; padding-top:6px; padding-bottom:6px; font-size:.85rem; }
+.fv-resources .cg-search-input, .fv-resources .cg-search-input input, .fv-resources .cg-deck select, .fv-resources .cg-mobile-picker select { min-height:38px; }
+.fv-resources .cg-card-list button { min-height:52px; }
+
+.fv-resources .fv-option, .fv-resources .ar-options .fv-option, .fv-resources .fg-options .fv-option { min-height:52px; padding:10px 12px; gap:4px; font-size:.9rem; border-width:1.5px; }
+.fv-resources .fv-option-check { font-size:.75rem; }
+.fv-resources .fv-options { grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr)); gap:8px; }
+.fv-resources .im-body .fv-body-figure .fv-option, .fv-resources .im-body .fv-options[aria-label=Sensação] .fv-option { min-height:48px; }
+
+.fv-resources .fv-field { margin:0 0 12px; }
+.fv-resources .fv-field > span:first-child { margin-bottom:4px; font-size:.88rem; }
+.fv-resources .fv-field :is(input,textarea,select) { min-height:38px; padding:8px 12px; border-width:1.5px; font-size:.9rem; }
+.fv-resources .fv-field textarea { min-height:84px; }
+.fv-resources .fv-scale input[type="range"] { min-height:32px; }
+.fv-resources .fv-scale input[type="range"]::-webkit-slider-thumb { width:20px; height:20px; margin-top:-8px; }
+.fv-resources .fv-scale input[type="range"]::-moz-range-thumb { width:20px; height:20px; }
+.fv-resources .fv-scale-ends, .fv-resources .fv-counter { font-size:.75rem; }
+
+/* Barra e cabeçalho da janela */
+.fv-resource-header { min-height:48px; padding:6px 12px; }
+.fv-resource-header .fv-resource-icon-btn, .fv-resource-header .fv-resource-back { min-height:34px; height:34px; }
+.fv-resource-header .fv-resource-icon-btn { width:34px; min-width:34px; }
+.fv-resource-heading h1 { font-size:1.1rem; margin:0; }
+.fv-resource-heading > p { font-size:.78rem; margin:0; }
+@media(max-width:639px) { .fv-resources .fv-content { padding:12px 12px 24px; } .fv-resources .fv-stage, .fv-resources .fv-aside { padding:12px; } }

@@ -144,7 +144,7 @@ export function LessonPlayerWrapper(props: LessonPlayerWrapperProps) {
       {/* Auto-Advance Toggle */}
       {props.nextLessonId && (
         <div className="flex items-center justify-end gap-2 px-2">
-          <label className="flex items-center gap-2 cursor-pointer select-none group">
+          <label className="flex min-h-12 items-center gap-3 cursor-pointer select-none group">
             <div className="relative">
               <input
                 type="checkbox"

@@ -6,6 +6,9 @@ import dynamic from "next/dynamic";
 import { Calendar, Clock, ArrowRight } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { CourseCover } from "@/components/courses/CourseCover";
+import { listPublishedContentPage } from "@/features/content/infrastructure/supabaseContentRepository";
+import { useCourses } from "@/hooks/useContent";
+import { ContentRetry } from "@/components/sections/ContentRetry";
 
 const CalendarModal = dynamic(() => import("@/components/CalendarModal"), {
   ssr: false,
@@ -61,9 +64,41 @@ function CourseMeta({ course }: { course: any }) {
   );
 }
 
-export default function CoursesListClient({ courses }: { courses: any[] }) {
+export default function CoursesListClient({
+  courses: initialCourses,
+  hasMore: initialHasMore = false,
+}: {
+  courses: any[];
+  hasMore?: boolean;
+}) {
+  const [courses, setCourses] = useState(initialCourses);
+  const [hasMore, setHasMore] = useState(initialHasMore);
+  const [nextPage, setNextPage] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [filter, setFilter] = useState<Filter>("Todos");
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const calendarCourses = useCourses(false, { enabled: isCalendarOpen });
+
+  const loadMore = async () => {
+    if (loadingMore) return;
+    setLoadingMore(true);
+    setLoadFailed(false);
+    try {
+      const page = await listPublishedContentPage("courses", nextPage);
+      setCourses((previous) => [
+        ...new Map(
+          [...previous, ...page.items].map((course) => [course.id, course]),
+        ).values(),
+      ]);
+      setHasMore(page.hasMore);
+      setNextPage((previous) => previous + 1);
+    } catch {
+      setLoadFailed(true);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   const [featured, ...rest] = courses;
   const filtered = useMemo(
@@ -169,11 +204,39 @@ export default function CoursesListClient({ courses }: { courses: any[] }) {
           ))}
         </div>
 
-        {filtered.length === 0 && (
-          <div className="py-20 text-center">
-            <p className="font-light text-stone-400">
-              Nenhum curso encontrado para este filtro.
-            </p>
+        {filtered.length === 0 &&
+          !hasMore &&
+          (filter !== "Todos" || !featured) && (
+            <div className="py-20 text-center">
+              <p className="font-light text-stone-400">
+                Nenhum curso encontrado para este filtro.
+              </p>
+            </div>
+          )}
+        {loadFailed && (
+          <ContentRetry
+            onRetry={() => {
+              void loadMore();
+            }}
+          />
+        )}
+        {hasMore && !loadFailed && (
+          <div className="mt-8 text-center" aria-busy={loadingMore}>
+            <button
+              type="button"
+              disabled={loadingMore}
+              onClick={() => {
+                void loadMore();
+              }}
+              className="min-h-11 rounded-md border border-primary px-6 py-3 text-primary disabled:opacity-60"
+            >
+              {loadingMore ? "Carregando cursos…" : "Carregar mais cursos"}
+            </button>
+            {filter !== "Todos" && (
+              <p className="mt-3 text-sm text-primary">
+                Carregue mais cursos para ampliar os resultados deste filtro.
+              </p>
+            )}
           </div>
         )}
       </div>
@@ -181,7 +244,7 @@ export default function CoursesListClient({ courses }: { courses: any[] }) {
       <CalendarModal
         isOpen={isCalendarOpen}
         onClose={() => setIsCalendarOpen(false)}
-        courses={courses}
+        courses={calendarCourses.data ?? courses}
       />
     </div>
   );

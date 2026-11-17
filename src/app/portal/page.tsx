@@ -31,7 +31,7 @@ const StatCard = ({ icon: Icon, label, value, trend, href }: any) => (
   <Link
     href={href || "#"}
     className={cn(
-      "bg-white p-4 rounded-xl border border-stone-100 shadow-sm flex items-center justify-between transition-all active:scale-95 group",
+      "portal-stat p-4 rounded-2xl border shadow-sm flex flex-wrap gap-3 items-center justify-between transition-colors group",
       href ? "hover:border-agedGold/30 hover:shadow-md cursor-pointer" : "",
     )}
   >
@@ -41,7 +41,7 @@ const StatCard = ({ icon: Icon, label, value, trend, href }: any) => (
     </div>
     <div className="flex items-center gap-2">
       {trend && (
-        <span className="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+        <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
           {trend}
         </span>
       )}
@@ -72,11 +72,11 @@ const ActivityItem = ({ icon: Icon, title, time, type, href, date }: any) => (
       </div>
       <div>
         <p className="text-xs font-medium text-stone-800">{title}</p>
-        <p className="text-[10px] text-stone-600">{time}</p>
+        <p className="text-xs text-stone-600">{time}</p>
       </div>
     </div>
     <div className="text-right shrink-0">
-      <span className="text-[10px] font-bold text-stone-500 bg-stone-100 px-2 py-1 rounded-md">
+      <span className="text-xs font-bold text-stone-500 bg-stone-100 px-2 py-1 rounded-md">
         {date}
       </span>
     </div>
@@ -99,17 +99,13 @@ const ActionItem = ({ title, course, type, date, href }: any) => (
       {type === "live" ? <Calendar size={20} /> : <Play size={20} />}
     </div>
     <div className="flex-1 min-w-0">
-      <h4 className="text-sm font-bold text-ink truncate group-hover:text-agedGold transition-colors">
+      <h4 className="text-sm font-bold text-ink break-words group-hover:text-agedGold transition-colors">
         {title}
       </h4>
-      <p className="text-[10px] text-stone-400 uppercase tracking-widest font-bold mt-0.5">
+      <p className="text-xs text-stone-500 uppercase tracking-widest font-bold mt-0.5">
         {course}
       </p>
-    </div>
-    <div className="text-right shrink-0">
-      <span className="text-[10px] font-bold text-stone-400 bg-stone-50 px-2.5 py-1 rounded-full border border-stone-100">
-        {date}
-      </span>
+      <span className="mt-2 inline-block text-xs font-medium text-stone-600">{date}</span>
     </div>
   </Link>
 );
@@ -276,7 +272,7 @@ export default function PortalDashboard() {
       ? [
           {
             label: `${recentAnnouncements.length} comunicado(s) recente(s)`,
-            href: "/portal",
+            href: "/portal/courses",
           },
         ]
       : []),
@@ -310,9 +306,9 @@ export default function PortalDashboard() {
   ];
 
   return (
-    <div className="panel-surface -m-4 min-h-screen space-y-8 p-4 animate-fade-in md:-m-6 md:p-6 lg:-m-8 lg:p-8">
+    <div className="portal-dashboard space-y-6 sm:space-y-8">
       {/* Header */}
-      <div className="relative overflow-hidden rounded-3xl border border-emerald-200 bg-[#FDFAF4] px-6 py-8 shadow-sm md:px-10 md:py-12" style={{backgroundImage:"url(/brand/recursos/portal/boas-vindas.webp)",backgroundPosition:"center",backgroundSize:"cover"}}>
+      <div className="portal-welcome relative overflow-hidden rounded-3xl border border-emerald-200 bg-[#FDFAF4] px-6 py-8 shadow-sm md:px-10 md:py-12" style={{backgroundImage:"url(/brand/recursos/portal/boas-vindas.webp)",backgroundPosition:"center",backgroundSize:"cover"}}>
         <div className="relative max-w-lg rounded-2xl bg-white/90 p-5 md:p-6">
           <p className="mb-2 text-xs font-bold uppercase tracking-widest text-emerald-700">Seu espaço de aprendizagem</p>
           <h1 className="text-4xl md:text-5xl font-serif italic font-bold text-emerald-900 tracking-tight">
@@ -337,7 +333,7 @@ export default function PortalDashboard() {
       </div>
 
       {kpiMeta.updatedAt && (
-        <p className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">
+        <p className="text-xs text-stone-500 uppercase tracking-widest font-bold">
           Dados atualizados em{" "}
           {new Date(kpiMeta.updatedAt).toLocaleTimeString("pt-BR")}
         </p>
@@ -383,103 +379,216 @@ export default function PortalDashboard() {
         </div>
       )}
 
-      {/* Quick Navigation Strip: Espaços Formativos & Recursos */}
-      <section
-        aria-label="Espaços e Recursos"
-        className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
-      >
-        <Link
-          href="/estante"
-          className="group rounded-2xl border border-stone-200/80 bg-white p-4 shadow-sm hover:border-agedGold/50 hover:shadow-md transition-all flex items-center gap-3.5"
-        >
-          <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-700 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-            <BookOpen size={20} />
-          </div>
-          <div className="min-w-0">
-            <h3 className="text-xs font-bold text-ink group-hover:text-agedGold transition-colors truncate">
-              Estante de Leituras
-            </h3>
-            <p className="text-[10px] text-stone-400 truncate">
-              Curadoria de obras
-            </p>
-          </div>
-        </Link>
+      {/* Row 1: Cockpit */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Hero Card: Resume (Col-8) */}
+        <div className="lg:col-span-12">
+          {lastCourse ? (
+            <div className="editorial-card portal-panel portal-panel--green relative flex flex-col overflow-hidden p-4 sm:p-6 group">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-agedGold/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
 
-        <Link
-          href="/portal/audio"
-          className="group rounded-2xl border border-stone-200/80 bg-white p-4 shadow-sm hover:border-agedGold/50 hover:shadow-md transition-all flex items-center gap-3.5"
-        >
-          <div className="w-10 h-10 rounded-xl bg-gold/20 text-gold flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-            <Headphones size={20} />
-          </div>
-          <div className="min-w-0">
-            <h3 className="text-xs font-bold text-ink group-hover:text-agedGold transition-colors truncate">
-              Meditação & Áudio
-            </h3>
-            <p className="text-[10px] text-stone-400 truncate">
-              Awareness & Presença
-            </p>
-          </div>
-        </Link>
+              <div className="relative z-10 flex flex-col md:flex-row gap-6 items-start md:items-center">
+                <div className="w-full md:w-48 aspect-video bg-ink rounded-lg flex items-center justify-center shrink-0 shadow-xl overflow-hidden relative">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                  <Play size={32} className="text-agedGold relative z-10" />
+                </div>
+                <div className="flex-1 w-full">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="px-3 py-1 bg-agedGold/10 text-agedGold text-xs font-bold uppercase tracking-[0.2em] rounded-sm border border-agedGold/10">
+                      {lastCourse.action === "start"
+                        ? "Começar sua jornada"
+                        : lastCourse.action === "review"
+                          ? "Curso concluído"
+                          : "Continuar estudando"}
+                    </span>
+                  </div>
+                  <h2 className="text-2xl font-serif text-ink mb-2 group-hover:text-agedGold transition-colors tracking-tight">
+                    {lastCourse.courseTitle}
+                  </h2>
+                  <p className="text-sm text-stone-500 mb-2 font-serif italic">
+                    {lastCourse.action === "review"
+                      ? "Revise seu percurso ou acesse seu certificado."
+                      : lastCourse.lessonTitle ||
+                        "Sua próxima etapa de aprendizagem."}
+                  </p>
+                  {lastCourse.moduleTitle && lastCourse.action !== "review" && (
+                    <p className="text-xs font-bold uppercase tracking-widest text-stone-500 mb-5">
+                      {lastCourse.moduleTitle}
+                      {lastCourse.lessonType
+                        ? ` · ${lastCourse.lessonType}`
+                        : ""}
+                    </p>
+                  )}
 
-        <Link
-          href="/galeria"
-          className="group rounded-2xl border border-stone-200/80 bg-white p-4 shadow-sm hover:border-agedGold/50 hover:shadow-md transition-all flex items-center gap-3.5"
-        >
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-700 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-            <ImageIcon size={20} />
-          </div>
-          <div className="min-w-0">
-            <h3 className="text-xs font-bold text-ink group-hover:text-agedGold transition-colors truncate">
-              Galeria de Vivências
-            </h3>
-            <p className="text-[10px] text-stone-400 truncate">
-              Registros e encontros
-            </p>
-          </div>
-        </Link>
+                  <div className="flex flex-wrap items-center gap-4">
+                    <Link
+                      href={
+                        lastCourse.action === "review"
+                          ? `/portal/course/${lastCourse.courseId}`
+                          : `/portal/course/${lastCourse.courseId}${lastCourse.lessonId ? `/lesson/${lastCourse.lessonId}` : ""}`
+                      }
+                      className="portal-primary-action min-h-12 rounded-xl px-5 py-3 text-sm font-semibold transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Play size={14} className="fill-current" />
+                      {lastCourse.action === "start"
+                        ? "Começar curso"
+                        : lastCourse.action === "review"
+                          ? "Revisar curso"
+                          : "Continuar aula"}
+                    </Link>
+                    <div className="flex-1 max-w-[140px]">
+                      <div className="h-1 bg-stone-100 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-agedGold transition-all duration-1000"
+                          style={{
+                            width: `${Math.min(100, Math.max(0, lastCourse.percent))}%`,
+                          }}
+                        />
+                      </div>
+                      <p className="text-xs font-bold uppercase tracking-widest text-stone-500 mt-2">
+                        {lastCourse.percent}% concluído
+                      </p>
+                      <p className="text-xs text-stone-500 mt-1">
+                        Aulas publicadas concluídas; avaliações obrigatórias
+                        também contam para a conclusão.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <EmptyState
+              icon={Target}
+              title="Comece sua Jornada"
+              description="Você ainda não iniciou nenhum curso. Explore nossa biblioteca de formações."
+              action={
+                <Link href="/portal/courses">
+                  <Button variant="primary">Ver Cursos</Button>
+                </Link>
+              }
+              className="h-full py-12"
+            />
+          )}
+        </div>
 
-        <Link
-          href="/portal/community"
-          className="group rounded-2xl border border-stone-200/80 bg-white p-4 shadow-sm hover:border-agedGold/50 hover:shadow-md transition-all flex items-center gap-3.5"
-        >
-          <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-700 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-            <MessageSquare size={20} />
-          </div>
-          <div className="min-w-0">
-            <h3 className="text-xs font-bold text-ink group-hover:text-agedGold transition-colors truncate">
-              Comunidade Viva
-            </h3>
-            <p className="text-[10px] text-stone-400 truncate">
-              Troca & discussões
-            </p>
-          </div>
-        </Link>
+        {/* KPI Cards (Col-4) */}
+        <div role="region" aria-label="Seu panorama de aprendizagem" className="portal-metrics lg:col-span-12 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          {gamification && (
+            <div className="bg-ink rounded-xl p-5 shadow-lg border border-white/5 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
+                <Star size={64} className="text-agedGold" />
+              </div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="bg-agedGold/20 p-2 rounded-lg">
+                    <Trophy size={16} className="text-agedGold" />
+                  </div>
+                  <span className="text-xs font-bold text-agedGold uppercase tracking-[0.2em]">
+                    Nível {gamification.level}
+                  </span>
+                </div>
+                <div className="flex items-end justify-between mb-2">
+                  <div className="text-3xl font-bold text-white tracking-tight">
+                    {gamification.totalXp}{" "}
+                    <span className="text-sm font-light text-stone-500">
+                      XP
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-orange-400">
+                    <Flame size={14} className="fill-current" />
+                    <span className="text-xs font-bold font-serif italic">
+                      {gamification.currentStreak} dias
+                    </span>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-agedGold transition-all duration-1000"
+                      style={{ width: `${gamification.progressToNextLevel}%` }}
+                    />
+                  </div>
+                  <div className="flex justify-between text-xs font-bold uppercase tracking-widest text-stone-500">
+                    <span>Progresso do Nível</span>
+                    <span>{gamification.nextLevelXp} XP</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
-        <Link
-          href="/portal/events"
-          className="group rounded-2xl border border-stone-200/80 bg-white p-4 shadow-sm hover:border-agedGold/50 hover:shadow-md transition-all flex items-center gap-3.5"
-        >
-          <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-700 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-            <Calendar size={20} />
+          <StatCard
+            icon={Target}
+            label="Meus cursos"
+            value={
+              metricsStatus.enrollments
+                ? enrollments.length
+                : loadError
+                  ? "—"
+                  : "..."
+            }
+            trend="Mantenha o foco!"
+            href="/portal/courses"
+          />
+          <StatCard
+            icon={Award}
+            label="Certificados"
+            value={
+              metricsStatus.certificates
+                ? certificates.length
+                : loadError
+                  ? "—"
+                  : "..."
+            }
+            trend={certificates.length > 0 ? "Parabéns!" : "Em breve"}
+            href="/portal/certificates"
+          />
+
+          {/* Activity Chart */}
+          <div className="bg-white rounded-xl border border-stone-100 p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-stone-800 text-base">
+                Atividade semanal (XP)
+              </h3>
+            </div>
+            <div className="flex items-end justify-between h-32 gap-2">
+              {activityPoints.map((point, i) => (
+                <div
+                  key={i}
+                  role="img"
+                  aria-label={`${point.day}: ${point.value} XP`}
+                  className="flex-1 bg-primary/20 rounded-t-md relative"
+                  style={{
+                    height:
+                      point.value > 0
+                        ? `${Math.max(10, Math.round((point.value / maxActivityValue) * 100))}%`
+                        : "4%",
+                  }}
+                >
+                  <div className="absolute -top-5 left-1/2 -translate-x-1/2 whitespace-nowrap text-primary text-xs font-semibold">
+                    {point.value}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-between mt-2 text-xs text-stone-500 font-bold uppercase tracking-tighter">
+              {activityPoints.map((point, idx) => (
+                <span key={`${point.day}-${idx}`}>{point.day}</span>
+              ))}
+            </div>
           </div>
-          <div className="min-w-0">
-            <h3 className="text-xs font-bold text-ink group-hover:text-agedGold transition-colors truncate">
-              Agenda & Encontros
-            </h3>
-            <p className="text-[10px] text-stone-400 truncate">Aulas ao vivo</p>
-          </div>
-        </Link>
-      </section>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <section
-          className="editorial-card lg:col-span-8 p-6"
+          className="editorial-card portal-panel portal-panel--amber lg:col-span-8 p-4 sm:p-6"
           aria-labelledby="pending-title"
         >
-          <div className="flex items-center justify-between mb-5">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-agedGold">
+              <p className="text-xs font-bold uppercase tracking-widest text-agedGold">
                 Próximas ações
               </p>
               <h2
@@ -512,14 +621,14 @@ export default function PortalDashboard() {
           )}
         </section>
         <section
-          className="editorial-card lg:col-span-4 p-6"
+          className="editorial-card portal-panel portal-panel--blue lg:col-span-4 p-4 sm:p-6"
           aria-labelledby="journey-title"
         >
-          <div className="flex items-center justify-between mb-5">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
             <h2 id="journey-title" className="text-xl font-serif text-ink">
               Minha jornada
             </h2>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400">
+            <span className="text-xs font-bold uppercase tracking-widest text-stone-500">
               Resumo
             </span>
           </div>
@@ -533,7 +642,7 @@ export default function PortalDashboard() {
                   />
                   <div>
                     <p className="font-semibold text-ink">{event.label}</p>
-                    <p className="text-xs text-stone-400">
+                    <p className="text-xs text-stone-500">
                       {event.date
                         ? new Date(event.date).toLocaleDateString("pt-BR")
                         : "Agora"}
@@ -550,218 +659,107 @@ export default function PortalDashboard() {
         </section>
       </div>
 
-      {/* Row 1: Cockpit */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Hero Card: Resume (Col-8) */}
-        <div className="lg:col-span-8">
-          {lastCourse ? (
-            <div className="editorial-card relative flex h-full flex-col justify-center overflow-hidden p-6 group">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-agedGold/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
-
-              <div className="relative z-10 flex flex-col md:flex-row gap-6 items-start md:items-center">
-                <div className="w-full md:w-48 aspect-video bg-ink rounded-lg flex items-center justify-center shrink-0 shadow-xl overflow-hidden relative">
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                  <Play size={32} className="text-agedGold relative z-10" />
-                </div>
-                <div className="flex-1 w-full">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="px-3 py-1 bg-agedGold/10 text-agedGold text-[9px] font-bold uppercase tracking-[0.2em] rounded-sm border border-agedGold/10">
-                      {lastCourse.action === "start"
-                        ? "Começar sua jornada"
-                        : lastCourse.action === "review"
-                          ? "Curso concluído"
-                          : "Continuar estudando"}
-                    </span>
-                  </div>
-                  <h2 className="text-2xl font-serif text-ink mb-2 group-hover:text-agedGold transition-colors tracking-tight">
-                    {lastCourse.courseTitle}
-                  </h2>
-                  <p className="text-sm text-stone-500 mb-2 font-serif italic">
-                    {lastCourse.action === "review"
-                      ? "Revise seu percurso ou acesse seu certificado."
-                      : lastCourse.lessonTitle ||
-                        "Sua próxima etapa de aprendizagem."}
-                  </p>
-                  {lastCourse.moduleTitle && lastCourse.action !== "review" && (
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-5">
-                      {lastCourse.moduleTitle}
-                      {lastCourse.lessonType
-                        ? ` · ${lastCourse.lessonType}`
-                        : ""}
-                    </p>
-                  )}
-
-                  <div className="flex items-center gap-6">
-                    <Link
-                      href={
-                        lastCourse.action === "review"
-                          ? `/portal/course/${lastCourse.courseId}`
-                          : `/portal/course/${lastCourse.courseId}${lastCourse.lessonId ? `/lesson/${lastCourse.lessonId}` : ""}`
-                      }
-                      className="bg-ink text-agedGold hover:bg-agedGold hover:text-ink px-8 py-2.5 rounded-sm text-[10px] font-bold uppercase tracking-widest transition-all shadow-lg flex items-center gap-2"
-                    >
-                      <Play size={14} className="fill-current" />
-                      {lastCourse.action === "start"
-                        ? "Começar curso"
-                        : lastCourse.action === "review"
-                          ? "Revisar curso"
-                          : "Continuar aula"}
-                    </Link>
-                    <div className="flex-1 max-w-[140px]">
-                      <div className="h-1 bg-stone-100 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-agedGold transition-all duration-1000"
-                          style={{
-                            width: `${Math.min(100, Math.max(0, lastCourse.percent))}%`,
-                          }}
-                        />
-                      </div>
-                      <p className="text-[9px] font-bold uppercase tracking-widest text-stone-400 mt-2">
-                        {lastCourse.percent}% concluído
-                      </p>
-                      <p className="text-[10px] text-stone-400 mt-1">
-                        Aulas publicadas concluídas; avaliações obrigatórias
-                        também contam para a conclusão.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <EmptyState
-              icon={Target}
-              title="Comece sua Jornada"
-              description="Você ainda não iniciou nenhum curso. Explore nossa biblioteca de formações."
-              action={
-                <Link href="/portal/courses">
-                  <Button variant="primary">Ver Cursos</Button>
-                </Link>
-              }
-              className="h-full py-12"
-            />
-          )}
-        </div>
-
-        {/* KPI Cards (Col-4) */}
-        <div className="lg:col-span-4 space-y-4">
-          {gamification && (
-            <div className="bg-ink rounded-xl p-5 shadow-lg border border-white/5 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
-                <Star size={64} className="text-agedGold" />
-              </div>
-              <div className="relative z-10">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="bg-agedGold/20 p-2 rounded-lg">
-                    <Trophy size={16} className="text-agedGold" />
-                  </div>
-                  <span className="text-[10px] font-bold text-agedGold uppercase tracking-[0.2em]">
-                    Nível {gamification.level}
-                  </span>
-                </div>
-                <div className="flex items-end justify-between mb-2">
-                  <div className="text-3xl font-bold text-white tracking-tight">
-                    {gamification.totalXp}{" "}
-                    <span className="text-sm font-light text-stone-400">
-                      XP
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-orange-400">
-                    <Flame size={14} className="fill-current" />
-                    <span className="text-xs font-bold font-serif italic">
-                      {gamification.currentStreak} dias
-                    </span>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-agedGold transition-all duration-1000"
-                      style={{ width: `${gamification.progressToNextLevel}%` }}
-                    />
-                  </div>
-                  <div className="flex justify-between text-[9px] font-bold uppercase tracking-widest text-stone-500">
-                    <span>Progresso do Nível</span>
-                    <span>{gamification.nextLevelXp} XP</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <StatCard
-            icon={Target}
-            label="Cursos Ativos"
-            value={
-              metricsStatus.enrollments
-                ? enrollments.length
-                : loadError
-                  ? "—"
-                  : "..."
-            }
-            trend="Mantenha o foco!"
-            href="/portal/courses"
-          />
-          <StatCard
-            icon={Award}
-            label="Certificados"
-            value={
-              metricsStatus.certificates
-                ? certificates.length
-                : loadError
-                  ? "—"
-                  : "..."
-            }
-            trend={certificates.length > 0 ? "Parabéns!" : "Em breve"}
-            href="/portal/certificates"
-          />
-
-          {/* Activity Chart */}
-          <div className="bg-white rounded-xl border border-stone-100 p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-stone-800 text-sm uppercase tracking-wide">
-                Atividade Semanal
-              </h3>
-            </div>
-            <div className="flex items-end justify-between h-32 gap-2">
-              {activityPoints.map((point, i) => (
-                <div
-                  key={i}
-                  className="flex-1 bg-stone-50 rounded-t-md hover:bg-agedGold/20 transition-colors relative group"
-                  style={{
-                    height:
-                      point.value > 0
-                        ? `${Math.max(10, Math.round((point.value / maxActivityValue) * 100))}%`
-                        : "4%",
-                  }}
-                >
-                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 bg-ink text-agedGold text-[10px] px-2 py-1 rounded pointer-events-none transition-opacity font-bold">
-                    {point.value} XP
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="flex justify-between mt-2 text-[10px] text-stone-400 font-bold uppercase tracking-tighter">
-              {activityPoints.map((point, idx) => (
-                <span key={`${point.day}-${idx}`}>{point.day}</span>
-              ))}
-            </div>
+      {/* Quick Navigation Strip: Espaços Formativos & Recursos */}
+      <section
+        aria-label="Explore seus espaços"
+        className="portal-shortcuts grid grid-cols-1 min-[480px]:grid-cols-2 xl:grid-cols-3 gap-3"
+      >
+        <Link
+          href="/estante"
+          className="group rounded-2xl border border-stone-200/80 bg-white p-4 shadow-sm hover:border-agedGold/50 hover:shadow-md transition-all flex items-center gap-3.5"
+        >
+          <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-700 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+            <BookOpen size={20} />
           </div>
-        </div>
-      </div>
+          <div className="min-w-0">
+            <h3 className="text-xs font-bold text-ink group-hover:text-primary transition-colors">
+              Estante de Leituras
+            </h3>
+            <p className="text-xs text-stone-500 truncate">
+              Curadoria de obras
+            </p>
+          </div>
+        </Link>
+
+        <Link
+          href="/portal/audio"
+          className="group rounded-2xl border border-stone-200/80 bg-white p-4 shadow-sm hover:border-agedGold/50 hover:shadow-md transition-all flex items-center gap-3.5"
+        >
+          <div className="w-10 h-10 rounded-xl bg-gold/20 text-gold flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+            <Headphones size={20} />
+          </div>
+          <div className="min-w-0">
+            <h3 className="text-xs font-bold text-ink group-hover:text-primary transition-colors">
+              Meditação & Áudio
+            </h3>
+            <p className="text-xs text-stone-500 truncate">
+              Awareness & Presença
+            </p>
+          </div>
+        </Link>
+
+        <Link
+          href="/galeria"
+          className="group rounded-2xl border border-stone-200/80 bg-white p-4 shadow-sm hover:border-agedGold/50 hover:shadow-md transition-all flex items-center gap-3.5"
+        >
+          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-700 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+            <ImageIcon size={20} />
+          </div>
+          <div className="min-w-0">
+            <h3 className="text-xs font-bold text-ink group-hover:text-primary transition-colors">
+              Galeria de Vivências
+            </h3>
+            <p className="text-xs text-stone-500 truncate">
+              Registros e encontros
+            </p>
+          </div>
+        </Link>
+
+        <Link
+          href="/portal/community"
+          className="group rounded-2xl border border-stone-200/80 bg-white p-4 shadow-sm hover:border-agedGold/50 hover:shadow-md transition-all flex items-center gap-3.5"
+        >
+          <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-700 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+            <MessageSquare size={20} />
+          </div>
+          <div className="min-w-0">
+            <h3 className="text-xs font-bold text-ink group-hover:text-primary transition-colors">
+              Comunidade Viva
+            </h3>
+            <p className="text-xs text-stone-500 truncate">
+              Troca & discussões
+            </p>
+          </div>
+        </Link>
+
+        <Link
+          href="/portal/events"
+          className="group rounded-2xl border border-stone-200/80 bg-white p-4 shadow-sm hover:border-agedGold/50 hover:shadow-md transition-all flex items-center gap-3.5"
+        >
+          <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-700 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+            <Calendar size={20} />
+          </div>
+          <div className="min-w-0">
+            <h3 className="text-xs font-bold text-ink group-hover:text-primary transition-colors">
+              Agenda & Encontros
+            </h3>
+            <p className="text-xs text-stone-500 truncate">Aulas ao vivo</p>
+          </div>
+        </Link>
+      </section>
 
       {/* Row 2: Journey & Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* My Journey (Visão Macro) */}
-        <div className="editorial-card lg:col-span-12 p-6">
-          <div className="flex items-center justify-between mb-6">
+        <div className="editorial-card portal-panel portal-panel--green lg:col-span-12 p-4 sm:p-6">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
             <div className="flex items-center gap-2">
               <TrendingUp size={20} className="text-primary" />
               <h3 className="font-bold text-stone-800">Minha Jornada</h3>
             </div>
             <Link
               href="/portal/courses"
-              className="text-xs font-bold text-primary hover:underline"
+              className="inline-flex min-h-12 items-center text-sm font-semibold text-primary hover:underline"
             >
               Ver Todos
             </Link>
@@ -782,7 +780,7 @@ export default function PortalDashboard() {
                       <h4 className="text-sm font-bold text-ink group-hover:text-agedGold transition-colors line-clamp-2 pr-4 font-serif">
                         {enr.courseTitle}
                       </h4>
-                      <span className="text-[10px] font-bold text-agedGold bg-white px-2 py-1 rounded-lg border border-stone-100 shadow-sm uppercase tracking-tighter">
+                      <span className="text-xs font-bold text-agedGold bg-white px-2 py-1 rounded-lg border border-stone-100 shadow-sm uppercase tracking-tighter">
                         {enr.progressSummary?.percent || 0}%
                       </span>
                     </div>
@@ -799,7 +797,7 @@ export default function PortalDashboard() {
               ))
             ) : (
               <div className="col-span-full py-4 text-center bg-stone-50/50 rounded-xl border border-stone-100">
-                <p className="text-[10px] text-stone-400 font-bold uppercase tracking-widest">
+                <p className="text-xs text-stone-500 font-bold uppercase tracking-widest">
                   Nenhum curso iniciado no momento
                 </p>
               </div>
@@ -808,12 +806,12 @@ export default function PortalDashboard() {
         </div>
 
         {/* Certificates / Achievements */}
-        <div className="editorial-card lg:col-span-8 flex flex-col p-6">
-          <div className="flex items-center justify-between mb-6">
+        <div className="editorial-card portal-panel portal-panel--lavender lg:col-span-8 flex flex-col p-4 sm:p-6">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
             <h3 className="font-bold text-stone-800">Conquistas Recentes</h3>
             <Link
               href="/portal/certificates"
-              className="text-xs font-bold text-primary hover:underline"
+              className="inline-flex min-h-12 items-center text-sm font-semibold text-primary hover:underline"
             >
               Ver Todos
             </Link>
@@ -832,10 +830,10 @@ export default function PortalDashboard() {
                       <Award size={24} />
                     </div>
                     <div className="min-w-0">
-                      <h4 className="text-sm font-bold text-ink truncate group-hover:text-agedGold transition-colors font-serif">
+                      <h4 className="text-sm font-bold text-ink break-words group-hover:text-agedGold transition-colors font-serif">
                         {cert.courseTitle}
                       </h4>
-                      <p className="text-[9px] text-stone-400 uppercase tracking-widest font-bold">
+                      <p className="text-xs text-stone-500 uppercase tracking-widest font-bold">
                         Concluído
                       </p>
                     </div>
@@ -845,7 +843,7 @@ export default function PortalDashboard() {
             ) : (
               <div className="flex flex-col items-center justify-center py-8 bg-stone-50/50 rounded-xl border border-stone-100 h-full">
                 <Award size={24} className="text-stone-300 mb-2 opacity-50" />
-                <p className="text-[10px] text-stone-400 font-bold uppercase tracking-widest">
+                <p className="text-xs text-stone-500 font-bold uppercase tracking-widest">
                   Nenhum certificado ainda
                 </p>
               </div>
@@ -854,15 +852,15 @@ export default function PortalDashboard() {
         </div>
 
         {/* Agenda Viva (Live Events) */}
-        <div className="editorial-card lg:col-span-4 flex flex-col p-6">
-          <div className="flex items-center justify-between mb-6">
+        <div className="editorial-card portal-panel portal-panel--blue lg:col-span-4 flex flex-col p-4 sm:p-6">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
             <div className="flex items-center gap-2">
               <Calendar size={20} className="text-gold" />
               <h3 className="font-bold text-stone-800">Agenda Viva</h3>
             </div>
             <Link
               href="/portal/events"
-              className="text-xs font-bold text-primary hover:underline"
+              className="inline-flex min-h-12 items-center text-sm font-semibold text-primary hover:underline"
             >
               Ver agenda
             </Link>
@@ -908,11 +906,11 @@ export default function PortalDashboard() {
                   className="text-stone-300 mb-2 opacity-50"
                 />
                 {metricsStatus.events ? (
-                  <p className="text-[10px] text-stone-400 font-bold uppercase tracking-widest">
+                  <p className="text-xs text-stone-500 font-bold uppercase tracking-widest">
                     Nenhum evento agendado
                   </p>
                 ) : (
-                  <p className="text-[10px] text-stone-500 font-bold uppercase tracking-widest">
+                  <p className="text-xs text-stone-500 font-bold uppercase tracking-widest">
                     Dados indisponíveis
                   </p>
                 )}

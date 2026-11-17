@@ -1,14 +1,14 @@
 import { cn } from "@/lib/utils";
 import {
   CheckCircle2,
-  Circle,
+  Search,
   Lock,
   PlayCircle,
   ChevronDown,
   ChevronRight,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Lesson, Module } from "@/types/lms";
 
@@ -25,6 +25,8 @@ export const LessonSidebar = ({
   onSelectLesson,
   className,
 }: LessonSidebarProps) => {
+  const [query, setQuery] = useState("");
+  const matchesSearch = (lesson: Lesson) => lesson.title.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR").includes(query.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLocaleLowerCase("pt-BR"));
   // Determine which module is initially open based on current lesson
   const initialOpenModule =
     modules.find((m) => m.lessons.some((l) => l.id === currentLessonId))?.id ||
@@ -32,6 +34,11 @@ export const LessonSidebar = ({
   const [openModules, setOpenModules] = useState<string[]>(
     initialOpenModule ? [initialOpenModule] : [],
   );
+
+  useEffect(() => {
+    const activeModule = modules.find(module => module.lessons.some(lesson => lesson.id === currentLessonId));
+    if (activeModule) setOpenModules(values => values.includes(activeModule.id) ? values : [...values, activeModule.id]);
+  }, [modules, currentLessonId]);
 
   const toggleModule = (moduleId: string) => {
     setOpenModules((prev) =>
@@ -52,7 +59,7 @@ export const LessonSidebar = ({
         <h3 className="font-serif text-xl text-primary">Conteúdo do Curso</h3>
         <p
           data-testid="lesson-sidebar-progress"
-          className="text-xs text-stone-400 mt-1 uppercase tracking-widest font-bold"
+          className="text-xs text-stone-500 mt-1 uppercase tracking-widest font-bold"
         >
           {modules.reduce(
             (acc, m) => acc + m.lessons.filter((l) => l.isCompleted).length,
@@ -63,9 +70,16 @@ export const LessonSidebar = ({
         </p>
       </div>
 
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4">
+      <label className="portal-field px-4 py-3 border-b border-stone-100">
+        <span>Buscar aula</span>
+        <div className="relative"><Search size={18} aria-hidden="true" className="absolute left-3 top-4 text-stone-500" /><input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Nome da aula" /></div>
+      </label>
+      <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar p-3 space-y-3" data-lenis-prevent>
+        {query.trim() && !modules.some(module => module.lessons.some(matchesSearch)) && <p role="status" className="p-3 text-sm text-stone-600">Nenhuma aula encontrada. <button type="button" className="min-h-12 underline" onClick={() => setQuery("")}>Limpar busca</button></p>}
         {modules.map((module) => {
-          const isOpen = openModules.includes(module.id);
+          const visibleLessons = module.lessons.filter(matchesSearch);
+          if (!visibleLessons.length) return null;
+          const isOpen = query.trim().length > 0 || openModules.includes(module.id);
           const completedCount = module.lessons.filter(
             (l) => l.isCompleted,
           ).length;
@@ -82,17 +96,17 @@ export const LessonSidebar = ({
                 onClick={() => toggleModule(module.id)}
                 aria-expanded={isOpen}
                 aria-controls={`module-lessons-${module.id}`}
-                className="w-full flex items-center justify-between p-4 bg-white hover:bg-stone-50 transition-colors text-left"
+                className="w-full min-h-14 flex items-center justify-between gap-3 p-4 bg-white hover:bg-stone-50 transition-colors text-left"
               >
                 <div>
                   <h4 className="font-bold text-sm text-primary">
                     {module.title}
                   </h4>
-                  <p className="text-[10px] text-stone-400 font-bold uppercase tracking-widest mt-1">
+                  <p className="text-xs text-stone-500 font-bold uppercase tracking-widest mt-1">
                     {completedCount}/{totalCount} Aulas
                   </p>
                 </div>
-                <div className="text-stone-400">
+                <div className="text-stone-500">
                   {isOpen ? (
                     <ChevronDown size={16} />
                   ) : (
@@ -110,7 +124,7 @@ export const LessonSidebar = ({
                     className="overflow-hidden"
                   >
                     <div id={`module-lessons-${module.id}`} className="p-2 space-y-1">
-                      {module.lessons.map((lesson) => {
+                      {visibleLessons.map((lesson) => {
                         const isActive = lesson.id === currentLessonId;
                         const durationLabel =
                           typeof lesson.duration === "number" &&
@@ -133,7 +147,7 @@ export const LessonSidebar = ({
                             aria-current={isActive ? "page" : undefined}
                             aria-label={`${lesson.title}, ${statusLabel}${durationLabel ? `, ${durationLabel}` : ""}`}
                             className={cn(
-                              "w-full flex items-center gap-3 p-3 rounded-lg text-left transition-all text-sm group",
+                              "w-full min-h-14 flex items-center gap-3 p-3 rounded-xl text-left transition-colors text-base group touch-manipulation",
                               isActive
                                 ? "bg-primary text-white shadow-md"
                                 : "hover:bg-white hover:shadow-sm text-stone-600",
@@ -160,7 +174,7 @@ export const LessonSidebar = ({
                                 <PlayCircle size={16} />
                               )}
                             </div>
-                            <div className="flex-1">
+                            <div className="flex-1 min-w-0">
                               <p
                                 className={cn(
                                   "font-medium line-clamp-2",
@@ -170,14 +184,14 @@ export const LessonSidebar = ({
                                 {lesson.title}
                               </p>
                               {lesson.isLocked && lesson.lockReason ? (
-                                <p className="text-[10px] mt-0.5 text-stone-500">
+                                <p className="text-xs mt-0.5 text-stone-500">
                                   {lesson.lockReason}
                                 </p>
                               ) : (
                                 durationLabel && (
                                   <p
                                     className={cn(
-                                      "text-[10px] mt-0.5 opacity-60",
+                                      "text-xs mt-0.5 opacity-60",
                                       isActive ? "text-white" : "",
                                     )}
                                   >

@@ -38,13 +38,15 @@
     "**/*.ts",
     "**/*.tsx",
     ".next-portal-refinement/types/**/*.ts",
+    ".next-wellness/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     ".next/types/**/*.ts",
-    "next-env.d.ts",
-    ".next-wellness/types/**/*.ts"
+    "next-env.d.ts"
   ],
   "exclude": [
     "node_modules",
+    "reports",
+    "output",
     "src/**/__tests__",
     "src/**/*.test.ts",
     "src/**/*.test.tsx"

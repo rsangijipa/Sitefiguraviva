@@ -183,17 +183,17 @@ function CourseContent({ initialData }: { initialData?: any }) {
 
   // View: LOBBY MODE (Tabs)
   return (
-    <div className="min-h-screen bg-[#FDFCF9] pb-20 animate-fade-in">
+    <div className="min-w-0 bg-transparent pb-8">
       {/* Minimal Header */}
-      <div className="bg-white border border-stone-200 rounded-2xl mx-4 mt-3 shadow-sm sticky top-0 z-30">
-        <div className="max-w-5xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
+      <div className="bg-white border border-stone-200 rounded-2xl shadow-sm">
+        <div className="max-w-5xl mx-auto px-3 sm:px-6 py-3 min-h-16 flex flex-wrap gap-2 items-center justify-between">
           <Link
-            href="/portal"
+            href="/portal/courses"
             className="text-primary hover:bg-emerald-50 flex min-h-11 items-center gap-2 rounded-xl border border-emerald-200 px-4 text-xs font-bold uppercase tracking-widest transition-colors"
           >
             <ArrowLeft size={14} /> Voltar
           </Link>
-          <h1 className="font-serif font-bold text-stone-800 truncate pl-4 flex-1 text-center md:text-left">
+          <h1 className="font-serif text-lg sm:text-xl font-bold text-stone-800 min-w-0 basis-40 flex-1 break-words">
             {course.title}
           </h1>
           {canStudy && lastLessonId && (
@@ -213,7 +213,7 @@ function CourseContent({ initialData }: { initialData?: any }) {
         <div
           role="tablist"
           aria-label="Seções do curso"
-          className="max-w-5xl mx-auto px-4 md:px-6 flex gap-6 overflow-x-auto no-scrollbar"
+          className="max-w-5xl mx-auto p-2 sm:px-4 grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-2"
         >
           {[
             { id: "overview", label: "Visão Geral", icon: Layout },
@@ -229,9 +229,20 @@ function CourseContent({ initialData }: { initialData?: any }) {
               aria-selected={activeTab === tab.id}
               aria-controls="course-tab-panel"
               key={tab.id}
+              tabIndex={activeTab === tab.id ? 0 : -1}
+              onKeyDown={event => {
+                const keys = ["ArrowRight", "ArrowLeft", "Home", "End"];
+                if (!keys.includes(event.key)) return;
+                event.preventDefault();
+                const tabs = Array.from(event.currentTarget.parentElement!.querySelectorAll<HTMLButtonElement>("[role=tab]"));
+                const index = tabs.indexOf(event.currentTarget);
+                const next = event.key === "Home" ? 0 : event.key === "End" ? tabs.length - 1 : (index + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
+                tabs[next].focus();
+                tabs[next].click();
+              }}
               onClick={() => handleTabChange(tab.id)}
               className={cn(
-                "flex min-h-11 items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors border whitespace-nowrap",
+                "flex min-h-12 items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-semibold transition-colors border",
                 activeTab === tab.id
                   ? "border-primary bg-primary text-white"
                   : "border-stone-200 text-stone-600 hover:bg-emerald-50 hover:text-primary",
@@ -248,12 +259,12 @@ function CourseContent({ initialData }: { initialData?: any }) {
         id="course-tab-panel"
         role="tabpanel"
         aria-labelledby={`course-tab-${activeTab}`}
-        className="max-w-5xl mx-auto px-4 md:px-6 py-8"
+        className="max-w-5xl mx-auto py-6 min-w-0"
       >
         {/* TAB: OVERVIEW */}
         {activeTab === "overview" && (
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="md:col-span-2 space-y-8">
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
+            <div className="xl:col-span-2 space-y-8">
               {/* Course Intro */}
               <section>
                 {(() => {

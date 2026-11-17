@@ -11,6 +11,7 @@ const galleryInput = z.object({
   caption: z.string().trim().max(1000).optional().default(""),
   tags: z.string().optional().default(""),
   category: z.string().trim().max(80).optional(),
+  year: z.union([z.number(), z.string()]).optional(),
 });
 
 export async function saveGalleryItemAction(id: string | null, data: unknown) {
@@ -27,7 +28,10 @@ export async function saveGalleryItemAction(id: string | null, data: unknown) {
         .map((tag) => tag.trim())
         .filter(Boolean),
       is_published: true,
-      legacy_payload: input.category ? { category: input.category } : {},
+      legacy_payload: {
+        ...(input.category ? { category: input.category } : {}),
+        ...(input.year ? { year: String(input.year) } : {}),
+      },
       updated_at: new Date().toISOString(),
     };
     const supabase = createSupabaseServiceClient();

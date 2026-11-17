@@ -10,6 +10,7 @@ import { Skeleton } from "../ui/Skeleton";
 import { Card, CardContent } from "../ui/Card";
 import { EmptyState } from "../ui/EmptyState";
 import SectionShell from "../ui/SectionShell";
+import { ContentRetry } from "./ContentRetry";
 
 interface BlogPost {
   id: string | number;
@@ -27,11 +28,15 @@ interface BlogSectionProps {
   blogPosts: BlogPost[];
   onSelectPost?: (post: BlogPost) => void;
   loading?: boolean;
+  error?: boolean;
+  onRetry?: () => void;
 }
 
 export default function BlogSection({
   blogPosts = [],
   loading = false,
+  error = false,
+  onRetry,
   content = DEFAULT_HOME,
 }: BlogSectionProps) {
   const [activeTab, setActiveTab] = useState<"blog" | "biblioteca">("blog");
@@ -88,7 +93,11 @@ export default function BlogSection({
 
       {/* Grid de 1 linha de 3 cards compactos */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {loading ? (
+        {error ? (
+          <div className="col-span-full w-full">
+            <ContentRetry onRetry={onRetry} />
+          </div>
+        ) : loading ? (
           [1, 2, 3].map((i) => (
             <div key={i} className="space-y-3">
               <Skeleton className="aspect-[16/9] w-full rounded-md" />

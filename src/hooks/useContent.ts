@@ -34,7 +34,10 @@ export const useCourses = (
     queryFn: () =>
       isAdmin
         ? listContent("courses", { publishedOnly: false })
-        : listPublishedContent("courses"),
+        : listPublishedContent(
+            "courses",
+            options?.scope === "preview" ? { limit: 3 } : {},
+          ),
     initialData: options?.initialData,
     staleTime: 1000 * 60 * 5,
   });
@@ -54,7 +57,10 @@ export const useBlogPosts = (
     queryFn: () =>
       isAdmin
         ? listContent("posts", { publishedOnly: false })
-        : listPublishedContent("posts"),
+        : listPublishedContent(
+            "posts",
+            options?.scope === "preview" ? { limit: 3 } : {},
+          ),
     initialData: options?.initialData,
     staleTime: 1000 * 60 * 5,
   });

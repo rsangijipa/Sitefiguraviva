@@ -1,6 +1,6 @@
 import type { ComponentType } from "react";
 import type { LucideProps } from "lucide-react";
-import { BookOpen, Circle, Fingerprint, Leaf, Lightbulb, MessageCircle, PenLine, Waves, Wind } from "lucide-react";
+import { Orbit, BookOpen, Circle, Fingerprint, Leaf, Lightbulb, MessageCircle, PenLine, Waves, Wind } from "lucide-react";
 
 export type ResourceCategory = "APRENDER" | "EXPERIMENTAR" | "PERCEBER" | "PAUSAR";
 export type ResourceStatus = "available" | "coming-soon";
@@ -37,6 +37,7 @@ export const resourceCatalog: ResourceDefinition[] = [
   entry({ slug: "sons-para-awareness", title: "Sons para Awareness", description: "Explore o entorno com ou sem áudio.", category: "PERCEBER", access: "public", visibility: "published", duration: "2–5 min", icon: Wind, modes: ["escutar", "texto"], saves: true }),
   entry({ slug: "sala-de-pausa", title: "Sala de Pausa", description: "Escolha uma pausa que caiba neste momento.", category: "PAUSAR", access: "public", visibility: "published", duration: "livre", icon: Wind, modes: ["respirar", "observar", "pelos-sentidos", "ouvir", "movimentar", "desacelerar"], saves: true }),
   entry({ slug: "igarape", title: "Igarapé", description: "Toque a água e acompanhe suas ondulações.", category: "PAUSAR", access: "public", visibility: "published", duration: "livre", icon: Waves, modes: ["agua", "estatico"] }),
+  entry({ slug: "ambientes-imersivos", title: "Ambientes Imersivos", description: "Explore ambientes em 3D e escolha convites abertos.", category: "EXPERIMENTAR", access: "public", visibility: "published", duration: "livre", icon: Orbit, modes: ["casa", "jardim", "ponte", "atelie", "ilha", "observatorio", "riacho", "santuario", "lago"] }),
   entry({ slug: "laboratorio-fenomenologico", title: "Laboratório Fenomenológico", description: "Explore descrição e leitura de trechos revisados.", category: "APRENDER", access: "formation", visibility: "draft", duration: "8–12 min", icon: BookOpen, modes: ["laboratorio"], saves: true }),
   entry({ slug: "atelie-do-experimento", title: "Ateliê do Experimento", description: "Construa uma proposta a partir de um microcaso.", category: "APRENDER", access: "formation", visibility: "draft", duration: "10–15 min", icon: BookOpen, modes: ["atelie"], saves: true }),
   entry({ slug: "escuta-dialogica", title: "Escuta Dialógica", description: "Escreva uma resposta e compare possibilidades.", category: "APRENDER", access: "formation", visibility: "draft", duration: "5–10 min", icon: MessageCircle, modes: ["escuta"], saves: true }),

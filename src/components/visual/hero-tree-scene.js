@@ -2,10 +2,6 @@
 // Adaptado da cena 3D fornecida pelo Instituto Figura Viva.
 
   import * as THREE from 'three';
-  import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
-  import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
-  import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
-  import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 
 
 export function mountHeroTree(root, onReady, onPhrase, background = false) {
@@ -84,18 +80,18 @@ export function mountHeroTree(root, onReady, onPhrase, background = false) {
      =================================================================== */
   let renderer;
   try {
-    renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'low-power' });
+    renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'low-power', stencil: false });
   } catch (err) {
     $('loading-text').textContent = 'Este navegador não conseguiu abrir a cena 3D (WebGL indisponível).';
     throw err;
   }
-  const PR = Math.min(window.devicePixelRatio || 1, 1.5);
+  const PR = Math.min(window.devicePixelRatio || 1, 1.25);
   renderer.setPixelRatio(PR);
   renderer.setSize(window.innerWidth, window.innerHeight, false);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.type = THREE.PCFShadowMap;
 
   const scene = new THREE.Scene();
   scene.fog = new THREE.FogExp2(0xd9a27f, 0.02);
@@ -835,12 +831,8 @@ export function mountHeroTree(root, onReady, onPhrase, background = false) {
   /* ===================================================================
      PÓS-PROCESSAMENTO
      =================================================================== */
-  const rt = new THREE.WebGLRenderTarget(root.clientWidth * PR, root.clientHeight * PR, { type: THREE.HalfFloatType, samples: 4 });
-  const composer = new EffectComposer(renderer, rt);
-  composer.addPass(new RenderPass(scene, camera));
-  const bloom = new UnrealBloomPass(new THREE.Vector2(root.clientWidth, root.clientHeight), 0.25, 0.7, 0.9);
-  composer.addPass(bloom);
-  composer.addPass(new OutputPass());
+  const bloom = {};   // bloom removido: custo alto para um brilho quase imperceptível
+
 
   /* ===================================================================
      ATMOSFERAS
@@ -943,7 +935,7 @@ export function mountHeroTree(root, onReady, onPhrase, background = false) {
 
   function resize() {
     const w = Math.max(1, root.clientWidth), h = Math.max(1, root.clientHeight);
-    renderer.setSize(w, h, false); composer.setSize(w, h);
+    renderer.setSize(w, h, false);
     camera.aspect = w / h; camera.updateProjectionMatrix();
     camDist = Math.max(6.5 / (2 * TAN_H), 5.3 / (2 * TAN_H * camera.aspect)) * 1.02;
   }
@@ -952,6 +944,7 @@ export function mountHeroTree(root, onReady, onPhrase, background = false) {
   /* ===================================================================
      LAÇO PRINCIPAL
      =================================================================== */
+  const LOW_END = (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4;
   let clockT = 0, lastNow = performance.now(), camYaw = 0, camLift = 0, spawnAcc = 0;
   const K = 55, C = 5.5;      // mola e amortecimento das folhas presas
 
@@ -1031,6 +1024,7 @@ export function mountHeroTree(root, onReady, onPhrase, background = false) {
     if (disposed) return;
     frameId = requestAnimationFrame(frame);
     if (document.hidden || !isVisible) { lastNow = now; return; }
+    if (LOW_END && now - lastNow < 30) return;
     const dt = Math.min((now - lastNow) / 1000, 0.05); lastNow = now; clockT += dt;
     const t = clockT;
 
@@ -1068,7 +1062,7 @@ export function mountHeroTree(root, onReady, onPhrase, background = false) {
 
     if (autoIn.checked && !hero && t - lastSummon > 16 && document.visibilityState === 'visible') summon();
 
-    composer.render(dt);
+    renderer.render(scene, camera);
   }
 
   /* ===================================================================
@@ -1089,5 +1083,5 @@ export function mountHeroTree(root, onReady, onPhrase, background = false) {
     onReady(() => summon());
   });
   
-  return () => { disposed = true; cancelAnimationFrame(frameId); observer.disconnect(); visibility.disconnect(); scene.traverse(object => { if (object.geometry) object.geometry.dispose(); if (object.material) { const materials = Array.isArray(object.material) ? object.material : [object.material]; materials.forEach(material => { Object.values(material).forEach(value => { if (value && value.isTexture) value.dispose(); }); material.dispose(); }); } }); envRT?.dispose(); pmrem.dispose(); composer.dispose(); renderer.dispose(); };
+  return () => { disposed = true; cancelAnimationFrame(frameId); observer.disconnect(); visibility.disconnect(); scene.traverse(object => { if (object.geometry) object.geometry.dispose(); if (object.material) { const materials = Array.isArray(object.material) ? object.material : [object.material]; materials.forEach(material => { Object.values(material).forEach(value => { if (value && value.isTexture) value.dispose(); }); material.dispose(); }); } }); envRT?.dispose(); pmrem.dispose(); renderer.dispose(); renderer.forceContextLoss(); };
 }

@@ -131,8 +131,8 @@
 @media (min-width:768px) { .visual { justify-self:end; width:100%; height:clamp(400px,45vw,570px); } }
 @media (max-width:767px) { .visual { width:min(100%,380px); height:370px; } }
 
-/* O cenário acompanha toda a seção, enquanto a árvore interativa permanece nítida. */
-.environment { position:absolute; inset:-32px; overflow:hidden; pointer-events:none; filter:blur(9px); }
+/* Cenário estático em CSS (antes era um segundo canvas WebGL desfocado). */
+.environment { position:absolute; inset:0; overflow:hidden; pointer-events:none; background:radial-gradient(ellipse at 78% 38%,rgb(255 192 138 / 38%),transparent 55%),linear-gradient(180deg,rgb(79 143 214 / 16%),rgb(150 173 120 / 14%) 85%); }
 .environment::after { content:""; position:absolute; inset:0; background:linear-gradient(90deg,rgb(var(--color-paper) / 70%),rgb(var(--color-paper) / 42%) 50%,rgb(var(--color-paper) / 18%)); }
 :global(.dark) .environment::after { background:linear-gradient(90deg,rgb(var(--color-paper) / 90%),rgb(var(--color-paper) / 65%) 55%,rgb(var(--color-paper) / 35%)); }
 .hero::after { z-index:0; background:none; }

@@ -20,7 +20,7 @@ export default function HeroSection({
 
   return (
     <header className={`fv-bg fv-bg-hero ${styles.hero}`} data-home-hero>
-      <div className={styles.environment} aria-hidden="true"><HeroTree3D background /></div>
+      <div className={styles.environment} aria-hidden="true" />
       <div className={styles.layout}>
         <div className={styles.copy}>
           {/* O nome da instituição é o título */}

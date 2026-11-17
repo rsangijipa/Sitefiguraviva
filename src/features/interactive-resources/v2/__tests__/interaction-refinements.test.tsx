@@ -90,5 +90,5 @@ it("combines duration and category filters and lets the person reset an empty re
  fireEvent.click(screen.getByRole("button",{name:/^Pausar/}));
  expect(screen.getByText("Nenhum recurso corresponde a esta combinação.")).toBeInTheDocument();
  fireEvent.click(screen.getByRole("button",{name:"Limpar filtros"}));
- expect(screen.getAllByRole("link",{name:/^Abrir recurso:/})).toHaveLength(10);
+ expect(screen.getAllByRole("link",{name:/^Abrir recurso:/})).toHaveLength(11);
 });

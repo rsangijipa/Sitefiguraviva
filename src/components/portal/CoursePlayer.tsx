@@ -47,7 +47,7 @@ const SIDEBAR_ID = "lesson-sidebar";
 
 const isDesktopViewport = () =>
   typeof window !== "undefined" &&
-  window.matchMedia("(min-width: 768px)").matches;
+  window.matchMedia("(min-width: 1280px)").matches;
 
 const formatDuration = (minutes?: number) =>
   typeof minutes === "number" && minutes > 0 ? `${minutes} min` : null;
@@ -120,7 +120,7 @@ export const CoursePlayer = ({
   const isSidebarOpen = sidebarOpen ?? isDesktop;
 
   useEffect(() => {
-    const query = window.matchMedia("(min-width: 768px)");
+    const query = window.matchMedia("(min-width: 1280px)");
     const sync = () => setIsDesktop(query.matches);
     sync();
     query.addEventListener("change", sync);
@@ -132,6 +132,15 @@ export const CoursePlayer = ({
       trackEvent("page_view", activeLesson.id, { courseId: course.id });
     }
   }, [activeLesson?.id, course.id]);
+
+  useEffect(() => {
+    if (!isSidebarOpen || isDesktop) return;
+    const close = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setSidebarOpen(false);
+    };
+    window.addEventListener("keydown", close);
+    return () => window.removeEventListener("keydown", close);
+  }, [isSidebarOpen, isDesktop]);
 
   const toggleSidebar = useCallback(
     () => setSidebarOpen((prev) => !(prev ?? isDesktopViewport())),
@@ -214,14 +223,14 @@ export const CoursePlayer = ({
   const duration = formatDuration(activeLesson?.duration);
 
   return (
-    <div className="h-[calc(100dvh-4rem)] flex flex-col bg-[#FDFCF9] overflow-hidden">
+    <div className="portal-lesson-player flex flex-col bg-[#FDFCF9] overflow-hidden">
       {/* Top Bar */}
       <header className="h-16 bg-white border-b border-stone-100 flex items-center justify-between gap-2 px-4 shrink-0 z-20 relative">
         <div className="flex items-center gap-3 min-w-0">
           <Link
             href={course.backLink}
             aria-label="Voltar para a página do curso"
-            className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full hover:bg-stone-50 text-stone-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="w-12 h-12 shrink-0 flex items-center justify-center rounded-full hover:bg-stone-50 text-stone-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
             <ArrowLeft size={20} aria-hidden="true" />
           </Link>
@@ -249,20 +258,21 @@ export const CoursePlayer = ({
           aria-label={
             isSidebarOpen ? "Fechar lista de aulas" : "Abrir lista de aulas"
           }
-          className="shrink-0 flex items-center gap-2 p-2 md:px-4 md:py-2 text-xs font-bold uppercase tracking-widest text-primary hover:bg-stone-50 rounded-lg transition-colors md:border md:border-stone-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="shrink-0 min-h-12 min-w-12 flex items-center justify-center gap-2 p-2 sm:px-4 text-sm font-semibold text-primary bg-emerald-50 hover:bg-emerald-100 rounded-xl transition-colors border border-emerald-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
-          <span className="md:hidden" aria-hidden="true">
+          <span className="xl:hidden" aria-hidden="true">
             {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
           </span>
-          <span className="hidden md:inline" aria-hidden="true">
+          <span className="hidden sm:inline" aria-hidden="true">
             {isSidebarOpen ? "Expandir tela" : "Ver aulas"}
           </span>
         </button>
       </header>
 
       {/* Main Layout */}
-      <div className="flex-1 flex overflow-hidden relative">
-        <main className="flex-1 overflow-y-auto custom-scrollbar bg-black/5 relative">
+      <div className="flex-1 min-h-0 flex overflow-hidden relative">
+        {isSidebarOpen && !isDesktop && <button type="button" aria-label="Ocultar lista de aulas" onClick={() => setSidebarOpen(false)} className="absolute inset-0 z-10 bg-stone-900/30" /> }
+        <main className="flex-1 min-w-0 overflow-y-auto custom-scrollbar bg-black/5 relative" inert={isSidebarOpen && !isDesktop} data-lenis-prevent>
           <div className="max-w-5xl mx-auto w-full min-h-full flex flex-col">
             {activeLesson && hasVideo && (
               <div
@@ -282,7 +292,7 @@ export const CoursePlayer = ({
               </div>
             )}
 
-            <div className="flex-1 bg-[#FDFCF9] p-6 md:p-12">
+            <div className="flex-1 bg-[#FDFCF9] p-4 sm:p-6 xl:p-8">
               {activeLesson ? (
                 <article
                   aria-labelledby="lesson-title"
@@ -297,7 +307,7 @@ export const CoursePlayer = ({
                       )}
                       <h1
                         id="lesson-title"
-                        className="font-serif text-3xl text-primary mb-2"
+                        className="font-serif text-2xl sm:text-3xl text-primary mb-2"
                       >
                         {activeLesson.title}
                       </h1>
@@ -387,7 +397,7 @@ export const CoursePlayer = ({
                   {/* Navigation Footer */}
                   <nav
                     aria-label="Navegação entre aulas"
-                    className="flex items-center justify-between gap-4 pt-12 border-t border-stone-100"
+                    className="grid grid-cols-1 min-[480px]:grid-cols-2 gap-3 pt-6 border-t border-stone-100"
                   >
                     <Button
                       variant="ghost"
@@ -398,7 +408,7 @@ export const CoursePlayer = ({
                       Aula anterior
                     </Button>
 
-                    <div className="flex flex-col items-end gap-1">
+                    <div className="flex flex-col min-w-0 items-stretch gap-2">
                       <Button
                         variant={
                           activeLesson.isCompleted &&
@@ -453,12 +463,12 @@ export const CoursePlayer = ({
           id={SIDEBAR_ID}
           aria-label="Aulas do curso"
           className={cn(
-            "absolute md:relative right-0 top-0 bottom-0 z-10 w-full md:w-96 bg-white shadow-2xl md:shadow-none transition-all duration-300 ease-in-out transform",
+            "absolute xl:relative right-0 top-0 bottom-0 z-10 w-full sm:w-80 xl:w-80 max-w-full shrink-0 bg-white shadow-2xl xl:shadow-none transition-all duration-300 ease-in-out transform",
             sidebarOpen === null
-              ? "translate-x-full invisible md:visible md:translate-x-0"
+              ? "translate-x-full invisible xl:visible xl:translate-x-0"
               : sidebarOpen
                 ? "translate-x-0"
-                : "translate-x-full invisible md:w-0 overflow-hidden",
+                : "translate-x-full invisible xl:w-0 overflow-hidden",
           )}
         >
           <LessonSidebar
