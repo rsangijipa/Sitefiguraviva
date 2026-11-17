@@ -1,7 +1,7 @@
 "use client";
 import { useMemo, useState } from "react";
 import PublicPageHero from "@/features/public-site/components/PublicPageHero";
-import { ArrowDown, ArrowUpRight, Search, X } from "lucide-react";
+import { ArrowDown, ArrowUpRight, Search, X, BookOpen, Sparkles } from "lucide-react";
 import BookCover from "./bookshelf/BookCover";
 import BookDetails from "./bookshelf/BookDetails";
 import styles from "./bookshelf/Bookshelf.module.css";
@@ -16,6 +16,7 @@ export interface Livro {
   publicationYear?: number | null;
   category?: string | null;
 }
+
 const normalize = (value: string) =>
   value
     .normalize("NFD")
@@ -32,6 +33,7 @@ export default function BookshelfSection({
   const [selected, setSelected] = useState<Livro | null>(null);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<string | null>(null);
+
   const categories = useMemo(
     () =>
       [
@@ -43,6 +45,7 @@ export default function BookshelfSection({
       ].sort((a, b) => a.localeCompare(b, "pt-BR")),
     [livros],
   );
+
   const filtered = useMemo(() => {
     const search = normalize(query.trim());
     return livros.filter(
@@ -51,7 +54,9 @@ export default function BookshelfSection({
         (!search || normalize(`${book.title} ${book.author}`).includes(search)),
     );
   }, [livros, query, category]);
+
   const featured = livros[0];
+
   return (
     <div className={styles.page}>
       <PublicPageHero
@@ -65,79 +70,105 @@ export default function BookshelfSection({
           </a>
         }
       />
+
       <div className={styles.container}>
+        {/* LIVRO EM DESTAQUE - Card com bordas arredondadas e fundo de traçados aquarela */}
         {featured && (
           <section
-            className={styles.featured}
+            className={styles.featuredCard}
             aria-labelledby="featured-heading"
           >
-            <div className={styles.featuredCover}>
-              <button
-                type="button"
-                onClick={() => setSelected(featured)}
-                aria-label={`Ver detalhes de ${featured.title}, de ${featured.author}`}
-                className={styles.featuredTrigger}
-                aria-haspopup="dialog"
-              >
-                <BookCover
-                  book={featured}
-                  sizes="(max-width: 639px) 180px, 240px"
-                />
-              </button>
-            </div>
-            <div className={styles.featuredCopy}>
-              <p className={styles.eyebrow}>Um encontro para começar</p>
-              <h2 id="featured-heading">{featured.title}</h2>
-              <p className={styles.author}>
-                {featured.author}
-                {featured.publicationYear != null
-                  ? ` · ${featured.publicationYear}`
-                  : ""}
-              </p>
-              <p className={styles.featuredDescription}>
-                {featured.description?.trim() ||
-                  "Uma das leituras escolhidas pela equipe do Instituto para acompanhar nossos encontros com a clínica e a formação."}
-              </p>
-              <button
-                type="button"
-                className={styles.textLink}
-                onClick={() => setSelected(featured)}
-              >
-                Conhecer esta leitura{" "}
-                <ArrowUpRight size={18} aria-hidden="true" />
-              </button>
+            <div className={styles.featuredWatercolorBg} aria-hidden="true" />
+
+            <div className={styles.featuredContent}>
+              <div className={styles.featuredCover}>
+                <button
+                  type="button"
+                  onClick={() => setSelected(featured)}
+                  aria-label={`Ver detalhes de ${featured.title}, de ${featured.author}`}
+                  className={styles.featuredTrigger}
+                  aria-haspopup="dialog"
+                >
+                  <BookCover
+                    book={featured}
+                    sizes="(max-width: 639px) 180px, 240px"
+                  />
+                </button>
+              </div>
+
+              <div className={styles.featuredCopy}>
+                <span className={styles.featuredBadge}>
+                  <Sparkles size={12} /> Obra em Destaque
+                </span>
+                <p className={styles.eyebrow}>Um encontro para começar</p>
+                <h2 id="featured-heading">{featured.title}</h2>
+                <p className={styles.author}>
+                  {featured.author}
+                  {featured.publicationYear != null
+                    ? ` · ${featured.publicationYear}`
+                    : ""}
+                </p>
+                <p className={styles.featuredDescription}>
+                  {featured.description?.trim() ||
+                    "Uma das leituras fundamentais escolhidas pela equipe do Instituto para acompanhar nossos encontros com a clínica, a arte e a formação."}
+                </p>
+                <button
+                  type="button"
+                  className={styles.featuredOpenBtn}
+                  onClick={() => setSelected(featured)}
+                >
+                  <BookOpen size={16} /> Conhecer esta leitura{" "}
+                  <ArrowUpRight size={18} aria-hidden="true" />
+                </button>
+              </div>
             </div>
           </section>
         )}
+
+        {/* ÁREA DA ESTANTE: CARD COM EFEITO DE PROFUNDIDADE E BARRA DE PESQUISA */}
         <section
           id="acervo"
           aria-labelledby="shelf-heading"
           className={styles.collection}
         >
-          <div className={styles.collectionHeading}>
-            <div>
-              <p className={styles.eyebrow}>Escolhas que nos acompanham</p>
-              <h2 id="shelf-heading">Na nossa estante</h2>
+          <div className={styles.shelfHeaderCard}>
+            <div className={styles.shelfHeaderMain}>
+              <div className={styles.shelfHeaderTitles}>
+                <p className={styles.eyebrow}>Escolhas que nos acompanham</p>
+                <h2 id="shelf-heading">Na nossa estante</h2>
+                <p className={styles.shelfSubtitle}>
+                  Escolha uma capa. Deixe a leitura abrir uma conversa.
+                </p>
+              </div>
+
+              {/* Barra de pesquisa normal à frente da nossa estante */}
+              <div className={styles.searchBarWrap}>
+                <label className={styles.searchBarNormal}>
+                  <Search size={18} aria-hidden="true" className={styles.searchIcon} />
+                  <input
+                    type="search"
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
+                    placeholder="Buscar por título ou autor..."
+                    aria-label="Buscar por título ou autor"
+                    aria-controls="bookshelf-results"
+                  />
+                  {query && (
+                    <button
+                      type="button"
+                      onClick={() => setQuery("")}
+                      className={styles.clearSearchBtn}
+                      aria-label="Apagar texto da busca"
+                    >
+                      <X size={15} />
+                    </button>
+                  )}
+                </label>
+              </div>
             </div>
-            <p>
-              Escolha uma capa.
-              <br />
-              Deixe a leitura abrir uma conversa.
-            </p>
-          </div>
-          {livros.length > 0 && (
-            <div className={styles.tools}>
-              <label className={styles.search}>
-                <Search size={19} aria-hidden="true" />
-                <span className="sr-only">Buscar por título ou autor</span>
-                <input
-                  type="search"
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Buscar por título ou autor"
-                  aria-controls="bookshelf-results"
-                />
-              </label>
+
+            {/* Categorias */}
+            {(
               <div
                 className={styles.filters}
                 role="group"
@@ -147,6 +178,7 @@ export default function BookshelfSection({
                   type="button"
                   aria-pressed={category === null}
                   onClick={() => setCategory(null)}
+                  className={styles.filterPill}
                 >
                   Todas as leituras
                 </button>
@@ -156,13 +188,15 @@ export default function BookshelfSection({
                     type="button"
                     aria-pressed={category === value}
                     onClick={() => setCategory(value)}
+                    className={styles.filterPill}
                   >
                     {value}
                   </button>
                 ))}
               </div>
-            </div>
-          )}
+            )}
+          </div>
+
           <p
             className={styles.resultCount}
             role="status"
@@ -176,35 +210,76 @@ export default function BookshelfSection({
                 : " encontradas"
               : " na estante"}
           </p>
+
+          {/* ESTANTE REALISTA */}
           <div id="bookshelf-results">
             {filtered.length > 0 ? (
-              <ul className={styles.shelves} aria-label="Livros da estante">
-                {filtered.map((book) => (
-                  <li key={book.id} className={styles.book}>
-                    <button
-                      type="button"
-                      className={styles.coverTrigger}
-                      onClick={() => setSelected(book)}
-                      aria-label={`Ver detalhes de ${book.title}, de ${book.author}`}
-                      aria-haspopup="dialog"
-                    >
-                      <span className={styles.cover}>
-                        <BookCover
-                          book={book}
-                          sizes="(max-width: 449px) 42vw, (max-width: 699px) 28vw, (max-width: 999px) 21vw, (max-width: 1199px) 17vw, (max-width: 1399px) 14vw, 170px"
-                        />
-                      </span>
-                    </button>
-                    <div className={styles.caption}>
-                      <h3>{book.title}</h3>
-                      <p>{book.author}</p>
-                      <p className={styles.bookDescription}>
-                        {book.description}
-                      </p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+              <div className={styles.realisticBookshelfStructure}>
+                {/* Lado esquerdo da estante */}
+                <div className={styles.shelfPillarLeft} aria-hidden="true" />
+
+                <ul className={styles.shelvesGrid} aria-label="Livros da estante">
+                  {filtered.map((book) => (
+                    <li key={book.id} className={styles.bookItem}>
+                      <div className={styles.bookStage}>
+                        {/* Capa com lombada, brilho e sombra; foco pelo teclado também revela o cartão */}
+                        <button
+                          type="button"
+                          className={styles.bookCoverWrapper}
+                          onClick={() => setSelected(book)}
+                          aria-haspopup="dialog"
+                          aria-label={`${book.title}, de ${book.author}. Ver detalhes`}
+                        >
+                          <BookCover
+                            book={book}
+                            sizes="(max-width: 449px) 42vw, (max-width: 699px) 28vw, (max-width: 999px) 21vw, (max-width: 1199px) 17vw, 180px"
+                          />
+                        </button>
+
+                        {/* Cartão à frente do livro (hover ou foco) */}
+                        <div className={styles.bookHoverCard}>
+                          <span className={styles.hoverCategoryTag}>
+                            {book.category?.trim() || "Gestalt-terapia"}
+                          </span>
+                          <p className={styles.hoverTitle} aria-hidden="true">
+                            {book.title}
+                          </p>
+                          <p className={styles.hoverAuthor}>{book.author}</p>
+                          <p className={styles.hoverSummary}>
+                            {book.description?.trim() ||
+                              "Leitura de referência escolhida pelo Instituto Figura Viva."}
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => setSelected(book)}
+                            className={styles.hoverOpenBtn}
+                            aria-haspopup="dialog"
+                            aria-label={`Abrir ${book.title}`}
+                          >
+                            <BookOpen size={14} aria-hidden="true" /> Abrir
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Tábua de madeira realista da estante */}
+                      <div className={styles.shelfWoodPlank} aria-hidden="true">
+                        <div className={styles.shelfWoodTop} />
+                        <div className={styles.shelfWoodBevel} />
+                        <div className={styles.shelfWoodShadow} />
+                      </div>
+
+                      {/* Legenda simples abaixo da estante para acessibilidade e mobile */}
+                      <div className={styles.caption}>
+                        <h3>{book.title}</h3>
+                        <p>{book.author}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+
+                {/* Lado direito da estante */}
+                <div className={styles.shelfPillarRight} aria-hidden="true" />
+              </div>
             ) : (
               <div className={styles.empty}>
                 <h3>
@@ -237,6 +312,7 @@ export default function BookshelfSection({
             )}
           </div>
         </section>
+
         <aside className={styles.invitation}>
           <p className={styles.eyebrow}>Uma leitura leva a outra</p>
           <h2>
@@ -254,6 +330,7 @@ export default function BookshelfSection({
           </a>
         </aside>
       </div>
+
       {selected && (
         <BookDetails book={selected} onClose={() => setSelected(null)} />
       )}

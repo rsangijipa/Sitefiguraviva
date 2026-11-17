@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" preserveAspectRatio="xMidYMid slice">
+  <!-- Aquarela suave da Estante: paleta primary #005a1f, igarape #07614c,
+       gold #b08d55, areia #f1e9db, nevoa #d8cfbe. Opacidades baixas para o
+       texto por cima manter contraste. -->
+  <defs>
+    <filter id="aquarela" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="3" seed="7" result="ruido"/>
+      <feDisplacementMap in="SourceGraphic" in2="ruido" scale="26" xChannelSelector="R" yChannelSelector="G" result="borda"/>
+      <feGaussianBlur in="borda" stdDeviation="9"/>
+    </filter>
+    <linearGradient id="verde" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#005a1f" stop-opacity=".13"/>
+      <stop offset=".55" stop-color="#07614c" stop-opacity=".07"/>
+      <stop offset="1" stop-color="#07614c" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="ouro" x1="1" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#b08d55" stop-opacity=".2"/>
+      <stop offset=".6" stop-color="#b08d55" stop-opacity=".08"/>
+      <stop offset="1" stop-color="#b08d55" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="nevoa" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#d8cfbe" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#d8cfbe" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="luz" cx=".42" cy=".5" r=".6">
+      <stop offset="0" stop-color="#fbf8f1" stop-opacity=".85"/>
+      <stop offset=".7" stop-color="#fbf8f1" stop-opacity=".35"/>
+      <stop offset="1" stop-color="#fbf8f1" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="600" fill="#f7f1e6"/>
+  <g filter="url(#aquarela)">
+    <path d="M-60-40C160 40 300-10 470 80s300 30 470 100 230-40 330-70V-90H-60Z" fill="url(#verde)"/>
+    <path d="M-50 440c180-60 320 50 500 0s320 70 500-10 220 20 300-10V660H-50Z" fill="url(#verde)"/>
+    <path d="M230 130c190-40 290 110 520 70s320 100 470 30c40 90-60 200-250 160-170-40-300 90-490 40C310 390 180 260 230 130Z" fill="url(#ouro)"/>
+    <path d="M700 330c170-50 310 30 450-20 60 90 70 200 10 280-140 30-260-50-360-90-80-30-130-130-100-170Z" fill="url(#nevoa)"/>
+    <circle cx="170" cy="190" r="30" fill="#005a1f" opacity=".06"/>
+    <circle cx="350" cy="110" r="22" fill="#b08d55" opacity=".1"/>
+    <circle cx="890" cy="160" r="26" fill="#b08d55" opacity=".1"/>
+    <circle cx="1060" cy="470" r="34" fill="#07614c" opacity=".06"/>
+  </g>
+  <rect width="1200" height="600" fill="url(#luz)"/>
+</svg>

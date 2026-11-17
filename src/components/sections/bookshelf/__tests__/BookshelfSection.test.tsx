@@ -59,7 +59,9 @@ it("searches all books including the featured book, by title and author without 
   ).toBeInTheDocument();
   fireEvent.change(input, { target: { value: "ponciano" } });
   expect(within(shelf).getAllByRole("listitem")).toHaveLength(1);
-  expect(within(shelf).getByText(books[1].title)).toBeInTheDocument();
+  expect(
+    within(shelf).getByRole("heading", { name: books[1].title }),
+  ).toBeInTheDocument();
 });
 it("filters only by stored categories and combines the search", () => {
   render(<BookshelfSection livros={books} />);
@@ -89,7 +91,9 @@ it("does not invent categories for unclassified books", () => {
 });
 it("shows accessible details, traps focus, closes on Escape cancellation and restores the opener", () => {
   render(<BookshelfSection livros={books} />);
-  const opener = within(screen.getByRole("list")).getAllByRole("button")[1];
+  const opener = within(screen.getByRole("list")).getAllByRole("button", {
+    name: /Ver detalhes/,
+  })[1];
   opener.focus();
   fireEvent.click(opener);
   const dialog = screen.getByRole("dialog", { name: books[1].title });
@@ -115,7 +119,9 @@ it("handles missing covers and unsafe or missing external links", () => {
       livros={[{ ...books[0], purchaseUrl: "javascript:alert(1)" }]}
     />,
   );
-  const opener = within(screen.getByRole("list")).getByRole("button");
+  const opener = within(screen.getByRole("list")).getByRole("button", {
+    name: /Ver detalhes/,
+  });
   fireEvent.click(opener);
   const dialog = screen.getByRole("dialog");
   expect(
@@ -139,4 +145,13 @@ it("distinguishes unavailable data from an empty catalog", () => {
   expect(
     screen.getByText("A estante está temporariamente indisponível."),
   ).toBeInTheDocument();
+});
+it("reveals theme, author, summary and an Abrir button in front of each book", () => {
+  render(<BookshelfSection livros={[books[0]]} />);
+  const shelf = screen.getByRole("list");
+  const open = within(shelf).getByRole("button", { name: "Abrir Gestalt-terapia" });
+  expect(open).toHaveTextContent("Abrir");
+  expect(within(shelf).getByText("Referência para a clínica.")).toBeInTheDocument();
+  fireEvent.click(open);
+  expect(screen.getByRole("dialog", { name: "Gestalt-terapia" })).toBeInTheDocument();
 });
