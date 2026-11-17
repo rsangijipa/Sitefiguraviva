@@ -20,9 +20,23 @@ test.describe("Resources catalog and experiences", () => {
   });
 
   test("legacy alias resolves to the canonical resource and mode", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
     await open(page, "/recursos/lago");
     await expect(page).toHaveURL(/\/recursos\/igarape\?modo=agua$/);
-    await expect(page.getByText("Modo selecionado:")).toContainText("Água");
+    const staticMode = page.getByRole("button", { name: "Modo estático", exact: true });
+    const touchWater = page.getByRole("button", { name: "Tocar a água", exact: true });
+    await expect(staticMode).toHaveAttribute("aria-pressed", "false");
+    await expect(touchWater).toBeEnabled();
+    await staticMode.click();
+    await expect(staticMode).toHaveAttribute("aria-pressed", "true");
+    await expect(touchWater).toBeDisabled();
+    await staticMode.click();
+    await expect(staticMode).toHaveAttribute("aria-pressed", "false");
+    await expect(touchWater).toBeEnabled();
+
+    await page.goto("/recursos/igarape?modo=estatico");
+    await expect(staticMode).toHaveAttribute("aria-pressed", "true");
+    await expect(touchWater).toBeDisabled();
   });
 
   test("global floating controls stay available inside a resource", async ({ page }) => {
