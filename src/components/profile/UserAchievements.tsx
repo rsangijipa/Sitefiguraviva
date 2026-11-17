@@ -15,6 +15,7 @@ import {
   GraduationCap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Modal, ModalBody } from "@/components/ui/Modal";
 
 const ICON_MAP: Record<string, any> = {
   Footprints,
@@ -31,6 +32,7 @@ export function UserAchievements() {
     null,
   );
   const [loading, setLoading] = useState(true);
+  const [selected,setSelected]=useState<(typeof BADGE_DEFINITIONS)[number] | null>(null);
 
   useEffect(() => {
     if (user?.uid) {
@@ -62,14 +64,15 @@ export function UserAchievements() {
       </div>
 
       {/* Badges Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-        {BADGE_DEFINITIONS.map((def) => {
+      {[{id:"learning",label:"Aprendizagem"},{id:"achievement",label:"Participação"}].map(group=><section key={group.id}><h3 className="mb-4 text-base font-semibold text-primary">{group.label}</h3><div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+        {BADGE_DEFINITIONS.filter(item=>item.category===group.id).map((def) => {
           const isEarned = profile?.badges.includes(def.id);
           const Icon = ICON_MAP[def.icon] || Award;
 
           return (
-            <div
+            <button type="button"
               key={def.id}
+              onClick={()=>setSelected(def)}
               className={cn(
                 "flex flex-col items-center p-4 rounded-xl border transition-all text-center group",
                 isEarned
@@ -99,10 +102,11 @@ export function UserAchievements() {
                   Conquistado
                 </div>
               )}
-            </div>
+            </button>
           );
         })}
-      </div>
+      </div></section>)}
+      <Modal isOpen={!!selected} onClose={()=>setSelected(null)} ariaLabel={selected?.title || "Conquista"}><ModalBody><h3 className="font-serif text-2xl text-primary">{selected?.title}</h3><p className="mt-3 text-stone-600">{selected?.description}</p><p className="mt-4 text-sm text-stone-500">{selected && profile?.badges.includes(selected.id) ? "Conquista obtida" : "Ainda não conquistada"}</p><button type="button" className="mt-6 min-h-11 rounded-xl bg-primary px-5 text-white" onClick={()=>setSelected(null)}>Fechar</button></ModalBody></Modal>
 
       {!profile?.badges.length && !loading && (
         <div className="bg-stone-50 rounded-xl p-6 text-center border border-dashed border-stone-200">

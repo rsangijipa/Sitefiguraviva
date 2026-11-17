@@ -16,6 +16,7 @@ import {
   Star,
   Headphones,
   Compass,
+  ChevronDown,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
@@ -96,8 +97,9 @@ const NavItem = ({
 }: NavItemProps) => (
   <Link
     href={href}
+    aria-current={isActive ? "page" : undefined}
     className={cn(
-      "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group relative",
+      "flex min-h-11 items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group relative",
       isActive
         ? "bg-stone-100 text-stone-900 font-medium"
         : isHighlight
@@ -123,20 +125,24 @@ const NavItem = ({
   </Link>
 );
 
-export const SidebarNav = ({ className }: { className?: string }) => {
+export const SidebarNav = ({ className, onNavigate }: { className?: string; onNavigate?: () => void }) => {
+  const [closed,setClosed]=useState<string[]>([]);
   const pathname = usePathname();
   const { user, signOut } = useAuth();
   const { addToast } = useToast();
 
-  const NAV_ITEMS = [
-    { label: "Visão Geral", icon: LayoutDashboard, href: ROUTES.portal },
-    { label: "Meus Cursos", icon: BookOpen, href: ROUTES.courses },
-    { label: "Meditação & Áudio", icon: Headphones, href: ROUTES.audio },
-    { label: "Certificados", icon: Award, href: ROUTES.certificates },
-    { label: "Comunidade", icon: MessageSquare, href: ROUTES.community },
-    { label: "Materiais", icon: FileText, href: ROUTES.materials },
-    { label: "Recursos", icon: Compass, href: "/portal/recursos" },
-    { label: "Ao Vivo", icon: Calendar, href: ROUTES.events },
+  const groups = [
+    { label:"Formação", items:[
+      {label:"Meus Cursos",icon:BookOpen,href:ROUTES.courses},
+      {label:"Certificados",icon:Award,href:ROUTES.certificates},
+      {label:"Comunidade",icon:MessageSquare,href:ROUTES.community},
+      {label:"Materiais",icon:FileText,href:ROUTES.materials},
+      {label:"Ao Vivo",icon:Calendar,href:ROUTES.events},
+    ]},
+    { label:"Práticas e recursos",items:[
+      {label:"Recursos",icon:Compass,href:"/portal/recursos"},
+      {label:"Meditação e áudio",icon:Headphones,href:ROUTES.audio},
+    ]},
   ];
 
   const { role } = useAuth();
@@ -149,6 +155,7 @@ export const SidebarNav = ({ className }: { className?: string }) => {
 
   const isPathActive = (href: string) => {
     if (href === ROUTES.portal && pathname === ROUTES.portal) return true;
+    if (href === ROUTES.courses && pathname.startsWith("/portal/course/")) return true;
     if (href !== ROUTES.portal && pathname.startsWith(href)) return true;
     return false;
   };
@@ -173,13 +180,8 @@ export const SidebarNav = ({ className }: { className?: string }) => {
         className="flex-1 px-4 py-6 space-y-1 overflow-y-auto custom-scrollbar"
         data-lenis-prevent
       >
-        {NAV_ITEMS.map((item) => (
-          <NavItem
-            key={item.href}
-            {...item}
-            isActive={isPathActive(item.href)}
-          />
-        ))}
+        <div onClick={onNavigate}><NavItem href={ROUTES.portal} icon={LayoutDashboard} label="Visão Geral" isActive={isPathActive(ROUTES.portal)}/></div>
+        {groups.map((group,index)=><section key={group.label} className="pt-4"><h2><button type="button" aria-expanded={!closed.includes(group.label)} aria-controls={`portal-nav-${index}`} onClick={()=>setClosed(values=>values.includes(group.label) ? values.filter(value=>value!==group.label) : [...values,group.label])} className="flex w-full min-h-11 items-center justify-between rounded-lg px-3 text-left text-xs font-bold uppercase tracking-wider text-stone-500 hover:bg-stone-50">{group.label}<ChevronDown size={16} className={closed.includes(group.label) ? "-rotate-90" : ""}/></button></h2><div id={`portal-nav-${index}`} hidden={closed.includes(group.label)} onClick={onNavigate}>{group.items.map(item=><NavItem key={item.href} {...item} isActive={isPathActive(item.href)}/>)}</div></section>)}
 
         {role === "admin" && (
           <div className="pt-4 mt-4 border-t border-stone-100">

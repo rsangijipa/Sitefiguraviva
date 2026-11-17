@@ -1,12 +1,13 @@
 "use client";
 import type { EditorialItem } from "../editorial-schema";
 import { IllustrationSlot } from "./IllustrationSlot";
-import { conceptSlot } from "./slots";
+import { conceptSlot,type IllustrationSlotDef } from "./slots";
 
 /**
  * Ilustração por conceito (seção 7.2 do guia). A chave vem do título da carta,
  * com o baralho como reserva, então cartas criadas no editor também ganham o
- * espaço certo. Cartas de autoria usam retrato tipográfico, sem imagem.
+ * espaço certo. Fritz e Laura Perls têm retratos ilustrados; outras autorias
+ * mantêm as iniciais enquanto não houver retrato disponível.
  */
 export type ConceptKey =
   | "awareness" | "aqui-agora" | "autorregulacao" | "suspensao" | "descricao" | "corpo"
@@ -45,6 +46,12 @@ function initials(title: string) {
 
 export function ConceptIllustration({ item, decorative = false }: { item: Pick<EditorialItem, "title" | "deck">; decorative?: boolean }) {
   const key = conceptKeyFor(item);
+  const author=normalize(item.title);
+  const portrait=key==="autoria" && (/\blaura\s+p(?:ea|e)rls\b/.test(author) ? "laura-perls" : /\bfritz\s+p(?:ea|e)rls\b/.test(author) ? "fritz-perls" : null);
+  if(portrait){
+    const slot:IllustrationSlotDef={path:`/brand/recursos/cartas/autores/${portrait}.webp`,ratio:"2:3",alt:`Retrato ilustrado de ${item.title}.`,brief:"Retrato editorial em aquarela sobre papel creme."};
+    return <IllustrationSlot slot={slot} decorative={decorative}/>;
+  }
   if (key === "autoria") return <div className="fv-author-portrait" role={decorative ? undefined : "img"} aria-label={decorative ? undefined : `Retrato tipográfico: ${item.title}`} aria-hidden={decorative || undefined}>
     <span>{initials(item.title)}</span>
   </div>;

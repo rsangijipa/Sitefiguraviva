@@ -6,8 +6,8 @@ import { getSavingOptions,savePrivateResourceRecord } from "./records.actions";
 import { recordSchemas,type FormationOption,type RecordResourceKey } from "./contracts";
 import { Button } from "./ui";
 
-export function SaveBar({resource,payload,contentVersion,preview,onDiscard}:{
- resource:ResourceDefinition;payload:unknown;contentVersion:string|null;preview:boolean;onDiscard:()=>void;
+export function SaveBar({resource,payload,contentVersion,preview,onDiscard,onSaved,onNavigateAway}:{
+ resource:ResourceDefinition;payload:unknown;contentVersion:string|null;preview:boolean;onDiscard:()=>void;onSaved?:()=>void;onNavigateAway?:(path:string)=>void;
 }) {
  const [formations,setFormations]=useState<FormationOption[]>([]); const [formation,setFormation]=useState("");
  const [enabled,setEnabled]=useState(false); const [message,setMessage]=useState(""); const [busy,setBusy]=useState(false); const [saved,setSaved]=useState(false);
@@ -31,7 +31,7 @@ export function SaveBar({resource,payload,contentVersion,preview,onDiscard}:{
   try {
    const result=await savePrivateResourceRecord({resourceKey:resource.slug,schemaVersion:1,formationId:formation,clientRequestId:request.current,contentVersion,payload});
    if(result.ok===false) setMessage(result.error);
-   else {setSaved(true);setMessage(`Registro guardado até ${new Date(result.data.expiresAt).toLocaleDateString("pt-BR")}.`);}
+   else {setSaved(true);setMessage(`Registro guardado até ${new Date(result.data.expiresAt).toLocaleDateString("pt-BR")}.`);onSaved?.();}
   } catch {setMessage("Não foi possível guardar. Seu texto continua nesta tela.");}
   finally {setBusy(false);}
  };
@@ -39,7 +39,7 @@ export function SaveBar({resource,payload,contentVersion,preview,onDiscard}:{
   {valid && !preview && !!formations.length && <label className="fv-field"><span>Formação deste registro</span><select value={formation} disabled={busy||saved} onChange={event=>{setFormation(event.target.value);request.current=null;}}>{formations.map(item=><option key={item.id} value={item.id}>{item.title}</option>)}</select></label>}
   {formation && <p className="fv-note">Prazo máximo: {new Date(formations.find(item=>item.id===formation)?.expiresAt ?? "").toLocaleDateString("pt-BR")}. Você pode exportar ou excluir antes.</p>}
   {message && <p role={saved ? "status" : "alert"} className={saved ? "fv-note" : "fv-error"}>{message}</p>}
-  {anonymous && <><Link href={`/auth?next=${encodeURIComponent(resourceHref(resource))}`}>Entrar na área do aluno</Link><p className="fv-note">Ao sair desta tela, o registro não guardado será descartado.</p></>}
+  {anonymous && <><Link href={`/auth?next=${encodeURIComponent(resourceHref(resource))}`} onClick={event=>{if(onNavigateAway){event.preventDefault();onNavigateAway(`/auth?next=${encodeURIComponent(resourceHref(resource))}`);}}}>Entrar na área do aluno</Link><p className="fv-note">Ao sair desta tela, o registro não guardado será descartado.</p></>}
   <div className="fv-actions">{valid && !preview && <Button onClick={()=>void save()} disabled={!enabled || !formation || busy || saved}>{busy ? "Guardando…" : saved ? "Guardado" : "Guardar no meu histórico"}</Button>}<Button secondary onClick={onDiscard}>{saved ? "Voltar aos recursos" : "Encerrar sem guardar"}</Button></div>
  </div>;
 }

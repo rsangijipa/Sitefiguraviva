@@ -125,7 +125,7 @@ export default function HomeClient({ initialData }: HomeClientProps = {}) {
   };
 
   return (
-    <div className="bg-paper min-h-screen flex flex-col font-sans text-primary overflow-hidden fx-grain">
+    <div className="fv-art-site bg-paper min-h-screen flex flex-col font-sans text-primary overflow-hidden fx-grain">
       <ScrollProgressBar />
       <AlertBar />
       <Navbar />

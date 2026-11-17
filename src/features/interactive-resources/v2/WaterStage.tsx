@@ -1,65 +1,21 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
-import { WebGLWaterSimulation } from "@/components/resources/apps/lago/webgl/waterSim";
-import { useResourceMotion } from "./ResourceShell";
-import { Button } from "./ui";
-
-export function WaterStage({forceStatic=false}:{forceStatic?:boolean}) {
-  const canvas = useRef<HTMLCanvasElement>(null);
-  const simulation = useRef<WebGLWaterSimulation | null>(null);
-  const frame = useRef(0);
-  const wake = useRef<()=>void>(()=>{});
-  const [rain,setRain] = useState(false); const [wind,setWind] = useState(false);
-  const [sunset,setSunset] = useState(false); const [staticChoice,setStatic] = useState(false);
-  const [unavailable,setUnavailable] = useState(false); const [touches,setTouches] = useState(0);
-  const systemReduced = useResourceMotion();
-  const reduced = systemReduced || staticChoice || forceStatic;
-  const config = useRef({rain,wind,sunset,reduced});
-  useEffect(() => { config.current={rain,wind,sunset,reduced}; wake.current(); },[rain,wind,sunset,reduced]);
-  useEffect(() => {
-    if (!canvas.current) return;
-    let sim: WebGLWaterSimulation;
-    let last = 0;
-    let observer:ResizeObserver|null=null;
-    try {
-      sim = new WebGLWaterSimulation(canvas.current,256);
-      simulation.current = sim;
-      const texture = document.createElement("canvas");
-      texture.width = texture.height = 2;
-      const ctx = texture.getContext("2d");
-      if (ctx) { ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue("--fv-verde-igarape").trim(); ctx.fillRect(0,0,2,2); }
-      sim.updateUnderwaterTexture(texture);
-      if (ctx) { ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue("--fv-verde-raiz").trim(); ctx.fillRect(0,0,2,2); }
-      sim.updateSkyTexture(texture);
-      const render = (time: number) => {
-        frame.current=0;
-        const surface = canvas.current;
-        if (!surface) return;
-        if (!document.hidden) {
-          const dpr=Math.min(window.devicePixelRatio || 1,2);
-          const width=Math.max(1,Math.round(surface.clientWidth*dpr));
-          const height=Math.round(width*.75);
-          if (surface.width!==width || surface.height!==height) { surface.width=width; surface.height=height; }
-          if (!config.current.reduced && time-last>33) {
-            if(config.current.rain && Math.random()<.2) sim.addDrop(Math.random(),Math.random(),.02,.015);
-            if(config.current.wind && Math.random()<.08) sim.addDrop(.2+Math.random()*.6,.5,.06,.008);
-            sim.step(.99); last=time;
-          }
-          sim.render(width,height,config.current.sunset ? "sunset" : "day",.025,.45,.3);
-        }
-        if(!config.current.reduced && !document.hidden) frame.current=requestAnimationFrame(render);
-      };
-      wake.current=()=>{if(!frame.current && !document.hidden)frame.current=requestAnimationFrame(render);};
-      observer=new ResizeObserver(()=>wake.current());observer.observe(canvas.current);
-      document.addEventListener("visibilitychange",wake.current);
-      wake.current();
-    } catch { setUnavailable(true); }
-    return () => { cancelAnimationFrame(frame.current); observer?.disconnect(); document.removeEventListener("visibilitychange",wake.current); wake.current=()=>{}; sim?.dispose(); simulation.current=null; };
-  },[]);
-  const touch = (x=.5,y=.5) => { if(!reduced) simulation.current?.addDrop(x,y,.035,.08); setTouches(value => value+1); };
-  return <><h2>Acompanhar a água</h2>{unavailable ? <div className="fv-visual-fallback">A superfície permanece estática neste navegador.</div> :
-    <canvas ref={canvas} className="fv-water" role="img" aria-label="Superfície do Igarapé; os controles estão abaixo" onPointerDown={event => { const bounds=event.currentTarget.getBoundingClientRect(); touch((event.clientX-bounds.left)/bounds.width,1-(event.clientY-bounds.top)/bounds.height); }} />}
-    <div className="fv-actions"><Button secondary onClick={() => touch()} disabled={reduced || unavailable}>Tocar a água</Button><Button secondary aria-pressed={rain} disabled={reduced} onClick={() => setRain(value => !value)}>Chuva</Button><Button secondary aria-pressed={wind} disabled={reduced} onClick={() => setWind(value => !value)}>Vento</Button><Button secondary aria-pressed={sunset} onClick={() => setSunset(value => !value)}>Entardecer</Button><Button secondary aria-pressed={reduced} disabled={systemReduced || forceStatic} onClick={() => setStatic(value => !value)}>Modo estático</Button></div>
-    <p className="fv-note" aria-live="polite">{touches ? `Toques na água: ${touches}.` : "Você pode acompanhar sem tocar."} {reduced ? "Movimento reduzido ativo." : ""}</p>
-  </>;
+import dynamic from "next/dynamic";
+import {Component,useCallback,useEffect,useRef,useState,type ReactNode} from "react";
+import {useResourceMotion} from "./ResourceShell";
+import {Button} from "./ui";
+import {AmbientControl} from "./immersive/AmbientControl";
+import {IllustrationSlot} from "./illustration/IllustrationSlot";
+import "./immersive/immersive.css";
+const RiverScene=dynamic(()=>import("./immersive/RiverScene"),{ssr:false,loading:()=> <p role="status">Preparando o rio em 3D…</p>});
+class RiverBoundary extends Component<{children:ReactNode;fallback:ReactNode;onFailure:()=>void},{failed:boolean}> {
+ state={failed:false};static getDerivedStateFromError(){return {failed:true};}componentDidCatch(error:Error){console.error("Falha ao renderizar o Igarapé:",error);this.props.onFailure();}render(){return this.state.failed ? this.props.fallback : this.props.children;}
+}
+export function WaterStage({forceStatic=false,showAmbient=false}:{forceStatic?:boolean;showAmbient?:boolean}) {
+ const [rain,setRain]=useState(false),[wind,setWind]=useState(false),[sunset,setSunset]=useState(false),[staticChoice,setStatic]=useState(forceStatic),[paused,setPaused]=useState(false),[unavailable,setUnavailable]=useState(false),[touches,setTouches]=useState(0),[touchSignal,setTouchSignal]=useState(0),[visible,setVisible]=useState(true);
+ const [view,setView]=useState({yaw:0,pitch:0});
+ const updateView=useCallback((next:{yaw:number;pitch:number})=>setView(next),[]);
+ const root=useRef<HTMLDivElement>(null);const motion=!useResourceMotion();const reduced=!motion || staticChoice;
+ useEffect(()=>{if(!root.current || typeof IntersectionObserver==="undefined")return;const observer=new IntersectionObserver(entries=>setVisible(entries[0].isIntersecting));observer.observe(root.current);return()=>observer.disconnect();},[]);
+ const art=<IllustrationSlot slot={{path:"/brand/recursos/igarape/margem.webp",ratio:"16:9",alt:"Paisagem em aquarela de um rio entre margens verdes, com reflexos das árvores na água.",brief:""}}/>;
+ return <><div className="im-river-title"><h2>Acompanhar o Igarapé</h2><p className="fv-note">Águas, reflexos e leito para observar.</p></div><div ref={root} className="im-river-scene" aria-label="Cena do rio">{reduced || unavailable ? art : <RiverBoundary fallback={art} onFailure={()=>setUnavailable(true)}><RiverScene view={view} onViewChange={updateView} paused={paused} visible={visible} wind={wind} rain={rain} sunset={sunset} touchSignal={touchSignal} onTouch={()=>setTouches(value=>value+1)} onFailure={()=>setUnavailable(true)}/></RiverBoundary>}<p className="im-river-hint">{reduced || unavailable ? "Paisagem estática · no seu tempo" : paused ? "Rio em pausa" : "Toque na água · botão central para olhar ao redor"}</p><div className="im-river-overlay"><div className="im-water-controls" role="group" aria-label="Controles do Igarapé"><Button secondary disabled={reduced || unavailable || paused} onClick={()=>{setTouchSignal(value=>value+1);setTouches(value=>value+1);}}>Tocar a água</Button><Button secondary disabled={reduced || unavailable} onClick={()=>setView(value=>({...value,yaw:Math.max(-.38,value.yaw-.12)}))}>Olhar à esquerda</Button><Button secondary disabled={reduced || unavailable} onClick={()=>setView(value=>({...value,yaw:Math.min(.38,value.yaw+.12)}))}>Olhar à direita</Button><Button secondary disabled={reduced || unavailable} onClick={()=>setView({yaw:0,pitch:0})}>Centralizar visão</Button><Button secondary aria-pressed={rain} disabled={reduced || unavailable} onClick={()=>setRain(value=>!value)}>Chuva</Button><Button secondary aria-pressed={wind} disabled={reduced || unavailable} onClick={()=>setWind(value=>!value)}>Vento</Button><Button secondary aria-pressed={sunset} disabled={reduced || unavailable} onClick={()=>setSunset(value=>!value)}>Entardecer</Button><Button secondary disabled={reduced || unavailable} onClick={()=>setPaused(value=>!value)}>{paused ? "Retomar água" : "Pausar água"}</Button><Button secondary aria-pressed={reduced || unavailable} disabled={!motion || unavailable} onClick={()=>setStatic(value=>!value)}>Modo estático</Button></div>{showAmbient && <details className="im-river-audio"><summary>Som ambiente</summary><AmbientControl channel="igarape"/></details>}</div></div>{unavailable && <p role="status" className="fv-note">O 3D está indisponível neste navegador. A paisagem permanece disponível.</p>}<span className="im-river-status" aria-live="polite">{touches ? `Toques na água: ${touches}.` : ""} {reduced ? "Movimento reduzido ativo." : ""}</span></>;
 }

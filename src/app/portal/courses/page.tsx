@@ -84,9 +84,9 @@ const CourseCard = ({
   };
 
   return (
-    <div className="bg-white rounded-xl border border-stone-100 overflow-hidden hover:shadow-lg transition-all group flex flex-col h-full">
+    <div className="bg-white rounded-2xl border border-emerald-100 overflow-hidden shadow-sm hover:shadow-lg transition-all group flex flex-col h-full">
       {/* Cover Image */}
-      <div className="h-40 bg-stone-200 relative overflow-hidden">
+      <div className="h-44 bg-emerald-50 relative overflow-hidden">
         {course.image ? (
           <Image
             src={course.image}
@@ -134,7 +134,7 @@ const CourseCard = ({
 
             <Link
               href={`/portal/course/${course.id}`}
-              className="block w-full py-2 bg-primary text-white text-center text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-stone-800 transition-colors mt-2"
+              className="flex min-h-11 items-center justify-center w-full py-2 bg-primary text-white text-center text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-stone-800 transition-colors mt-2"
             >
               Continuar
             </Link>
@@ -159,7 +159,7 @@ const CourseCard = ({
             <Link
               href={detailsHref}
               className={cn(
-                "block w-full py-2 border text-center text-xs font-bold uppercase tracking-widest rounded-lg transition-colors mt-3",
+                "flex min-h-11 items-center justify-center w-full py-2 border text-center text-xs font-bold uppercase tracking-widest rounded-lg transition-colors mt-3",
                 isCatalog
                   ? "border-primary text-primary hover:bg-primary hover:text-white"
                   : isPendingApproval

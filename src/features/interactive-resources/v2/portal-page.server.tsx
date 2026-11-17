@@ -34,5 +34,5 @@ export async function PortalResourcePage({params,searchParams}:PortalResourcePro
   const result=await resourceDatabase().from("resource_content_versions").select("*").eq("id",query.versao).eq("resource_key",ResourceKeySchema.parse(resource.slug)).maybeSingle();
   if(!result.error && result.data) snapshot.version=contentVersion(result.data);
  }
- return <ResourceHost slug={resource.slug} snapshot={snapshot} initialMode={destination.mode} preview={preview} />;
+ return <ResourceHost slug={resource.slug} snapshot={snapshot} initialMode={destination.mode} preview={preview} returnTo="/portal/recursos" />;
 }

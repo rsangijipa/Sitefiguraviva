@@ -3,6 +3,8 @@ import { useId, useEffect, type ReactNode, type ButtonHTMLAttributes } from "rea
 import { Check } from "lucide-react";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import type { EditorialItem } from "./editorial-schema";
+import { IllustrationSlot } from "./illustration/IllustrationSlot";
+import { conceptSlot } from "./illustration/slots";
 
 export function Button({ children, secondary = false, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { secondary?: boolean }) {
   return <button type="button" className={`fv-button${secondary ? " fv-button--secondary" : ""}`} {...props}>{children}</button>;
@@ -36,7 +38,7 @@ export function Dialog({ title, open, onClose, children }: { title: string; open
   return <dialog ref={ref} className="fv-modal fv-resources" aria-labelledby={id} onCancel={event => { event.preventDefault(); onClose(); }}><h2 id={id}>{title}</h2>{open && children}<div className="fv-actions"><Button secondary onClick={onClose}>Fechar</Button></div></dialog>;
 }
 export function EmptyContent() {
-  return <section aria-label="Acervo em revisão"><h2>O acervo aguarda revisão docente</h2><p>Os conteúdos aparecem aqui depois da autoria, revisão e publicação pela equipe.</p></section>;
+  return <section aria-label="Acervo em revisão"><IllustrationSlot slot={conceptSlot("vazio-fertil")} decorative className="fv-state-art"/><h2>O acervo aguarda revisão docente</h2><p>Os conteúdos aparecem aqui depois da autoria, revisão e publicação pela equipe.</p></section>;
 }
 export function PrivacyNote() {
   return <p className="fv-note">Nada é guardado automaticamente. Se você escolher guardar, o registro fica no seu histórico privado. Professores e outros alunos não têm acesso por esta ferramenta.</p>;

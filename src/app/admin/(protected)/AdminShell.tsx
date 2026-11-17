@@ -14,7 +14,9 @@ import {
   Settings,
   X,
   ArrowUpRight,
+  ChevronDown,
 } from "lucide-react";
+import { useFounderSettings } from "@/hooks/useSiteSettings";
 import { useToast } from "@/context/ToastContext";
 import { useAuth } from "@/context/AuthContext";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
@@ -25,7 +27,20 @@ import {
 } from "@/config/admin-navigation";
 import styles from "./Admin.module.css";
 
-const items = ADMIN_NAVIGATION_GROUPS.flatMap((group) => group.items);
+const items = [
+  ...ADMIN_NAVIGATION_GROUPS.flatMap((group) => group.items.map(item=>({...item, group:group.label}))),
+  {icon:Settings,label:"Conteúdo do site e fundadora",path:"/admin/settings",group:"Sistema"},
+  {icon:Home,label:"Matrículas",path:"/admin/enrollments",group:"Pessoas"},
+  {icon:Home,label:"Inscrições",path:"/admin/applications",group:"Pessoas"},
+  {icon:Home,label:"Comunidade",path:"/admin/community",group:"Aprendizagem"},
+  {icon:Home,label:"Gamificação",path:"/admin/gamification",group:"Aprendizagem"},
+  {icon:Home,label:"Análises",path:"/admin/analytics",group:"Sistema"},
+  {icon:Home,label:"Editor de recursos",path:"/admin/recursos/editor",group:"Conteúdo"},
+  {icon:Home,label:"Novo curso",path:"/admin/courses/new",group:"Aprendizagem"},
+  {icon:Home,label:"Nova avaliação",path:"/admin/assessments/new",group:"Aprendizagem"},
+  {icon:Home,label:"Novo livro",path:"/admin/books/new",group:"Conteúdo"},
+  {icon:Home,label:"Nova imagem na galeria",path:"/admin/gallery/new",group:"Conteúdo"},
+];
 
 export default function AdminShell({
   children,
@@ -33,6 +48,10 @@ export default function AdminShell({
   children: React.ReactNode;
 }) {
   const { user, signOut } = useAuth();
+  const {data:founder} = useFounderSettings();
+  const [hiddenGroups,setHiddenGroups] = useState<string[]>([]);
+  const [imageError,setImageError] = useState(false);
+  useEffect(()=>setImageError(false),[founder?.image]);
   const { addToast } = useToast();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -50,8 +69,7 @@ export default function AdminShell({
         .toLowerCase();
     const term = normalize(query.trim());
     return items
-      .filter((item) => !term || normalize(item.label).includes(term))
-      .slice(0, 7);
+      .filter((item) => !term || normalize(`${item.label} ${item.group} ${item.path}`).includes(term));
   }, [query]);
 
   useEffect(() => {
@@ -151,8 +169,8 @@ export default function AdminShell({
               className={styles.navGroup}
               data-tone={index % 4}
             >
-              <h2>{group.label}</h2>
-              {group.items.map((item) => {
+              <h2><button type="button" className={styles.groupToggle} aria-expanded={collapsed && !open || !hiddenGroups.includes(group.label)} aria-controls={`admin-group-${index}`} onClick={()=>setHiddenGroups(values=>values.includes(group.label) ? values.filter(value=>value!==group.label) : [...values,group.label])}>{group.label}<ChevronDown size={15} aria-hidden="true" className={hiddenGroups.includes(group.label) ? styles.groupClosed : undefined}/></button></h2>
+              <div id={`admin-group-${index}`} hidden={(!collapsed || open) && hiddenGroups.includes(group.label)}>{group.items.map((item) => {
                 const active = isAdminRouteActive(pathname, item.path);
                 return (
                   <Link
@@ -173,7 +191,7 @@ export default function AdminShell({
                     )}
                   </Link>
                 );
-              })}
+              })}</div>
             </section>
           ))}
         </nav>
@@ -266,11 +284,11 @@ export default function AdminShell({
             />
             {searchOpen && (
               <div className={styles.searchResults}>
-                <p>Ir para uma área</p>
+                <p>Áreas e ferramentas do painel</p>
                 {suggestions.length ? (
                   suggestions.map((item) => (
                     <Link
-                      key={item.path}
+                      key={`${item.path}-${item.label}`}
                       href={item.path}
                       onClick={() => {
                         setSearchOpen(false);
@@ -296,7 +314,7 @@ export default function AdminShell({
             title="Configurações"
           >
             <span className={styles.avatar}>
-              {user?.displayName?.[0]?.toUpperCase() || "A"}
+              {founder?.image && !imageError ? <img src={founder.image} alt="" onError={()=>setImageError(true)} /> : user?.displayName?.[0]?.toUpperCase() || "A"}
             </span>
             <span className={styles.accountName}>
               {user?.displayName || "Administrador"}

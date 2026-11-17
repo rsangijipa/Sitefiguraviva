@@ -1,0 +1,5 @@
+export const ambientSounds=[
+ {id:"floresta",title:"Floresta",path:"/brand/audio/ambient/floresta.mp3",credit:"Joseph SARDIN · BigSoundBank",license:"CC0 1.0",licenseUrl:"https://creativecommons.org/publicdomain/zero/1.0/",source:"https://bigsoundbank.com/forest-s0100.html",description:"Pássaros, insetos e ambiente de floresta. Trecho de 45 segundos.",art:"floresta"},
+ {id:"riacho",title:"Riacho e pássaros",path:"/brand/audio/ambient/riacho.mp3",credit:"Joseph SARDIN · BigSoundBank",license:"CC0 1.0",licenseUrl:"https://creativecommons.org/publicdomain/zero/1.0/",source:"https://bigsoundbank.com/forest-and-stream-1-s2713.html",description:"Água corrente com pássaros ao fundo. Trecho de 45 segundos.",art:"riacho"},
+ {id:"chuva",title:"Chuva",path:"/brand/audio/ambient/chuva.mp3",credit:"Effib · Wikimedia Commons",license:"CC BY-SA 3.0",licenseUrl:"https://creativecommons.org/licenses/by-sa/3.0/",source:"https://commons.wikimedia.org/wiki/File:Sound_of_rain.ogg",description:"Gravação de chuva, cerca de 26 segundos. Volume ajustado, entrada e saída suaves; adaptação sob CC BY-SA 3.0.",art:"chuva"},
+] as const;

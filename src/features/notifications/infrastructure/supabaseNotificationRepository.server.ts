@@ -1,4 +1,3 @@
-import { randomUUID } from "crypto";
 import { createSupabaseBrowserClient } from "@/infrastructure/supabase/client";
 import type { TableRow } from "@/infrastructure/supabase/database.types";
 import type { NotificationDoc } from "@/types/lms";
@@ -98,7 +97,7 @@ export async function createNotification(
   >,
   supabase = createSupabaseBrowserClient(),
 ): Promise<string> {
-  const id = randomUUID();
+  const id = globalThis.crypto.randomUUID();
   const { error } = await supabase.from("notifications").insert({
     id,
     user_id: userId,

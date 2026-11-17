@@ -1,6 +1,20 @@
 # Ilustrações dos Recursos Interativos — espaços e instruções de arte
 
-Cada ilustração é um arquivo em `public/brand/recursos/`. Basta salvar a imagem com o nome indicado: o site passa a exibi-la sem mudança de código. Enquanto o arquivo não existe, o recurso mostra um quadro vazio "Espaço para ilustração" (em desenvolvimento, com o nome do arquivo esperado).
+Cada ilustração é um arquivo em `public/brand/recursos/`. Basta salvar a imagem com o nome indicado: o site passa a exibi-la sem mudança de código. Falhas em imagens decorativas não deixam espaços vazios; nas imagens informativas, a interface oferece uma mensagem para continuar pelo texto. O quadro "Espaço para ilustração" fica restrito ao desenvolvimento.
+
+## Produção de 16/11/2026
+
+Figura e Fundo recebeu quatro estudos originais em `figura-e-fundo/estudos/`: `vaso-perfis.webp`, `pato-coelho.webp`, `arvore-perfis.webp` e `mancha-simetrica.webp`. São composições 4:3 (1200 × 900) com leituras visuais alternativas, sem pontuação ou interpretação psicológica. A mancha simétrica é inventada e não reproduz pranchas de testes. O manifesto de produção agora verifica 48 imagens.
+
+Na revisão das Cartas 3D, por solicitação expressa do usuário, foram acrescentados os retratos ilustrados `cartas/autores/laura-perls.webp` e `cartas/autores/fritz-perls.webp`, além de `cartas/textura-papel.webp` para o verso. Os três arquivos têm proporção 2:3 e estão incluídos no manifesto de produção. Essa solicitação autoriza a exceção à regra anterior de iniciais para esses dois autores. A vinculação é pelo nome, não pela posição: no acervo atual, Laura corresponde à carta 22 e Fritz à 23. Outros autores mantêm as iniciais quando não há retrato disponível.
+
+A frente das Cartas 3D usa imagem em toda a superfície e pequenas áreas de leitura translúcidas. O verso usa a textura real de papel, com tipografia verde. O conjunto atual soma 44 imagens WebP.
+
+Foram produzidos e integrados 41 WebP: 26 conceitos, copa, árvore de Rubin, vaso/perfis, duas cadeiras, fronteira, seis práticas de pausa e quatro paisagens (água dia/entardecer, jardim e rio). As capas do catálogo reutilizam essas composições. Prompts, dimensões, tamanho e SHA-256 constam em `docs/recursos-assets-production.json`; execute `npm run audit:resource-assets` para conferir os arquivos.
+
+A rodada `perceptivo-2` usa a cena descrita em texto enquanto não houver imagem licenciada fornecida pela equipe. Ela menciona uma pessoa conhecida; não foi criada uma pessoa por IA. Rodadas editoriais com `asset` usam a arte curada cadastrada, e rodadas novas sem arte mantêm a alternativa textual.
+
+Três texturas sonoras sintetizadas estão em `public/brand/audio/awareness/`, com alternativas textuais e candidatos de cadastro em `curation-candidates.json`. Não são gravações de natureza. Foram preparadas para escuta e curadoria, sem alterar publicações editoriais. A geração é reproduzível com `node tools/generate-awareness-audio.mjs`.
 
 ## Regras para todas as imagens
 
@@ -62,8 +76,23 @@ A carta escolhe o arquivo pelo título (ex.: "Introjeção" → `introjecao.webp
 
 Rodadas perceptivas criadas depois no editor usam `figura-e-fundo/<id-da-rodada>.webp`.
 
+## Chegada — assets integrados em 16/11/2026
+
+A Chegada tem sete ilustrações próprias em `public/brand/recursos/chegada/`: `abertura.webp` (1600 × 900) e `palavra.webp`, `corpo.webp`, `emocao.webp`, `intensidade.webp`, `necessidade.webp`, `reflexao.webp` (1200 × 900). A abertura também aparece no catálogo. Todas são decorativas, em aquarela sobre papel creme, com informações e controles disponíveis em texto.
+
+O manifesto `docs/recursos-assets-production.json` contém os prompts completos e hashes dos 55 WebP do acervo. A auditoria `npm run audit:resource-assets` verifica dimensões, tamanho e integridade. Detalhes da Chegada e evidências estão em `docs/audits/2026-11-16-chegada.md`.
+
 ## O que continua desenhado pelo site
 
 - **Silhueta do Mapa do Corpo**: é interativa (cada região é um botão), por isso fica em SVG. Arte licenciada pode substituí-la pelo editor (item com formato `frente`/`costas` e arte curada).
 - **Diagrama do Ciclo do Contato**: é um gráfico das fases marcadas, não uma ilustração.
 - **Retrato tipográfico** das cartas de autoria.
+
+
+## Cards de Necessidades Agora — ilustrações individuais
+
+Cada card usa um asset próprio em `public/brand/recursos/necessidades/cards/`, com 800 × 600 pixels em WebP: `descanso.webp`, `seguranca.webp`, `pertencimento.webp`, `autonomia.webp`, `reconhecimento.webp`, `expressao.webp`, `cuidado-corpo.webp`, `movimento.webp`, `silencio.webp` e `contato.webp`.
+
+Composições simples em aquarela sobre papel creme, sem texto dentro da imagem. Os nomes das necessidades permanecem em HTML. As imagens são decorativas e os estados de seleção continuam nos botões. O mapeamento aceita o identificador editorial ou o título normalizado; itens futuros sem arte específica usam o jardim existente. A capa do recurso no catálogo permanece com a ilustração anterior.
+
+Assets gerados com o image_gen integrado. Prompts e hashes registrados em `docs/recursos-assets-production.json`.

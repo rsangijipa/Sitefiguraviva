@@ -97,7 +97,7 @@ export const DashboardShell = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFCF9] flex font-sans">
+    <div className="fv-art-portal min-h-screen bg-[#FDFCF9] flex font-sans">
       {/* Desktop Sidebar */}
       <SidebarNav className="hidden lg:flex shrink-0 z-30" />
 
@@ -119,7 +119,7 @@ export const DashboardShell = ({ children }: { children: React.ReactNode }) => {
               transition={{ type: "spring", bounce: 0, duration: 0.4 }}
               className="fixed top-0 bottom-0 left-0 z-50 w-72 lg:hidden shadow-2xl"
             >
-              <SidebarNav className="h-full w-full" />
+              <SidebarNav className="h-full w-full" onNavigate={()=>setMobileMenuOpen(false)} />
             </motion.div>
           </>
         )}

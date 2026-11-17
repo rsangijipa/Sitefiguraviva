@@ -185,11 +185,11 @@ function CourseContent({ initialData }: { initialData?: any }) {
   return (
     <div className="min-h-screen bg-[#FDFCF9] pb-20 animate-fade-in">
       {/* Minimal Header */}
-      <div className="bg-white border-b border-stone-100 sticky top-0 z-30">
+      <div className="bg-white border border-stone-200 rounded-2xl mx-4 mt-3 shadow-sm sticky top-0 z-30">
         <div className="max-w-5xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
           <Link
             href="/portal"
-            className="text-stone-400 hover:text-primary flex items-center gap-2 text-xs font-bold uppercase tracking-widest transition-colors"
+            className="text-primary hover:bg-emerald-50 flex min-h-11 items-center gap-2 rounded-xl border border-emerald-200 px-4 text-xs font-bold uppercase tracking-widest transition-colors"
           >
             <ArrowLeft size={14} /> Voltar
           </Link>
@@ -231,10 +231,10 @@ function CourseContent({ initialData }: { initialData?: any }) {
               key={tab.id}
               onClick={() => handleTabChange(tab.id)}
               className={cn(
-                "flex items-center gap-2 pb-3 mb-[-1px] text-sm font-medium transition-colors border-b-2 whitespace-nowrap",
+                "flex min-h-11 items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors border whitespace-nowrap",
                 activeTab === tab.id
-                  ? "border-primary text-primary"
-                  : "border-transparent text-stone-500 hover:text-stone-800",
+                  ? "border-primary bg-primary text-white"
+                  : "border-stone-200 text-stone-600 hover:bg-emerald-50 hover:text-primary",
               )}
             >
               <tab.icon size={16} aria-hidden="true" />

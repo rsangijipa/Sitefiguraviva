@@ -1,107 +1,43 @@
 "use client";
-import { useState, type ReactNode } from "react";
-import { Button, TextArea, SelectableCard, EmptyContent, ReferenceLine, TextField, Dialog } from "./ui";
-import { DECKS, type EditorialItem } from "./editorial-schema";
+import { useState } from "react";
+import { Button, TextArea, SelectableCard, EmptyContent, ReferenceLine } from "./ui";
 import { useExperienceDraft, type ExperienceProps } from "./experience-types";
-import { ConceptIllustration } from "./illustration/ConceptIllustration";
-import { Canopy, ContactBoundary, CycleDiagram, RubinTree } from "./illustration/scenes";
-import { IllustrationSlot } from "./illustration/IllustrationSlot";
-import { SLOTS } from "./illustration/slots";
+import { ContactBoundary } from "./illustration/scenes";
+import { useDiscardConfirmation } from "./useDiscardConfirmation";
+import {InteractiveCycle} from "./cycle/InteractiveCycle";
+import "./cycle/cycle.css";
+import {FigureGroundStudies} from "./figure-ground/FigureGroundStudies";
 
-/** Primeira frase da definição: a frente da carta mostra uma frase; o resto vai para "Aprofundar". */
-const firstSentence = (text: string) => text.match(/^.*?[.!?](\s|$)/)?.[0].trim() ?? text;
-const cardCode = (index: number) => `FV-C${String(index + 1).padStart(3, "0")}`;
-const deckTitle = (id: string) => DECKS.find(deck => deck.id === id)?.title ?? "Conceito";
+export {CardsExperience} from "./cards/CardsExperience";
 
-/** Carta 2:3 (seção 7.2): frente com ilustração do conceito; verso em Verde Raiz com a pergunta. */
-function GestaltCard({ item, code, back, children }: { item: EditorialItem; code: string; back: boolean; children?: ReactNode }) {
-  return <article className={`fv-gcard${back ? " fv-gcard--back" : ""}`} aria-label={`${item.title}, ${back ? "verso" : "frente"}`}>
-    {back ? <div className="fv-gcard-face">
-      <span className="fv-gcard-label fv-gcard-label--back">Para ficar com isso</span>
-      <p className="fv-gcard-question">{item.prompt || "O que esta carta desperta em você agora?"}</p>
-      <span className="fv-gcard-meta">{item.title} · {code}</span>
-    </div> : <div className="fv-gcard-face">
-      <span className="fv-gcard-label">{deckTitle(item.deck)} · {code}</span>
-      <div className="fv-gcard-art"><ConceptIllustration item={item} decorative /></div>
-      <h3>{item.title}</h3>
-      <p className="fv-gcard-text">{firstSentence(item.text)}</p>
-      {/* A frente leva a primeira referência; a lista completa fica em "Aprofundar". */}
-      <ReferenceLine item={{ ...item, references: item.references.slice(0, 1) }} />
-      {item.references.length > 1 && <span className="fv-gcard-more">+{item.references.length - 1} {item.references.length === 2 ? "referência" : "referências"} em Aprofundar</span>}
-    </div>}
-    {children}
-  </article>;
-}
-
-export function CardsExperience(props: ExperienceProps) {
-  const [deck,setDeck] = useState(""); const [search,setSearch] = useState("");
-  const [favorites,setFavorites] = useState<string[]>([]); const [review,setReview] = useState<string[]>([]);
-  const [known,setKnown] = useState<string[]>([]); const [reflection,setReflection] = useState("");
-  const [flipped,setFlipped] = useState<string[]>([]); const [selected,setSelected] = useState<string|null>(null);
-  const [leaf,setLeaf] = useState<number|null>(null);
-  const payload={favorites,review,known,reflection}; useExperienceDraft(payload,props.onDraft);
-  const items=props.version?.configuration.items.filter(item => item.kind==="card") ?? [];
-  if(!items.length) return <EmptyContent />;
-  const code=(id:string) => cardCode(items.findIndex(item => item.id===id));
-  const toggle=(id:string,ids:string[],change:(ids:string[])=>void) => change(ids.includes(id) ? ids.filter(value => value!==id) : [...ids,id]);
-  const pick=(index:number|null) => { setLeaf(index); setSelected(items[Math.floor(Math.random()*items.length)].id); };
-  const visible=items.filter(item => (!deck || item.deck===deck) && (!search || item.title.toLocaleLowerCase("pt-BR").includes(search.toLocaleLowerCase("pt-BR"))) && (props.mode!=="revisar" || review.includes(item.id)));
-  const card=items.find(item => item.id===selected);
-  return <><h2>{props.mode==="copa" ? "Colher uma carta" : props.mode==="relacoes" ? "Relações entre conceitos" : "Percorrer o acervo"}</h2>
-    {props.mode==="copa" ? <div className="fv-copa"><p>Toque uma folha da copa. Uma carta do acervo vem até você.</p>
-      <Canopy onPick={pick} picked={leaf} />
-      <div className="fv-actions"><Button secondary onClick={() => pick(null)}>Colher uma carta ao acaso</Button></div></div> :
-      <><div className="fv-card-filters"><TextField label="Buscar título" value={search} onChange={setSearch} /><label className="fv-field"><span>Baralho</span><select value={deck} onChange={event => setDeck(event.target.value)}><option value="">Todos os baralhos</option>{DECKS.map(value => <option key={value.id} value={value.id}>{value.title} ({items.filter(item => item.deck===value.id).length})</option>)}</select></label></div>
-      {props.mode==="revisar" && !visible.length && <p>Você ainda não marcou cartas para rever nesta experiência.</p>}
-      <div className="fv-gcards">{visible.map(item => {
-        const back=flipped.includes(item.id);
-        return <GestaltCard key={item.id} item={item} code={code(item.id)} back={back}>
-          <div className="fv-gcard-actions">
-            <Button secondary onClick={() => toggle(item.id,flipped,setFlipped)}>{back ? "Ver conceito" : "Virar carta"}</Button>
-            <Button secondary onClick={() => setSelected(item.id)}>Aprofundar</Button>
-          </div>
-          <div className="fv-gcard-actions fv-gcard-actions--marks">
-            <Button secondary aria-pressed={favorites.includes(item.id)} onClick={() => toggle(item.id,favorites,setFavorites)}>Favorita</Button>
-            <Button secondary aria-pressed={review.includes(item.id)} onClick={() => toggle(item.id,review,setReview)}>Rever</Button>
-            <Button secondary aria-pressed={known.includes(item.id)} onClick={() => toggle(item.id,known,setKnown)}>Já li</Button>
-          </div>
-          {props.mode==="relacoes" && !!item.relatedConcepts.length && <div className="fv-gcard-relations"><span className="fv-label">Conversa com</span><ul>{item.relatedConcepts.map(id => <li key={id}><button type="button" className="fv-link-button" onClick={() => setSelected(id)}>{items.find(value => value.id===id)?.title ?? id}</button></li>)}</ul></div>}
-        </GestaltCard>;
-      })}</div></>}
-    <TextArea label="Uma nota de estudo, se quiser" value={reflection} onChange={setReflection} /><div className="fv-actions"><Button onClick={() => props.onComplete(payload)}>Concluir estudo</Button></div>
-    <Dialog title={card?.title ?? "Carta"} open={!!card} onClose={() => setSelected(null)}>{card && <article className="fv-print-card"><span className="fv-label">{deckTitle(card.deck)} · {code(card.id)}</span><div className="fv-gcard-art"><ConceptIllustration item={card} /></div><p className="fv-summary">{card.text}</p>{card.prompt && <p><strong>Para ficar com isso:</strong> {card.prompt}</p>}{card.teacherResponse && <p>{card.teacherResponse}</p>}<ReferenceLine item={card} />{!!card.relatedConcepts.length && <p className="fv-support">Conversa com: {card.relatedConcepts.map(id => items.find(value => value.id===id)?.title ?? id).join(", ")}</p>}<Button secondary onClick={() => window.print()}>Imprimir ou salvar ficha em PDF</Button></article>}</Dialog>
-  </>;
-}
-
-const RUBIN_OPTIONS = ["Dois rostos", "Uma árvore", "Os dois, alternando", "Outra coisa"];
 type Layer = "figura" | "fundo";
 /**
  * Figura e Fundo (seções 7.3 e 8 do guia):
- * - perceptivo: abre com a árvore de Rubin; cada rodada tem a sua imagem;
+ * - perceptivo: estudos visuais originais, sem interpretação de respostas;
  * - clínico: "Mesa posta" quando a rodada traz necessidades (alternativas):
  *   a figura muda conforme a necessidade escolhida;
  * - sessão: "Figura na sessão": cada trecho é marcado como figura ou fundo.
  */
 export function FigureExperience(props: ExperienceProps) {
-  const [index,setIndex] = useState(props.mode==="perceptivo" ? -1 : 0); const [selected,setSelected] = useState("");
-  const [rubin,setRubin] = useState(""); const [need,setNeed] = useState(""); const [layers,setLayers] = useState<Record<string,Layer>>({});
+  return props.mode==="perceptivo" ? <FigureGroundStudies {...props}/> : <EditorialFigureExperience {...props}/>;
+}
+function EditorialFigureExperience(props: ExperienceProps) {
+  const [index,setIndex] = useState(0); const [selected,setSelected] = useState("");
+  const [need,setNeed] = useState(""); const [layers,setLayers] = useState<Record<string,Layer>>({});
   const [reflection,setReflection] = useState(""); const [compare,setCompare] = useState(false);
-  useExperienceDraft(null,props.onDraft);
+  const {requestChange,confirmation}=useDiscardConfirmation();
+  const hasResponse=!!(selected || need || Object.keys(layers).length || reflection.trim());
+  useExperienceDraft({index,selected,need,layers,reflection},props.onDraft);
   const items=(props.version?.configuration.items ?? []).filter(item => item.format===props.mode);
-  if(index<0) return <><h2>A árvore de Rubin</h2><RubinTree /><p className="fv-summary">O que aparece primeiro para você?</p>
-    <div className="fv-options" role="group" aria-label="O que aparece primeiro">{RUBIN_OPTIONS.map(option => <SelectableCard key={option} label={option} selected={rubin===option} onSelect={() => setRubin(option)} />)}</div>
-    {rubin && <p className="fv-note" aria-live="polite">Não há resposta certa. A figura se forma na relação entre quem percebe e o que é percebido: a primeira camada vem da psicologia da Gestalt (Rubin, 1915); a segunda, do conceito clínico de figura e fundo (Perls, Hefferline e Goodman, 1951).</p>}
-    <div className="fv-actions"><Button onClick={() => setIndex(0)} disabled={!items.length}>{items.length ? "Seguir para as rodadas" : "Rodadas aguardam o acervo"}</Button><Button secondary onClick={() => props.onComplete(null)}>Encerrar</Button></div></>;
   const current=items[index];
   if(!current) return <EmptyContent />;
-  const next=() => {setIndex(index+1);setSelected("");setNeed("");setLayers({});setReflection("");setCompare(false);};
+  const next=() => requestChange(hasResponse,()=>{setIndex(index+1);setSelected("");setNeed("");setLayers({});setReflection("");setCompare(false);});
   const chosen=current.segments.find(item => item.id===selected);
   const chosenNeed=current.alternatives.find(item => item.id===need);
   const session=props.mode==="sessao";
   const marked=Object.keys(layers).length;
-  return <><p className="fv-tag">Rodada {index+1} de {items.length}{props.mode!=="perceptivo" ? " · situação fictícia" : ""}</p><h2>{current.title}</h2>
-    <div className={props.mode==="perceptivo" ? "fv-figure-stage" : undefined}>
-      {props.mode==="perceptivo" && <IllustrationSlot slot={SLOTS.round(current.id,current.title)} />}
+  return <>{confirmation}<p className="fv-tag">Rodada {index+1} de {items.length} · situação fictícia</p><h2>{current.title}</h2>
+    <div>
       <div><p className="fv-summary">{current.text}</p>
         {!!current.alternatives.length && <><h3>Mesa posta: com qual necessidade você chega?</h3><div className="fv-options" role="group" aria-label="Necessidade">{current.alternatives.map(item => <SelectableCard key={item.id} label={item.text} selected={need===item.id} onSelect={() => setNeed(item.id)} />)}</div>
           {chosenNeed && <p className="fv-note" aria-live="polite">Com {chosenNeed.text.toLocaleLowerCase("pt-BR")}, costuma virar figura: <strong>{chosenNeed.comment}</strong></p>}</>}
@@ -119,27 +55,34 @@ export function FigureExperience(props: ExperienceProps) {
 export function CycleExperience(props: ExperienceProps) {
   const [model,setModel] = useState<"zinker"|"phg"|"ribeiro">("zinker"); const [index,setIndex] = useState(0);
   const [sequence,setSequence] = useState<string[]>([]); const [interruption,setInterruption] = useState(""); const [reflection,setReflection] = useState(""); const [compare,setCompare] = useState(false);
+  const {requestChange,confirmation}=useDiscardConfirmation();
+  const hasResponse=!!(sequence.length || interruption || reflection.trim());
   const items=(props.version?.configuration.items ?? []).filter(item => item.format===model);
   const item=items[index]; const payload={itemId:item?.id ?? "",model,sequence,reflection:[interruption && `Interrupção percebida: ${item?.segments.find(phase => phase.id===interruption)?.text ?? ""}`,reflection].filter(Boolean).join("\n").slice(0,500)}; useExperienceDraft(payload,props.onDraft);
   if(!(props.version?.configuration.items.length)) return <EmptyContent />;
   const reset=() => {setSequence([]);setInterruption("");setReflection("");setCompare(false);};
-  return <><h2>Escolher uma lente de estudo</h2><div className="fv-options">{(["zinker","phg","ribeiro"] as const).map(id => <SelectableCard key={id} label={id==="zinker" ? "Zinker" : id==="phg" ? "PHG" : "Jorge Ponciano Ribeiro"} selected={model===id} onSelect={() => {setModel(id);setIndex(0);reset();}} />)}</div>{item ? <><h3 style={{marginTop:24}}>{item.title}</h3><p className="fv-summary">{item.text}</p>
-    <CycleDiagram phases={item.segments} marked={sequence} /><p>{item.prompt}</p><div className="fv-options">{item.segments.map(phase => <SelectableCard key={phase.id} label={phase.text} selected={sequence.includes(phase.id)} onSelect={() => setSequence(values => values.includes(phase.id) ? values.filter(value => value!==phase.id) : [...values,phase.id])} />)}</div>
-    <label className="fv-field"><span>Onde o ciclo se interrompeu?</span><select value={interruption} onChange={event => setInterruption(event.target.value)}><option value="">Não se interrompeu / não sei</option>{item.segments.map(phase => <option key={phase.id} value={phase.id}>{phase.text}</option>)}</select></label>
-    <TextArea label="Sua leitura da situação, se quiser" value={reflection} onChange={setReflection} />{compare && item.teacherResponse && <><h3>Leitura docente</h3><p className="fv-summary">{item.teacherResponse}</p></>}<ReferenceLine item={item} /><div className="fv-actions">{item.teacherResponse && <Button secondary onClick={() => setCompare(true)}>Comparar leituras</Button>}{index+1<items.length && <Button secondary onClick={() => {setIndex(index+1);reset();}}>Outra situação</Button>}<Button onClick={() => props.onComplete(payload)}>Concluir estudo</Button></div></> : <EmptyContent />}</>;
+  const toggle=(id:string)=>setSequence(values=>values.includes(id) ? values.filter(value=>value!==id) : [...values,id]);
+  return <div className="cy-app">{confirmation}<div className="cy-models"><div><span className="fv-label">Modelo de estudo</span><h2>Escolha uma lente</h2></div><div className="cy-model-options" role="group" aria-label="Modelo do ciclo">{(["zinker","phg","ribeiro"] as const).map(id=><button type="button" key={id} aria-pressed={model===id} onClick={()=>{if(id!==model)requestChange(hasResponse,()=>{setModel(id);setIndex(0);reset();});}}>{id==="zinker" ? "Zinker" : id==="phg" ? "PHG" : "Jorge Ponciano Ribeiro"}</button>)}</div></div>
+  {item ? <><div className="cy-workspace"><section className="cy-situation" aria-labelledby="cy-situation-title">{item.id==="zinker-1" && <img src="/brand/recursos/ciclo/sala-reuniao.webp" alt="" className="cy-room"/>}<div className="cy-situation-copy"><span className="fv-label">Situação {index+1} de {items.length} · estudo fictício</span><h2 id="cy-situation-title">{item.title}</h2><p>{item.text}</p><p className="cy-prompt">{item.prompt}</p></div></section><section className="cy-cycle" aria-label="Ciclo do contato"><div className="cy-section-head"><div><span className="fv-label">Sua observação</span><h2>O ciclo em movimento</h2></div><span className="cy-counter" aria-live="polite">{sequence.length} de {item.segments.length} marcadas</span></div><InteractiveCycle phases={item.segments} marked={sequence} onToggle={toggle}/><div className="cy-phases" role="group" aria-label="Etapas do ciclo">{item.segments.map((phase,index)=><button type="button" key={phase.id} aria-pressed={sequence.includes(phase.id)} onClick={()=>toggle(phase.id)}><span>{index+1}</span>{phase.text}</button>)}</div></section></div>
+  <section className="cy-reading" aria-label="Sua leitura"><div className="cy-section-head"><div><span className="fv-label">Descreva o que percebe</span><h2>Sua leitura da situação</h2></div></div><div className="cy-form"><label className="fv-field"><span>Onde o ciclo se interrompeu?</span><select value={interruption} onChange={event=>setInterruption(event.target.value)}><option value="">Não se interrompeu / não sei</option>{item.segments.map(phase=><option key={phase.id} value={phase.id}>{phase.text}</option>)}</select></label><TextArea label="Sua leitura da situação, se quiser" value={reflection} onChange={setReflection}/></div>
+  {item.teacherResponse && <><Button secondary aria-expanded={compare} onClick={()=>setCompare(value=>!value)}>{compare ? "Recolher leitura docente" : "Comparar leituras"}</Button>{compare && <div className="cy-compare"><section><h3>Sua leitura</h3><p>{reflection.trim() || "Você ainda não escreveu uma leitura."}</p></section><section><h3>Leitura docente</h3><p>{item.teacherResponse}</p></section></div>}</>}
+  <details className="cy-references"><summary>Referências do modelo</summary><ReferenceLine item={item}/></details><div className="fv-actions">{index+1<items.length && <Button secondary onClick={()=>requestChange(hasResponse,()=>{setIndex(index+1);reset();})}>Outra situação</Button>}<Button onClick={()=>props.onComplete(payload)}>Concluir estudo</Button></div></section></> : <EmptyContent/>}</div>;
+
 }
 export function BoundariesExperience(props: ExperienceProps) {
   const [index,setIndex]=useState(0); const [hypotheses,setHypotheses]=useState<string[]>([]); const [reflection,setReflection]=useState(""); const [compare,setCompare]=useState(false);
+  const {requestChange,confirmation}=useDiscardConfirmation();
   const items=props.version?.configuration.items ?? []; const item=items[index];
   const payload={itemId:item?.id ?? "",hypotheses,reflection}; useExperienceDraft(payload,props.onDraft);
   if(!item) return <EmptyContent />;
-  return <><ContactBoundary /><p className="fv-tag">Vinheta {index+1} de {items.length} · situação fictícia</p><h2>{item.title}</h2><p className="fv-summary">{item.text}</p><p>{item.prompt}</p><div className="fv-options">{item.alternatives.map(hypothesis => <SelectableCard key={hypothesis.id} label={hypothesis.text} selected={hypotheses.includes(hypothesis.id)} onSelect={() => setHypotheses(values => values.includes(hypothesis.id) ? values.filter(value => value!==hypothesis.id) : [...values,hypothesis.id])} />)}</div><Button secondary onClick={() => setHypotheses([])}>Não sei</Button><TextArea label="Uma hipótese nas suas palavras, se quiser" value={reflection} onChange={setReflection} />{compare && <><h3>Leitura docente</h3><p>{item.teacherResponse}</p></>}<ReferenceLine item={item} /><div className="fv-actions"><Button secondary onClick={() => setCompare(true)}>Comparar leituras</Button>{index+1<items.length && <Button secondary onClick={() => {setIndex(index+1);setHypotheses([]);setReflection("");setCompare(false);}}>Outra vinheta</Button>}<Button onClick={() => props.onComplete(payload)}>Concluir</Button></div></>;
+  return <>{confirmation}<ContactBoundary /><p className="fv-tag">Vinheta {index+1} de {items.length} · situação fictícia</p><h2>{item.title}</h2><p className="fv-summary">{item.text}</p><p>{item.prompt}</p><div className="fv-options">{item.alternatives.map(hypothesis => <SelectableCard key={hypothesis.id} label={hypothesis.text} selected={hypotheses.includes(hypothesis.id)} onSelect={() => setHypotheses(values => values.includes(hypothesis.id) ? values.filter(value => value!==hypothesis.id) : [...values,hypothesis.id])} />)}</div><Button secondary onClick={() => setHypotheses([])}>Não sei</Button><TextArea label="Uma hipótese nas suas palavras, se quiser" value={reflection} onChange={setReflection} />{compare && <><h3>Leitura docente</h3><p>{item.teacherResponse}</p></>}<ReferenceLine item={item} /><div className="fv-actions"><Button secondary onClick={() => setCompare(true)}>Comparar leituras</Button>{index+1<items.length && <Button secondary onClick={() => requestChange(!!(hypotheses.length || reflection.trim()),()=>{setIndex(index+1);setHypotheses([]);setReflection("");setCompare(false);})}>Outra vinheta</Button>}<Button onClick={() => props.onComplete(payload)}>Concluir</Button></div></>;
 }
 export function CaseExperience(props: ExperienceProps) {
   const [index,setIndex]=useState(0); const [observable,setObservable]=useState(""); const [question,setQuestion]=useState(""); const [experiment,setExperiment]=useState(""); const [field,setField]=useState(""); const [compare,setCompare]=useState(false);
+  const {requestChange,confirmation}=useDiscardConfirmation();
   const items=(props.version?.configuration.items ?? []).filter(item => item.format===props.mode); const item=items[index];
   const payload={itemId:item?.id ?? "",observable,question,experiment,field}; useExperienceDraft(payload,props.onDraft);
   if(!item) return <EmptyContent />;
-  return <><p className="fv-tag">Situação fictícia para estudo</p><h2>{item.title}</h2><p className="fv-summary">{item.text}</p><p>{item.prompt}</p><TextArea label="O que você consegue observar neste trecho?" value={observable} onChange={setObservable} /><TextArea label="Uma pergunta fenomenológica" value={question} onChange={setQuestion} /><TextArea label="Uma possibilidade de experimento" value={experiment} onChange={setExperiment} /><TextArea label="Mudar uma variável do campo e reler" value={field} onChange={setField} />
-    {compare && <><h3>Leitura docente para comparar</h3><p className="fv-summary">{item.teacherResponse}</p></>}<ReferenceLine item={item} /><div className="fv-actions"><Button secondary onClick={() => setCompare(true)}>Comparar leituras</Button>{index+1<items.length && <Button secondary onClick={() => {setIndex(index+1);setObservable("");setQuestion("");setExperiment("");setField("");setCompare(false);}}>Outro caso</Button>}<Button onClick={() => props.onComplete(payload)}>Concluir</Button></div></>;
+  return <>{confirmation}<p className="fv-tag">Situação {index+1} de {items.length} · fictícia para estudo</p><h2>{item.title}</h2><p className="fv-summary">{item.text}</p><p>{item.prompt}</p><TextArea label="O que você consegue observar neste trecho?" value={observable} onChange={setObservable} /><TextArea label="Uma pergunta fenomenológica" value={question} onChange={setQuestion} /><TextArea label="Uma possibilidade de experimento" value={experiment} onChange={setExperiment} /><TextArea label="Mudar uma variável do campo e reler" value={field} onChange={setField} />
+    {compare && <div className="fv-compare"><section><h3>Sua leitura</h3><p className="fv-summary">{[observable,question,experiment,field].filter(Boolean).join("\n\n") || "Você seguiu sem escrever uma leitura."}</p></section><section><h3>Leitura docente para comparar</h3><p className="fv-summary">{item.teacherResponse}</p></section></div>}<ReferenceLine item={item} /><div className="fv-actions"><Button secondary onClick={() => setCompare(true)}>Comparar leituras</Button>{index+1<items.length && <Button secondary onClick={() => requestChange(!!(observable.trim() || question.trim() || experiment.trim() || field.trim()),()=>{setIndex(index+1);setObservable("");setQuestion("");setExperiment("");setField("");setCompare(false);})}>Outro caso</Button>}<Button onClick={() => props.onComplete(payload)}>Concluir</Button></div></>;
 }

@@ -8,6 +8,9 @@ import React from "react";
 const routeLabels: Record<string, string> = {
   portal: "Início",
   courses: "Cursos",
+  course: "Meus cursos",
+  lesson: "Aulas",
+  gamificacao: "Conquistas",
   certificates: "Certificados",
   community: "Comunidade",
   profile: "Perfil",
@@ -54,7 +57,7 @@ export default function Breadcrumbs({
       }
     }
 
-    return { href, label, isLast };
+    return { href: href === "/portal/course" ? "/portal/courses" : href, label, isLast };
   });
 
   return (
@@ -65,7 +68,7 @@ export default function Breadcrumbs({
       <Link
         href={pathname.startsWith("/admin") ? "/admin" : "/portal"}
         aria-label={pathname.startsWith("/admin") ? "Visão geral do painel" : "Início do portal"}
-        className="text-stone-500 hover:text-stone-800 transition-colors flex items-center"
+        className="inline-flex min-h-11 min-w-11 justify-center rounded-xl border border-stone-200 bg-white px-3 text-stone-600 hover:bg-stone-50 transition-colors items-center"
       >
         <Home size={14} className="mr-1" />
       </Link>
@@ -79,7 +82,7 @@ export default function Breadcrumbs({
             <ChevronRight size={14} className="text-stone-300 flex-shrink-0" />
             <Link
               href={item.href}
-              className={`transition-colors truncate max-w-[150px] ${
+              className={`inline-flex min-h-11 items-center rounded-xl border border-stone-200 bg-white px-3 transition-colors truncate max-w-[150px] ${
                 item.isLast
                   ? "text-stone-800 font-medium pointer-events-none"
                   : "text-stone-500 hover:text-stone-800"

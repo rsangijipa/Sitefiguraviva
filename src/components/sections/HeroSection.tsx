@@ -3,10 +3,9 @@ import { DEFAULT_CONFIG, type ConfigSettings } from "@/lib/siteSettings";
 import { ArrowRight, Sparkles } from "lucide-react";
 import dynamic from "next/dynamic";
 import styles from "./HeroSection.module.css";
-import TreeAtmosphere from "../visual/TreeAtmosphere";
 
-const EnhancedLivingTree = dynamic(
-  () => import("../visual/EnhancedLivingTree"),
+const HeroTree3D = dynamic(
+  () => import("../visual/HeroTree3D"),
   { ssr: false },
 );
 
@@ -21,8 +20,7 @@ export default function HeroSection({
 
   return (
     <header className={`fv-bg fv-bg-hero ${styles.hero}`} data-home-hero>
-      {/* Aquarela de chão: ocupa a largura da janela, ancorada na base da árvore. */}
-      <TreeAtmosphere />
+      <div className={styles.environment} aria-hidden="true"><HeroTree3D background /></div>
       <div className={styles.layout}>
         <div className={styles.copy}>
           {/* O nome da instituição é o título */}
@@ -85,17 +83,8 @@ export default function HeroSection({
           </div>
         </div>
 
-        <div className={styles.visual} aria-hidden="true" data-hero-tree>
-          <EnhancedLivingTree
-            className={styles.tree}
-            theme="figura-viva"
-            timeOfDay="tarde"
-            windIntensity={0.26}
-            windDirection={0.28}
-            leafFlutter
-            driftingLeaves={false}
-            interactive={false}
-          />
+        <div className={styles.visual} data-hero-tree>
+          <HeroTree3D />
         </div>
       </div>
     </header>

@@ -39,7 +39,6 @@
   justify-self: center;
   width: min(100%, 280px);
   height: 280px;
-  pointer-events: none;
 }
 
 .visual::before {
@@ -124,3 +123,17 @@
 :global(.dark) .tree {
   opacity: 0.72;
 }
+
+/* A atmosfera é suavizada separadamente, mantendo a árvore nítida. */
+.hero :global([data-tree-wash]) { filter: blur(28px); opacity:.55; }
+.copy { position:relative; z-index:2; }
+.visual { width:min(100%, 420px); height:420px; }
+@media (min-width:768px) { .visual { justify-self:end; width:100%; height:clamp(400px,45vw,570px); } }
+@media (max-width:767px) { .visual { width:min(100%,380px); height:370px; } }
+
+/* O cenário acompanha toda a seção, enquanto a árvore interativa permanece nítida. */
+.environment { position:absolute; inset:-32px; overflow:hidden; pointer-events:none; filter:blur(9px); }
+.environment::after { content:""; position:absolute; inset:0; background:linear-gradient(90deg,rgb(var(--color-paper) / 70%),rgb(var(--color-paper) / 42%) 50%,rgb(var(--color-paper) / 18%)); }
+:global(.dark) .environment::after { background:linear-gradient(90deg,rgb(var(--color-paper) / 90%),rgb(var(--color-paper) / 65%) 55%,rgb(var(--color-paper) / 35%)); }
+.hero::after { z-index:0; background:none; }
+@media(max-width:767px) { .environment::after { background:rgb(var(--color-paper) / 65%); } }

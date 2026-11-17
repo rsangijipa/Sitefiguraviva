@@ -78,4 +78,20 @@ export function modeLabel(mode: string): string {
   const label = modeLabels[mode] ?? mode.replaceAll("-", " ");
   return label.charAt(0).toLocaleUpperCase("pt-BR") + label.slice(1);
 }
+const MODE_DESCRIPTIONS: Record<string,Record<string,string>> = {
+  "cartas-gestalticas": {
+    explorar: "Percorra os baralhos, vire cartas e aprofunde um conceito. 5–10 min.",
+    revisar: "Revisite as cartas marcadas para rever nesta experiência. 5–10 min.",
+    copa: "Escolha uma folha e descubra uma carta ao acaso. 5–10 min.",
+    relacoes: "Siga as conexões entre os conceitos do acervo. 5–10 min.",
+  },
+  "figura-e-fundo": {
+    perceptivo: "Observe imagens e perceba o que se destaca para você. 3–8 min.",
+    clinico: "Explore uma situação fictícia a partir de diferentes necessidades. 3–8 min.",
+    sessao: "Leia trechos de uma sessão fictícia e marque figura e fundo. 3–8 min.",
+  },
+};
+export function modeDescription(slug:string,mode:string):string {
+  return MODE_DESCRIPTIONS[slug]?.[mode] ?? "";
+}
 export function isPublicResource(resource: ResourceDefinition): boolean { return resource.access === "public" && resource.visibility === "published"; }

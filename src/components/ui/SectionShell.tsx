@@ -30,7 +30,7 @@ export default function SectionShell({
   return (
     <Component
       className={cn(
-        "w-full relative overflow-hidden",
+        "fv-art-section w-full relative overflow-hidden",
         !noPadding && "section-shell",
         className,
       )}

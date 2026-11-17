@@ -120,6 +120,15 @@ html[data-cookie-consent="pending"] [data-floating-whatsapp] {
      clara (nunca inverte no escuro), então usa os hex literais da marca em vez
      das triplas RGB tematizáveis usadas pelo resto do site. */
   --fv-verde-raiz: #005a1f;
+  --fv-verde-igarape: #07614c;
+  --fv-dark-raiz: #7cc894;
+  --fv-dark-igarape: #57b79e;
+  --fv-dark-terra: #d9995a;
+  --fv-dark-papel: #12160f;
+  --fv-dark-areia: #1b211a;
+  --fv-dark-nevoa: #394537;
+  --fv-dark-mata: #e4e8dc;
+  --fv-dark-pedra: #abb6a4;
   --fv-terra-barro: #96551f;
   --fv-creme: #fdfaf4;
   --fv-areia: #f1e9db;
@@ -1224,7 +1233,7 @@ html[data-cookie-consent="pending"] [data-floating-whatsapp] {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-4);
+  padding: 0;
   /* Fundo areia semi-opaco — nunca cinza translúcido nem preto */
   background: rgba(241, 233, 219, 0.94);
 }
@@ -1235,12 +1244,12 @@ html[data-cookie-consent="pending"] [data-floating-whatsapp] {
   flex-direction: column;
   min-width: 0;
   min-height: 0;
-  width: min(1180px, calc(100vw - 48px));
-  height: min(780px, calc(100dvh - 48px));
-  max-height: calc(100dvh - 32px);
+  width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
   background: var(--fv-creme);
-  border: 1px solid var(--fv-nevoa);
-  border-radius: var(--fv-radius-lg);
+  border: 0;
+  border-radius: 0;
   overflow: hidden;
   box-shadow: none;
 }
@@ -1341,15 +1350,15 @@ html[data-cookie-consent="pending"] [data-floating-whatsapp] {
 .fv-resource-tools { display: flex; align-items: center; gap: var(--space-2); }
 
 .dark .fv-resource-overlay {
-  --fv-verde-raiz: #7cc894;
-  --fv-verde-igarape: #57b79e;
-  --fv-terra-barro: #d9995a;
-  --fv-creme: #12160f;
-  --fv-creme-papel: #12160f;
-  --fv-areia: #1b211a;
-  --fv-nevoa: #394537;
-  --fv-mata: #e4e8dc;
-  --fv-pedra: #abb6a4;
+  --fv-verde-raiz: var(--fv-dark-raiz);
+  --fv-verde-igarape: var(--fv-dark-igarape);
+  --fv-terra-barro: var(--fv-dark-terra);
+  --fv-creme: var(--fv-dark-papel);
+  --fv-creme-papel: var(--fv-dark-papel);
+  --fv-areia: var(--fv-dark-areia);
+  --fv-nevoa: var(--fv-dark-nevoa);
+  --fv-mata: var(--fv-dark-mata);
+  --fv-pedra: var(--fv-dark-pedra);
   --fv-verde-raiz-rgb: 124 200 148;
   --fv-creme-papel-rgb: 18 22 15;
   --fv-areia-rgb: 27 33 26;
@@ -1731,3 +1740,30 @@ html[data-cookie-consent="pending"] [data-floating-whatsapp] {
     transition: none !important;
   }
 }
+
+/* Papel e aquarela: linguagem comum às páginas e aos cartões editoriais. */
+.fv-art-site, .fv-art-portal { --art-shadow: 7 97 76; }
+.fv-art-section { isolation:isolate; }
+.fv-art-site .fv-art-section::after { content:""; position:absolute; z-index:-1; inset:auto -8% -90px auto; width:min(64%,760px); height:300px; background:url('/assets/fv/art/aquarela-confluencia.webp') center/contain no-repeat; opacity:.18; pointer-events:none; }
+.fv-art-site .fv-art-section:nth-of-type(even)::after { left:-8%; right:auto; transform:scaleX(-1); }
+.fv-art-site .fv-art-card, .fv-art-portal .fv-art-card, .fv-art-site .fv-card:not(.fv-resource-card) {
+  background-image:url('/assets/fv/art/textura-papel.svg'), linear-gradient(145deg,rgb(var(--color-surface)),rgb(var(--color-areia) / .66));
+  border-color:rgb(var(--color-border)); border-radius:18px;
+  box-shadow:0 8px 24px rgb(var(--art-shadow) / .07);
+}
+.fv-art-site article:nth-child(3n + 1) .fv-art-card, .fv-art-site article.fv-card:nth-child(3n + 1) { background-image:url('/assets/fv/art/textura-papel.svg'),linear-gradient(145deg,rgb(var(--color-surface)),rgb(var(--color-aurora) / .10)); }
+.fv-art-site article:nth-child(3n + 2) .fv-art-card, .fv-art-site article.fv-card:nth-child(3n + 2) { background-image:url('/assets/fv/art/textura-papel.svg'),linear-gradient(145deg,rgb(var(--color-surface)),rgb(var(--color-vazante) / .13)); }
+.fv-art-site article:nth-child(3n) .fv-art-card, .fv-art-site article.fv-card:nth-child(3n) { background-image:url('/assets/fv/art/textura-papel.svg'),linear-gradient(145deg,rgb(var(--color-surface)),rgb(var(--color-broto) / .10)); }
+.fv-art-site .fv-art-card:hover, .fv-art-portal .fv-art-card:hover { border-color:rgb(var(--color-igarape) / .65); box-shadow:0 14px 32px rgb(var(--art-shadow) / .12); }
+.fv-art-site .fv-resources .fv-resource-card { background-image:url('/assets/fv/art/textura-papel.svg'),linear-gradient(155deg,var(--fv-creme-papel),color-mix(in srgb,var(--fv-areia) 60%,var(--fv-creme-papel))); border-radius:18px; box-shadow:0 7px 20px rgb(var(--art-shadow) / .08); }
+.fv-art-site .fv-resources .fv-resource-card:nth-child(3n + 1) { background-image:url('/assets/fv/art/textura-papel.svg'),linear-gradient(155deg,var(--fv-creme-papel),rgb(var(--color-aurora) / .10)); }
+.fv-art-site .fv-resources .fv-resource-card:nth-child(3n + 2) { background-image:url('/assets/fv/art/textura-papel.svg'),linear-gradient(155deg,var(--fv-creme-papel),rgb(var(--color-vazante) / .13)); }
+.fv-art-site .fv-resources .fv-resource-card:nth-child(3n) { background-image:url('/assets/fv/art/textura-papel.svg'),linear-gradient(155deg,var(--fv-creme-papel),rgb(var(--color-broto) / .10)); }
+.dark .fv-art-site .fv-art-card, .dark .fv-art-portal .fv-art-card, .dark .fv-art-site .fv-card:not(.fv-resource-card) { background-image:url('/assets/fv/art/textura-papel.svg'),linear-gradient(145deg,rgb(var(--color-surface)),rgb(var(--color-areia))); box-shadow:none; }
+.dark .fv-art-site .fv-resources .fv-resource-card { background-image:url('/assets/fv/art/textura-papel.svg'),linear-gradient(145deg,var(--fv-creme-papel),var(--fv-areia)); }
+.dark .fv-art-site .fv-art-section::after { opacity:.09; }
+@media (prefers-reduced-motion:reduce) { .fv-art-card { transition:none; } }
+/* Os cartões compartilhados também aparecem nas páginas que têm layout próprio. */
+.fv-art-card, .fv-card:not(.fv-resource-card) { background-image:url('/assets/fv/art/textura-papel.svg'),linear-gradient(145deg,rgb(var(--color-surface)),rgb(var(--color-areia) / .65)); border-radius:18px; }
+.fv-art-portal .fv-resources .fv-resource-card { background-image:url('/assets/fv/art/textura-papel.svg'),linear-gradient(155deg,var(--fv-creme-papel),var(--fv-areia)); border-radius:18px; }
+.dark .fv-art-card, .dark .fv-card:not(.fv-resource-card) { background-image:url('/assets/fv/art/textura-papel.svg'),linear-gradient(145deg,rgb(var(--color-surface)),rgb(var(--color-areia))); }

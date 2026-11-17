@@ -27,7 +27,11 @@ it("mostra o espaço vazio identificado enquanto a imagem não existe", () => {
   expect(screen.getByRole("img", { name: SLOTS.rubin.alt })).toHaveTextContent("Espaço para ilustração");
 });
 
-it("cartas de autoria usam retrato tipográfico, sem imagem", () => {
-  render(<ConceptIllustration item={{ title: "Laura Perls", deck: "autoras-autores" }} />);
-  expect(screen.getByRole("img", { name: "Retrato tipográfico: Laura Perls" })).toHaveTextContent("LP");
+it("autor sem retrato disponível mantém as iniciais", () => {
+  render(<ConceptIllustration item={{ title: "Martin Buber", deck: "autoras-autores" }} />);
+  expect(screen.getByRole("img", { name: "Retrato tipográfico: Martin Buber" })).toHaveTextContent("MB");
+});
+it.each([['Laura Perls','laura-perls'],['Fritz Perls','fritz-perls']])("%s possui um retrato ilustrado",(title,file)=>{
+ render(<ConceptIllustration item={{title,deck:"autoras-autores"}}/>);
+ expect(screen.getByRole("img",{name:`Retrato ilustrado de ${title}.`})).toHaveAttribute("src",`/brand/recursos/cartas/autores/${file}.webp`);
 });

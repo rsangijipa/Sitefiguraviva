@@ -312,17 +312,18 @@ export default function PortalDashboard() {
   return (
     <div className="panel-surface -m-4 min-h-screen space-y-8 p-4 animate-fade-in md:-m-6 md:p-6 lg:-m-8 lg:p-8">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <h1 className="text-4xl font-serif text-ink tracking-tight">
+      <div className="relative overflow-hidden rounded-3xl border border-emerald-200 bg-[#FDFAF4] px-6 py-8 shadow-sm md:px-10 md:py-12" style={{backgroundImage:"url(/brand/recursos/portal/boas-vindas.webp)",backgroundPosition:"center",backgroundSize:"cover"}}>
+        <div className="relative max-w-lg rounded-2xl bg-white/90 p-5 md:p-6">
+          <p className="mb-2 text-xs font-bold uppercase tracking-widest text-emerald-700">Seu espaço de aprendizagem</p>
+          <h1 className="text-4xl md:text-5xl font-serif italic font-bold text-emerald-900 tracking-tight">
             Olá, {firstName}
           </h1>
           <p className="text-stone-500 mt-2 font-serif italic">
             Pronto para continuar sua jornada hoje?
           </p>
         </div>
-        <div className="flex gap-2">
-          <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-white rounded-full border border-stone-100 text-sm text-stone-500 shadow-sm">
+        <div className="absolute right-5 bottom-4 hidden md:flex gap-2">
+          <div className="flex items-center gap-2 px-4 py-2 bg-white/90 rounded-full border border-emerald-100 text-sm text-stone-600 shadow-sm">
             <Calendar size={16} />
             <span>
               {new Date().toLocaleDateString("pt-BR", {

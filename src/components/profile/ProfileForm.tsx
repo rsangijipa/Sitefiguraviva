@@ -156,7 +156,8 @@ export function ProfileForm() {
     setMessage(null);
 
     try {
-      await supabase.auth.updateUser({ password: newPassword });
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
       setMessage({ type: "success", text: "Senha alterada com sucesso!" });
       setNewPassword("");
       setConfirmPassword("");

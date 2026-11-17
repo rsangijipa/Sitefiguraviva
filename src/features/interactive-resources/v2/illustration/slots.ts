@@ -5,7 +5,7 @@
  * vazio e identificado. A lista completa, com as instruções de arte, fica em
  * docs/recursos-v2-ilustracoes.md e é conferida por teste.
  */
-export type SlotRatio = "3:2" | "16:9" | "4:3" | "1:1" | "5:2";
+export type SlotRatio = "3:2" | "2:3" | "16:9" | "4:3" | "1:1" | "5:2";
 export interface IllustrationSlotDef { path: string; ratio: SlotRatio; alt: string; brief: string }
 
 const DIR = "/brand/recursos";

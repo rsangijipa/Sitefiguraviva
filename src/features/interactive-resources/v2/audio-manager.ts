@@ -1,8 +1,9 @@
 "use client";
 
+type Sound = {source:AudioBufferSourceNode|null;gain:GainNode;buffer:AudioBuffer;offset:number;startedAt:number;volume:number};
 class ResourceAudioManager {
   private context: AudioContext | null = null;
-  private channels = new Map<string, { source: AudioBufferSourceNode; gain: GainNode }>();
+  private channels = new Map<string, Sound>();
   private muted = true;
   private listening = false;
   private pending = new Map<string, AbortController>();
@@ -20,6 +21,45 @@ class ResourceAudioManager {
     return true;
   }
   isMuted() { return this.muted; }
+  private notify(){if(typeof window!=="undefined")window.dispatchEvent(new Event("fv:resource-audio-state"));}
+  getPlayback(channel:string){
+    const sound=this.channels.get(channel);
+    if(!sound)return null;
+    return {paused:!sound.source,duration:sound.buffer.duration,position:Math.min(sound.buffer.duration,sound.offset+(sound.source && this.context ? this.context.currentTime-sound.startedAt : 0)),volume:sound.volume};
+  }
+  pause(channel:string){
+    const sound=this.channels.get(channel);
+    if(!sound?.source || !this.context)return;
+    sound.offset=Math.min(sound.buffer.duration,sound.offset+this.context.currentTime-sound.startedAt);
+    sound.source.onended=null;sound.source.stop();sound.source.disconnect();sound.source=null;
+    this.notify();
+  }
+  async resume(channel:string){
+    const sound=this.channels.get(channel);
+    if(!sound || sound.source || this.muted || document.hidden || !this.context)return false;
+    if(Array.from(document.querySelectorAll("video,audio")).some(element=>element instanceof HTMLMediaElement && !element.paused && !element.muted))return false;
+    await this.context.resume();
+    if(this.channels.get(channel)!==sound || this.muted || document.hidden)return false;
+    this.start(channel,sound);return true;
+  }
+  setVolume(channel:string,volume:number){
+    const sound=this.channels.get(channel);
+    if(!sound || !this.context)return;
+    sound.volume=Math.max(0,Math.min(1,volume));
+    sound.gain.gain.setTargetAtTime(sound.volume*.5,this.context.currentTime,.05);
+    this.notify();
+  }
+  private start(channel:string,sound:Sound){
+    const context=this.context;
+    if(!context)return;
+    const source=context.createBufferSource();source.buffer=sound.buffer;
+    source.connect(sound.gain);sound.source=source;sound.startedAt=context.currentTime;
+    source.onended=()=>{
+      source.disconnect();
+      if(this.channels.get(channel)?.source===source){sound.gain.disconnect();this.channels.delete(channel);this.notify();}
+    };
+    source.start(0,sound.offset);this.notify();
+  }
   mute() { this.muted = true; this.stopAll(); if(typeof window!=="undefined")window.dispatchEvent(new Event("fv:resource-audio-muted")); }
   async play(channel: string, path: string) {
     if (this.muted || !this.context || document.hidden) return false;
@@ -33,15 +73,13 @@ class ResourceAudioManager {
     const buffer = await this.context.decodeAudioData(await response.arrayBuffer());
     if (this.muted || document.hidden || controller.signal.aborted || this.pending.get(channel) !== controller || document.documentElement.dataset.lessonAudioPlaying === "true") return false;
     this.pending.delete(channel);
-    const source = this.context.createBufferSource();
     const gain = this.context.createGain();
-    source.buffer = buffer;
     gain.gain.setValueAtTime(0, this.context.currentTime);
     gain.gain.linearRampToValueAtTime(.15, this.context.currentTime + .1);
-    source.connect(gain); gain.connect(this.context.destination);
-    this.channels.set(channel, { source, gain });
-    source.onended = () => { source.disconnect(); gain.disconnect(); if (this.channels.get(channel)?.source === source) this.channels.delete(channel); };
-    source.start();
+    gain.connect(this.context.destination);
+    const sound:Sound={source:null,gain,buffer,offset:0,startedAt:0,volume:.3};
+    this.channels.set(channel,sound);
+    this.start(channel,sound);
     return true;
   }
   stop(channel: string) {
@@ -49,8 +87,8 @@ class ResourceAudioManager {
     const sound = this.channels.get(channel);
     if (!sound) return;
     this.channels.delete(channel);
-    try { sound.source.stop(); } catch { /* already ended */ }
-    sound.source.disconnect(); sound.gain.disconnect();
+    if(sound.source){sound.source.onended=null;try { sound.source.stop(); } catch { /* already ended */ }sound.source.disconnect();}
+    sound.gain.disconnect();this.notify();
   }
   stopAll() { for (const key of new Set([...this.channels.keys(), ...this.pending.keys()])) this.stop(key); }
 }
