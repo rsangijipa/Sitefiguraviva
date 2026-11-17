@@ -45,6 +45,9 @@ test.describe("Resources catalog and experiences", () => {
     // control is actually exercised.
     await page.setViewportSize({ width: 390, height: 700 });
     await open(page, "/recursos/figura-e-fundo");
+    // The mode chooser can fit without scrolling; exercise the actual resource.
+    await page.getByRole("button", { name: "Iniciar recurso", exact: true }).click();
+    await expect(page.getByRole("region", { name: "Estudos de percepção visual" })).toBeVisible();
     const options = page.getByRole("button", { name: "Mais opções: tema" });
     await expect(options).toBeVisible();
     await options.click();

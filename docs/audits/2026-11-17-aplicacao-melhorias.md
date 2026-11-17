@@ -30,6 +30,7 @@ Importante para a migração: não foi feita reconciliação de registros histó
 - `courseService.getCourse` propaga erro de consulta e retorna `null` somente quando a consulta bem-sucedida não encontra o curso. O catálogo de cursos também deixou de capturar indisponibilidade como catálogo vazio.
 - O detalhe de um livro sem link válido não afirma que a obra está disponível no acervo; informa a ausência do link externo.
 - O smoke público identificou que abrir um recurso diretamente colocava o aviso de cookies e os controles globais atrás de um dialog nativo. As rotas públicas agora usam a moldura não modal; o portal e as prévias mantêm a janela nativa, que protege contra recorte por contêineres transformados. Há regressão unitária para os dois modos e a navegação pública é repetida sobre a build corrigida.
+- Os botões do cabeçalho compacto preservam alvo mínimo de 44 pixels em telas de celular. O teste de retorno ao topo inicia a experiência real antes de rolar, pois o seletor inicial de modos pode caber inteiro na tela; as verificações de acessibilidade e retorno continuam ativas.
 
 ### A4 Registro de eventos
 
@@ -51,7 +52,7 @@ Importante para a migração: não foi feita reconciliação de registros histó
 
 Na cópia isolada, lint, os 57 testes de scripts e as checagens TypeScript geral e de segurança passaram. A suíte Jest completa, repetida após a correção dos recursos públicos, aprovou 191 suítes e 974 testes; uma suíte com sete testes legados de Firestore permaneceu ignorada por depender do emulador. Evidências de comandos e capturas ficam em `reports/improvements-2026-11-17/`; os testes de scripts estão em `ci-validation-final.log` e a rodada posterior à correção dos recursos está em `ci-validation-resource-fix.log`.
 
-O navegador aprovou seis verificações no harness de interface, sem erros de página e sem overflow horizontal nos cenários exercitados. As capturas em celular e desktop foram inspecionadas. A compilação de produção e o smoke público são verificados separadamente dos testes autenticados.
+O navegador aprovou seis verificações no harness de interface, sem erros de página e sem overflow horizontal nos cenários exercitados. As capturas em celular e desktop foram inspecionadas. A build de produção corrigida passou; os oito testes públicos de Playwright passaram em 13,2 segundos, sem falhas ou repetições. A rodada final de lint, tipos, tipos de segurança, build e smoke está em `ci-build-smoke-final.log`, com todos os códigos de saída iguais a zero. Ela inclui a entrada direta nos recursos, troca de modo, controles globais, retorno ao topo, alvo de toque no celular e rotas públicas. As jornadas autenticadas dependentes de homologação não foram executadas.
 
 O harness de interface usa componentes reais com dados e consultas substituídos, sem autenticação ou chamadas a serviços remotos. Ele verifica recuperação das prévias e falha/repetição/deduplicação de páginas em 390, 768 e 1440 pixels. Isso não equivale a homologação do fluxo completo.
 
