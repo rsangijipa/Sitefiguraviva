@@ -4,7 +4,7 @@ jest.mock("next/navigation",()=>({usePathname:()=>"/admin"}));
 jest.mock("@/context/AuthContext",()=>({useAuth:()=>({user:{displayName:"Admin"},signOut:jest.fn()})}));
 jest.mock("@/context/ToastContext",()=>({useToast:()=>({addToast:jest.fn()})}));
 jest.mock("@/hooks/useSiteSettings",()=>({useFounderSettings:()=>({data:{image:"/fundadora.jpg"}})}));
-jest.mock("@/components/layout/NotificationBell",()=>()=> <button>Notificações</button>);
+jest.mock("@/components/layout/NotificationBell",()=>function MockNotificationBell(){return <button>Notificações</button>;});
 jest.mock("@/components/ui/Breadcrumbs",()=>()=>null);
 it("allows each navigation group to collapse and expand",()=>{
  render(<AdminShell>Conteúdo</AdminShell>);
