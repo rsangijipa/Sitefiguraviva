@@ -1,0 +1,560 @@
+/* Suspended floating window with rounded borders */
+.dialog {
+  width: min(1200px, calc(100% - 32px));
+  max-width: none;
+  max-height: calc(100dvh - 40px);
+  height: calc(100dvh - 40px);
+  margin: auto;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid rgba(216, 207, 190, 0.7);
+  border-radius: 28px;
+  box-shadow: 0 24px 64px -12px rgba(18, 26, 17, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+  color: #262b22;
+  background: #f7f3e8;
+  transition: background-color 260ms ease, color 260ms ease;
+}
+
+.dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.dialog::backdrop {
+  background: rgb(22 28 20 / 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+/* Header bar */
+.header {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  padding: 14px 24px;
+  background: #005a1f;
+  color: #fdfaf4;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  flex-shrink: 0;
+}
+
+.headerTitleWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  max-width: 580px;
+}
+
+.eyebrowTag {
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #d8c38a;
+  font-weight: 600;
+}
+
+.headerTitle {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 1.15rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+
+/* Header Actions */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.toolGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.actionBtn,
+.actions :is(button, a) {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 12px;
+  padding: 8px 14px;
+  color: #fdfaf4;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: all 180ms ease;
+  text-decoration: none;
+}
+
+.actionBtn:hover,
+.actions :is(button, a):hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.6);
+  transform: translateY(-1px);
+}
+
+.subActionBtn {
+  min-height: 44px;
+  padding: 8px 10px;
+  font-size: 0.75rem;
+  background: transparent;
+  color: #ffd885;
+  border: 1px dashed rgba(255, 216, 133, 0.4);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.subActionBtn:hover {
+  background: rgba(255, 216, 133, 0.15);
+}
+
+.counterBadge {
+  background: #f59e0b;
+  color: #1a2016;
+  font-weight: 700;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 9999px;
+  margin-left: 2px;
+}
+
+/* Theme toggle pills */
+.themeToggleGroup {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 14px;
+  gap: 3px;
+}
+
+.themeOption {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: all 180ms ease;
+}
+
+.themeOption:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.themeOptionActive {
+  background: #ffffff !important;
+  color: #005a1f !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.closeBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fdfaf4;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: all 180ms ease;
+}
+
+.closeBtn:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: white;
+}
+
+/* Body & Content */
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: clamp(16px, 3.5vw, 36px);
+  -webkit-overflow-scrolling: touch;
+}
+
+.pdfBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: rgba(0, 90, 31, 0.08);
+  border: 1px solid rgba(0, 90, 31, 0.2);
+  font-size: 0.82rem;
+  color: #005a1f;
+}
+
+.pdfLinkBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: #005a1f;
+  color: white;
+  text-decoration: none;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.frame {
+  width: 100%;
+  height: calc(100% - 50px);
+  min-height: 480px;
+  border: 0;
+  border-radius: 16px;
+  background: white;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.paper {
+  max-width: 840px;
+  min-height: 100%;
+  margin: auto;
+  padding: clamp(24px, 5vw, 64px);
+  border-radius: 20px;
+  box-shadow: 0 10px 36px rgba(38, 43, 34, 0.1);
+  font-size: 1.08rem;
+  line-height: 1.9;
+  transition: all 260ms ease;
+}
+
+.paperHeader {
+  margin-bottom: 32px;
+}
+
+.paperCategory {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: #005a1f;
+  margin-bottom: 8px;
+}
+
+.paperHeader h1 {
+  font-family: var(--font-serif), Georgia, serif;
+  color: #005a1f;
+  font-size: clamp(1.8rem, 3.4vw, 2.7rem);
+  line-height: 1.22;
+  margin: 0 0 16px 0;
+}
+
+.paperSubtitle {
+  font-size: 1.15rem;
+  font-style: italic;
+  color: #555b50;
+  margin-bottom: 12px;
+}
+
+.paperAuthor {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #8c7853;
+}
+
+.paperDivider {
+  margin-top: 24px;
+  border: 0;
+  height: 1px;
+  background: #e2d9cb;
+}
+
+.articleContent {
+  overflow-wrap: break-word;
+}
+
+.articleContent :is(p, ul, ol, blockquote) {
+  margin-bottom: 1.4em;
+}
+
+.articleContent blockquote {
+  border-left: 4px solid #005a1f;
+  padding-left: 20px;
+  font-style: italic;
+  color: #4a5445;
+  background: rgba(0, 90, 31, 0.04);
+  padding-block: 8px;
+  border-radius: 0 8px 8px 0;
+}
+
+.articleContent h2,
+.articleContent h3 {
+  font-family: var(--font-serif), Georgia, serif;
+  color: #005a1f;
+  margin-top: 2em;
+  margin-bottom: 0.8em;
+  line-height: 1.3;
+}
+
+.emptyNote {
+  font-style: italic;
+  color: #6b6b63;
+}
+
+.failedBox {
+  padding: 32px;
+  text-align: center;
+  border: 1px dashed #d8cfbe;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* ==================== THEME: TOM PASTEL ==================== */
+.dialog[data-reader-theme="pastel"] {
+  background: #f6f1e5;
+  color: #242921;
+}
+
+.dialog[data-reader-theme="pastel"] .paper {
+  background: #fdfbf7;
+  border: 1px solid #ebd9c2;
+  color: #262c23;
+}
+
+.dialog[data-reader-theme="pastel"] .paperHeader h1 {
+  color: #005a1f;
+}
+
+/* ==================== THEME: ESCURO ==================== */
+.dialog[data-reader-theme="dark"] {
+  background: #111512;
+  color: #e5ede3;
+  border-color: #263327;
+}
+
+.dialog[data-reader-theme="dark"] .paper {
+  background: #1a211b;
+  border: 1px solid #28372b;
+  color: #e2e8df;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+
+.dialog[data-reader-theme="dark"] .paperHeader h1 {
+  color: #a4deb9;
+}
+
+.dialog[data-reader-theme="dark"] .paperCategory {
+  color: #d1b46a;
+}
+
+.dialog[data-reader-theme="dark"] .paperSubtitle {
+  color: #a8b3a5;
+}
+
+.dialog[data-reader-theme="dark"] .paperAuthor {
+  color: #c9ba95;
+}
+
+.dialog[data-reader-theme="dark"] .paperDivider {
+  background: #2f3c30;
+}
+
+.dialog[data-reader-theme="dark"] .articleContent blockquote {
+  border-left-color: #a4deb9;
+  background: rgba(164, 222, 185, 0.08);
+  color: #cbd4c8;
+}
+
+.dialog[data-reader-theme="dark"] .articleContent h2,
+.dialog[data-reader-theme="dark"] .articleContent h3 {
+  color: #a4deb9;
+}
+
+.dialog[data-reader-theme="dark"] .pdfBanner {
+  background: rgba(164, 222, 185, 0.1);
+  border-color: rgba(164, 222, 185, 0.25);
+  color: #cbe6d6;
+}
+
+/* Highlighter Styles */
+.paper::highlight(fv-reader-highlight),
+.paper ::highlight(fv-reader-highlight) {
+  background: #fde68a;
+  color: #1a2016;
+}
+
+.dialog[data-reader-theme="dark"] .paper ::highlight(fv-reader-highlight) {
+  background: #d8b44a;
+  color: #111512;
+}
+
+.toastNotice[hidden] {
+  display: none;
+}
+
+.note {
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .dialog {
+    width: calc(100% - 16px);
+    height: calc(100dvh - 16px);
+    max-height: calc(100dvh - 16px);
+    border-radius: 20px;
+  }
+  .header {
+    position: relative;
+    padding: 10px 12px;
+    gap: 8px;
+  }
+  .headerTitleWrap {
+    width: 100%;
+    padding-right: 52px;
+  }
+  /* Uma linha de ferramentas com rolagem lateral própria; o fechar fica no canto. */
+  .actions {
+    width: 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 6px;
+    padding-bottom: 2px;
+    scrollbar-width: thin;
+  }
+  .actions > *,
+  .toolGroup > * {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .closeBtn {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+  }
+  .actionBtn span,
+  .themeOption span {
+    font-size: 0.72rem;
+  }
+}
+
+.fallbackMark {
+  background-color: #fde68a;
+  color: #1a2016;
+  border-radius: 3px;
+  padding: 1px 3px;
+}
+
+/* Floating Toast Notice */
+.toastNotice {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #005a1f;
+  color: #ffffff;
+  padding: 10px 20px;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+  z-index: 50;
+  animation: toastFade 200ms ease-out;
+}
+
+@keyframes toastFade {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 10px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+/* Print styling */
+@media print {
+  body:has(.dialog[open]) > *:not(:has(.dialog[open])) {
+    display: none !important;
+  }
+  body:has(.dialog[open]) * {
+    visibility: hidden;
+  }
+  .dialog[open],
+  .dialog[open] .body,
+  .dialog[open] .paper,
+  .dialog[open] .paper * {
+    visibility: visible;
+  }
+  .dialog[open] {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: auto;
+    max-height: none;
+    border: 0;
+    overflow: visible;
+    background: white !important;
+    color: black !important;
+    box-shadow: none;
+  }
+  .dialog[open] .header {
+    display: none !important;
+  }
+  .dialog[open] .body {
+    overflow: visible;
+    padding: 0;
+  }
+  .dialog[open] .paper {
+    box-shadow: none;
+    border: none;
+    background: white !important;
+    color: black !important;
+    padding: 0;
+    max-width: 100%;
+  }
+  .dialog[open] .paperHeader h1 {
+    color: black !important;
+  }
+}
+
+.actions :is(button, a):focus-visible,
+.pdfLinkBtn:focus-visible {
+  outline: 3px solid #d8c38a;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dialog,
+  .paper,
+  .toastNotice,
+  .actions :is(button, a) {
+    transition: none;
+    animation: none;
+  }
+}
