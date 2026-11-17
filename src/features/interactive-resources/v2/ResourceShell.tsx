@@ -22,7 +22,19 @@ export function ResourceShell({ resource, version, concepts, onNavigateAway, chi
 }) {
   const [largeText,setLargeText]=useState(false);
   const windowRef=useRef<HTMLDivElement>(null);
-  useEffect(()=>{const node=windowRef.current;const previous=document.activeElement instanceof HTMLElement ? document.activeElement : null;node?.querySelector<HTMLElement>("a,button")?.focus();const trap=(event:KeyboardEvent)=>{if(event.key!=="Tab" || !node || document.querySelector("dialog[open]"))return;const targets=Array.from(node.querySelectorAll<HTMLElement>("a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex='-1'])")).filter(el=>el.getClientRects().length>0);if(!targets.length)return;const first=targets[0],last=targets[targets.length-1];if(event.shiftKey && (document.activeElement===first || !node.contains(document.activeElement))){event.preventDefault();last.focus();}else if(!event.shiftKey && document.activeElement===last){event.preventDefault();first.focus();}};document.addEventListener("keydown",trap);return()=>{document.removeEventListener("keydown",trap);previous?.focus();};},[]);
+  const dialogRef=useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const overflow = document.body.style.overflow;
+    dialog?.showModal();
+    document.body.style.overflow = "hidden";
+    return () => {
+      dialog?.close();
+      document.body.style.overflow = overflow;
+      previous?.focus();
+    };
+  }, []);
   const [systemReduced, setSystemReduced] = useState(true);
   const [chosenReduced, setChosenReduced] = useState(false);
   const [sound, setSound] = useState(false);
@@ -65,8 +77,12 @@ export function ResourceShell({ resource, version, concepts, onNavigateAway, chi
   };
 
   return <MotionPreference.Provider value={reduced}><ResourceNavigation.Provider value={onNavigateAway ?? null}>
-    <div className="fv-resource-overlay">
-      <div ref={windowRef} className="fv-resource-window" data-resource-window data-text-size={largeText ? "large" : "normal"} role="dialog" aria-modal="true" aria-labelledby="resource-title" aria-describedby="resource-description">
+    <dialog ref={dialogRef} className="fv-resource-overlay fv-resource-dialog" aria-labelledby="resource-title" aria-describedby="resource-description" onCancel={event => {
+      if (event.target !== event.currentTarget) return;
+      event.preventDefault();
+      onNavigateAway?.(navigation);
+    }}>
+      <div ref={windowRef} className="fv-resource-window" data-resource-window data-text-size={largeText ? "large" : "normal"}>
         <header className="fv-resource-header">
           <Link className="fv-resource-back" href={navigation} aria-label="Voltar para recursos" onClick={event => requestNavigation(event, navigation)}>
             <ArrowLeft size={20} aria-hidden="true" /><span>Recursos</span>
@@ -79,7 +95,7 @@ export function ResourceShell({ resource, version, concepts, onNavigateAway, chi
             </button>
           </div>
         </header>
-        <div className="fv-resource-body" data-scroll-root>
+        <div className="fv-resource-body" data-scroll-root data-lenis-prevent>
           <section className="fv-resources" data-register={resource.register} data-resource-key={resource.slug} aria-label={resource.title}>
             <div className={`fv-content${focusedCards ? " fv-content--cards" : focusedImmersive ? " fv-content--immersive" : focusedArrival ? " fv-content--arrival" : focusedVisual ? " fv-content--visual" : ""}`}>
               {!isRiver && !isPause && <details className="fv-accessibility-more"><summary>Mais opções de acessibilidade</summary><div className="fv-resource-tools">{version?.configuration.audio.length ? <button className="fv-resource-icon-btn" type="button" aria-label={sound ? "Desativar som" : "Ativar som"} aria-pressed={sound} title={sound ? "Desativar som" : "Ativar som"} onClick={() => void toggleSound()}>{sound ? <Volume2 size={20} aria-hidden="true" /> : <VolumeX size={20} aria-hidden="true" />}</button> : null}
@@ -100,7 +116,7 @@ export function ResourceShell({ resource, version, concepts, onNavigateAway, chi
           </section>
         </div>
       </div>
-    </div>
+    </dialog>
     <Dialog title={concept?.title ?? "Conceito"} open={!!concept} onClose={() => setConcept(null)}>{concept && <><p className="fv-summary">{concept.text}</p><ReferenceLine item={concept} /></>}</Dialog>
   </ResourceNavigation.Provider></MotionPreference.Provider>;
 }

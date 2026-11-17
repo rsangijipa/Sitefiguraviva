@@ -41,10 +41,11 @@ export const courseService = {
   async getCoursesByIds(ids: string[], tenantId?: string): Promise<Course[]> {
     if (!ids || ids.length === 0) return [];
 
-    const { data } = await createSupabaseBrowserClient()
+    const { data, error } = await createSupabaseBrowserClient()
       .from("courses")
       .select("*")
       .in("id", ids);
+    if (error) throw error;
     const results = (data ?? []).map(
       (row: any) =>
         ({
@@ -81,7 +82,7 @@ export const courseService = {
       }));
     } catch (error) {
       console.error(`Error fetching materials for course ${courseId}:`, error);
-      return [];
+      throw error;
     }
   },
 };

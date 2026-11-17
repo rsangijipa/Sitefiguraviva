@@ -1767,3 +1767,21 @@ html[data-cookie-consent="pending"] [data-floating-whatsapp] {
 .fv-art-card, .fv-card:not(.fv-resource-card) { background-image:url('/assets/fv/art/textura-papel.svg'),linear-gradient(145deg,rgb(var(--color-surface)),rgb(var(--color-areia) / .65)); border-radius:18px; }
 .fv-art-portal .fv-resources .fv-resource-card { background-image:url('/assets/fv/art/textura-papel.svg'),linear-gradient(155deg,var(--fv-creme-papel),var(--fv-areia)); border-radius:18px; }
 .dark .fv-art-card, .dark .fv-card:not(.fv-resource-card) { background-image:url('/assets/fv/art/textura-papel.svg'),linear-gradient(145deg,rgb(var(--color-surface)),rgb(var(--color-areia))); }
+
+/* Native top-layer resource windows escape portal transforms and clipping. */
+dialog.fv-resource-dialog {
+  width: 100vw;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  color: var(--fv-mata);
+}
+dialog.fv-resource-dialog:not([open]) { display: none; }
+dialog.fv-resource-dialog::backdrop { background: rgb(15 35 25 / .45); }
+dialog.fv-resource-dialog .fv-resource-window { height: 100%; max-height: 100%; padding-top: 0; padding-bottom: 0; }
+dialog.fv-resource-dialog .fv-resource-header { padding-top: max(8px, env(safe-area-inset-top)); }
+dialog.fv-resource-dialog .fv-resource-body { padding-bottom: env(safe-area-inset-bottom); }

@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { Search, ArrowRight } from "lucide-react";
+import { Search, ArrowRight, BookOpen } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PublicPageHero from "@/features/public-site/components/PublicPageHero";
@@ -129,9 +129,13 @@ export default function LibraryClient({
                     {featured.subtitle}
                   </p>
                 </div>
-                <span className="inline-flex min-h-11 items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-primary group-hover:text-gold transition-colors">
-                  Ler <ArrowRight size={14} />
-                </span>
+                <div className="flex items-center">
+                  <div className="rounded-2xl bg-primary/10 p-1.5 transition-all group-hover:bg-primary/20">
+                    <span className="inline-flex min-h-[56px] min-w-[140px] items-center justify-center gap-3 rounded-xl border-2 border-primary/20 bg-primary px-6 py-3.5 text-xs font-bold uppercase tracking-widest text-white shadow-md transition-all group-hover:bg-igarape group-hover:border-gold/50 group-hover:shadow-lg touch-manipulation">
+                      <BookOpen size={16} /> Ler <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
+                    </span>
+                  </div>
+                </div>
               </button>
             </section>
           )}
@@ -194,16 +198,29 @@ export default function LibraryClient({
                   {item.subtitle}
                 </p>
 
-                <button
-                  onClick={() => handleOpenItem(item)}
-                  className="mt-auto inline-flex min-h-11 items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-primary transition-colors hover:text-gold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary group/btn"
-                >
-                  Ler{" "}
-                  <ArrowRight
-                    size={14}
-                    className="group-hover/btn:translate-x-1 transition-transform"
-                  />
-                </button>
+                {/* Botão Ler envolto em botão maior para touchscreen */}
+                <div className="mt-auto pt-4">
+                  <div className="rounded-2xl bg-stone-100/80 p-1 transition-all group-hover:bg-primary/10">
+                    <button
+                      type="button"
+                      onClick={() => handleOpenItem(item)}
+                      aria-label={`Ler artigo completo: ${item.title}`}
+                      className="group/touch-btn relative flex w-full min-h-[58px] items-center justify-between gap-3 rounded-xl border-2 border-primary/20 bg-primary px-5 py-3 text-white shadow-md transition-all duration-200 hover:bg-igarape hover:border-gold/50 hover:shadow-lg active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary touch-manipulation cursor-pointer"
+                    >
+                      <span className="flex items-center gap-2.5 text-xs font-bold uppercase tracking-wider">
+                        <BookOpen size={16} className="text-gold" />
+                        Ler Artigo
+                      </span>
+                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-white/90 group-hover/touch-btn:text-gold transition-colors">
+                        Abrir
+                        <ArrowRight
+                          size={15}
+                          className="group-hover/touch-btn:translate-x-1 transition-transform"
+                        />
+                      </span>
+                    </button>
+                  </div>
+                </div>
               </motion.div>
             ))}
 

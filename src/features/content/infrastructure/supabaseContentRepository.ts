@@ -169,8 +169,9 @@ export function mapPublicCourse(row: TableRow<"courses">): ContentRecord {
 }
 
 export function mapPublicPost(row: TableRow<"posts">): ContentRecord {
+  const legacy = jsonObject(row.legacy_payload);
   return {
-    ...editorialText(jsonObject(row.legacy_payload), [
+    ...editorialText(legacy, [
       "author",
       "authorImage",
       "date",
@@ -189,6 +190,11 @@ export function mapPublicPost(row: TableRow<"posts">): ContentRecord {
     externalUrl: row.external_url,
     pdfUrl: row.pdf_url,
     tags: row.tags,
+    post_format: (legacy.post_format as string) || "article",
+    youtube_url: (legacy.youtube_url as string) || row.external_url || null,
+    quote_author: (legacy.quote_author as string) || (legacy.author as string) || null,
+    card_size: (legacy.card_size as string) || "normal",
+    bg_style: (legacy.bg_style as string) || "default",
     isPublished: row.is_published,
     publishedAt: row.published_at,
     createdAt: row.created_at,
@@ -199,6 +205,14 @@ export function mapPublicPost(row: TableRow<"posts">): ContentRecord {
 }
 
 function mapGalleryItem(row: TableRow<"gallery_items">): ContentRecord {
+  const legacy = jsonObject(row.legacy_payload);
+  const rawYear = legacy.year || legacy.ano;
+  const derivedYear = rawYear
+    ? String(rawYear)
+    : row.created_at
+      ? String(new Date(row.created_at).getFullYear())
+      : null;
+
   return {
     id: row.id,
     src: row.image_url,
@@ -209,6 +223,9 @@ function mapGalleryItem(row: TableRow<"gallery_items">): ContentRecord {
     width: row.width,
     height: row.height,
     isPublished: row.is_published,
+    year: derivedYear,
+    ano: derivedYear,
+    category: typeof legacy.category === "string" ? legacy.category : null,
     createdAt: row.created_at,
     created_at: row.created_at,
     updatedAt: row.updated_at,
