@@ -4,6 +4,7 @@ import {useEffect,useRef, type PointerEvent} from "react";
 import {RotateCcw, Sparkles} from "lucide-react";
 import type {EditorialItem} from "../editorial-schema";
 import {ConceptIllustration} from "../illustration/ConceptIllustration";
+import {firstSentence as summarize} from "./GestaltCard";
 
 export function Card3D({item,code,deck,flipped,reduced,onFlip}:{
   item:EditorialItem;code:string;deck:string;flipped:boolean;reduced:boolean;onFlip:()=>void;
@@ -27,7 +28,7 @@ export function Card3D({item,code,deck,flipped,reduced,onFlip}:{
     tilt.current?.style.setProperty("--card-tilt-x",`${(0.5-(event.clientY-bounds.top)/bounds.height)*8}deg`);
     tilt.current?.style.setProperty("--card-tilt-y",`${((event.clientX-bounds.left)/bounds.width-0.5)*10}deg`);
   };
-  const firstSentence=item.text.match(/^.*?[.!?](\s|$)/)?.[0].trim() ?? item.text;
+  const firstSentence=summarize(item.text);
   return <div className="cg-scene" data-reduced={reduced} onPointerMove={move} onPointerLeave={resetTilt}>
     <div className="cg-tilt" ref={tilt}>
       <div className="cg-card" ref={card} data-flipped={flipped} aria-label={`Carta ${item.title}`}>
