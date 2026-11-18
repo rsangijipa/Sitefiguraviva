@@ -2,6 +2,7 @@ import { DEFAULT_HOME, type HomeSettings } from "@/lib/site-content";
 import { DEFAULT_CONFIG, type ConfigSettings } from "@/lib/siteSettings";
 import { ArrowRight, Sparkles } from "lucide-react";
 import dynamic from "next/dynamic";
+import HeroAmbience from "../visual/HeroAmbience";
 import styles from "./HeroSection.module.css";
 
 const HeroTree3D = dynamic(
@@ -20,7 +21,7 @@ export default function HeroSection({
 
   return (
     <header className={`fv-bg fv-bg-hero ${styles.hero}`} data-home-hero>
-      <div className={styles.environment} aria-hidden="true" />
+      <div className={styles.environment} aria-hidden="true"><HeroAmbience /></div>
       <div className={styles.layout}>
         <div className={styles.copy}>
           {/* O nome da instituição é o título */}

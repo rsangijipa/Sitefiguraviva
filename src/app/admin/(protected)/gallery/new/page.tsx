@@ -20,7 +20,7 @@ export default function NewGalleryImagePage() {
   const [formData, setFormData] = useState({
     title: "",
     category: "Geral",
-    year: new Date().getFullYear().toString(),
+    year: "",
     tags: "",
     caption: "",
     src: "",

@@ -51,7 +51,7 @@ export default function EditGalleryImagePage({
         setFormData({
           title: item.title || "",
           category: item.category || "Geral",
-          year: item.year || item.ano || (item.created_at ? new Date(item.created_at).getFullYear().toString() : ""),
+          year: String(item.year || item.ano || ""),
           tags: Array.isArray(item.tags)
             ? item.tags.join(", ")
             : item.tags || "",

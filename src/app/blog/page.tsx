@@ -17,7 +17,7 @@ import PublicPageHero from "@/features/public-site/components/PublicPageHero";
 import PublicSiteFrame from "@/features/public-site/components/PublicSiteFrame";
 import { listPublishedContent } from "@/features/content/infrastructure/supabaseContentRepository";
 import { getBlogThemeAction } from "@/app/actions/blog";
-import { extractYouTubeId } from "@/app/admin/(protected)/blog/components/BlogPostForm";
+import { getYouTubeVideoId } from "@/lib/course-content/media";
 
 export const metadata: Metadata = {
   title: "Diário Visual | Reflexões em Movimento",
@@ -244,15 +244,18 @@ export default async function BlogPage({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-start">
             {posts.map((post) => {
               const format = post.post_format || "article";
+              const cardBackground: Record<string, string> = {watercolor:"linear-gradient(135deg, #fdfaf4, #f5dfd6)", forest:"linear-gradient(135deg, #fdfaf4, #dcece0)", terracotta:"linear-gradient(135deg, #fdfaf4, #f3ded0)"};
+              const cardStyle = cardBackground[post.bg_style] ? { background: cardBackground[post.bg_style] } : undefined;
               const isLarge = post.card_size === "large";
               const isTall = post.card_size === "tall";
-              const youtubeId = post.youtube_url ? extractYouTubeId(post.youtube_url) : null;
+              const youtubeId = post.youtube_url ? getYouTubeVideoId(post.youtube_url) : null;
 
               // 1. FORMATO: FRASE SOLTA / PENSAMENTO
               if (format === "quote") {
                 return (
                   <div
                     key={post.id}
+                    style={cardStyle}
                     className={`group relative overflow-hidden rounded-3xl p-8 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl border ${themeConfig.quoteBg} ${
                       isLarge ? "md:col-span-2" : "col-span-1"
                     }`}
@@ -261,7 +264,7 @@ export default async function BlogPage({
                       <Quote size={36} className="rotate-180" />
                     </span>
 
-                    <blockquote className="font-serif text-xl sm:text-2xl italic leading-relaxed text-stone-900 mb-6">
+                    <blockquote className={`font-serif text-xl sm:text-2xl italic leading-relaxed ${themeConfig.textDefault} mb-6`}>
                       “{post.content || post.excerpt || post.title}”
                     </blockquote>
 
@@ -282,6 +285,7 @@ export default async function BlogPage({
                 return (
                   <div
                     key={post.id}
+                    style={cardStyle}
                     className={`group overflow-hidden rounded-3xl border border-stone-200/90 bg-white/95 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ${
                       isLarge ? "md:col-span-2" : "col-span-1"
                     }`}
@@ -289,7 +293,7 @@ export default async function BlogPage({
                     {/* Player do YouTube Embutido */}
                     <div className="relative aspect-video w-full bg-stone-900 overflow-hidden">
                       <iframe
-                        src={`https://www.youtube-nocookie.com/embed/${youtubeId}`}
+                        src={`https://www.youtube.com/embed/${youtubeId}`}
                         title={post.title}
                         className="w-full h-full border-0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -337,6 +341,7 @@ export default async function BlogPage({
                 return (
                   <div
                     key={post.id}
+                    style={cardStyle}
                     className={`group overflow-hidden rounded-3xl border border-stone-200/90 bg-white/95 shadow-md transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl flex flex-col ${
                       isLarge ? "md:col-span-2" : "col-span-1"
                     } ${isTall ? "row-span-2" : ""}`}
@@ -398,6 +403,7 @@ export default async function BlogPage({
                   }`}
                 >
                   <Card
+                    style={cardStyle}
                     className={`h-full overflow-hidden flex flex-col rounded-3xl border border-stone-200/90 bg-white/95 shadow-md transition-all duration-300 group-hover:-translate-y-1.5 group-hover:shadow-2xl`}
                   >
                     <div className="h-64 overflow-hidden relative bg-stone-100">

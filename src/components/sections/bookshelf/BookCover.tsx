@@ -6,6 +6,7 @@ import styles from "./Bookshelf.module.css";
 
 export function safeBookUrl(value: string | null | undefined): string | null {
   try {
+    if (value?.startsWith("/") && !value.startsWith("//")) return value;
     const url = new URL(value || "");
     return ["https:", "http:"].includes(url.protocol) ? url.href : null;
   } catch {
@@ -16,7 +17,7 @@ export function safeBookUrl(value: string | null | undefined): string | null {
 export default function BookCover({
   book,
   sizes,
-  fillContainer = true,
+  fillContainer = false,
 }: {
   book: Livro;
   sizes: string;
@@ -26,7 +27,7 @@ export default function BookCover({
   const source = safeBookUrl(book.coverImageUrl);
   const optimized =
     source &&
-    new URL(source).protocol === "https:" &&
+    !source.startsWith("/") && new URL(source).protocol === "https:" &&
     (new URL(source).hostname.endsWith(".supabase.co") ||
       [
         "firebasestorage.googleapis.com",
@@ -35,7 +36,7 @@ export default function BookCover({
       ].includes(new URL(source).hostname));
 
   return (
-    <div className={styles.realisticBookWrapper}>
+    <div className={`${styles.realisticBookWrapper} ${fillContainer ? styles.realisticBookWrapperFull : ""}`}>
       {source && failedSource !== source ? (
         <Image
           src={source}

@@ -998,3 +998,10 @@
     margin-inline: auto;
   }
 }
+/* Assets de aquarela e madeira criados para esta estante. */
+.featuredWatercolorBg { background-image:url('/assets/fv/art/aquarela-destaque-estante.webp'); background-position:center; background-size:cover; }
+.realisticBookshelfStructure { background-image:linear-gradient(rgb(241 233 219 / .2),rgb(241 233 219 / .2)),url('/assets/fv/art/estante-madeira.webp'); background-size:100% 420px; background-repeat:repeat-y; }
+.bookItem .caption { width:100%; border-radius:10px; background:rgb(253 250 244 / .94); padding:8px 5px; }
+.bookCoverWrapper:focus-visible { outline:3px solid var(--river); outline-offset:4px; }
+
+.realisticBookWrapperFull { width:100%; height:100%; }

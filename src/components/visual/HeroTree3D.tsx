@@ -1,5 +1,6 @@
 "use client";
 import {useEffect,useRef,useState} from "react";
+import { HERO_FONTS } from "./hero-fonts";
 import styles from "./HeroTree3D.module.css";
 
 export default function HeroTree3D({background=false}:{background?:boolean}) {
@@ -10,7 +11,7 @@ export default function HeroTree3D({background=false}:{background?:boolean}) {
   let disposed=false;let cleanup: (()=>void) | undefined;
   void import("./hero-tree-scene").then(({mountHeroTree})=>{
    if(disposed || !root.current)return;
-   cleanup=mountHeroTree(root.current, (action:()=>void)=>{if(!disposed){summon.current=action;setReady(true);}}, (message:string)=>{if(!disposed)setPhrase(message);}, background);
+   cleanup=mountHeroTree(root.current, (action:()=>void)=>{if(!disposed){summon.current=action;setReady(true);}}, (message:string)=>{if(!disposed)setPhrase(message);}, background, HERO_FONTS);
   }).catch(()=>{if(!disposed)setFailed(true);});
   return ()=>{disposed=true;summon.current=null;cleanup?.();};
  },[background]);

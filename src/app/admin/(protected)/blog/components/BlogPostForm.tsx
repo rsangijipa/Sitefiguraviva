@@ -17,19 +17,12 @@ import ImageUpload from "@/components/admin/ImageUpload";
 import FileUpload from "@/components/admin/FileUpload";
 import { saveBlogPostAction } from "@/app/actions/blog";
 import Button from "@/components/ui/Button";
+import { getYouTubeVideoId } from "@/lib/course-content/media";
 
 interface BlogPostFormProps {
   post?: any;
   onSuccess: () => void;
   onCancel: () => void;
-}
-
-export function extractYouTubeId(url: string | null | undefined): string | null {
-  if (!url) return null;
-  const match = url.match(
-    /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i,
-  );
-  return match ? match[1] : null;
 }
 
 export function BlogPostForm({ post, onSuccess, onCancel }: BlogPostFormProps) {
@@ -45,7 +38,7 @@ export function BlogPostForm({ post, onSuccess, onCancel }: BlogPostFormProps) {
     author: post?.author || "Lilian Vanessa Nicacio",
     readingTime: post?.readingTime || "5 min",
     type: post?.type || "blog",
-    pdf_url: post?.pdf_url || "",
+    pdf_url: post?.pdf_url || post?.pdfUrl || "",
     image: post?.image || "",
     post_format: post?.post_format || post?.legacy_payload?.post_format || "article",
     youtube_url: post?.youtube_url || post?.legacy_payload?.youtube_url || post?.externalUrl || "",
@@ -56,7 +49,7 @@ export function BlogPostForm({ post, onSuccess, onCancel }: BlogPostFormProps) {
 
   const [formData, setFormData] = useState(initialForm);
 
-  const youtubeVideoId = extractYouTubeId(formData.youtube_url);
+  const youtubeVideoId = getYouTubeVideoId(formData.youtube_url);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -252,7 +245,7 @@ export function BlogPostForm({ post, onSuccess, onCancel }: BlogPostFormProps) {
             {youtubeVideoId ? (
               <div className="mt-3 aspect-video w-full max-w-md overflow-hidden rounded-xl border border-stone-300 shadow-sm">
                 <iframe
-                  src={`https://www.youtube-nocookie.com/embed/${youtubeVideoId}`}
+                  src={`https://www.youtube.com/embed/${youtubeVideoId}`}
                   title="Prévia do vídeo"
                   className="w-full h-full border-0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

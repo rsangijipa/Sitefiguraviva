@@ -4,7 +4,7 @@
   import * as THREE from 'three';
 
 
-export function mountHeroTree(root, onReady, onPhrase, background = false) {
+export function mountHeroTree(root, onReady, onPhrase, background = false, fonts = {}) {
   let disposed = false, frameId = 0, isVisible = true;
   const visibility = new IntersectionObserver(entries => { isVisible = entries[0].isIntersecting; }); visibility.observe(root);
   /* ===================================================================
@@ -106,7 +106,7 @@ export function mountHeroTree(root, onReady, onPhrase, background = false) {
   /* ===================================================================
      TEXTURAS PROCEDURAIS (canvas → textura, sem imagens externas)
      =================================================================== */
-  const maxAniso = renderer.capabilities.getMaxAnisotropy();
+  const maxAniso = Math.min(4, renderer.capabilities.getMaxAnisotropy());
 
   function barkTextures() {
     const W = 512, H = 1024;
@@ -161,44 +161,6 @@ export function mountHeroTree(root, onReady, onPhrase, background = false) {
     const bump = new THREE.CanvasTexture(hgt);
     for (const t of [map, bump]) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = maxAniso; }
     return { map, bump };
-  }
-
-  function groundTextures() {
-    const W = 512;
-    const cv = document.createElement('canvas'); cv.width = cv.height = W;
-    const c = cv.getContext('2d');
-    c.fillStyle = '#4a5a26'; c.fillRect(0, 0, W, W);
-    const tones = ['rgba(92,112,44,', 'rgba(58,74,28,', 'rgba(110,104,54,', 'rgba(74,58,34,', 'rgba(126,140,62,'];
-    for (let i = 0; i < 1500; i++) {
-      const x = rnd() * W, y = rnd() * W, r = 4 + rnd() * 30, tone = tones[i % tones.length];
-      for (const ox of [-W, 0, W]) for (const oy of [-W, 0, W]) {
-        const g = c.createRadialGradient(x + ox, y + oy, 0, x + ox, y + oy, r);
-        g.addColorStop(0, tone + '0.3)'); g.addColorStop(1, tone + '0)');
-        c.fillStyle = g; c.fillRect(x + ox - r, y + oy - r, r * 2, r * 2);
-      }
-    }
-    for (let i = 0; i < 5000; i++) {
-      c.strokeStyle = `rgba(${40 + rnd() * 90 | 0},${70 + rnd() * 90 | 0},${20 + rnd() * 40 | 0},0.35)`;
-      c.lineWidth = 1; const x = rnd() * W, y = rnd() * W;
-      c.beginPath(); c.moveTo(x, y); c.lineTo(x + (rnd() - 0.5) * 7, y - 2 - rnd() * 7); c.stroke();
-    }
-    const map = new THREE.CanvasTexture(cv); map.colorSpace = THREE.SRGBColorSpace;
-    map.wrapS = map.wrapT = THREE.RepeatWrapping; map.repeat.set(26, 26); map.anisotropy = maxAniso;
-    return map;
-  }
-
-  function soilTexture() {
-    const W = 256; const cv = document.createElement('canvas'); cv.width = cv.height = W;
-    const c = cv.getContext('2d');
-    const g = c.createRadialGradient(W / 2, W / 2, 0, W / 2, W / 2, W / 2);
-    g.addColorStop(0, 'rgba(46,30,20,0.95)'); g.addColorStop(0.45, 'rgba(58,40,24,0.7)'); g.addColorStop(1, 'rgba(60,44,26,0)');
-    c.fillStyle = g; c.fillRect(0, 0, W, W);
-    for (let i = 0; i < 900; i++) {
-      const a = rnd() * 6.283, r = Math.pow(rnd(), 0.7) * W * 0.42;
-      c.fillStyle = `rgba(${20 + rnd() * 70 | 0},${14 + rnd() * 40 | 0},${8 + rnd() * 24 | 0},${0.25 * (1 - r / (W * 0.45))})`;
-      c.beginPath(); c.arc(W / 2 + Math.cos(a) * r, W / 2 + Math.sin(a) * r, 1 + rnd() * 3, 0, 6.283); c.fill();
-    }
-    const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; return t;
   }
 
   function glowSprite() {
@@ -265,39 +227,131 @@ export function mountHeroTree(root, onReady, onPhrase, background = false) {
     return 0.2126 * f(n >> 16 & 255) + 0.7152 * f(n >> 8 & 255) + 0.0722 * f(n & 255);
   }
 
-  // Folha-mensagem: folha colorida em alta resolução com a frase composta dentro do contorno.
-  function messageTexture(type, hex, phrase) {
-    const W = 1024, H = Math.round(W * LH / LW), k = W / LW;
+  /* ===================================================================
+     FOLHA-MENSAGEM: folha realista, colorida, com fonte sorteada
+     =================================================================== */
+  const FONT_SPECS = [
+    { k: 'playfair',  style: 'italic', weight: 500, lh: 1.2,  scale: 1,    fallback: 'Georgia, serif' },
+    { k: 'caveat',    style: 'normal', weight: 600, lh: 1.08, scale: 1.34, fallback: '"Segoe Script", "Brush Script MT", cursive' },
+    { k: 'lora',      style: 'italic', weight: 500, lh: 1.22, scale: 0.96, fallback: 'Georgia, serif' },
+    { k: 'cormorant', style: 'italic', weight: 600, lh: 1.14, scale: 1.2,  fallback: '"Palatino Linotype", Georgia, serif' },
+    { k: 'dancing',   style: 'normal', weight: 600, lh: 1.18, scale: 1.08, fallback: '"Segoe Script", "Brush Script MT", cursive' }
+  ];
+  let lastFont = -1;
+  function pickFont() {
+    let i; do { i = Math.random() * FONT_SPECS.length | 0; } while (i === lastFont && FONT_SPECS.length > 1);
+    lastFont = i; return FONT_SPECS[i];
+  }
+  const fontFamily = spec => (fonts[spec.k] ? fonts[spec.k] + ', ' : '') + spec.fallback;
+  const fontCache = {};
+  function ensureFont(spec) {
+    if (!fonts[spec.k] || !document.fonts || !document.fonts.load) return Promise.resolve();
+    return fontCache[spec.k] || (fontCache[spec.k] = Promise.race([
+      document.fonts.load(`${spec.style} ${spec.weight} 40px ${fonts[spec.k]}`, 'Aáçõ'),
+      new Promise(r => setTimeout(r, 1800))
+    ]).catch(() => {}));
+  }
+
+  function mixC(a, b, amt) {
+    const x = parseInt(a.slice(1), 16), y = parseInt(b.slice(1), 16);
+    const c = sh => Math.round((x >> sh & 255) + ((y >> sh & 255) - (x >> sh & 255)) * amt);
+    return `rgb(${c(16)},${c(8)},${c(0)})`;
+  }
+
+  // Folha pintada com degradê base→ponta, manchas de pigmento, margem outonal,
+  // nervura central e nervuras laterais ramificadas.
+  function paintMessageLeaf(ctx, type, k, hex, darkInk) {
+    const sh = LEAF_SHAPES[type], rnd = mulberry32(Math.random() * 1e9 | 0);
+    const deep = hexMix(hex, 0, 0.42), dark = hexMix(hex, 0, 0.2), light = hexMix(hex, 255, 0.22);
+    const tip = mixC('#f3d46e', hex, 0.4), rim = mixC('#d9962f', hex, 0.45);
+    ctx.save();
+    ctx.setTransform(k, 0, 0, k, LCX * k, LCY * k);
+    const outline = new Path2D(sh.outline);
+    ctx.clip(outline);
+    // cor base: da base escura à ponta clara e quente
+    let g = ctx.createLinearGradient(0, 19, 0, -21);
+    g.addColorStop(0, deep); g.addColorStop(0.25, dark); g.addColorStop(0.55, hex); g.addColorStop(0.85, light); g.addColorStop(1, tip);
+    ctx.fillStyle = g; ctx.fillRect(-LCX, -LCY, LW, LH);
+    // luz vinda do alto à direita
+    g = ctx.createLinearGradient(-14, 0, 14, 0);
+    g.addColorStop(0, 'rgba(0,0,0,0.20)'); g.addColorStop(0.5, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(255,255,225,0.16)');
+    ctx.fillStyle = g; ctx.fillRect(-LCX, -LCY, LW, LH);
+    // manchas de pigmento
+    for (let i = 0; i < 150; i++) {
+      const x = (rnd() - 0.5) * 28, y = -21 + rnd() * 40, r = 0.7 + rnd() * 2.6;
+      const bg = ctx.createRadialGradient(x, y, 0, x, y, r);
+      const c = rnd() < 0.5 ? '255,250,215' : '0,0,0';
+      bg.addColorStop(0, `rgba(${c},${0.05 + rnd() * 0.08})`); bg.addColorStop(1, `rgba(${c},0)`);
+      ctx.fillStyle = bg; ctx.fillRect(x - r, y - r, r * 2, r * 2);
+    }
+    // margem com tom outonal
+    ctx.lineJoin = 'round'; ctx.strokeStyle = rim; ctx.globalAlpha = 0.46; ctx.lineWidth = 4.6; ctx.stroke(outline);
+    ctx.globalAlpha = 0.16; ctx.lineWidth = 8; ctx.stroke(outline); ctx.globalAlpha = 1;
+    // suaviza a região do texto para a frase ficar legível
+    g = ctx.createRadialGradient(0, -4, 0, 0, -4, 14);
+    g.addColorStop(0, darkInk ? 'rgba(255,248,220,0.30)' : 'rgba(0,0,0,0.20)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g; ctx.fillRect(-LCX, -LCY, LW, LH);
+    // nervuras: central + laterais ramificadas (relevo escuro e fio claro)
+    const mid = t => ({ x: Math.sin(t * Math.PI) * 0.8, y: 17 - 36 * t });
+    ctx.lineCap = 'round';
+    const veinStroke = (w, a, style) => { ctx.lineWidth = w; ctx.strokeStyle = style; ctx.globalAlpha = a; ctx.stroke(); ctx.globalAlpha = 1; };
+    ctx.beginPath(); for (let i = 0; i <= 24; i++) { const q = mid(i / 24); i ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y); }
+    veinStroke(1.5, 0.26, '#000'); veinStroke(0.8, 0.55, '#fff6dc');
+    for (let i = 1; i <= 10; i++) {
+      const t = 0.07 + i * 0.082, o = mid(t), len = 13 * Math.sin(Math.PI * Math.pow(t, 0.85)) + 1.5;
+      for (const side of [-1, 1]) {
+        const ex = o.x + side * len * 0.92, ey = o.y - len * 0.58, cx = o.x + side * len * 0.5, cy = o.y - len * 0.08;
+        ctx.beginPath(); ctx.moveTo(o.x, o.y); ctx.quadraticCurveTo(cx, cy, ex, ey);
+        veinStroke(0.9, 0.2, '#000');
+        ctx.save(); ctx.translate(0.12, -0.12);
+        ctx.beginPath(); ctx.moveTo(o.x, o.y); ctx.quadraticCurveTo(cx, cy, ex, ey);
+        veinStroke(0.62, 0.55, '#fff6dc'); ctx.restore();
+        for (const f of [0.42, 0.7]) {   // raminhos finos
+          const bx = (1 - f) * (1 - f) * o.x + 2 * (1 - f) * f * cx + f * f * ex, by = (1 - f) * (1 - f) * o.y + 2 * (1 - f) * f * cy + f * f * ey;
+          ctx.beginPath(); ctx.moveTo(bx, by); ctx.quadraticCurveTo(bx + side * 1.6, by - 1.9, bx + side * 3.2 * (1 - f * 0.5), by - 3.1);
+          veinStroke(0.3, 0.4, '#fff6dc');
+        }
+      }
+    }
+    // brilho suave na superfície
+    g = ctx.createRadialGradient(5, -9, 0, 5, -9, 15);
+    g.addColorStop(0, 'rgba(255,255,235,0.20)'); g.addColorStop(1, 'rgba(255,255,235,0)');
+    ctx.fillStyle = g; ctx.fillRect(-LCX, -LCY, LW, LH);
+    ctx.strokeStyle = 'rgba(0,0,0,0.22)'; ctx.lineWidth = 0.9; ctx.stroke(outline);
+    ctx.restore();
+  }
+
+  function messageTexture(type, hex, phrase, spec) {
+    const W = 800, H = Math.round(W * LH / LW), k = W / LW;
     const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
     const ctx = cv.getContext('2d');
     const darkInk = luminance(hex) > 0.34;
-    paintLeaf(ctx, type, k, {
-      dark: hexMix(hex, 0, 0.22), mid: hex, light: hexMix(hex, 255, 0.26),
-      vein: darkInk ? '#fffdf2' : '#fff7e6', veinAlpha: 0.2, edge: 0.16
-    });
+    paintMessageLeaf(ctx, type, k, hex, darkInk);
+    const family = fontFamily(spec), fontOf = fs => `${spec.style} ${spec.weight} ${fs}px ${family}`;
     // contorno em espaço de pixels para medir a largura útil em cada linha
     const px = new Path2D(); px.addPath(new Path2D(LEAF_SHAPES[type].outline), new DOMMatrix([k, 0, 0, k, LCX * k, LCY * k]));
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     const span = y => {
       let a = -1, b = -1;
-      for (let x = 0; x < W; x += 6) if (ctx.isPointInPath(px, x, y)) { if (a < 0) a = x; b = x; }
+      for (let x = 0; x < W; x += 5) if (ctx.isPointInPath(px, x, y)) { if (a < 0) a = x; b = x; }
       if (a < 0) return null;
       const pad = W * 0.085; a += pad; b -= pad;
-      return b - a > 60 ? { c: (a + b) / 2, w: b - a } : null;
+      return b - a > 50 ? { c: (a + b) / 2, w: b - a } : null;
     };
     const words = phrase.split(/\s+/);
     const yMin = (LCY - 15.5) * k, yMax = (LCY + 6.5) * k, yMid = (LCY - 4.2) * k;
     let best = null;
-    for (const fs of [84, 78, 72, 66, 60, 56, 52, 48, 44, 40, 36, 32]) {
-      ctx.font = `italic 500 ${fs}px "Playfair Display", Georgia, serif`;
-      const lh = fs * 1.2;
+    for (const base of [66, 61, 57, 52, 48, 44, 40, 36, 33, 30, 27, 24]) {
+      const fs = Math.round(base * spec.scale);
+      ctx.font = fontOf(fs);
+      const lh = fs * spec.lh;
       let start = yMid - lh, lines = null;
       for (let pass = 0; pass < 5; pass++) {
         lines = []; let i = 0, y = start, ok = true;
         while (i < words.length) {
-          const s = span(y - fs * 0.3); const s2 = span(y + fs * 0.12);
-          if (!s || !s2) { ok = false; break; }
-          const w = Math.min(s.w, s2.w), cx = (s.c + s2.c) / 2;
+          const s1 = span(y - fs * 0.3), s2 = span(y + fs * 0.12);
+          if (!s1 || !s2) { ok = false; break; }
+          const w = Math.min(s1.w, s2.w), cx = (s1.c + s2.c) / 2;
           let line = words[i];
           if (ctx.measureText(line).width > w) { ok = false; break; }
           i++;
@@ -317,9 +371,9 @@ export function mountHeroTree(root, onReady, onPhrase, background = false) {
       if (!best && top >= yMin - 20 && bot <= yMax + 30) best = { fs, lines };
     }
     if (best) {
-      ctx.font = `italic 500 ${best.fs}px "Playfair Display", Georgia, serif`;
+      ctx.font = fontOf(best.fs);
       ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
-      ctx.shadowColor = darkInk ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.4)'; ctx.shadowBlur = 10;
+      ctx.shadowColor = darkInk ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.45)'; ctx.shadowBlur = 8;
       ctx.fillStyle = darkInk ? '#2a160c' : '#fffaf0';
       for (const l of best.lines) ctx.fillText(l.text, l.cx, l.y);
       ctx.shadowBlur = 0;
@@ -327,11 +381,11 @@ export function mountHeroTree(root, onReady, onPhrase, background = false) {
     // assinatura discreta perto da ponta
     const sy = (LCY + 10.6) * k, ss = span(sy);
     if (ss) {
-      ctx.font = '600 25px "DM Sans", system-ui, sans-serif';
-      try { ctx.letterSpacing = '7px'; } catch (e) { /* navegadores antigos */ }
+      ctx.font = '600 20px system-ui, sans-serif';
+      try { ctx.letterSpacing = '5px'; } catch (e) { /* navegadores antigos */ }
       ctx.textAlign = 'center'; ctx.globalAlpha = 0.62;
       ctx.fillStyle = darkInk ? '#2a160c' : '#fffaf0';
-      ctx.fillText('FIGURA VIVA', ss.c + 3, sy);
+      ctx.fillText('FIGURA VIVA', ss.c + 2, sy);
       ctx.globalAlpha = 1;
     }
     const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = maxAniso;
@@ -370,51 +424,8 @@ export function mountHeroTree(root, onReady, onPhrase, background = false) {
   scene.add(sun); scene.add(sun.target); sun.target.position.set(0.5, 1.5, 0);
   const fill = new THREE.DirectionalLight(0xffffff, 0.5); scene.add(fill);
 
-  const groundMat = new THREE.MeshStandardMaterial({ map: groundTextures(), roughness: 1, metalness: 0 });
-  const ground = new THREE.Mesh(new THREE.CircleGeometry(120, 64), groundMat);
-  ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; if (background) scene.add(ground);
-  const soil = new THREE.Mesh(new THREE.CircleGeometry(1.7, 40), new THREE.MeshStandardMaterial({ map: soilTexture(), transparent: true, depthWrite: false, roughness: 1 }));
-  soil.rotation.x = -Math.PI / 2; soil.position.y = 0.006; soil.receiveShadow = true; if (background) scene.add(soil);
-
   // Grama: lâminas instanciadas que balançam no shader
   const windUniforms = { uTime: { value: 0 }, uWind: { value: 1 } };
-
-  if (background) (function buildGrass() {
-    const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.Float32BufferAttribute([-0.5, 0, 0, 0.5, 0, 0, -0.32, 0.5, 0, 0.32, 0.5, 0, 0, 1, 0], 3));
-    g.setAttribute('normal', new THREE.Float32BufferAttribute([0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0], 3));
-    g.setAttribute('uv', new THREE.Float32BufferAttribute([0, 0, 1, 0, 0, 0.5, 1, 0.5, 0.5, 1], 2));
-    g.setIndex([0, 1, 2, 2, 1, 3, 2, 3, 4]);
-    const N = 6000;
-    const mat = new THREE.MeshStandardMaterial({ roughness: 0.9, side: THREE.DoubleSide });
-    mat.onBeforeCompile = sh => {
-      sh.uniforms.uTime = windUniforms.uTime; sh.uniforms.uWind = windUniforms.uWind;
-      sh.vertexShader = 'uniform float uTime; uniform float uWind;\n' + sh.vertexShader.replace('#include <project_vertex>', `
-        vec4 mvPosition = vec4( transformed, 1.0 );
-        #ifdef USE_INSTANCING
-          mvPosition = instanceMatrix * mvPosition;
-          float gw = sin(uTime * 2.1 + mvPosition.x * 1.4 + mvPosition.z * 0.9) * 0.6 + sin(uTime * 3.9 + mvPosition.x * 3.1 - mvPosition.z * 2.3) * 0.4;
-          float bend = uv.y * uv.y;
-          mvPosition.x += bend * (0.035 * uWind + gw * 0.018 * (0.5 + uWind));
-          mvPosition.z += bend * gw * 0.01;
-        #endif
-        mvPosition = modelViewMatrix * mvPosition;
-        gl_Position = projectionMatrix * mvPosition;`);
-    };
-    const mesh = new THREE.InstancedMesh(g, mat, N);
-    const m = new THREE.Matrix4(), q = new THREE.Quaternion(), p = new THREE.Vector3(), s = new THREE.Vector3(), e = new THREE.Euler(), col = new THREE.Color();
-    for (let i = 0; i < N; i++) {
-      // mais densa perto da câmera e ao redor da árvore
-      let x, z;
-      if (i % 3 === 0) { const a = rnd() * 6.283, r = 0.35 + Math.pow(rnd(), 0.8) * 5; x = Math.cos(a) * r; z = Math.sin(a) * r; }
-      else { x = rr(-9, 9); z = rr(-5, 12); }
-      const h = rr(0.05, 0.16) * (i % 11 === 0 ? 1.5 : 1);
-      p.set(x, 0, z); e.set(rr(-0.25, 0.25), rnd() * 6.283, rr(-0.25, 0.25)); q.setFromEuler(e); s.set(rr(0.008, 0.015), h, 1);
-      m.compose(p, q, s); mesh.setMatrixAt(i, m);
-      col.setHSL(rr(0.22, 0.31), rr(0.45, 0.65), rr(0.16, 0.3)); mesh.setColorAt(i, col);
-    }
-    mesh.receiveShadow = true; mesh.frustumCulled = false; scene.add(mesh);
-  })();
 
   /* ===================================================================
      ÁRVORE: tronco, galhos, raízes e raminhos como tubos afilados
@@ -741,13 +752,25 @@ export function mountHeroTree(root, onReady, onPhrase, background = false) {
     return pool.length ? pool[Math.random() * pool.length | 0] : null;
   }
 
+  let summoning = false;
   function summon(L) {
+    if (summoning) return;
     if (hero) releaseHero();
     L = L || pickLeaf(); if (!L || L.grow < 0.95) return;
-    const phrase = nextPhrase();
+    const phrase = nextPhrase(), spec = pickFont();
+    summoning = true;
+    L.grow = 0.94;   // reserva a folha enquanto a fonte carrega
+    ensureFont(spec).then(() => {
+      summoning = false;
+      if (disposed) return;
+      if (hero) releaseHero();
+      openMessage(L, phrase, spec);
+    });
+  }
+  function openMessage(L, phrase, spec) {
     leafWorld(L, _lp, _lq);
-    const tex = messageTexture(L.type, L.hex, phrase);
-    const mat = translucent(new THREE.MeshStandardMaterial({ map: tex, transparent: true, alphaTest: 0.02, side: THREE.DoubleSide, roughness: 0.55, metalness: 0, emissive: 0xffffff, emissiveMap: tex, emissiveIntensity: 0.2 }));
+    const tex = messageTexture(L.type, L.hex, phrase, spec);
+    const mat = translucent(new THREE.MeshStandardMaterial({ map: tex, transparent: true, alphaTest: 0.02, side: THREE.DoubleSide, roughness: 0.5, metalness: 0, emissive: 0xffffff, emissiveMap: tex, emissiveIntensity: 0.16 }));
     const mesh = new THREE.Mesh(heroGeo, mat);
     mesh.renderOrder = 999; mesh.castShadow = true; mesh.frustumCulled = false; scene.add(mesh);
     hero = { mesh, tex, mat, phase: 'fly', t: 0, hold: clamp(4.2 + phrase.length * 0.075, 6, 10), p0: _lp.clone(), q0: _lq.clone(), s0: L.scl.clone(), body: null, phrase };
@@ -862,7 +885,7 @@ export function mountHeroTree(root, onReady, onPhrase, background = false) {
     moteLevel = m.motes; firefly = m.fire; stars.visible = m.stars;
     if (envRT) envRT.dispose();
     envRT = pmrem.fromScene(envScene, 0.03); scene.environment = envRT.texture;
-    for (const mat of [barkMat, groundMat, ...TYPES.map(t => leafMat[t])]) mat.envMapIntensity = m.env;
+    for (const mat of [barkMat, ...TYPES.map(t => leafMat[t])]) mat.envMapIntensity = m.env;
     root.querySelectorAll('.moods button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mood === name)));
   }
 
@@ -937,7 +960,7 @@ export function mountHeroTree(root, onReady, onPhrase, background = false) {
     const w = Math.max(1, root.clientWidth), h = Math.max(1, root.clientHeight);
     renderer.setSize(w, h, false);
     camera.aspect = w / h; camera.updateProjectionMatrix();
-    camDist = Math.max(6.5 / (2 * TAN_H), 5.3 / (2 * TAN_H * camera.aspect)) * 1.02;
+    camDist = Math.max(6.5 / (2 * TAN_H), 5.3 / (2 * TAN_H * camera.aspect)) * 0.94;
   }
   const observer = new ResizeObserver(resize); observer.observe(root);
 
@@ -1070,9 +1093,7 @@ export function mountHeroTree(root, onReady, onPhrase, background = false) {
      =================================================================== */
   resize();
   applyMood('ouro');
-  const fontsReady = (document.fonts && document.fonts.load)
-    ? Promise.race([Promise.all([document.fonts.load('italic 500 48px "Playfair Display"'), document.fonts.load('600 24px "DM Sans"')]), new Promise(r => setTimeout(r, 2500))])
-    : Promise.resolve();
+  const fontsReady = Promise.resolve();   // fontes das mensagens carregam sob demanda, uma por vez
   fontsReady.catch(() => {}).then(() => {
     window.__treeReady = true;
     if (disposed) return; $('loading').classList.add('done');

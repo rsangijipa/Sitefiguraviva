@@ -86,7 +86,7 @@ it("does not invent categories for unclassified books", () => {
 });
 it("shows accessible details, traps focus, closes on Escape cancellation and restores the opener", () => {
   render(<BookshelfSection livros={books} />);
-  const opener = within(screen.getByRole("list")).getAllByRole("button")[1];
+  const opener = within(screen.getByRole("list")).getByRole("button", { name: `Abrir detalhes de ${books[1].title}, de ${books[1].author}` });
   opener.focus();
   fireEvent.click(opener);
   const dialog = screen.getByRole("dialog", { name: books[1].title });
@@ -112,7 +112,7 @@ it("handles missing covers and unsafe or missing external links", () => {
       livros={[{ ...books[0], purchaseUrl: "javascript:alert(1)" }]}
     />,
   );
-  const opener = within(screen.getByRole("list")).getByRole("button");
+  const opener = within(screen.getByRole("list")).getByRole("button", { name: `Abrir detalhes de ${books[0].title}, de ${books[0].author}` });
   fireEvent.click(opener);
   const dialog = screen.getByRole("dialog");
   expect(

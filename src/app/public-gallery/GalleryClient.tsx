@@ -44,7 +44,6 @@ function extractDominantColor(
   try {
     const img = new Image();
     img.crossOrigin = "Anonymous";
-    img.src = src;
 
     img.onload = () => {
       try {
@@ -59,43 +58,27 @@ function extractDominantColor(
 
         ctx.drawImage(img, 0, 0, 16, 16);
         const data = ctx.getImageData(0, 0, 16, 16).data;
-        let r = 0,
-          g = 0,
-          b = 0,
-          count = 0;
-
+        const buckets = new Map<string, {count:number; r:number; g:number; b:number}>();
         for (let i = 0; i < data.length; i += 4) {
-          const lum =
-            0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-          // Exclude extremely dark or blown-out highlights
-          if (lum > 25 && lum < 235) {
-            r += data[i];
-            g += data[i + 1];
-            b += data[i + 2];
-            count++;
-          }
+          const lum = .299 * data[i] + .587 * data[i + 1] + .114 * data[i + 2];
+          if (data[i + 3] < 128 || lum <= 25 || lum >= 235) continue;
+          const key = [data[i] >> 5, data[i + 1] >> 5, data[i + 2] >> 5].join(":");
+          const bucket = buckets.get(key) ?? {count:0,r:0,g:0,b:0};
+          bucket.count++; bucket.r += data[i]; bucket.g += data[i + 1]; bucket.b += data[i + 2]; buckets.set(key, bucket);
         }
-
-        if (count > 0) {
-          const avgR = Math.round(r / count);
-          const avgG = Math.round(g / count);
-          const avgB = Math.round(b / count);
-
-          // Harmonize dominant color with Figura Viva's signature forest green tint
-          const blendedR = Math.round(avgR * 0.45 + 0 * 0.55);
-          const blendedG = Math.round(avgG * 0.45 + 90 * 0.55);
-          const blendedB = Math.round(avgB * 0.45 + 31 * 0.55);
-
-          onResult(`rgba(${blendedR}, ${blendedG}, ${blendedB}, 0.88)`);
-        } else {
-          onResult(fallback);
-        }
+        const dominant = [...buckets.values()].sort((a, b) => b.count - a.count)[0];
+        if (!dominant) { onResult(fallback); return; }
+        const r = Math.round((dominant.r / dominant.count) * .23);
+        const g = Math.round((dominant.g / dominant.count) * .23 + 45);
+        const b = Math.round((dominant.b / dominant.count) * .23 + 10);
+        onResult(`rgba(${r}, ${g}, ${b}, 0.94)`);
       } catch {
         onResult(fallback);
       }
     };
 
     img.onerror = () => onResult(fallback);
+    img.src = src;
   } catch {
     onResult(fallback);
   }
@@ -161,7 +144,7 @@ function GalleryGridCard({
         {/* Hover Overlay com Cor Predominante Analisada */}
         <div
           style={{ backgroundColor: dominantBg }}
-          className="absolute inset-0 flex flex-col justify-end p-5 opacity-0 backdrop-blur-sm transition-all duration-300 group-hover:opacity-100"
+          className="absolute inset-0 flex flex-col justify-end p-5 opacity-0 backdrop-blur-sm transition-all duration-300 group-hover:opacity-100 group-focus-visible:opacity-100"
         >
           <div className="flex items-center gap-1.5 mb-1.5 text-gold text-[10px] font-bold uppercase tracking-widest translate-y-3 group-hover:translate-y-0 transition-transform duration-300">
             <Sparkles size={11} />
@@ -202,6 +185,8 @@ export default function GalleryClient({
   );
   const lastTriggerRef = useRef<HTMLButtonElement | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+  const lightboxRef = useRef<HTMLDivElement | null>(null);
+  const lightboxOpen = selectedPhotoIndex !== null;
 
   const safeGallery = useMemo(
     () =>
@@ -212,7 +197,6 @@ export default function GalleryClient({
     [initialGallery],
   );
 
-  const featuredPhoto = safeGallery[0];
   const restGallery = safeGallery;
 
   const hasCategory = (photo: any, category: Category) => {
@@ -258,6 +242,8 @@ export default function GalleryClient({
     return result;
   }, [filter, search, sort, restGallery]);
 
+  const featuredPhoto = filteredPhotos[0];
+
   const openLightbox = (index: number, trigger: HTMLButtonElement) => {
     lastTriggerRef.current = trigger;
     setSelectedPhotoIndex(index);
@@ -284,12 +270,21 @@ export default function GalleryClient({
   };
 
   useEffect(() => {
+    if (lightboxOpen) closeButtonRef.current?.focus();
+  }, [lightboxOpen]);
+
+  useEffect(() => {
     if (selectedPhotoIndex === null) return;
-    closeButtonRef.current?.focus();
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") closeLightbox();
       if (event.key === "ArrowRight") nextPhoto();
       if (event.key === "ArrowLeft") prevPhoto();
+      if (event.key === "Tab" && lightboxRef.current) {
+        const controls = [...lightboxRef.current.querySelectorAll<HTMLElement>('button:not([disabled]), a[href]')];
+        const first = controls[0], last = controls.at(-1);
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+      }
     };
 
     document.addEventListener("keydown", handleKeyDown);
@@ -338,10 +333,7 @@ export default function GalleryClient({
               >
                 {/* Imagem com animação de movimento suave contínuo */}
                 <div
-                  className="h-full w-full will-change-transform"
-                  style={{
-                    animation: "fvKenBurns 22s ease-in-out infinite alternate",
-                  }}
+                  className="gallery-feature-motion h-full w-full will-change-transform"
                 >
                   <GalleryImage
                     src={featuredPhoto.src}
@@ -501,6 +493,7 @@ export default function GalleryClient({
       <AnimatePresence>
         {selectedPhotoIndex !== null && (
           <motion.div
+            ref={lightboxRef}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -639,6 +632,8 @@ export default function GalleryClient({
 
       {/* Global CSS Animation for Ken Burns effect */}
       <style jsx global>{`
+        .gallery-feature-motion { animation: fvKenBurns 22s ease-in-out infinite alternate; }
+        @media (prefers-reduced-motion: reduce) { .gallery-feature-motion { animation: none; } }
         @keyframes fvKenBurns {
           0% {
             transform: scale(1) translate(0, 0);

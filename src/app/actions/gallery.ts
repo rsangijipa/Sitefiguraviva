@@ -11,7 +11,7 @@ const galleryInput = z.object({
   caption: z.string().trim().max(1000).optional().default(""),
   tags: z.string().optional().default(""),
   category: z.string().trim().max(80).optional(),
-  year: z.union([z.number(), z.string()]).optional(),
+  year: z.union([z.number(), z.string()]).optional().refine(value => value === undefined || value === "" || /^(18|19|20|21)\d{2}$/.test(String(value)), "Informe um ano válido com quatro dígitos"),
 });
 
 export async function saveGalleryItemAction(id: string | null, data: unknown) {
@@ -19,6 +19,14 @@ export async function saveGalleryItemAction(id: string | null, data: unknown) {
     await assertIsAdmin();
 
     const input = galleryInput.parse(data);
+    const supabase = createSupabaseServiceClient();
+    let existing: Record<string, unknown> = {};
+    if (id) {
+      const { data: current, error } = await supabase.from("gallery_items").select("legacy_payload").eq("id", id).single();
+      if (error) throw error;
+      if (current?.legacy_payload && typeof current.legacy_payload === "object" && !Array.isArray(current.legacy_payload)) existing = current.legacy_payload as Record<string, unknown>;
+    }
+    const { year: _year, ano: _ano, category: _category, ...otherMetadata } = existing;
     const payload = {
       image_url: input.src,
       title: input.title,
@@ -29,13 +37,12 @@ export async function saveGalleryItemAction(id: string | null, data: unknown) {
         .filter(Boolean),
       is_published: true,
       legacy_payload: {
+        ...otherMetadata,
         ...(input.category ? { category: input.category } : {}),
         ...(input.year ? { year: String(input.year) } : {}),
       },
       updated_at: new Date().toISOString(),
     };
-    const supabase = createSupabaseServiceClient();
-
     if (id) {
       const { error } = await supabase
         .from("gallery_items")

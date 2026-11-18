@@ -224,20 +224,23 @@ export default function BookshelfSection({
                     <li key={book.id} className={styles.bookItem}>
                       <div className={styles.bookStage}>
                         {/* Capa com efeito 3D realista */}
-                        <div
+                        <button
+                          type="button"
                           className={styles.bookCoverWrapper}
                           onClick={() => setSelected(book)}
+                          aria-label={`Abrir detalhes de ${book.title}, de ${book.author}`}
+                          aria-haspopup="dialog"
                         >
                           <BookCover
                             book={book}
                             sizes="(max-width: 449px) 42vw, (max-width: 699px) 28vw, (max-width: 999px) 21vw, (max-width: 1199px) 17vw, 180px"
                           />
-                        </div>
+                        </button>
 
                         {/* Card interativo na frente ao passar o mouse */}
                         <div className={styles.bookHoverCard}>
                           <span className={styles.hoverCategoryTag}>
-                            {book.category || "Arte-terapia · Gestalt"}
+                            {book.category || "Leitura"}
                           </span>
                           <h4 className={styles.hoverTitle}>{book.title}</h4>
                           <p className={styles.hoverAuthor}>{book.author}</p>

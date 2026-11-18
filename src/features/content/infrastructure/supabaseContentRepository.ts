@@ -208,12 +208,10 @@ export function mapPublicPost(row: TableRow<"posts">): ContentRecord {
 
 function mapGalleryItem(row: TableRow<"gallery_items">): ContentRecord {
   const legacy = jsonObject(row.legacy_payload);
-  const rawYear = legacy.year || legacy.ano;
-  const derivedYear = rawYear
-    ? String(rawYear)
-    : row.created_at
-      ? String(new Date(row.created_at).getFullYear())
-      : null;
+  const rawYear = legacy.year ?? legacy.ano;
+  const derivedYear = typeof rawYear === "string" || typeof rawYear === "number"
+    ? String(rawYear).trim() || null
+    : null;
 
   return {
     id: row.id,
