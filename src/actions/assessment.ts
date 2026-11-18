@@ -6,8 +6,8 @@ import {
   removeAdminAssessment,
   setAdminAssessmentStatus,
 } from "@/features/assessments/infrastructure/adminAssessmentManagement.server";
-import { adminDb } from "@/lib/firebase/admin";
-import { Timestamp } from "firebase-admin/firestore";
+import { startAttempt, submitAssessment } from "@/app/actions/assessment";
+import { assertCanAccessCourse } from "@/lib/auth/access-gate";
 import { revalidatePath } from "next/cache";
 import { rateLimit, RateLimitPresets } from "@/lib/rateLimit";
 import { verifySession } from "@/lib/auth/server";
@@ -76,339 +76,128 @@ export async function getAdminSubmissionsPage({
   return readSubmissionsPage({ status, pageSize, cursorId });
 }
 
-/**
- * Start a new assessment attempt in a server-authoritative way.
- */
+/** Legacy quiz API delegates to the canonical Supabase attempt lifecycle. */
 export async function startAssessmentAttempt(
   assessmentId: string,
   courseId: string,
-) {
+): Promise<{
+  success?: boolean;
+  submissionId?: string;
+  answers?: StudentAnswer[];
+  error?: string;
+}> {
   try {
-    const claims = await requireUserClaims();
-    const uid = claims.uid;
-
-    const assessmentSnap = await adminDb
-      .collection("assessments")
-      .doc(assessmentId)
-      .get();
-    if (!assessmentSnap.exists) {
-      return { error: "Avaliação não encontrada" };
-    }
-
-    const assessment = assessmentSnap.data() as AssessmentDoc;
-    if (assessment.courseId !== courseId) {
-      return { error: "Curso da avaliação inválido" };
-    }
-
-    const existingAttempts = await adminDb
-      .collection("assessmentSubmissions")
-      .where("assessmentId", "==", assessmentId)
-      .where("userId", "==", uid)
-      .get();
-
-    const maxAttempt = existingAttempts.docs.reduce((max, d) => {
-      const value = Number(d.data()?.attemptNumber || 0);
-      return value > max ? value : max;
-    }, 0);
-
-    const submissionRef = await adminDb
-      .collection("assessmentSubmissions")
-      .add({
-        assessmentId,
-        userId: uid,
-        courseId,
-        answers: [],
-        status: "pending",
-        attemptNumber: maxAttempt + 1,
-        startedAt: Timestamp.now(),
-      });
-
-    // Supabase mirror write
-    try {
-      const supabase = createSupabaseServiceClient();
-      await supabase.from("assessment_submissions").insert({
-        id: submissionRef.id,
-        assessment_id: assessmentId,
-        user_id: uid,
-        course_id: courseId,
-        answers: [],
-        status: "pending",
-        attempt_number: maxAttempt + 1,
-        started_at: new Date().toISOString(),
-        score: 0,
-        percentage: 0,
-        passed: false,
-      });
-    } catch {
-      // ignore
-    }
-
-    return { success: true, submissionId: submissionRef.id };
-  } catch (error) {
-    console.error("Start Assessment Attempt Error:", error);
-    return { error: "Erro ao iniciar avaliação" };
+    return await startAttempt(assessmentId, courseId);
+  } catch {
+    console.error("Assessment attempt could not be started");
+    return {
+      error:
+        "Não foi possível iniciar a avaliação. Confira seu acesso e tente novamente.",
+    };
   }
 }
 
-/**
- * Submit an assessment attempt answer payload before grading.
- */
+async function ownedSubmission(submissionId: string) {
+  const claims = await requireUserClaims();
+  if (!/^[a-zA-Z0-9_-]{1,200}$/.test(submissionId))
+    throw new Error("Invalid submission");
+  const { data, error } = await createSupabaseServiceClient()
+    .from("assessment_submissions")
+    .select(
+      "id,user_id,course_id,assessment_id,status,score,percentage,passed,answers",
+    )
+    .eq("id", submissionId)
+    .eq("user_id", claims.uid)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) throw new Error("Submission unavailable");
+  await assertCanAccessCourse(claims.uid, data.course_id);
+  return { submission: data, claims };
+}
+
 export async function submitAssessmentAttempt(
   submissionId: string,
   answers: StudentAnswer[],
 ) {
   try {
-    const claims = await requireUserClaims();
-    const uid = claims.uid;
-
-    const submissionRef = adminDb
-      .collection("assessmentSubmissions")
-      .doc(submissionId);
-    const submissionSnap = await submissionRef.get();
-    if (!submissionSnap.exists) {
-      return { error: "Submissão não encontrada" };
-    }
-
-    const submission = submissionSnap.data() as AssessmentSubmissionDoc;
-    if (submission.userId !== uid) {
-      return { error: "Acesso negado" };
-    }
-
-    const nowIso = new Date().toISOString();
-    await submissionRef.update({
-      answers,
-      status: "submitted",
-      submittedAt: Timestamp.now(),
-    });
-
-    try {
-      const supabase = createSupabaseServiceClient();
-      await supabase
-        .from("assessment_submissions")
-        .update({
-          answers: answers as any,
-          status: "submitted",
-          submitted_at: nowIso,
-          updated_at: nowIso,
-        })
-        .eq("id", submissionId);
-    } catch {
-      // ignore
-    }
-
-    return { success: true };
-  } catch (error) {
-    console.error("Submit Assessment Attempt Error:", error);
-    return { error: "Erro ao enviar avaliação" };
-  }
-}
-
-/**
- * Grade an assessment submission
- * Auto-grades multiple choice and true/false
- * Marks essays/practicals for manual review
- */
-export async function gradeAssessment(submissionId: string) {
-  try {
-    const claims = await requireUserClaims();
-
-    // Rate limiting: Prevent spam submissions
-    const rateLimitResult = await rateLimit(
+    const { submission, claims } = await ownedSubmission(submissionId);
+    if (submission.status !== "pending")
+      throw new Error("Attempt already submitted");
+    if (
+      !Array.isArray(answers) ||
+      answers.length > 200 ||
+      new Set(answers.map((answer) => answer.questionId)).size !==
+        answers.length
+    )
+      throw new Error("Invalid answers");
+    const limited = await rateLimit(
       claims.uid,
       "submitAssessment",
       RateLimitPresets.SUBMIT_ASSIGNMENT,
     );
-
-    if (!rateLimitResult.allowed) {
-      const waitSeconds = Math.ceil(
-        (rateLimitResult.resetAt - Date.now()) / 1000,
-      );
+    if (!limited.allowed)
       return {
-        error: `Limite de submissões excedido. Aguarde ${waitSeconds}s.`,
+        error: "Limite de submissões excedido. Aguarde e tente novamente.",
       };
-    }
-
-    // Get submission
-    const submissionRef = adminDb
-      .collection("assessmentSubmissions")
-      .doc(submissionId);
-    const submissionSnap = await submissionRef.get();
-
-    if (!submissionSnap.exists) {
-      return { error: "Submissão não encontrada" };
-    }
-
-    const submission = submissionSnap.data() as AssessmentSubmissionDoc;
-
-    // Verify ownership
-    if (submission.userId !== claims.uid) {
-      return { error: "Acesso negado" };
-    }
-
-    // Get assessment
-    const assessmentSnap = await adminDb
-      .collection("assessments")
-      .doc(submission.assessmentId)
-      .get();
-
-    if (!assessmentSnap.exists) {
-      return { error: "Avaliação não encontrada" };
-    }
-
-    const assessment = assessmentSnap.data() as AssessmentDoc;
-
-    // Auto-grade
-    let totalPoints = 0;
-    let earnedPoints = 0;
-    let requiresManualReview = false;
-
-    const gradedAnswers: StudentAnswer[] = submission.answers.map((answer) => {
-      const question = assessment.questions.find(
-        (q) => q.id === answer.questionId,
-      );
-
-      if (!question) return answer;
-
-      totalPoints += question.points;
-
-      // Multiple Choice grading
-      if (question.type === "multiple_choice" && answer.selectedOptions) {
-        const correctOptions = question.options
-          .filter((opt) => opt.isCorrect)
-          .map((opt) => opt.id);
-
-        const isCorrect =
-          correctOptions.length === answer.selectedOptions.length &&
-          correctOptions.every((id) => answer.selectedOptions!.includes(id));
-
-        const pointsEarned = isCorrect ? question.points : 0;
-        earnedPoints += pointsEarned;
-
-        return { ...answer, isCorrect, pointsEarned };
-      }
-
-      // True/False grading
-      if (
-        question.type === "true_false" &&
-        answer.booleanAnswer !== undefined
-      ) {
-        const isCorrect = answer.booleanAnswer === question.correctAnswer;
-        const pointsEarned = isCorrect ? question.points : 0;
-        earnedPoints += pointsEarned;
-
-        return { ...answer, isCorrect, pointsEarned };
-      }
-
-      // Essay/Practical - requires manual review
-      if (question.type === "essay" || question.type === "practical") {
-        requiresManualReview = true;
-        return { ...answer, pointsEarned: 0 };
-      }
-
-      return answer;
-    });
-
-    const percentage = totalPoints > 0 ? (earnedPoints / totalPoints) * 100 : 0;
-    const passed = percentage >= assessment.passingScore;
-
-    // Update submission
-    const updateData: any = {
-      answers: gradedAnswers,
-      score: earnedPoints,
-      percentage,
-      passed: requiresManualReview ? false : passed,
-      status: requiresManualReview ? "submitted" : "graded",
-      gradedAt: Timestamp.now(),
+    const raw = Object.fromEntries(
+      answers.map((answer) => [
+        answer.questionId,
+        answer.storagePath
+          ? {
+              storagePath: answer.storagePath,
+              fileName: answer.fileName,
+              mimeType: answer.mimeType,
+              fileSize: answer.fileSize,
+              ...(answer.textAnswer !== undefined
+                ? { textAnswer: answer.textAnswer }
+                : {}),
+            }
+          : (answer.selectedOptions ??
+            answer.booleanAnswer ??
+            answer.textAnswer),
+      ]),
+    );
+    const result = await submitAssessment(
+      submission.assessment_id,
+      raw,
+      submissionId,
+    );
+    return { success: true, progressSaved: result.progressSaved };
+  } catch {
+    console.error("Assessment attempt could not be submitted");
+    return {
+      error:
+        "Não foi possível enviar a avaliação. Confira seu acesso e tente novamente.",
     };
+  }
+}
 
-    await submissionRef.update(updateData);
-
-    // Update user progress in Firestore
-    const progressRef = adminDb
-      .collection("users")
-      .doc(claims.uid)
-      .collection("assessmentProgress")
-      .doc(submission.assessmentId);
-
-    const progressSnap = await progressRef.get();
-    const currentProgress = progressSnap.exists ? progressSnap.data() : null;
-
-    const newBestPercentage = Math.max(
-      percentage,
-      currentProgress?.bestPercentage || 0,
-    );
-    const newBestScore = Math.max(
-      earnedPoints,
-      currentProgress?.bestScore || 0,
-    );
-    const totalAttempts = (currentProgress?.attempts || 0) + 1;
-
-    await progressRef.set(
-      {
-        assessmentId: submission.assessmentId,
-        userId: claims.uid,
-        courseId: submission.courseId,
-        attempts: totalAttempts,
-        bestScore: newBestScore,
-        bestPercentage: newBestPercentage,
-        passed: requiresManualReview
-          ? false
-          : newBestPercentage >= assessment.passingScore,
-        lastAttemptAt: Timestamp.now(),
-        submissions: [...(currentProgress?.submissions || []), submissionId],
-      },
-      { merge: true },
-    );
-
-    // Sync to Supabase
-    try {
-      const supabase = createSupabaseServiceClient();
-      const nowIso = new Date().toISOString();
-      await supabase
-        .from("assessment_submissions")
-        .update({
-          answers: gradedAnswers as any,
-          score: earnedPoints,
-          percentage,
-          passed: requiresManualReview ? false : passed,
-          status: requiresManualReview ? "submitted" : "graded",
-          graded_at: nowIso,
-          updated_at: nowIso,
-        })
-        .eq("id", submissionId);
-
-      await supabase.from("assessment_progress").upsert({
-        id: `${claims.uid}_${submission.assessmentId}`,
-        assessment_id: submission.assessmentId,
-        user_id: claims.uid,
-        course_id: submission.courseId,
-        attempts: totalAttempts,
-        best_score: newBestScore,
-        best_percentage: newBestPercentage,
-        passed: requiresManualReview
-          ? false
-          : newBestPercentage >= assessment.passingScore,
-        last_attempt_at: nowIso,
-        submissions: [
-          ...(currentProgress?.submissions || []),
-          submissionId,
-        ] as any,
-      });
-    } catch {
-      // ignore
-    }
-
+/** The canonical submit already grades once; reading its result is idempotent. */
+export async function gradeAssessment(submissionId: string) {
+  try {
+    const { submission } = await ownedSubmission(submissionId);
+    if (!["submitted", "graded"].includes(submission.status))
+      throw new Error("Attempt not submitted");
+    const { data: assessment, error } = await createSupabaseServiceClient()
+      .from("assessments")
+      .select("total_points")
+      .eq("id", submission.assessment_id)
+      .eq("course_id", submission.course_id)
+      .maybeSingle();
+    if (error) throw error;
+    if (!assessment) throw new Error("Assessment unavailable");
+    const requiresManualReview = submission.status === "submitted";
     return {
       success: true,
-      score: earnedPoints,
-      totalPoints,
-      percentage,
-      passed: requiresManualReview ? null : passed,
+      score: submission.score,
+      totalPoints: assessment.total_points,
+      percentage: submission.percentage,
+      passed: requiresManualReview ? null : submission.passed,
       requiresManualReview,
     };
-  } catch (error) {
-    console.error("Grade Assessment Error:", error);
-    return { error: "Erro ao processar avaliação" };
+  } catch {
+    console.error("Assessment result could not be read");
+    return { error: "Não foi possível consultar o resultado da avaliação." };
   }
 }
 

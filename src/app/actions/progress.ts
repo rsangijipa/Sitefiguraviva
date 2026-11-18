@@ -10,6 +10,7 @@ import {
   lessonProgressInput,
 } from "@/features/progress/application/recordLessonProgress.server";
 import { awardCanonicalCompletion } from "@/features/gamification/application/awardCanonicalGamification.server";
+import { assertLessonReleased } from "@/features/courses/application/lessonRelease.server";
 
 /**
  * Validates user session and enrollment, then marks lesson as complete.
@@ -26,7 +27,9 @@ export async function markLessonCompleted(
 
     // 2. Access Check (Enrollment SSoT)
     // This ensures only enrolled students with active status can progress.
-    await assertCanAccessCourse(uid, courseId);
+    const access = await assertCanAccessCourse(uid, courseId);
+    if (!access.isAdminOverride && !access.isTeamPreview)
+      await assertLessonReleased(uid, courseId, lessonId);
 
     const result = await recordLessonProgress(uid, {
       courseId,
@@ -74,7 +77,9 @@ export async function updateLessonProgress(
     if (!session) throw new Error("Unauthenticated");
     const uid = session.uid;
 
-    await assertCanAccessCourse(uid, courseId);
+    const access = await assertCanAccessCourse(uid, courseId);
+    if (!access.isAdminOverride && !access.isTeamPreview)
+      await assertLessonReleased(uid, courseId, lessonId);
 
     const input = lessonProgressInput.parse({
       courseId,

@@ -1,0 +1,818 @@
+{
+  "createdAt": "2026-11-16",
+  "project": "Figura Viva",
+  "note": "Assets generated for this project using the built-in image_gen tool. Prompts document production; this file is not a clinical or editorial approval record.",
+  "assets": [
+    {
+      "file": "/brand/recursos/cartas/ajustamento.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE standalone 3:2 production educational concept-card illustration for Instituto Figura Viva, not a contact sheet. Editorial restrained watercolor, subtle paper grain on warm cream #FDFAF4, large empty margins, organic pigment edges. Palette: Verde Raiz #005A1F, Igarapé #07614C, Terra Barro #96551F, Areia #F1E9DB, Névoa #D8CFBE, Pedra #6B6B63; accents Aurora #FE538B, Vazante #FED701, Broto #01C94D. Interpret the following Portuguese art brief literally using these named colors: Ramo que contorna um obstáculo Névoa e brota folhas do outro lado. . Minimal abstract symbolic composition, no readable writing, text, logos, borders, shadows, shine, animals, flowers, lotus, 3D, realistic people or faces. If 'silhueta' is specified, a simple faceless outline only; if Rubin is specified, flat shared profile/tree negative space outlines only. Do not print the concept name.",
+      "source": "exec-f829bc48-3e9f-4e0d-ab24-a5c004acc40e.png",
+      "width": 1200,
+      "height": 800,
+      "bytes": 26894,
+      "sha256": "8488a275a21b856a93ac35b2dc0439de17c3dd20ec6e5db78871810cc22e2f8c"
+    },
+    {
+      "file": "/brand/recursos/cartas/aqui-agora.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE standalone 3:2 production educational concept-card illustration for Instituto Figura Viva, not a contact sheet. Editorial restrained watercolor, subtle paper grain on warm cream #FDFAF4, large empty margins, organic pigment edges. Palette: Verde Raiz #005A1F, Igarapé #07614C, Terra Barro #96551F, Areia #F1E9DB, Névoa #D8CFBE, Pedra #6B6B63; accents Aurora #FE538B, Vazante #FED701, Broto #01C94D. Interpret the following Portuguese art brief literally using these named colors: Linha fina Névoa que converge para um único ponto Vazante no centro. . Minimal abstract symbolic composition, no readable writing, text, logos, borders, shadows, shine, animals, flowers, lotus, 3D, realistic people or faces. If 'silhueta' is specified, a simple faceless outline only; if Rubin is specified, flat shared profile/tree negative space outlines only. Do not print the concept name.",
+      "source": "exec-6021c64b-68cd-425b-b637-704e5f7f1bb0.png",
+      "width": 1200,
+      "height": 800,
+      "bytes": 13858,
+      "sha256": "7663134f02a888a0cfa44f7deafb2bb04ca874416d436bd7515b637bd932f320"
+    },
+    {
+      "file": "/brand/recursos/cartas/autorregulacao.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE standalone 3:2 production educational concept-card illustration for Instituto Figura Viva, not a contact sheet. Editorial restrained watercolor, subtle paper grain on warm cream #FDFAF4, large empty margins, organic pigment edges. Palette: Verde Raiz #005A1F, Igarapé #07614C, Terra Barro #96551F, Areia #F1E9DB, Névoa #D8CFBE, Pedra #6B6B63; accents Aurora #FE538B, Vazante #FED701, Broto #01C94D. Interpret the following Portuguese art brief literally using these named colors: Mancha Aurora apagada e mancha Broto viva, ligadas por um Ramo Verde Raiz em arco. . Minimal abstract symbolic composition, no readable writing, text, logos, borders, shadows, shine, animals, flowers, lotus, 3D, realistic people or faces. If 'silhueta' is specified, a simple faceless outline only; if Rubin is specified, flat shared profile/tree negative space outlines only. Do not print the concept name.",
+      "source": "exec-79e054f8-38cd-4766-88fb-8926abae43f7.png",
+      "width": 1200,
+      "height": 800,
+      "bytes": 33142,
+      "sha256": "65a4a4d169a8218d65c3cf692e0fd498ef68852e032b36ad5fb94bacadc33524"
+    },
+    {
+      "file": "/brand/recursos/cartas/awareness.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE standalone 3:2 production educational concept-card illustration for Instituto Figura Viva, not a contact sheet. Editorial restrained watercolor, subtle paper grain on warm cream #FDFAF4, large empty margins, organic pigment edges. Palette: Verde Raiz #005A1F, Igarapé #07614C, Terra Barro #96551F, Areia #F1E9DB, Névoa #D8CFBE, Pedra #6B6B63; accents Aurora #FE538B, Vazante #FED701, Broto #01C94D. Interpret the following Portuguese art brief literally using these named colors: Ponto Vazante surgindo num campo Areia, anéis muito leves ao redor. . Minimal abstract symbolic composition, no readable writing, text, logos, borders, shadows, shine, animals, flowers, lotus, 3D, realistic people or faces. If 'silhueta' is specified, a simple faceless outline only; if Rubin is specified, flat shared profile/tree negative space outlines only. Do not print the concept name.",
+      "source": "exec-8ac23d88-e8b7-4b53-a5b1-28de986eeac1.png",
+      "width": 1200,
+      "height": 800,
+      "bytes": 23918,
+      "sha256": "e3b7570f7a54ae8bbf0935a9c62bebd5be18692b97e713bac8028a499ade7c26"
+    },
+    {
+      "file": "/brand/recursos/cartas/campo.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE standalone 3:2 production educational concept-card illustration for Instituto Figura Viva, not a contact sheet. Editorial restrained watercolor, subtle paper grain on warm cream #FDFAF4, large empty margins, organic pigment edges. Palette: Verde Raiz #005A1F, Igarapé #07614C, Terra Barro #96551F, Areia #F1E9DB, Névoa #D8CFBE, Pedra #6B6B63; accents Aurora #FE538B, Vazante #FED701, Broto #01C94D. Interpret the following Portuguese art brief literally using these named colors: Campo Areia com uma mancha Verde Raiz e manchas vizinhas mais leves, sem centro dominante. . Minimal abstract symbolic composition, no readable writing, text, logos, borders, shadows, shine, animals, flowers, lotus, 3D, realistic people or faces. If 'silhueta' is specified, a simple faceless outline only; if Rubin is specified, flat shared profile/tree negative space outlines only. Do not print the concept name.",
+      "source": "exec-2a4a4ba6-ca25-4d0c-bf58-3197d2066b46.png",
+      "width": 1200,
+      "height": 800,
+      "bytes": 72642,
+      "sha256": "f9d4c6fc5bcd3f2e6a6ffa5aee2fdf12b4491cb80fb56d97366172bb2d4e2022"
+    },
+    {
+      "file": "/brand/recursos/cartas/confluencia.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE standalone 3:2 production educational concept-card illustration for Instituto Figura Viva, not a contact sheet. Editorial restrained watercolor, subtle paper grain on warm cream #FDFAF4, large empty margins, organic pigment edges. Palette: Verde Raiz #005A1F, Igarapé #07614C, Terra Barro #96551F, Areia #F1E9DB, Névoa #D8CFBE, Pedra #6B6B63; accents Aurora #FE538B, Vazante #FED701, Broto #01C94D. Interpret the following Portuguese art brief literally using these named colors: Duas manchas (Aurora e Broto) que se misturam sem contorno. . Minimal abstract symbolic composition, no readable writing, text, logos, borders, shadows, shine, animals, flowers, lotus, 3D, realistic people or faces. If 'silhueta' is specified, a simple faceless outline only; if Rubin is specified, flat shared profile/tree negative space outlines only. Do not print the concept name.",
+      "source": "exec-43eb874f-a600-490b-8c43-97015e910c7d.png",
+      "width": 1200,
+      "height": 800,
+      "bytes": 51274,
+      "sha256": "9e7ba351cd4a65ac6fb2071fdd8d07b693f0ef4017b08838bb9995565421b3e6"
+    },
+    {
+      "file": "/brand/recursos/cartas/copa.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Editorial watercolor canopy on cream #FDFAF4 paper. Thin earth brown #96551F trunk, about ten distinct large leaves in pink #FE538B, yellow #FED701 and green #01C94D; rooted green #005A1F accents. Square composition, subtle paper grain, no sky, landscape, animals, text, shadows or glossy effects.",
+      "source": "exec-94db79f3-9a1d-4760-ba36-1991a3950c1c.png",
+      "width": 1200,
+      "height": 1200,
+      "bytes": 108594,
+      "sha256": "7002ba1033fba706b234d39a6d79b50a3ce8fcddf9a6ed66d618e8dc13732303"
+    },
+    {
+      "file": "/brand/recursos/cartas/corpo.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create a single 3:2 minimal watercolor educational BODY concept illustration on warm cream #FDFAF4 paper. One small centered gender-neutral STANDING silhouette drawn only as a very simple thin continuous dark green #005A1F outline, front view, arms relaxed at sides, feet apart slightly, head a plain oval with NO face, no hair or gender markers, not a realistic person. A small soft pink #FE538B watercolor patch at the chest. Nothing else. Huge empty margins. No yoga, sitting, lotus, cross-legged pose, landscape, sun, leaves, decorative shapes, shadow or text.",
+      "source": "exec-1fbf3409-55db-4cb6-bde2-6bd1800b727b.png",
+      "width": 1200,
+      "height": 800,
+      "bytes": 12028,
+      "sha256": "6f7ae39d338f63c27dd4309242ce7eee0f7c29fdd52daa030364d1f86be10037"
+    },
+    {
+      "file": "/brand/recursos/cartas/deflexao.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE standalone 3:2 production educational concept-card illustration for Instituto Figura Viva, not a contact sheet. Editorial restrained watercolor, subtle paper grain on warm cream #FDFAF4, large empty margins, organic pigment edges. Palette: Verde Raiz #005A1F, Igarapé #07614C, Terra Barro #96551F, Areia #F1E9DB, Névoa #D8CFBE, Pedra #6B6B63; accents Aurora #FE538B, Vazante #FED701, Broto #01C94D. Interpret the following Portuguese art brief literally using these named colors: Ramo Terra Barro que se aproxima de uma mancha Igarapé e desvia antes de tocá-la. . Minimal abstract symbolic composition, no readable writing, text, logos, borders, shadows, shine, animals, flowers, lotus, 3D, realistic people or faces. If 'silhueta' is specified, a simple faceless outline only; if Rubin is specified, flat shared profile/tree negative space outlines only. Do not print the concept name.",
+      "source": "exec-ffbc3770-6d84-4730-97c0-e5ab1da91d0b.png",
+      "width": 1200,
+      "height": 800,
+      "bytes": 56966,
+      "sha256": "c0e51ba5bb8fb2c18d0db8a9ed09d5756005ea04427b1177f28e08aa2730b6ce"
+    },
+    {
+      "file": "/brand/recursos/cartas/descricao.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE standalone 3:2 production educational concept-card illustration for Instituto Figura Viva, not a contact sheet. Editorial restrained watercolor, subtle paper grain on warm cream #FDFAF4, large empty margins, organic pigment edges. Palette: Verde Raiz #005A1F, Igarapé #07614C, Terra Barro #96551F, Areia #F1E9DB, Névoa #D8CFBE, Pedra #6B6B63; accents Aurora #FE538B, Vazante #FED701, Broto #01C94D. Interpret the following Portuguese art brief literally using these named colors: Mancha Vazante à esquerda e linhas de escrita Pedra à direita, sem texto legível. . Minimal abstract symbolic composition, no readable writing, text, logos, borders, shadows, shine, animals, flowers, lotus, 3D, realistic people or faces. If 'silhueta' is specified, a simple faceless outline only; if Rubin is specified, flat shared profile/tree negative space outlines only. Do not print the concept name.",
+      "source": "exec-9dc25594-69ea-4c07-b8a0-3fbf4aed1f93.png",
+      "width": 1200,
+      "height": 800,
+      "bytes": 28808,
+      "sha256": "b28c683096afcca065da463dea09798cb206aab699d23242350d66ac9e60454c"
+    },
+    {
+      "file": "/brand/recursos/cartas/egotismo.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create a single minimal 3:2 abstract watercolor concept illustration for an educational website. A small soft round YELLOW watercolor blob centered on warm cream #FDFAF4 paper. Around the yellow blob, ONE separate larger simple rigid nearly-circular dark green #262B22 outline, no gaps, no decorations. Huge empty margins. No other objects. CRITICAL: NO puzzle-piece shape, no interlocking shapes, no jigsaw contours, no leaves, no branches, no frame or words. The yellow blob must be a plain rounded oval. Subtle pigment texture.",
+      "source": "exec-d8762fa0-a604-46f1-b561-088e7e89befa.png",
+      "width": 1200,
+      "height": 800,
+      "bytes": 12756,
+      "sha256": "f33ba61112a6f5caf035c52b6dc83371ce257e81851573b363075050f2612a5f"
+    },
+    {
+      "file": "/brand/recursos/cartas/eu-tu.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE standalone 3:2 production educational concept-card illustration for Instituto Figura Viva, not a contact sheet. Editorial restrained watercolor, subtle paper grain on warm cream #FDFAF4, large empty margins, organic pigment edges. Palette: Verde Raiz #005A1F, Igarapé #07614C, Terra Barro #96551F, Areia #F1E9DB, Névoa #D8CFBE, Pedra #6B6B63; accents Aurora #FE538B, Vazante #FED701, Broto #01C94D. Interpret the following Portuguese art brief literally using these named colors: Duas formas (Igarapé e Terra Barro) com o espaço entre elas iluminado em Vazante. . Minimal abstract symbolic composition, no readable writing, text, logos, borders, shadows, shine, animals, flowers, lotus, 3D, realistic people or faces. If 'silhueta' is specified, a simple faceless outline only; if Rubin is specified, flat shared profile/tree negative space outlines only. Do not print the concept name.",
+      "source": "exec-c255ec7d-815b-4a35-886b-09681bab11e1.png",
+      "width": 1200,
+      "height": 800,
+      "bytes": 96624,
+      "sha256": "a9d20fa9fdfdf6186483a4f1c59231dcd1647c2f0732cc5a51967fba78a0e18c"
+    },
+    {
+      "file": "/brand/recursos/cartas/figura-fundo.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE standalone production illustration for Instituto Figura Viva, use-case illustration-story, not a collage or contact sheet. Editorial watercolor on warm cream paper #FDFAF4 with discrete real paper grain, rooted green #005A1F, teal #07614C, earth #96551F, sand #F1E9DB, pale beige #D8CFBE, accents pink #FE538B yellow #FED701 fresh green #01C94D. No text, typography, logo, watermark, frames, glossy effects, cast shadows, photorealistic people, animals, flowers, lotuses, fish or 3D scenery. Match aspect ratio 1200:900. Educational reversible optical illusion. Two completely flat warm cream human PROFILE SILHOUETTES face each other from left and right. Shared sharply readable boundaries form a rooted green central tree trunk in negative space. Above the trunk is a restrained watercolor canopy in pink yellow green. BOTH profile silhouettes and tree MUST be readable from exactly the same shared contour, not three separate objects. No realistic faces, eyes, hair, portraits or rendered people. Functional Rubin illusion, strong figure-ground legibility.",
+      "source": "exec-5d81f43c-03c4-4925-8b15-0b58c24bd0b7.png",
+      "derivedFrom": "/brand/recursos/figura-e-fundo/arvore-de-rubin.webp",
+      "width": 1200,
+      "height": 800,
+      "bytes": 49982,
+      "sha256": "e20538b2e9609b46df36509fb1af572d07fff66ef543ec586e008976266bb17f"
+    },
+    {
+      "file": "/brand/recursos/cartas/fronteira.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE standalone 3:2 production educational concept-card illustration for Instituto Figura Viva, not a contact sheet. Editorial restrained watercolor, subtle paper grain on warm cream #FDFAF4, large empty margins, organic pigment edges. Palette: Verde Raiz #005A1F, Igarapé #07614C, Terra Barro #96551F, Areia #F1E9DB, Névoa #D8CFBE, Pedra #6B6B63; accents Aurora #FE538B, Vazante #FED701, Broto #01C94D. Interpret the following Portuguese art brief literally using these named colors: Dois campos (Igarapé e Vazante) que se tocam por membrana pontilhada Creme. . Minimal abstract symbolic composition, no readable writing, text, logos, borders, shadows, shine, animals, flowers, lotus, 3D, realistic people or faces. If 'silhueta' is specified, a simple faceless outline only; if Rubin is specified, flat shared profile/tree negative space outlines only. Do not print the concept name.",
+      "source": "exec-b7777702-1723-4b2f-9817-f0904f00f6b7.png",
+      "width": 1200,
+      "height": 800,
+      "bytes": 78140,
+      "sha256": "ddfdd1d55e41a42f0e561a382a85e1b2b2d3b1a06063b6077235f79813fa5dd4"
+    },
+    {
+      "file": "/brand/recursos/cartas/inclusao.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE standalone 3:2 production educational concept-card illustration for Instituto Figura Viva, not a contact sheet. Editorial restrained watercolor, subtle paper grain on warm cream #FDFAF4, large empty margins, organic pigment edges. Palette: Verde Raiz #005A1F, Igarapé #07614C, Terra Barro #96551F, Areia #F1E9DB, Névoa #D8CFBE, Pedra #6B6B63; accents Aurora #FE538B, Vazante #FED701, Broto #01C94D. Interpret the following Portuguese art brief literally using these named colors: Dois círculos (Igarapé e Terra Barro) sobrepostos, cada um mantendo o contorno. . Minimal abstract symbolic composition, no readable writing, text, logos, borders, shadows, shine, animals, flowers, lotus, 3D, realistic people or faces. If 'silhueta' is specified, a simple faceless outline only; if Rubin is specified, flat shared profile/tree negative space outlines only. Do not print the concept name.",
+      "source": "exec-bf43db3f-3d5e-46da-8c03-a3d227dd13b7.png",
+      "width": 1200,
+      "height": 800,
+      "bytes": 85156,
+      "sha256": "6f0c95a3173e7995bd68bfe973c1ef9de02b15b505c8b374e260518396468ea8"
+    },
+    {
+      "file": "/brand/recursos/cartas/introjecao.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE standalone 3:2 production educational concept-card illustration for Instituto Figura Viva, not a contact sheet. Editorial restrained watercolor, subtle paper grain on warm cream #FDFAF4, large empty margins, organic pigment edges. Palette: Verde Raiz #005A1F, Igarapé #07614C, Terra Barro #96551F, Areia #F1E9DB, Névoa #D8CFBE, Pedra #6B6B63; accents Aurora #FE538B, Vazante #FED701, Broto #01C94D. Interpret the following Portuguese art brief literally using these named colors: Forma inteira de contorno nítido (Terra Barro) dentro de uma mancha Broto, sem mistura. . Minimal abstract symbolic composition, no readable writing, text, logos, borders, shadows, shine, animals, flowers, lotus, 3D, realistic people or faces. If 'silhueta' is specified, a simple faceless outline only; if Rubin is specified, flat shared profile/tree negative space outlines only. Do not print the concept name.",
+      "source": "exec-78d91f10-11be-4cce-bd4d-eaf9c5d14d7c.png",
+      "width": 1200,
+      "height": 800,
+      "bytes": 76090,
+      "sha256": "eb89692921bb266a33844f90a6c2c180649cb7689a96c5ef50e7a1bd36201894"
+    },
+    {
+      "file": "/brand/recursos/cartas/polaridades.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE standalone 3:2 production educational concept-card illustration for Instituto Figura Viva, not a contact sheet. Editorial restrained watercolor, subtle paper grain on warm cream #FDFAF4, large empty margins, organic pigment edges. Palette: Verde Raiz #005A1F, Igarapé #07614C, Terra Barro #96551F, Areia #F1E9DB, Névoa #D8CFBE, Pedra #6B6B63; accents Aurora #FE538B, Vazante #FED701, Broto #01C94D. Interpret the following Portuguese art brief literally using these named colors: Manchas Aurora e Broto nos extremos unidas por gradiente contínuo Aurora → Vazante → Broto. . Minimal abstract symbolic composition, no readable writing, text, logos, borders, shadows, shine, animals, flowers, lotus, 3D, realistic people or faces. If 'silhueta' is specified, a simple faceless outline only; if Rubin is specified, flat shared profile/tree negative space outlines only. Do not print the concept name.",
+      "source": "exec-ae800fc2-8956-42de-b1f0-cad205e56511.png",
+      "width": 1200,
+      "height": 800,
+      "bytes": 57442,
+      "sha256": "b972002f308770cf0b2a1a18781053f1e67a375d0171ba97f6e6edb3c5135030"
+    },
+    {
+      "file": "/brand/recursos/cartas/presenca.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE standalone 3:2 production educational concept-card illustration for Instituto Figura Viva, not a contact sheet. Editorial restrained watercolor, subtle paper grain on warm cream #FDFAF4, large empty margins, organic pigment edges. Palette: Verde Raiz #005A1F, Igarapé #07614C, Terra Barro #96551F, Areia #F1E9DB, Névoa #D8CFBE, Pedra #6B6B63; accents Aurora #FE538B, Vazante #FED701, Broto #01C94D. Interpret the following Portuguese art brief literally using these named colors: Mancha Broto com contorno pontilhado Verde Raiz ao redor, aberto. . Minimal abstract symbolic composition, no readable writing, text, logos, borders, shadows, shine, animals, flowers, lotus, 3D, realistic people or faces. If 'silhueta' is specified, a simple faceless outline only; if Rubin is specified, flat shared profile/tree negative space outlines only. Do not print the concept name.",
+      "source": "exec-09a34ad8-30cc-4268-9cad-a03547424d8e.png",
+      "width": 1200,
+      "height": 800,
+      "bytes": 45442,
+      "sha256": "09417d1ce7df9387b35452768ffafd0fadd18237c16d82fccec6ff339ffbf696"
+    },
+    {
+      "file": "/brand/recursos/cartas/projecao.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE standalone 3:2 production educational concept-card illustration for Instituto Figura Viva, not a contact sheet. Editorial restrained watercolor, subtle paper grain on warm cream #FDFAF4, large empty margins, organic pigment edges. Palette: Verde Raiz #005A1F, Igarapé #07614C, Terra Barro #96551F, Areia #F1E9DB, Névoa #D8CFBE, Pedra #6B6B63; accents Aurora #FE538B, Vazante #FED701, Broto #01C94D. Interpret the following Portuguese art brief literally using these named colors: Forma Aurora e sua 'sombra' colorida pousada sobre uma forma Névoa. . Minimal abstract symbolic composition, no readable writing, text, logos, borders, shadows, shine, animals, flowers, lotus, 3D, realistic people or faces. If 'silhueta' is specified, a simple faceless outline only; if Rubin is specified, flat shared profile/tree negative space outlines only. Do not print the concept name.",
+      "source": "exec-f7462d88-447d-4b0e-afcb-23b8a4244b8c.png",
+      "width": 1200,
+      "height": 800,
+      "bytes": 32858,
+      "sha256": "e20d038a487d04371be06e21e1a179dcdbd766c4e3c7c31231a4d40f403a0163"
+    },
+    {
+      "file": "/brand/recursos/cartas/retroflexao.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE standalone 3:2 production educational concept-card illustration for Instituto Figura Viva, not a contact sheet. Editorial restrained watercolor, subtle paper grain on warm cream #FDFAF4, large empty margins, organic pigment edges. Palette: Verde Raiz #005A1F, Igarapé #07614C, Terra Barro #96551F, Areia #F1E9DB, Névoa #D8CFBE, Pedra #6B6B63; accents Aurora #FE538B, Vazante #FED701, Broto #01C94D. Interpret the following Portuguese art brief literally using these named colors: Ramo Terra Barro que sai de um ponto, faz um arco e volta a ele. . Minimal abstract symbolic composition, no readable writing, text, logos, borders, shadows, shine, animals, flowers, lotus, 3D, realistic people or faces. If 'silhueta' is specified, a simple faceless outline only; if Rubin is specified, flat shared profile/tree negative space outlines only. Do not print the concept name.",
+      "source": "exec-787959c6-0d87-46f4-bb45-99bf2023d248.png",
+      "width": 1200,
+      "height": 800,
+      "bytes": 32984,
+      "sha256": "64edd1e645dc316c5943f849d81676bb92a388f47b3af6a00648c9bcfaf8e659"
+    },
+    {
+      "file": "/brand/recursos/cartas/self-ego.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE standalone 3:2 production educational concept-card illustration for Instituto Figura Viva, not a contact sheet. Editorial restrained watercolor, subtle paper grain on warm cream #FDFAF4, large empty margins, organic pigment edges. Palette: Verde Raiz #005A1F, Igarapé #07614C, Terra Barro #96551F, Areia #F1E9DB, Névoa #D8CFBE, Pedra #6B6B63; accents Aurora #FE538B, Vazante #FED701, Broto #01C94D. Interpret the following Portuguese art brief literally using these named colors: Mancha Broto (identificação) e mancha Névoa (alienação) separadas por linha Verde Raiz. . Minimal abstract symbolic composition, no readable writing, text, logos, borders, shadows, shine, animals, flowers, lotus, 3D, realistic people or faces. If 'silhueta' is specified, a simple faceless outline only; if Rubin is specified, flat shared profile/tree negative space outlines only. Do not print the concept name.",
+      "source": "exec-a7129c62-9760-4e5e-a281-99fd3096d1af.png",
+      "width": 1200,
+      "height": 800,
+      "bytes": 43188,
+      "sha256": "a04505f8f8afe9147e7c0c247c534f21ea666d2fce9b2b18e299a7feb2f0befa"
+    },
+    {
+      "file": "/brand/recursos/cartas/self-id.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE standalone 3:2 production educational concept-card illustration for Instituto Figura Viva, not a contact sheet. Editorial restrained watercolor, subtle paper grain on warm cream #FDFAF4, large empty margins, organic pigment edges. Palette: Verde Raiz #005A1F, Igarapé #07614C, Terra Barro #96551F, Areia #F1E9DB, Névoa #D8CFBE, Pedra #6B6B63; accents Aurora #FE538B, Vazante #FED701, Broto #01C94D. Interpret the following Portuguese art brief literally using these named colors: Mancha Aurora emergindo de um fundo Aurora apagado, pequeno broto saindo. . Minimal abstract symbolic composition, no readable writing, text, logos, borders, shadows, shine, animals, flowers, lotus, 3D, realistic people or faces. If 'silhueta' is specified, a simple faceless outline only; if Rubin is specified, flat shared profile/tree negative space outlines only. Do not print the concept name.",
+      "source": "exec-16694529-1f44-455b-ab0d-f06793da7436.png",
+      "width": 1200,
+      "height": 800,
+      "bytes": 31906,
+      "sha256": "8f0724edb9c9277d291cb7c914cd60bdde267aaf5faeacfb006d6cc312ac2856"
+    },
+    {
+      "file": "/brand/recursos/cartas/self-personalidade.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE standalone 3:2 production educational concept-card illustration for Instituto Figura Viva, not a contact sheet. Editorial restrained watercolor, subtle paper grain on warm cream #FDFAF4, large empty margins, organic pigment edges. Palette: Verde Raiz #005A1F, Igarapé #07614C, Terra Barro #96551F, Areia #F1E9DB, Névoa #D8CFBE, Pedra #6B6B63; accents Aurora #FE538B, Vazante #FED701, Broto #01C94D. Interpret the following Portuguese art brief literally using these named colors: Camadas concêntricas Areia, Vazante e Broto, como anéis de crescimento. . Minimal abstract symbolic composition, no readable writing, text, logos, borders, shadows, shine, animals, flowers, lotus, 3D, realistic people or faces. If 'silhueta' is specified, a simple faceless outline only; if Rubin is specified, flat shared profile/tree negative space outlines only. Do not print the concept name.",
+      "source": "exec-896daa2f-588c-4c96-a832-e7d63414ddbb.png",
+      "width": 1200,
+      "height": 800,
+      "bytes": 42730,
+      "sha256": "783431bb7340118e53d01b276be5e0f3f00467ce628697d0d97e5a66ca36bbff"
+    },
+    {
+      "file": "/brand/recursos/cartas/suspensao.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE standalone 3:2 production educational concept-card illustration for Instituto Figura Viva, not a contact sheet. Editorial restrained watercolor, subtle paper grain on warm cream #FDFAF4, large empty margins, organic pigment edges. Palette: Verde Raiz #005A1F, Igarapé #07614C, Terra Barro #96551F, Areia #F1E9DB, Névoa #D8CFBE, Pedra #6B6B63; accents Aurora #FE538B, Vazante #FED701, Broto #01C94D. Interpret the following Portuguese art brief literally using these named colors: Mancha Broto entre dois ramos curvos como parênteses (epoché). . Minimal abstract symbolic composition, no readable writing, text, logos, borders, shadows, shine, animals, flowers, lotus, 3D, realistic people or faces. If 'silhueta' is specified, a simple faceless outline only; if Rubin is specified, flat shared profile/tree negative space outlines only. Do not print the concept name.",
+      "source": "exec-42fc3676-9b7d-4434-9ac6-10b96c51f570.png",
+      "width": 1200,
+      "height": 800,
+      "bytes": 44102,
+      "sha256": "19665bed8eb6be25515db0260032a73cdba88983bee096ed028b8b2f17497b0b"
+    },
+    {
+      "file": "/brand/recursos/cartas/teoria-campo.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE standalone 3:2 production educational concept-card illustration for Instituto Figura Viva, not a contact sheet. Editorial restrained watercolor, subtle paper grain on warm cream #FDFAF4, large empty margins, organic pigment edges. Palette: Verde Raiz #005A1F, Igarapé #07614C, Terra Barro #96551F, Areia #F1E9DB, Névoa #D8CFBE, Pedra #6B6B63; accents Aurora #FE538B, Vazante #FED701, Broto #01C94D. Interpret the following Portuguese art brief literally using these named colors: Nós e linhas de força sem centro, em Verde Raiz, Terra Barro e Igarapé. . Minimal abstract symbolic composition, no readable writing, text, logos, borders, shadows, shine, animals, flowers, lotus, 3D, realistic people or faces. If 'silhueta' is specified, a simple faceless outline only; if Rubin is specified, flat shared profile/tree negative space outlines only. Do not print the concept name.",
+      "source": "exec-45346079-8e43-491e-9203-a2c49ad9bcbe.png",
+      "width": 1200,
+      "height": 800,
+      "bytes": 82996,
+      "sha256": "7e7127dc68baa4395aaa88c4c34d86c34584c4ad3fd788f0b426a3d7b7ed6487"
+    },
+    {
+      "file": "/brand/recursos/cartas/territorio.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE standalone 3:2 production educational concept-card illustration for Instituto Figura Viva, not a contact sheet. Editorial restrained watercolor, subtle paper grain on warm cream #FDFAF4, large empty margins, organic pigment edges. Palette: Verde Raiz #005A1F, Igarapé #07614C, Terra Barro #96551F, Areia #F1E9DB, Névoa #D8CFBE, Pedra #6B6B63; accents Aurora #FE538B, Vazante #FED701, Broto #01C94D. Interpret the following Portuguese art brief literally using these named colors: Faixa de rio Igarapé, céu em mancha Broto apagada, um ramo com folhas na margem. Sem fauna nem folclore. . Minimal abstract symbolic composition, no readable writing, text, logos, borders, shadows, shine, animals, flowers, lotus, 3D, realistic people or faces. If 'silhueta' is specified, a simple faceless outline only; if Rubin is specified, flat shared profile/tree negative space outlines only. Do not print the concept name.",
+      "source": "exec-c84c3570-aa72-4c4f-81c3-675ce7e4895c.png",
+      "width": 1200,
+      "height": 800,
+      "bytes": 69758,
+      "sha256": "9cd39d8e8d5906d2e2a6adf6162b552e5e7b778a458b9f1c14de253c5f4eac8a"
+    },
+    {
+      "file": "/brand/recursos/cartas/vazio-fertil.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE standalone 3:2 production educational concept-card illustration for Instituto Figura Viva, not a contact sheet. Editorial restrained watercolor, subtle paper grain on warm cream #FDFAF4, large empty margins, organic pigment edges. Palette: Verde Raiz #005A1F, Igarapé #07614C, Terra Barro #96551F, Areia #F1E9DB, Névoa #D8CFBE, Pedra #6B6B63; accents Aurora #FE538B, Vazante #FED701, Broto #01C94D. Interpret the following Portuguese art brief literally using these named colors: Grande campo Areia vazio com uma pequena mancha Broto nascendo na borda. . Minimal abstract symbolic composition, no readable writing, text, logos, borders, shadows, shine, animals, flowers, lotus, 3D, realistic people or faces. If 'silhueta' is specified, a simple faceless outline only; if Rubin is specified, flat shared profile/tree negative space outlines only. Do not print the concept name.",
+      "source": "exec-0c7c654a-2c42-4a2a-bee4-738557b14101.png",
+      "width": 1200,
+      "height": 800,
+      "bytes": 22568,
+      "sha256": "208510d30e8a50bb73c0ea292dcbc0a9118706c69e9426c87dfb44c6f67a2c1a"
+    },
+    {
+      "file": "/brand/recursos/figura-e-fundo/arvore-de-rubin.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE standalone production illustration for Instituto Figura Viva, use-case illustration-story, not a collage or contact sheet. Editorial watercolor on warm cream paper #FDFAF4 with discrete real paper grain, rooted green #005A1F, teal #07614C, earth #96551F, sand #F1E9DB, pale beige #D8CFBE, accents pink #FE538B yellow #FED701 fresh green #01C94D. No text, typography, logo, watermark, frames, glossy effects, cast shadows, photorealistic people, animals, flowers, lotuses, fish or 3D scenery. Match aspect ratio 1200:900. Educational reversible optical illusion. Two completely flat warm cream human PROFILE SILHOUETTES face each other from left and right. Shared sharply readable boundaries form a rooted green central tree trunk in negative space. Above the trunk is a restrained watercolor canopy in pink yellow green. BOTH profile silhouettes and tree MUST be readable from exactly the same shared contour, not three separate objects. No realistic faces, eyes, hair, portraits or rendered people. Functional Rubin illusion, strong figure-ground legibility.",
+      "source": "exec-5d81f43c-03c4-4925-8b15-0b58c24bd0b7.png",
+      "width": 1200,
+      "height": 900,
+      "bytes": 88718,
+      "sha256": "1d328a363248b62c9978f9ca5064af4197dab07c529174567e5dcc07fa5c2538"
+    },
+    {
+      "file": "/brand/recursos/figura-e-fundo/perceptivo-1.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE standalone production illustration for Instituto Figura Viva, use-case illustration-story, not a collage or contact sheet. Editorial watercolor on warm cream paper #FDFAF4 with discrete real paper grain, rooted green #005A1F, teal #07614C, earth #96551F, sand #F1E9DB, pale beige #D8CFBE, accents pink #FE538B yellow #FED701 fresh green #01C94D. No text, typography, logo, watermark, frames, glossy effects, cast shadows, photorealistic people, animals, flowers, lotuses, fish or 3D scenery. Match aspect ratio 1200:900. Educational Rubin vase illusion. A single centered warm cream vase or goblet silhouette against rooted green background. Its left and right edges are exactly two symmetrical inward-facing human facial PROFILE outlines in the green negative space, showing forehead nose lips and chin. No realistic people, eyes or hair. Functional reversible contour, clearly legible at small sizes. Barely perceptible watercolor at far outer edges, keep shared contours sharp. ONLY vase/profiles, no tree.",
+      "source": "exec-126cfb68-d23c-465b-a0cd-d092ad31a65d.png",
+      "width": 1200,
+      "height": 900,
+      "bytes": 48528,
+      "sha256": "e9528470e6272147fe99857e5e231e7edc0a4be6175930e17511cf09e6d7a172"
+    },
+    {
+      "file": "/brand/recursos/fronteiras/fronteira-de-contato.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE standalone production illustration for Instituto Figura Viva, use-case illustration-story, not a collage or contact sheet. Editorial watercolor on warm cream paper #FDFAF4 with discrete real paper grain, rooted green #005A1F, teal #07614C, earth #96551F, sand #F1E9DB, pale beige #D8CFBE, accents pink #FE538B yellow #FED701 fresh green #01C94D. No text, typography, logo, watermark, frames, glossy effects, cast shadows, photorealistic people, animals, flowers, lotuses, fish or 3D scenery. Match aspect ratio 1600:640. Wide horizontal banner. A flowing forest teal green watercolor field approaches a warm yellow watercolor field. They touch along a delicate dotted cream membrane in the center, without fully merging. Lots of cream blank paper. Purely abstract.",
+      "source": "exec-e129a193-2e06-4751-ac19-16031aaf7b53.png",
+      "width": 1600,
+      "height": 640,
+      "bytes": 64386,
+      "sha256": "be2062cbad266289f6c29cf067a9aea37a976143358f9cfcdbbcffb92481fc86"
+    },
+    {
+      "file": "/brand/recursos/paisagens/igarape-dia.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE standalone production illustration for Instituto Figura Viva, use-case illustration-story, not a collage or contact sheet. Editorial watercolor on warm cream paper #FDFAF4 with discrete real paper grain, rooted green #005A1F, teal #07614C, earth #96551F, sand #F1E9DB, pale beige #D8CFBE, accents pink #FE538B yellow #FED701 fresh green #01C94D. No text, typography, logo, watermark, frames, glossy effects, cast shadows, photorealistic people, animals, flowers, lotuses, fish or 3D scenery. Match aspect ratio 1600:1200. Contemplative top-down watercolor study of a still teal green WATER surface. Very subtle warm cream ring ripples and soft shifting translucent green pigment. Full image water, no banks, sky, fish, flowers or people. Quiet low-contrast composition, minimal organic texture.",
+      "source": "exec-65dd4b52-b8eb-4941-ac37-68180c59d335.png",
+      "width": 1600,
+      "height": 1200,
+      "bytes": 152408,
+      "sha256": "de2804d2717b7de7ccdd827e679fd4f86612ed2808f8a96586adfdb7de6993f4"
+    },
+    {
+      "file": "/brand/recursos/paisagens/igarape-entardecer.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE standalone production illustration for Instituto Figura Viva, use-case illustration-story, not a collage or contact sheet. Editorial watercolor on warm cream paper #FDFAF4 with discrete real paper grain, rooted green #005A1F, teal #07614C, earth #96551F, sand #F1E9DB, pale beige #D8CFBE, accents pink #FE538B yellow #FED701 fresh green #01C94D. No text, typography, logo, watermark, frames, glossy effects, cast shadows, photorealistic people, animals, flowers, lotuses, fish or 3D scenery. Match aspect ratio 1600:1200. Contemplative top-down watercolor study of a still teal green WATER surface at dusk, subtle earth brown and soft pink reflections over dark green, a few fine warm cream ring ripples. Full image water, no horizon, sky, animals or plants. Quiet low contrast.",
+      "source": "exec-6d5f1817-d183-4176-a64f-19cc49ac7303.png",
+      "width": 1600,
+      "height": 1200,
+      "bytes": 139950,
+      "sha256": "ae2a7b78898c5ee044d41ff3eafa8b41efdffa7ea4ed1f590677622ca587432b"
+    },
+    {
+      "file": "/brand/recursos/paisagens/jardim.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE standalone production illustration for Instituto Figura Viva, use-case illustration-story, not a collage or contact sheet. Editorial watercolor on warm cream paper #FDFAF4 with discrete real paper grain, rooted green #005A1F, teal #07614C, earth #96551F, sand #F1E9DB, pale beige #D8CFBE, accents pink #FE538B yellow #FED701 fresh green #01C94D. No text, typography, logo, watermark, frames, glossy effects, cast shadows, photorealistic people, animals, flowers, lotuses, fish or 3D scenery. Match aspect ratio 1600:900. Airy quiet watercolor garden impression on warm cream paper, a low winding sand path and just a few simple rooted green stems and fresh green leaves at the lower edges. LARGE EMPTY CENTRAL SPACE for separately rendered interface text. No flowers, sky, grass, animals, people, pots or lettering. Restrained abstract botanical composition.",
+      "source": "exec-6f15cf62-4c5a-473b-b87c-40d75691c359.png",
+      "width": 1600,
+      "height": 900,
+      "bytes": 67252,
+      "sha256": "d24eadcbef4734d390b2c5c6f3eb7e9405945e4b08550e71fdb646c3c00afeaf"
+    },
+    {
+      "file": "/brand/recursos/paisagens/rio.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE standalone production illustration for Instituto Figura Viva, use-case illustration-story, not a collage or contact sheet. Editorial watercolor on warm cream paper #FDFAF4 with discrete real paper grain, rooted green #005A1F, teal #07614C, earth #96551F, sand #F1E9DB, pale beige #D8CFBE, accents pink #FE538B yellow #FED701 fresh green #01C94D. No text, typography, logo, watermark, frames, glossy effects, cast shadows, photorealistic people, animals, flowers, lotuses, fish or 3D scenery. Match aspect ratio 1600:900. Airy top-down watercolor impression of a gently flowing TEAL GREEN stream across warm cream paper. A few earth brown river stones at the outer lower edge, tiny fresh green leaves at the margins. LARGE CALM CENTRAL AREA for separately rendered interface text. No animals, boats, flowers, sky, people or lettering.",
+      "source": "exec-1b061980-26f9-4ea8-9c57-245ce7a79067.png",
+      "width": 1600,
+      "height": 900,
+      "bytes": 97388,
+      "sha256": "b0083ab807b7305eb8d0551fbe032c0cc0bf9f32322271f5a4b95a147cfaf0a8"
+    },
+    {
+      "file": "/brand/recursos/polaridades/duas-cadeiras.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE standalone production illustration for Instituto Figura Viva, use-case illustration-story, not a collage or contact sheet. Editorial watercolor on warm cream paper #FDFAF4 with discrete real paper grain, rooted green #005A1F, teal #07614C, earth #96551F, sand #F1E9DB, pale beige #D8CFBE, accents pink #FE538B yellow #FED701 fresh green #01C94D. No text, typography, logo, watermark, frames, glossy effects, cast shadows, photorealistic people, animals, flowers, lotuses, fish or 3D scenery. Match aspect ratio 1600:900. Two simple armless wooden CHAIRS facing each other, fine earth brown lines over a very subtle sand ground. Empty space BETWEEN chairs emphasized with a faint dotted pale beige path. Airy centered composition, no room, no people, no shadows.",
+      "source": "exec-915755d2-61fb-47fc-bc09-93a8a4856653.png",
+      "width": 1600,
+      "height": 900,
+      "bytes": 81256,
+      "sha256": "04b201d3a7354f54c0f05c74e704411369b460fc633f5cdde33f3216d14acf7b"
+    },
+    {
+      "file": "/brand/recursos/sala-de-pausa/desacelerar.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE standalone production illustration for Instituto Figura Viva, use-case illustration-story, not a collage or contact sheet. Editorial watercolor on warm cream paper #FDFAF4 with discrete real paper grain, rooted green #005A1F, teal #07614C, earth #96551F, sand #F1E9DB, pale beige #D8CFBE, accents pink #FE538B yellow #FED701 fresh green #01C94D. No text, typography, logo, watermark, frames, glossy effects, cast shadows, photorealistic people, animals, flowers, lotuses, fish or 3D scenery. Match aspect ratio 1600:640. Very wide airy abstract watercolor banner, a horizontal teal green water surface with a few delicate warm cream ripple rings, soft pigment edges fading into cream paper. No landscape, sky, plants or animals.",
+      "source": "exec-e540945c-179f-4834-aa3f-c661b2fa601e.png",
+      "width": 1600,
+      "height": 640,
+      "bytes": 100244,
+      "sha256": "5ff0ed4f9f7ab221bfefe99a471b550b7e5b67f8b638e477261f2c5176c21559"
+    },
+    {
+      "file": "/brand/recursos/sala-de-pausa/movimentar.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE standalone production illustration for Instituto Figura Viva, use-case illustration-story, not a collage or contact sheet. Editorial watercolor on warm cream paper #FDFAF4 with discrete real paper grain, rooted green #005A1F, teal #07614C, earth #96551F, sand #F1E9DB, pale beige #D8CFBE, accents pink #FE538B yellow #FED701 fresh green #01C94D. No text, typography, logo, watermark, frames, glossy effects, cast shadows, photorealistic people, animals, flowers, lotuses, fish or 3D scenery. Match aspect ratio 1600:640. Very wide airy watercolor banner, one simple earth brown curved slender twig with a fresh green LEAF at its tip, gentle curved gesture, huge cream whitespace. No flowers.",
+      "source": "exec-567a6c71-7164-4d08-81d3-1d29f9f1e3e1.png",
+      "width": 1600,
+      "height": 640,
+      "bytes": 23808,
+      "sha256": "ff71129876e34e82db45910d918c5dc702129c92bc7deb8f672e5b49bacb6a39"
+    },
+    {
+      "file": "/brand/recursos/sala-de-pausa/observar.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE standalone production illustration for Instituto Figura Viva, use-case illustration-story, not a collage or contact sheet. Editorial watercolor on warm cream paper #FDFAF4 with discrete real paper grain, rooted green #005A1F, teal #07614C, earth #96551F, sand #F1E9DB, pale beige #D8CFBE, accents pink #FE538B yellow #FED701 fresh green #01C94D. No text, typography, logo, watermark, frames, glossy effects, cast shadows, photorealistic people, animals, flowers, lotuses, fish or 3D scenery. Match aspect ratio 1600:640. Very wide airy abstract watercolor banner, one small sun yellow pigment spot in a faint sand-beige field. The eye can rest on the single dot. Huge cream whitespace, extreme restraint.",
+      "source": "exec-d267cbf8-be72-4c04-b274-c4175a865b5f.png",
+      "width": 1600,
+      "height": 640,
+      "bytes": 35044,
+      "sha256": "bc8dee463afb4b955b5f9c3ef6b6534dea1052566e7a89dceb17dabf71eaa845"
+    },
+    {
+      "file": "/brand/recursos/sala-de-pausa/ouvir.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE standalone production illustration for Instituto Figura Viva, use-case illustration-story, not a collage or contact sheet. Editorial watercolor on warm cream paper #FDFAF4 with discrete real paper grain, rooted green #005A1F, teal #07614C, earth #96551F, sand #F1E9DB, pale beige #D8CFBE, accents pink #FE538B yellow #FED701 fresh green #01C94D. No text, typography, logo, watermark, frames, glossy effects, cast shadows, photorealistic people, animals, flowers, lotuses, fish or 3D scenery. Match aspect ratio 1600:640. Very wide airy abstract watercolor banner, THREE delicate sinuous single lines in teal green, rooted green and muted earth brown, like soft sound waves. Very faint pigment bleed, huge cream whitespace.",
+      "source": "exec-238561ae-c2ca-4c4d-8f77-e06a40f0f2a4.png",
+      "width": 1600,
+      "height": 640,
+      "bytes": 37660,
+      "sha256": "46c922ed50431b40a51a3a911832bcda24366a9750d16c4a457c63d378074599"
+    },
+    {
+      "file": "/brand/recursos/sala-de-pausa/pelos-sentidos.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE standalone production illustration for Instituto Figura Viva, use-case illustration-story, not a collage or contact sheet. Editorial watercolor on warm cream paper #FDFAF4 with discrete real paper grain, rooted green #005A1F, teal #07614C, earth #96551F, sand #F1E9DB, pale beige #D8CFBE, accents pink #FE538B yellow #FED701 fresh green #01C94D. No text, typography, logo, watermark, frames, glossy effects, cast shadows, photorealistic people, animals, flowers, lotuses, fish or 3D scenery. Match aspect ratio 1600:640. Very wide airy abstract watercolor banner, FIVE small separated pigment patches in rooted green, teal green, earth brown, sun yellow and soft pink. Distinct organic textures and lots of breathing room. No pictograms.",
+      "source": "exec-2eca0ac9-9ab9-4f91-afe7-6e30898940aa.png",
+      "width": 1600,
+      "height": 640,
+      "bytes": 105216,
+      "sha256": "11e65fedae8ca27e18c2d768032f257d8bfce8f21234defa27f28a2394f00687"
+    },
+    {
+      "file": "/brand/recursos/sala-de-pausa/respirar.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE standalone production illustration for Instituto Figura Viva, use-case illustration-story, not a collage or contact sheet. Editorial watercolor on warm cream paper #FDFAF4 with discrete real paper grain, rooted green #005A1F, teal #07614C, earth #96551F, sand #F1E9DB, pale beige #D8CFBE, accents pink #FE538B yellow #FED701 fresh green #01C94D. No text, typography, logo, watermark, frames, glossy effects, cast shadows, photorealistic people, animals, flowers, lotuses, fish or 3D scenery. Match aspect ratio 1600:640. Very wide airy abstract watercolor banner, concentric delicate soft GREEN rings, irregular gentle pigment edges. Breath and expansion without arrows, no symbols. Huge cream whitespace.",
+      "source": "exec-a8ab8768-6c7e-4505-9ab1-639f2e63fb73.png",
+      "width": 1600,
+      "height": 640,
+      "bytes": 56928,
+      "sha256": "9f43c55add185346e15a0812d0357917bf5aea803b17cb09a556caa2aa992272"
+    },
+    {
+      "file": "/brand/recursos/cartas/autores/fritz-perls.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create a portrait-format 2:3 full-bleed editorial watercolor ILLUSTRATION of Fritz Perls, the historical Gestalt therapist: elderly bald man with a prominent full long white beard and mustache, expressive eyes and round eyeglasses, recognizable thoughtful face, simple dark green clothing. Hand-painted historical portrait interpretation, NOT a photograph. Portrait occupies the full canvas with face centered in upper middle, shoulders extending to lower edges; subtle organic watercolor color fields fill every edge in muted forest green #005A1F, teal #07614C, warm sand #F1E9DB and cream #FDFAF4, a little earth brown #96551F. Refined fine pigment and natural paper grain. Keep bottom quarter calmer and lower contrast for HTML text overlay added separately. No typography, initials, signature, logo, border or words. No extra figures or objects. Warm, dignified, human and consistent with a watercolor educational card deck.",
+      "source": "exec-7ba61ca5-f510-4fa7-b7b0-b8eaf44b8541.png",
+      "width": 1000,
+      "height": 1500,
+      "bytes": 154320,
+      "sha256": "28b99d9e19a7119eb8b750b87ae17642f1cb01306d74dc03ee6c3e9cc427ae03"
+    },
+    {
+      "file": "/brand/recursos/cartas/autores/laura-perls.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create a portrait-format 2:3 full-bleed editorial watercolor ILLUSTRATION of Laura Perls, the historical Gestalt therapist: elderly woman with short softly waved gray hair and delicate eyeglasses, kind attentive expressive face, simple green blouse or jacket. Hand-painted historical portrait interpretation, NOT a photograph. Portrait occupies the full canvas with face centered in upper middle, shoulders extending to lower edges; subtle organic watercolor color fields fill every edge in muted forest green #005A1F, teal #07614C, warm sand #F1E9DB and cream #FDFAF4, a little earth brown #96551F. Refined fine pigment and natural paper grain. Keep bottom quarter calmer and lower contrast for HTML text overlay added separately. No typography, initials, signature, logo, border or words. No extra figures or objects. Warm, dignified, human and consistent with a watercolor educational card deck.",
+      "source": "exec-73963b70-53b7-4e68-bd1a-c8ecc875bba6.png",
+      "width": 1000,
+      "height": 1500,
+      "bytes": 165844,
+      "sha256": "aa808c1a886193bf40f96fc0fec9536f7cb3a9a6dc390fb34f67e59267b56eed"
+    },
+    {
+      "file": "/brand/recursos/cartas/textura-papel.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE full-bleed portrait 2:3 high resolution natural handmade cotton PAPER TEXTURE for the reverse of an educational card. Warm cream #FDFAF4 and very light sand #F1E9DB, subtle visible fine fibers and delicate irregular watercolor-paper tooth. Flat evenly lit surface, extremely restrained contrast, no central object, no large stains, no creases, no tears, no grunge, no shadows, no vignette, no edges, no frame, no text, no letters, no symbols, no illustrations. Texture should cover every pixel and allow dark green HTML text to be perfectly readable anywhere over it.",
+      "source": "exec-67e184f2-4b8f-4b3f-a07a-79e584487593.png",
+      "width": 1000,
+      "height": 1500,
+      "bytes": 74960,
+      "sha256": "c7283d1dfdce4290cfae0c011ec92c7c5faccb125eba248f2185aa18592a3d6a"
+    },
+    {
+      "file": "/brand/recursos/figura-e-fundo/estudos/vaso-perfis.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE original educational figure-ground optical illusion, landscape 4:3, high contrast rooted green #005A1F and warm cream #FDFAF4. A centered cream goblet silhouette whose LEFT AND RIGHT SHARED EDGES also form TWO inward-facing GREEN human facial profiles in the negative space. The SAME contours must clearly describe forehead, nose, lips and chin AND the goblet. Flat simple precisely readable reversible silhouette, very subtle watercolor pigment only within the green fills, sharp clean contours. No separate drawn faces, no eyes, hair or additional objects. No words, frames, symbols or labels. Balanced figure and background, both readings equally plausible.",
+      "source": "exec-c3cea9f3-1b01-483c-bdd6-2d91b32244e4.png",
+      "width": 1200,
+      "height": 900,
+      "bytes": 19892,
+      "sha256": "292a656ee1c532678724687318b6151623a7065048f0f9db7f4978d8658576aa"
+    },
+    {
+      "file": "/brand/recursos/figura-e-fundo/estudos/pato-coelho.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE genuinely ambiguous duck-rabbit optical illusion as an original simple editorial illustration, landscape 4:3. ONE SINGLE ANIMAL HEAD in profile, centered, shown as a thick dark rooted-green #005A1F contour with a soft light teal #07614C wash on warm cream #FDFAF4 paper. TWO long horizontal protrusions extend to the LEFT: they can be read as the upper/lower bills of a duck looking LEFT, OR as the two long ears of a rabbit looking RIGHT. A single neutral small eye near the center works for BOTH orientations. Rounded head at center-right. The rightmost face contour must read as a rabbit nose/mouth while the leftward protrusions read as a duck bill in the other interpretation. NOT two animals side by side, not a merged decorative animal, no body. Focus on classic reversible shared silhouette logic, minimal drawing, no text, border or extra shapes.",
+      "source": "exec-26a5088b-60d2-4102-a110-7a90644ff5ff.png",
+      "width": 1200,
+      "height": 900,
+      "bytes": 46394,
+      "sha256": "20ad8e8c0783743b9567598e30b1164dd16f76a6d9c1af84c29c21409aafcbe8"
+    },
+    {
+      "file": "/brand/recursos/figura-e-fundo/estudos/arvore-perfis.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE original 4:3 reversible figure-ground illusion. Two warm cream #FDFAF4 profile silhouettes face inward from left and right edges. Their SHARED dark rooted-green #005A1F negative-space outline forms ONE tree trunk at the center, branching upward into a minimal restrained watercolor canopy in dark green and muted yellow #FED701, pink #FE538B accents. BOTH two profiles and tree must be readable from the SAME contours; do not draw separate faces. Profiles have clear forehead-nose-lips-chin boundaries, no eyes or facial details. Symmetric balanced composition, crisp functional contours with delicate pigment texture. No people portraits, words, landscape, fauna, frames or labels.",
+      "source": "exec-a4165d2c-bfd0-42e6-a5c7-1b68af08a872.png",
+      "width": 1200,
+      "height": 900,
+      "bytes": 87014,
+      "sha256": "160a10d35109dbada5f6675b96a12b2136749baf54e2f719249f35bbdcb15708"
+    },
+    {
+      "file": "/brand/recursos/figura-e-fundo/estudos/mancha-simetrica.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create ONE ORIGINAL symmetrical watercolor inkblot for a non-diagnostic visual perception activity, landscape 4:3. Deep green #005A1F and teal #07614C ink on warm cream #FDFAF4 paper, subtle warm brown #96551F details. Precisely bilateral symmetry about the vertical axis. A single unified ambiguous organic shape can be perceived as a butterfly with four broad wings OR as two abstract upright figures facing each other across a central gap. No literal eyes, faces or explicit creatures; suggest both through edges and negative space, allow ambiguity. No splatter beyond the central shape, clean large margins, no words, numerals, borders or symbols. This must be an ORIGINAL invented blot, NOT a reproduction of any official Rorschach test card.",
+      "source": "exec-1c42ca0a-8816-4ebc-aa4e-1d55a6ba3d74.png",
+      "width": 1200,
+      "height": 900,
+      "bytes": 66200,
+      "sha256": "271abe1d092f91663bb09f6fd5be0910ad9645abdac4186d34d1e2f707580d7d"
+    },
+    {
+      "file": "/brand/recursos/chegada/abertura.webp",
+      "prompt": "Create ONE standalone editorial watercolor illustration for Instituto Figura Viva. Warm cream paper #FDFAF4, subtle cotton grain, rooted green #005A1F, teal #07614C, warm earth #96551F, pale sand #F1E9DB, restrained small accents soft pink #FE538B and sun yellow #FED701. Quiet airy composition with ample negative space, no text, letters, numbers, borders, logo, shadows, glossy 3D, people, faces, animals, lotus or religious symbols. Landscape 16:9. An inviting abstract open threshold formed by two very gentle curved green branches, a soft warm sand path arriving from the bottom foreground and opening into a calm cream clearing. One tiny yellow pigment light near the center. Not an architectural door, no building, sky or grass. A welcoming pause, intimate and grounded, restrained botanical impression.",
+      "source": "exec-9c13ea49-127c-4499-9d4c-89440f8aa0ca.png",
+      "generator": "Built-in image_gen",
+      "width": 1600,
+      "height": 900,
+      "bytes": 86870,
+      "sha256": "98be74ae5a72df562cc0fae885a6e4681836edceebebcffcbbc52182800834ec"
+    },
+    {
+      "file": "/brand/recursos/chegada/palavra.webp",
+      "prompt": "Create ONE standalone editorial watercolor illustration for Instituto Figura Viva. Warm cream paper #FDFAF4, subtle cotton grain, rooted green #005A1F, teal #07614C, warm earth #96551F, pale sand #F1E9DB, restrained small accents soft pink #FE538B and sun yellow #FED701. Quiet airy composition with ample negative space, no text, letters, numbers, borders, logo, shadows, glossy 3D, people, faces, animals, lotus or religious symbols. Landscape 4:3. One slender earth-brown continuous line curls softly across cream paper like a thought finding its shape, next to one small yellow watercolor pigment dot. No actual writing, letters, pen or notebook. A simple open-ended gesture, beautifully restrained.",
+      "source": "exec-666e2aa7-ce10-43e8-af57-0e54587f4b9e.png",
+      "generator": "Built-in image_gen",
+      "width": 1200,
+      "height": 900,
+      "bytes": 37760,
+      "sha256": "b3a028043324d7236686bc582ba1cb151b0cebb707096f1ee247ad244642683b"
+    },
+    {
+      "file": "/brand/recursos/chegada/corpo.webp",
+      "prompt": "Create ONE standalone editorial watercolor illustration for Instituto Figura Viva. Warm cream paper #FDFAF4, subtle cotton grain, rooted green #005A1F, teal #07614C, warm earth #96551F, pale sand #F1E9DB, restrained small accents soft pink #FE538B and sun yellow #FED701. Quiet airy composition with ample negative space, no text, letters, numbers, borders, logo, shadows, glossy 3D, people, faces, animals, lotus or religious symbols. Landscape 4:3. A small calm upright organic oval in rooted green outline, with a soft pink watercolor patch near its center and a gentle earth-brown grounding arc beneath. Purely abstract sense of bodily presence and support, not a person or anatomical drawing, no yoga silhouette. Lots of cream whitespace.",
+      "source": "exec-2687e557-082a-4470-8ac7-1075d8db3e9c.png",
+      "generator": "Built-in image_gen",
+      "width": 1200,
+      "height": 900,
+      "bytes": 31586,
+      "sha256": "3b770b705eaea3d6acf7dd48aef3eb5af85aee655f1dbc5dae97c2f86318cf67"
+    },
+    {
+      "file": "/brand/recursos/chegada/emocao.webp",
+      "prompt": "Create ONE standalone editorial watercolor illustration for Instituto Figura Viva. Warm cream paper #FDFAF4, subtle cotton grain, rooted green #005A1F, teal #07614C, warm earth #96551F, pale sand #F1E9DB, restrained small accents soft pink #FE538B and sun yellow #FED701. Quiet airy composition with ample negative space, no text, letters, numbers, borders, logo, shadows, glossy 3D, people, faces, animals, lotus or religious symbols. Landscape 4:3. Four separated organic translucent watercolor patches: teal green, soft pink, sun yellow and rooted green. Slightly different edges and sizes, delicate mingling at just one boundary, spacious and balanced, no face expressions, icons or emotional valence scale. Gentle complexity on cream paper.",
+      "source": "exec-ec76d15c-27ac-4476-92c8-bdeaf2e15092.png",
+      "generator": "Built-in image_gen",
+      "width": 1200,
+      "height": 900,
+      "bytes": 112240,
+      "sha256": "5d70e6c16674850bf01fe81f0c19c1f3f59796da1210de04b46c2eece9b505e5"
+    },
+    {
+      "file": "/brand/recursos/chegada/intensidade.webp",
+      "prompt": "Create ONE standalone editorial watercolor illustration for Instituto Figura Viva. Warm cream paper #FDFAF4, subtle cotton grain, rooted green #005A1F, teal #07614C, warm earth #96551F, pale sand #F1E9DB, restrained small accents soft pink #FE538B and sun yellow #FED701. Quiet airy composition with ample negative space, no text, letters, numbers, borders, logo, shadows, glossy 3D, people, faces, animals, lotus or religious symbols. Landscape 4:3. Three soft incomplete nested watercolor rings around a small teal-green pigment center. Pigment gradually becomes lighter toward the outer ring. No chart, scale, numbers, ticks, arrows or heatmap. Just a calm study of presence varying in strength, ample cream negative space.",
+      "source": "exec-59557e9e-a2bc-4175-8537-b3977ca813a7.png",
+      "generator": "Built-in image_gen",
+      "width": 1200,
+      "height": 900,
+      "bytes": 35820,
+      "sha256": "c3d0e9419df5b77db19d9d0591657f4f1c87f36d49f9b45b11aa4958c84aced1"
+    },
+    {
+      "file": "/brand/recursos/chegada/necessidade.webp",
+      "prompt": "Create ONE standalone editorial watercolor illustration for Instituto Figura Viva. Warm cream paper #FDFAF4, subtle cotton grain, rooted green #005A1F, teal #07614C, warm earth #96551F, pale sand #F1E9DB, restrained small accents soft pink #FE538B and sun yellow #FED701. Quiet airy composition with ample negative space, no text, letters, numbers, borders, logo, shadows, glossy 3D, people, faces, animals, lotus or religious symbols. Landscape 4:3. Two simple curved rooted-green branches gently form an open shelter around one tiny fresh green sprout rooted on a sand watercolor patch. Open and breathable, not a closed cage, no pot, hands or people. A quiet abstract-botanical suggestion of support and care on cream paper.",
+      "source": "exec-181be80a-fb7a-4707-b9b7-91bc432ef6f3.png",
+      "generator": "Built-in image_gen",
+      "width": 1200,
+      "height": 900,
+      "bytes": 48958,
+      "sha256": "93401f79b199b1f86f982f1096426ace9bcbf0b1a01b314ddf1a2154e69b231a"
+    },
+    {
+      "file": "/brand/recursos/chegada/reflexao.webp",
+      "prompt": "Create ONE standalone editorial watercolor illustration for Instituto Figura Viva. Warm cream paper #FDFAF4, subtle cotton grain, rooted green #005A1F, teal #07614C, warm earth #96551F, pale sand #F1E9DB, restrained small accents soft pink #FE538B and sun yellow #FED701. Quiet airy composition with ample negative space, no text, letters, numbers, borders, logo, shadows, glossy 3D, people, faces, animals, lotus or religious symbols. Landscape 4:3. A small calm oval surface of teal-green water with a single fine cream ripple and a slender earth-brown twig resting near the margin. The water dissolves into the warm cream paper at its edges. No landscape, sky, stones, flowers, fauna or literal mirror. Spacious contemplative composition.",
+      "source": "exec-b970f082-5b8e-4e56-9c2d-c8f28fbf5d92.png",
+      "generator": "Built-in image_gen",
+      "width": 1200,
+      "height": 900,
+      "bytes": 47042,
+      "sha256": "ba14ddd53ff639bdc08e01c0e93362fa58dd6738703dbf632be17c3e16d4cee5"
+    },
+    {
+      "prompt": "Generate ONE production illustration for Instituto Figura Viva, restrained editorial watercolor on warm cream #FDFAF4 cotton paper. Palette rooted green #005A1F, teal #07614C, earth brown #96551F, sand #F1E9DB, small accents pink #FE538B and yellow #FED701. Organic pigment edges, calm and sophisticated, no text, letters, logos, frames, UI, photorealism or glossy render. A calm gender-neutral abstract standing human silhouette with no face, subtle wash of green and pink around chest and feet, thin earth-brown contour, lots of space. Landscape editorial illustration.",
+      "source": "exec-5cf0f81f-fea7-402c-9cfb-150ab84f1fbf.png",
+      "file": "/brand/recursos/corpo/presenca.webp",
+      "generator": "Built-in image_gen",
+      "width": 1600,
+      "height": 900,
+      "bytes": 52032,
+      "sha256": "243ccbd9ed50b71eefbff93496760d2befe64a1e005c29b72c0e10dd84a341cf"
+    },
+    {
+      "prompt": "Generate ONE production illustration for Instituto Figura Viva, restrained editorial watercolor on warm cream #FDFAF4 cotton paper. Palette rooted green #005A1F, teal #07614C, earth brown #96551F, sand #F1E9DB, small accents pink #FE538B and yellow #FED701. Organic pigment edges, calm and sophisticated, no text, letters, logos, frames, UI, photorealism or glossy render. An airy ring of six soft watercolor pigment stones arranged like petals around an empty central cream area, teal, rooted green, soft pink, yellow and sand. No words, no emotional expressions. Landscape.",
+      "source": "exec-08e08164-91b7-4ead-8847-22c5c8679595.png",
+      "file": "/brand/recursos/emocoes/orbita.webp",
+      "generator": "Built-in image_gen",
+      "width": 1200,
+      "height": 900,
+      "bytes": 57350,
+      "sha256": "ae310d89726b54bd05e99861749e22c88da513f436044c7fdf2d2cb9f5345549"
+    },
+    {
+      "prompt": "Generate ONE production illustration for Instituto Figura Viva, restrained editorial watercolor on warm cream #FDFAF4 cotton paper. Palette rooted green #005A1F, teal #07614C, earth brown #96551F, sand #F1E9DB, small accents pink #FE538B and yellow #FED701. Organic pigment edges, calm and sophisticated, no text, letters, logos, frames, UI, photorealism or glossy render. A small sheltered garden of six separate sprouting plants on warm sand islands, green rounded leaves and delicate stems, balanced open composition, calm editorial landscape.",
+      "source": "exec-8c84dd42-5dae-406d-9b92-5a4cfa5e280d.png",
+      "file": "/brand/recursos/necessidades/jardim.webp",
+      "generator": "Built-in image_gen",
+      "width": 1600,
+      "height": 900,
+      "bytes": 158602,
+      "sha256": "da5c7ecc7a8ee3c488acc52482764641b752e936d5f6fe61a243c7427e269244"
+    },
+    {
+      "prompt": "Generate ONE production illustration for Instituto Figura Viva, restrained editorial watercolor on warm cream #FDFAF4 cotton paper. Palette rooted green #005A1F, teal #07614C, earth brown #96551F, sand #F1E9DB, small accents pink #FE538B and yellow #FED701. Organic pigment edges, calm and sophisticated, no text, letters, logos, frames, UI, photorealism or glossy render. A serene garden seen at slight angle with an open sandy clearing at center, green branches at edges, small soft green leaf shapes in foreground. No people, no objects, no writing. Wide scene to overlay interactive written notes.",
+      "source": "exec-93faeb40-5a6f-4600-b47c-91f4b4b60f57.png",
+      "file": "/brand/recursos/pensamentos/jardim.webp",
+      "generator": "Built-in image_gen",
+      "width": 1600,
+      "height": 900,
+      "bytes": 150882,
+      "sha256": "9bf143d7c8f06b5d165b6d8cad16f3e9a37a71523944fe0e9c6c62a91ca6042d"
+    },
+    {
+      "prompt": "Generate ONE production illustration for Instituto Figura Viva, restrained editorial watercolor on warm cream #FDFAF4 cotton paper. Palette rooted green #005A1F, teal #07614C, earth brown #96551F, sand #F1E9DB, small accents pink #FE538B and yellow #FED701. Organic pigment edges, calm and sophisticated, no text, letters, logos, frames, UI, photorealism or glossy render. A serene narrow teal stream seen from above curving from top left to bottom right, open clear central water, mossy banks and a few floating soft green leaves, watercolor.",
+      "source": "exec-8f6307d5-4c6f-43d8-8711-1375769f1ec5.png",
+      "file": "/brand/recursos/pensamentos/rio.webp",
+      "generator": "Built-in image_gen",
+      "width": 1600,
+      "height": 900,
+      "bytes": 126778,
+      "sha256": "87c2a34378fa18a69e065af819075f7bc1ba502fb6dc20eb25ed0fd788798d5e"
+    },
+    {
+      "prompt": "Generate ONE production illustration for Instituto Figura Viva, restrained editorial watercolor on warm cream #FDFAF4 cotton paper. Palette rooted green #005A1F, teal #07614C, earth brown #96551F, sand #F1E9DB, small accents pink #FE538B and yellow #FED701. Organic pigment edges, calm and sophisticated, no text, letters, logos, frames, UI, photorealism or glossy render. Gentle fine rain falling on a quiet teal pond with small concentric ripples and a leafy branch at the upper edge, no storm, calm wide watercolor.",
+      "source": "exec-836633fe-0400-4d20-a562-7a25938470b9.png",
+      "file": "/brand/recursos/sons/chuva.webp",
+      "generator": "Built-in image_gen",
+      "width": 1200,
+      "height": 900,
+      "bytes": 175780,
+      "sha256": "4af7162dce2a5b5c7eddd0beb55084cf587fa9d1d5a7be893a6b6054dc32f146"
+    },
+    {
+      "prompt": "Generate ONE production illustration for Instituto Figura Viva, restrained editorial watercolor on warm cream #FDFAF4 cotton paper. Palette rooted green #005A1F, teal #07614C, earth brown #96551F, sand #F1E9DB, small accents pink #FE538B and yellow #FED701. Organic pigment edges, calm and sophisticated, no text, letters, logos, frames, UI, photorealism or glossy render. A close gentle stream flowing over rounded earth-brown stones, green bank with small leaves, calm clear flowing water, no waterfall.",
+      "source": "exec-685d922a-4b29-4506-a0f4-f7bc775d736a.png",
+      "file": "/brand/recursos/sons/riacho.webp",
+      "generator": "Built-in image_gen",
+      "width": 1200,
+      "height": 900,
+      "bytes": 166928,
+      "sha256": "594085efa30a674e6faf6d579e952e1a2bc5fd737699a00d947756e44778997c"
+    },
+    {
+      "prompt": "Generate ONE production illustration for Instituto Figura Viva, restrained editorial watercolor on warm cream #FDFAF4 cotton paper. Palette rooted green #005A1F, teal #07614C, earth brown #96551F, sand #F1E9DB, small accents pink #FE538B and yellow #FED701. Organic pigment edges, calm and sophisticated, no text, letters, logos, frames, UI, photorealism or glossy render. A quiet woodland clearing with soft green broadleaf branches, pale morning light and warm earth, no animals, wide watercolor.",
+      "source": "exec-bbd5e12c-a847-4575-a101-11b56a0712b0.png",
+      "file": "/brand/recursos/sons/floresta.webp",
+      "generator": "Built-in image_gen",
+      "width": 1200,
+      "height": 900,
+      "bytes": 199120,
+      "sha256": "9a1f0527528490ab8e80cbd8c25f0c6c620bcd0a4f48614b3c7448b16895e2ae"
+    },
+    {
+      "prompt": "Generate ONE production illustration for Instituto Figura Viva, restrained editorial watercolor on warm cream #FDFAF4 cotton paper. Palette rooted green #005A1F, teal #07614C, earth brown #96551F, sand #F1E9DB, small accents pink #FE538B and yellow #FED701. Organic pigment edges, calm and sophisticated, no text, letters, logos, frames, UI, photorealism or glossy render. A serene garden refuge, softly curved open branches surround a calm empty cream clearing, very small teal pond below, warm morning light, composition spacious enough for overlaid controls.",
+      "source": "exec-642e5127-cdb7-4c96-ba8c-0e8a011a2284.png",
+      "file": "/brand/recursos/pausa/refugio.webp",
+      "generator": "Built-in image_gen",
+      "width": 1600,
+      "height": 900,
+      "bytes": 140602,
+      "sha256": "200212f354ddf9458f50a70a25df4d74e7595128a686d60db9596ee28436399b"
+    },
+    {
+      "prompt": "Generate ONE production illustration for Instituto Figura Viva, restrained editorial watercolor on warm cream #FDFAF4 cotton paper. Palette rooted green #005A1F, teal #07614C, earth brown #96551F, sand #F1E9DB, small accents pink #FE538B and yellow #FED701. Organic pigment edges, calm and sophisticated, no text, letters, logos, frames, UI, photorealism or glossy render. Top-down seamless-like underwater riverbed texture, rounded warm brown stones of several sizes beneath clear shallow teal water, a few green submerged aquatic stems and sand, no horizon, no people, no fish, uniform soft lighting. Texture for a Three.js river floor.",
+      "source": "exec-e33c0f7a-79cf-424a-9c80-7d22a11697bc.png",
+      "file": "/brand/recursos/igarape/leito.webp",
+      "generator": "Built-in image_gen",
+      "width": 1200,
+      "height": 900,
+      "bytes": 161506,
+      "sha256": "67f0352ed5fb6f00f162f8cd8e901f9220255e5c28623d79b9e0e8f18d71e451"
+    },
+    {
+      "prompt": "Generate ONE production illustration for Instituto Figura Viva, restrained editorial watercolor on warm cream #FDFAF4 cotton paper. Palette rooted green #005A1F, teal #07614C, earth brown #96551F, sand #F1E9DB, small accents pink #FE538B and yellow #FED701. Organic pigment edges, calm and sophisticated, no text, letters, logos, frames, UI, photorealism or glossy render. Wide calm forest stream viewed low above the water, green banks left and right, warm distant clearing at horizon, rich subtle tree reflections in teal water, no people, editorial watercolor panorama for static fallback and river cover.",
+      "source": "exec-9e93bcdf-0593-4952-bb85-5f65f7c3b8f5.png",
+      "file": "/brand/recursos/igarape/margem.webp",
+      "generator": "Built-in image_gen",
+      "width": 1600,
+      "height": 900,
+      "bytes": 193818,
+      "sha256": "0fcb6c8728d46050ccba98fe8864f34a79298b97062b4a16003dc832f176d965"
+    },
+    {
+      "prompt": "Create ONE simple beautiful standalone watercolor icon illustration for a Portuguese wellbeing educational card. Subject: a single softly folded linen cushion with one small leaf. Centered small isolated composition, generous empty warm cream paper #FDFAF4, delicate cotton grain. Instituto Figura Viva palette rooted green #005A1F, teal #07614C, earth brown #96551F, sand #F1E9DB, tiny accents pink #FE538B or yellow #FED701. Landscape 4:3. Restrained sophisticated organic pigment, easily recognizable at small card size. No text, letters, numbers, frame, logo, people, faces, scenery or glossy 3D.",
+      "source": "exec-355ecffd-e29a-4bdb-ad47-eb7acc0bbba0.png",
+      "file": "/brand/recursos/necessidades/cards/descanso.webp",
+      "generator": "Built-in image_gen",
+      "width": 800,
+      "height": 600,
+      "bytes": 17468,
+      "sha256": "7cf29922425cb5c5580f5aca1677bc8af0fca84a35a46153a98fe853775c13c5"
+    },
+    {
+      "prompt": "Create ONE simple beautiful standalone watercolor icon illustration for a Portuguese wellbeing educational card. Subject: two curved branches forming an open protective shelter around a small seed. Centered small isolated composition, generous empty warm cream paper #FDFAF4, delicate cotton grain. Instituto Figura Viva palette rooted green #005A1F, teal #07614C, earth brown #96551F, sand #F1E9DB, tiny accents pink #FE538B or yellow #FED701. Landscape 4:3. Restrained sophisticated organic pigment, easily recognizable at small card size. No text, letters, numbers, frame, logo, people, faces, scenery or glossy 3D.",
+      "source": "exec-8213b77a-82b0-40bd-871f-61d31144562e.png",
+      "file": "/brand/recursos/necessidades/cards/seguranca.webp",
+      "generator": "Built-in image_gen",
+      "width": 800,
+      "height": 600,
+      "bytes": 23006,
+      "sha256": "2838e77af0a7260cb7e06ba6cf0cb4c8bec04967236810746c578e7a3799a0cf"
+    },
+    {
+      "prompt": "Create ONE simple beautiful standalone watercolor icon illustration for a Portuguese wellbeing educational card. Subject: three small distinct green leaves joined on one gentle branch. Centered small isolated composition, generous empty warm cream paper #FDFAF4, delicate cotton grain. Instituto Figura Viva palette rooted green #005A1F, teal #07614C, earth brown #96551F, sand #F1E9DB, tiny accents pink #FE538B or yellow #FED701. Landscape 4:3. Restrained sophisticated organic pigment, easily recognizable at small card size. No text, letters, numbers, frame, logo, people, faces, scenery or glossy 3D.",
+      "source": "exec-b66ffa02-972a-430f-b825-4273742a6538.png",
+      "file": "/brand/recursos/necessidades/cards/pertencimento.webp",
+      "generator": "Built-in image_gen",
+      "width": 800,
+      "height": 600,
+      "bytes": 26762,
+      "sha256": "c464eca48ef4b25afacf3ef6cb177716df9ae1ab3f85a7f8206e4f720d3bbb4c"
+    },
+    {
+      "prompt": "Create ONE simple beautiful standalone watercolor icon illustration for a Portuguese wellbeing educational card. Subject: one small sprout growing freely on its own sand island. Centered small isolated composition, generous empty warm cream paper #FDFAF4, delicate cotton grain. Instituto Figura Viva palette rooted green #005A1F, teal #07614C, earth brown #96551F, sand #F1E9DB, tiny accents pink #FE538B or yellow #FED701. Landscape 4:3. Restrained sophisticated organic pigment, easily recognizable at small card size. No text, letters, numbers, frame, logo, people, faces, scenery or glossy 3D.",
+      "source": "exec-049e22bc-e801-4751-88a5-ec2deb237419.png",
+      "file": "/brand/recursos/necessidades/cards/autonomia.webp",
+      "generator": "Built-in image_gen",
+      "width": 800,
+      "height": 600,
+      "bytes": 14992,
+      "sha256": "95786dfeed09eb4442940fe976fdab9762952bed90668b3af4274521fe6c4593"
+    },
+    {
+      "prompt": "Create ONE simple beautiful standalone watercolor icon illustration for a Portuguese wellbeing educational card. Subject: one small green leaf illuminated by a restrained warm yellow halo. Centered small isolated composition, generous empty warm cream paper #FDFAF4, delicate cotton grain. Instituto Figura Viva palette rooted green #005A1F, teal #07614C, earth brown #96551F, sand #F1E9DB, tiny accents pink #FE538B or yellow #FED701. Landscape 4:3. Restrained sophisticated organic pigment, easily recognizable at small card size. No text, letters, numbers, frame, logo, people, faces, scenery or glossy 3D.",
+      "source": "exec-52ea6639-b6b5-4550-9ad0-5152c7ee5d6f.png",
+      "file": "/brand/recursos/necessidades/cards/reconhecimento.webp",
+      "generator": "Built-in image_gen",
+      "width": 800,
+      "height": 600,
+      "bytes": 15108,
+      "sha256": "e9b61edee8dc27213a8b1db117540df7164db735da9145eac857db4da834791b"
+    },
+    {
+      "prompt": "Create ONE simple beautiful standalone watercolor icon illustration for a Portuguese wellbeing educational card. Subject: a single earth-brown brush making one flowing pink watercolor gesture. Centered small isolated composition, generous empty warm cream paper #FDFAF4, delicate cotton grain. Instituto Figura Viva palette rooted green #005A1F, teal #07614C, earth brown #96551F, sand #F1E9DB, tiny accents pink #FE538B or yellow #FED701. Landscape 4:3. Restrained sophisticated organic pigment, easily recognizable at small card size. No text, letters, numbers, frame, logo, people, faces, scenery or glossy 3D.",
+      "source": "exec-215ea570-d077-4ae6-a0ee-ec8cee2b0d91.png",
+      "file": "/brand/recursos/necessidades/cards/expressao.webp",
+      "generator": "Built-in image_gen",
+      "width": 800,
+      "height": 600,
+      "bytes": 17360,
+      "sha256": "6e0b51fae747ad812013c89eadfc48b357bbc20fcb561faf58d3d038be01a2a7"
+    },
+    {
+      "prompt": "Create ONE simple beautiful standalone watercolor icon illustration for a Portuguese wellbeing educational card. Subject: two abstract curved shapes gently holding a small green oval. Centered small isolated composition, generous empty warm cream paper #FDFAF4, delicate cotton grain. Instituto Figura Viva palette rooted green #005A1F, teal #07614C, earth brown #96551F, sand #F1E9DB, tiny accents pink #FE538B or yellow #FED701. Landscape 4:3. Restrained sophisticated organic pigment, easily recognizable at small card size. No text, letters, numbers, frame, logo, people, faces, scenery or glossy 3D.",
+      "source": "exec-14fcce8c-3aa0-4791-a5a9-df1dc1d92669.png",
+      "file": "/brand/recursos/necessidades/cards/cuidado-corpo.webp",
+      "generator": "Built-in image_gen",
+      "width": 800,
+      "height": 600,
+      "bytes": 20212,
+      "sha256": "609a63c038cda51f3b0ff60b5667028cd177583aa7a34cf4f998d65e50bf4cb7"
+    },
+    {
+      "prompt": "Create ONE simple beautiful standalone watercolor icon illustration for a Portuguese wellbeing educational card. Subject: a graceful curved green stem with three leaves suggesting a gentle breeze. Centered small isolated composition, generous empty warm cream paper #FDFAF4, delicate cotton grain. Instituto Figura Viva palette rooted green #005A1F, teal #07614C, earth brown #96551F, sand #F1E9DB, tiny accents pink #FE538B or yellow #FED701. Landscape 4:3. Restrained sophisticated organic pigment, easily recognizable at small card size. No text, letters, numbers, frame, logo, people, faces, scenery or glossy 3D.",
+      "source": "exec-dd9b9e93-988c-4bb4-8f0c-f46c276c0374.png",
+      "file": "/brand/recursos/necessidades/cards/movimento.webp",
+      "generator": "Built-in image_gen",
+      "width": 800,
+      "height": 600,
+      "bytes": 15346,
+      "sha256": "d5ff02dd92c3552003611877180fa121a2244966b19281aa816d1713e2d30c34"
+    },
+    {
+      "prompt": "Create ONE simple beautiful standalone watercolor icon illustration for a Portuguese wellbeing educational card. Subject: one small smooth stone beside a very still teal oval of water. Centered small isolated composition, generous empty warm cream paper #FDFAF4, delicate cotton grain. Instituto Figura Viva palette rooted green #005A1F, teal #07614C, earth brown #96551F, sand #F1E9DB, tiny accents pink #FE538B or yellow #FED701. Landscape 4:3. Restrained sophisticated organic pigment, easily recognizable at small card size. No text, letters, numbers, frame, logo, people, faces, scenery or glossy 3D.",
+      "source": "exec-847f0480-a1e9-4b5d-ab44-f0d7ecd448a0.png",
+      "file": "/brand/recursos/necessidades/cards/silencio.webp",
+      "generator": "Built-in image_gen",
+      "width": 800,
+      "height": 600,
+      "bytes": 21344,
+      "sha256": "05acf4503a550821d01c0e92238f42b47589e680a94f0a9ff6f53896c4da6e85"
+    },
+    {
+      "prompt": "Create ONE simple beautiful standalone watercolor icon illustration for a Portuguese wellbeing educational card. Subject: two separate curved green stems gently meeting at their tips. Centered small isolated composition, generous empty warm cream paper #FDFAF4, delicate cotton grain. Instituto Figura Viva palette rooted green #005A1F, teal #07614C, earth brown #96551F, sand #F1E9DB, tiny accents pink #FE538B or yellow #FED701. Landscape 4:3. Restrained sophisticated organic pigment, easily recognizable at small card size. No text, letters, numbers, frame, logo, people, faces, scenery or glossy 3D.",
+      "source": "exec-a14bd3ca-7ae0-4eb1-8624-1f088e560e7e.png",
+      "file": "/brand/recursos/necessidades/cards/contato.webp",
+      "generator": "Built-in image_gen",
+      "width": 800,
+      "height": 600,
+      "bytes": 15558,
+      "sha256": "d0fe9e5a257fd027f8ab5c195d6eb434b0d6eec32309ae35d2d8606823b35fb3"
+    },
+    {
+      "file": "/brand/recursos/portal/boas-vindas.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Create a wide landscape editorial watercolor illustration for the student dashboard of Instituto Figura Viva. A welcoming abstract river of soft watercolor pigment gently winds through botanical branches, with airy leaves and a few delicate floating circles. Harmonious warm cream paper #FDFAF4, deep green #005A1F, teal #07614C, small accents pink #FE538B and yellow #FED701. Open light space at left for a heading overlay, artwork concentrated at right, no text, logos, people or letters, elegant contemporary Brazilian educational brand, panoramic 16:9.",
+      "source": "exec-02a42ede-0d27-4d3c-96eb-172e61eda74b.png",
+      "width": 1600,
+      "height": 900,
+      "bytes": 108612,
+      "sha256": "3e64cb3094401e83345dff7bc3d7751fdea3617971868164ea46adb054d7f9e8"
+    },
+    {
+      "file": "/brand/recursos/ciclo/sala-reuniao.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Editorial watercolor illustration for an educational Gestalt therapy resource: a quiet modern meeting room, horizontal wooden table seen at a slight angle, a clear glass of water on the table, several simple empty chairs, large window with soft natural daylight and a few green plants. No people, no letters, no logos, no numbers. Warm cream paper background, sophisticated restrained palette rooted green #005A1F, teal #07614C, earth #96551F and sand #F1E9DB, very small yellow accent, inviting and contemplative, wide 16:9 composition.",
+      "source": "exec-7c84dfbf-e37f-4a37-8f71-1fc2040bafcf.png",
+      "width": 1600,
+      "height": 900,
+      "bytes": 191364,
+      "sha256": "aa36945b2f4901888436387eb1431663103fd6148d0f28e84f48357207e412be"
+    },
+    {
+      "file": "/brand/recursos/igarape/ceu-realista.webp",
+      "prompt": "Photorealistic wide landscape panoramic background for a real-time tropical river scene, looking toward a distant bend, lush deep green forest on both sides, light blue sky with soft clouds above and mist in distance, natural morning light. Empty foreground, no humans, no text, no buildings. Soft detailed natural colors, avoid oversaturation. Landscape 16:9.",
+      "source": "exec-ca6772c7-a46a-4f26-ad06-ed0ee626ac18.png",
+      "generator": "Built-in image_gen",
+      "width": 1200,
+      "height": 675,
+      "bytes": 181062,
+      "sha256": "122e27ee83a517736c6f41f55cb27889cfe67ac0acede0b76cd9203a69739aaf"
+    },
+    {
+      "file": "/brand/recursos/igarape/leito-realista.webp",
+      "prompt": "Photorealistic top-down seamless-looking riverbed texture for a 3D shallow tropical freshwater stream, rounded small stones, irregular gravel and sandy dark earth, scattered subtle submerged green aquatic plants. No water surface reflections, no large objects, no horizon, no text, even natural lighting, high detail and natural muted earth and green tones. Landscape 4:3.",
+      "source": "exec-9a1ad04f-d6e8-4266-a71d-cf84ea7c200d.png",
+      "generator": "Built-in image_gen",
+      "width": 1200,
+      "height": 900,
+      "bytes": 197312,
+      "sha256": "2fa8feccb8763df2ca5085cda0bef38bfe75a74db56db47f249afb52137eb368"
+    },
+    {
+      "file": "/brand/recursos/igarape/arvore-realista.webp",
+      "generator": "Built-in image_gen",
+      "prompt": "Photorealistic isolated tropical riverside tree asset, a single young Brazilian rainforest tree with natural rough brown trunk and lush irregular green leaves, full tree from roots to crown, straight upright tree, photographed in diffuse daylight, front view. Genuine transparent background with alpha, clean silhouette with no floor, no shadow, no words, no other objects. For a real-time 3D scene billboard; natural organic shape, not cartoon.",
+      "source": "exec-060fe5f9-67c5-42b7-b208-53ae7b158270.png",
+      "width": 800,
+      "height": 1200,
+      "bytes": 151428,
+      "sha256": "f3b0af34f993d3fed95670530ae3f704d7d6a2ac7260ff72c1842a630200ee8a"
+    }
+  ]
+}

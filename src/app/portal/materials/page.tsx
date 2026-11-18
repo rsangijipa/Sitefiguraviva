@@ -10,12 +10,18 @@ import Loading from "../loading";
 
 export default function MaterialsPage() {
   const { user } = useAuth();
+  const [error, setError] = useState("");
+  const [retry, setRetry] = useState(0);
   const [loading, setLoading] = useState(true);
   const [materialsByCourse, setMaterialsByCourse] = useState<any[]>([]);
 
   useEffect(() => {
+    let active = true;
     async function loadMaterials() {
-      if (!user?.uid) return;
+      if (!user?.uid) { setLoading(false); return; }
+      setLoading(true);
+      setError("");
+      setMaterialsByCourse([]);
       try {
         // 1. Get Enrollments to know which courses user can access
         const enrollments = await enrollmentService.getActiveEnrollments(
@@ -43,20 +49,24 @@ export default function MaterialsPage() {
           );
 
           // Filter out courses with no materials to keep UI clean
-          setMaterialsByCourse(
+          if (active) setMaterialsByCourse(
             results.filter((r) => r.materials && r.materials.length > 0),
           );
         }
       } catch (error) {
         console.error("Error loading materials:", error);
+        if (active) setError("Não foi possível carregar os materiais. Verifique sua conexão e tente novamente.");
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     }
-    loadMaterials();
-  }, [user?.uid]);
+    void loadMaterials();
+    return () => { active = false; };
+  }, [user?.uid, retry]);
 
   if (loading) return <Loading />;
+
+  if (error) return <section className="rounded-2xl border border-amber-200 bg-amber-50 p-6"><h1 className="text-2xl font-serif text-amber-950">Materiais complementares</h1><p role="alert" className="mt-3 text-amber-900">{error}</p><button type="button" className="mt-3 min-h-12 rounded-xl border border-amber-300 px-4 font-semibold text-amber-950" onClick={() => setRetry(value => value + 1)}>Tentar novamente</button></section>;
 
   if (materialsByCourse.length === 0) {
     return (
@@ -104,9 +114,9 @@ export default function MaterialsPage() {
               {group.materials.map((item: any) => (
                 <div
                   key={item.id}
-                  className="p-4 flex items-center justify-between hover:bg-stone-50 transition-colors group"
+                  className="p-4 flex flex-col sm:flex-row gap-4 sm:items-center justify-between hover:bg-stone-50 transition-colors group"
                 >
-                  <div className="flex items-center gap-4">
+                  <div className="flex min-w-0 items-center gap-4">
                     <div className="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-500 flex items-center justify-center shrink-0">
                       <FileText size={20} />
                     </div>
@@ -114,7 +124,7 @@ export default function MaterialsPage() {
                       <h4 className="text-sm font-medium text-stone-800 group-hover:text-primary transition-colors">
                         {item.title}
                       </h4>
-                      <p className="text-xs text-stone-400">
+                      <p className="text-xs text-stone-500">
                         {item.description || "Material de apoio"}
                       </p>
                     </div>
@@ -124,14 +134,16 @@ export default function MaterialsPage() {
                     href={item.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-2 text-stone-400 hover:text-primary hover:bg-primary/5 rounded-full transition-all"
-                    title="Abrir Material"
+                    className="inline-flex min-h-12 min-w-12 shrink-0 items-center justify-center gap-2 self-start rounded-xl border border-emerald-200 px-3 text-sm font-semibold text-primary hover:bg-emerald-50 transition-colors"
+                    aria-label={`Abrir ${item.title} (nova aba)`}
+                    title="Abrir material em nova aba"
                   >
                     {item.type === "link" ? (
                       <ExternalLink size={18} />
                     ) : (
                       <Download size={18} />
                     )}
+                    <span>Abrir material</span>
                   </a>
                 </div>
               ))}

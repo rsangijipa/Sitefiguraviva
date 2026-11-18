@@ -3313,5 +3313,45 @@
     ],
     "audio": [],
     "artApprovalId": null
+  },
+  "ambientes-imersivos": {
+    "schemaVersion": 1,
+    "resourceKey": "ambientes-imersivos",
+    "items": [
+      {
+        "deck": "",
+        "format": "",
+        "prompt": "",
+        "teacherResponse": "",
+        "segments": [],
+        "alternatives": [],
+        "relatedConcepts": [],
+        "references": [],
+        "asset": "",
+        "license": "",
+        "id": "ambientes-imersivos-1",
+        "kind": "guidance",
+        "title": "Escolher um ambiente",
+        "text": "Use o seletor no topo para visitar a casa, o jardim, a ponte, o ateliê, a ilha ou o observatório. Você pode ficar só olhando."
+      },
+      {
+        "deck": "",
+        "format": "",
+        "prompt": "",
+        "teacherResponse": "",
+        "segments": [],
+        "alternatives": [],
+        "relatedConcepts": [],
+        "references": [],
+        "asset": "",
+        "license": "",
+        "id": "ambientes-imersivos-2",
+        "kind": "guidance",
+        "title": "Convites abertos",
+        "text": "Os pontos luminosos trazem perguntas sem resposta certa. Você pode pular, pausar ou escolher outro ambiente."
+      }
+    ],
+    "audio": [],
+    "artApprovalId": null
   }
 }

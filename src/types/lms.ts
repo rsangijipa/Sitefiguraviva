@@ -335,6 +335,8 @@ export type Lesson = LessonDoc & {
   blocks?: Block[];
   isCompleted?: boolean;
   isLocked?: boolean;
+  /** Why the lesson is locked (content release rules), shown to students. */
+  lockReason?: string;
   maxWatchedSecond?: number;
   percent?: number;
 };

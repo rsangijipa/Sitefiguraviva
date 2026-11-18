@@ -320,3 +320,13 @@ it.each(["publicGallery", "team"] as const)(
     expect(JSON.stringify(records)).not.toContain("SECRET");
   },
 );
+it("usa apenas o ano informado da fotografia e não a data de cadastro", async () => {
+  const query = queryResult([
+    { id: "a", title: "Com ano", created_at: "2026-03-01T00:00:00Z", legacy_payload: { year: "2019" } },
+    { id: "b", title: "Sem ano", created_at: "2026-03-01T00:00:00Z", legacy_payload: {} },
+  ]);
+  mockedCreateSupabaseBrowserClient.mockReturnValue({ from: () => query } as never);
+  const records = await listPublishedContent("publicGallery");
+  expect(records[0].year).toBe("2019");
+  expect(records[1].year).toBeNull();
+});

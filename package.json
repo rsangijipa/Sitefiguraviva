@@ -16,6 +16,7 @@
     "test:e2e": "playwright test",
     "test:rules": "firebase emulators:exec --only firestore \"jest src/security/__tests__/firestore.rules.security.test.ts --runInBand\"",
     "audit:no-firebase": "node scripts/check-no-firebase.mjs",
+    "audit:resource-assets": "node tools/verify-resource-assets.mjs",
     "audit:firebase": "node scripts/check-firebase-migration-status.mjs",
     "migrate:assessment-attachments": "node scripts/migrate-assessment-attachments.mjs",
     "test:watch": "jest --watch",

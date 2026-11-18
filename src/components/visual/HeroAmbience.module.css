@@ -1,0 +1,153 @@
+.root {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  /* base: céu azulado em cima, mata no meio, terra embaixo */
+  background:
+    linear-gradient(180deg, #dcebf2 0%, #e8efe0 38%, #cfdcc0 66%, #bba98a 100%);
+  contain: paint;
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(64px);
+  will-change: transform, opacity;
+  animation-duration: var(--d, 30s);
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+.root[data-active="false"] .blob,
+.root[data-active="false"] .shaft {
+  animation-play-state: paused;
+}
+
+/* azul do céu, canto superior esquerdo */
+.sky {
+  width: 62%; height: 58%; left: -12%; top: -18%;
+  background: radial-gradient(circle, #5fa3d6 0%, rgb(95 163 214 / 0%) 70%);
+  opacity: 0.7;
+  --d: 34s;
+  animation-name: driftA;
+}
+
+/* luz dourada entrando pelo alto, à direita (onde fica a árvore) */
+.sun {
+  width: 58%; height: 62%; right: -6%; top: -22%;
+  background: radial-gradient(circle, #ffd68a 0%, rgb(255 190 110 / 0%) 68%);
+  opacity: 0.85;
+  --d: 12s;
+  animation-name: glow;
+}
+
+/* folhagem verde-clara */
+.leafA {
+  width: 52%; height: 56%; right: 6%; top: 18%;
+  background: radial-gradient(circle, #7fc17a 0%, rgb(127 193 122 / 0%) 70%);
+  opacity: 0.62;
+  --d: 27s;
+  animation-name: driftB;
+}
+
+/* verde profundo atrás da copa */
+.leafB {
+  width: 46%; height: 52%; left: 18%; top: 30%;
+  background: radial-gradient(circle, #2f8a5a 0%, rgb(47 138 90 / 0%) 70%);
+  opacity: 0.5;
+  --d: 36s;
+  animation-name: driftC;
+}
+
+/* verde-azulado, profundidade */
+.teal {
+  width: 44%; height: 48%; right: -10%; bottom: -8%;
+  background: radial-gradient(circle, #1f8f8a 0%, rgb(31 143 138 / 0%) 70%);
+  opacity: 0.45;
+  --d: 31s;
+  animation-name: driftA;
+}
+
+/* terra, base */
+.earth {
+  width: 70%; height: 40%; left: 8%; bottom: -20%;
+  background: radial-gradient(ellipse, #8a6a45 0%, rgb(138 106 69 / 0%) 72%);
+  opacity: 0.7;
+  --d: 40s;
+  animation-name: driftB;
+}
+
+/* marrom do tronco, ao centro-direita */
+.bark {
+  width: 22%; height: 46%; right: 24%; bottom: -4%;
+  background: radial-gradient(ellipse, #6b4a2f 0%, rgb(107 74 47 / 0%) 72%);
+  opacity: 0.5;
+  --d: 26s;
+  animation-name: driftC;
+}
+
+/* feixe de luz oblíquo, atravessa o ambiente devagar */
+.shaft {
+  position: absolute;
+  inset: -20% 18% -20% 30%;
+  background: linear-gradient(
+    105deg,
+    rgb(255 236 190 / 0%) 30%,
+    rgb(255 236 190 / 34%) 46%,
+    rgb(255 236 190 / 0%) 62%
+  );
+  filter: blur(36px);
+  mix-blend-mode: soft-light;
+  will-change: transform, opacity;
+  animation: sway 16s ease-in-out infinite alternate;
+}
+
+/* granulação mínima para o blur não "bandear" */
+.grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.05;
+  background-image: radial-gradient(rgb(0 0 0 / 60%) 0.5px, transparent 0.6px);
+  background-size: 3px 3px;
+}
+
+@keyframes driftA {
+  from { transform: translate3d(-4%, -3%, 0) scale(1); }
+  to   { transform: translate3d(7%, 5%, 0) scale(1.14); }
+}
+@keyframes driftB {
+  from { transform: translate3d(5%, 4%, 0) scale(1.08); }
+  to   { transform: translate3d(-6%, -5%, 0) scale(0.95); }
+}
+@keyframes driftC {
+  from { transform: translate3d(-5%, 5%, 0) scale(0.96); }
+  to   { transform: translate3d(6%, -4%, 0) scale(1.12); }
+}
+@keyframes glow {
+  from { opacity: 0.55; transform: translate3d(2%, 0, 0) scale(0.96); }
+  to   { opacity: 0.95; transform: translate3d(-3%, 4%, 0) scale(1.1); }
+}
+@keyframes sway {
+  from { transform: translate3d(-6%, 0, 0) rotate(-2deg); opacity: 0.55; }
+  to   { transform: translate3d(8%, 0, 0) rotate(2deg); opacity: 1; }
+}
+
+/* modo escuro: ambiente de entardecer, mais profundo */
+:global(.dark) .root {
+  background: linear-gradient(180deg, #0f2233 0%, #12281f 45%, #1b2a1d 70%, #2a2016 100%);
+}
+:global(.dark) .sky { opacity: 0.45; }
+:global(.dark) .sun { opacity: 0.55; }
+:global(.dark) .shaft { opacity: 0.6; }
+
+/* aparelhos modestos: menos camadas desfocadas */
+@media (max-width: 767px) {
+  .blob { filter: blur(44px); }
+  .teal, .bark, .leafB { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blob, .shaft { animation: none; }
+}

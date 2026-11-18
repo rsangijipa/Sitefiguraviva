@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" width="100%" height="100%" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <filter id="watercolor-filter" x="-20%" y="-20%" width="140%" height="140%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="4" result="noise" />
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="32" xChannelSelector="R" yChannelSelector="G" result="displaced" />
+      <feGaussianBlur in="displaced" stdDeviation="6" result="blurred" />
+      <feBlend in="SourceGraphic" in2="blurred" mode="multiply" />
+    </filter>
+    
+    <linearGradient id="wash-green" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#005a1f" stop-opacity="0.16" />
+      <stop offset="45%" stop-color="#07614c" stop-opacity="0.12" />
+      <stop offset="85%" stop-color="#2d7a4f" stop-opacity="0.03" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+    </linearGradient>
+
+    <linearGradient id="wash-gold" x1="100%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#d4af37" stop-opacity="0.22" />
+      <stop offset="50%" stop-color="#e8c868" stop-opacity="0.14" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+    </linearGradient>
+
+    <linearGradient id="wash-terracotta" x1="10% y1="100%" x2="90%" y2="0%">
+      <stop offset="0%" stop-color="#b86128" stop-opacity="0.14" />
+      <stop offset="40%" stop-color="#c97e4b" stop-opacity="0.08" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+    </linearGradient>
+    
+    <radialGradient id="soft-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fdfaf4" stop-opacity="0.9" />
+      <stop offset="60%" stop-color="#f5ede0" stop-opacity="0.5" />
+      <stop offset="100%" stop-color="#f1e9db" stop-opacity="0.1" />
+    </radialGradient>
+  </defs>
+
+  <!-- Canvas Base Texture -->
+  <rect width="100%" height="100%" fill="#fbf8f1" />
+  
+  <g filter="url(#watercolor-filter)">
+    <!-- Organic Watercolor Stroke 1: Broad forest green wash from top left -->
+    <path d="M-50,-30 C180,40 320,-20 480,90 C620,190 740,110 920,180 C1040,230 1150,150 1280,110 L1280,-80 L-60,-80 Z" fill="url(#wash-green)" />
+
+    <!-- Organic Watercolor Stroke 2: Soft fluid green curve along bottom -->
+    <path d="M-40,420 C140,360 280,480 460,430 C640,380 780,490 960,410 C1080,360 1190,440 1260,390 L1260,650 L-50,650 Z" fill="url(#wash-green)" />
+
+    <!-- Organic Watercolor Stroke 3: Warm golden wash flowing across the middle -->
+    <path d="M220,120 C420,80 520,240 760,190 C960,150 1080,290 1240,220 C1280,310 1180,430 980,380 C810,340 680,470 490,420 C320,380 180,260 220,120 Z" fill="url(#wash-gold)" />
+
+    <!-- Organic Watercolor Stroke 4: Earthy terracotta accent in bottom right -->
+    <path d="M720,310 C890,260 1020,340 1160,290 C1220,380 1240,490 1180,580 C1040,610 920,530 820,490 C740,460 690,360 720,310 Z" fill="url(#wash-terracotta)" />
+    
+    <!-- Organic Brush Splatters / Drops -->
+    <circle cx="160" cy="180" r="32" fill="#005a1f" opacity="0.08" />
+    <circle cx="210" cy="220" r="16" fill="#07614c" opacity="0.07" />
+    <circle cx="340" cy="110" r="24" fill="#d4af37" opacity="0.1" />
+    <circle cx="880" cy="160" r="28" fill="#d4af37" opacity="0.12" />
+    <circle cx="940" cy="210" r="14" fill="#005a1f" opacity="0.06" />
+    <circle cx="1060" cy="460" r="38" fill="#b86128" opacity="0.08" />
+    <circle cx="680" cy="490" r="22" fill="#07614c" opacity="0.07" />
+  </g>
+
+  <!-- Central luminous vignette to keep text highly legible -->
+  <rect width="100%" height="100%" fill="url(#soft-glow)" opacity="0.75" />
+</svg>

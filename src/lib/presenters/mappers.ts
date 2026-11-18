@@ -7,6 +7,11 @@ import {
 } from "./types";
 import { deepSafeSerialize } from "@/lib/utils";
 import { canConsumeCourse } from "@/lib/auth/access-policy";
+import {
+  computeLessonLocks,
+  describeLessonLock,
+  readContentRelease,
+} from "@/features/courses/domain/content-release";
 
 // Mapper Helper: Firestore Timestamp to ISO String
 function toISO(val: any): string {
@@ -131,6 +136,23 @@ export function toCourseFullDTO(
       return toModuleDTO(mDoc, lessonsDTO);
     })
     .sort((a, b) => a.order - b.order);
+
+  // Content release (sequential / module dates). Team preview sees all.
+  if (!isAdmin) {
+    const locks = computeLessonLocks(
+      modules,
+      readContentRelease((courseRaw.data ? courseRaw.data() : courseRaw)?.details),
+    );
+    for (const courseModule of modules) {
+      for (const lesson of courseModule.lessons) {
+        const lock = locks.get(lesson.id);
+        if (lock?.locked) {
+          lesson.isLocked = true;
+          lesson.lockReason = describeLessonLock(lock) ?? undefined;
+        }
+      }
+    }
+  }
 
   // Calculate live totals
   const allLessons = modules.flatMap((m) => m.lessons);

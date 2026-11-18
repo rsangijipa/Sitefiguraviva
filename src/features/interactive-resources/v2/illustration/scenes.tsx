@@ -5,13 +5,13 @@ import { SLOTS } from "./slots";
 
 /** Copa do ritual "Colher uma carta" (seção 7.4): imagem + 10 folhas como botões. */
 export function Canopy({ onPick, picked }: { onPick: (leaf: number) => void; picked?: number | null }) {
+  const leaves=[[29,20],[52,14],[70,22],[17,36],[39,39],[63,43],[81,37],[13,51],[33,59],[80,57]];
   return <div className="fv-canopy">
     <IllustrationSlot slot={SLOTS.copa} />
     <ul className="fv-canopy-leaves" aria-label="Folhas da copa">
-      {Array.from({ length: 10 }, (_, index) => <li key={index}>
+      {leaves.map(([x,y], index) => <li key={index} style={{left:`${x}%`,top:`${y}%`}}>
         <button type="button" className="fv-leaf-button" aria-pressed={picked === index} onClick={() => onPick(index)}>
-          <svg viewBox="-12 -16 24 32" aria-hidden="true"><path d="M0 -14 C9 -8 9 6 0 14 C-9 6 -9 -8 0 -14Z" /></svg>
-          <span>Folha {index + 1}</span>
+          <span className="fv-leaf-label">Folha </span>{index + 1}
         </button>
       </li>)}
     </ul>

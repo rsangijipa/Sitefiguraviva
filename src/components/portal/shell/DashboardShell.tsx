@@ -1,21 +1,15 @@
+import "./portal.css";
 import { SidebarNav } from "./SidebarNav";
 import {
   Menu,
   Search,
   ArrowRight,
-  BookOpen,
-  Compass,
-  House,
-  MessageCircle,
-  UserRound,
 } from "lucide-react";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useCallback, useMemo, useState } from "react";
 import NotificationBell from "@/components/layout/NotificationBell";
-import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { PortalMenu } from "./PortalMenu";
+import { useRouter } from "next/navigation";
 import { ROUTES } from "@/lib/routes";
-import { cn } from "@/lib/utils";
 
 import { UserXPBadge } from "@/components/gamification/UserXPBadge";
 
@@ -59,6 +53,16 @@ const QUICK_LINKS = [
     keywords: ["evento", "aovivo", "mentoria"],
   },
   {
+    label: "Recursos da formação",
+    href: "/portal/recursos",
+    keywords: ["pratica", "recurso", "exclusivo"],
+  },
+  {
+    label: "Suporte",
+    href: ROUTES.support,
+    keywords: ["ajuda", "duvida"],
+  },
+  {
     label: "Minha Conta",
     href: ROUTES.settings,
     keywords: ["perfil", "configuracao", "senha"],
@@ -70,7 +74,7 @@ export const DashboardShell = ({ children }: { children: React.ReactNode }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const router = useRouter();
-  const pathname = usePathname();
+  const closeMenu = useCallback(() => setMobileMenuOpen(false), []);
 
   const suggestions = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -97,33 +101,11 @@ export const DashboardShell = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFCF9] flex font-sans">
+    <div className="fv-art-portal portal-shell min-h-screen flex font-sans">
       {/* Desktop Sidebar */}
       <SidebarNav className="hidden lg:flex shrink-0 z-30" />
 
-      {/* Mobile Sidebar Overlay with Framer Motion */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setMobileMenuOpen(false)}
-              className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm"
-            />
-            <motion.div
-              initial={{ x: "-100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "-100%" }}
-              transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-              className="fixed top-0 bottom-0 left-0 z-50 w-72 lg:hidden shadow-2xl"
-            >
-              <SidebarNav className="h-full w-full" />
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      {mobileMenuOpen && <PortalMenu onClose={closeMenu} />}
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 relative">
@@ -131,11 +113,13 @@ export const DashboardShell = ({ children }: { children: React.ReactNode }) => {
         <header className="h-16 bg-white/80 backdrop-blur-md border-b border-stone-100 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-20">
           <div className="flex items-center gap-4">
             <button
-              className="lg:hidden p-2 text-stone-500 hover:bg-stone-50 rounded-lg active:scale-95 transition-transform"
+              className="lg:hidden inline-flex min-h-12 items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 font-semibold text-emerald-900 transition-colors active:bg-emerald-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
               onClick={() => setMobileMenuOpen(true)}
               aria-label="Abrir menu"
+              aria-expanded={mobileMenuOpen}
+              aria-haspopup="dialog"
             >
-              <Menu size={20} />
+              <Menu size={22} aria-hidden="true" /><span>Menu</span>
             </button>
 
             {/* Search Bar */}
@@ -172,7 +156,7 @@ export const DashboardShell = ({ children }: { children: React.ReactNode }) => {
                         key={item.href}
                         type="button"
                         onClick={() => goTo(item.href)}
-                        className="w-full px-3 py-2.5 text-left text-sm text-stone-700 hover:bg-stone-50 flex items-center justify-between"
+                        className="w-full min-h-12 px-3 py-2.5 text-left text-sm text-stone-700 hover:bg-stone-50 flex items-center justify-between"
                       >
                         <span>{item.label}</span>
                         <ArrowRight size={14} className="text-stone-400" />
@@ -189,7 +173,7 @@ export const DashboardShell = ({ children }: { children: React.ReactNode }) => {
           </div>
 
           <div className="flex items-center gap-2 md:gap-4 shrink-0">
-            <UserXPBadge />
+            <div className="hidden sm:block"><UserXPBadge /></div>
             <NotificationBell />
 
             {/* Avatar / User Dropdown Placeholder */}
@@ -201,49 +185,15 @@ export const DashboardShell = ({ children }: { children: React.ReactNode }) => {
 
         {/* Page Content */}
         <div
-          className="flex-1 overflow-y-auto p-4 pb-24 lg:p-8 scroll-smooth"
+          className="portal-page flex-1 min-w-0 p-4 sm:p-6 lg:p-8"
           data-lenis-prevent
         >
-          <div className="max-w-7xl mx-auto space-y-8 animate-fade-in-up">
+          <div className="max-w-7xl min-w-0 mx-auto space-y-6">
             {children}
           </div>
         </div>
 
-        <nav
-          aria-label="Navegação principal do portal"
-          className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-stone-200 bg-white/95 px-1 pb-[max(0.25rem,env(safe-area-inset-bottom))] pt-1 backdrop-blur lg:hidden"
-        >
-          {[
-            { href: ROUTES.portal, label: "Início", icon: House },
-            { href: ROUTES.courses, label: "Cursos", icon: BookOpen },
-            { href: "/portal/recursos", label: "Recursos", icon: Compass },
-            {
-              href: ROUTES.community,
-              label: "Comunidade",
-              icon: MessageCircle,
-            },
-            { href: ROUTES.settings, label: "Perfil", icon: UserRound },
-          ].map(({ href, label, icon: Icon }) => {
-            const active =
-              href === ROUTES.portal
-                ? pathname === href
-                : pathname.startsWith(href);
-            return (
-              <Link
-                key={href}
-                href={href}
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-lg text-[10px] font-semibold",
-                  active ? "text-primary" : "text-stone-500",
-                )}
-              >
-                <Icon size={19} aria-hidden="true" />
-                <span>{label}</span>
-              </Link>
-            );
-          })}
-        </nav>
+
       </div>
     </div>
   );

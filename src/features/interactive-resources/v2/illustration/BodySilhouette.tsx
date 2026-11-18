@@ -10,7 +10,7 @@ type Region = typeof BODY_REGIONS[number];
  * mancha cujo tamanho indica a intensidade 1–5, sempre com o número ao lado.
  * A lista HTML do seletor continua sendo a alternativa completa.
  */
-const OUTLINE = "M100 18 C116 18 124 30 124 44 C124 58 116 68 100 68 C84 68 76 58 76 44 C76 30 84 18 100 18Z M90 68 V80 M110 68 V80 M90 80 C70 82 58 88 54 100 L44 168 L40 214 M110 80 C130 82 142 88 146 100 L156 168 L160 214 M66 104 L68 200 C70 220 76 232 80 300 L84 392 M134 104 L132 200 C130 220 124 232 120 300 L116 392 M100 236 L96 300 L94 392 M100 236 L104 300 L106 392";
+const OUTLINE = "M100 18 C116 18 124 30 124 44 C124 58 116 68 100 68 C84 68 76 58 76 44 C76 30 84 18 100 18Z M90 68 V78 C75 79 61 86 55 99 L38 198 Q32 213 34 224 Q37 238 44 232 L55 207 L68 124 L69 191 Q65 213 73 238 L78 306 L79 381 L72 393 Q70 402 85 401 L96 397 L98 301 L100 246 L102 301 L104 397 L115 401 Q130 402 128 393 L121 381 L122 306 L127 238 Q135 213 131 191 L132 124 L145 207 L156 232 Q163 238 166 224 Q168 213 162 198 L145 99 C139 86 125 79 110 78 V68";
 const HITS: Record<Region, { label: string; shapes: [number, number, number, number][] }> = {
   "cabeça": { label: "Cabeça", shapes: [[100, 43, 26, 27]] },
   "pescoço": { label: "Pescoço", shapes: [[100, 75, 14, 8]] },
@@ -33,7 +33,7 @@ export function BodySilhouette({ view, points, current, onSelect }: { view: "fre
     <ellipse cx={100} cy={400} rx={70} ry={8} fill={C.areia} />
     {marked.map(point => HITS[point.region].shapes.map(([x, y], index) =>
       <Stain key={`${point.region}-${index}`} cx={x} cy={y} rx={8 + (point.intensity ?? 1) * 4} color="aurora" opacity={0.55} filter={ids.aquarela} />))}
-    <path d={OUTLINE} fill="none" stroke={C.raiz} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+    <path d={OUTLINE} fill={C.areia} fillOpacity={0.25} stroke={C.raiz} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
     {view === "costas" && <path d="M100 84 V230" stroke={C.raiz} strokeWidth={1.5} strokeDasharray="2 6" strokeLinecap="round" opacity={0.6} />}
     {(Object.keys(HITS) as Region[]).map(region => {
       const point = marked.find(item => item.region === region);

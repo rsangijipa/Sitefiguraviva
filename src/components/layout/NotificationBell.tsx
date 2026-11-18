@@ -1,181 +1,19 @@
 "use client";
-
-import { useState, useEffect, useCallback } from "react";
-import { Bell, Check, BellRing } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
-import { notificationService } from "@/services/notificationService";
-import { NotificationDoc } from "@/types/lms";
-import { cn } from "@/lib/utils";
+import {useState,useEffect,useCallback,useRef} from "react";
+import {Bell,BellRing,Check} from "lucide-react";
 import Link from "next/link";
-import Button from "@/components/ui/Button";
+import {useAuth} from "@/context/AuthContext";
+import {notificationService,type NotificationDoc} from "@/services/notificationService";
 
 export default function NotificationBell() {
-  const { user } = useAuth();
-  const [notifications, setNotifications] = useState<NotificationDoc[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [isOpen, setIsOpen] = useState(false);
-
-  const loadNotifications = useCallback(async () => {
-    if (!user) return;
-    const data = await notificationService.getUserNotifications(user.uid);
-    const count = await notificationService.getUnreadCount(user.uid);
-    setNotifications(data);
-    setUnreadCount(count);
-  }, [user]);
-
-  useEffect(() => {
-    if (!user) return;
-    loadNotifications();
-
-    // Polling for MVP (Real-time listener would be better)
-    const interval = setInterval(loadNotifications, 30000);
-    return () => clearInterval(interval);
-  }, [user, loadNotifications]);
-
-  const handleMarkAsRead = async (id: string, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!user) return;
-    await notificationService.markAsRead(user.uid, id);
-    loadNotifications();
-  };
-
-  const handleMarkAllRead = async () => {
-    if (!user) return;
-    await notificationService.markAllAsRead(user.uid);
-    loadNotifications();
-  };
-
-  if (!user) return null;
-
-  return (
-    <div className="relative z-50">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="relative flex h-11 w-11 items-center justify-center rounded-lg text-stone-600 hover:bg-stone-100 hover:text-stone-800 transition-colors"
-        aria-label="Notificações"
-        aria-expanded={isOpen}
-        title="Notificações"
-      >
-        <Bell size={20} />
-        {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white" />
-        )}
-      </button>
-
-      {isOpen && (
-        <>
-          <div
-            className="fixed inset-0 z-40 bg-transparent"
-            onClick={() => setIsOpen(false)}
-          />
-          <div className="fixed inset-x-4 top-16 w-auto sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-3 sm:w-96 bg-white rounded-2xl shadow-2xl border border-stone-100 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 origin-top-right">
-            <div className="p-5 border-b border-stone-50 flex justify-between items-center bg-white">
-              <div>
-                <h3 className="font-bold text-stone-800">Notificações</h3>
-                <p className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">
-                  Você tem {unreadCount} novas
-                </p>
-              </div>
-              {unreadCount > 0 && (
-                <button
-                  onClick={handleMarkAllRead}
-                  className="text-[10px] text-primary hover:text-gold font-bold uppercase tracking-wider transition-colors"
-                >
-                  Marcar todas
-                </button>
-              )}
-            </div>
-            <div className="max-h-[450px] overflow-y-auto divide-y divide-stone-50 custom-scrollbar">
-              {notifications.length > 0 ? (
-                notifications.map((notif) => (
-                  <Link
-                    key={notif.id}
-                    href={notif.link || "#"}
-                    onClick={() => setIsOpen(false)}
-                    className={cn(
-                      "block p-5 hover:bg-stone-50 transition-all relative group",
-                      !notif.isRead ? "bg-primary/[0.02]" : "",
-                    )}
-                  >
-                    <div className="flex gap-4">
-                      <div
-                        className={cn(
-                          "mt-1.5 w-2 h-2 rounded-full shrink-0 shadow-sm",
-                          !notif.isRead
-                            ? "bg-gold animate-pulse"
-                            : "bg-stone-200",
-                        )}
-                      />
-                      <div className="flex-1">
-                        <div className="flex justify-between items-start mb-1">
-                          <h4
-                            className={cn(
-                              "text-sm text-stone-800 leading-snug",
-                              !notif.isRead ? "font-bold" : "font-medium",
-                            )}
-                          >
-                            {notif.title}
-                          </h4>
-                          {!notif.isRead && (
-                            <button
-                              onClick={(e) => handleMarkAsRead(notif.id, e)}
-                              className="p-1 text-stone-300 hover:text-primary opacity-0 group-hover:opacity-100 transition-all"
-                              title="Lida"
-                            >
-                              <Check size={14} />
-                            </button>
-                          )}
-                        </div>
-                        {notif.body && (
-                          <p className="text-xs text-stone-500 line-clamp-2 leading-relaxed">
-                            {notif.body}
-                          </p>
-                        )}
-                        <div className="flex items-center gap-2 mt-2">
-                          <span className="text-[10px] text-stone-300 font-bold uppercase tracking-tight">
-                            {notif.createdAt
-                              ? new Date(
-                                  typeof notif.createdAt === "string"
-                                    ? notif.createdAt
-                                    : (notif.createdAt as any)?.toDate
-                                      ? (notif.createdAt as any).toDate()
-                                      : (notif.createdAt as any),
-                                ).toLocaleDateString("pt-BR", {
-                                  day: "2-digit",
-                                  month: "short",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })
-                              : ""}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                ))
-              ) : (
-                <div className="p-12 text-center">
-                  <div className="w-16 h-16 bg-stone-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <BellRing size={24} className="text-stone-300" />
-                  </div>
-                  <h4 className="text-stone-800 font-bold text-sm">
-                    Tudo em dia!
-                  </h4>
-                  <p className="text-xs text-stone-400 mt-1">
-                    Você não tem novas notificações no momento.
-                  </p>
-                </div>
-              )}
-            </div>
-            <div className="p-3 bg-stone-50 border-t border-stone-100 text-center">
-              <button className="text-[10px] font-bold text-stone-400 uppercase tracking-[0.2em] hover:text-primary transition-colors">
-                Central de Ajuda
-              </button>
-            </div>
-          </div>
-        </>
-      )}
-    </div>
-  );
+ const {user}=useAuth();const [notifications,setNotifications]=useState<NotificationDoc[]>([]);const [unread,setUnread]=useState(0);const [open,setOpen]=useState(false);const [error,setError]=useState("");const [busy,setBusy]=useState(false);const request=useRef(0);const trigger=useRef<HTMLButtonElement>(null);
+ const load=useCallback(async()=>{if(!user)return;const current=++request.current;try{const [data,count]=await Promise.all([notificationService.getUserNotifications(user.uid),notificationService.getUnreadCount(user.uid)]);if(current===request.current){setNotifications(data);setUnread(count);setError("");}}catch{if(current===request.current)setError("Não foi possível carregar as notificações. Tente novamente.");}},[user]);
+ useEffect(()=>{if(!user){setNotifications([]);setUnread(0);return;}const sequence=request;void load();const timer=window.setInterval(()=>void load(),30000);return()=>{sequence.current++;window.clearInterval(timer);};},[user,load]);
+ useEffect(()=>{if(!open)return;const onKey=(event:KeyboardEvent)=>{if(event.key==="Escape"){setOpen(false);trigger.current?.focus();}};document.addEventListener("keydown",onKey);return()=>document.removeEventListener("keydown",onKey);},[open]);
+ const mark=async(id?:string)=>{if(!user || busy)return;setBusy(true);setError("");try{if(id)await notificationService.markAsRead(user.uid,id);else await notificationService.markAllAsRead(user.uid);await load();}catch{setError("Não foi possível marcar as notificações como lidas. Tente novamente.");}finally{setBusy(false);}};
+ if(!user)return null;
+ return <div className="relative z-50"><button ref={trigger} type="button" onClick={()=>{setOpen(value=>!value);if(!open)void load();}} className="relative flex h-11 w-11 items-center justify-center rounded-lg text-stone-600 hover:bg-stone-100" aria-label={unread ? `Notificações: ${unread} não lidas` : "Notificações"} aria-expanded={open} aria-controls="notification-list" title="Notificações"><Bell size={20}/>{unread>0 && <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"/>}</button>
+ {open && <><button type="button" className="fixed inset-0 z-40 bg-transparent" aria-label="Fechar notificações" tabIndex={-1} onClick={()=>setOpen(false)}/><section id="notification-list" aria-label="Notificações" className="fixed inset-x-4 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-3 sm:w-96 bg-white rounded-2xl border border-stone-200 z-50 overflow-hidden"><div className="p-5 border-b border-stone-100 flex justify-between items-center"><div><h3 className="font-bold text-stone-800">Notificações</h3><p className="text-xs text-stone-500">{unread} não lidas</p></div>{unread>0 && <button type="button" disabled={busy} onClick={()=>void mark()} className="text-xs text-primary font-bold">Marcar todas como lidas</button>}</div>
+ {error && <div className="p-4 text-sm text-red-700" role="alert">{error} <button type="button" onClick={()=>void load()} className="underline">Tentar novamente</button></div>}
+ <div className="max-h-[450px] overflow-y-auto divide-y divide-stone-100">{notifications.length ? notifications.map(item=><div key={item.id} className="flex gap-3 p-4"><span className={item.isRead ? "mt-2 w-2 h-2 rounded-full bg-stone-200 shrink-0" : "mt-2 w-2 h-2 rounded-full bg-primary shrink-0"}/><div className="flex-1 min-w-0"><Link href={item.link?.startsWith("/") && !item.link.startsWith("//") ? item.link : "/"} onClick={()=>setOpen(false)} className="block"><strong className="text-sm text-stone-800">{item.title}</strong>{item.body && <p className="text-xs text-stone-500 mt-1">{item.body}</p>}<time className="text-xs text-stone-500">{item.createdAt ? new Date(item.createdAt).toLocaleString("pt-BR",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}) : ""}</time></Link></div>{!item.isRead && <button type="button" disabled={busy} aria-label={`Marcar ${item.title} como lida`} title="Marcar como lida" onClick={()=>void mark(item.id)} className="p-2 text-primary self-start"><Check size={16}/></button>}</div>) : !error && <div className="p-10 text-center"><BellRing className="mx-auto text-stone-300" size={24}/><p className="text-sm text-stone-600 mt-3">Nenhuma notificação por enquanto.</p></div>}</div></section></>}</div>;
 }

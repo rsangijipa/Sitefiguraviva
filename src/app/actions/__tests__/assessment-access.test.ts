@@ -26,7 +26,7 @@ jest.mock("@/lib/auth/access-gate", () => ({
 }));
 jest.mock("next/cache", () => ({ revalidatePath: jest.fn() }));
 jest.mock("@/app/actions/progress", () => ({ markLessonCompleted: jest.fn() }));
-import { saveDraft, submitAssessment } from "../assessment";
+import { saveDraft, submitAssessment, startAttempt } from "../assessment";
 import { markLessonCompleted } from "@/app/actions/progress";
 const assessment = {
   id: "assessment",
@@ -140,4 +140,33 @@ it("leaves manual questions pending and does not approve or complete the lesson"
   expect(result).toMatchObject({ passed: false, requiresManualGrading: true });
   expect(writes).toHaveBeenCalledWith(expect.objectContaining({ status: "submitted", passed: false }));
   expect(markLessonCompleted).not.toHaveBeenCalled();
+});
+
+it("resumes the same canonical pending attempt with persisted answers", async () => {
+  reads.mockResolvedValueOnce({ data: { id: "draft", status: "pending", attempt_number: 1, answers: [{ questionId: "q", selectedOptions: ["yes"] }] } });
+  expect(await startAttempt("assessment", "course")).toMatchObject({ submissionId: "draft", answers: [{ questionId: "q", selectedOptions: ["yes"] }] });
+  expect(writes).not.toHaveBeenCalled();
+});
+it("rejects a course mismatch before creating an attempt", async () => {
+  await expect(startAttempt("assessment", "other")).rejects.toThrow("Curso");
+  expect(writes).not.toHaveBeenCalled();
+});
+it("does not update a different pending attempt through the compatibility API", async () => {
+  reads.mockResolvedValueOnce({ data: { id: "other", status: "pending", attempt_number: 1 } });
+  await expect(submitAssessment("assessment", { q: "yes" }, "expected")).rejects.toThrow("mismatch");
+  expect(writes).not.toHaveBeenCalled();
+});
+it.each(["other/draft/q/file.pdf", "student/other/q/file.pdf", "student/draft/other/file.pdf", "student/draft/q/../file.pdf"])("rejects an attachment outside the current user's answer path: %s", async storagePath => {
+  reads.mockReset().mockResolvedValueOnce({ data: { ...assessment, questions: [{ id: "q", type: "practical", points: 10 }] } });
+  reads.mockResolvedValueOnce({ data: { id: "draft", status: "pending", attempt_number: 1 } });
+  await expect(submitAssessment("assessment", { q: { storagePath, fileName: "file.pdf", mimeType: "application/pdf", fileSize: 20 } })).rejects.toThrow("ownership");
+  expect(writes).not.toHaveBeenCalled();
+});
+it("preserves an owned private attachment and leaves it for manual grading", async () => {
+  reads.mockReset().mockResolvedValueOnce({ data: { ...assessment, questions: [{ id: "q", type: "practical", points: 10 }] } });
+  reads.mockResolvedValueOnce({ data: { id: "draft", status: "pending", attempt_number: 1 } });
+  reads.mockResolvedValueOnce({ data: { id: "draft" } });
+  const file = { storagePath: "student/draft/q/file.pdf", fileName: "file.pdf", mimeType: "application/pdf", fileSize: 20 };
+  expect(await submitAssessment("assessment", { q: file })).toMatchObject({ requiresManualGrading: true, passed: false });
+  expect(writes).toHaveBeenCalledWith(expect.objectContaining({ answers: [expect.objectContaining(file)], status: "submitted" }));
 });

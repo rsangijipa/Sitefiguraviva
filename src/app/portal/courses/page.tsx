@@ -1,3 +1,4 @@
+import { CourseCollection } from "@/components/portal/CourseCollection";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -23,7 +24,7 @@ const CourseCard = ({
     enrollment?.status || (isCatalog ? "catalog" : "pending_approval");
   const isActive = status === "active" || status === "completed";
   const isPendingApproval = status === "pending_approval";
-  const progress = enrollment?.progressSummary?.percent || 0;
+  const progress = Math.max(0, Math.min(100, Number(enrollment?.progressSummary?.percent) || 0));
   const lastAccessValue =
     enrollment?.lastAccessAt ?? enrollment?.lastAccessedAt;
   const lastAccess = lastAccessValue
@@ -40,43 +41,43 @@ const CourseCard = ({
     switch (status) {
       case "active":
         return (
-          <span className="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold uppercase rounded-full">
+          <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-bold uppercase rounded-full">
             Ativo
           </span>
         );
       case "completed":
         return (
-          <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-bold uppercase rounded-full">
+          <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-bold uppercase rounded-full">
             Concluído
           </span>
         );
       case "canceled":
         return (
-          <span className="px-2 py-0.5 bg-red-100 text-red-700 text-[10px] font-bold uppercase rounded-full">
+          <span className="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-bold uppercase rounded-full">
             Cancelado
           </span>
         );
       case "refunded":
         return (
-          <span className="px-2 py-0.5 bg-stone-200 text-stone-700 text-[10px] font-bold uppercase rounded-full">
+          <span className="px-2 py-0.5 bg-stone-200 text-stone-700 text-xs font-bold uppercase rounded-full">
             Reembolsado
           </span>
         );
       case "pending_approval":
         return (
-          <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-bold uppercase rounded-full">
+          <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs font-bold uppercase rounded-full">
             Em análise
           </span>
         );
       case "catalog":
         return (
-          <span className="px-2 py-0.5 bg-stone-200 text-stone-700 text-[10px] font-bold uppercase rounded-full">
+          <span className="px-2 py-0.5 bg-stone-200 text-stone-700 text-xs font-bold uppercase rounded-full">
             Disponível
           </span>
         );
       default:
         return (
-          <span className="px-2 py-0.5 bg-stone-100 text-stone-500 text-[10px] font-bold uppercase rounded-full">
+          <span className="px-2 py-0.5 bg-stone-100 text-stone-500 text-xs font-bold uppercase rounded-full">
             Aguardando
           </span>
         );
@@ -84,19 +85,19 @@ const CourseCard = ({
   };
 
   return (
-    <div className="bg-white rounded-xl border border-stone-100 overflow-hidden hover:shadow-lg transition-all group flex flex-col h-full">
+    <div className="bg-white rounded-2xl border border-emerald-100 overflow-hidden shadow-sm hover:shadow-lg transition-all group flex flex-col h-full">
       {/* Cover Image */}
-      <div className="h-40 bg-stone-200 relative overflow-hidden">
+      <div className="aspect-[16/10] bg-emerald-50 relative overflow-hidden">
         {course.image ? (
           <Image
             src={course.image}
             alt={course.title}
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+            className="object-contain p-2"
+            sizes="(max-width: 639px) 100vw, (max-width: 1279px) 50vw, 33vw"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-stone-400">
+          <div className="w-full h-full flex items-center justify-center text-stone-500">
             <BookOpen size={32} />
           </div>
         )}
@@ -127,14 +128,14 @@ const CourseCard = ({
 
             {/* Footer Info */}
             <div className="flex items-center justify-between pt-3 border-t border-stone-50">
-              <span className="text-[10px] text-stone-400">
+              <span className="text-xs text-stone-500">
                 Último acesso: {lastAccess || "Nunca"}
               </span>
             </div>
 
             <Link
               href={`/portal/course/${course.id}`}
-              className="block w-full py-2 bg-primary text-white text-center text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-stone-800 transition-colors mt-2"
+              className="flex min-h-12 items-center justify-center w-full py-2 bg-primary text-white text-center text-sm font-semibold rounded-lg hover:bg-stone-800 transition-colors mt-2"
             >
               Continuar
             </Link>
@@ -147,7 +148,7 @@ const CourseCard = ({
               </p>
             ) : isPendingApproval ? (
               <p className="text-xs text-amber-700">
-                Pagamento confirmado. Sua matrícula aguarda validação da equipe.
+                Sua inscrição está em análise. A equipe verificará o pagamento e os dados da matrícula.
               </p>
             ) : (
               <p className="text-xs text-stone-500 italic">
@@ -159,7 +160,7 @@ const CourseCard = ({
             <Link
               href={detailsHref}
               className={cn(
-                "block w-full py-2 border text-center text-xs font-bold uppercase tracking-widest rounded-lg transition-colors mt-3",
+                "flex min-h-12 items-center justify-center w-full py-2 border text-center text-sm font-semibold rounded-lg transition-colors mt-3",
                 isCatalog
                   ? "border-primary text-primary hover:bg-primary hover:text-white"
                   : isPendingApproval
@@ -185,7 +186,7 @@ export default async function MyCoursesPage() {
   const uid = session.uid;
 
   // 1. Fetch User Enrollments
-  const enrollments = await listUserEnrollments(uid);
+  const [enrollments, courses] = await Promise.all([listUserEnrollments(uid), listAdminCourses()]);
 
   // 2. Resolve Enrolled Courses
   let enrolledCourses: any[] = [];
@@ -194,7 +195,6 @@ export default async function MyCoursesPage() {
   if (enrollments.length > 0) {
     const courseIds = enrollments.map((e) => e.courseId);
     enrolledCourseIds = new Set(courseIds);
-    const courses = await listAdminCourses();
     enrolledCourses = courses
       .filter(
         (course) =>
@@ -215,17 +215,15 @@ export default async function MyCoursesPage() {
       !["active", "completed"].includes(course?.enrollment?.status),
   );
 
-  // 3. Fetch Catalog (Published & Open, limit 10 for MVP)
-  // Exclude enrolled? Ideally yes, but Firestore "not-in" has limits.
-  // We will fetch widely and filter in memory for this page since catalog size is likely small (<100) for now.
-  const catalogCourses = (await listAdminCourses())
+  // Reuse the same course snapshot for enrollments and the open catalog.
+  const catalogCourses = courses
     .filter(
       (course) => course.status === "open" && course.isPublished !== false,
     )
     .filter((course) => !enrolledCourseIds.has(course.id));
 
   return (
-    <div className="space-y-12 pb-12">
+    <div className="portal-courses space-y-10 pb-8">
       {/* Section: My Enrollments */}
       <section className="space-y-6">
         <header className="flex items-center justify-between border-b border-stone-100 pb-4">
@@ -240,15 +238,15 @@ export default async function MyCoursesPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className="bg-white border border-stone-100 rounded-xl px-4 py-3">
-            <p className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">
-              Matrículas ativas
+            <p className="text-xs uppercase tracking-widest text-stone-500 font-bold">
+              Cursos liberados
             </p>
             <p className="text-2xl font-bold text-stone-800 mt-1">
               {activeEnrolledCourses.length}
             </p>
           </div>
           <div className="bg-white border border-stone-100 rounded-xl px-4 py-3">
-            <p className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">
+            <p className="text-xs uppercase tracking-widest text-stone-500 font-bold">
               Em análise
             </p>
             <p className="text-2xl font-bold text-amber-700 mt-1">
@@ -261,7 +259,7 @@ export default async function MyCoursesPage() {
             </p>
           </div>
           <div className="bg-white border border-stone-100 rounded-xl px-4 py-3">
-            <p className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">
+            <p className="text-xs uppercase tracking-widest text-stone-500 font-bold">
               Catálogo aberto
             </p>
             <p className="text-2xl font-bold text-stone-800 mt-1">
@@ -271,20 +269,18 @@ export default async function MyCoursesPage() {
         </div>
 
         {activeEnrolledCourses.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {activeEnrolledCourses.map((course) => (
-              <CourseCard
-                key={course.id}
-                course={course}
-                enrollment={course.enrollment}
-              />
-            ))}
-          </div>
+          <CourseCollection items={activeEnrolledCourses.map(course => ({
+            id: course.id,
+            title: course.title,
+            completed: course.enrollment?.status === "completed",
+            lastAccess: String(course.enrollment?.lastAccessAt ?? course.enrollment?.lastAccessedAt ?? ""),
+            card: <CourseCard key={course.id} course={course} enrollment={course.enrollment} />,
+          }))} />
         ) : (
           <EmptyState
             icon={<BookOpen size={40} strokeWidth={1.5} />}
             title="Sua Prateleira está Vazia"
-            description="Você ainda não se matriculou em nenhuma formação. Descubra novos caminhos no nosso catálogo."
+            description="Nenhum curso com acesso liberado no momento. Confira suas inscrições em andamento ou explore o catálogo."
             action={
               <Link href="/portal/courses#catalog">
                 <Button variant="primary">Ver Catálogo</Button>
@@ -305,7 +301,7 @@ export default async function MyCoursesPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
               {pendingEnrolledCourses.map((course) => (
                 <CourseCard
                   key={course.id}
@@ -322,7 +318,7 @@ export default async function MyCoursesPage() {
       {catalogCourses.length > 0 && (
         <section id="catalog" className="space-y-6">
           <header className="flex items-center gap-3 border-b border-stone-100 pb-4">
-            <Library className="text-stone-400" />
+            <Library className="text-stone-500" />
             <div>
               <h2 className="font-serif text-2xl text-stone-800">
                 Catálogo Disponível
@@ -333,7 +329,7 @@ export default async function MyCoursesPage() {
             </div>
           </header>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
             {catalogCourses.map((course) => (
               <CourseCard key={course.id} course={course} isCatalog={true} />
             ))}

@@ -15,6 +15,7 @@ interface LessonPlayerWrapperProps {
   activeLesson: Lesson;
   prevLessonId?: string;
   nextLessonId?: string;
+  nextLessonLockReason?: string;
   assessment?: any;
   submission?: any;
 }
@@ -31,19 +32,40 @@ const AssessmentPlayer = dynamic(() =>
 import { analyticsService } from "@/services/analyticsService";
 import { useAuth } from "@/context/AuthContext";
 
+const AUTO_ADVANCE_KEY = "fv:lesson-auto-advance";
+
 export function LessonPlayerWrapper(props: LessonPlayerWrapperProps) {
   const router = useRouter();
   const { user } = useAuth();
   const [autoAdvance, setAutoAdvance] = useState(false);
   const [progressError, setProgressError] = useState<string | null>(null);
 
-  // v4: Retention Tracking
+  // Per-viewer convenience only; storage can be unavailable (private mode).
+  useEffect(() => {
+    try {
+      setAutoAdvance(window.localStorage.getItem(AUTO_ADVANCE_KEY) === "1");
+    } catch {
+      /* keep default */
+    }
+  }, []);
+
+  const changeAutoAdvance = (enabled: boolean) => {
+    setAutoAdvance(enabled);
+    try {
+      window.localStorage.setItem(AUTO_ADVANCE_KEY, enabled ? "1" : "0");
+    } catch {
+      /* preference just won't persist */
+    }
+  };
+
+  // Records the "continue where you left off" pointer. A failure here does
+  // not affect the lesson itself, so it is logged instead of shown.
   useEffect(() => {
     if (user?.uid && props.course.id && props.activeLesson.id) {
       void analyticsService
         .trackLessonStart(user.uid, props.course.id, props.activeLesson.id)
-        .catch(() =>
-          setProgressError("Não foi possível registrar o acesso à aula."),
+        .catch((error) =>
+          console.warn("Failed to record lesson access", error),
         );
     }
   }, [user?.uid, props.course.id, props.activeLesson.id]);
@@ -66,26 +88,27 @@ export function LessonPlayerWrapper(props: LessonPlayerWrapperProps) {
       if (!result.success) throw new Error(result.error);
       setProgressError(null);
       router.refresh();
-
-      // v4: Retention Tracking
-      if (user?.uid) {
-        await analyticsService.trackLessonCompletion(
-          user.uid,
-          props.course.id,
-          lessonId,
-        );
-      }
     } catch (error) {
       setProgressError("Não foi possível salvar a conclusão. Tente novamente.");
       console.error("Failed to mark lesson complete", error);
+      return;
+    }
+
+    // Telemetry runs after the completion is stored and never reports its
+    // own failure as a failed completion.
+    if (user?.uid) {
+      void analyticsService
+        .trackLessonCompletion(user.uid, props.course.id, lessonId)
+        .catch((error) =>
+          console.warn("Failed to track lesson completion", error),
+        );
     }
   };
 
   const handleVideoCompleted = () => {
     // Refresh data implicitly happens via server action revalidation in VideoPlayer
     // but here we handle navigation
-    if (autoAdvance && props.nextLessonId) {
-      console.log("Aula concluída! Indo para a próxima...");
+    if (autoAdvance && props.nextLessonId && !props.nextLessonLockReason) {
       setTimeout(() => {
         router.push(
           `/portal/course/${props.course.id}/lesson/${props.nextLessonId}`,
@@ -121,18 +144,18 @@ export function LessonPlayerWrapper(props: LessonPlayerWrapperProps) {
       {/* Auto-Advance Toggle */}
       {props.nextLessonId && (
         <div className="flex items-center justify-end gap-2 px-2">
-          <label className="flex items-center gap-2 cursor-pointer select-none group">
+          <label className="flex min-h-12 items-center gap-3 cursor-pointer select-none group">
             <div className="relative">
               <input
                 type="checkbox"
                 checked={autoAdvance}
-                onChange={(e) => setAutoAdvance(e.target.checked)}
+                onChange={(e) => changeAutoAdvance(e.target.checked)}
                 className="sr-only peer"
               />
               <div className="w-10 h-6 bg-stone-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-primary/20 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
             </div>
             <span className="text-sm font-medium text-stone-600 group-hover:text-stone-800 transition-colors">
-              Reprodução automática
+              Ir para a próxima aula ao terminar o vídeo
             </span>
           </label>
         </div>

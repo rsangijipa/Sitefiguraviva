@@ -12,7 +12,7 @@ const Card = React.forwardRef<
       // é de superfície (Creme -> Areia) com o traço virando Igarapé.
       // A sombra saiu: era ela que fazia cada bloco parecer um objeto
       // solto sobre a tela em vez de um campo impresso na página.
-      "rounded-md border border-border bg-paper text-primary transition-colors duration-300 hover:border-igarape hover:bg-areia",
+      "fv-art-card rounded-md border border-border bg-paper text-primary transition-colors duration-300 hover:border-igarape hover:bg-areia",
       className,
     )}
     {...props}

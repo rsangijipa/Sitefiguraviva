@@ -1,15 +1,15 @@
 import { resourceCatalog, resourceAliases, resolveResourceSlug,resolveResourceDestination,resourceHref,isPublicResource } from "../resourceCatalog";
 describe("Figura Viva v2 catalog and destinations",()=>{
  it("registers fifteen consolidated and three draft learning resources",()=>{
-  expect(resourceCatalog).toHaveLength(18);
+  expect(resourceCatalog).toHaveLength(19);
   expect(resourceCatalog.filter(item=>item.visibility==="draft")).toHaveLength(3);
   expect(resourceCatalog.filter(item=>item.visibility==="hidden").map(item=>item.slug)).toEqual(["instrumentos-em-estudo"]);
-  expect(new Set(resourceCatalog.map(item=>item.slug)).size).toBe(18);
+  expect(new Set(resourceCatalog.map(item=>item.slug)).size).toBe(19);
  });
  it("exposes published self-guided experiences while keeping learning and case-study tools in formation",()=>{
   expect(resourceCatalog.filter(isPublicResource).map(item=>item.slug)).toEqual([
    "cartas-gestalticas","figura-e-fundo","chegada","mapa-do-corpo","roda-das-emocoes",
-   "necessidades-agora","paisagem-de-pensamentos","sons-para-awareness","sala-de-pausa","igarape",
+   "necessidades-agora","paisagem-de-pensamentos","sons-para-awareness","sala-de-pausa","igarape","ambientes-imersivos",
   ]);
   expect(resourceCatalog.filter(item=>item.category==="APRENDER" && item.slug!=="cartas-gestalticas" && item.slug!=="figura-e-fundo").every(item=>!isPublicResource(item))).toBe(true);
   expect(isPublicResource(resourceCatalog.find(item=>item.slug==="polaridades-e-cadeiras")!)).toBe(false);

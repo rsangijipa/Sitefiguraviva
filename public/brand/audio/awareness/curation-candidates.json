@@ -1,0 +1,41 @@
+{
+  "curationRequired": true,
+  "note": "Texturas sintetizadas para este projeto. Não são gravações de natureza. Importar somente após escuta e curadoria; este arquivo não publica conteúdo editorial.",
+  "audio": [
+    {
+      "id": "chuva-sintetizada",
+      "title": "Textura de chuva · síntese",
+      "path": "/brand/audio/awareness/chuva-sintetizada.wav",
+      "credit": "Síntese procedural original para o Instituto Figura Viva",
+      "license": "Produzido para uso no projeto Figura Viva"
+    },
+    {
+      "id": "vento-sintetizado",
+      "title": "Vento suave · síntese",
+      "path": "/brand/audio/awareness/vento-sintetizado.wav",
+      "credit": "Síntese procedural original para o Instituto Figura Viva",
+      "license": "Produzido para uso no projeto Figura Viva"
+    },
+    {
+      "id": "agua-sintetizada",
+      "title": "Água em movimento · síntese",
+      "path": "/brand/audio/awareness/agua-sintetizada.wav",
+      "credit": "Síntese procedural original para o Instituto Figura Viva",
+      "license": "Produzido para uso no projeto Figura Viva"
+    }
+  ],
+  "textAlternatives": [
+    {
+      "id": "chuva-sintetizada",
+      "text": "Uma textura contínua de pequenos ruídos, sem trovões ou mudanças bruscas."
+    },
+    {
+      "id": "vento-sintetizado",
+      "text": "Um sopro grave e contínuo que cresce e diminui lentamente."
+    },
+    {
+      "id": "agua-sintetizada",
+      "text": "Uma textura fluida e irregular, com pequenas variações suaves."
+    }
+  ]
+}

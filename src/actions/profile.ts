@@ -28,7 +28,7 @@ const updateProfileSchema = z.object({
   dateOfBirth: z
     .string()
     .trim()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Data inválida")
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Data inválida").or(z.literal(""))
     .optional(),
   instagram: z.string().trim().max(60, "Instagram muito longo").optional(),
 });

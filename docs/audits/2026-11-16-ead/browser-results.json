@@ -1,0 +1,234 @@
+{
+  "mode": "isolated UI fixtures; no backend calls",
+  "checks": [
+    {
+      "width": 320,
+      "height": 740,
+      "route": "/portal",
+      "horizontalOverflow": false
+    },
+    {
+      "width": 320,
+      "height": 740,
+      "route": "/portal/courses",
+      "horizontalOverflow": false
+    },
+    {
+      "width": 320,
+      "height": 740,
+      "route": "/portal/course/demo/lesson/lesson-1",
+      "horizontalOverflow": false
+    },
+    {
+      "width": 320,
+      "height": 740,
+      "route": "/portal/recursos",
+      "horizontalOverflow": false
+    },
+    {
+      "width": 320,
+      "height": 740,
+      "route": "/portal/support",
+      "horizontalOverflow": false
+    },
+    {
+      "width": 320,
+      "height": 740,
+      "resourceTopLayer": true,
+      "resourceEndReachable": true
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "route": "/portal",
+      "horizontalOverflow": false
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "route": "/portal/courses",
+      "horizontalOverflow": false
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "route": "/portal/course/demo/lesson/lesson-1",
+      "horizontalOverflow": false
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "route": "/portal/recursos",
+      "horizontalOverflow": false
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "route": "/portal/support",
+      "horizontalOverflow": false
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "resourceTopLayer": true,
+      "resourceEndReachable": true
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "theme": "dark",
+      "horizontalOverflow": false
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "route": "/portal",
+      "horizontalOverflow": false
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "route": "/portal/courses",
+      "horizontalOverflow": false
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "route": "/portal/course/demo/lesson/lesson-1",
+      "horizontalOverflow": false
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "route": "/portal/recursos",
+      "horizontalOverflow": false
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "route": "/portal/support",
+      "horizontalOverflow": false
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "resourceTopLayer": true,
+      "resourceEndReachable": true
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "route": "/portal",
+      "horizontalOverflow": false
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "route": "/portal/courses",
+      "horizontalOverflow": false
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "route": "/portal/course/demo/lesson/lesson-1",
+      "horizontalOverflow": false
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "route": "/portal/recursos",
+      "horizontalOverflow": false
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "route": "/portal/support",
+      "horizontalOverflow": false
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "resourceTopLayer": true,
+      "resourceEndReachable": true
+    },
+    {
+      "width": 1440,
+      "height": 1000,
+      "route": "/portal",
+      "horizontalOverflow": false
+    },
+    {
+      "width": 1440,
+      "height": 1000,
+      "route": "/portal/courses",
+      "horizontalOverflow": false
+    },
+    {
+      "width": 1440,
+      "height": 1000,
+      "route": "/portal/course/demo/lesson/lesson-1",
+      "horizontalOverflow": false
+    },
+    {
+      "width": 1440,
+      "height": 1000,
+      "route": "/portal/recursos",
+      "horizontalOverflow": false
+    },
+    {
+      "width": 1440,
+      "height": 1000,
+      "route": "/portal/support",
+      "horizontalOverflow": false
+    },
+    {
+      "width": 1440,
+      "height": 1000,
+      "resourceTopLayer": true,
+      "resourceEndReachable": true
+    },
+    {
+      "width": 1440,
+      "height": 1000,
+      "theme": "dark",
+      "horizontalOverflow": false
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "route": "/portal",
+      "horizontalOverflow": false
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "route": "/portal/courses",
+      "horizontalOverflow": false
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "route": "/portal/course/demo/lesson/lesson-1",
+      "horizontalOverflow": false
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "route": "/portal/recursos",
+      "horizontalOverflow": false
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "route": "/portal/support",
+      "horizontalOverflow": false
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "resourceTopLayer": true,
+      "resourceEndReachable": true
+    }
+  ],
+  "pageErrors": []
+}

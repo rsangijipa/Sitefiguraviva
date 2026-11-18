@@ -17,8 +17,8 @@ export const AUDIO_CATALOG: AudioTrackItem[] = [
     title: "Presença & Awareness no Aqui-e-Agora",
     artist: "Instituto Figura Viva",
     category: "meditation",
-    duration: 368,
-    durationFormatted: "06:08",
+    duration: 184,
+    durationFormatted: "03:04",
     description: "Condução suave de atenção plena focada na respiração organísmica e percepção da figura e fundo corporal.",
     url: "/assets/audio/meditation.mp3",
     cover: "/images/cursos/gestalt-intro.jpg",
@@ -29,47 +29,26 @@ export const AUDIO_CATALOG: AudioTrackItem[] = [
     title: "Fritz Perls: Teoria Gestáltica & O Encontro Vivo (1966)",
     artist: "Fritz Perls • Gravação Histórica",
     category: "historical",
-    duration: 745,
-    durationFormatted: "12:25",
+    duration: 1728,
+    durationFormatted: "28:48",
     description: "Registro histórico restaurado onde Frederick Perls explora a fronteira de contato, a auto-regulação organísmica e a autenticidade.",
     url: "/laura/audio/fritz-perls-gestalt-theory-1966.mp3",
     cover: "/laura/fritz.jpg",
     tags: ["Histórico", "Fritz Perls", "Teoria"]
   },
   {
-    id: "respiracao-ancoragem",
-    title: "Ancoragem Organísmica & Respiração Fluida",
-    artist: "Prática Clínica • Figura Viva",
-    category: "grounding",
-    duration: 300,
-    durationFormatted: "05:00",
-    description: "Exercício de ancoragem somática para desanuviar a tensão antes de atendimentos clínicos ou estudos profundos.",
-    url: "/assets/audio/meditation.mp3",
-    cover: "/assets/lilian-vanessa.jpeg",
-    tags: ["Grounding", "Corpo", "Respiração"]
+    id: "ambiente-floresta", title: "Floresta", artist: "Joseph SARDIN · BigSoundBank · CC0", category: "ambient",
+    duration: 45, durationFormatted: "00:45", description: "Pássaros, insetos e ambiente de floresta.",
+    url: "/brand/audio/ambient/floresta.mp3", cover: "/brand/recursos/sons/floresta.webp", tags: ["Natureza", "Floresta"]
   },
   {
-    id: "fluxo-contemplacao",
-    title: "Sons do Bosque & Paisagem de Estudo",
-    artist: "Som Ambiente • Instituto Figura Viva",
-    category: "ambient",
-    duration: 600,
-    durationFormatted: "10:00",
-    description: "Harmonia sutil da natureza para acompanhar momentos de leitura da biblioteca e anotações teóricas.",
-    url: "/assets/audio/meditation.mp3",
-    cover: "/assets/foto-grupo.jpg",
-    tags: ["Ambiente", "Foco", "Natureza"]
+    id: "ambiente-riacho", title: "Riacho e pássaros", artist: "Joseph SARDIN · BigSoundBank · CC0", category: "ambient",
+    duration: 45, durationFormatted: "00:45", description: "Água corrente com pássaros ao fundo.",
+    url: "/brand/audio/ambient/riacho.mp3", cover: "/brand/recursos/sons/riacho.webp", tags: ["Água", "Natureza"]
   },
   {
-    id: "awareness-polaridades",
-    title: "Meditação das Polaridades e Integração",
-    artist: "Richard Sangi • Figura Viva",
-    category: "awareness",
-    duration: 480,
-    durationFormatted: "08:00",
-    description: "Acolhimento das tensões e diálogo entre opostos internos para fechamento de situações inacabadas.",
-    url: "/assets/audio/meditation.mp3",
-    cover: "/assets/curso-experiencia-atemporal.jpg",
-    tags: ["Polaridades", "Integração", "Gestalt"]
+    id: "ambiente-chuva", title: "Chuva", artist: "Effib · Wikimedia Commons · CC BY-SA 3.0", category: "ambient",
+    duration: 26, durationFormatted: "00:26", description: "Gravação de chuva com volume ajustado e entrada e saída suaves.",
+    url: "/brand/audio/ambient/chuva.mp3", cover: "/brand/recursos/sons/chuva.webp", tags: ["Chuva", "Natureza"]
   }
 ];

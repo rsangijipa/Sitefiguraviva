@@ -15,7 +15,7 @@ async function canAccessOwnRecords(uid:string,isStaff:boolean){try{return !isSta
 function toRecord(row: RecordRow): PrivateRecord {
   return { id: row.id, resourceKey: row.resource_key, schemaVersion: row.schema_version, formationId: row.formation_id, payload: row.payload, createdAt: row.created_at, expiresAt: row.expires_at, legacy: row.legacy_record,labels:z.array(z.strictObject({id:z.string().max(80),title:z.string().max(160)})).max(80).catch([]).parse(row.display_labels) };
 }
-function referencedIds(payload:unknown){const values=payload as Record<string,unknown>;return new Set([...["emotion","emotionId","itemId","caseId","sceneId"].map(key=>values[key]),...["needs","ids","favorites","review","known","hypotheses","sequence"].flatMap(key=>Array.isArray(values[key])?values[key]:[])].filter((value):value is string=>typeof value==="string"));}
+function referencedIds(payload:unknown){const values=payload as Record<string,unknown>;return new Set([...["emotion","emotionId","itemId","caseId","sceneId"].map(key=>values[key]),...["needs","ids","favorites","review","known","hypotheses","sequence"].flatMap(key=>Array.isArray(values[key])?values[key]:[]),...(Array.isArray(values.emotions)?values.emotions:[]).map(entry=>(entry as Record<string,unknown>)?.emotionId)].filter((value):value is string=>typeof value==="string"));}
 export async function getSavingOptions(): Promise<ResourceResult<{ formations: FormationOption[]; enabled: boolean }>> {
   const session = await resourceSession();
   if (!session) return failure("unauthenticated", "Entre para consultar seu histórico privado.");

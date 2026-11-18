@@ -12,3 +12,7 @@
 :global(.dark) .hero::after { background:linear-gradient(90deg, rgb(var(--color-paper) / .94) 0%, rgb(var(--color-paper) / .88) 48%, rgb(var(--color-paper) / .76) 100%); }
 @media (min-width:1024px) { .hero { padding-inline:40px; min-height:370px; } }
 @media (max-width:767px) { .hero { padding:104px 20px 32px; min-height:270px; } .copy { width:100%; } .visual { display:none; } .description { max-width:40ch; } .hero::after { background:linear-gradient(90deg, rgb(var(--color-paper) / .94), rgb(var(--color-paper) / .84)); } }
+.hero::before { content:""; position:absolute; z-index:2; inset:auto -4% -80px auto; width:min(65%,720px); height:260px; pointer-events:none; background:url('/assets/fv/art/aquarela-confluencia.webp') center/contain no-repeat; opacity:.22; }
+.layout { z-index:3; }
+:global(.dark) .hero::before { opacity:.1; }
+@media(max-width:767px) { .hero::before { width:100%; opacity:.15; } }

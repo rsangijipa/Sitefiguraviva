@@ -20,13 +20,34 @@ test.describe("Resources catalog and experiences", () => {
   });
 
   test("legacy alias resolves to the canonical resource and mode", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
     await open(page, "/recursos/lago");
     await expect(page).toHaveURL(/\/recursos\/igarape\?modo=agua$/);
-    await expect(page.getByText("Modo selecionado:")).toContainText("Água");
+    const staticMode = page.getByRole("button", { name: "Modo estático", exact: true });
+    const touchWater = page.getByRole("button", { name: "Tocar a água", exact: true });
+    await expect(staticMode).toHaveAttribute("aria-pressed", "false");
+    await expect(touchWater).toBeEnabled();
+    await staticMode.click();
+    await expect(staticMode).toHaveAttribute("aria-pressed", "true");
+    await expect(touchWater).toBeDisabled();
+    await staticMode.click();
+    await expect(staticMode).toHaveAttribute("aria-pressed", "false");
+    await expect(touchWater).toBeEnabled();
+
+    await page.goto("/recursos/igarape?modo=estatico");
+    await expect(staticMode).toHaveAttribute("aria-pressed", "true");
+    await expect(touchWater).toBeDisabled();
   });
 
   test("global floating controls stay available inside a resource", async ({ page }) => {
+    // A phone-sized screen makes the resource scroll whatever its published
+    // content (CI fixtures are shorter than production), so the back-to-top
+    // control is actually exercised.
+    await page.setViewportSize({ width: 390, height: 700 });
     await open(page, "/recursos/figura-e-fundo");
+    // The mode chooser can fit without scrolling; exercise the actual resource.
+    await page.getByRole("button", { name: "Iniciar recurso", exact: true }).click();
+    await expect(page.getByRole("region", { name: "Estudos de percepção visual" })).toBeVisible();
     const options = page.getByRole("button", { name: "Mais opções: tema" });
     await expect(options).toBeVisible();
     await options.click();

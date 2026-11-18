@@ -302,12 +302,17 @@ export async function getPlatformAnalytics() {
     // Try Supabase first
     try {
       const supabase = createSupabaseServiceClient();
-      const [usersRes, coursesRes, enrollmentsRes, certsRes] = await Promise.all([
-        supabase.from("profiles").select("*", { count: "exact", head: true }),
-        supabase.from("courses").select("*", { count: "exact", head: true }),
-        supabase.from("enrollments").select("*", { count: "exact", head: true }),
-        supabase.from("certificates").select("*", { count: "exact", head: true }),
-      ]);
+      const [usersRes, coursesRes, enrollmentsRes, certsRes] =
+        await Promise.all([
+          supabase.from("profiles").select("*", { count: "exact", head: true }),
+          supabase.from("courses").select("*", { count: "exact", head: true }),
+          supabase
+            .from("enrollments")
+            .select("*", { count: "exact", head: true }),
+          supabase
+            .from("certificates")
+            .select("*", { count: "exact", head: true }),
+        ]);
 
       if (
         !usersRes.error &&
@@ -375,19 +380,37 @@ export async function getPlatformAnalytics() {
 /**
  * Track granular student interaction events
  */
-export type EventType =
-  | "video_play"
-  | "video_pause"
-  | "video_complete"
-  | "quiz_start"
-  | "quiz_complete"
-  | "document_open"
-  | "page_view"
-  | "funnel_signup"
-  | "funnel_enrollment_pending"
-  | "funnel_enrollment_active"
-  | "funnel_course_completed"
-  | "funnel_certificate_issued";
+const eventTypes = [
+  "video_play",
+  "video_pause",
+  "video_complete",
+  "quiz_start",
+  "quiz_complete",
+  "document_open",
+  "page_view",
+  "funnel_signup",
+  "funnel_enrollment_pending",
+  "funnel_enrollment_active",
+  "funnel_course_completed",
+  "funnel_certificate_issued",
+] as const;
+export type EventType = (typeof eventTypes)[number];
+
+function safeEventMetadata(metadata: Record<string, unknown>) {
+  const payload: Record<string, string | number> = {};
+  for (const key of ["courseId", "moduleId", "lessonId", "submissionId"]) {
+    const value = metadata?.[key];
+    if (typeof value === "string" && /^[A-Za-z0-9_-]{1,200}$/.test(value))
+      payload[key] = value;
+  }
+  if (
+    typeof metadata?.currentTime === "number" &&
+    Number.isFinite(metadata.currentTime) &&
+    metadata.currentTime >= 0
+  )
+    payload.currentTime = metadata.currentTime;
+  return payload;
+}
 
 export async function trackEvent(
   type: EventType,
@@ -397,46 +420,32 @@ export async function trackEvent(
   try {
     const claims = await getAuthContext();
     if (!claims) return { success: false, error: "Unauthenticated" };
-    const uid = claims.uid;
-
-    const eventId = `${uid}_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-
-    // Write to Firestore if available
-    try {
-      await adminDb.collection("analytics_events").doc(eventId).set({
-        userId: uid,
-        type,
-        resourceId,
-        metadata,
-        timestamp: new Date(),
-      });
-    } catch {
-      // ignore
-    }
-
-    // Write to Supabase audit_logs
-    try {
-      const supabase = createSupabaseServiceClient();
-      await supabase.from("audit_logs").insert({
+    if (
+      !eventTypes.includes(type) ||
+      typeof resourceId !== "string" ||
+      !/^[A-Za-z0-9_-]{1,200}$/.test(resourceId)
+    )
+      return { success: false, error: "Evento inválido" };
+    const { error } = await createSupabaseServiceClient()
+      .from("audit_logs")
+      .insert({
         event_type: type,
-        actor_user_id: uid,
+        actor_user_id: claims.uid,
         target_collection: "analytics",
         target_id: resourceId,
-        payload: metadata,
+        payload: safeEventMetadata(metadata),
       });
-    } catch {
-      // ignore
-    }
-
+    if (error) throw error;
     return { success: true };
-  } catch (error: any) {
-    console.error("[TrackEvent Error]:", error);
-    return { success: false, error: error.message };
+  } catch {
+    // Optional telemetry must not interrupt learning or log student content.
+    console.error("Analytics event could not be persisted");
+    return { success: false, error: "Evento não registrado" };
   }
 }
 
 /**
- * Track funnel milestones using server-side writes to analytics_events.
+ * Track optional funnel telemetry in the canonical audit log.
  */
 export async function trackFunnelEvent(
   type:
@@ -456,40 +465,29 @@ export async function trackFunnelEvent(
     const actorIsAdmin = claims.admin === true || claims.role === "admin";
 
     const userId = explicitUserId || actorUid;
+    if (
+      !eventTypes.includes(type) ||
+      !type.startsWith("funnel_") ||
+      !/^[A-Za-z0-9_-]{1,200}$/.test(userId)
+    )
+      return { success: false, error: "Evento inválido" };
     if (explicitUserId && explicitUserId !== actorUid && !actorIsAdmin) {
       return { success: false, error: "Forbidden" };
     }
 
-    const eventId = `${userId}_${type}_${Date.now()}`;
-    try {
-      await adminDb.collection("analytics_events").doc(eventId).set({
-        userId,
-        actorUid,
-        type,
-        metadata,
-        source: "server_action",
-        timestamp: new Date(),
-      });
-    } catch {
-      // ignore
-    }
-
-    try {
-      const supabase = createSupabaseServiceClient();
-      await supabase.from("audit_logs").insert({
+    const { error } = await createSupabaseServiceClient()
+      .from("audit_logs")
+      .insert({
         event_type: type,
         actor_user_id: actorUid,
         target_collection: "funnel",
         target_id: userId,
-        payload: metadata,
+        payload: safeEventMetadata(metadata),
       });
-    } catch {
-      // ignore
-    }
-
+    if (error) throw error;
     return { success: true };
-  } catch (error: any) {
-    console.error("[trackFunnelEvent Error]:", error);
-    return { success: false, error: error.message };
+  } catch {
+    console.error("Funnel event could not be persisted");
+    return { success: false, error: "Evento não registrado" };
   }
 }

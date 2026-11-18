@@ -6,7 +6,7 @@ permissions:
 jobs:
   e2e:
     environment: homologacao
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 40
     env:
       BASE_URL: ${{ vars.E2E_BASE_URL }}

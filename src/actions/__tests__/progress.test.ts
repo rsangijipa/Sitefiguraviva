@@ -3,6 +3,7 @@ import { assertCanAccessCourse } from "@/lib/auth/access-gate";
 import { verifySession } from "@/lib/auth/server";
 import { recordLessonProgress } from "@/features/progress/application/recordLessonProgress.server";
 import { revalidatePath } from "next/cache";
+import { assertLessonReleased } from "@/features/courses/application/lessonRelease.server";
 
 jest.mock("next/headers", () => ({
   cookies: jest.fn(() =>
@@ -43,6 +44,10 @@ jest.mock(
     awardCanonicalCompletion: jest.fn().mockResolvedValue(undefined),
   }),
 );
+
+jest.mock("@/features/courses/application/lessonRelease.server", () => ({
+  assertLessonReleased: jest.fn().mockResolvedValue(undefined),
+}));
 
 describe("updateLessonProgress action", () => {
   beforeEach(() => {
@@ -122,5 +127,33 @@ describe("updateLessonProgress action", () => {
     expect(result).toEqual({ success: true });
     expect(revalidatePath).toHaveBeenCalledWith("/portal/course/c1");
     expect(revalidatePath).toHaveBeenCalledWith("/admin/enrollments");
+  });
+
+  it("refuses progress on a lesson the release rules still hold back", async () => {
+    (assertLessonReleased as jest.Mock).mockRejectedValueOnce(
+      new Error("Disponível após concluir a aula anterior"),
+    );
+
+    const result = await updateLessonProgress("c1", "m1", "l2", {
+      status: "completed",
+    });
+
+    expect(result).toEqual({
+      success: false,
+      error: "Disponível após concluir a aula anterior",
+    });
+    expect(recordLessonProgress).not.toHaveBeenCalled();
+  });
+
+  it("lets team preview record progress without the release check", async () => {
+    (assertCanAccessCourse as jest.Mock).mockResolvedValueOnce({
+      uid: "user123",
+      courseId: "c1",
+      isTeamPreview: true,
+    });
+
+    await updateLessonProgress("c1", "m1", "l1", { status: "in_progress" });
+
+    expect(assertLessonReleased).not.toHaveBeenCalled();
   });
 });

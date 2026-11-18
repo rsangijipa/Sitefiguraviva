@@ -476,3 +476,11 @@
   .root :where([role="dialog"]) :is(button,a) { min-height:44px; }
   .root .content { padding-bottom:110px; }
 }
+
+.groupToggle { display:flex; align-items:center; justify-content:space-between; width:100%; min-height:36px; text-align:left; color:inherit; font:inherit; letter-spacing:inherit; text-transform:inherit; }
+.groupToggle svg { transition:transform 160ms ease; }
+.groupClosed { transform:rotate(-90deg); }
+.searchResults { max-height:min(60vh,480px); overflow-y:auto; }
+.avatar { overflow:hidden; flex-shrink:0; }
+.avatar img { width:100%; height:100%; object-fit:cover; object-position:top; }
+@media(prefers-reduced-motion:reduce) { .groupToggle svg { transition:none; } }

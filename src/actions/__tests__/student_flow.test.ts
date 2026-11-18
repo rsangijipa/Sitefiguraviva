@@ -52,6 +52,10 @@ jest.mock("@/lib/auth/access-gate", () => ({
   assertCanAccessCourse: jest.fn(),
 }));
 
+jest.mock("@/features/courses/application/lessonRelease.server", () => ({
+  assertLessonReleased: jest.fn().mockResolvedValue(undefined),
+}));
+
 jest.mock("@/lib/progress/progressService", () => ({
   progressService: {
     updateLessonProgress: jest.fn(),

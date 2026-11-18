@@ -1,4 +1,3 @@
-import { randomUUID } from "crypto";
 import { createSupabaseBrowserClient } from "@/infrastructure/supabase/client";
 import type { TableRow } from "@/infrastructure/supabase/database.types";
 import type { CommunityReplyDoc, CommunityThreadDoc } from "@/types/lms";
@@ -116,7 +115,7 @@ export async function createThread(
   content: string,
   supabase = createSupabaseBrowserClient(),
 ): Promise<string> {
-  const id = randomUUID();
+  const id = globalThis.crypto.randomUUID();
   const { error } = await supabase.from("community_threads").insert({
     id,
     course_id: courseId,
@@ -146,7 +145,7 @@ export async function createReply(
   content: string,
   supabase = createSupabaseBrowserClient(),
 ): Promise<string> {
-  const id = randomUUID();
+  const id = globalThis.crypto.randomUUID();
   const now = new Date().toISOString();
 
   const { error: replyError } = await supabase

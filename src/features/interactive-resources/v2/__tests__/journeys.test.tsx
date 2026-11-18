@@ -8,6 +8,7 @@ describe("optional journeys and unavailable content",()=>{
  it("completes arrival through skipped steps without writing browser storage",()=>{
   const write=jest.spyOn(Storage.prototype,"setItem");render(<ArrivalExperience {...base}/>);
   fireEvent.click(screen.getByRole("button",{name:"Começar"}));fireEvent.click(screen.getByRole("button",{name:"Pular"}));fireEvent.click(screen.getByRole("button",{name:"Pular"}));
+ fireEvent.click(screen.getByRole("button",{name:"Concluir chegada"}));
   expect(base.onComplete).toHaveBeenCalledWith({word:"",body:[],emotion:"",intensity:null,needs:[],reflection:""});expect(write).not.toHaveBeenCalled();write.mockRestore();
  });
  it("preserves a pending dialogue turn in the completion payload",()=>{

@@ -1,0 +1,36 @@
+/* Ambientes Imersivos — tela cheia na janela do recurso, controles compactos no padrão Figura Viva. */
+.fv-resource-body--fill { display:flex; flex-direction:column; overflow:hidden; }
+.fv-resource-body--fill > .fv-resources, .fv-resources[data-resource-key="ambientes-imersivos"] .fv-content, .fv-resources[data-resource-key="ambientes-imersivos"] .fv-stage-grid, .fv-resources[data-resource-key="ambientes-imersivos"] .fv-stage { display:flex; flex-direction:column; flex:1 1 auto; min-height:0; }
+.fv-resources[data-resource-key="ambientes-imersivos"] .fv-content { max-width:none; padding:0; width:100%; }
+.fv-resources[data-resource-key="ambientes-imersivos"] .fv-stage { padding:0; border-radius:0; background:var(--fv-creme); width:100%; max-width:none; }
+.fv-worlds { display:flex; flex-direction:column; flex:1 1 auto; min-height:0; }
+.fv-worlds-bar { display:flex; gap:6px; padding:8px 12px; overflow-x:auto; border-bottom:1px solid var(--fv-nevoa); background:var(--fv-creme); scrollbar-width:thin; }
+.fv-worlds-tab { flex:0 0 auto; min-height:32px; padding:4px 14px; border:1.5px solid var(--fv-nevoa); border-radius:999px; background:var(--fv-creme-papel); color:var(--fv-verde-raiz); font-size:.85rem; font-weight:700; white-space:nowrap; }
+.fv-worlds-tab:hover { background:var(--fv-areia); }
+.fv-worlds-tab[aria-selected="true"] { background:var(--fv-verde-raiz); border-color:var(--fv-verde-raiz); color:var(--fv-creme-papel); }
+.fv-worlds-panel { position:relative; flex:1 1 auto; min-height:320px; }
+.fv-world { position:absolute; inset:0; background:var(--fv-areia); overflow:hidden; }
+.fv-world-canvas { position:absolute; inset:0; }
+.fv-world-fallback { position:absolute; inset:0; display:grid; place-items:center; margin:0; padding:24px 24px 160px; text-align:center; color:var(--fv-pedra); font-size:.9rem; }
+.fv-world[data-state="ready"] .fv-world-fallback { display:none; }
+.fv-world-tools { position:absolute; top:10px; right:10px; display:flex; flex-wrap:wrap; justify-content:flex-end; gap:6px; max-width:calc(100% - 20px); }
+.fv-chip { display:inline-flex; align-items:center; gap:5px; min-height:30px; padding:3px 11px; border:1.5px solid var(--fv-verde-raiz); border-radius:999px; background:var(--fv-creme-papel); color:var(--fv-verde-raiz); font-size:.78rem; font-weight:700; line-height:1.2; }
+.fv-chip:hover:not(:disabled) { background:var(--fv-areia); }
+.fv-chip[aria-pressed="true"] { background:var(--fv-verde-raiz); color:var(--fv-creme-papel); }
+.fv-chip:disabled { opacity:.5; cursor:default; }
+.fv-world-card { position:absolute; left:10px; bottom:10px; width:min(360px,calc(100% - 20px)); max-height:calc(100% - 60px); overflow:auto; display:grid; gap:8px; padding:12px 14px; border:1.5px solid var(--fv-nevoa); border-radius:16px; background:color-mix(in srgb,var(--fv-creme-papel) 94%,transparent); color:var(--fv-mata); box-shadow:0 8px 28px rgb(0 0 0 / .16); }
+.fv-world-card-head { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+.fv-world-count { font-size:.75rem; color:var(--fv-pedra); }
+.fv-world-title { font:600 1.05rem/1.2 var(--font-serif),Fraunces,serif; color:var(--fv-verde-raiz); }
+.fv-world-text { margin:0; font-size:.86rem; line-height:1.45; }
+.fv-world-chips { display:flex; flex-wrap:wrap; gap:5px; }
+.fv-world-actions { display:flex; gap:6px; }
+.fv-world-actions .fv-button { min-height:34px; padding:5px 14px; font-size:.82rem; border-radius:999px; flex:1 1 0; }
+.fv-world-note { display:flex; gap:5px; align-items:flex-start; margin:0; font-size:.72rem; color:var(--fv-pedra); }
+@media (max-width:639px) { .fv-world-card { width:calc(100% - 16px); left:8px; bottom:8px; max-height:52%; } .fv-world-tools { top:8px; right:8px; } .fv-world-note { display:none; } }
+@media (prefers-reduced-motion:reduce) { .fv-world * { transition:none; } }
+.fv-resources[data-resource-key="ambientes-imersivos"] .fv-editorial-notice { margin:0; padding:4px 12px; font-size:.75rem; border-radius:0; }
+.fv-world-card-head .fv-min-toggle { margin-left:auto; }
+.fv-world-card.fv-minimizable[data-min="true"] { width:auto; max-height:none; }
+.fv-world .fv-master { top:10px; left:10px; z-index:7; }
+.fv-world .fv-min-toggle { width:28px; height:28px; border:1.5px solid var(--fv-verde-raiz); border-radius:999px; background:var(--fv-creme-papel); color:var(--fv-verde-raiz); display:inline-grid; place-items:center; padding:0; }

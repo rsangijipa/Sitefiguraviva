@@ -20,5 +20,5 @@ export default async function ResourcePage({params,searchParams}:ResourcePagePro
  if(!resource || resource.visibility==="hidden" || resource.visibility==="draft") notFound();
  if(resource.access!=="public" || destination.slug!==slug) permanentRedirect(resourceHref(resource,destination.mode));
  const snapshot=await resourceSnapshot(ResourceKeySchema.parse(resource.slug));
- return <PublicSiteFrame><ResourceHost slug={resource.slug} snapshot={snapshot} initialMode={destination.mode} /></PublicSiteFrame>;
+ return <PublicSiteFrame><ResourceHost slug={resource.slug} snapshot={snapshot} initialMode={destination.mode} modal={false} /></PublicSiteFrame>;
 }

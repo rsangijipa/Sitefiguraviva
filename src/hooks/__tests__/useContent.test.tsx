@@ -9,6 +9,18 @@ jest.mock(
     getPublicPageContent: jest.fn(),
   }),
 );
+
+it.each(["courses", "posts"] as const)("limits refreshed %s previews at the repository boundary", async kind => {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  jest.mocked(listPublishedContent).mockResolvedValue([]);
+  const wrapper = ({ children }: { children: ReactNode }) => <QueryClientProvider client={client}>{children}</QueryClientProvider>;
+  const hook = kind === "courses" ? useCourses : useBlogPosts;
+  const result = renderHook(() => hook(false, { scope: "preview" }), { wrapper });
+  await waitFor(() => expect(result.result.current.isSuccess).toBe(true));
+  expect(listPublishedContent).toHaveBeenCalledWith(kind, { limit: 3 });
+  result.unmount();
+  client.clear();
+});
 import { listPublishedContent } from "@/features/content/infrastructure/supabaseContentRepository";
 import { useCourses, useBlogPosts } from "../useContent";
 it.each(["courses", "posts"] as const)(

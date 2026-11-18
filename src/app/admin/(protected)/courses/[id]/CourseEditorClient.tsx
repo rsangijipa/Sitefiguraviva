@@ -28,6 +28,8 @@ import {
   ChevronRight,
   Bell,
   AlertTriangle,
+  CalendarClock,
+  ClipboardCheck,
 } from "lucide-react";
 import Image from "next/image";
 import Button from "@/components/ui/Button";
@@ -45,6 +47,8 @@ import CourseCommunityTab from "./tabs/CourseCommunityTab";
 import CourseAnnouncementsTab from "./tabs/CourseAnnouncementsTab";
 import CourseMaterialsTab from "./tabs/CourseMaterialsTab";
 import CourseSettingsTab from "./tabs/CourseSettingsTab";
+import CourseReleaseTab from "./tabs/CourseReleaseTab";
+import CourseCompletionTab from "./tabs/CourseCompletionTab";
 import { setCourseCommercialState } from "@/app/actions/admin-publishing";
 import { AdminPageShell } from "@/components/admin/AdminPageShell";
 import { FormShell, FormSection } from "@/components/admin/FormShell";
@@ -63,10 +67,22 @@ const TABS = [
     description: "Módulos e aulas",
   },
   {
+    id: "release",
+    label: "Liberação",
+    icon: CalendarClock,
+    description: "Ordem e datas de abertura das aulas",
+  },
+  {
     id: "students",
     label: "Alunos",
     icon: Users,
     description: "Matrículas e progresso",
+  },
+  {
+    id: "completion",
+    label: "Conclusão",
+    icon: ClipboardCheck,
+    description: "Aulas concluídas por aluno",
   },
   {
     id: "materials",
@@ -550,8 +566,17 @@ export default function CourseEditorClient({
               {activeTab === "curriculum" && (
                 <CourseCurriculumTab courseId={course.id} />
               )}
+              {activeTab === "release" && (
+                <CourseReleaseTab courseId={course.id} />
+              )}
               {activeTab === "students" && (
                 <CourseStudentsTab courseId={course.id} />
+              )}
+              {activeTab === "completion" && (
+                <CourseCompletionTab
+                  courseId={course.id}
+                  courseTitle={course.title}
+                />
               )}
               {activeTab === "materials" && (
                 <CourseMaterialsTab courseId={course.id} />

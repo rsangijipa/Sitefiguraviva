@@ -35,8 +35,8 @@ import {
 
 interface HomeClientProps {
   initialData?: {
-    courses: any[];
-    posts: any[];
+    courses?: any[];
+    posts?: any[];
     gallery: any[];
     home?: HomeSettings;
     config?: ConfigSettings;
@@ -47,14 +47,16 @@ import ScrollProgressBar from "./motion/ScrollProgressBar";
 import Reveal from "./motion/Reveal";
 
 export default function HomeClient({ initialData }: HomeClientProps = {}) {
-  const { data: courses = [] } = useCourses(false, {
+  const coursesQuery = useCourses(false, {
     initialData: initialData?.courses,
     scope: "preview",
   });
-  const { data: blogPosts = [] } = useBlogPosts(false, {
+  const postsQuery = useBlogPosts(false, {
     initialData: initialData?.posts,
     scope: "preview",
   });
+  const courses = coursesQuery.data ?? [];
+  const blogPosts = postsQuery.data ?? [];
   const { data: gallery = [] } = usePublicGallery({
     initialData: initialData?.gallery?.length ? initialData.gallery : undefined,
   });
@@ -125,7 +127,7 @@ export default function HomeClient({ initialData }: HomeClientProps = {}) {
   };
 
   return (
-    <div className="bg-paper min-h-screen flex flex-col font-sans text-primary overflow-hidden fx-grain">
+    <div className="fv-art-site bg-paper min-h-screen flex flex-col font-sans text-primary overflow-hidden fx-grain">
       <ScrollProgressBar />
       <AlertBar />
       <Navbar />
@@ -136,6 +138,11 @@ export default function HomeClient({ initialData }: HomeClientProps = {}) {
         <Reveal variant="medium">
           <CoursesSection
             courses={courses.slice(0, 3)}
+            loading={coursesQuery.isPending}
+            error={coursesQuery.isError}
+            onRetry={() => {
+              void coursesQuery.refetch();
+            }}
             content={home}
             onOpenCalendar={() => openModal("calendar")}
             onSelectCourse={selectCourse}
@@ -146,6 +153,11 @@ export default function HomeClient({ initialData }: HomeClientProps = {}) {
           <BlogSection
             content={home}
             blogPosts={blogPosts}
+            loading={postsQuery.isPending}
+            error={postsQuery.isError}
+            onRetry={() => {
+              void postsQuery.refetch();
+            }}
             onSelectPost={selectPost}
           />
         </Reveal>

@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { ImageIcon } from "lucide-react";
 import type { IllustrationSlotDef } from "./slots";
 
-const RATIOS = { "3:2": "3 / 2", "16:9": "16 / 9", "4:3": "4 / 3", "1:1": "1 / 1", "5:2": "5 / 2" } as const;
+const RATIOS = { "3:2": "3 / 2", "2:3": "2 / 3", "16:9": "16 / 9", "4:3": "4 / 3", "1:1": "1 / 1", "5:2": "5 / 2" } as const;
 
 /**
  * Espaço reservado para uma ilustração. Mostra o arquivo de `public/` quando
@@ -19,9 +19,10 @@ export function IllustrationSlot({ slot, decorative = false, className }: { slot
     setMissing(!!element && element.complete && element.naturalWidth === 0);
   }, [slot.path]);
   const style = { aspectRatio: RATIOS[slot.ratio] };
+  if(missing && decorative)return null;
   if (missing) return <div className={`fv-slot fv-slot--empty ${className ?? ""}`} style={style} data-slot={slot.path} role={decorative ? undefined : "img"} aria-label={decorative ? undefined : slot.alt} aria-hidden={decorative || undefined}>
     <ImageIcon size={22} aria-hidden="true" />
-    <span>Espaço para ilustração</span>
+    <span>{process.env.NODE_ENV==="production" ? "Imagem indisponível. Você pode continuar pelo texto." : "Espaço para ilustração"}</span>
     {process.env.NODE_ENV !== "production" && <code>{slot.path.replace("/brand/recursos/", "")}</code>}
   </div>;
   return <img ref={image} className={`fv-slot ${className ?? ""}`} style={style} src={slot.path} alt={decorative ? "" : slot.alt} loading="lazy" decoding="async" onError={() => setMissing(true)} data-slot={slot.path} />;

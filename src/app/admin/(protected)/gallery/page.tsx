@@ -136,8 +136,11 @@ export default function GalleryManager() {
                     alt={item.title}
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
-                  <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] font-bold text-white uppercase tracking-wider">
-                    {item.category || "Geral"}
+                  <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] font-bold text-white uppercase tracking-wider">
+                    <span>{item.category || "Geral"}</span>
+                    {(item.year || item.ano) && (
+                      <span className="text-gold">· {item.year || item.ano}</span>
+                    )}
                   </div>
                   <button
                     onClick={(e) => handleDelete(item.id, e)}

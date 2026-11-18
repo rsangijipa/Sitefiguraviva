@@ -16,7 +16,9 @@ import {
   Download,
   PlayCircle,
   ArrowRight,
+  CheckCircle2,
   MessageSquare,
+  GraduationCap,
   Layout,
   List,
   Bell,
@@ -30,6 +32,7 @@ import { communityService } from "@/services/communityService";
 import { certificateService } from "@/services/certificateService";
 import { CertificateDoc } from "@/types/lms";
 import { CertificateIssueCard } from "@/components/portal/CertificateIssueCard";
+import { CourseGradesPanel } from "@/components/portal/CourseGradesPanel";
 
 const CourseCommunity = dynamic(
   () => import("@/components/community/CourseCommunity"),
@@ -66,6 +69,8 @@ function CourseContent({ initialData }: { initialData?: any }) {
   const courseId = typeof routeId === "string" ? routeId : "";
 
   const initialTab = searchParams.get("tab") || "overview";
+  // Set by the lesson page when it redirects away from a locked lesson.
+  const lockedLessonId = searchParams.get("bloqueada");
 
   // State
   const {
@@ -128,13 +133,41 @@ function CourseContent({ initialData }: { initialData?: any }) {
   };
 
   const getContinueLessonId = () => {
-    if (enrollment?.progressSummary?.lastLessonId)
-      return enrollment.progressSummary.lastLessonId;
+    const last = enrollment?.progressSummary?.lastLessonId;
+    const lastLesson = last
+      ? allLessons.find((lesson: any) => lesson.id === last)
+      : undefined;
+    if (lastLesson && !lastLesson.isLocked) return lastLesson.id;
+    // Otherwise the first open lesson still to do, then the first lesson.
+    const next = allLessons.find(
+      (lesson: any) => !lesson.isLocked && !lesson.isCompleted,
+    );
+    if (next) return next.id;
     if (allLessons.length > 0) return allLessons[0].id;
     return null;
   };
 
   const lastLessonId = getContinueLessonId();
+  const lockedLesson = lockedLessonId
+    ? allLessons.find((lesson: any) => lesson.id === lockedLessonId)
+    : undefined;
+  const progressPercent = Math.round(enrollment?.progressSummary?.percent || 0);
+  const lessonHref = (lessonId: string) =>
+    `/portal/course/${courseId}/lesson/${encodeURIComponent(lessonId)}`;
+  // A blocked student used to get a button into the lesson, which only
+  // redirected back here. Without access, the only action offered is the
+  // enrollment form (when there is no enrollment yet).
+  const canStudy = !isAccessDenied && !!lastLessonId;
+  const studyLabel =
+    progressPercent >= 100
+      ? "Revisar o curso"
+      : enrollment?.progressSummary?.lastLessonId || progressPercent > 0
+        ? "Continuar de onde parei"
+        : "Começar o curso";
+  const enrollHref =
+    isAccessDenied && status === "none"
+      ? `/inscricao/${encodeURIComponent(courseId)}`
+      : null;
 
   // --- RENDER ---
 
@@ -150,93 +183,135 @@ function CourseContent({ initialData }: { initialData?: any }) {
 
   // View: LOBBY MODE (Tabs)
   return (
-    <div className="min-h-screen bg-[#FDFCF9] pb-20 animate-fade-in">
+    <div className="min-w-0 bg-transparent pb-8">
       {/* Minimal Header */}
-      <div className="bg-white border-b border-stone-100 sticky top-0 z-30">
-        <div className="max-w-5xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
+      <div className="bg-white border border-stone-200 rounded-2xl shadow-sm">
+        <div className="max-w-5xl mx-auto px-3 sm:px-6 py-3 min-h-16 flex flex-wrap gap-2 items-center justify-between">
           <Link
-            href="/portal"
-            className="text-stone-400 hover:text-primary flex items-center gap-2 text-xs font-bold uppercase tracking-widest transition-colors"
+            href="/portal/courses"
+            className="text-primary hover:bg-emerald-50 flex min-h-11 items-center gap-2 rounded-xl border border-emerald-200 px-4 text-xs font-bold uppercase tracking-widest transition-colors"
           >
             <ArrowLeft size={14} /> Voltar
           </Link>
-          <h1 className="font-serif font-bold text-stone-800 truncate pl-4 flex-1 text-center md:text-left">
+          <h1 className="font-serif text-lg sm:text-xl font-bold text-stone-800 min-w-0 basis-40 flex-1 break-words">
             {course.title}
           </h1>
-          {lastLessonId && (
+          {canStudy && lastLessonId && (
             <Button
               size="sm"
               onClick={() => handleSelectLesson(lastLessonId)}
-              leftIcon={
-                isAccessDenied ? <Lock size={14} /> : <PlayCircle size={14} />
-              }
+              leftIcon={<PlayCircle size={14} aria-hidden="true" />}
               className="hidden md:flex ml-4"
-              variant={isAccessDenied ? "outline" : "primary"}
+              variant="primary"
             >
-              {isAccessDenied ? "Ver Detalhes" : "Continuar"}
+              {progressPercent >= 100 ? "Revisar" : "Continuar"}
             </Button>
           )}
         </div>
 
         {/* Tabs */}
-        <div className="max-w-5xl mx-auto px-4 md:px-6 flex gap-6 overflow-x-auto no-scrollbar">
+        <div
+          role="tablist"
+          aria-label="Seções do curso"
+          className="max-w-5xl mx-auto p-2 sm:px-4 grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-2"
+        >
           {[
             { id: "overview", label: "Visão Geral", icon: Layout },
             { id: "modules", label: "Conteúdo", icon: List },
             { id: "materials", label: "Materiais", icon: FileText },
+            { id: "grades", label: "Notas", icon: GraduationCap },
             { id: "community", label: "Comunidade", icon: MessageSquare },
           ].map((tab) => (
             <button
+              type="button"
+              role="tab"
+              id={`course-tab-${tab.id}`}
+              aria-selected={activeTab === tab.id}
+              aria-controls="course-tab-panel"
               key={tab.id}
+              tabIndex={activeTab === tab.id ? 0 : -1}
+              onKeyDown={event => {
+                const keys = ["ArrowRight", "ArrowLeft", "Home", "End"];
+                if (!keys.includes(event.key)) return;
+                event.preventDefault();
+                const tabs = Array.from(event.currentTarget.parentElement!.querySelectorAll<HTMLButtonElement>("[role=tab]"));
+                const index = tabs.indexOf(event.currentTarget);
+                const next = event.key === "Home" ? 0 : event.key === "End" ? tabs.length - 1 : (index + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
+                tabs[next].focus();
+                tabs[next].click();
+              }}
               onClick={() => handleTabChange(tab.id)}
               className={cn(
-                "flex items-center gap-2 pb-3 mb-[-1px] text-sm font-medium transition-colors border-b-2 whitespace-nowrap",
+                "flex min-h-12 items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-semibold transition-colors border",
                 activeTab === tab.id
-                  ? "border-primary text-primary"
-                  : "border-transparent text-stone-500 hover:text-stone-800",
+                  ? "border-primary bg-primary text-white"
+                  : "border-stone-200 text-stone-600 hover:bg-emerald-50 hover:text-primary",
               )}
             >
-              <tab.icon size={16} />
+              <tab.icon size={16} aria-hidden="true" />
               {tab.label}
             </button>
           ))}
         </div>
       </div>
 
-      <main className="max-w-5xl mx-auto px-4 md:px-6 py-8">
+      <main
+        id="course-tab-panel"
+        role="tabpanel"
+        aria-labelledby={`course-tab-${activeTab}`}
+        className="max-w-5xl mx-auto py-6 min-w-0"
+      >
         {/* TAB: OVERVIEW */}
         {activeTab === "overview" && (
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="md:col-span-2 space-y-8">
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
+            <div className="xl:col-span-2 space-y-8">
               {/* Course Intro */}
               <section>
-                <div
-                  className="aspect-video bg-stone-100 rounded-xl overflow-hidden mb-6 relative group cursor-pointer"
-                  onClick={() =>
-                    lastLessonId && handleSelectLesson(lastLessonId)
-                  }
-                >
-                  {course.coverImage || course.image ? (
-                    <Image
-                      src={course.coverImage || course.image}
-                      alt={course.title}
-                      fill
-                      className="object-cover"
-                      priority
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 50vw"
-                    />
+                {(() => {
+                  const cover = (
+                    <>
+                      {course.coverImage || course.image ? (
+                        <Image
+                          src={course.coverImage || course.image}
+                          alt=""
+                          fill
+                          className="object-cover"
+                          priority
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 50vw"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-stone-300">
+                          <BookOpen size={48} aria-hidden="true" />
+                        </div>
+                      )}
+                      {canStudy && (
+                        <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity flex items-center justify-center">
+                          <PlayCircle
+                            size={64}
+                            aria-hidden="true"
+                            className="text-white drop-shadow-lg scale-90 group-hover:scale-100 transition-transform"
+                          />
+                        </div>
+                      )}
+                    </>
+                  );
+                  const coverClass =
+                    "block aspect-video bg-stone-100 rounded-xl overflow-hidden mb-6 relative group";
+                  return canStudy && lastLessonId ? (
+                    <Link
+                      href={lessonHref(lastLessonId)}
+                      aria-label={`${studyLabel}: ${course.title}`}
+                      className={cn(
+                        coverClass,
+                        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+                      )}
+                    >
+                      {cover}
+                    </Link>
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-stone-300">
-                      <BookOpen size={48} />
-                    </div>
-                  )}
-                  <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <PlayCircle
-                      size={64}
-                      className="text-white drop-shadow-lg scale-90 group-hover:scale-100 transition-transform"
-                    />
-                  </div>
-                </div>
+                    <div className={coverClass}>{cover}</div>
+                  );
+                })()}
                 <h2 className="text-2xl font-serif text-primary mb-4">
                   Bem-vindo ao Curso
                 </h2>
@@ -281,30 +356,43 @@ function CourseContent({ initialData }: { initialData?: any }) {
                   </div>
                 )}
                 <div className="mb-2 flex justify-between text-xs font-bold text-stone-500">
-                  <span>Concluído</span>
+                  <span id="course-progress-label">Concluído</span>
                   <span data-testid="course-progress-percent">
-                    {Math.round(enrollment?.progressSummary?.percent || 0)}%
+                    {progressPercent}%
                   </span>
                 </div>
-                <div className="h-2 w-full bg-stone-100 rounded-full overflow-hidden mb-4">
+                <div
+                  role="progressbar"
+                  aria-labelledby="course-progress-label"
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={progressPercent}
+                  className="h-2 w-full bg-stone-100 rounded-full overflow-hidden mb-4"
+                >
                   <div
                     className="h-full bg-green-500"
                     style={{
-                      width: `${enrollment?.progressSummary?.percent || 0}%`,
+                      width: `${Math.min(progressPercent, 100)}%`,
                     }}
                   />
                 </div>
-                {lastLessonId && (
+                {canStudy && lastLessonId && (
                   <Button
                     className="w-full"
                     onClick={() => handleSelectLesson(lastLessonId)}
-                    variant={isAccessDenied ? "outline" : "primary"}
-                    leftIcon={isAccessDenied ? <Lock size={14} /> : undefined}
+                    variant="primary"
                   >
-                    {isAccessDenied
-                      ? "Matricule-se para Acessar"
-                      : "Continuar Estudando"}
+                    {studyLabel}
                   </Button>
+                )}
+                {enrollHref && (
+                  <Link
+                    href={enrollHref}
+                    className="flex h-12 w-full items-center justify-center gap-2 rounded-md border border-border text-sm font-bold text-primary hover:border-igarape hover:bg-areia focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  >
+                    <Lock size={14} aria-hidden="true" />
+                    Fazer inscrição
+                  </Link>
                 )}
               </Card>
 
@@ -329,6 +417,19 @@ function CourseContent({ initialData }: { initialData?: any }) {
         {/* TAB: MODULES */}
         {activeTab === "modules" && (
           <div className="space-y-6 max-w-3xl">
+            {lockedLessonId && (
+              <div
+                role="status"
+                className="flex gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"
+              >
+                <Lock size={18} className="shrink-0" aria-hidden="true" />
+                <p>
+                  {lockedLesson?.lockReason
+                    ? `A aula “${lockedLesson.title}” ainda não está liberada. ${lockedLesson.lockReason}.`
+                    : "Essa aula ainda não está liberada para você."}
+                </p>
+              </div>
+            )}
             {modules.map((module: any) => (
               <div
                 key={module.id}
@@ -340,42 +441,88 @@ function CourseContent({ initialData }: { initialData?: any }) {
                     {module.lessons.length} aulas
                   </span>
                 </div>
-                <div className="divide-y divide-stone-50">
-                  {module.lessons.map((lesson: any) => (
-                    <div
-                      key={lesson.id}
-                      onClick={() => handleSelectLesson(lesson.id)}
-                      className="p-4 hover:bg-stone-50 transition-colors cursor-pointer flex items-center gap-4 group"
-                    >
-                      <div
+                <ul className="divide-y divide-stone-50">
+                  {module.lessons.map((lesson: any) => {
+                    const isCurrent = lesson.id === lastLessonId;
+                    // Course access denied, or this lesson held back by the
+                    // course's release rules (sequence / module date).
+                    const blocked = isAccessDenied || !!lesson.isLocked;
+                    const row = (
+                      <>
+                        <span
+                          aria-hidden="true"
+                          className={cn(
+                            "w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-stone-300 border border-stone-100",
+                            lesson.isCompleted &&
+                              "bg-green-100 text-green-600 border-green-200",
+                            isCurrent &&
+                              !blocked &&
+                              "bg-primary text-white border-primary",
+                          )}
+                        >
+                          {blocked ? (
+                            <Lock size={14} />
+                          ) : lesson.isCompleted ? (
+                            <CheckCircle2 size={14} />
+                          ) : (
+                            <PlayCircle size={14} />
+                          )}
+                        </span>
+                        <span
+                          className={cn(
+                            "flex-1 text-sm font-medium text-stone-600",
+                            !blocked && "group-hover:text-primary",
+                            isCurrent &&
+                              !blocked &&
+                              "font-bold text-primary",
+                          )}
+                        >
+                          {lesson.title}
+                          {lesson.isCompleted && (
+                            <span className="sr-only"> (concluída)</span>
+                          )}
+                          {isCurrent && !blocked && (
+                            <span className="sr-only"> (última aula acessada)</span>
+                          )}
+                          {!isAccessDenied && lesson.isLocked && lesson.lockReason && (
+                            <span className="block text-xs font-normal text-stone-500">
+                              {lesson.lockReason}
+                            </span>
+                          )}
+                        </span>
+                        {!blocked && (
+                          <ArrowRight
+                            size={14}
+                            aria-hidden="true"
+                            className="text-stone-300 group-hover:text-primary"
+                          />
+                        )}
+                      </>
+                    );
+                    return (
+                      <li
+                        key={lesson.id}
+                        id={`lesson-row-${lesson.id}`}
                         className={cn(
-                          "w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-stone-300 border border-stone-100",
-                          lesson.isCompleted &&
-                            "bg-green-100 text-green-600 border-green-200",
-                          lesson.id === lastLessonId &&
-                            "bg-primary text-white border-primary",
+                          lockedLessonId === lesson.id && "bg-amber-50",
                         )}
                       >
-                        {isAccessDenied ? (
-                          <Lock size={14} />
-                        ) : lesson.isCompleted ? (
-                          <ArrowRight size={14} />
+                        {blocked ? (
+                          <div className="p-4 flex items-center gap-4 text-stone-400">
+                            {row}
+                          </div>
                         ) : (
-                          <PlayCircle size={14} />
+                          <Link
+                            href={lessonHref(lesson.id)}
+                            className="p-4 hover:bg-stone-50 transition-colors flex items-center gap-4 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
+                          >
+                            {row}
+                          </Link>
                         )}
-                      </div>
-                      <span
-                        className={cn(
-                          "text-sm font-medium text-stone-600 group-hover:text-primary",
-                          lesson.id === lastLessonId &&
-                            "font-bold text-primary",
-                        )}
-                      >
-                        {lesson.title}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+                      </li>
+                    );
+                  })}
+                </ul>
               </div>
             ))}
           </div>
@@ -407,9 +554,10 @@ function CourseContent({ initialData }: { initialData?: any }) {
                     href={item.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-2 text-stone-300 hover:text-primary transition-colors"
+                    aria-label={`Abrir ${item.title} (nova aba)`}
+                    className="p-2 text-stone-400 hover:text-primary transition-colors rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   >
-                    <Download size={20} />
+                    <Download size={20} aria-hidden="true" />
                   </a>
                 </div>
               ))
@@ -423,6 +571,15 @@ function CourseContent({ initialData }: { initialData?: any }) {
         )}
 
         {/* TAB: COMMUNITY */}
+        {activeTab === "grades" &&
+          (isAccessDenied ? (
+            <p className="max-w-3xl rounded-xl bg-amber-50 p-4 text-sm text-amber-900">
+              Suas notas ficam disponíveis com a matrícula ativa.
+            </p>
+          ) : (
+            <CourseGradesPanel courseId={courseId} />
+          ))}
+
         {activeTab === "community" && (
           <CourseCommunity courseId={courseId} user={user} />
         )}

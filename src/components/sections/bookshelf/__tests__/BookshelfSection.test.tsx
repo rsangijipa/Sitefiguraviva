@@ -49,22 +49,22 @@ afterEach(() => {
 it("searches all books including the featured book, by title and author without accents", () => {
   render(<BookshelfSection livros={books} />);
   const input = screen.getByRole("searchbox", {
-    name: "Buscar por título ou autor",
+    name: "Buscar por título ou autor na estante",
   });
-  const shelf = screen.getByRole("list", { name: "Livros da estante" });
+  const shelf = screen.getByRole("list", { name: "Livros na estante" });
   fireEvent.change(input, { target: { value: "PERLS" } });
   expect(within(shelf).getAllByRole("listitem")).toHaveLength(1);
   expect(
-    within(shelf).getByRole("heading", { name: "Gestalt-terapia" }),
+    within(shelf).getByRole("heading", { name: "Gestalt-terapia", level: 3 }),
   ).toBeInTheDocument();
   fireEvent.change(input, { target: { value: "ponciano" } });
   expect(within(shelf).getAllByRole("listitem")).toHaveLength(1);
-  expect(within(shelf).getByText(books[1].title)).toBeInTheDocument();
+  expect(within(shelf).getByRole("heading", { name: books[1].title, level: 3 })).toBeInTheDocument();
 });
 it("filters only by stored categories and combines the search", () => {
   render(<BookshelfSection livros={books} />);
   fireEvent.click(screen.getByRole("button", { name: "Gestalt", exact: true }));
-  const shelf = screen.getByRole("list", { name: "Livros da estante" });
+  const shelf = screen.getByRole("list", { name: "Livros na estante" });
   expect(within(shelf).getAllByRole("listitem")).toHaveLength(1);
   fireEvent.change(screen.getByRole("searchbox"), {
     target: { value: "Ribeiro" },
@@ -72,7 +72,7 @@ it("filters only by stored categories and combines the search", () => {
   expect(
     screen.getByText("Ainda não encontramos essa leitura."),
   ).toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button", { name: /Limpar busca/ }));
+  fireEvent.click(screen.getByRole("button", { name: "Limpar busca e filtros", exact: true }));
   expect(screen.getByRole("status")).toHaveTextContent("2 leituras na estante");
 });
 it("does not invent categories for unclassified books", () => {
@@ -81,15 +81,12 @@ it("does not invent categories for unclassified books", () => {
       livros={books.map((book) => ({ ...book, category: null }))}
     />,
   );
-  expect(
-    within(
-      screen.getByRole("group", { name: "Filtrar por categoria" }),
-    ).getAllByRole("button"),
-  ).toHaveLength(1);
+  expect(screen.queryByRole("group", { name: "Filtrar por categoria" })).not.toBeInTheDocument();
+  expect(within(screen.getByRole("list")).getAllByRole("listitem")).toHaveLength(2);
 });
 it("shows accessible details, traps focus, closes on Escape cancellation and restores the opener", () => {
   render(<BookshelfSection livros={books} />);
-  const opener = within(screen.getByRole("list")).getAllByRole("button")[1];
+  const opener = within(screen.getByRole("list")).getByRole("button", { name: `Abrir detalhes de ${books[1].title}, de ${books[1].author}` });
   opener.focus();
   fireEvent.click(opener);
   const dialog = screen.getByRole("dialog", { name: books[1].title });
@@ -115,7 +112,7 @@ it("handles missing covers and unsafe or missing external links", () => {
       livros={[{ ...books[0], purchaseUrl: "javascript:alert(1)" }]}
     />,
   );
-  const opener = within(screen.getByRole("list")).getByRole("button");
+  const opener = within(screen.getByRole("list")).getByRole("button", { name: `Abrir detalhes de ${books[0].title}, de ${books[0].author}` });
   fireEvent.click(opener);
   const dialog = screen.getByRole("dialog");
   expect(

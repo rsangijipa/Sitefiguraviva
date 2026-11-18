@@ -1,16 +1,9 @@
-import {
-  PUBLIC_COURSE_COLUMNS,
-  PUBLIC_POST_COLUMNS,
-} from "@/features/content/infrastructure/public-content-columns";
 import { getPublicPage } from "@/features/public-site/infrastructure/supabasePublicPagesRepository.server";
 import { DEFAULT_HOME, DEFAULT_CONFIG } from "@/lib/siteSettings";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
-import {
-  mapPublicCourse,
-  mapPublicPost,
-} from "@/features/content/infrastructure/supabaseContentRepository";
+import { readHomePreview } from "@/features/content/infrastructure/readHomePreview.server";
 import HomeClient from "@/components/HomeClient";
 import { createSupabaseAnonServerClient } from "@/infrastructure/supabase/server";
 
@@ -42,42 +35,9 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export const revalidate = 3600;
 
-async function getHomeData() {
-  try {
-    const supabase = createSupabaseAnonServerClient();
-    const [{ data: courseRows }, { data: postRows }] = await Promise.all([
-      supabase
-        .from("courses")
-        .select(PUBLIC_COURSE_COLUMNS)
-        .eq("is_published", true)
-        .in("status", ["open", "closed"])
-        .order("created_at", { ascending: false })
-        .limit(3),
-      supabase
-        .from("posts")
-        .select(PUBLIC_POST_COLUMNS)
-        .eq("is_published", true)
-        .order("created_at", { ascending: false })
-        .limit(3),
-    ]);
-
-    const courses = (courseRows ?? []).map(mapPublicCourse);
-    const posts = (postRows ?? []).map(mapPublicPost);
-
-    return {
-      courses,
-      posts,
-      gallery: [],
-    };
-  } catch (error) {
-    console.error("Error fetching home data:", error);
-    return { courses: [], posts: [], gallery: [] };
-  }
-}
-
 export default async function Home() {
   const [data, home, config] = await Promise.all([
-    getHomeData(),
+    readHomePreview(),
     getPublicPage("home", DEFAULT_HOME).catch(() => DEFAULT_HOME),
     getPublicPage("config", DEFAULT_CONFIG).catch(() => DEFAULT_CONFIG),
   ]);

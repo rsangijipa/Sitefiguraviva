@@ -185,8 +185,7 @@ export async function getReadableCourseOutline(courseId: string) {
   const access = await assertCurrentCourseAccess(courseId);
   const outline = await getCourseOutlineById(courseId);
   if (!outline) return null;
-  return readableOutline(
-    outline,
-    !!(access.isAdminOverride || access.isTeamPreview),
-  );
+  const preview = !!(access.isAdminOverride || access.isTeamPreview);
+  // `preview` lets callers skip student-only rules such as content release.
+  return { ...readableOutline(outline, preview), preview };
 }

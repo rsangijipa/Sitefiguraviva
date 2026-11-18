@@ -12,6 +12,9 @@ import {
   Loader2,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import {useAuth} from "@/context/AuthContext";
+import {enrollmentService} from "@/services/enrollmentService";
+import {courseService} from "@/services/courseService";
 import { communityService } from "@/services/communityService";
 import { CommunityThreadDoc } from "@/types/lms";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -19,6 +22,12 @@ import Link from "next/link";
 // Removed date-fns
 
 export default function CommunityPage() {
+  const {user}=useAuth();
+  const [chooseCourse,setChooseCourse]=useState(false);
+  const [courseChoices,setCourseChoices]=useState<{id:string;title:string}[]>([]);
+  const [courseError,setCourseError]=useState("");
+  const [coursesLoading,setCoursesLoading]=useState(false);
+  const openCoursePicker=async()=>{setChooseCourse(true);if(!user)return;setCoursesLoading(true);setCourseError("");try{const enrollments=await enrollmentService.getActiveEnrollments(user.uid);setCourseChoices(await courseService.getCoursesByIds(enrollments.map(item=>item.courseId)));}catch{setCourseError("Não foi possível carregar suas formações.");}finally{setCoursesLoading(false);}};
   const [activeTab, setActiveTab] = useState("all");
   const [threads, setThreads] = useState<CommunityThreadDoc[]>([]);
   const [loading, setLoading] = useState(true);
@@ -64,12 +73,13 @@ export default function CommunityPage() {
             Troque experiências e tire dúvidas com outros alunos.
           </p>
         </div>
-        <button className="btn-primary flex items-center gap-2 px-6 py-3 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all">
+        <button type="button" onClick={()=>void openCoursePicker()} className="btn-primary flex min-h-11 items-center gap-2 px-6 py-3 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all">
           <Plus size={20} />
           <span>Novo Tópico</span>
         </button>
       </div>
 
+      {chooseCourse && <section aria-label="Escolher formação para novo tópico" className="rounded-2xl border border-emerald-200 bg-white p-5"><div className="flex justify-between gap-3"><div><h2 className="font-serif text-xl text-primary">Escolha uma formação</h2><p className="mt-1 text-sm text-stone-600">Abra a comunidade da formação para escrever seu tópico.</p></div><button type="button" className="min-h-11 px-3 text-primary" onClick={()=>setChooseCourse(false)}>Fechar</button></div>{coursesLoading ? <p role="status">Carregando formações…</p> : courseError ? <p role="alert">{courseError}</p> : courseChoices.length ? <ul className="mt-4 grid gap-2">{courseChoices.map(course=><li key={course.id}><Link href={`/portal/course/${encodeURIComponent(course.id)}?tab=community`} className="flex min-h-11 items-center rounded-xl border border-stone-200 px-4 text-primary hover:bg-emerald-50">{course.title} →</Link></li>)}</ul> : <p className="mt-4 text-sm text-stone-600">Você ainda não possui uma formação ativa. <Link className="underline" href="/portal/courses">Conhecer cursos</Link></p>}</section>}
       {/* Controls */}
       <div className="flex flex-col md:flex-row gap-4">
         <div className="relative flex-1">

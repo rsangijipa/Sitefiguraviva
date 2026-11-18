@@ -3,6 +3,7 @@ import { Fraunces, Karla } from "next/font/google";
 import "./globals.css";
 import "@/design/fv-tokens.css";
 import "@/features/interactive-resources/v2/resource.css";
+import "@/features/interactive-resources/v2/compact.css";
 import Providers from "./providers";
 import { getPublicSiteOrigin } from "@/lib/public-site-url";
 const siteOrigin = getPublicSiteOrigin();

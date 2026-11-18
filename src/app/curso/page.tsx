@@ -1,6 +1,6 @@
 import PublicPageHero from "@/features/public-site/components/PublicPageHero";
 import PublicSiteFrame from "@/features/public-site/components/PublicSiteFrame";
-import { listPublishedCourses } from "@/features/content/infrastructure/supabaseContentRepository";
+import { listPublishedContentPage } from "@/features/content/infrastructure/supabaseContentRepository";
 import CoursesListClient from "./CoursesListClient";
 
 // Revalidate every hour
@@ -11,17 +11,8 @@ export const revalidate = 3600;
 // used to read from Firestore while the home page and course detail already
 // read from Supabase — two different data sources meant the count and
 // content shown here vs. on the homepage never matched.
-async function getCourses(): Promise<any[]> {
-  try {
-    return await listPublishedCourses();
-  } catch (error) {
-    console.error("Error fetching courses:", error);
-    return [];
-  }
-}
-
 export default async function CoursesPage() {
-  const courses = await getCourses();
+  const firstPage = await listPublishedContentPage("courses");
 
   return (
     <PublicSiteFrame>
@@ -31,7 +22,10 @@ export default async function CoursesPage() {
         description="Cursos, grupos de estudos e vivências para habitar a Gestalt-terapia com rigor, sensibilidade e presença."
         backgroundImage="/assets/fv/heroes/formacoes.webp"
       />
-      <CoursesListClient courses={courses} />
+      <CoursesListClient
+        courses={firstPage.items}
+        hasMore={firstPage.hasMore}
+      />
     </PublicSiteFrame>
   );
 }

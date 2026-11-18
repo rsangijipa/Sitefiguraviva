@@ -42,15 +42,20 @@ interface CoursesSectionProps {
   onOpenCalendar: () => void;
   onSelectCourse: (course: Course) => void;
   loading?: boolean;
+  error?: boolean;
+  onRetry?: () => void;
 }
 
 import SectionShell from "../ui/SectionShell";
+import { ContentRetry } from "./ContentRetry";
 
 export default function CoursesSection({
   courses = [],
   onOpenCalendar,
   onSelectCourse,
   loading = false,
+  error = false,
+  onRetry,
   content = DEFAULT_HOME,
 }: CoursesSectionProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -91,7 +96,11 @@ export default function CoursesSection({
           className="flex md:grid md:grid-cols-2 lg:grid-cols-3 overflow-x-auto md:overflow-visible snap-x snap-mandatory gap-6 pb-8 -mx-6 px-6 md:mx-0 md:px-0 scrollbar-hide"
           style={{ scrollBehavior: "smooth" }}
         >
-          {loading ? (
+          {error ? (
+            <div className="col-span-full w-full">
+              <ContentRetry onRetry={onRetry} />
+            </div>
+          ) : loading ? (
             [1, 2, 3].map((i) => (
               <div key={i} className="flex-shrink-0 w-80 md:w-96 snap-center">
                 <div className="flex h-full flex-col rounded-md border border-border bg-paper p-4">
@@ -122,17 +131,25 @@ export default function CoursesSection({
           ) : (
             courses.map((course, index) => {
               const isClosed =
-                course.enrollmentOpen === false || course.status === "closed" || course.status === "archived" || course.status === "Encerrado" || course.status === "Esgotado";
+                course.enrollmentOpen === false ||
+                course.status === "closed" ||
+                course.status === "archived" ||
+                course.status === "Encerrado" ||
+                course.status === "Esgotado";
               const statusLabels: Record<string, string> = {
                 open: "Inscrições abertas",
                 closed: "Inscrições encerradas",
                 archived: "Arquivado",
               };
-              const normalizedCategory = course.category?.trim().toLocaleLowerCase("pt-BR");
+              const normalizedCategory = course.category
+                ?.trim()
+                .toLocaleLowerCase("pt-BR");
               const categoryLabel =
-                normalizedCategory === "formacao" || normalizedCategory === "formação"
+                normalizedCategory === "formacao" ||
+                normalizedCategory === "formação"
                   ? "Formação"
-                  : normalizedCategory === "grupoestudos" || normalizedCategory === "grupo de estudos"
+                  : normalizedCategory === "grupoestudos" ||
+                      normalizedCategory === "grupo de estudos"
                     ? "Grupo de Estudos"
                     : course.category;
               const courseUrl = `/curso/${course.slug || course.id}`;
@@ -171,7 +188,10 @@ export default function CoursesSection({
                           )}
                           {isClosed && (
                             <span className="rounded-sm bg-error/90 px-2.5 py-0.5 text-caption font-bold uppercase tracking-wider text-white backdrop-blur-sm">
-                              {statusLabels[course.status] || (course.enrollmentOpen === false ? "Inscrições encerradas" : course.status)}
+                              {statusLabels[course.status] ||
+                                (course.enrollmentOpen === false
+                                  ? "Inscrições encerradas"
+                                  : course.status)}
                             </span>
                           )}
                         </div>
@@ -188,7 +208,9 @@ export default function CoursesSection({
                             </p>
                           )}
                           <p className="text-caption font-bold uppercase tracking-wider text-fv-terra-barro">
-                            {isClosed ? "Inscrições encerradas" : course.date || "Datas a confirmar"}
+                            {isClosed
+                              ? "Inscrições encerradas"
+                              : course.date || "Datas a confirmar"}
                           </p>
                         </div>
 

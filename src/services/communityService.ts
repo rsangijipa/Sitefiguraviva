@@ -10,6 +10,12 @@ import {
 } from "@/features/community/infrastructure/supabaseCommunityRepository.server";
 import { CommunityThreadDoc, CommunityReplyDoc } from "@/types/lms";
 
+function poll<T>(fetcher:()=>Promise<T>,callback:(data:T)=>void) {
+  let active=true;
+  const update=()=>{void fetcher().then(data=>{if(active)callback(data);}).catch(error=>console.error("Falha ao atualizar comunidade",error));};
+  update();const timer=window.setInterval(update,15000);
+  return ()=>{active=false;window.clearInterval(timer);};
+}
 export const communityService = {
   // --- Global Community (Root Level) ---
   async getGlobalThreads(limitCount = 10): Promise<CommunityThreadDoc[]> {
@@ -23,9 +29,7 @@ export const communityService = {
     callback: (threads: CommunityThreadDoc[]) => void,
     limitCount = 15,
   ) {
-    void limitCount;
-    callback([]);
-    return () => undefined;
+    return poll(()=>listGlobalThreads(limitCount),callback);
   },
 
   // --- Course Specific ---
@@ -44,10 +48,7 @@ export const communityService = {
     callback: (threads: CommunityThreadDoc[]) => void,
     limitCount = 20,
   ) {
-    void courseId;
-    void limitCount;
-    callback([]);
-    return () => undefined;
+    return poll(()=>listCourseThreads(courseId,limitCount),callback);
   },
 
   async createThread(
@@ -84,10 +85,8 @@ export const communityService = {
     limitCount = 50,
   ) {
     void courseId;
-    void threadId;
     void limitCount;
-    callback([]);
-    return () => undefined;
+    return poll(()=>listReplies(threadId),callback);
   },
 
   async createReply(
