@@ -140,22 +140,28 @@
 @keyframes world-leaf { to { translate:35px 85px; rotate:20deg; opacity:.4; } } @keyframes world-bird { to { translate:240px -25px; } } @keyframes world-glow { from { opacity:.25; } to { opacity:.9; } } @keyframes world-fish { 0%,75%,100% { translate:0 0; } 85% { translate:35px -65px; } 95% { translate:70px 0; } } @keyframes world-rain { to { translate:-24px 150px; } }
 @media(max-width:700px) { .sound-catalog { grid-template-columns:1fr; } .sound-catalog-card { display:grid; grid-template-columns:115px 1fr; } .sound-catalog-card img { height:100%; min-height:130px; } .sound-fullscreen-header,.sound-fullscreen-controls { margin:12px; padding:14px; } .sound-fullscreen-header h2 { font-size:1.4rem; } }
 @media(prefers-reduced-motion:reduce) { .sound-layer * { animation:none!important; } }
-.fv-resources[data-resource-key="igarape"] .fv-content--immersive { max-width:none; padding:8px 12px 24px; }
+.fv-resources[data-resource-key="igarape"] .fv-content--immersive { max-width:none; padding:0; }
 .fv-resources[data-resource-key="igarape"] .fv-stage { padding:0; background:transparent; }
-.im-river-title { padding:10px 8px 14px; }
-.im-river-title h2, .im-river-title p { margin:0; }
-.im-river-title p { margin-top:4px; }
-.im-river-scene { height:clamp(480px,calc(100dvh - 210px),900px); }
-.im-river-hint { bottom:auto; top:14px; left:14px; padding:7px 12px; }
-.im-river-overlay { position:absolute; z-index:2; left:12px; right:12px; bottom:12px; display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:9px; border:1px solid var(--fv-nevoa); border-radius:18px; background:color-mix(in srgb,var(--fv-creme-papel) 88%,transparent); }
-.im-water-controls { display:flex; flex:1 1 600px; gap:6px; margin:0; overflow-x:auto; scrollbar-width:thin; }
-.im-water-controls .fv-button, .im-river-audio summary { flex:none; min-height:44px; padding:8px 11px; font-size:.8rem; white-space:nowrap; }
+.im-river-title { position:absolute; z-index:2; top:10px; left:10px; display:grid; gap:1px; max-width:min(340px,calc(100% - 20px)); padding:7px 14px; border:1.5px solid var(--fv-nevoa); border-radius:18px; background:color-mix(in srgb,var(--fv-creme-papel) 86%,transparent); backdrop-filter:blur(6px); }
+.im-river-title strong { font:600 .95rem/1.2 var(--font-serif),Fraunces,serif; color:var(--fv-verde-raiz); }
+.im-river-title span { font-size:.76rem; color:var(--fv-pedra); }
+.im-river-scene { position:relative; flex:1 1 auto; min-height:360px; height:auto; }
+.im-river-hint { position:absolute; z-index:2; bottom:auto; top:10px; right:10px; left:auto; margin:0; padding:5px 12px; border-radius:999px; font-size:.75rem; background:color-mix(in srgb,var(--fv-creme-papel) 80%,transparent); color:var(--fv-pedra); }
+.im-look { position:absolute; inset:0; z-index:2; pointer-events:none; }
+.im-look-btn { position:absolute; pointer-events:auto; display:grid; place-items:center; width:44px; height:44px; padding:0; border:1.5px solid color-mix(in srgb,var(--fv-creme-papel) 70%,transparent); border-radius:50%; background:color-mix(in srgb,var(--fv-creme-papel) 32%,transparent); color:var(--fv-creme-papel); backdrop-filter:blur(4px); transition:background .2s; }
+.im-look-btn:hover, .im-look-btn:focus-visible { background:color-mix(in srgb,var(--fv-creme-papel) 80%,transparent); color:var(--fv-verde-raiz); }
+.im-look-left { left:14px; top:50%; transform:translateY(-50%); }
+.im-look-right { right:14px; top:50%; transform:translateY(-50%); }
+.im-look-center { left:50%; top:62px; transform:translateX(-50%); width:34px; height:34px; }
+.im-river-overlay { position:absolute; z-index:2; left:50%; bottom:10px; transform:translateX(-50%); width:max-content; max-width:calc(100% - 20px); padding:5px; border:1.5px solid var(--fv-nevoa); border-radius:999px; background:color-mix(in srgb,var(--fv-creme-papel) 88%,transparent); backdrop-filter:blur(6px); }
+.im-water-controls { display:flex; flex-wrap:wrap; justify-content:center; gap:4px; margin:0; }
+.im-water-controls .fv-chip, .im-river-audio summary { min-height:32px; font-size:.78rem; white-space:nowrap; list-style:none; cursor:pointer; }
+.im-river-audio > summary::-webkit-details-marker { display:none; }
 .im-river-audio { position:relative; }
-.im-river-audio > summary { display:flex; align-items:center; cursor:pointer; border:1px solid var(--fv-nevoa); border-radius:12px; background:var(--fv-creme-papel); font-weight:600; }
 .im-river-audio > .im-panel { position:absolute; right:0; bottom:calc(100% + 10px); width:min(430px,calc(100vw - 60px)); max-height:min(55vh,420px); overflow:auto; padding:16px; }
 .im-river-audio .im-toolbar { margin-bottom:8px; }
 .im-river-status { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
-@media(max-width:600px) { .fv-resources[data-resource-key="igarape"] .fv-content--immersive { padding:4px 6px 16px; } .im-river-scene { height:clamp(440px,calc(100dvh - 190px),720px); } .im-river-overlay { left:8px; right:8px; bottom:8px; } .im-water-controls { flex-basis:100%; } }
+@media(max-width:600px) { .fv-resources[data-resource-key="igarape"] .fv-content--immersive { padding:0; } .im-river-hint { display:none; } .im-river-overlay { bottom:8px; border-radius:20px; } }
 .fv-resources[data-resource-key="igarape"] .fv-stage-grid, .fv-resources[data-resource-key="igarape"] .fv-stage, .im-water-controls { min-width:0; }
 .im-river-audio { flex:0 0 auto; }
 /* Sala de Pausa: cada prática ocupa seu próprio espaço. */
@@ -186,3 +192,18 @@
 .pause-movement { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:30px; padding:20px; }.pause-movement > div { max-width:480px; }.pause-avatar { width:170px; height:220px; color:var(--fv-verde-igarape); }.pause-avatar-arm { transform-origin:100px 76px; transition:transform .8s; }.pause-avatar--arms .pause-avatar-arm-left { transform:rotate(95deg); }.pause-avatar--arms .pause-avatar-arm-right { transform:rotate(-95deg); }.pause-avatar--shoulders { transform:translateY(-8px); }
 @media(max-width:700px) { .pause-catalog { grid-template-columns:repeat(2,minmax(0,1fr)); }.pause-breath-stage { gap:10px; padding:20px 0; } }
 @media(prefers-reduced-motion:reduce) { .pause-mandala,.pause-orb { animation:none; }.pause-bubble,.pause-avatar-arm { transition:none; } }
+
+/* Igarapé ocupa toda a janela do recurso */
+.fv-resources[data-resource-key="igarape"] :is(.fv-content,.fv-stage-grid,.fv-stage) { display:flex; flex-direction:column; flex:1 1 auto; min-height:0; width:100%; max-width:none; }
+.fv-resources[data-resource-key="igarape"] .fv-stage { border-radius:0; }
+
+/* Ambientes sonoros imersivos: foto com paralaxe + camada viva em canvas */
+.sound-world { overflow:hidden; }
+.sound-photo { position:absolute; inset:-4%; z-index:-2; background-size:cover; background-position:center; transform:translate3d(calc(var(--px,0) * -14px), calc(var(--py,0) * -9px), 0) scale(1.03); transition:transform .25s ease-out; }
+.sound-canvas { position:absolute; inset:0; width:100%; height:100%; z-index:-1; pointer-events:none; }
+.sound-prompt { position:absolute; z-index:1; right:20px; bottom:20px; max-width:min(420px,calc(100% - 40px)); margin:0; padding:8px 18px; border-radius:999px; background:color-mix(in srgb,var(--fv-creme-papel) 80%,transparent); backdrop-filter:blur(6px); color:var(--fv-verde-raiz); font:italic 600 .95rem/1.35 var(--font-serif),Fraunces,serif; text-align:right; border-radius:18px; pointer-events:none; }
+.sound-world-tools { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+.sound-world-tools .fv-button { min-height:30px; padding:3px 12px; font-size:.78rem; }
+.sound-fullscreen-header, .sound-fullscreen-controls { background:color-mix(in srgb,var(--fv-creme-papel) 90%,transparent); backdrop-filter:blur(8px); }
+.sound-world[data-motion="false"] .sound-photo { transition:none; transform:scale(1.03); }
+@media (max-width:700px) { .sound-prompt { right:12px; left:12px; bottom:auto; top:76px; max-width:none; font-size:.82rem; text-align:center; } }

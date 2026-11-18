@@ -10,7 +10,7 @@ it("lets the person observe before revealing readings and keeps choices when ret
  fireEvent.click(screen.getByRole("button",{name:"Ver possibilidades"}));
  fireEvent.click(screen.getByRole("button",{name:/^Dois rostos de perfil/}));
  fireEvent.click(screen.getByRole("button",{name:"Próxima imagem"}));
- expect(screen.getByRole("status")).toHaveTextContent("Imagem 2 de 4");
+ expect(screen.getByRole("status")).toHaveTextContent("Imagem 2 de 7");
  fireEvent.click(screen.getByRole("button",{name:"Imagem anterior"}));
  expect(screen.getByRole("button",{name:/^Dois rostos de perfil/})).toHaveAttribute("aria-pressed","true");
  expect(base.onDraft).toHaveBeenCalledWith({observations:{"vaso-perfis":{choice:"Dois rostos de perfil",other:""}}});
@@ -21,10 +21,10 @@ it("accepts an alternative perception and shows a descriptive summary without a 
  fireEvent.click(screen.getByRole("button",{name:"Ver possibilidades"}));
  fireEvent.click(screen.getByRole("button",{name:/^Vejo outra coisa/}));
  fireEvent.change(screen.getByLabelText("O que você vê? (opcional)"),{target:{value:"Uma forma que lembra uma taça"}});
- for(let step=0;step<3;step++)fireEvent.click(screen.getByRole("button",{name:"Próxima imagem"}));
+ for(let step=0;step<6;step++)fireEvent.click(screen.getByRole("button",{name:"Próxima imagem"}));
  fireEvent.click(screen.getByRole("button",{name:"Ver minhas observações"}));
  expect(screen.getByText("Uma forma que lembra uma taça")).toBeInTheDocument();
- expect(screen.getAllByText("Você seguiu sem escolher.")).toHaveLength(3);
+ expect(screen.getAllByText("Você seguiu sem escolher.")).toHaveLength(6);
  expect(screen.getByText(/Não há pontuação nem interpretação/)).toBeInTheDocument();
  fireEvent.click(screen.getByRole("button",{name:"Encerrar experiência"}));
  expect(base.onComplete).toHaveBeenCalledWith(null);

@@ -1,6 +1,7 @@
 "use client";
 import { useId, useEffect, type ReactNode, type ButtonHTMLAttributes } from "react";
-import { Check } from "lucide-react";
+import { Check, ShoppingCart } from "lucide-react";
+import { amazonLinkFor } from "./cards/amazon-links";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import type { EditorialItem } from "./editorial-schema";
 import { IllustrationSlot } from "./illustration/IllustrationSlot";
@@ -25,7 +26,7 @@ export function RangeScale({ label, value, onChange, min = 0, max = 10, ends = [
   return <label className="fv-field fv-scale" htmlFor={id}><span>{label}: {value}</span><input id={id} type="range" min={min} max={max} step={1} value={value} aria-label={label} aria-valuetext={`${value} de ${max}`} onChange={event => onChange(Number(event.target.value))} /><span className="fv-scale-ends"><span>{ends[0]}</span><span>{ends[1]}</span></span></label>;
 }
 export function ReferenceLine({ item }: { item: EditorialItem }) {
-  return <div className="fv-reference">{item.references.map((reference, index) => <p key={index}>{reference.author} · {reference.work} · {reference.year}{reference.edition ? ` · ${reference.edition}` : ""}{reference.pages ? ` · p. ${reference.pages}` : ""}</p>)}</div>;
+  return <div className="fv-reference">{item.references.map((reference, index) => { const link = amazonLinkFor(reference.author, reference.work); return <p key={index}>{reference.author} · {reference.work} · {reference.year}{reference.edition ? ` · ${reference.edition}` : ""}{reference.pages ? ` · p. ${reference.pages}` : ""} <a className="fv-amz" href={link.url} target="_blank" rel="noopener noreferrer" aria-label={`${link.kind === "direto" ? "Comprar" : "Buscar"} ${reference.work} na Amazon (abre em nova aba)`} title={link.kind === "direto" ? "Ver na Amazon" : "Buscar na Amazon"}><ShoppingCart size={13} aria-hidden="true" /></a></p>; })}</div>;
 }
 export function Dialog({ title, open, onClose, children }: { title: string; open: boolean; onClose: () => void; children: ReactNode }) {
   const id = useId();

@@ -30,7 +30,7 @@ beforeAll(() => {
 
 it.each(Object.keys(content))("%s mostra o conteúdo de demonstração com o aviso", key => {
   render(<ResourceHost slug={key} snapshot={snapshot(key)} />);
-  if (key === "igarape" || key === "sala-de-pausa") expect(screen.queryByRole("note")).not.toBeInTheDocument();
+  if (key === "igarape" || key === "sala-de-pausa" || key === "cartas-gestalticas") expect(screen.queryByRole("note")).not.toBeInTheDocument();
   else expect(screen.getByRole("note")).toHaveTextContent("Conteúdo de demonstração · ainda sem revisão docente");
   const start = screen.queryByRole("button", { name: "Iniciar recurso" });
   if (start) fireEvent.click(start);

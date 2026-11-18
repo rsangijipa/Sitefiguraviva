@@ -23,7 +23,7 @@ const itemId = z.string().min(1).max(80);
 export const BODY_REGIONS = ["cabeça", "pescoço", "ombros", "peito", "abdômen", "braços", "mãos", "quadril", "pernas", "pés"] as const;
 export const SENSATIONS = ["tensão", "calor", "frio", "peso", "leveza", "formigamento", "pulsação", "pouca percepção", "não sei", "outra"] as const;
 export const BodyPointSchema = z.strictObject({
-  region: z.enum(BODY_REGIONS), view: z.enum(["frente", "costas"]),
+  region: z.enum(BODY_REGIONS), view: z.enum(["frente", "costas"]), side: z.enum(["esquerdo", "direito"]).optional(),
   sensation: z.enum(SENSATIONS), intensity: z.number().int().min(1).max(5).nullable(), note: z.string().max(120),
 });
 export type BodyPoint = z.infer<typeof BodyPointSchema>;
@@ -31,7 +31,7 @@ export const EXPERIMENT_STEPS = ["preparar", "consenso", "graduacao", "energia",
 export const recordSchemas = {
   "chegada": z.strictObject({ word: z.string().max(120), body: z.array(BodyPointSchema).max(20), emotion: z.string().max(80), intensity: z.number().int().min(0).max(10).nullable(), needs: z.array(itemId).max(3), reflection: shortText }),
   "mapa-do-corpo": z.strictObject({ regions: z.array(BodyPointSchema).max(20), mode: z.enum(["mapear", "percorrer"]) }),
-  "roda-das-emocoes": z.strictObject({ emotionId: itemId, intensity: z.number().int().min(1).max(5), reflection: shortText }),
+  "roda-das-emocoes": z.strictObject({ emotionId: itemId, intensity: z.number().int().min(1).max(5), reflection: shortText, emotions: z.array(z.strictObject({ emotionId: itemId, intensity: z.number().int().min(1).max(5) })).max(12).optional() }),
   "necessidades-agora": z.strictObject({ ids: z.array(itemId).max(3), reflection: shortText }),
   "paisagem-de-pensamentos": z.strictObject({ mode: z.enum(["jardim", "rio"]), thoughts: z.array(shortText).max(20), reflection: shortText }).refine(value => value.mode !== "rio" || value.thoughts.length === 0, "As folhas do Rio são efêmeras."),
   "polaridades-e-cadeiras": z.strictObject({ names: z.tuple([z.string().max(60), z.string().max(60)]), position: z.number().int().min(0).max(10).nullable(), turns: z.array(z.strictObject({ side: z.union([z.literal(0), z.literal(1)]), text: shortText })).max(12), reflection: shortText }),

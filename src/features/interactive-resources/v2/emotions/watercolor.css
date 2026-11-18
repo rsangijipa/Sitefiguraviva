@@ -1,0 +1,63 @@
+/* Roda das Emoções — aquarelas vivas em tela cheia, controles compactos. */
+.fv-resources[data-resource-key="roda-das-emocoes"] :is(.fv-content,.fv-stage-grid,.fv-stage) { display:flex; flex-direction:column; flex:1 1 auto; min-height:0; width:100%; max-width:none; }
+.fv-resources[data-resource-key="roda-das-emocoes"] .fv-content { padding:8px 10px 10px; }
+.fv-resources[data-resource-key="roda-das-emocoes"] .fv-stage { padding:8px 10px; border-radius:16px; }
+.fv-resources[data-resource-key="roda-das-emocoes"] .fv-editorial-notice { margin:0 0 6px; padding:3px 10px; font-size:.72rem; }
+
+.wc-app { display:flex; flex-direction:column; flex:1 1 auto; min-height:0; gap:6px; }
+.wc-top { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:6px 14px; }
+.wc-title { min-width:0; flex:1 1 280px; }
+.wc-title h2 { margin:0; font-size:1.15rem; }
+.wc-title p { margin:0; font-size:.78rem; color:var(--fv-pedra); }
+.wc-top-actions { display:flex; flex-wrap:wrap; gap:6px; }
+.wc-top-actions .fv-button { min-height:32px; padding:4px 14px; font-size:.8rem; }
+.wc-app > .fv-mode-status { margin:0; font-size:.75rem; }
+
+.wc-stage { position:relative; flex:1 1 auto; min-height:360px; overflow:hidden; border:1.5px solid var(--fv-nevoa); border-radius:20px; background:radial-gradient(ellipse at 50% 40%,#fffdf7,#f7efe0 70%); }
+.wc-canvas { position:absolute; inset:0; width:100%; height:100%; touch-action:none; }
+.wc-fallback { position:absolute; inset:0; display:grid; place-items:center; margin:0; padding:24px; text-align:center; color:var(--fv-pedra); }
+
+/* Círculo central: vidro suave com anel de aquarela */
+.wc-center { position:absolute; left:50%; top:46%; width:clamp(104px,17vmin,164px); aspect-ratio:1; transform:translate(-50%,-50%); display:grid; place-content:center; text-align:center; border-radius:50%; background:radial-gradient(circle at 35% 30%,rgb(255 255 255 / .92),rgb(255 252 245 / .62) 70%); border:1px solid rgb(255 255 255 / .8); box-shadow:0 8px 30px rgb(0 90 31 / .14), inset 0 0 22px rgb(250 205 41 / .18); backdrop-filter:blur(3px); pointer-events:none; }
+.wc-center-ring { position:absolute; inset:-9px; border-radius:50%; background:conic-gradient(from 0deg,#00786f,#4a8d28,#facd29,#bd6d2d,#f35e78,#00786f); opacity:.38; filter:blur(5px); animation:wc-turn 30s linear infinite; z-index:-1; }
+.wc-center-text { font:600 clamp(.82rem,1.7vmin,1.05rem)/1.2 var(--font-serif),Fraunces,serif; color:var(--fv-verde-raiz); }
+.wc-center small { margin-top:4px; font-size:.68rem; color:var(--fv-pedra); }
+@keyframes wc-turn { to { transform:rotate(360deg); } }
+.wc-stage[data-motion="false"] .wc-center-ring { animation:none; }
+
+/* Cartões sobre a aquarela: translúcidos, como parte da pintura */
+.wc-cards { position:absolute; inset:0; pointer-events:none; overflow:hidden; }
+.wc-card { position:absolute; left:0; top:0; padding:5px 14px; border-radius:999px; font:600 .85rem/1.2 var(--font-serif),Fraunces,serif; color:#262b22; white-space:nowrap; background:color-mix(in srgb,var(--tint) 34%,rgb(255 255 255 / .55)); border:1px solid color-mix(in srgb,var(--tint) 55%,transparent); backdrop-filter:blur(2px); box-shadow:0 2px 14px color-mix(in srgb,var(--tint) 30%,transparent); will-change:transform; }
+.wc-card[data-intensity="1"] { font-size:.78rem; opacity:.72; }
+.wc-card[data-intensity="3"] { font-size:.95rem; }
+.wc-card[data-intensity="4"] { font-size:1.05rem; }
+.wc-card[data-intensity="5"] { font-size:1.2rem; padding:7px 18px; }
+
+/* Listras de emoções */
+.wc-strips { position:absolute; left:8px; right:8px; bottom:8px; z-index:2; display:flex; flex-wrap:wrap; gap:4px; max-height:46%; overflow:auto; padding:6px; border:1.5px solid var(--fv-nevoa); border-radius:18px; background:color-mix(in srgb,var(--fv-creme-papel) 88%,transparent); backdrop-filter:blur(6px); scrollbar-width:thin; }
+.wc-strip { display:flex; flex-direction:column; flex:0 0 auto; }
+.wc-strip[data-open="true"] { flex:1 1 100%; order:-1; padding:4px; border-radius:14px; background:color-mix(in srgb,var(--tint) 14%,transparent); }
+.wc-strip-main { display:inline-flex; align-items:center; gap:6px; min-height:28px; padding:2px 12px; border:1.5px solid var(--fv-nevoa); border-radius:999px; background:var(--fv-creme-papel); color:var(--fv-mata); font-size:.8rem; font-weight:600; }
+.wc-strip-main:hover { border-color:var(--tint); }
+.wc-dot { width:9px; height:9px; border-radius:50%; background:var(--tint); flex:none; }
+.wc-strip[data-picked="true"] .wc-strip-main { background:color-mix(in srgb,var(--tint) 24%,var(--fv-creme-papel)); border-color:var(--tint); }
+.wc-level { display:inline-grid; place-items:center; min-width:18px; height:18px; border-radius:50%; background:var(--tint); color:#fff; font-size:.68rem; text-shadow:0 0 3px rgb(0 0 0 / .45); }
+.wc-intensity { display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:6px 4px 2px; }
+.wc-intensity-label { min-width:78px; font-size:.78rem; font-weight:700; color:var(--fv-verde-raiz); }
+.wc-scale { display:flex; gap:4px; }
+.wc-scale button { display:grid; place-items:center; width:30px; height:30px; padding:0; border:1.5px solid var(--fv-verde-raiz); border-radius:50%; background:var(--fv-creme-papel); color:var(--fv-verde-raiz); font-size:.78rem; font-weight:700; }
+.wc-scale button[aria-pressed="true"] { background:var(--fv-verde-raiz); color:var(--fv-creme-papel); }
+.wc-remove { display:inline-flex; align-items:center; gap:4px; margin-left:auto; padding:2px 10px; border:0; background:none; color:var(--fv-pedra); font-size:.75rem; text-decoration:underline; }
+
+/* Mandala final */
+.wc-mandala { display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,1fr); gap:16px 28px; align-items:center; flex:1 1 auto; min-height:0; padding:6px; }
+.wc-mandala-art { display:grid; place-items:center; }
+.wc-mandala-art .mandala { width:min(100%,62vh); height:auto; border-radius:50%; box-shadow:0 12px 40px rgb(0 90 31 / .16); }
+.wc-mandala-side { display:grid; gap:8px; min-width:0; }
+.wc-mandala-side h2 { margin:0; }
+.wc-legend { display:flex; flex-wrap:wrap; gap:6px; margin:0; padding:0; list-style:none; }
+.wc-legend li { display:flex; align-items:center; gap:6px; padding:3px 10px; border:1.5px solid var(--fv-nevoa); border-radius:999px; background:var(--fv-creme-papel); font-size:.8rem; }
+.wc-legend i { width:9px; height:9px; border-radius:50%; }
+.wc-legend span { color:var(--fv-pedra); }
+@media (max-width:760px) { .wc-mandala { grid-template-columns:minmax(0,1fr); } .wc-stage { min-height:420px; } .wc-strips { max-height:52%; } }
+@media (prefers-reduced-motion:reduce) { .wc-center-ring { animation:none; } }

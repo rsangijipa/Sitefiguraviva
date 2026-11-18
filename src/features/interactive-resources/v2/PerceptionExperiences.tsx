@@ -5,7 +5,6 @@ import { BodySelector } from "./BodySelector";
 import { Button, TextField, TextArea, RangeScale, SelectableCard, EmptyContent, ReferenceLine } from "./ui";
 import { useExperienceDraft, type ExperienceProps } from "./experience-types";
 import type { EditorialItem } from "./editorial-schema";
-import { EmotionWheel } from "./EmotionWheel";
 import {ExperienceIntro} from "./immersive/ExperienceIntro";
 import {NeedsCards} from "./immersive/NeedsCards";
 import "./immersive/immersive.css";
@@ -32,22 +31,13 @@ export function BodyExperience(props: ExperienceProps) {
   const mode = props.mode === "percorrer" ? "percorrer" : "mapear";
   const payload = { regions,mode };
   useExperienceDraft({...payload,pending},props.onDraft);
-  return <div className="im-body"><div className="bm-intro"><h2>{mode === "percorrer" ? `Percorrer: ${BODY_REGIONS[index]}` : "Um mapa do que você percebe"}</h2><p>1. Escolha uma região · 2. Perceba uma sensação · 3. Registre no mapa</p></div><BodySelector onPendingChange={setPending} value={regions} onChange={setRegions} illustrations={props.version?.configuration.items} currentRegion={mode==="percorrer" ? BODY_REGIONS[index] : undefined} />
+  return <div className="im-body bd-exp"><div className="bm-intro"><h2>{mode === "percorrer" ? `Percorrer: ${BODY_REGIONS[index]}` : "Um mapa do que você percebe"}</h2><p>1. Escolha uma região · 2. Perceba uma sensação · 3. Registre no mapa</p></div><BodySelector onPendingChange={setPending} value={regions} onChange={setRegions} illustrations={props.version?.configuration.items} currentRegion={mode==="percorrer" ? BODY_REGIONS[index] : undefined} />
     {!!describeBody(regions) && <p className="fv-mode-status" aria-live="polite">{describeBody(regions)}</p>}
     {mode==="percorrer" && <p className="fv-note">O roteiro permanece em texto. Áudio docente aparece quando houver gravação revisada e licenciada.</p>}
     <div className="fv-actions">{mode==="percorrer" && index<BODY_REGIONS.length-1 ? <><Button onClick={() => setIndex(index+1)}>Próxima região</Button><Button secondary onClick={() => setIndex(index+1)}>Pular região</Button></> : <Button onClick={() => props.onComplete(payload)}>Concluir percepção</Button>}{index>0 && mode==="percorrer" && <Button secondary onClick={() => setIndex(index-1)}>Região anterior</Button>}</div>
   </div>;
 }
-export function EmotionExperience(props: ExperienceProps) {
-  const [listOnly,setListOnly] = useState(props.mode==="lista");
-  const [emotionId,setEmotion] = useState(""); const [intensity,setIntensity] = useState(1); const [reflection,setReflection] = useState("");
-  const payload = { emotionId,intensity,reflection };
-  useExperienceDraft(payload,props.onDraft);
-  const items = props.version?.configuration.items.filter(item => item.kind==="emotion") ?? [];
-  if (!items.length) return <EmptyContent />;
-  const item = items.find(value => value.id===emotionId);
-  return <><ExperienceIntro asset="emocoes/orbita" title="Encontre uma palavra, se quiser" description="Explore a roda em 3D ou use a lista. As cores e posições não classificam as emoções."/><div className="im-toolbar"><Button secondary aria-pressed={listOnly} onClick={()=>setListOnly(value=>!value)}>{listOnly?"Ver a roda":"Usar apenas a lista"}</Button></div><div className="im-columns">{!listOnly && <EmotionWheel items={items} selected={emotionId} onSelect={setEmotion}/>}<div className="im-panel"><p className="fv-mode-status" role="status">{item ? `Emoção escolhida: ${item.title}.` : "Nenhuma emoção escolhida. Você pode seguir sem escolher."}</p><ItemSelection items={items} value={emotionId ? [emotionId] : []} onChange={ids => setEmotion(ids[0] ?? "")} /><RangeScale label="Intensidade" min={1} max={5} value={intensity} onChange={setIntensity} ends={["Mais leve","Mais intensa"]} /><p className="fv-support">Intensidade percebida: {intensity} de 5.</p><TextArea label="Uma percepção, se quiser" value={reflection} onChange={setReflection} />{item && <ReferenceLine item={item} />}<div className="fv-actions"><Button onClick={() => props.onComplete(payload)}>Concluir</Button><Button secondary onClick={() => props.onComplete(null)}>Não sei · encerrar sem registrar</Button></div></div></div></>;
-}
+export { EmotionExperience } from "./emotions/EmotionExperience";
 export function NeedsExperience(props: ExperienceProps) {
   const [ids,setIds] = useState<string[]>([]); const [reflection,setReflection] = useState("");
   const [listOnly,setListOnly]=useState(false);

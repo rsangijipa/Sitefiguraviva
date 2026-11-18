@@ -5,7 +5,8 @@ import { Button, TextArea, SelectableCard } from "./ui";
 import { useExperienceDraft, type ExperienceProps } from "./experience-types";
 import { resourceAudioManager } from "./audio-manager";
 import {PausePractice} from "./immersive/PausePractice";
-import {AmbientControl} from "./immersive/AmbientControl";
+import {PauseDock} from "./pause/PauseDock";
+import "./pause/pause.css";
 import {SoundScene} from "./immersive/SoundScene";
 import {ambientSounds} from "./immersive/ambient-sounds";
 import {useResourceMotion} from "./ResourceShell";
@@ -13,6 +14,14 @@ import "./immersive/immersive.css";
 import { PracticeArt } from "./illustration/scenes";
 import { useDiscardConfirmation } from "./useDiscardConfirmation";
 const WaterStage = dynamic(() => import("./WaterStage").then(module => module.WaterStage), { ssr:false, loading:() => <p role="status">Preparando a superfície…</p> });
+const PRACTICE_HELP: Record<string,string> = {
+  respirar:"escolha um tipo de respiração e acompanhe a mandala: ela abre ao inspirar e fecha ao expirar. Se houver tontura, volte à respiração natural.",
+  observar:"escolha o que observar (cor, forma, textura ou espaço) e deixe o olhar repousar na cena lenta. Depois, procure algo parecido no ambiente em que você está.",
+  "pelos-sentidos":"escolha os sentidos que fazem sentido agora. Cada um ganha uma camada em movimento; toque em play para ouvir os sons e veja as formas se moverem com eles.",
+  ouvir:"toque o som e mova o controle de perto a longe (ou deixe o passeio automático). Note como volume, brilho, eco e lado mudam com a distância.",
+  movimentar:"escolha mãos, ombros ou imobilidade e acompanhe a figura no seu ritmo. Pule ou adapte qualquer parte e interrompa se sentir dor.",
+  desacelerar:"liste suas tarefas com prioridade e tempo; o relógio monta blocos de foco com descansos. Você pode deixar uma tarefa de lado a qualquer momento.",
+};
 const PRACTICES = [
   { id:"respirar",title:"Respirar",text:"Perceba sua respiração natural, no seu ritmo." },
   { id:"observar",title:"Observar",text:"Uma cor, uma forma ou uma textura no espaço em que você está." },
@@ -38,10 +47,12 @@ export function PauseExperience(props: ExperienceProps) {
   },[started,paused]);
   useEffect(()=>{const root=document.querySelector<HTMLElement>("[data-scroll-root]");if(root)root.scrollTop=0;},[started]);
   const selected=PRACTICES.find(item => item.id===practice) ?? PRACTICES[0];
-  if(!started) return <><div className="pause-intro"><h2>Que tipo de pausa cabe agora?</h2><p>Um ambiente para se demorar um instante. Você pode adaptar, trocar ou encerrar quando quiser.</p></div><div className="pause-catalog">{PRACTICES.map(item => <SelectableCard key={item.id} label={item.title} selected={practice===item.id} onSelect={() => setPractice(item.id)}><PracticeArt practice={item.id} className="fv-illustration fv-practice-art" /><span>{item.text}</span></SelectableCard>)}</div><div className="fv-actions"><Button onClick={() => setStarted(true)}>Começar pausa</Button></div></>;
-  return <>{confirmation}<PausePractice practice={practice} title={selected.title} paused={paused} motion={motion}/><p aria-live="off">Tempo nesta pausa: {Math.floor(seconds/60)} min {seconds%60} s · sem meta</p>
-    <TextArea label="Uma percepção, se quiser" value={reflection} onChange={setReflection} /><div className="fv-actions"><Button secondary onClick={() => setPaused(value => !value)}>{paused ? "Retomar" : "Pausar"}</Button><Button secondary onClick={() => {setStarted(false);setPaused(false);setSeconds(0);}}>Trocar prática</Button><Button onClick={() => requestChange(!!reflection.trim(),()=>props.onComplete(null))}>Encerrar sem registrar</Button><Button onClick={() => props.onComplete(payload)}>Encerrar pausa</Button></div>
-  </>;
+  if(!started) return <div className="ps-intro"><div className="pause-intro"><h2>Que tipo de pausa cabe agora?</h2><p>Um ambiente para se demorar um instante. Você pode adaptar, trocar ou encerrar quando quiser.</p></div><div className="pause-catalog">{PRACTICES.map(item => <SelectableCard key={item.id} label={item.title} selected={practice===item.id} onSelect={() => setPractice(item.id)}><PracticeArt practice={item.id} className="fv-illustration fv-practice-art" /><span>{item.text}</span></SelectableCard>)}</div><div className="fv-actions"><Button onClick={() => setStarted(true)}>Começar pausa</Button></div></div>;
+  return <>{confirmation}<div className="ps-app" data-paused={paused}>
+    <header className="ps-head"><h2>{selected.title}</h2><p><strong>Como usar:</strong> {PRACTICE_HELP[selected.id] ?? selected.text}</p></header>
+    <div className="ps-body"><PausePractice practice={practice} title={selected.title} paused={paused} motion={motion}/></div>
+    <PauseDock paused={paused} hideSound={practice==="ouvir" || practice==="pelos-sentidos"} seconds={seconds} reflection={reflection} onReflection={setReflection} onTogglePause={() => setPaused(value => !value)} onSwitch={() => {setStarted(false);setPaused(false);setSeconds(0);}} onEndWithout={() => requestChange(!!reflection.trim(),()=>props.onComplete(null))} onEnd={() => props.onComplete(payload)}/>
+  </div></>;
 }
 export function ListeningExperience(props: ExperienceProps) {
   const [reflection,setReflection] = useState(""); const [sceneId,setScene] = useState("");
@@ -68,5 +79,5 @@ export function ListeningExperience(props: ExperienceProps) {
 }
 export function WaterExperience(props: ExperienceProps) {
   useExperienceDraft(null,props.onDraft);
-  return <><WaterStage forceStatic={props.mode==="estatico"} showAmbient /><div className="fv-actions"><Button onClick={() => props.onComplete(null)}>Encerrar experiência</Button></div></>;
+  return <WaterStage forceStatic={props.mode==="estatico"} showAmbient />;
 }

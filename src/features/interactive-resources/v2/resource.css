@@ -250,3 +250,17 @@
 .fv-accessibility-more { margin:0 0 12px; color:var(--fv-pedra); font-size:.85rem; }
 .fv-accessibility-more summary { cursor:pointer; min-height:44px; display:flex; align-items:center; }
 .fv-accessibility-more .fv-resource-tools { justify-content:flex-start; }
+
+/* Encerrar (cabeçalho) e mini janela de encerramento */
+.fv-finish-btn { min-height:34px; padding:4px 14px; border:1.5px solid var(--fv-verde-raiz); border-radius:999px; background:var(--fv-creme-papel); color:var(--fv-verde-raiz); font-size:.85rem; font-weight:700; }
+.fv-finish-btn:hover { background:var(--fv-areia); }
+.fv-resource-tools { align-items:center; }
+dialog.fv-modal.fv-resources { border-radius:22px; max-width:min(520px,calc(100vw - 24px)); }
+.fv-finish { display:grid; gap:12px; }
+.fv-finish p { margin:0; font-size:.9rem; }
+.fv-finish-box { display:grid; gap:8px; padding:14px; border:1.5px solid var(--fv-nevoa); border-radius:18px; background:var(--fv-areia); }
+.fv-finish-box strong { display:flex; align-items:center; gap:6px; color:var(--fv-verde-raiz); }
+.fv-finish-tip { display:flex; gap:6px; align-items:flex-start; color:var(--fv-pedra); font-size:.82rem !important; }
+.fv-finish code { padding:1px 6px; border-radius:6px; background:var(--fv-creme-papel); font-size:.82rem; }
+.fv-amz { display:inline-grid; place-items:center; width:22px; height:22px; vertical-align:middle; margin-left:4px; border:1px solid var(--fv-nevoa); border-radius:50%; color:var(--fv-pedra); background:var(--fv-creme-papel); text-decoration:none; }
+.fv-amz:hover { color:var(--fv-verde-raiz); border-color:var(--fv-verde-raiz); }
